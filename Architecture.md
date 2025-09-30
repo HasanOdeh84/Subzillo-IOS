@@ -1,4 +1,4 @@
-## MVVM Architecture for Mobile Applications
+## MVVM Architecture
 
 The **MVVM (Model-View-ViewModel)** architecture is a design pattern used in mobile app development to promote separation of concerns and facilitate easier management of application code.  
 It separates the data layer (**Model**), the presentation layer (**View**), and the business or presentation logic (**ViewModel**). This results in more **maintainable, testable, and scalable code**.
