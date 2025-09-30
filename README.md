@@ -106,6 +106,14 @@ Follow these steps to set up and run the project locally:
    - Select the target device or simulator in Xcode.
    - Press Cmd + R to build and run the project.
 
+# Designs
+All UI/UX designs for this project are available in Figma:  
+[Figma Project Link]() //We will add once we recieve the figma link
+
+# API Documentation
+The project uses the following backend APIs:  
+[API Documentation Link](https://devsubzillo.krify.com/api/docs/#/) 
+
 # Contribution
 This project is maintained by the iOS development team of **Hasan Odeh** and **Hasanien**.
 Any contributions should be coordinated with the team lead before submitting changes.
