@@ -10,13 +10,13 @@ import SwiftUI
 struct RegistrationView: View {
     
     //MARK: - Properties
-    @State private var username         = ""
-    @State private var fullName         = ""
-    @State private var email            = ""
-    @State private var mobile           = ""
-    @State private var password         = ""
-    @State private var confirmPassword  = ""
-    @State private var agreeTerms       = false
+    @State private var username                 = ""
+    @State private var fullName                 = ""
+    @State private var email                    = ""
+    @State private var mobile                   = ""
+    @State private var password                 = ""
+    @State private var confirmPassword          = ""
+    @State private var agreeTerms               = false
     @StateObject private var registerVM         = RegistrationViewModel()
     @EnvironmentObject var notificationManager  : NotificationManager
     @Binding var path                           : NavigationPath
@@ -201,5 +201,5 @@ struct CheckboxToggleStyle: ToggleStyle {
 }
 
 #Preview {
-//    RegistrationView()
+    RegistrationView(path: .constant(NavigationPath()))
 }

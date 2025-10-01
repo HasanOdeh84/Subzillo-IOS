@@ -331,3 +331,7 @@ struct UITextFieldWrapper: UIViewRepresentable {
         }
     }
 }
+
+#Preview {
+    OtpVerifyView(path: .constant(NavigationPath()), from: .register)
+}

@@ -57,5 +57,5 @@ struct ForgotPasswordView: View {
 }
 
 #Preview {
-//    ForgotPasswordView()
+    ForgotPasswordView(path: .constant(NavigationPath()))
 }

@@ -63,3 +63,7 @@ public struct LoginResponseData: Codable {
         self.refreshToken               = refreshToken
     }
 }
+
+public struct LogoutRequest: Codable {
+    let userId : String
+}

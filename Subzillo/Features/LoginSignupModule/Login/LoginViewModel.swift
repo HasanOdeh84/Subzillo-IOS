@@ -47,6 +47,26 @@ class LoginViewModel: ObservableObject {
         .store(in: &self.subscriptions)
     }
     
+    func logout(input:LogoutRequest, path:Binding<NavigationPath>) {
+        apiReference.postApi(endPoint: Endpoint.logout, method: .POST,token: authKey,body: input,showLoader: true, responseType: GeneralResponse.self)
+            .sink { [unowned self] completion in
+                self.isLoading = false
+                if case let .failure(error) = completion {
+                    self.handleError(error,endPoint: Endpoint.logout)
+                }
+            }
+        receiveValue: { response in
+            PrintLogger.modelLog(response, type: .response, isInput: false)
+            ToastManager.shared.showToast(message: response.message ?? "")
+            Constants.resetDefaults()
+            LoginStatus().loginUpdate(isLogin: false)
+            DispatchQueue.main.async {
+                path.wrappedValue.append(PendingRoute.login)
+            }
+        }
+        .store(in: &self.subscriptions)
+    }
+    
     // MARK: - Handle errors
     func handleError(_ apiError: APIError, endPoint : Endpoint) {
         print("API Error : \(endPoint) - \(apiError.localizedDescription)")

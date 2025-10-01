@@ -75,5 +75,5 @@ struct ResetPasswordView: View {
 }
 
 #Preview {
-    //    ResetPasswordView()
+    ResetPasswordView(username: "", path: .constant(NavigationPath()))
 }

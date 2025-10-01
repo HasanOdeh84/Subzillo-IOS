@@ -128,5 +128,5 @@ struct LoginView: View {
 }
 
 #Preview {
-//    LoginView()
+    LoginView(path: .constant(NavigationPath()))
 }

@@ -77,7 +77,7 @@ struct Constants{
         let defaults = UserDefaults.standard
         let dictionary = defaults.dictionaryRepresentation()
         dictionary.keys.forEach { key in
-            if key == Constants.deviceToken || key ==  Bundle.main.bundleIdentifier ?? AppInfo.bundleId || key == "token" || key == "lat" || key == "long" || key == Constants.isFirstLoggedIn {
+            if key == Constants.deviceToken || key ==  Bundle.main.bundleIdentifier ?? AppInfo.bundleId {
             } else {
                 defaults.removeObject(forKey: key)
             }

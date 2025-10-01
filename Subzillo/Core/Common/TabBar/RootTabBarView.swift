@@ -26,7 +26,7 @@ struct RootTabBar: View {
                 case .activity:
                     ActivityView()
                 case .profile:
-                    ProfileView()
+                    ProfileView(path: $path)
                 }
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
