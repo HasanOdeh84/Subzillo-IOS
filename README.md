@@ -16,7 +16,7 @@ Subzillo is a smart subscription management platform that helps users track, org
 | **Programming Language**        | Swift                                            |
 | **UI Framework**                | SwiftUI + Combine                               |
 | **Architecture Pattern**        | MVVM (Model–View–ViewModel)                     |
-| **Dependency Management**       | CocoaPods          |
+| **Dependency Management**       | Swift Package Manager(SPM)          |
 | **Networking**                  | Native URLSession for secure HTTP networking    |
 | **Backend Communication**       | RESTful APIs with JSON                           |
 | **Push Notifications**          | Apple Push Notification Service (APNs)          |
@@ -33,53 +33,77 @@ The app follows **MVVM (Model-View-ViewModel)** pattern to ensure separation of 
 # Project structure
 
 ```text
-Application/
-└─ Core/                       
-   ├─ Common/
-   │  ├─ Enums.swift
-   │  ├─ Models.swift
-   │  └─ Views.swift
-   ├─ Controllers/
-   │  └─ MainApp.swift
-   ├─ Extensions/
-   │  ├─ ColorExtensions.swift
-   │  ├─ FontExtension.swift
-   │  └─ ViewExtensions.swift
-   ├─ Services/
-   │  └─ Network/
-   │     ├─ APIEndPoints.swift
-   │     ├─ APIError.swift
-   │     ├─ MultipartRequest.swift
-   │     ├─ NetworkRequest.swift
-   │     ├─ NetworkResult.swift
-   │     └─ ResponseContainer.swift
-   ├─ Utils/
-   │  ├─ ColorConstants.swift
-   │  ├─ Constants.swift
-   │  ├─ LogType.swift
-   │  └─ NetworkMonitor.swift
-   └─ Features/
-      ├─ Login/
-      │  ├─ Models/
-      │  │  └─ LoginModel.swift
-      │  ├─ ViewModels/
-      │  │  └─ LoginViewModel.swift
-      │  └─ Views/
-      │     └─ LoginView.swift
-      ├─ AddSubscription/
-      │  ├─ Models/
-      │  │  └─ AddSubscriptionModel.swift
-      │  ├─ ViewModels/
-      │  │  └─ AddSubscriptionViewModel.swift
-      │  └─ Views/
-      │     └─ AddSubscriptionView.swift
-    Resources/
-    ├─ Assets.xcassets
-    ├─ Fonts
-    ├─ Localization
-    ├─ Lotties
-    ├─ Info
-    └─ LaunchScreen
+Subzillo/
+│
+├── App/
+│   ├── SubzilloApp.swift            // Main entry point
+│
+├── Common/
+│   ├── Models/                      // Shared models used across features
+│   │   ├── GeneralResponseModel.swift
+│   │   ├── RefreshTokenModel.swift
+│   │
+│   ├── TabBar/                      // Tab bar UI
+│   │   └── MainTabView.swift
+│   │
+│   └── Views/                       // Reusable UI components
+│       ├── CustomButton.swift
+│       └── CustomTextField.swift
+│
+├── Features/
+│   ├── Login/                        // Feature-based grouping
+│   │   ├── LoginView.swift
+│   │   ├── LoginViewModel.swift
+│   │   ├── LoginModel.swift
+│   │
+│   ├── Signup/
+│   │   ├── SignupView.swift
+│   │   ├── SignupViewModel.swift
+│   │   ├── SignupModel.swift
+│   │
+│   └── ForgotPassword/
+│       ├── ForgotPasswordView.swift
+│       ├── ForgotPasswordViewModel.swift
+│       ├── ForgotPasswordModel.swift
+│
+├── Managers/                         // App-wide managers
+│   ├── AlertManager.swift
+│   └── ToastManager.swift
+│
+├── Network/                          // Networking layer
+│   ├── APIEndpoints.swift
+│   ├── APIError.swift
+│   ├── MultipartRequest.swift
+│   ├── NetworkRequest.swift
+│   ├── NetworkResult.swift
+│   └── ResponseContainer.swift
+│
+├── Utils/                            // Utilities and helpers
+│   ├── Enums/
+│   │   └── SomeEnum.swift
+│   │
+│   ├── Extensions/
+│   │   ├── Color+Extensions.swift
+│   │   ├── Font+Extensions.swift
+│   │   └── View+Extensions.swift
+│   │
+│   ├── Validations/
+│   │   ├── AuthenticationValidations.swift
+│   │   └── HomeValidations.swift
+│   │
+│   ├── Constants.swift
+│   ├── LogType.swift
+│   ├── KeychainHelper.swift
+│   └── NetworkMonitor.swift
+│
+└── Resources/                        // App assets
+    ├── Fonts/
+    ├── Localization/
+    ├── Lotties/
+    ├── Assets.xcassets
+    ├── Info.plist
+    ├── LaunchScreen.storyboard
+    └── PreviewContent/
 
 ```
 # Setup & Installation
