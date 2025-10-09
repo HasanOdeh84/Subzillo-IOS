@@ -15,7 +15,7 @@ struct LoginView: View {
     @State private var password                 : String = ""
     @State private var isPasswordVisible        : Bool = false
     @Binding var path                           : NavigationPath
-    @EnvironmentObject var notificationManager  : NotificationManager
+    @EnvironmentObject var appDelegate          : AppDelegate
     
     //MARK: - Body
     var body: some View {
@@ -89,7 +89,7 @@ struct LoginView: View {
                         let input = LoginRequest(
                             username: username,
                             password: password,
-                            deviceId: notificationManager.deviceToken ?? ""
+                            deviceId: appDelegate.deviceToken ?? ""
 //                            pushMode: 1
                         )
                         loginVM.login(input: input,path:$path)

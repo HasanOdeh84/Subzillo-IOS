@@ -18,7 +18,7 @@ struct RootTabBar: View {
                 switch selectedTab {
                 case .home:
                     //                        HomeView()
-                    VoiceCommandView()
+                    VoiceCommandView(path:$path)
                 case .subscriptions:
                     SubscriptionsView()
                 case .analytics:

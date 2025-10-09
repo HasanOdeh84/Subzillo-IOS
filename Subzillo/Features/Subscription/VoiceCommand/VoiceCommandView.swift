@@ -10,9 +10,14 @@ import SwiftUI
 struct VoiceCommandView: View {
     @StateObject private var audioManager   = AudioRecorderManager()
     @StateObject private var viewModel      = VoiceCommandViewModel()
+    @Binding var path                       : NavigationPath
     
     var body: some View {
         VStack(spacing: 30) {
+            
+            Button("Add subscription"){
+                path.append(PendingRoute.addSubscription(serviceName: "netflix", planName: "basi", price: 100.0, billingCycle: "monthly"))
+            }
             
             // Record button
             Button(action: {
@@ -93,5 +98,5 @@ struct VoiceCommandView: View {
 }
 
 #Preview {
-    VoiceCommandView()
+    VoiceCommandView(path:  .constant(NavigationPath()))
 }

@@ -18,7 +18,7 @@ struct RegistrationView: View {
     @State private var confirmPassword          = ""
     @State private var agreeTerms               = false
     @StateObject private var registerVM         = RegistrationViewModel()
-    @EnvironmentObject var notificationManager  : NotificationManager
+    @EnvironmentObject var appDelegate          : AppDelegate
     @Binding var path                           : NavigationPath
     
     //MARK: - Body
@@ -93,7 +93,7 @@ struct RegistrationView: View {
                                                                            password     : password,
                                                                            fullName     : fullName,
                                                                            platform     : Constants.platform,
-                                                                           deviceId     : notificationManager.deviceToken ?? ""),path:$path)
+                                                                           deviceId     : appDelegate.deviceToken ?? ""),path:$path)
                             }
                         }) {
                             Text("Signup")

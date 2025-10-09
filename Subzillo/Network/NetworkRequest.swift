@@ -47,7 +47,7 @@ class NetworkRequest {
     func regenerateAccessAPI() -> Future<Void, APIError> {
         return Future<Void, APIError> { promise in
             self.getApi(endPoint    : .regenerateAccessToken,
-                        token       : KeychainHelper.read(account: Constants.authKey) ?? "",
+                        token       : KeychainHelper.read(account: Constants.refreshKey) ?? "",
                         showLoader  : false,
                         responseType: RefreshTokenResponse.self)
             .sink { completion in

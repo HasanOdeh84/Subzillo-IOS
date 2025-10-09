@@ -19,6 +19,9 @@ enum Endpoint: String {
     case resetPassword                  = "/resetPassword"
     case resendOtp                      = "/resendOtp"
     case logout                         = "/logout"
+    case addSubscription                = "/addSubscription"
+    case updateUserInfo                 = "/updateUserInfo"
+    case updatePassword                 = "/updatePassword"
 }
 
 var authKey: String {
