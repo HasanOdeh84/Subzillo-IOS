@@ -95,6 +95,7 @@ struct SubzilloApp: App {
     @StateObject private var audioManager   = AudioRecorderManager()
     @StateObject private var networkMonitor = NetworkMonitor()
     @StateObject private var toastManager   = ToastManager()
+    @StateObject var mediaPicker            = MediaPickerManager.shared
     
     var body: some Scene {
         WindowGroup {
@@ -103,6 +104,7 @@ struct SubzilloApp: App {
                 .environmentObject(appDelegate)
                 .environmentObject(networkMonitor)
                 .environmentObject(toastManager)
+                .environmentObject(mediaPicker)
                 .withLoader()
                 .withAlert()
                 .withToast()
@@ -126,11 +128,12 @@ struct SubzilloApp: App {
 }
 
 struct RootView: View {
-    @State private var path = NavigationPath()
+    @StateObject var appState   = AppState.shared
+    @State private var path     = NavigationPath()
     var body: some View {
         NavigationStack(path: $path) {
             Group {
-                if LoginStatus().isLogin() {
+                if appState.isLoggedIn {
                     RootTabBar(path: $path)
                 } else {
                     LoginView(path: $path)
@@ -177,5 +180,6 @@ struct RootView: View {
                 }
             }
         }
+        .environmentObject(appState)
     }
 }

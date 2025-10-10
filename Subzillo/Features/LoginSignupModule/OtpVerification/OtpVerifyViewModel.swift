@@ -31,7 +31,7 @@ class OtpVerifyViewModel: ObservableObject {
                 if from == .forgot{
                     path.wrappedValue.append(PendingRoute.resetPassword(username: input.username))
                 }else{
-                    LoginStatus().loginUpdate(isLogin: true)
+                    AppState.shared.login()
                     path.wrappedValue.append(PendingRoute.home)
                 }
             }

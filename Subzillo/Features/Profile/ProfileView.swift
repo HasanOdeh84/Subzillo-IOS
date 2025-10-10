@@ -8,12 +8,19 @@
 import SwiftUI
 
 struct ProfileView: View {
-    @Binding var path           : NavigationPath
-    @StateObject var loginVM    = LoginViewModel()
-    @StateObject var profileVM  = ProfileViewModel()
     
+    //MARK: - Properties
+    @Binding var path                       : NavigationPath
+    @StateObject var loginVM                = LoginViewModel()
+    @StateObject var profileVM              = ProfileViewModel()
+    @EnvironmentObject var picker           : MediaPickerManager
+    @State private var selectedImage        : UIImage?
+    @State private var selectedDocumentName : String?
+    
+    //MARK: - Body
     var body: some View {
         VStack{
+            Spacer()
             CustomButton(title: "Logout") {
                 AlertManager.shared.showAlert(
                     title       : "Logout",
@@ -40,7 +47,68 @@ struct ProfileView: View {
                                                   newPassword       : "krify@123")
                 profileVM.updatePassword(input: input)
             }
+            if let image = selectedImage {
+                Image(uiImage: image)
+                    .resizable()
+                    .scaledToFit()
+                    .frame(height: 250)
+                    .cornerRadius(10)
+            }
+            
+            if let doc = selectedDocumentName {
+                Text("Selected document: \(doc)")
+                    .font(.footnote)
+                    .foregroundColor(.gray)
+            }
+                        
+            Button("camera image picker") {
+                picker.present(allowDocument: false,onImageData: {image, data, filename, mimeType in
+                    profileVM.updateProfileImage(input: UpdateProfileImageRequest(userId: Constants.getUserId()), fileData: [MultiPartFileInput(
+                        fieldName   : "profile",
+                        fileName    : filename,
+                        mimeType    : mimeType,//"image/jpeg",
+                        fileData    : data
+                    )])
+                    selectedImage = image
+                })
+            }
+            
+            Spacer()
+            
+            /* picker with document
+            Button("camera image document picker") {
+                picker.present(allowDocument: true,
+                               onImageData: { image, data, filename, mimeType in
+                    profileVM.updateProfileImage(input: UpdateProfileImageRequest(userId: Constants.getUserId()), fileData: [MultiPartFileInput(
+                        fieldName   : "profile",
+                        fileName    : filename,
+                        mimeType    : mimeType,
+                        fileData    : data
+                    )])
+                    selectedImage = image
+                },
+                               onDocumentData: {url, data, filename, mimeType in
+                    selectedDocumentName = url?.lastPathComponent
+                })
+            }
+            Spacer()
+            */
+            
+            Button("Image subscription") {
+                picker.present(allowDocument: false,onImageData: {image, data, filename, mimeType in
+                    profileVM.imageSubscription(input: ImageSubscriptionRequest(userId: Constants.getUserId()), fileData: [MultiPartFileInput(
+                        fieldName   : "screenshot",
+                        fileName    : filename,
+                        mimeType    : mimeType,
+                        fileData    : data
+                    )])
+                    selectedImage = image
+                })
+            }
+            
+            Spacer()
         }
+        .background(MediaPickerHost().allowsHitTesting(false)) // host
     }
 }
 

@@ -73,18 +73,6 @@ struct Constants{
         return value
     }
     
-    static func resetDefaults() {
-        let defaults = UserDefaults.standard
-        let dictionary = defaults.dictionaryRepresentation()
-        dictionary.keys.forEach { key in
-            if key == Constants.deviceToken || key ==  Bundle.main.bundleIdentifier ?? AppInfo.bundleId {
-            } else {
-                defaults.removeObject(forKey: key)
-            }
-        }
-        KeychainHelper().deleteAllKeychainItems()
-    }
-    
     static func removeDefaults(key: String) {
         let defaults = UserDefaults.standard
         _ = defaults.dictionaryRepresentation()
@@ -120,22 +108,68 @@ class DeviceType{
     }
 }
 
-class LoginStatus{
-    //Login status
-    func loginUpdate(isLogin:Bool) {
-        UserDefaults.standard.setValue(isLogin, forKey: "loginstatus")
+//class LoginStatus {
+//    static let shared = LoginStatus()
+//    private init() {}
+//
+//    private let key = "loginstatus"
+//
+//    func loginUpdate(isLogin: Bool) {
+//        UserDefaults.standard.setValue(isLogin, forKey: key)
+//    }
+//
+//    func isLogin() -> Bool {
+//        return UserDefaults.standard.bool(forKey: key)
+//    }
+//}
+
+//class AppState: ObservableObject {
+//    
+//    static let shared = AppState()
+//    private init() {}
+//    @Published var isLoggedIn: Bool = LoginStatus.shared.isLogin()
+//
+//    func resetDefaults() {
+//        let defaults = UserDefaults.standard
+//        let dictionary = defaults.dictionaryRepresentation()
+//        dictionary.keys.forEach { key in
+//            if key == Constants.deviceToken || key ==  Bundle.main.bundleIdentifier ?? AppInfo.bundleId {
+//            } else {
+//                defaults.removeObject(forKey: key)
+//            }
+//        }
+//        KeychainHelper().deleteAllKeychainItems()
+//        isLoggedIn = false
+//    }
+//}
+
+class AppState: ObservableObject {
+    static let shared = AppState()
+    init() {
+        // Initialize from UserDefaults
+        isLoggedIn = UserDefaults.standard.bool(forKey: key)
     }
 
-    func isLogin()->Bool{
-        if let isUserLoggedIn = UserDefaults.standard.value(forKey: "loginstatus") as? Bool {
-            if isUserLoggedIn {
-                print("User is logged in.")
-                return true
+    private let key = "loginstatus"
+    
+    @Published var isLoggedIn: Bool = false
+
+    // MARK: - Login/Logout
+    func login() {
+        isLoggedIn = true
+        UserDefaults.standard.setValue(true, forKey: key)
+    }
+    
+    func logout() {
+        isLoggedIn = false
+        let defaults = UserDefaults.standard
+        let dictionary = defaults.dictionaryRepresentation()
+        dictionary.keys.forEach { key in
+            if key == Constants.deviceToken || key ==  Bundle.main.bundleIdentifier ?? AppInfo.bundleId {
             } else {
-                return false
+                defaults.removeObject(forKey: key)
             }
-        } else {
-            return false
         }
+        KeychainHelper().deleteAllKeychainItems()
     }
 }

@@ -37,7 +37,7 @@ class LoginViewModel: ObservableObject {
                 DispatchQueue.main.async {
                     path.wrappedValue.append(PendingRoute.home)
                 }
-                LoginStatus().loginUpdate(isLogin: true)
+                AppState.shared.login()
             }else{
                 DispatchQueue.main.async {
                     path.wrappedValue.append(PendingRoute.verifyOtp(emailId: response.data?.email, from: .login, username: response.data?.username))
@@ -58,8 +58,7 @@ class LoginViewModel: ObservableObject {
         receiveValue: { response in
             PrintLogger.modelLog(response, type: .response, isInput: false)
             ToastManager.shared.showToast(message: response.message ?? "")
-            Constants.resetDefaults()
-            LoginStatus().loginUpdate(isLogin: false)
+            AppState.shared.logout()
             DispatchQueue.main.async {
                 path.wrappedValue.append(PendingRoute.login)
             }

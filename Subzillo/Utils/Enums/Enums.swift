@@ -32,3 +32,7 @@ enum FocusPin {
 enum ToVerify{
     case forgot, register, login, profile
 }
+
+enum MediaSource {
+    case camera, library, document
+}
