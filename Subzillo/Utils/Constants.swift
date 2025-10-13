@@ -27,6 +27,7 @@ struct Constants{
     static let systemVersion                        = UIDevice.current.systemVersion
     static let googleMapApiKey                      = "AIzaSyAjueXZzKodaxXdG2mZYG21_Jaf_ikFicQ"
     static let googleToken                          = "AIzaSyC8QkcmKT-p9tpMnamwLZ3xY4RSTxcvaKk"
+    static let googleSigninId                       = "353333226738-1htnc4n6tddp5pbm78e3e9qbceeui88u.apps.googleusercontent.com"
     static let userDefaults                         = UserDefaults.standard
     
     static func saveDefaults(value: Any?, key: String) {

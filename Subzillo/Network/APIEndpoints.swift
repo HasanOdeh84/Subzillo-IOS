@@ -24,6 +24,7 @@ enum Endpoint: String {
     case updatePassword                 = "/updatePassword"
     case updateProfileImage             = "/updateProfileImage"
     case imageSubscription              = "/imageSubscription"
+    case socialLogin                    = "/socialLogin"
 }
 
 var authKey: String {

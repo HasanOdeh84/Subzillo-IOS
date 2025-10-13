@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import GoogleSignInSwift
 
 struct LoginView: View {
     
@@ -98,8 +99,12 @@ struct LoginView: View {
                 
                 // Social logins
                 VStack(spacing: 15) {
-                    SocialButton(title: "Continue with Google")
-                    SocialButton(title: "Continue with Apple")
+                    SocialButton(title: "Continue with Google"){
+                        loginVM.socialLogin(loginType: .google, path: $path)
+                    }
+                    SocialButton(title: "Continue with Apple") {
+                        loginVM.socialLogin(loginType: .apple, path: $path)
+                    }
                 }
                 .padding(.top, 10)
                 

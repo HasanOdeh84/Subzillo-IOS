@@ -36,3 +36,10 @@ enum ToVerify{
 enum MediaSource {
     case camera, library, document
 }
+
+// Social login type enum
+enum loginType:Int,Codable {
+    case google   = 1
+    case apple    = 2
+    case facebook = 3
+}

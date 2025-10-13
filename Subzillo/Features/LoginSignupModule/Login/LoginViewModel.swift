@@ -47,6 +47,48 @@ class LoginViewModel: ObservableObject {
         .store(in: &self.subscriptions)
     }
     
+    func socialLogin(loginType:loginType, path:Binding<NavigationPath>){
+        if loginType == .google{
+            SocialLogins.shared.signInWithGoogle()
+        }else{
+            SocialLogins.shared.signInWithGoogleApple()
+        }
+        let data = SocialLogins.shared.socialLoginData
+        if SocialLogins.shared.isSocialLoggedIn ?? false{
+            socialLoginApi(input: SocialLoginRequest(socialId       : data?.id ?? "",
+                                                     authProvider   : data?.loginType,
+                                                     email          : data?.emailAddress ?? "",
+                                                     fullName       : data?.fullName ?? "",
+                                                     username       : data?.fullName ?? "",
+                                                     deviceId       : AppDelegate.shared.deviceToken ?? ""),
+                           path: path)
+        }
+    }
+    
+    func socialLoginApi(input:SocialLoginRequest, path:Binding<NavigationPath>) {
+        isLoading = true
+        apiReference.postApi(endPoint: Endpoint.socialLogin, method: .POST,token: defaultAuthKey,body: input,showLoader: true, responseType: LoginResponse.self)
+            .sink { [unowned self] completion in
+                self.isLoading = false
+                if case let .failure(error) = completion {
+                    self.handleError(error,endPoint: Endpoint.socialLogin)
+                }
+            }
+        receiveValue: { response in
+            PrintLogger.modelLog(response, type: .response, isInput: false)
+            ToastManager.shared.showToast(message: response.message ?? "")
+            KeychainHelper.save(response.data?.accessToken, account: Constants.authKey)
+            KeychainHelper.save(response.data?.refreshToken, account: Constants.refreshKey)
+            Constants.saveDefaults(value: response.data?.id, key: Constants.userId)
+            Constants.saveDefaults(value: response.data?.username, key: Constants.username)
+            DispatchQueue.main.async {
+                path.wrappedValue.append(PendingRoute.home)
+            }
+            AppState.shared.login()
+        }
+        .store(in: &self.subscriptions)
+    }
+    
     func logout(input:LogoutRequest, path:Binding<NavigationPath>) {
         apiReference.postApi(endPoint: Endpoint.logout, method: .POST,token: authKey,body: input,showLoader: true, responseType: GeneralResponse.self)
             .sink { [unowned self] completion in

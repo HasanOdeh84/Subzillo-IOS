@@ -111,8 +111,12 @@ struct RegistrationView: View {
                     
                     // Social logins
                     VStack(spacing: 15) {
-                        SocialButton(title: "Continue with Google")
-                        SocialButton(title: "Continue with Apple")
+                        SocialButton(title: "Continue with Google") {
+                            
+                        }
+                        SocialButton(title: "Continue with Apple") {
+                            
+                        }
                     }
                     .padding(.top, 10)
                     
@@ -173,10 +177,10 @@ struct PasswordRuleView: View {
 
 struct SocialButton: View {
     var title: String
+    let action: () -> Void
     
     var body: some View {
-        Button(action: {
-        }) {
+        Button(action: action){
             Text(title)
                 .frame(maxWidth: .infinity)
                 .padding()

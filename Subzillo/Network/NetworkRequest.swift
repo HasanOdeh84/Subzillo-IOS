@@ -73,11 +73,20 @@ class NetworkRequest {
         return self.getRequest(endPoint: endPoint, token: token, showLoader: showLoader,extraParams: extraParams, responseType: responseType)
             .catch { error -> AnyPublisher<T, APIError> in
                 if case .unauthorized = error {
-                    return self.regenerateAccessAPI()
-                        .flatMap {
-                            return self.getRequest(endPoint: endPoint, token: authKey, showLoader: showLoader,extraParams: extraParams, responseType: responseType)
+                    if endPoint == .regenerateAccessToken{
+                        DispatchQueue.main.async {
+                            AlertManager.shared.showAlert(title: "", message: "Session expired, Please login again.",okAction: {
+                                AppState.shared.logout()
+                            })
                         }
-                        .eraseToAnyPublisher()
+                        return Fail(error: .unauthorized).eraseToAnyPublisher()
+                    }else{
+                        return self.regenerateAccessAPI()
+                            .flatMap {
+                                return self.getRequest(endPoint: endPoint, token: authKey, showLoader: showLoader,extraParams: extraParams, responseType: responseType)
+                            }
+                            .eraseToAnyPublisher()
+                    }
                 } else {
                     return Fail(error: error).eraseToAnyPublisher()
                 }
@@ -96,11 +105,20 @@ class NetworkRequest {
         return self.postRequest(endPoint: endPoint, method: method,token: token,body: body,showLoader: showLoader, responseType: responseType)
             .catch { error -> AnyPublisher<T, APIError> in
                 if case .unauthorized = error {
-                    return self.regenerateAccessAPI()
-                        .flatMap {
-                            return self.postRequest(endPoint: endPoint, method: method,token: authKey,body: body,showLoader: showLoader, responseType: responseType)
+                    if endPoint == .regenerateAccessToken{
+                        DispatchQueue.main.async {
+                            AlertManager.shared.showAlert(title: "", message: "Session expired, Please login again.",okAction: {
+                                AppState.shared.logout()
+                            })
                         }
-                        .eraseToAnyPublisher()
+                        return Fail(error: .unauthorized).eraseToAnyPublisher()
+                    }else{
+                        return self.regenerateAccessAPI()
+                            .flatMap {
+                                return self.postRequest(endPoint: endPoint, method: method,token: authKey,body: body,showLoader: showLoader, responseType: responseType)
+                            }
+                            .eraseToAnyPublisher()
+                    }
                 } else {
                     return Fail(error: error).eraseToAnyPublisher()
                 }
@@ -119,11 +137,20 @@ class NetworkRequest {
         return self.multiPartRequest(endPoint: endPoint, method: method,token: token,body: body,showLoader: showLoader, responseType: responseType)
             .catch { error -> AnyPublisher<T, APIError> in
                 if case .unauthorized = error {
-                    return self.regenerateAccessAPI()
-                        .flatMap {
-                            return self.multiPartRequest(endPoint: endPoint, method: method,token: authKey,body: body,showLoader: showLoader, responseType: responseType)
+                    if endPoint == .regenerateAccessToken{
+                        DispatchQueue.main.async {
+                            AlertManager.shared.showAlert(title: "", message: "Session expired, Please login again.",okAction: {
+                                AppState.shared.logout()
+                            })
                         }
-                        .eraseToAnyPublisher()
+                        return Fail(error: .unauthorized).eraseToAnyPublisher()
+                    }else{
+                        return self.regenerateAccessAPI()
+                            .flatMap {
+                                return self.multiPartRequest(endPoint: endPoint, method: method,token: authKey,body: body,showLoader: showLoader, responseType: responseType)
+                            }
+                            .eraseToAnyPublisher()
+                    }
                 } else {
                     return Fail(error: error).eraseToAnyPublisher()
                 }
@@ -178,7 +205,7 @@ class NetworkRequest {
                     }
                     print("Status Code : \(httpResponse.statusCode)")
                     switch httpResponse.statusCode {
-                    case 400 :
+                    case 400 : //Error case
                         if let apiError = try? JSONDecoder().decode(APIErrorResponse.self, from: result.data) {
                             throw APIError.apiError(apiError.message)
                         }else{
@@ -193,22 +220,37 @@ class NetworkRequest {
                             throw APIError.internalServerError
                         }
                     case 409: //Someone logged
+                        DispatchQueue.main.async {
+                            AlertManager.shared.showAlert(title: "", message: "Someone logged in your account.",okAction: {
+                                AppState.shared.logout()
+                            })
+                        }
                         if let apiError = try? JSONDecoder().decode(APIErrorResponse.self, from: result.data) {
                             throw APIError.apiError(apiError.message)
                         }else{
                             throw APIError.someOneLoggedInElsewhere
                         }
                     case 403: //Account blocked
+                        DispatchQueue.main.async {
+                            AlertManager.shared.showAlert(title: "", message: "Account has been blocked.",okAction: {
+                                AppState.shared.logout()
+                            })
+                        }
                         if let apiError = try? JSONDecoder().decode(APIErrorResponse.self, from: result.data) {
                             throw APIError.apiError(apiError.message)
                         }else{
                             throw APIError.accountBlocked
                         }
                     case 404: //User not found
+                        DispatchQueue.main.async {
+                            AlertManager.shared.showAlert(title: "", message: "User not found.",okAction: {
+                                AppState.shared.logout()
+                            })
+                        }
                         if let apiError = try? JSONDecoder().decode(APIErrorResponse.self, from: result.data) {
                             throw APIError.apiError(apiError.message)
                         }else{
-                            throw APIError.accountBlocked
+                            throw APIError.notFound
                         }
                     default:
                         return result.data
@@ -308,22 +350,37 @@ class NetworkRequest {
                             throw APIError.internalServerError
                         }
                     case 409: //Someone logged
+                        DispatchQueue.main.async {
+                            AlertManager.shared.showAlert(title: "", message: "Someone logged in your account.",okAction: {
+                                AppState.shared.logout()
+                            })
+                        }
                         if let apiError = try? JSONDecoder().decode(APIErrorResponse.self, from: result.data) {
                             throw APIError.apiError(apiError.message)
                         }else{
                             throw APIError.someOneLoggedInElsewhere
                         }
                     case 403: //Account blocked
+                        DispatchQueue.main.async {
+                            AlertManager.shared.showAlert(title: "", message: "Account has been blocked.",okAction: {
+                                AppState.shared.logout()
+                            })
+                        }
                         if let apiError = try? JSONDecoder().decode(APIErrorResponse.self, from: result.data) {
                             throw APIError.apiError(apiError.message)
                         }else{
                             throw APIError.accountBlocked
                         }
                     case 404: //User not found
+                        DispatchQueue.main.async {
+                            AlertManager.shared.showAlert(title: "", message: "User not found.",okAction: {
+                                AppState.shared.logout()
+                            })
+                        }
                         if let apiError = try? JSONDecoder().decode(APIErrorResponse.self, from: result.data) {
                             throw APIError.apiError(apiError.message)
                         }else{
-                            throw APIError.accountBlocked
+                            throw APIError.notFound
                         }
                     default:
                         return result.data
@@ -421,22 +478,37 @@ class NetworkRequest {
                             throw APIError.internalServerError
                         }
                     case 409: //Someone logged
+                        DispatchQueue.main.async {
+                            AlertManager.shared.showAlert(title: "", message: "Someone logged in your account.",okAction: {
+                                AppState.shared.logout()
+                            })
+                        }
                         if let apiError = try? JSONDecoder().decode(APIErrorResponse.self, from: result.data) {
                             throw APIError.apiError(apiError.message)
                         }else{
                             throw APIError.someOneLoggedInElsewhere
                         }
                     case 403: //Account blocked
+                        DispatchQueue.main.async {
+                            AlertManager.shared.showAlert(title: "", message: "Account has been blocked.",okAction: {
+                                AppState.shared.logout()
+                            })
+                        }
                         if let apiError = try? JSONDecoder().decode(APIErrorResponse.self, from: result.data) {
                             throw APIError.apiError(apiError.message)
                         }else{
                             throw APIError.accountBlocked
                         }
                     case 404: //User not found
+                        DispatchQueue.main.async {
+                            AlertManager.shared.showAlert(title: "", message: "User not found.",okAction: {
+                                AppState.shared.logout()
+                            })
+                        }
                         if let apiError = try? JSONDecoder().decode(APIErrorResponse.self, from: result.data) {
                             throw APIError.apiError(apiError.message)
                         }else{
-                            throw APIError.accountBlocked
+                            throw APIError.notFound
                         }
                     default:
                         return result.data
@@ -492,7 +564,7 @@ class NetworkRequest {
         
         for (index, obj) in input.fileInput.enumerated() {
             body.append(Data("--\(boundary)\r\n".utf8))
-//            body.append(Data("Content-Disposition: form-data; name=\"\(obj.fieldName)\"; filename=\"profileImage\(index).png\"\r\n".utf8))
+            //            body.append(Data("Content-Disposition: form-data; name=\"\(obj.fieldName)\"; filename=\"profileImage\(index).png\"\r\n".utf8))
             body.append(Data("Content-Disposition: form-data; name=\"\(obj.fieldName)\"; filename=\"\(obj.fileName)\"\r\n".utf8))
             body.append(Data("Content-Type: \(obj.mimeType)\r\n\r\n".utf8))
             body.append(obj.fileData)

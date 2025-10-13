@@ -67,3 +67,23 @@ public struct LoginResponseData: Codable {
 public struct LogoutRequest: Codable {
     let userId : String
 }
+
+// Social login model
+struct SocialLoginModel:Codable{
+    var id            : String?     = nil
+    var loginType     : loginType?  = nil
+    var fullName      : String?     = nil
+    var emailAddress  : String?     = nil
+    var mobileNumber  : String?     = nil
+}
+
+public struct SocialLoginRequest: Codable {
+    let socialId     : String
+    var authProvider : loginType?  = nil
+    let email        : String
+    let fullName     : String
+    let username     : String
+    var platform     : Int = Constants.platform
+    let deviceId     : String
+    var uniqueId     : String = UUID().uuidString
+}

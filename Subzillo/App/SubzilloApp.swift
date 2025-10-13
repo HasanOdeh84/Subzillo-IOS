@@ -10,8 +10,9 @@ import UserNotifications
 import UIKit
 
 class AppDelegate: NSObject, ObservableObject, UIApplicationDelegate, UNUserNotificationCenterDelegate {
-    @Published var deviceToken: String? = nil
-    @Published var permissionGranted: Bool = false
+    @Published var deviceToken          : String? = nil
+    @Published var permissionGranted    : Bool = false
+    static let shared                   = AppDelegate()
     
     // Called when app launches
     func application(
@@ -137,6 +138,11 @@ struct RootView: View {
                     RootTabBar(path: $path)
                 } else {
                     LoginView(path: $path)
+                        .onAppear {
+                            if !path.isEmpty {
+                                path.removeLast(path.count) // reset stack on login view
+                            }
+                        }
                 }
             }
             .navigationDestination(for: PendingRoute.self) { screen in
