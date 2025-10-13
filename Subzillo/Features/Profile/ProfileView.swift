@@ -16,6 +16,7 @@ struct ProfileView: View {
     @EnvironmentObject var picker           : MediaPickerManager
     @State private var selectedImage        : UIImage?
     @State private var selectedDocumentName : String?
+    @StateObject private var commonApiVM    = CommonAPIViewModel()
     
     //MARK: - Body
     var body: some View {
@@ -104,6 +105,14 @@ struct ProfileView: View {
                     )])
                     selectedImage = image
                 })
+            }
+            
+            Button("get categories api"){
+                commonApiVM.getCategories(path: $path)
+            }
+            
+            Button("get currencies api"){
+                commonApiVM.getCurrencies(path: $path)
             }
             
             Spacer()

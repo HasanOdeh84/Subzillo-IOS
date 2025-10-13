@@ -17,10 +17,10 @@ class OtpVerifyViewModel: ObservableObject {
     @Published var resendOtpResponse    : Bool = false
     
     func verifyOtp(input:OtpVerifyRequest, path: Binding<NavigationPath>,from:ToVerify?) {
-        apiReference.postApi(endPoint: Endpoint.verifyOtp, method: .POST, token: defaultAuthKey, body: input, showLoader: true, responseType: GeneralResponse.self)
+        apiReference.postApi(endPoint: APIEndpoint.verifyOtp, method: .POST, token: defaultAuthKey, body: input, showLoader: true, responseType: GeneralResponse.self)
             .sink { [unowned self] completion in
                 if case let .failure(error) = completion {
-                    self.handleError(error,endPoint: Endpoint.verifyOtp)
+                    self.handleError(error,endPoint: APIEndpoint.verifyOtp)
                 }
             }
         receiveValue: { [unowned self] response in
@@ -40,10 +40,10 @@ class OtpVerifyViewModel: ObservableObject {
     }
     
     func resendOtp(input:ResendOtpRequest) {
-        apiReference.postApi(endPoint: Endpoint.resendOtp, method: .POST, token: defaultAuthKey, body: input, showLoader: true, responseType: GeneralResponse.self)
+        apiReference.postApi(endPoint: APIEndpoint.resendOtp, method: .POST, token: defaultAuthKey, body: input, showLoader: true, responseType: GeneralResponse.self)
             .sink { [unowned self] completion in
                 if case let .failure(error) = completion {
-                    self.handleError(error,endPoint: Endpoint.resendOtp)
+                    self.handleError(error,endPoint: APIEndpoint.resendOtp)
                 }
             }
         receiveValue: { [unowned self] response in
@@ -55,7 +55,7 @@ class OtpVerifyViewModel: ObservableObject {
     }
     
     // MARK: - Handle errors
-    func handleError(_ apiError: APIError, endPoint : Endpoint) {
+    func handleError(_ apiError: APIError, endPoint : APIEndpoint) {
         print("API Error : \(endPoint) - \(apiError.localizedDescription)")
     }
 }

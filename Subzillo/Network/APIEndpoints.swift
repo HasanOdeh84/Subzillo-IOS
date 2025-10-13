@@ -9,7 +9,7 @@ enum HTTPMethod: String {
     case GET, POST, PUT, DELETE, PATCH
 }
 
-enum Endpoint: String {
+enum APIEndpoint: String {
     case login                          = "/login"
     case registration                   = "/register"
     case voiceSubscription              = "/voiceSubscription"
@@ -25,6 +25,8 @@ enum Endpoint: String {
     case updateProfileImage             = "/updateProfileImage"
     case imageSubscription              = "/imageSubscription"
     case socialLogin                    = "/socialLogin"
+    case getCategories                  = "/getCategories"
+    case getCurrencies                  = "/getCurrencies"
 }
 
 var authKey: String {

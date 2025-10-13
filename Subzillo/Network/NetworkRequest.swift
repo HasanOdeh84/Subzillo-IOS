@@ -3,7 +3,6 @@ import Network
 import SwiftUICore
 import Combine
 import UIKit
-//import Reachability
 
 class NetworkRequest {
     
@@ -64,7 +63,7 @@ class NetworkRequest {
     }
     
     func getApi<T: Decodable>(
-        endPoint    : Endpoint,
+        endPoint    : APIEndpoint,
         token       : String,
         showLoader  : Bool = false,
         extraParams : String? = nil,
@@ -95,7 +94,7 @@ class NetworkRequest {
     }
     
     func postApi<T: Decodable, U : Encodable>(
-        endPoint    : Endpoint,
+        endPoint    : APIEndpoint,
         method      : HTTPMethod,
         token       : String,
         body        : U?,
@@ -127,7 +126,7 @@ class NetworkRequest {
     }
     
     func postMultipartApi<T: Decodable, U : Encodable>(
-        endPoint    : Endpoint,
+        endPoint    : APIEndpoint,
         method      : HTTPMethod,
         token       : String,
         body        : MultipartInput<U>?,
@@ -160,7 +159,7 @@ class NetworkRequest {
     
     // MARK: - Get Request
     func getRequest<T: Decodable>(
-        endPoint    : Endpoint,
+        endPoint    : APIEndpoint,
         token       : String,
         showLoader  : Bool = false,
         extraParams : String? = nil,
@@ -285,7 +284,7 @@ class NetworkRequest {
     
     //MARK: - Post Request
     func postRequest<T: Decodable, U : Encodable>(
-        endPoint    : Endpoint,
+        endPoint    : APIEndpoint,
         method      : HTTPMethod,
         token       : String,
         body        : U?,
@@ -414,7 +413,7 @@ class NetworkRequest {
     
     //MARK: - Post Request
     func multiPartRequest<T: Decodable, U: Encodable>(
-        endPoint    : Endpoint,
+        endPoint    : APIEndpoint,
         method      : HTTPMethod,
         token       : String,
         body        : MultipartInput<U>?,

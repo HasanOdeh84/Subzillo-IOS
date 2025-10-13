@@ -16,10 +16,10 @@ class ResetPasswordViewModel: ObservableObject {
     @Published var resetResponse        : GeneralResponse?
     
     func resetPassword(input:ResetPasswordRequest, path: Binding<NavigationPath>) {
-        apiReference.postApi(endPoint: Endpoint.resetPassword, method: .POST,token: defaultAuthKey,body: input,showLoader: true, responseType: GeneralResponse.self)
+        apiReference.postApi(endPoint: APIEndpoint.resetPassword, method: .POST,token: defaultAuthKey,body: input,showLoader: true, responseType: GeneralResponse.self)
             .sink { [unowned self] completion in
                 if case let .failure(error) = completion {
-                    self.handleError(error,endPoint: Endpoint.resetPassword)
+                    self.handleError(error,endPoint: APIEndpoint.resetPassword)
                 }
             }
         receiveValue: { [unowned self] response in
@@ -34,7 +34,7 @@ class ResetPasswordViewModel: ObservableObject {
     }
     
     // MARK: - Handle errors
-    func handleError(_ apiError: APIError, endPoint : Endpoint) {
+    func handleError(_ apiError: APIError, endPoint : APIEndpoint) {
         print("API Error : \(endPoint) - \(apiError.localizedDescription)")
     }
 }

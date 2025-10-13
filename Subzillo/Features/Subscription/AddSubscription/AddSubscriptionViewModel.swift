@@ -16,10 +16,10 @@ class AddSubscriptionViewModel: ObservableObject {
     var apiReference                    = NetworkRequest.shared
     
     func addSubscription(input:AddSubscriptionRequest) {
-        apiReference.postApi(endPoint: Endpoint.addSubscription, method: .POST,token: authKey,body: input,showLoader: true, responseType: AddSubscriptionResponse.self)
+        apiReference.postApi(endPoint: APIEndpoint.addSubscription, method: .POST,token: authKey,body: input,showLoader: true, responseType: AddSubscriptionResponse.self)
             .sink { [unowned self] completion in
                 if case let .failure(error) = completion {
-                    self.handleError(error,endPoint: Endpoint.addSubscription)
+                    self.handleError(error,endPoint: APIEndpoint.addSubscription)
                 }
             }
         receiveValue: { response in
@@ -30,7 +30,7 @@ class AddSubscriptionViewModel: ObservableObject {
     }
     
     // MARK: - Handle errors
-    func handleError(_ apiError: APIError, endPoint : Endpoint) {
+    func handleError(_ apiError: APIError, endPoint : APIEndpoint) {
         print("API Error : \(endPoint) - \(apiError.localizedDescription)")
     }
 }

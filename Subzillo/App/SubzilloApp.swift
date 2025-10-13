@@ -177,6 +177,11 @@ struct RootView: View {
                     RegistrationView(path: $path)
                 case .login:
                     LoginView(path: $path)
+                        .onAppear {
+                            if !path.isEmpty {
+                                path.removeLast(path.count) // reset stack on login view
+                            }
+                        }
                 case .onboarding:
                     OnboardingView()
                 case .verifyOtp(let emailId, let from, let username):

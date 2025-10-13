@@ -17,10 +17,10 @@ class ForgotPasswordViewModel: ObservableObject {
     @Published var forgotResponse       : GeneralResponse?
     
     func forgotPassword(input:ForgotPasswordRequest, path: Binding<NavigationPath>) {
-        apiReference.postApi(endPoint: Endpoint.forgotPassword, method: .POST,token: defaultAuthKey,body: input,showLoader: true, responseType: GeneralResponse.self)
+        apiReference.postApi(endPoint: APIEndpoint.forgotPassword, method: .POST,token: defaultAuthKey,body: input,showLoader: true, responseType: GeneralResponse.self)
             .sink { [unowned self] completion in
                 if case let .failure(error) = completion {
-                    self.handleError(error,endPoint: Endpoint.forgotPassword)
+                    self.handleError(error,endPoint: APIEndpoint.forgotPassword)
                 }
             }
         receiveValue: { [unowned self] response in
@@ -35,7 +35,7 @@ class ForgotPasswordViewModel: ObservableObject {
     }
     
     // MARK: - Handle errors
-    func handleError(_ apiError: APIError, endPoint : Endpoint) {
+    func handleError(_ apiError: APIError, endPoint : APIEndpoint) {
         print("API Error : \(endPoint) - \(apiError.localizedDescription)")
     }
 }

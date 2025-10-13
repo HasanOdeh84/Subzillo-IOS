@@ -18,11 +18,11 @@ class LoginViewModel: ObservableObject {
     
     func login(input:LoginRequest, path:Binding<NavigationPath>) {
         isLoading = true
-        apiReference.postApi(endPoint: Endpoint.login, method: .POST,token: defaultAuthKey,body: input,showLoader: true, responseType: LoginResponse.self)
+        apiReference.postApi(endPoint: APIEndpoint.login, method: .POST,token: defaultAuthKey,body: input,showLoader: true, responseType: LoginResponse.self)
             .sink { [unowned self] completion in
                 self.isLoading = false
                 if case let .failure(error) = completion {
-                    self.handleError(error,endPoint: Endpoint.login)
+                    self.handleError(error,endPoint: APIEndpoint.login)
                 }
             }
         receiveValue: { [unowned self] response in
@@ -34,9 +34,9 @@ class LoginViewModel: ObservableObject {
             Constants.saveDefaults(value: response.data?.username, key: Constants.username)
             self.loginResponse = response
             if response.data?.emailOtpVerified ?? false{
-                DispatchQueue.main.async {
-                    path.wrappedValue.append(PendingRoute.home)
-                }
+//                DispatchQueue.main.async {
+//                    path.wrappedValue.append(PendingRoute.home)
+//                }
                 AppState.shared.login()
             }else{
                 DispatchQueue.main.async {
@@ -67,11 +67,11 @@ class LoginViewModel: ObservableObject {
     
     func socialLoginApi(input:SocialLoginRequest, path:Binding<NavigationPath>) {
         isLoading = true
-        apiReference.postApi(endPoint: Endpoint.socialLogin, method: .POST,token: defaultAuthKey,body: input,showLoader: true, responseType: LoginResponse.self)
+        apiReference.postApi(endPoint: APIEndpoint.socialLogin, method: .POST,token: defaultAuthKey,body: input,showLoader: true, responseType: LoginResponse.self)
             .sink { [unowned self] completion in
                 self.isLoading = false
                 if case let .failure(error) = completion {
-                    self.handleError(error,endPoint: Endpoint.socialLogin)
+                    self.handleError(error,endPoint: APIEndpoint.socialLogin)
                 }
             }
         receiveValue: { response in
@@ -90,26 +90,26 @@ class LoginViewModel: ObservableObject {
     }
     
     func logout(input:LogoutRequest, path:Binding<NavigationPath>) {
-        apiReference.postApi(endPoint: Endpoint.logout, method: .POST,token: authKey,body: input,showLoader: true, responseType: GeneralResponse.self)
+        apiReference.postApi(endPoint: APIEndpoint.logout, method: .POST,token: authKey,body: input,showLoader: true, responseType: GeneralResponse.self)
             .sink { [unowned self] completion in
                 self.isLoading = false
                 if case let .failure(error) = completion {
-                    self.handleError(error,endPoint: Endpoint.logout)
+                    self.handleError(error,endPoint: APIEndpoint.logout)
                 }
             }
         receiveValue: { response in
             PrintLogger.modelLog(response, type: .response, isInput: false)
             ToastManager.shared.showToast(message: response.message ?? "")
             AppState.shared.logout()
-            DispatchQueue.main.async {
-                path.wrappedValue.append(PendingRoute.login)
-            }
+//            DispatchQueue.main.async {
+//                path.wrappedValue.append(PendingRoute.login)
+//            }
         }
         .store(in: &self.subscriptions)
     }
     
     // MARK: - Handle errors
-    func handleError(_ apiError: APIError, endPoint : Endpoint) {
+    func handleError(_ apiError: APIError, endPoint : APIEndpoint) {
         print("API Error : \(endPoint) - \(apiError.localizedDescription)")
     }
 }

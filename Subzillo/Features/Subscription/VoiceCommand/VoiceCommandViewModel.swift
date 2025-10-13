@@ -17,10 +17,10 @@ class VoiceCommandViewModel: NSObject, ObservableObject, AVAudioPlayerDelegate, 
     @Published var voiceSubscriptionResponse    : VoiceSubscriptionResponse?
     
     func voiceSubscription(input:VoiceSubscriptionRequest,fileData:[MultiPartFileInput]){
-        apiReference.postMultipartApi(endPoint: Endpoint.voiceSubscription, method: .POST,token: authKey,body: MultipartInput(parameters: input, fileInput: fileData),showLoader: true, responseType: VoiceSubscriptionResponse.self)
+        apiReference.postMultipartApi(endPoint: APIEndpoint.voiceSubscription, method: .POST,token: authKey,body: MultipartInput(parameters: input, fileInput: fileData),showLoader: true, responseType: VoiceSubscriptionResponse.self)
             .sink { [unowned self] completion in
                 if case let .failure(error) = completion {
-                    self.handleError(error,endPoint: Endpoint.voiceSubscription)
+                    self.handleError(error,endPoint: APIEndpoint.voiceSubscription)
                 }
             }
         receiveValue: { [unowned self] response in
@@ -31,7 +31,7 @@ class VoiceCommandViewModel: NSObject, ObservableObject, AVAudioPlayerDelegate, 
     }
     
     // MARK: - Handle errors
-    func handleError(_ apiError: APIError, endPoint : Endpoint) {
+    func handleError(_ apiError: APIError, endPoint : APIEndpoint) {
         print("API Error : \(endPoint) - \(apiError.localizedDescription)")
     }
 }

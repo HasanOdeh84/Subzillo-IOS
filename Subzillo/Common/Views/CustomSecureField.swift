@@ -7,8 +7,6 @@
 
 import SwiftUI
 
-import SwiftUI
-
 struct CustomSecureField: View {
     let placeholder: String
     @Binding var text: String

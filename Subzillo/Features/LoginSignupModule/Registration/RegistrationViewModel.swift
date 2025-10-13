@@ -16,10 +16,10 @@ class RegistrationViewModel: ObservableObject {
     @Published var registerResponse     : RegisterResponse?
     
     func register(input:RegisterRequest, path: Binding<NavigationPath>) {
-        apiReference.postApi(endPoint: Endpoint.registration, method: .POST,token: defaultAuthKey,body: input,showLoader: true, responseType: RegisterResponse.self)
+        apiReference.postApi(endPoint: APIEndpoint.registration, method: .POST,token: defaultAuthKey,body: input,showLoader: true, responseType: RegisterResponse.self)
             .sink { [unowned self] completion in
                 if case let .failure(error) = completion {
-                    self.handleError(error,endPoint: Endpoint.registration)
+                    self.handleError(error,endPoint: APIEndpoint.registration)
                 }
             }
         receiveValue: { [unowned self] response in
@@ -38,7 +38,7 @@ class RegistrationViewModel: ObservableObject {
     }
     
     // MARK: - Handle errors
-    func handleError(_ apiError: APIError, endPoint : Endpoint) {
+    func handleError(_ apiError: APIError, endPoint : APIEndpoint) {
         print("API Error : \(endPoint) - \(apiError.localizedDescription)")
     }
 }

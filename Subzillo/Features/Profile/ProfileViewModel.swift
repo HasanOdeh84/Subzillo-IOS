@@ -16,10 +16,10 @@ class ProfileViewModel: ObservableObject {
     var apiReference                    = NetworkRequest.shared
     
     func updateUserInfo(input:UpdateUserInfoRequest) {
-        apiReference.postApi(endPoint: Endpoint.updateUserInfo, method: .POST,token: authKey,body: input,showLoader: true, responseType: GeneralResponse.self)
+        apiReference.postApi(endPoint: APIEndpoint.updateUserInfo, method: .POST,token: authKey,body: input,showLoader: true, responseType: GeneralResponse.self)
             .sink { [unowned self] completion in
                 if case let .failure(error) = completion {
-                    self.handleError(error,endPoint: Endpoint.updateUserInfo)
+                    self.handleError(error,endPoint: APIEndpoint.updateUserInfo)
                 }
             }
         receiveValue: { response in
@@ -30,10 +30,10 @@ class ProfileViewModel: ObservableObject {
     }
     
     func updatePassword(input:UpdatePasswordRequest) {
-        apiReference.postApi(endPoint: Endpoint.updatePassword, method: .POST,token: authKey,body: input,showLoader: true, responseType: GeneralResponse.self)
+        apiReference.postApi(endPoint: APIEndpoint.updatePassword, method: .POST,token: authKey,body: input,showLoader: true, responseType: GeneralResponse.self)
             .sink { [unowned self] completion in
                 if case let .failure(error) = completion {
-                    self.handleError(error,endPoint: Endpoint.updatePassword)
+                    self.handleError(error,endPoint: APIEndpoint.updatePassword)
                 }
             }
         receiveValue: { response in
@@ -44,10 +44,10 @@ class ProfileViewModel: ObservableObject {
     }
     
     func updateProfileImage(input:UpdateProfileImageRequest,fileData:[MultiPartFileInput]){
-        apiReference.postMultipartApi(endPoint: Endpoint.updateProfileImage, method: .POST,token: authKey,body: MultipartInput(parameters: input, fileInput: fileData),showLoader: true, responseType: GeneralResponse.self)
+        apiReference.postMultipartApi(endPoint: APIEndpoint.updateProfileImage, method: .POST,token: authKey,body: MultipartInput(parameters: input, fileInput: fileData),showLoader: true, responseType: GeneralResponse.self)
             .sink { [unowned self] completion in
                 if case let .failure(error) = completion {
-                    self.handleError(error,endPoint: Endpoint.updateProfileImage)
+                    self.handleError(error,endPoint: APIEndpoint.updateProfileImage)
                 }
             }
         receiveValue: { response in
@@ -57,10 +57,10 @@ class ProfileViewModel: ObservableObject {
     }   
     
     func imageSubscription(input:ImageSubscriptionRequest,fileData:[MultiPartFileInput]){
-        apiReference.postMultipartApi(endPoint: Endpoint.imageSubscription, method: .POST,token: authKey,body: MultipartInput(parameters: input, fileInput: fileData),showLoader: true, responseType: ImageSubscriptionResponse.self)
+        apiReference.postMultipartApi(endPoint: APIEndpoint.imageSubscription, method: .POST,token: authKey,body: MultipartInput(parameters: input, fileInput: fileData),showLoader: true, responseType: ImageSubscriptionResponse.self)
             .sink { [unowned self] completion in
                 if case let .failure(error) = completion {
-                    self.handleError(error,endPoint: Endpoint.imageSubscription)
+                    self.handleError(error,endPoint: APIEndpoint.imageSubscription)
                 }
             }
         receiveValue: { response in
@@ -70,7 +70,7 @@ class ProfileViewModel: ObservableObject {
     }
     
     // MARK: - Handle errors
-    func handleError(_ apiError: APIError, endPoint : Endpoint) {
+    func handleError(_ apiError: APIError, endPoint : APIEndpoint) {
         print("API Error : \(endPoint) - \(apiError.localizedDescription)")
     }
 }
