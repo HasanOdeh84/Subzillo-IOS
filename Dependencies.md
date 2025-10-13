@@ -1,10 +1,10 @@
 # Dependencies Used in Subzillo
 
-This document lists all **major dependencies** used in the project.
+This document lists all **dependencies** used in the project.
 
 ## 1. Lottie-iOS
 
-- **Pod**: pod 'lottie-ios'
+- **Dependency**: 'lottie-ios'
 - **Purpose**: Lottie-iOS is a library that allows you to easily add high-quality animations to your iOS app. It supports JSON-based animations exported from Adobe After Effects using the Bodymovin plugin.
 - **Use Cases in Subzillo**:
   - Displaying animated loading indicators.
@@ -14,7 +14,7 @@ This document lists all **major dependencies** used in the project.
 
 ## 2. SDWebImageSwiftUI
 
-- **Pod**: pod 'SDWebImageSwiftUI'
+- **Dependency**: 'SDWebImageSwiftUI'
 - **Purpose**: This library allows asynchronous downloading and caching of images in SwiftUI views. It automatically handles memory management, caching, and smooth image rendering.
 - **Use Cases in Subzillo**:
   - Efficiently loading remote images without blocking the UI.
@@ -23,7 +23,7 @@ This document lists all **major dependencies** used in the project.
 
 ## 3. Google Sign-In
 
-- **Pod**: pod 'GoogleSignIn'
+- **Dependency**: 'GoogleSignIn'
 - **Purpose**: Google Sign-In enables users to authenticate using their Google accounts. It provides a secure and familiar login method.
 - **Use Cases in Subzillo**:
   - Allowing users to quickly sign in without creating a separate account.
