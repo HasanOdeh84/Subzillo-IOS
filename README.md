@@ -113,20 +113,28 @@ Follow these steps to set up and run the project locally:
 ### Prerequisites
 - macOS 15.2 or later
 - Xcode 16.2 or later
-- CocoaPods 
   
 ### Installation
 1. Clone the repository
     ```bash
    git clone git@github.com:HasanOdeh84/Subzillo-IOS.git
    cd Subzillo
-2. Install dependencies
-    ```bash
-   sudo gem install cocoapods   # if CocoaPods is not installed
-   pod install
-3. Open the project
-   * open Subzillo.xcworkspace
-4. Build and run
+2. Open the project
+   * open Subzillo.xcodeproj
+3. Dependencies Setup (Swift Package Manager):
+    * Subzillo uses Swift Package Manager (SPM) to manage third-party libraries.
+    All dependencies are automatically resolved by SPM when you open the project in Xcode.
+    * If packages don’t load automatically:
+    * Go to File → Packages → Resolve Package Versions.
+    * Wait until Xcode finishes fetching and updating all dependencies.
+    * Once complete, you can build and run the project without any manual installation steps.
+4. Certificates & Provisioning Profiles:
+    * Select your app target → Signing & Capabilities tab.
+    * Choose the correct Team (subzillo’s Apple Developer account).
+    * You can find the certificates and profiles in Project folder (Certificates).
+    * Double-click each certificate file and profiles to install it in Keychain Access on your Mac - it will automatically be added to Xcode.
+    * Make sure correct profiles are selected.
+5. Build and run
    - Select the target device or simulator in Xcode.
    - Press Cmd + R to build and run the project.
 
