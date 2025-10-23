@@ -8,36 +8,22 @@
 import SwiftUI
 
 struct CustomButton: View {
-    let title: String
-    var background: Color = .gray
-    var textColor: Color = .black
-    var width: CGFloat = 160
-    var height: CGFloat = 50
-    var cornerRadius: CGFloat = 10
-    let action: () -> Void
+    let title       : String
+    var background  : Color = .navyBlueCTA700
+    var textColor   : Color = .neutralDisabled200
+    var width       : CGFloat = 160
+    var height      : CGFloat = 56
+    var cornerRadius: CGFloat = 8
+    let action      : () -> Void
     
     var body: some View {
         Button(action: action) {
             Text(title)
-                .frame(width: width, height: height)
-                .background(background)
+                .multilineTextAlignment(.center)
                 .foregroundColor(textColor)
-                .cornerRadius(cornerRadius)
         }
-//        VStack {
-//            Spacer()
-//            Button(action: action) {
-//                Text(title)
-//                    .frame(width: width, height: height)
-//                    .background(background)
-//                    .foregroundColor(textColor)
-//                    .cornerRadius(cornerRadius)
-//            }
-//            Spacer()
-//        }
+        .frame(maxWidth: .infinity, minHeight: height)
+        .background(background)
+        .cornerRadius(cornerRadius)
     }
-}
-
-#Preview {
-//    CustomButton()
 }

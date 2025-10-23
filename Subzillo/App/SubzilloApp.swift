@@ -19,7 +19,7 @@ class AppDelegate: NSObject, ObservableObject, UIApplicationDelegate, UNUserNoti
         _ application: UIApplication,
         didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey : Any]? = nil
     ) -> Bool {
-        sleep(3)
+//        sleep(1)
         UNUserNotificationCenter.current().delegate = self
         return true
     }
@@ -134,16 +134,17 @@ struct RootView: View {
     var body: some View {
         NavigationStack(path: $path) {
             Group {
-                if appState.isLoggedIn {
-                    RootTabBar(path: $path)
-                } else {
-                    LoginView(path: $path)
-                        .onAppear {
-                            if !path.isEmpty {
-                                path.removeLast(path.count) // reset stack on login view
-                            }
-                        }
-                }
+//                if appState.isLoggedIn {
+//                    RootTabBar(path: $path)
+//                } else {
+//                    LoginView(path: $path)
+//                        .onAppear {
+//                            if !path.isEmpty {
+//                                path.removeLast(path.count) // reset stack on login view
+//                            }
+//                        }
+//                }
+                SplashView(path: $path)
             }
             .navigationDestination(for: PendingRoute.self) { screen in
                 switch screen {
@@ -171,19 +172,17 @@ struct RootView: View {
                     Text("Test")
                 case .home:
                     RootTabBar(path: $path)
-                case .forgot:
-                    ForgotPasswordView(path:$path)
                 case .signup:
                     RegistrationView(path: $path)
                 case .login:
                     LoginView(path: $path)
-                        .onAppear {
-                            if !path.isEmpty {
-                                path.removeLast(path.count) // reset stack on login view
-                            }
-                        }
+//                        .onAppear {
+//                            if !path.isEmpty {
+//                                path.removeLast(path.count) // reset stack on login view
+//                            }
+//                        }
                 case .onboarding:
-                    OnboardingView()
+                    OnboardingView(path: $path)
                 case .verifyOtp(let emailId, let from, let username):
                     OtpVerifyView(path:$path, email:emailId ?? "", username:username ?? "", from:from)
                 case .resetPassword(let username):

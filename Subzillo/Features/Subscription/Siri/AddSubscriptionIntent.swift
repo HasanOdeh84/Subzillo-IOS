@@ -49,6 +49,7 @@ struct AddSubscriptionIntent: AppIntent {
     
     @MainActor
     func perform() async throws -> some IntentResult {
+        //    func perform() async throws -> some IntentResult & ProvidesDialog{
         // Save into router (instead of deep link)
         AppIntentRouter.shared.pendingRoute = .addSubscription(
             serviceName: serviceName,
@@ -57,6 +58,9 @@ struct AddSubscriptionIntent: AppIntent {
             billingCycle: billingCycle
         )
         return .result()
+        //        return .result(
+        //            dialog: "Opening Subzillo to add your Netflix Basic subscription."
+        //        )
     }
 }
 

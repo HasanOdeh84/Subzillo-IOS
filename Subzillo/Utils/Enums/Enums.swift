@@ -19,7 +19,6 @@ enum PendingRoute: Hashable {
     case home
     case signup
     case login
-    case forgot
     case onboarding
     case verifyOtp(emailId:String? = "",from:ToVerify,username:String? = "")
     case resetPassword(username:String? = "")

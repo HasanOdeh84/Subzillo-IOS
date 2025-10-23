@@ -80,7 +80,7 @@ private struct LoaderOverlay: View {
             if loader.isShowing {
                 ZStack {
                     // Transparent background
-                    ColorConstants.black.opacity(0.5)
+                    Color.black.opacity(0.5)
                         .ignoresSafeArea()
                     
                     VStack() {
@@ -92,7 +92,7 @@ private struct LoaderOverlay: View {
                         if let message = loader.text, !message.isEmpty {
                             Text(message)
                                 .font(.system(size: 15, weight: .bold))
-                                .foregroundColor(ColorConstants.gray)
+                                .foregroundColor(Color.gray)
                                 .multilineTextAlignment(.center)
                         }
                     }

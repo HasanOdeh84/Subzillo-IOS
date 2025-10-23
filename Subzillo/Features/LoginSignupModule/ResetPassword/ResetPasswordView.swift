@@ -54,7 +54,7 @@ struct ResetPasswordView: View {
                     PasswordRuleView(rule: "One special character (e.g., Pa$$word!)", isValid: password.range(of: "[^A-Za-z0-9]", options: .regularExpression) != nil)
                 }
                 .font(.footnote)
-                .foregroundColor(ColorConstants.black)
+                .foregroundColor(Color.black)
                 
                 HStack{
                     Spacer()

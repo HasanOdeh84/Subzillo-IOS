@@ -8,56 +8,83 @@
 import SwiftUI
 
 struct OnboardingPage {
-    let image: String
-    let title: String
-    let description: String
+    let image       : String
+    let title       : String
+    let description : String
 }
 
 struct OnboardingView: View {
     
-    @State private var currentPage = 0
+    @State private var currentPage  = 0
+    @Binding var path               : NavigationPath
     
     let pages: [OnboardingPage] = [
         OnboardingPage(
-            image: "carousel",
-            title: "All Your Subscriptions in One Place",
-            description: "Add and track every subscription easily — from Netflix to gym memberships — all inside Subzillo"
+            image: "onboarding",
+            title: "Manage your and your family's subscriptions in one place",
+            description: "Track Netflix, Spotify, gym memberships, and more in one organized dashboard. Never lose track again."
         ),
         OnboardingPage(
-            image: "carousel",
-            title: "Let Subzillo Do the Work",
-            description: "Add subscriptions by voice, screenshot, email, or bank statement. No more manual tracking."
+            image: "onboarding",
+            title: "Manage your and your family's subscriptions in one place",
+            description: "Track Netflix, Spotify, gym memberships, and more in one organized dashboard. Never lose track again."
         ),
         OnboardingPage(
-            image: "carousel",
-            title: "Stay Ahead with Reminders & Insights",
-            description: "Get notified before renewals, monitor spending, and manage plans with ease."
+            image: "onboarding",
+            title: "Manage your and your family's subscriptions in one place",
+            description: "Track Netflix, Spotify, gym memberships, and more in one organized dashboard. Never lose track again."
+        ),
+        OnboardingPage(
+            image: "onboarding",
+            title: "Manage your and your family's subscriptions in one place",
+            description: "Track Netflix, Spotify, gym memberships, and more in one organized dashboard. Never lose track again."
+        ),
+        OnboardingPage(
+            image: "onboarding",
+            title: "Manage your and your family's subscriptions in one place",
+            description: "Track Netflix, Spotify, gym memberships, and more in one organized dashboard. Never lose track again."
         )
     ]
     
     var body: some View {
         VStack {
+
+            HStack(spacing: 10){
+                Spacer()
+                NavigationLink("Skip Onboarding", destination: LoginView(path: $path))
+                    .foregroundColor(Color.navyBlueCTA700)
+                    .font(.appRegular(14))
+                Image(systemName: "arrow.right")
+                    .foregroundColor(Color.blueMain700)
+                    .frame(width: 20,height: 20)
+            }
+            .padding(.vertical,32)
             
             TabView(selection: $currentPage) {
                 ForEach(0..<pages.count, id: \.self) { index in
-                    VStack(spacing: 20) {
-                        
+                    VStack {
+                        if currentPage == pages.count - 1{
+                            
+                        }else{
+                            
+                        }
                         Image(pages[index].image)
                             .resizable()
                             .scaledToFit()
-                            .frame(height: 300)
-                            .padding(.horizontal, 24)  
+                            .frame(height: 190)
                         
                         Text(pages[index].title)
-                            .font(.headline)
+                            .font(.appRegular(28))
                             .multilineTextAlignment(.center)
                             .padding(.horizontal)
+                            .padding(.top,64)
                         
                         Text(pages[index].description)
-                            .font(.subheadline)
-                            .foregroundColor(.gray)
+                            .font(.appRegular(18))
+                            .foregroundColor(Color.neutral500)
                             .multilineTextAlignment(.center)
                             .padding(.horizontal)
+                            .padding(.top,32)
                         
                         Spacer()
                     }
@@ -67,54 +94,40 @@ struct OnboardingView: View {
             .tabViewStyle(PageTabViewStyle(indexDisplayMode: .never)) // hide default dots
             
             // Custom page indicator
-            HStack(spacing: 8) {
+            HStack(spacing: 13) {
                 ForEach(0..<pages.count, id: \.self) { index in
-                    Circle()
-                        .fill(index == currentPage ? Color.black : Color.gray.opacity(0.4))
-                        .frame(width: 8, height: 8)
+                    if index == currentPage{
+                        Capsule()
+                            .fill(Color.blueMain700)
+                            .frame(width: 32, height: 8)
+                    }else{
+                        Circle()
+                            .fill(Color.neutral400)
+                            .frame(width: 8, height: 8)
+                    }
                 }
             }
-            .padding(.bottom, 20)
-            
-            // Buttons
-            HStack {
-                if currentPage == pages.count - 1 {
-                }else{
-                    Button("Skip") {
-                        currentPage = pages.count - 1
+            .padding(.bottom, 23)
+           
+            GradientBorderButton(title: currentPage == pages.count - 1 ?
+                                 "Lets Go!" : "Next") {
+//                withAnimation {
+                    if currentPage == pages.count - 1{
+                        path.append(PendingRoute.login)
+                    }else{
+                        currentPage += 1
                     }
-                    .foregroundColor(.black)
-                    Spacer()
-                }
-                
-                if currentPage == pages.count - 1 {
-                    Spacer()
-                    CustomButton(title: "Get Started") {
-                        print("Get Started tapped")
-                    }
-                    Spacer()
-                } else {
-                    Button("Next") {
-                        withAnimation {
-                            currentPage += 1
-                        }
-                    }
-                    .foregroundColor(.black)
-                }
+//                }
             }
-            .padding(.horizontal, 20)
-            .padding(.bottom, 30)
+            .padding(.bottom,48)
         }
+        .padding(.horizontal, 20)
+        .navigationBarBackButtonHidden(true)
     }
 }
 
 struct OnboardingView_Previews: PreviewProvider {
     static var previews: some View {
-        OnboardingView()
+        OnboardingView(path: .constant(NavigationPath()))
     }
-}
-
-
-#Preview {
-    OnboardingView()
 }

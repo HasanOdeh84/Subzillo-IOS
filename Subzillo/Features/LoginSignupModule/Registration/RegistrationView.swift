@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import _AuthenticationServices_SwiftUI
 
 struct RegistrationView: View {
     
@@ -33,7 +34,7 @@ struct RegistrationView: View {
                             .fontWeight(.bold)
                         Text("Smart way to manage all your subscriptions")
                             .font(.subheadline)
-                            .foregroundColor(ColorConstants.black)
+                            .foregroundColor(Color.black)
                             .multilineTextAlignment(.center)
                     }
                     .frame(maxWidth: .infinity)
@@ -63,7 +64,7 @@ struct RegistrationView: View {
                         PasswordRuleView(rule: "One special character (e.g., Pa$$word!)", isValid: password.range(of: "[^A-Za-z0-9]", options: .regularExpression) != nil)
                     }
                     .font(.footnote)
-                    .foregroundColor(ColorConstants.black)
+                    .foregroundColor(Color.black)
                     
                     // Terms and Conditions
                     Toggle(isOn: $agreeTerms) {
@@ -101,7 +102,7 @@ struct RegistrationView: View {
     //                            .padding()
                                 .background(.gray)
                             //                            .background(isFormValid ? Color.blue : Color.gray)
-                                .foregroundColor(ColorConstants.black)
+                                .foregroundColor(Color.black)
                                 .cornerRadius(8)
                         }
                         //                    .disabled(!isFormValid)
@@ -114,9 +115,14 @@ struct RegistrationView: View {
                         SocialButton(title: "Continue with Google") {
                             
                         }
-                        SocialButton(title: "Continue with Apple") {
-                            
-                        }
+                        
+                        SignInWithAppleButton(.signIn, onRequest: { request in
+                            // handle result
+                        }, onCompletion: { result in
+                            // handle result
+                        })
+                        .frame(height: 50)
+                        .signInWithAppleButtonStyle(.black)
                     }
                     .padding(.top, 10)
                     
@@ -131,7 +137,7 @@ struct RegistrationView: View {
                         }) {
                             Text("Log In")
                                 .fontWeight(.bold)
-                                .foregroundColor(ColorConstants.black)
+                                .foregroundColor(Color.black)
                         }
                     }
                     .font(.footnote)
@@ -169,7 +175,7 @@ struct PasswordRuleView: View {
     var body: some View {
         HStack(spacing: 8) {
             Image(systemName: isValid ? "checkmark" : "checkmark")
-                .foregroundColor(isValid ? .green : ColorConstants.black)
+                .foregroundColor(isValid ? .green : Color.black)
             Text(rule)
         }
     }
@@ -185,7 +191,7 @@ struct SocialButton: View {
                 .frame(maxWidth: .infinity)
                 .padding()
                 .background(Color(.systemGray6))
-                .foregroundColor(ColorConstants.black)
+                .foregroundColor(Color.black)
                 .cornerRadius(8)
         }
     }
@@ -197,7 +203,7 @@ struct CheckboxToggleStyle: ToggleStyle {
         Button(action: { configuration.isOn.toggle() }) {
             HStack {
                 Image(systemName: configuration.isOn ? "checkmark.square.fill" : "square")
-                    .foregroundColor(configuration.isOn ? ColorConstants.primaryBlue : ColorConstants.gray)
+                    .foregroundColor(configuration.isOn ? Color.blueMain700 : Color.gray)
                 configuration.label
             }
         }

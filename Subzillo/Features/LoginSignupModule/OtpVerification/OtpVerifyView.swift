@@ -104,7 +104,7 @@ struct OtpVerifyView: View {
                                 otpVerifyVM.resendOtp(input: ResendOtpRequest(userId: Constants.getUserId(), username: username))
                                 timerFun()
                             }
-                            .foregroundColor(ColorConstants.black)
+                            .foregroundColor(Color.black)
                         }
                     }
                 }
@@ -207,7 +207,7 @@ struct AttributedString1: View{
         
         // Find the range of "Edit"
         if let range = attributedString.range(of: "Edit") {
-            attributedString[range].foregroundColor = ColorConstants.black
+            attributedString[range].foregroundColor = Color.black
             //                            attributedString[range].underlineStyle = .single
             attributedString[range].link = URL(string: "myapp://edit") // custom URL
         }
