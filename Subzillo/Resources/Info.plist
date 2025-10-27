@@ -6,11 +6,24 @@
 	<false/>
 	<key>UIAppFonts</key>
 	<array>
-		<string>Inter-Black.tff</string>
-		<string>Inter-Medium.tff</string>
-		<string>Inter-Regular.tff</string>
-		<string>Inter-Bold.tff</string>
-		<string>Inter-SemiBold.tff</string>
+		<string>Roboto-Thin.ttf</string>
+		<string>Roboto-ExtraLight.ttf</string>
+		<string>Roboto-Light.ttf</string>
+		<string>Roboto-Regular.ttf</string>
+		<string>Roboto-Medium.ttf</string>
+		<string>Roboto-SemiBold.ttf</string>
+		<string>Roboto-Bold.ttf</string>
+		<string>Roboto-ExtraBold.ttf</string>
+		<string>Roboto-Black.ttf</string>
+		<string>Roboto-ThinItalic.ttf</string>
+		<string>Roboto-ExtraLightItalic.ttf</string>
+		<string>Roboto-LightItalic.ttf</string>
+		<string>Roboto-Italic.ttf</string>
+		<string>Roboto-MediumItalic.ttf</string>
+		<string>Roboto-SemiBoldItalic.ttf</string>
+		<string>Roboto-BoldItalic.ttf</string>
+		<string>Roboto-ExtraBoldItalic.ttf</string>
+		<string>Roboto-BlackItalic.ttf</string>
 	</array>
 	<key>UILaunchScreen</key>
 	<dict>
