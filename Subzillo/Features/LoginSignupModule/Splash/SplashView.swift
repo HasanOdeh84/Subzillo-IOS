@@ -12,6 +12,7 @@ struct SplashView: View {
     @State var isActive               : Bool = false
     @Binding var path                 : NavigationPath
     @StateObject var appState         = AppState.shared
+    @Environment(\.colorScheme) var colorScheme
     
     var body: some View {
         ZStack {
@@ -28,48 +29,39 @@ struct SplashView: View {
                     OnboardingView(path: $path)
                 }
             }else {
-                Color.white
-                    .ignoresSafeArea()
+//                Color.white
+//                    .ignoresSafeArea()
+                Group {
+                    if colorScheme == .light {
+                        Color.white // Light mode background
+                    } else {
+                        Color.black // Dark mode background
+                    }
+                }
+                .ignoresSafeArea()
                 
-                VStack(spacing: 60) {
+                VStack {
                     Spacer()
                     
-                    Image("splash_logo")
+                    Image("logo_svg")
                         .resizable()
                         .scaledToFit()
                         .frame(height: 150)
                         .padding(.horizontal,70)
                         .foregroundStyle(LinearGradient(colors: [.blue, .purple], startPoint: .topLeading, endPoint: .bottomTrailing))
+                        .padding(.bottom,50)
                     
                     Text("One place for\n all your subscriptions")
                         .multilineTextAlignment(.center)
                         .font(.appRegular(24))
                         .foregroundColor(Color.blueMain700)
+                        .padding(.bottom,60)
                     
-                    Spacer()
-                    
-                    // Animated Bubbles Section
-//                    ZStack {
-//                        ForEach(0..<8) { index in
-//                            BubbleView(size: CGFloat.random(in: 20...60))
-//                                .offset(
-//                                    x: CGFloat.random(in: -150...150),
-//                                    y: animateBubbles ? CGFloat.random(in: -20...20) : CGFloat.random(in: 20...40)
-//                                )
-//                                .animation(
-//                                    Animation.easeInOut(duration: Double.random(in: 2...4))
-//                                        .repeatForever(autoreverses: true)
-//                                        .delay(Double(index) * 0.3),
-//                                    value: animateBubbles
-//                                )
-//                        }
-//                    }
-//                    .frame(height: 100)
-//                    .onAppear {
-//                        animateBubbles = true
-//                    }
+                    LottieView(name: "splash_bubble")
+                        .frame(height: 242)
+                        .frame(maxWidth: .infinity)
                 }
-                .padding(.bottom, 20)
+                .ignoresSafeArea(edges: .horizontal)
             }
         }
         .onAppear {

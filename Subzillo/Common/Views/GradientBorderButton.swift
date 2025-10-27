@@ -57,12 +57,12 @@ struct GradientBorderButton: View {
                     HStack {
                         Image("google")
                             .frame(width: 20, height: 20)
-                        Text(title)
+                        Text(LocalizedStringKey(title))
                             .font(.appSemiBold(18))
                             .foregroundColor(Color.navyBlueCTA700)
                     }
                 } else {
-                    Text(title)
+                    Text(LocalizedStringKey(title))
                         .font(.appSemiBold(18))
                         .foregroundColor(Color.navyBlueCTA700)
                 }

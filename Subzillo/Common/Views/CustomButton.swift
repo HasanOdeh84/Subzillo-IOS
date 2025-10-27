@@ -18,7 +18,7 @@ struct CustomButton: View {
     
     var body: some View {
         Button(action: action) {
-            Text(title)
+            Text(LocalizedStringKey(title))
                 .multilineTextAlignment(.center)
                 .foregroundColor(textColor)
         }

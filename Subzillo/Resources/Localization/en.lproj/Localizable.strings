@@ -6,3 +6,23 @@
   
 */
 
+//Splash
+"One place for\n all your subscriptions" = "One place for\n all your subscriptions";
+
+//Onboarding
+"Manage your and your family's subscriptions in one place" = "Manage your and your family's subscriptions in one place";
+"Track Netflix, Spotify, gym memberships, and more in one organized dashboard. Never lose track again." = "Track Netflix, Spotify, gym memberships, and more in one organized dashboard. Never lose track again.";
+"Skip Onboarding" = "Skip Onboarding";
+"Lets Go!" = "Lets Go!";
+"Next" = "Next";
+
+//Login
+"Welcome to" = "Welcome to";
+"You're not logged in" = "You're not logged in";
+"Sign in to your Subzillo account" = "Sign in to your Subzillo account";
+"Log In" = "Log In";
+"Continue with Google" = "Continue with Google";
+"By continuing, you agree to our Terms of Service and Privacy Policy" = "By continuing, you agree to our Terms of Service and Privacy Policy";
+"Privacy Policy" = "Privacy Policy";
+"Terms of Service" = "Terms of Service";
+"Enter your phone number" = "Enter your phone number";

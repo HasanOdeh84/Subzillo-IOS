@@ -27,9 +27,9 @@ struct LoginView: View {
                     .font(.appRegular(24))
                     .foregroundColor(Color.neutralMain700)
                     .multilineTextAlignment(.center)
-                    .padding(.top, 60)
+                    .padding(.top, 70)
                 
-                Image("splash_logo")
+                Image("logo_svg")
                     .resizable()
                     .scaledToFit()
                     .frame(width: 128,height: 88)
@@ -110,7 +110,7 @@ struct LoginView: View {
     
     func getAttriText() -> AttributedString {
         
-        var attriString = AttributedString("By continuing, you agree to our Terms of Service and Privacy Policy")
+        var attriString = AttributedString(localized: "By continuing, you agree to our Terms of Service and Privacy Policy")
         attriString.foregroundColor = .gray
         
         if let privacyRange = attriString.range(of: "Privacy Policy") {

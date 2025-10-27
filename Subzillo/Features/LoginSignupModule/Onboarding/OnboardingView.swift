@@ -73,13 +73,13 @@ struct OnboardingView: View {
                             .scaledToFit()
                             .frame(height: 190)
                         
-                        Text(pages[index].title)
+                        Text(LocalizedStringKey(pages[index].title))
                             .font(.appRegular(28))
                             .multilineTextAlignment(.center)
                             .padding(.horizontal)
                             .padding(.top,64)
                         
-                        Text(pages[index].description)
+                        Text(LocalizedStringKey(pages[index].description))
                             .font(.appRegular(18))
                             .foregroundColor(Color.neutral500)
                             .multilineTextAlignment(.center)

@@ -18,7 +18,7 @@ struct LottieView: UIViewRepresentable {
         let view = UIView(frame: .zero)
         
         animationView.animation = LottieAnimation.named(name)
-        animationView.contentMode = .scaleAspectFit
+        animationView.contentMode = .scaleAspectFill
         animationView.loopMode = loopMode
         animationView.play()
         
@@ -36,7 +36,6 @@ struct LottieView: UIViewRepresentable {
     
     func updateUIView(_ uiView: UIView, context: Context) {}
 }
-
 
 // MARK: - Global Loader Store (Singleton)
 
