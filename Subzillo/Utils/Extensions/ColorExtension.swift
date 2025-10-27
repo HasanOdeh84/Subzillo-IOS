@@ -27,6 +27,9 @@ extension Color {
     static let neutralBg100             = Color(hex: "#F6F9FB")
     static let underlineGray            = Color(hex: "#111827")
     static let neutral100               = Color(hex: "#E3E3E3")
+    static let neutral300Border         = Color(hex: "#DAE2ED")
+    static let blue500                  = Color(hex: "#028DB4")
+    static let grayCapsule              = Color(hex: "#DFDFDF")
     
     init(hex: String) {
         let hex = hex.trimmingCharacters(in: CharacterSet.alphanumerics.inverted)
@@ -54,28 +57,12 @@ extension Color {
     }
 }
 
-
-//import SwiftUI
-//
-//public extension Color {
-//    init(hex: String) {
-//        // Trim spaces and newlines
-//        let hex = hex.trimmingCharacters(in: .whitespacesAndNewlines)
-//        let scanner = Scanner(string: hex)
-//        
-//        // Skip "#" if present
-//        if hex.hasPrefix("#") {
-//            scanner.currentIndex = hex.index(after: hex.startIndex)
-//        }
-//        
-//        var color: UInt64 = 0
-//        scanner.scanHexInt64(&color)
-//        
-//        let mask = 0x000000FF
-//        let red = Double((color >> 16) & UInt64(mask)) / 255.0
-//        let green = Double((color >> 8) & UInt64(mask)) / 255.0
-//        let blue = Double(color & UInt64(mask)) / 255.0
-//        
-//        self.init(red: red, green: green, blue: blue)
-//    }
-//}
+struct AppColors {
+    static func background(isDark: Bool) -> Color {
+        isDark ? Color.black : Color.white
+    }
+    
+    static func primaryText(isDark: Bool) -> Color {
+        isDark ? Color.white : Color.black
+    }
+}

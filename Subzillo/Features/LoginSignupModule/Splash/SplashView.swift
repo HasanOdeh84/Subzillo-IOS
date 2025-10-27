@@ -13,6 +13,8 @@ struct SplashView: View {
     @Binding var path                 : NavigationPath
     @StateObject var appState         = AppState.shared
     @Environment(\.colorScheme) var colorScheme
+    @AppStorage("hasSeenOnboarding") private var hasSeenOnboarding = false
+    @StateObject private var commonApiVM    = CommonAPIViewModel()
     
     var body: some View {
         ZStack {
@@ -20,13 +22,16 @@ struct SplashView: View {
                 if appState.isLoggedIn {
                     RootTabBar(path: $path)
                 } else {
-//                    LoginView(path: $path)
-//                        .onAppear {
-//                            if !path.isEmpty {
-//                                path.removeLast(path.count) // reset stack on login view
+                    if hasSeenOnboarding{
+                        LoginView(path: $path)
+//                            .onAppear {
+//                                if !path.isEmpty {
+//                                    path.removeLast(path.count) // reset stack on login view
+//                                }
 //                            }
-//                        }
-                    OnboardingView(path: $path)
+                    }else{
+                        OnboardingView(path: $path)
+                    }
                 }
             }else {
 //                Color.white
@@ -70,6 +75,7 @@ struct SplashView: View {
                     self.isActive = true
                 }
             }
+            commonApiVM.getCurrencies()
         }
     }
 }

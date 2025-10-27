@@ -13,6 +13,7 @@ class CommonAPIViewModel: ObservableObject {
     
     private var subscriptions           = Set<AnyCancellable>()
     var apiReference                    = NetworkRequest.shared
+    @Published var currencyResponse     : [Currency]?
     
     func getCategories(path: Binding<NavigationPath>) {
         apiReference.getApi(endPoint: APIEndpoint.getCategories, token: defaultAuthKey, responseType: getCategoriesResponse.self)
@@ -28,16 +29,17 @@ class CommonAPIViewModel: ObservableObject {
         .store(in: &self.subscriptions)
     }
     
-    func getCurrencies(path: Binding<NavigationPath>) {
+    func getCurrencies() {
         apiReference.getApi(endPoint: APIEndpoint.getCurrencies, token: defaultAuthKey, responseType: getCurrenciesResponse.self)
             .sink { [unowned self] completion in
                 if case let .failure(error) = completion {
                     self.handleError(error,endPoint: APIEndpoint.getCurrencies)
                 }
             }
-        receiveValue: { response in
+        receiveValue: { [self] response in
             PrintLogger.modelLog(response, type: .response, isInput: false)
             ToastManager.shared.showToast(message: response.message ?? "")
+            currencyResponse = response.data
         }
         .store(in: &self.subscriptions)
     }

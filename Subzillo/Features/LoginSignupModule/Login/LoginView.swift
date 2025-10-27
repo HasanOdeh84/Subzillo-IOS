@@ -47,7 +47,7 @@ struct LoginView: View {
                 
                 PhoneNumberField()
                 
-                CustomButton(title: "Log In") {
+                CustomButton(title: "Log In"){
                     if let errorMessage = LoginSignupValidations().validateLogin(username: username,
                                                                                  password: password) {
                         ToastManager.shared.showToast(message: errorMessage)

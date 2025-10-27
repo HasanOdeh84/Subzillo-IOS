@@ -21,6 +21,7 @@ struct CustomButton: View {
             Text(LocalizedStringKey(title))
                 .multilineTextAlignment(.center)
                 .foregroundColor(textColor)
+                .frame(maxWidth: .infinity, minHeight: height)
         }
         .frame(maxWidth: .infinity, minHeight: height)
         .background(background)

@@ -12,7 +12,7 @@ public struct getCurrenciesResponse: Codable {
     let data    : [Currency]?
 }
 
-public struct Currency: Codable {
+public struct Currency: Codable, Hashable {
     let id          : String?
     let name        : String?
     let symbol      : String?

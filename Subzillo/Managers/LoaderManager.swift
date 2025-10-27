@@ -44,7 +44,7 @@ final class LoaderManager: ObservableObject {
     static let shared           = LoaderManager()
     @Published var isShowing    = false
     @Published var text         : String? = nil
-    var animationName           = "splash"
+    var animationName           = "subzillo_loader"
     // Prevents flicker when multiple parts of the app show/hide quickly
     private var counter         = 0
     
@@ -85,7 +85,7 @@ private struct LoaderOverlay: View {
                     VStack() {
                         // Lottie Animation
                         LottieView(name: loader.animationName, loopMode: .loop)
-                            .frame(width: 200, height: 200)
+                            .frame(width: 100, height: 100)
                         
                         // Optional label
                         if let message = loader.text, !message.isEmpty {

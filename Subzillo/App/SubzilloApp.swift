@@ -97,6 +97,7 @@ struct SubzilloApp: App {
     @StateObject private var networkMonitor = NetworkMonitor()
     @StateObject private var toastManager   = ToastManager()
     @StateObject var mediaPicker            = MediaPickerManager.shared
+    @StateObject private var themeManager   = ThemeManager()
     
     var body: some Scene {
         WindowGroup {
@@ -106,6 +107,8 @@ struct SubzilloApp: App {
                 .environmentObject(networkMonitor)
                 .environmentObject(toastManager)
                 .environmentObject(mediaPicker)
+                .environmentObject(themeManager)
+//                .preferredColorScheme(themeManager.preferredColorScheme)
                 .withLoader()
                 .withAlert()
                 .withToast()

@@ -111,10 +111,6 @@ struct ProfileView: View {
                 commonApiVM.getCategories(path: $path)
             }
             
-            Button("get currencies api"){
-                commonApiVM.getCurrencies(path: $path)
-            }
-            
             Spacer()
         }
         .background(MediaPickerHost().allowsHitTesting(false)) // host
