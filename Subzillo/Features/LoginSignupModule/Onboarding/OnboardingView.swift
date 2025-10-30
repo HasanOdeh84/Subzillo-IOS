@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct OnboardingPage {
-    let image       : String
+    let lottie      : String
     let title       : String
     let description : String
 }
@@ -16,38 +16,46 @@ struct OnboardingPage {
 struct OnboardingView: View {
     
     //MARK: - Properties
-    @State private var currentPage              = 0
-    @Binding var path                           : NavigationPath
-    @EnvironmentObject var themeManager         : ThemeManager
-    @AppStorage("hasSeenOnboarding") private var hasSeenOnboarding = false
-    @State private var selectedSubscriptions    : String? = nil
-    @State private var selectedSpending         : String? = nil
-    private let subscriptionOptions             = ["5 - 10", "10 - 20", "20 - 30", "More than 30"]
-    private let spendingOptions                 = ["Less than $50", "Less than $150", "More than $150"]
+    @State private var currentPage                                  = 0
+    @Binding var path                                               : NavigationPath
+    @EnvironmentObject var themeManager                             : ThemeManager
+    @AppStorage("hasSeenOnboarding") private var hasSeenOnboarding  = false
+    @State private var selectedSubscriptions                        : String? = nil
+    @State private var selectedSpending                             : String? = nil
+    private let subscriptionOptions                                 = ["5 - 10", "10 - 20", "20 - 30", "More than 30"]
+    private let spendingOptions                                     = ["Less than $50", "Less than $150", "More than $150"]
+    @StateObject private var commonApiVM                            = CommonAPIViewModel()
+    @State private var selectedCurrency                             : Currency? = Currency(id: "7603cf97-e39c-48b8-86ec-629429072761", name: "United States Dollarr", symbol: "$", code: "USD")
+    
+    // controls the SwiftUI offset animation
+    @State private var animateIn    = false
+    // delay and distance
+    var appearDelay: Double         = 0.12
+    var moveDistance: CGFloat       = 280
     
     let pages: [OnboardingPage] = [
         OnboardingPage(
-            image: "onboarding",
+            lottie: "onboarding",
             title: "Manage your and your family's subscriptions in one place",
             description: "Track Netflix, Spotify, gym memberships, and more in one organized dashboard. Never lose track again."
         ),
         OnboardingPage(
-            image: "onboarding",
+            lottie: "onboarding",
             title: "Manage your and your family's subscriptions in one place",
             description: "Track Netflix, Spotify, gym memberships, and more in one organized dashboard. Never lose track again."
         ),
         OnboardingPage(
-            image: "onboarding",
+            lottie: "onboarding2",
             title: "Manage your and your family's subscriptions in one place",
             description: "Track Netflix, Spotify, gym memberships, and more in one organized dashboard. Never lose track again."
         ),
         OnboardingPage(
-            image: "onboarding",
+            lottie: "onboarding3",
             title: "Manage your and your family's subscriptions in one place",
             description: "Track Netflix, Spotify, gym memberships, and more in one organized dashboard. Never lose track again."
         ),
         OnboardingPage(
-            image: "onboarding",
+            lottie: "onboarding",
             title: "Manage your and your family's subscriptions in one place",
             description: "Track Netflix, Spotify, gym memberships, and more in one organized dashboard. Never lose track again."
         )
@@ -56,7 +64,6 @@ struct OnboardingView: View {
     //MARK: - Body
     var body: some View {
         VStack {
-            
             HStack(spacing: 10) {
                 Spacer()
                 Button {
@@ -99,17 +106,57 @@ struct OnboardingView: View {
                                         WrapButtonsView(options: spendingOptions,
                                                         selected: $selectedSpending)
                                     }
-                                    
-                                    PhoneNumberField(header             : "Your payment currency",
-                                                     placeholder        : "United States Dollarr")
+                                                                        
+                                    PhoneNumberField(phoneNumber        : .constant(""),
+                                                     header             : "Your payment currency",
+                                                     placeholder        : "United States Dollarr",
+                                                     selectedCurrency   : $selectedCurrency,
+                                                     currencyResponse   : commonApiVM.currencyResponse)
                                     Spacer()
                                 }
+                                .padding(.horizontal,2)
                             }
                         }else{
-                            Image(pages[index].image)
-                                .resizable()
-                                .scaledToFit()
-                                .frame(height: 190)
+                            if currentPage == 0{
+                                Image(pages[index].lottie)
+                                    .resizable()
+                                    .scaledToFit()
+                                    .frame(height: 190)
+                            }else{
+                                if currentPage == 3{
+                                    LottieView(name: pages[index].lottie)
+                                        .frame(height: 190)
+                                        .frame(maxWidth: .infinity)
+                                        .offset(y: animateIn ? 0 : moveDistance)
+                                        .opacity(animateIn ? 1 : 0)
+                                        .id(currentPage)
+                                        .onAppear {
+                                            if currentPage == index {
+                                                withAnimation(.interpolatingSpring(stiffness: 220, damping: 22).delay(appearDelay)) {
+                                                    animateIn = true
+                                                }
+                                            }
+                                        }
+                                        .onChange(of: currentPage) { newValue in
+                                            if newValue == index {
+                                                animateIn = false
+                                                withAnimation(.interpolatingSpring(stiffness: 220, damping: 22).delay(appearDelay)) {
+                                                    animateIn = true
+                                                }
+                                            }
+                                        }
+                                        .onDisappear {
+                                            if currentPage != 3{
+                                                // Reset when leaving page
+                                                animateIn = false
+                                            }
+                                        }
+                                }else{
+                                    LottieView(name: pages[index].lottie)
+                                        .frame(height: 190)
+                                        .frame(maxWidth: .infinity)
+                                }
+                            }
                             
                             Text(LocalizedStringKey(pages[index].title))
                                 .font(.appRegular(28))
@@ -130,6 +177,7 @@ struct OnboardingView: View {
                     .tag(index)
                 }
             }
+            .animation(.none, value: currentPage)
             .tabViewStyle(PageTabViewStyle(indexDisplayMode: .never)) // hide default dots
             
             // Custom page indicator
@@ -150,19 +198,18 @@ struct OnboardingView: View {
             
             GradientBorderButton(title: currentPage == pages.count - 1 ?
                                  "Lets Go!" : "Next") {
-                //                withAnimation {
                 if currentPage == pages.count - 1{
                     hasSeenOnboarding = true
                 }else{
                     currentPage += 1
                 }
-                //                }
             }
-                                 .padding(.bottom,48)
+            .padding(.bottom,48)
         }
         .padding(.horizontal, 20)
         .navigationBarBackButtonHidden(true)
         .onAppear {
+            commonApiVM.getCurrencies()
         }
     }
 }
@@ -183,7 +230,7 @@ struct WrapButtonsView: View {
                 Button {
                     selected = option
                 } label: {
-                    Text(option)
+                    Text(LocalizedStringKey(option))
                         .font(.appRegular(18))
                     //                        .lineLimit(1)
                     //                        .fixedSize(horizontal: true, vertical: false)
@@ -204,4 +251,3 @@ struct WrapButtonsView: View {
         }
     }
 }
-

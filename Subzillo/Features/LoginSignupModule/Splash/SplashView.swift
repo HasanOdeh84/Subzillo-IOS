@@ -14,7 +14,6 @@ struct SplashView: View {
     @StateObject var appState         = AppState.shared
     @Environment(\.colorScheme) var colorScheme
     @AppStorage("hasSeenOnboarding") private var hasSeenOnboarding = false
-    @StateObject private var commonApiVM    = CommonAPIViewModel()
     
     var body: some View {
         ZStack {
@@ -34,8 +33,6 @@ struct SplashView: View {
                     }
                 }
             }else {
-//                Color.white
-//                    .ignoresSafeArea()
                 Group {
                     if colorScheme == .light {
                         Color.white // Light mode background
@@ -62,7 +59,7 @@ struct SplashView: View {
                         .foregroundColor(Color.blueMain700)
                         .padding(.bottom,60)
                     
-                    LottieView(name: "splash_bubble")
+                    LottieView(name: "splash_bubble",isAspectFit: false)
                         .frame(height: 242)
                         .frame(maxWidth: .infinity)
                 }
@@ -75,7 +72,6 @@ struct SplashView: View {
                     self.isActive = true
                 }
             }
-            commonApiVM.getCurrencies()
         }
     }
 }

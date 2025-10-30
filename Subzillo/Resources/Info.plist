@@ -28,7 +28,7 @@
 	<key>UILaunchScreen</key>
 	<dict>
 		<key>UIImageName</key>
-		<string>splash_logo</string>
+		<string>launch_png</string>
 	</dict>
 </dict>
 </plist>

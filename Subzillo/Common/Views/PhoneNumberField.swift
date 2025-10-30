@@ -7,26 +7,17 @@
 
 import SwiftUI
 
-struct Country: Identifiable {
-    let id = UUID()
-    let code: String
-    let flag: String
-}
-
 struct PhoneNumberField: View {
-    var selectedCountry                     : Country?
-    @State private var phoneNumber          : String = ""
+    
+    //MMARK: - Properties
+    @Binding var phoneNumber                : String
     var header                              : String?
     var placeholder                         : String?
     @State private var showCurrencySheet    = false
-    @State private var selectedCurrency     : Currency? = Currency(id: "7603cf97-e39c-48b8-86ec-629429072761", name: "United States Dollarr", symbol: "$", code: "USD")
+    @Binding var selectedCurrency           : Currency?
+    var currencyResponse                    : [Currency]?
     
-    let countries = [
-        Country(code: "+971", flag: "🇦🇪"),
-        Country(code: "+91", flag: "🇮🇳"),
-        Country(code: "+1", flag: "🇺🇸")
-    ]
-    
+    //MARK: - body
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             Text(LocalizedStringKey(header ?? ""))
@@ -35,13 +26,6 @@ struct PhoneNumberField: View {
             
             HStack(spacing: 0) {
                 Button {
-                    //                    ForEach(countries) { country in
-                    //                        Button {
-                    //                            selectedCountry = country
-                    //                        } label: {
-                    //                            Text("\(country.flag) \(country.code)")
-                    //                        }
-                    //                    }
                     showCurrencySheet = true
                 } label: {
                     HStack(spacing: 4) {
@@ -61,18 +45,26 @@ struct PhoneNumberField: View {
                     .frame(height: 52)
                     .foregroundColor(.neutral100)
                 
-                TextField(LocalizedStringKey(placeholder ?? ""), text: $phoneNumber)
+                if placeholder == "United States Dollarr"{
+                    TextField(LocalizedStringKey(placeholder ?? ""), text: Binding(
+                        get: { selectedCurrency?.name ?? "" },
+                        set: { selectedCurrency?.name = $0 }
+                    ))
                     .keyboardType(.numberPad)
                     .padding(.horizontal, 16)
                     .frame(height: 52)
                     .background(Color.white)
                     .font(.appRegular(14))
-                
-//                Text(selectedCurrency?.name ?? "")
-//                    .padding(.horizontal, 16)
-//                    .frame(height: 52)
-//                    .background(Color.white)
-//                    .font(.appRegular(14))
+                    .disabled(true)
+                }else{
+                    TextField(LocalizedStringKey(placeholder ?? ""), text: $phoneNumber)
+                        .keyboardType(.numberPad)
+                        .padding(.horizontal, 16)
+                        .frame(height: 52)
+                        .background(Color.white)
+                        .font(.appRegular(14))
+                        .disabled(false)
+                }
             }
             .frame(height: 52)
             .background(Color.neutralBg100)
@@ -83,13 +75,9 @@ struct PhoneNumberField: View {
             )
         }
         .sheet(isPresented: $showCurrencySheet) {
-            CountriesBottomSheet(selectedCurrency: $selectedCurrency)
+            CountriesBottomSheet(selectedCurrency: $selectedCurrency,currencyResponse: currencyResponse,header: placeholder == "United States Dollarr" ? "Your payment currency" : "Your Country",placeholder: placeholder == "United States Dollarr" ? "Search currency" : "Search country")
                 .presentationDetents([.medium, .large])
                 .presentationDragIndicator(.hidden)
         }
     }
 }
-
-//#Preview {
-//    PhoneNumberField()
-//}

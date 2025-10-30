@@ -24,7 +24,6 @@ class CommonAPIViewModel: ObservableObject {
             }
         receiveValue: { response in
             PrintLogger.modelLog(response, type: .response, isInput: false)
-            ToastManager.shared.showToast(message: response.message ?? "")
         }
         .store(in: &self.subscriptions)
     }
@@ -38,7 +37,6 @@ class CommonAPIViewModel: ObservableObject {
             }
         receiveValue: { [self] response in
             PrintLogger.modelLog(response, type: .response, isInput: false)
-            ToastManager.shared.showToast(message: response.message ?? "")
             currencyResponse = response.data
         }
         .store(in: &self.subscriptions)

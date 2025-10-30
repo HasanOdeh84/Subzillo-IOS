@@ -95,7 +95,7 @@ struct RootTabBar: View {
                     .font(.system(size: 22))
                     .foregroundColor(selectedTab == tab ? .blue : .gray)
                 if let title = title {
-                    Text(title)
+                    Text(LocalizedStringKey(title))
                         .font(.caption)
                         .foregroundColor(selectedTab == tab ? .blue : .gray)
                 }

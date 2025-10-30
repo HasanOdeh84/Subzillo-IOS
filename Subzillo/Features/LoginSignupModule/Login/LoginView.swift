@@ -18,6 +18,9 @@ struct LoginView: View {
     @State private var isPasswordVisible        : Bool = false
     @Binding var path                           : NavigationPath
     @EnvironmentObject var appDelegate          : AppDelegate
+    @StateObject private var commonApiVM        = CommonAPIViewModel()
+    @State private var phoneNumber              : String = ""
+    @State private var selectedCurrency         : Currency? = Currency(id: "7603cf97-e39c-48b8-86ec-629429072761", name: "United States Dollarr", symbol: "$", code: "USD")
     
     //MARK: - Body
     var body: some View {
@@ -45,7 +48,11 @@ struct LoginView: View {
                         .multilineTextAlignment(.center)
                 }
                 
-                PhoneNumberField()
+                PhoneNumberField(phoneNumber        : $phoneNumber,
+                                 header             : "Enter your phone number",
+                                 placeholder        : "000 000 000",
+                                 selectedCurrency   : $selectedCurrency,
+                                 currencyResponse   : commonApiVM.currencyResponse)
                 
                 CustomButton(title: "Log In"){
                     if let errorMessage = LoginSignupValidations().validateLogin(username: username,
@@ -91,11 +98,11 @@ struct LoginView: View {
                     .multilineTextAlignment(.center)
                     .environment(\.openURL, OpenURLAction(handler: { url in
                         if url.absoluteString.contains("privacy") {
-                            ToastManager.shared.showToast(message: "privacy policy coming soon")
+                            path.append(PendingRoute.termsAndPrivacy(isTerm: true))
                         }
                         
                         if url.absoluteString.contains("terms") {
-                            ToastManager.shared.showToast(message: "terms of service coming soon")
+                            path.append(PendingRoute.termsAndPrivacy(isTerm: false))
                         }
                         return .systemAction
                     }))
@@ -106,6 +113,9 @@ struct LoginView: View {
         }
         .background(Color.neutralBg100)
         .ignoresSafeArea()
+        .onAppear{
+            commonApiVM.getCurrencies()
+        }
     }
     
     func getAttriText() -> AttributedString {

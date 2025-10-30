@@ -15,6 +15,14 @@
 "Skip Onboarding" = "Skip Onboarding";
 "Lets Go!" = "Lets Go!";
 "Next" = "Next";
+"More than 30" = "More than 30";
+"Less than $50" = "Less than $50";
+"Less than $150" = "Less than $150";
+"More than $150" = "More than $150";
+"Tell us about yourself" = "Tell us about yourself";
+"How many subscriptions do you have?" = "How many subscriptions do you have?";
+"How much you spend on subscription monthly?" = "How much you spend on subscription monthly?";
+"Your payment currency" = "Your payment currency";
 
 //Login
 "Welcome to" = "Welcome to";
@@ -26,3 +34,11 @@
 "Privacy Policy" = "Privacy Policy";
 "Terms of Service" = "Terms of Service";
 "Enter your phone number" = "Enter your phone number";
+
+//Currency and number bottom sheet
+"search" = "search";
+"Search country" = "Search country";
+"Search currency" = "Search currency";
+
+//Terms and conditions and privacy policy
+

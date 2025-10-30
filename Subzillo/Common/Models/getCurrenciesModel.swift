@@ -13,8 +13,8 @@ public struct getCurrenciesResponse: Codable {
 }
 
 public struct Currency: Codable, Hashable {
-    let id          : String?
-    let name        : String?
-    let symbol      : String?
-    let code        : String?
+    var id          : String?
+    var name        : String?
+    var symbol      : String?
+    var code        : String?
 }

@@ -10,30 +10,30 @@ class NetworkRequest {
     static let shared                       = NetworkRequest()
     private let urlSession                  = URLSession.shared
     private var subscriptions               = Set<AnyCancellable>()
-    let monitor                             = NWPathMonitor()
-    let queue                               = DispatchQueue(label: "NetworkMonitor")
-    var isConnected                         = false
-    var connectionType: NWPath.Status       = .unsatisfied // More detailed status
+//    let monitor                             = NWPathMonitor()
+//    let queue                               = DispatchQueue(label: "NetworkMonitor")
+//    var isConnected                         = false
+//    var connectionType: NWPath.Status       = .unsatisfied // More detailed status
     
     private let jsonDecoder: JSONDecoder = {
         let jsonDecoder = JSONDecoder()
         return jsonDecoder
     }()
     
-    // MARK: - Init method
-    private init() {
-        monitor.pathUpdateHandler = { path in
-            DispatchQueue.main.async { // Update UI on the main thread
-                self.isConnected = path.status == .satisfied
-                self.connectionType = path.status
-            }
-        }
-        monitor.start(queue: queue)
-    }
-    
-    deinit {
-        monitor.cancel()
-    }
+//    // MARK: - Init method
+//    private init() {
+//        monitor.pathUpdateHandler = { path in
+//            DispatchQueue.main.async { // Update UI on the main thread
+//                self.isConnected = path.status == .satisfied
+//                self.connectionType = path.status
+//            }
+//        }
+//        monitor.start(queue: queue)
+//    }
+//    
+//    deinit {
+//        monitor.cancel()
+//    }
     
     // MARK: - Create Endpoint
     private func createURL(with endpoint: String) -> URL? {
@@ -166,12 +166,14 @@ class NetworkRequest {
         responseType: T.Type
     ) -> Future<T, APIError> { //A Future is a Combine publisher that emits one value or one failure, then completes. Then the subscription automatically completes (no more emissions)
         return Future<T, APIError> { [self] promise in
-            
-            guard self.isConnected else {
-                DispatchQueue.main.async {
-                    AlertManager.shared.showAlert(title: "No Internet Connection", message: "Please check your internet connection.")
+
+            NetworkMonitor.shared.waitForNetworkStatus {
+                guard NetworkMonitor.shared.isConnected else {
+                    DispatchQueue.main.async {
+                        AlertManager.shared.showAlert(title: "No Internet Connection", message: "Please check your internet connection.")
+                    }
+                    return promise(.failure(.noInternetConnection))
                 }
-                return promise(.failure(.noInternetConnection))
             }
             
             if showLoader{
@@ -293,11 +295,19 @@ class NetworkRequest {
     ) -> Future<T, APIError> {
         return Future<T, APIError> { [self] promise in
             
-            guard self.isConnected else {
-                DispatchQueue.main.async {
-                    AlertManager.shared.showAlert(title: "No Internet Connection", message: "Please check your internet connection.")
+//            guard self.isConnected else {
+//                DispatchQueue.main.async {
+//                    AlertManager.shared.showAlert(title: "No Internet Connection", message: "Please check your internet connection.")
+//                }
+//                return promise(.failure(.noInternetConnection))
+//            }
+            NetworkMonitor.shared.waitForNetworkStatus {
+                guard NetworkMonitor.shared.isConnected else {
+                    DispatchQueue.main.async {
+                        AlertManager.shared.showAlert(title: "No Internet Connection", message: "Please check your internet connection.")
+                    }
+                    return promise(.failure(.noInternetConnection))
                 }
-                return promise(.failure(.noInternetConnection))
             }
             
             if showLoader{
@@ -422,11 +432,13 @@ class NetworkRequest {
     ) -> Future<T, APIError> {
         return Future<T, APIError> { [self] promise in
             
-            guard self.isConnected else {
-                DispatchQueue.main.async {
-                    AlertManager.shared.showAlert(title: "No Internet Connection", message: "Please check your internet connection.")
+            NetworkMonitor.shared.waitForNetworkStatus {
+                guard NetworkMonitor.shared.isConnected else {
+                    DispatchQueue.main.async {
+                        AlertManager.shared.showAlert(title: "No Internet Connection", message: "Please check your internet connection.")
+                    }
+                    return promise(.failure(.noInternetConnection))
                 }
-                return promise(.failure(.noInternetConnection))
             }
             
             if showLoader{
