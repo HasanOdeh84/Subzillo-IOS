@@ -1,4 +1,14 @@
-## MVVM Architecture
+## System Architecture
+
+### Top level layer design :
+
+![unnamed (1)](https://github.com/user-attachments/assets/b47836fb-2d89-4da3-887d-ca94df208e5f)
+
+### Top architecture design : 
+
+![unnamed (1)](https://github.com/user-attachments/assets/7d8c6b36-37f2-463b-879a-fe47268e6581)
+
+## Code-level Architecture
 
 The **MVVM (Model-View-ViewModel)** architecture is a design pattern used in mobile app development to promote separation of concerns and facilitate easier management of application code.  
 It separates the data layer (**Model**), the presentation layer (**View**), and the business or presentation logic (**ViewModel**). This results in more **maintainable, testable, and scalable code**.
@@ -42,6 +52,10 @@ The communication flow in MVVM is based on **data binding** or **reactive progra
 
 ---
 
-### MVVM Interaction Diagram
+### MVVM Interaction Diagram:
 
 ![unnamed (1)](https://github.com/user-attachments/assets/8fc56025-33be-4256-b75d-60d7bf4347c1)
+
+### Detailed flow chart and use diagrams:
+
+[Doc Link](https://www.figma.com/board/Fwj7FLmWkPxRYPEftA668F/Subzillo?node-id=0-1&p=f&t=CYAng7xzDAxiuaZ7-0) 
