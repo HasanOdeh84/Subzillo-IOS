@@ -140,7 +140,7 @@ Follow these steps to set up and run the project locally:
 
 # Designs
 All UI/UX designs for this project are available in Figma:  
-[Figma Project Link]() //We will add once we recieve the figma link
+[Figma Project Link](https://www.figma.com/design/pJQb6t4lm3Oe7BsBr7Ymbp/Subzillo-App?node-id=29-2530&p=f&t=gAmwpkvwUc7gWdqi-0)
 
 # API Documentation
 The project uses the following backend APIs:  
