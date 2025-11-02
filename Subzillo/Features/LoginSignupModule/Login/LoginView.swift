@@ -86,7 +86,7 @@ struct LoginView: View {
 //                        loginVM.socialLogin(loginType: .google, path: $path)
                         ToastManager.shared.showToast(message: "coming soon")
                     }
-                    .background(Color.white)
+//                    .background(.clear)
                 }
                 .padding(.top, 10)
                 
@@ -98,11 +98,11 @@ struct LoginView: View {
                     .multilineTextAlignment(.center)
                     .environment(\.openURL, OpenURLAction(handler: { url in
                         if url.absoluteString.contains("privacy") {
-                            path.append(PendingRoute.termsAndPrivacy(isTerm: true))
+                            path.append(PendingRoute.termsAndPrivacy(isTerm: false))
                         }
                         
                         if url.absoluteString.contains("terms") {
-                            path.append(PendingRoute.termsAndPrivacy(isTerm: false))
+                            path.append(PendingRoute.termsAndPrivacy(isTerm: true))
                         }
                         return .systemAction
                     }))
@@ -111,7 +111,7 @@ struct LoginView: View {
             .padding(.horizontal, 20)
             .navigationBarBackButtonHidden(true)
         }
-        .background(.appNeutralBg100)
+        .background(.appBackground)
         .ignoresSafeArea()
         .onAppear{
             commonApiVM.getCurrencies()

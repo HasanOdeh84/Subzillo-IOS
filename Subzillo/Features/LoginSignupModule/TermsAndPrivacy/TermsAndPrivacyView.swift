@@ -14,22 +14,37 @@ struct TermsAndPrivacyView: View {
     var isTerm : Bool = false
     
     var body: some View {
-//        ScrollView{
-//            
-//        }
-//        .background(Color.neutralBg100)
-//        .ignoresSafeArea()
-        VStack{
-            HeaderView(
-                title: "Terms of service",
-                trailingTitle: "Share",
-                onBack: { dismiss() },
-                onTrailingAction: { print("Share tapped") }
-            )
-                            
-            Text("This is the main content of your screen.")
-                .padding()
-            Spacer()
+        ZStack{
+            Group{
+                Color(.appBackground)
+            }
+            .ignoresSafeArea()
+            VStack{
+                HeaderView(
+                    title           : isTerm ? "Terms of service" : "Privacy Policy",
+                    trailingTitle   : "Share",
+                    onBack          : { dismiss() },
+                    onTrailingAction: { print("Share tapped") }
+                )
+                .padding(.bottom,24)
+                ScrollView(){
+                    VStack(){
+                        VStack(){
+                            Text("This is the main content of your screen.")
+                                .multilineTextAlignment(.leading)
+                        }
+                        .padding(18)
+                    }
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .cornerRadius(12)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 12)
+                            .stroke(Color.neutral300Border, lineWidth: 1)
+                    )
+                    Spacer()
+                }
+            }
+            .padding(20)
         }
         .navigationBarBackButtonHidden(true)
     }
@@ -50,39 +65,32 @@ struct HeaderView: View {
 
     var body: some View {
         HStack {
-            // MARK: - Back Button
             Button(action: {
                 onBack?()
             }) {
-                Image(systemName: "chevron.left")
-                    .font(.system(size: 17, weight: .semibold))
-                    .foregroundColor(.blue)
+                Image("back_gray")
+                    .frame(width: 24,height: 24)
             }
 
-            Spacer()
-
-            // MARK: - Title
             Text(title)
-                .font(.headline)
-                .foregroundColor(.primary)
+                .font(.appRegular(24))
+                .foregroundColor(.appNeutralMain700)
 
             Spacer()
 
-            // MARK: - Trailing Button (optional)
             if let trailingTitle = trailingTitle {
                 Button(action: {
                     onTrailingAction?()
                 }) {
                     Text(trailingTitle)
-                        .font(.system(size: 17, weight: .regular))
-                        .foregroundColor(.blue)
+                        .font(.appRegular(14))
+                        .foregroundColor(.blueMain700)
                 }
             } else {
                 // To keep layout balanced when no trailing item
                 Color.clear.frame(width: 44, height: 44)
             }
         }
-        .padding(.horizontal)
-        .frame(height: 44)
+        .frame(height: 32)
     }
 }

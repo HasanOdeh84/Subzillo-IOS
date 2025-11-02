@@ -195,7 +195,7 @@ struct RootView: View {
                 case .resetPassword(let username):
                     ResetPasswordView(username:username ?? "", path:$path)
                 case .termsAndPrivacy(isTerm: let isTerm):
-                    TermsAndPrivacyView(isTerm:isTerm)
+                    TermsAndPrivacyView(isTerm:isTerm ?? false)
                 }
             }
         }

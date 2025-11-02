@@ -16,9 +16,11 @@ extension Color {
     
     static let blueMain700              = Color(hex: "#4489EB")
     static let navyBlueCTA700           = Color(hex: "#3260BB")
+    static let neutral2_500             = Color(hex: "#8C8C8C")
     static let neutral500               = Color(hex: "#76869E")
+    static let neutral900               = Color(hex: "#0F192E")
     static let neutral400               = Color(hex: "#AAB9CC")
-    static let neutral200               = Color(hex: "#D1D1D1")
+    static let neutral2_200             = Color(hex: "#D1D1D1")
     static let neutralMain700           = Color(hex: "#353F54")
     static let gradientPurple           = Color(hex: "#EA85E0")
     static let gradientBlue             = Color(hex: "#8FCBF2")
@@ -30,6 +32,10 @@ extension Color {
     static let neutral300Border         = Color(hex: "#DAE2ED")
     static let blue500                  = Color(hex: "#028DB4")
     static let grayCapsule              = Color(hex: "#DFDFDF")
+    
+    static let neutral_2_500            = Color("appNeutral2_500")
+    static let neutral_2_200            = Color("appNeutral2_200")
+    static let appBg                    = Color("AppBackground")
 
     init(hex: String) {
         let hex = hex.trimmingCharacters(in: CharacterSet.alphanumerics.inverted)

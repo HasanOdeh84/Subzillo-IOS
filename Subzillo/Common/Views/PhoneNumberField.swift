@@ -36,7 +36,7 @@ struct PhoneNumberField: View {
                             .foregroundColor(.primaryText)
                         Text(selectedCurrency?.code ?? "")
                             .font(.appRegular(14))
-                            .foregroundColor(.appNeutral500)
+                            .foregroundColor(.neutral_2_500)
                     }
                     .padding(.horizontal, 10)
                 }
@@ -53,8 +53,8 @@ struct PhoneNumberField: View {
                     .keyboardType(.numberPad)
                     .padding(.horizontal, 16)
                     .frame(height: 52)
-                    .background(.appBackground)
-                    .foregroundColor(.primaryText)
+                    .background(.appNeutral900)
+                    .foregroundColor(.neutral_2_500)
                     .font(.appRegular(14))
                     .disabled(true)
                 }else{
@@ -62,8 +62,8 @@ struct PhoneNumberField: View {
                         .keyboardType(.numberPad)
                         .padding(.horizontal, 16)
                         .frame(height: 52)
-                        .background(.appBackground)
-                        .foregroundColor(.primaryText)
+                        .background(.appNeutral900)
+                        .foregroundColor(.neutral_2_500)
                         .font(.appRegular(14))
                         .disabled(false)
                 }
@@ -73,7 +73,7 @@ struct PhoneNumberField: View {
             .cornerRadius(12)
             .overlay(
                 RoundedRectangle(cornerRadius: 12)
-                    .stroke(Color.neutral200, lineWidth: 1)
+                    .stroke(Color.neutral_2_200, lineWidth: 1)
             )
         }
         .sheet(isPresented: $showCurrencySheet) {

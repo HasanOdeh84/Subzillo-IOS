@@ -33,7 +33,7 @@ struct SplashView: View {
                 }
             }else {
                 Group {
-                    Color(.appBackground)
+                    Color("appBlack_white")
                 }
                 .ignoresSafeArea()
                 

@@ -81,7 +81,7 @@ struct CountriesBottomSheet: View {
                     }
                     .listStyle(.plain)
                 }
-                .background(.appBackground)
+                .background(.clear)
                 .cornerRadius(12)
                 .overlay(
                     RoundedRectangle(cornerRadius: 12)

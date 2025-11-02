@@ -64,7 +64,7 @@ struct OnboardingView: View {
     var body: some View {
         ZStack{
             Group {
-                Color(.appNeutralBg100)
+                Color(.appBackground)
             }
             .ignoresSafeArea()
             VStack {
@@ -209,6 +209,7 @@ struct OnboardingView: View {
                         currentPage += 1
                     }
                 }
+                .background(Color.clear)
                 .padding(.bottom,48)
             }
             .padding(.horizontal, 20)
@@ -240,17 +241,17 @@ struct WrapButtonsView: View {
                         .font(.appRegular(18))
                     //                        .lineLimit(1)
                     //                        .fixedSize(horizontal: true, vertical: false)
-                        .foregroundColor(selected == option ? .white : .neutralMain700)
+                        .foregroundColor(selected == option ? .white : .appNeutralMain700)
                         .padding(.vertical, 6)
                         .padding(.horizontal, 12)
                         .frame(maxWidth: .infinity)
                         .background(
                             Capsule()
-                                .fill(selected == option ? Color.blueMain700 : Color.white)
+                                .fill(selected == option ? Color.blueMain700 : .appNeutral900)
                         )
                         .overlay(
                             Capsule()
-                                .stroke(selected == option ? Color.clear : Color.neutral300Border, lineWidth: 1)
+                                .stroke(selected == option ? Color.clear : .appNeutral800, lineWidth: 1)
                         )
                 }
             }

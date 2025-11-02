@@ -22,7 +22,7 @@ enum PendingRoute: Hashable {
     case onboarding
     case verifyOtp(emailId:String? = "",from:ToVerify,username:String? = "")
     case resetPassword(username:String? = "")
-    case termsAndPrivacy(isTerm:Bool = false)
+    case termsAndPrivacy(isTerm:Bool?)
 }
 
 enum FocusPin {
