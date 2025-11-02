@@ -30,7 +30,7 @@ extension Color {
     static let neutral300Border         = Color(hex: "#DAE2ED")
     static let blue500                  = Color(hex: "#028DB4")
     static let grayCapsule              = Color(hex: "#DFDFDF")
-    
+
     init(hex: String) {
         let hex = hex.trimmingCharacters(in: CharacterSet.alphanumerics.inverted)
         var int: UInt64 = 0
@@ -54,15 +54,5 @@ extension Color {
             blue: Double(blue) / 255,
             opacity: Double(alpha) / 255
         )
-    }
-}
-
-struct AppColors {
-    static func background(isDark: Bool) -> Color {
-        isDark ? Color.black : Color.white
-    }
-    
-    static func primaryText(isDark: Bool) -> Color {
-        isDark ? Color.white : Color.black
     }
 }

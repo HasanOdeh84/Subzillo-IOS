@@ -12,7 +12,6 @@ struct SplashView: View {
     @State var isActive               : Bool = false
     @Binding var path                 : NavigationPath
     @StateObject var appState         = AppState.shared
-    @Environment(\.colorScheme) var colorScheme
     @AppStorage("hasSeenOnboarding") private var hasSeenOnboarding = false
     
     var body: some View {
@@ -34,11 +33,7 @@ struct SplashView: View {
                 }
             }else {
                 Group {
-                    if colorScheme == .light {
-                        Color.white // Light mode background
-                    } else {
-                        Color.black // Dark mode background
-                    }
+                    Color(.appBackground)
                 }
                 .ignoresSafeArea()
                 

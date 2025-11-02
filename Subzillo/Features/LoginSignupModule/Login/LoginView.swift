@@ -111,7 +111,7 @@ struct LoginView: View {
             .padding(.horizontal, 20)
             .navigationBarBackButtonHidden(true)
         }
-        .background(Color.neutralBg100)
+        .background(.appNeutralBg100)
         .ignoresSafeArea()
         .onAppear{
             commonApiVM.getCurrencies()

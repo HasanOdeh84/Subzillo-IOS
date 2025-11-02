@@ -68,7 +68,7 @@ struct GradientBorderButton: View {
                 }
             }
             .frame(maxWidth: .infinity, minHeight: 50)
-            .background(Color.white)
+            .background(Color.clear)
             .overlay(
                 RoundedRectangle(cornerRadius: 8)
                     .stroke(

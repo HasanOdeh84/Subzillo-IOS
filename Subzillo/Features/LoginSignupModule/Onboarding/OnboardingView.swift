@@ -18,7 +18,6 @@ struct OnboardingView: View {
     //MARK: - Properties
     @State private var currentPage                                  = 0
     @Binding var path                                               : NavigationPath
-    @EnvironmentObject var themeManager                             : ThemeManager
     @AppStorage("hasSeenOnboarding") private var hasSeenOnboarding  = false
     @State private var selectedSubscriptions                        : String? = nil
     @State private var selectedSpending                             : String? = nil
@@ -63,153 +62,160 @@ struct OnboardingView: View {
     
     //MARK: - Body
     var body: some View {
-        VStack {
-            HStack(spacing: 10) {
-                Spacer()
-                Button {
-                    hasSeenOnboarding = true
-                } label: {
-                    HStack(spacing: 4) {
-                        Text("Skip Onboarding")
-                            .foregroundColor(Color.navyBlueCTA700)
-                            .font(.appRegular(14))
-                        Image(systemName: "arrow.right")
-                            .foregroundColor(Color.blueMain700)
-                            .frame(width: 20, height: 20)
-                    }
-                }
+        ZStack{
+            Group {
+                Color(.appNeutralBg100)
             }
-            .padding(.vertical, 32)
-            
-            TabView(selection: $currentPage) {
-                ForEach(0..<pages.count, id: \.self) { index in
-                    VStack {
-                        if currentPage == pages.count - 1{
-                            ScrollView{
-                                VStack(spacing: 32){
-                                    Text("Tell us about yourself")
-                                        .font(.appRegular(28))
-                                        .foregroundColor(Color.neutralMain700)
-                                    
-                                    VStack(alignment: .leading, spacing: 12) {
-                                        Text("How many subscriptions do you have?")
-                                            .font(.appRegular(18))
-                                            .foregroundColor(Color.neutralMain700)
-                                        WrapButtonsView(options: subscriptionOptions,
-                                                        selected: $selectedSubscriptions)
-                                    }
-                                    
-                                    VStack(alignment: .leading, spacing: 12) {
-                                        Text("How much you spend on subscription monthly?")
-                                            .font(.appRegular(18))
-                                            .foregroundColor(Color.neutralMain700)
-                                        WrapButtonsView(options: spendingOptions,
-                                                        selected: $selectedSpending)
-                                    }
-                                                                        
-                                    PhoneNumberField(phoneNumber        : .constant(""),
-                                                     header             : "Your payment currency",
-                                                     placeholder        : "United States Dollarr",
-                                                     selectedCurrency   : $selectedCurrency,
-                                                     currencyResponse   : commonApiVM.currencyResponse)
-                                    Spacer()
-                                }
-                                .padding(.horizontal,2)
-                            }
-                        }else{
-                            if currentPage == 0{
-                                Image(pages[index].lottie)
-                                    .resizable()
-                                    .scaledToFit()
-                                    .frame(height: 190)
-                            }else{
-                                if currentPage == 3{
-                                    LottieView(name: pages[index].lottie)
-                                        .frame(height: 190)
-                                        .frame(maxWidth: .infinity)
-                                        .offset(y: animateIn ? 0 : moveDistance)
-                                        .opacity(animateIn ? 1 : 0)
-                                        .id(currentPage)
-                                        .onAppear {
-                                            if currentPage == index {
-                                                withAnimation(.interpolatingSpring(stiffness: 220, damping: 22).delay(appearDelay)) {
-                                                    animateIn = true
-                                                }
-                                            }
-                                        }
-                                        .onChange(of: currentPage) { newValue in
-                                            if newValue == index {
-                                                animateIn = false
-                                                withAnimation(.interpolatingSpring(stiffness: 220, damping: 22).delay(appearDelay)) {
-                                                    animateIn = true
-                                                }
-                                            }
-                                        }
-                                        .onDisappear {
-                                            if currentPage != 3{
-                                                // Reset when leaving page
-                                                animateIn = false
-                                            }
-                                        }
-                                }else{
-                                    LottieView(name: pages[index].lottie)
-                                        .frame(height: 190)
-                                        .frame(maxWidth: .infinity)
-                                }
-                            }
-                            
-                            Text(LocalizedStringKey(pages[index].title))
-                                .font(.appRegular(28))
-                                .multilineTextAlignment(.center)
-                                .padding(.horizontal)
-                                .padding(.top,64)
-                            
-                            Text(LocalizedStringKey(pages[index].description))
-                                .font(.appRegular(18))
-                                .foregroundColor(Color.neutral500)
-                                .multilineTextAlignment(.center)
-                                .padding(.horizontal)
-                                .padding(.top,32)
-                            
-                            Spacer()
+            .ignoresSafeArea()
+            VStack {
+                HStack(spacing: 10) {
+                    Spacer()
+                    Button {
+                        hasSeenOnboarding = true
+                    } label: {
+                        HStack(spacing: 4) {
+                            Text("Skip Onboarding")
+                                .foregroundColor(Color.navyBlueCTA700)
+                                .font(.appRegular(14))
+                            Image(systemName: "arrow.right")
+                                .foregroundColor(Color.blueMain700)
+                                .frame(width: 20, height: 20)
                         }
                     }
-                    .tag(index)
                 }
-            }
-            .animation(.none, value: currentPage)
-            .tabViewStyle(PageTabViewStyle(indexDisplayMode: .never)) // hide default dots
-            
-            // Custom page indicator
-            HStack(spacing: 13) {
-                ForEach(0..<pages.count, id: \.self) { index in
-                    if index == currentPage{
-                        Capsule()
-                            .fill(Color.blueMain700)
-                            .frame(width: 32, height: 8)
-                    }else{
-                        Circle()
-                            .fill(Color.neutral400)
-                            .frame(width: 8, height: 8)
+                .padding(.vertical, 32)
+                
+                TabView(selection: $currentPage) {
+                    ForEach(0..<pages.count, id: \.self) { index in
+                        VStack {
+                            if currentPage == pages.count - 1{
+                                ScrollView{
+                                    VStack(spacing: 32){
+                                        Text("Tell us about yourself")
+                                            .font(.appRegular(28))
+                                            .foregroundColor(.appNeutralMain700)
+                                        
+                                        VStack(alignment: .leading, spacing: 12) {
+                                            Text("How many subscriptions do you have?")
+                                                .font(.appRegular(18))
+                                                .foregroundColor(.appNeutralMain700)
+                                            WrapButtonsView(options: subscriptionOptions,
+                                                            selected: $selectedSubscriptions)
+                                        }
+                                        
+                                        VStack(alignment: .leading, spacing: 12) {
+                                            Text("How much you spend on subscription monthly?")
+                                                .font(.appRegular(18))
+                                                .foregroundColor(.appNeutralMain700)
+                                            WrapButtonsView(options: spendingOptions,
+                                                            selected: $selectedSpending)
+                                        }
+                                        
+                                        PhoneNumberField(phoneNumber        : .constant(""),
+                                                         header             : "Your payment currency",
+                                                         placeholder        : "United States Dollarr",
+                                                         selectedCurrency   : $selectedCurrency,
+                                                         currencyResponse   : commonApiVM.currencyResponse)
+                                        Spacer()
+                                    }
+                                    .padding(.horizontal,2)
+                                }
+                            }else{
+                                if currentPage == 0{
+                                    Image(pages[index].lottie)
+                                        .resizable()
+                                        .scaledToFit()
+                                        .frame(height: 190)
+                                }else{
+                                    if currentPage == 3{
+                                        LottieView(name: pages[index].lottie)
+                                            .frame(height: 190)
+                                            .frame(maxWidth: .infinity)
+                                            .offset(y: animateIn ? 0 : moveDistance)
+                                            .opacity(animateIn ? 1 : 0)
+                                            .id(currentPage)
+                                            .onAppear {
+                                                if currentPage == index {
+                                                    withAnimation(.interpolatingSpring(stiffness: 220, damping: 22).delay(appearDelay)) {
+                                                        animateIn = true
+                                                    }
+                                                }
+                                            }
+                                            .onChange(of: currentPage) { newValue in
+                                                if newValue == index {
+                                                    animateIn = false
+                                                    withAnimation(.interpolatingSpring(stiffness: 220, damping: 22).delay(appearDelay)) {
+                                                        animateIn = true
+                                                    }
+                                                }
+                                            }
+                                            .onDisappear {
+                                                if currentPage != 3{
+                                                    // Reset when leaving page
+                                                    animateIn = false
+                                                }
+                                            }
+                                    }else{
+                                        LottieView(name: pages[index].lottie)
+                                            .frame(height: 190)
+                                            .frame(maxWidth: .infinity)
+                                    }
+                                }
+                                
+                                Text(LocalizedStringKey(pages[index].title))
+                                    .font(.appRegular(28))
+                                    .multilineTextAlignment(.center)
+                                    .padding(.horizontal)
+                                    .padding(.top,64)
+                                    .foregroundColor(.appNeutralMain700)
+                                
+                                Text(LocalizedStringKey(pages[index].description))
+                                    .font(.appRegular(18))
+                                    .foregroundColor(.appNeutral500)
+                                    .multilineTextAlignment(.center)
+                                    .padding(.horizontal)
+                                    .padding(.top,32)
+                                
+                                Spacer()
+                            }
+                        }
+                        .tag(index)
                     }
                 }
-            }
-            .padding(.bottom, 23)
-            
-            GradientBorderButton(title: currentPage == pages.count - 1 ?
-                                 "Lets Go!" : "Next") {
-                if currentPage == pages.count - 1{
-                    hasSeenOnboarding = true
-                }else{
-                    currentPage += 1
+                .animation(.none, value: currentPage)
+                .tabViewStyle(PageTabViewStyle(indexDisplayMode: .never)) // hide default dots
+                
+                // Custom page indicator
+                HStack(spacing: 13) {
+                    ForEach(0..<pages.count, id: \.self) { index in
+                        if index == currentPage{
+                            Capsule()
+                                .fill(Color.blueMain700)
+                                .frame(width: 32, height: 8)
+                        }else{
+                            Circle()
+                                .fill(Color.neutral400)
+                                .frame(width: 8, height: 8)
+                        }
+                    }
                 }
+                .padding(.bottom, 23)
+                
+                GradientBorderButton(title: currentPage == pages.count - 1 ?
+                                     "Lets Go!" : "Next") {
+                    if currentPage == pages.count - 1{
+                        hasSeenOnboarding = true
+                    }else{
+                        currentPage += 1
+                    }
+                }
+                .padding(.bottom,48)
             }
-            .padding(.bottom,48)
-        }
-        .padding(.horizontal, 20)
-        .navigationBarBackButtonHidden(true)
-        .onAppear {
-            commonApiVM.getCurrencies()
+            .padding(.horizontal, 20)
+            .navigationBarBackButtonHidden(true)
+            .onAppear {
+                commonApiVM.getCurrencies()
+            }
         }
     }
 }

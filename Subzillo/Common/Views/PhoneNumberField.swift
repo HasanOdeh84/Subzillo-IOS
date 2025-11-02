@@ -22,7 +22,7 @@ struct PhoneNumberField: View {
         VStack(alignment: .leading, spacing: 8) {
             Text(LocalizedStringKey(header ?? ""))
                 .font(.appRegular(14))
-                .foregroundColor(.neutralMain700)
+                .foregroundColor(.appNeutralMain700)
             
             HStack(spacing: 0) {
                 Button {
@@ -33,17 +33,17 @@ struct PhoneNumberField: View {
                             .frame(width: 24, height: 18)
                         Image(systemName: "chevron.down")
                             .frame(width: 20, height: 20)
-                            .foregroundColor(.black)
+                            .foregroundColor(.primaryText)
                         Text(selectedCurrency?.code ?? "")
                             .font(.appRegular(14))
-                            .foregroundColor(.neutral500)
+                            .foregroundColor(.appNeutral500)
                     }
                     .padding(.horizontal, 10)
                 }
                 
                 Divider()
                     .frame(height: 52)
-                    .foregroundColor(.neutral100)
+                    .foregroundColor(.appNeutral100)
                 
                 if placeholder == "United States Dollarr"{
                     TextField(LocalizedStringKey(placeholder ?? ""), text: Binding(
@@ -53,7 +53,8 @@ struct PhoneNumberField: View {
                     .keyboardType(.numberPad)
                     .padding(.horizontal, 16)
                     .frame(height: 52)
-                    .background(Color.white)
+                    .background(.appBackground)
+                    .foregroundColor(.primaryText)
                     .font(.appRegular(14))
                     .disabled(true)
                 }else{
@@ -61,13 +62,14 @@ struct PhoneNumberField: View {
                         .keyboardType(.numberPad)
                         .padding(.horizontal, 16)
                         .frame(height: 52)
-                        .background(Color.white)
+                        .background(.appBackground)
+                        .foregroundColor(.primaryText)
                         .font(.appRegular(14))
                         .disabled(false)
                 }
             }
             .frame(height: 52)
-            .background(Color.neutralBg100)
+            .background(.appNeutralBg100)
             .cornerRadius(12)
             .overlay(
                 RoundedRectangle(cornerRadius: 12)

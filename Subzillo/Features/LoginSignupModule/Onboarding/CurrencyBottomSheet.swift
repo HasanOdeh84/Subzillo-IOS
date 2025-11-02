@@ -36,7 +36,7 @@ struct CountriesBottomSheet: View {
                 
                 Text(LocalizedStringKey(header ?? ""))
                     .font(.appRegular(24))
-                    .foregroundColor(.neutralMain700)
+                    .foregroundColor(.appNeutralMain700)
                     .padding(.vertical,24)
                 
                 HStack {
@@ -47,9 +47,10 @@ struct CountriesBottomSheet: View {
                     TextField(LocalizedStringKey(placeholder ?? ""), text: $searchText)
                         .textFieldStyle(PlainTextFieldStyle())
                         .padding(.trailing,10)
+                        .foregroundColor(.primaryText)
                 }
                 .frame(height: 52)
-                .background(Color(.white))
+                .background(.appBackground)
                 .cornerRadius(12)
                 .overlay(
                     RoundedRectangle(cornerRadius: 12)
@@ -69,10 +70,10 @@ struct CountriesBottomSheet: View {
                                     .padding(.leading, -12)
                                 Text(currency.code ?? "")
                                     .font(.appRegular(16))
-                                    .foregroundColor(.neutralMain700)
+                                    .foregroundColor(.appNeutralMain700)
                                 Text(currency.name ?? "")
                                     .font(.appRegular(16))
-                                    .foregroundColor(.neutralMain700)
+                                    .foregroundColor(.appNeutralMain700)
                                 Spacer()
                             }
                             .frame(height: 40)
@@ -80,7 +81,7 @@ struct CountriesBottomSheet: View {
                     }
                     .listStyle(.plain)
                 }
-                .background(Color.white)
+                .background(.appBackground)
                 .cornerRadius(12)
                 .overlay(
                     RoundedRectangle(cornerRadius: 12)

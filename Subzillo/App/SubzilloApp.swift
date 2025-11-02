@@ -108,7 +108,11 @@ struct SubzilloApp: App {
                 .environmentObject(toastManager)
                 .environmentObject(mediaPicker)
                 .environmentObject(themeManager)
-//                .preferredColorScheme(themeManager.preferredColorScheme)
+                .preferredColorScheme(
+                                    themeManager.userChangedTheme
+                                    ? (themeManager.isDarkMode ? .dark : .light)
+                                    : nil // nil = follow system theme
+                                )
                 .withLoader()
                 .withAlert()
                 .withToast()
