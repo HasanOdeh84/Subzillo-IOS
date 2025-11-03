@@ -21,10 +21,29 @@ struct CustomButton: View {
             Text(LocalizedStringKey(title))
                 .multilineTextAlignment(.center)
                 .foregroundColor(textColor)
+                .font(.appSemiBold(18))
                 .frame(maxWidth: .infinity, minHeight: height)
         }
         .frame(maxWidth: .infinity, minHeight: height)
         .background(background)
         .cornerRadius(cornerRadius)
+    }
+}
+
+struct underlineText: View{
+    var text        : String
+    var image       : String
+    let action      : () -> Void
+    
+    var body: some View{
+        HStack{
+            Image(image)
+            Button(action: action){
+                Text(text)
+                    .font(.appRegular(16))
+                    .foregroundColor(.navyBlueCTA700)
+                    .underline()
+            }
+        }
     }
 }

@@ -21,132 +21,74 @@ struct RegistrationView: View {
     @StateObject private var registerVM         = RegistrationViewModel()
     @EnvironmentObject var appDelegate          : AppDelegate
     @Binding var path                           : NavigationPath
+    @State private var familyMembers: [FamilyMember] = [FamilyMember()]
     
-    //MARK: - Body
-    var body: some View {
-            ScrollView {
-                VStack(alignment: .leading, spacing: 20) {
+    //MARK: - body
+    var body: some View{
+        
+        ZStack{
+            Group {
+                Color(.appBackground)
+            }
+            .ignoresSafeArea()
+            
+            ScrollView{
+                VStack(spacing: 24) {
+                    Text("Welcome to")
+                        .font(.appRegular(24))
+                        .foregroundColor(Color.neutralMain700)
+                        .multilineTextAlignment(.center)
                     
-                    // App Title
-                    VStack(spacing: 4) {
-                        Text("Subzillo")
-                            .font(.largeTitle)
-                            .fontWeight(.bold)
-                        Text("Smart way to manage all your subscriptions")
-                            .font(.subheadline)
-                            .foregroundColor(Color.black)
-                            .multilineTextAlignment(.center)
-                    }
-                    .frame(maxWidth: .infinity)
-                    .padding(.top, 40)
+                    Image("logo_svg")
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 128,height: 88)
+                        .padding(.vertical,24)
                     
-                    // Signup Title
-                    Text("Signup")
-                        .font(.title2)
-                        .fontWeight(.semibold)
-                        .padding(.top, 20)
-                    
-                    // Input Fields
                     Group {
-                        CustomTextField(placeholder: "User Name", text: $username)
-                        CustomTextField(placeholder: "Full Name", text: $fullName)
-                        CustomTextField(placeholder: "Email", text: $email, keyboardType: .emailAddress)
-                        CustomTextField(placeholder: "Mobile Number (Optional)", text: $mobile, keyboardType: .phonePad)
-                        CustomSecureField(placeholder: "Password", text: $password)
-                        CustomSecureField(placeholder: "Confirm Password", text: $confirmPassword)
+                        ReusableTextField(placeholder: "Enter your full name", text: $fullName,header:"Full Name")
+                        ReusableTextField(placeholder: "name@example.com", text: $email, isEmail: true,header: "Email [Optional]")
                     }
                     
-                    // Password Rules
-                    VStack(alignment: .leading, spacing: 8) {
-                        PasswordRuleView(rule: "At least 8 characters", isValid: password.count >= 8)
-                        PasswordRuleView(rule: "One uppercase letter (e.g., Subzillo1)", isValid: password.range(of: "[A-Z]", options: .regularExpression) != nil)
-                        PasswordRuleView(rule: "One number (e.g., Secure123)", isValid: password.range(of: "\\d", options: .regularExpression) != nil)
-                        PasswordRuleView(rule: "One special character (e.g., Pa$$word!)", isValid: password.range(of: "[^A-Za-z0-9]", options: .regularExpression) != nil)
-                    }
-                    .font(.footnote)
-                    .foregroundColor(Color.black)
-                    
-                    // Terms and Conditions
-                    Toggle(isOn: $agreeTerms) {
-                        Text("I agree to the terms and conditions")
-                            .font(.footnote)
-                            .foregroundStyle(.black)
-                    }
-                    .toggleStyle(CheckboxToggleStyle())   // ✅ Use directly
-                    
-                    HStack {
-                        Spacer()
-                        // Signup Button
-                        Button(action: {
-                            if let errorMessage = LoginSignupValidations().validateSignup(
-                                username: username,
-                                fullName: fullName,
-                                email: email,
-                                mobile: mobile,
-                                password: password,
-                                confirmPassword: confirmPassword,
-                                termsPrivacy: agreeTerms
-                            ) {
-                                ToastManager.shared.showToast(message: errorMessage)
-                            } else {
-                                registerVM.register(input: RegisterRequest(username     : username,
-                                                                           email        : email,
-                                                                           password     : password,
-                                                                           fullName     : fullName,
-                                                                           platform     : Constants.platform,
-                                                                           deviceId     : appDelegate.deviceToken ?? ""),path:$path)
-                            }
-                        }) {
-                            Text("Signup")
-                                .frame(width: 160,height: 50,alignment: .center)
-    //                            .padding()
-                                .background(.gray)
-                            //                            .background(isFormValid ? Color.blue : Color.gray)
-                                .foregroundColor(Color.black)
-                                .cornerRadius(8)
-                        }
-                        //                    .disabled(!isFormValid)
-                        .padding(.top, 10)
-                        Spacer()
-                    }
-                    
-                    // Social logins
-                    VStack(spacing: 15) {
-                        SocialButton(title: "Continue with Google") {
+                    ForEach(familyMembers.indices, id: \.self) { index in
+                        VStack {
+                            FamilyMemberView(member: $familyMembers[index])
                             
-                        }
-                        
-                        SignInWithAppleButton(.signIn, onRequest: { request in
-                            // handle result
-                        }, onCompletion: { result in
-                            // handle result
-                        })
-                        .frame(height: 50)
-                        .signInWithAppleButtonStyle(.black)
-                    }
-                    .padding(.top, 10)
-                    
-                    // Login Option
-                    HStack {
-                        Text("Already have an account?")
-                        Button(action: {
-                            if !path.isEmpty {
-                                path.removeLast()
+                            if familyMembers.count > 1 {
+                                Button(action: {
+                                    familyMembers.remove(at: index)
+                                }) {
+                                    Image(systemName: "minus.circle")
+                                        .foregroundColor(.red)
+                                    Text("Remove")
+                                        .foregroundColor(.red)
+                                }
+                                .padding(.bottom, 8)
                             }
-                            path.append(PendingRoute.login)
-                        }) {
-                            Text("Log In")
-                                .fontWeight(.bold)
-                                .foregroundColor(Color.black)
                         }
                     }
-                    .font(.footnote)
-                    .frame(maxWidth: .infinity, alignment: .center)
-                    .padding(.top, 20)
+                    
+                    underlineText(text: "Add Family Member", image: "profile_add") {
+                        familyMembers.append(FamilyMember())
+                    }
+                    
+                    CustomButton(title: "Finish Sign Up") {
+                    }
+                    Spacer()
+                    TermsAndPrivacyText(
+                        onTapTerms: {
+                            path.append(PendingRoute.termsAndPrivacy(isTerm: true))
+                        },
+                        onTapPrivacy: {
+                            path.append(PendingRoute.termsAndPrivacy(isTerm: false))
+                        },
+                        bottomPadding: 38
+                    )
                 }
-                .padding(.horizontal, 24)
+                .padding(20)
                 .navigationBarBackButtonHidden(true)
             }
+        }
     }
     
     //MARK: - Methods

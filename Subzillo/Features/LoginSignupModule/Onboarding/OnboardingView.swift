@@ -23,7 +23,6 @@ struct OnboardingView: View {
     @State private var selectedSpending                             : String? = nil
     private let subscriptionOptions                                 = ["5 - 10", "10 - 20", "20 - 30", "More than 30"]
     private let spendingOptions                                     = ["Less than $50", "Less than $150", "More than $150"]
-    @StateObject private var commonApiVM                            = CommonAPIViewModel()
     @State private var selectedCurrency                             : Currency? = Currency(id: "7603cf97-e39c-48b8-86ec-629429072761", name: "United States Dollarr", symbol: "$", code: "USD")
     
     // controls the SwiftUI offset animation
@@ -114,8 +113,7 @@ struct OnboardingView: View {
                                         PhoneNumberField(phoneNumber        : .constant(""),
                                                          header             : "Your payment currency",
                                                          placeholder        : "United States Dollarr",
-                                                         selectedCurrency   : $selectedCurrency,
-                                                         currencyResponse   : commonApiVM.currencyResponse)
+                                                         selectedCurrency   : $selectedCurrency)
                                         Spacer()
                                     }
                                     .padding(.horizontal,2)
@@ -214,9 +212,6 @@ struct OnboardingView: View {
             }
             .padding(.horizontal, 20)
             .navigationBarBackButtonHidden(true)
-            .onAppear {
-                commonApiVM.getCurrencies()
-            }
         }
     }
 }

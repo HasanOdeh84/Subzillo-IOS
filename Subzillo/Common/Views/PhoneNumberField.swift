@@ -15,7 +15,7 @@ struct PhoneNumberField: View {
     var placeholder                         : String?
     @State private var showCurrencySheet    = false
     @Binding var selectedCurrency           : Currency?
-    var currencyResponse                    : [Currency]?
+    @EnvironmentObject var commonApiVM      : CommonAPIViewModel
     
     //MARK: - body
     var body: some View {
@@ -26,7 +26,11 @@ struct PhoneNumberField: View {
             
             HStack(spacing: 0) {
                 Button {
-                    showCurrencySheet = true
+                    if let error = commonApiVM.error {
+                        commonApiVM.getCurrencies()
+                    } else if let data = commonApiVM.currencyResponse {
+                        showCurrencySheet = true
+                    }
                 } label: {
                     HStack(spacing: 4) {
                         Text(selectedCurrency?.symbol ?? "")
@@ -77,7 +81,7 @@ struct PhoneNumberField: View {
             )
         }
         .sheet(isPresented: $showCurrencySheet) {
-            CountriesBottomSheet(selectedCurrency: $selectedCurrency,currencyResponse: currencyResponse,header: placeholder == "United States Dollarr" ? "Your payment currency" : "Your Country",placeholder: placeholder == "United States Dollarr" ? "Search currency" : "Search country")
+            CountriesBottomSheet(selectedCurrency: $selectedCurrency,currencyResponse: commonApiVM.currencyResponse,header: placeholder == "United States Dollarr" ? "Your payment currency" : "Your Country",placeholder: placeholder == "United States Dollarr" ? "Search currency" : "Search country")
                 .presentationDetents([.medium, .large])
                 .presentationDragIndicator(.hidden)
         }

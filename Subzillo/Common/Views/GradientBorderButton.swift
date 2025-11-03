@@ -47,15 +47,16 @@ import SwiftUI
 
 struct GradientBorderButton: View {
     var title           : String
-    var isSocialBtn     : Bool = false
+    var isBtn           : Bool = false
+    var buttonImage     : String?
     var action          : () -> Void
     
     var body: some View {
         Button(action: action) {
             Group {
-                if isSocialBtn {
+                if isBtn {
                     HStack {
-                        Image("google")
+                        Image(buttonImage ?? "")
                             .frame(width: 20, height: 20)
                         Text(LocalizedStringKey(title))
                             .font(.appSemiBold(18))

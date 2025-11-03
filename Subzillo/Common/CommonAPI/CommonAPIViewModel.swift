@@ -14,6 +14,7 @@ class CommonAPIViewModel: ObservableObject {
     private var subscriptions           = Set<AnyCancellable>()
     var apiReference                    = NetworkRequest.shared
     @Published var currencyResponse     : [Currency]?
+    @Published var error                : Error?
     
     func getCategories(path: Binding<NavigationPath>) {
         apiReference.getApi(endPoint: APIEndpoint.getCategories, token: defaultAuthKey, responseType: getCategoriesResponse.self)
@@ -32,6 +33,7 @@ class CommonAPIViewModel: ObservableObject {
         apiReference.getApi(endPoint: APIEndpoint.getCurrencies, token: defaultAuthKey, responseType: getCurrenciesResponse.self)
             .sink { [unowned self] completion in
                 if case let .failure(error) = completion {
+                    self.error = error
                     self.handleError(error,endPoint: APIEndpoint.getCurrencies)
                 }
             }

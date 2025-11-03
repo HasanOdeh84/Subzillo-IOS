@@ -13,7 +13,6 @@ extension Color {
     static let transparentColor         = Color(hex: "#00000000")
     static let black                    = Color(hex: "#000000")
     static let white                    = Color(hex: "#FFFFFF")
-    
     static let blueMain700              = Color(hex: "#4489EB")
     static let navyBlueCTA700           = Color(hex: "#3260BB")
     static let neutral2_500             = Color(hex: "#8C8C8C")
@@ -36,6 +35,7 @@ extension Color {
     static let neutral_2_500            = Color("appNeutral2_500")
     static let neutral_2_200            = Color("appNeutral2_200")
     static let appBg                    = Color("AppBackground")
+    static let black_white              = Color("appBlack_white")
 
     init(hex: String) {
         let hex = hex.trimmingCharacters(in: CharacterSet.alphanumerics.inverted)

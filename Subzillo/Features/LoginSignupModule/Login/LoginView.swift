@@ -18,7 +18,6 @@ struct LoginView: View {
     @State private var isPasswordVisible        : Bool = false
     @Binding var path                           : NavigationPath
     @EnvironmentObject var appDelegate          : AppDelegate
-    @StateObject private var commonApiVM        = CommonAPIViewModel()
     @State private var phoneNumber              : String = ""
     @State private var selectedCurrency         : Currency? = Currency(id: "7603cf97-e39c-48b8-86ec-629429072761", name: "United States Dollarr", symbol: "$", code: "USD")
     
@@ -51,8 +50,7 @@ struct LoginView: View {
                 PhoneNumberField(phoneNumber        : $phoneNumber,
                                  header             : "Enter your phone number",
                                  placeholder        : "000 000 000",
-                                 selectedCurrency   : $selectedCurrency,
-                                 currencyResponse   : commonApiVM.currencyResponse)
+                                 selectedCurrency   : $selectedCurrency)
                 
                 CustomButton(title: "Log In"){
                     if let errorMessage = LoginSignupValidations().validateLogin(username: username,
@@ -73,7 +71,7 @@ struct LoginView: View {
                 VStack(spacing: 8) {
                     SignInWithAppleButton(.continue, onRequest: { request in
                         //Need to configure
-//                        loginVM.socialLogin(loginType: .apple, path: $path)
+                        //                        loginVM.socialLogin(loginType: .apple, path: $path)
                         ToastManager.shared.showToast(message: "coming soon")
                     }, onCompletion: { result in
                         // handle result
@@ -81,31 +79,25 @@ struct LoginView: View {
                     .frame(height: 50)
                     .signInWithAppleButtonStyle(.whiteOutline)
                     
-                    GradientBorderButton(title: "Continue with Google",isSocialBtn:true) {
+                    GradientBorderButton(title: "Continue with Google",isBtn:true, buttonImage: "google") {
                         //Need to configure
-//                        loginVM.socialLogin(loginType: .google, path: $path)
+                        //                        loginVM.socialLogin(loginType: .google, path: $path)
                         ToastManager.shared.showToast(message: "coming soon")
                     }
-//                    .background(.clear)
+                    //                    .background(.clear)
                 }
                 .padding(.top, 10)
                 
                 Spacer()
-                Text(getAttriText())
-                    .font(.appRegular(14))
-                    .padding(.horizontal,20)
-                    .padding(.bottom,48)
-                    .multilineTextAlignment(.center)
-                    .environment(\.openURL, OpenURLAction(handler: { url in
-                        if url.absoluteString.contains("privacy") {
-                            path.append(PendingRoute.termsAndPrivacy(isTerm: false))
-                        }
-                        
-                        if url.absoluteString.contains("terms") {
-                            path.append(PendingRoute.termsAndPrivacy(isTerm: true))
-                        }
-                        return .systemAction
-                    }))
+                TermsAndPrivacyText(
+                    onTapTerms: {
+                        path.append(PendingRoute.termsAndPrivacy(isTerm: true))
+                    },
+                    onTapPrivacy: {
+                        path.append(PendingRoute.termsAndPrivacy(isTerm: false))
+                    },
+                    bottomPadding: 48
+                )
             }
             .frame(minHeight: UIScreen.main.bounds.height)
             .padding(.horizontal, 20)
@@ -113,29 +105,6 @@ struct LoginView: View {
         }
         .background(.appBackground)
         .ignoresSafeArea()
-        .onAppear{
-            commonApiVM.getCurrencies()
-        }
-    }
-    
-    func getAttriText() -> AttributedString {
-        
-        var attriString = AttributedString(localized: "By continuing, you agree to our Terms of Service and Privacy Policy")
-        attriString.foregroundColor = .gray
-        
-        if let privacyRange = attriString.range(of: "Privacy Policy") {
-            attriString[privacyRange].link                  = URL(string: "www.apple.com/privacy")
-            attriString[privacyRange].underlineStyle        = .single
-            attriString[privacyRange].foregroundColor       = .underlineGray
-        }
-        
-        if let termsRange = attriString.range(of: "Terms of Service") {
-            attriString[termsRange].link                = URL(string: "www.apple.com/terms")
-            attriString[termsRange].underlineStyle      = .single
-            attriString[termsRange].foregroundColor     = .underlineGray
-        }
-        
-        return attriString
     }
 }
 

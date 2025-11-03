@@ -98,6 +98,7 @@ struct SubzilloApp: App {
     @StateObject private var toastManager   = ToastManager()
     @StateObject var mediaPicker            = MediaPickerManager.shared
     @StateObject private var themeManager   = ThemeManager()
+    @StateObject private var sharedViewModel = CommonAPIViewModel()
     
     var body: some Scene {
         WindowGroup {
@@ -108,6 +109,7 @@ struct SubzilloApp: App {
                 .environmentObject(toastManager)
                 .environmentObject(mediaPicker)
                 .environmentObject(themeManager)
+                .environmentObject(sharedViewModel)
                 .preferredColorScheme(
                                     themeManager.userChangedTheme
                                     ? (themeManager.isDarkMode ? .dark : .light)
@@ -116,6 +118,7 @@ struct SubzilloApp: App {
                 .withLoader()
                 .withAlert()
                 .withToast()
+                .onAppear { sharedViewModel.getCurrencies() }
         }
         .onChange(of: scenePhase) { phase in
             switch phase {
@@ -196,6 +199,8 @@ struct RootView: View {
                     ResetPasswordView(username:username ?? "", path:$path)
                 case .termsAndPrivacy(isTerm: let isTerm):
                     TermsAndPrivacyView(isTerm:isTerm ?? false)
+                case .SuccessView(isOtp: let isOtp):
+                    SuccessView(isOtp:isOtp ?? false)
                 }
             }
         }

@@ -42,3 +42,20 @@
 
 //Terms and conditions and privacy policy
 "Share" = "Share";
+
+//Otp verification
+"Verify Phone Number" = "Verify Phone Number";
+"We send a code to your phone number" = "We send a code to your phone number";
+"Enter validation code" = "Enter validation code";
+"Verify Phone Number" = "Verify Phone Number";
+"Resend code in" = "Resend code in";
+"Didn't receive the code?" = "Didn't receive the code?";
+"Resend Code" = "Resend Code";
+"Change number" = "Change number";
+
+//Otp Success
+"Phone Number Verified" = "Phone Number Verified";
+
+//Change mobile number bottom sheet
+"Change mobile number" = "Change mobile number";
+"Update" = "Update";
