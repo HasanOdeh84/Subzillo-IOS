@@ -32,6 +32,11 @@ extension Color {
     static let blue500                  = Color(hex: "#028DB4")
     static let grayCapsule              = Color(hex: "#DFDFDF")
     
+    static let purple500                = Color(hex: "#8766CE")
+    static let green                    = Color(hex: "#9AC473")
+    static let orange                   = Color(hex: "#E9D2A1")
+    static let red                      = Color(hex: "#FF5959")
+    
     static let neutral_2_500            = Color("appNeutral2_500")
     static let neutral_2_200            = Color("appNeutral2_200")
     static let appBg                    = Color("AppBackground")

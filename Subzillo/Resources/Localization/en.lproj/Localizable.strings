@@ -59,3 +59,19 @@
 //Change mobile number bottom sheet
 "Change mobile number" = "Change mobile number";
 "Update" = "Update";
+
+//signup
+"Full Name" = "Full Name";
+"Enter your full name" = "Enter your full name";
+"Email [Optional]" = "Email [Optional]";
+"name@example.com" = "name@example.com";
+"Family Member" = "Family Member";
+"Family Nickname" = "Family Nickname";
+"Nickname" = "Nickname";
+"Family Member phone number" = "Family Member phone number";
+"Color (To distinguish color family subscriptions)" = "Color (To distinguish color family subscriptions)";
+
+//Signup success
+"Account created successfully" = "Account created successfully";
+"Quick tip" = "Quick tip";
+"Start by adding your first subscription to see how Subzillo helps you stay organized." = "Start by adding your first subscription to see how Subzillo helps you stay organized.";
