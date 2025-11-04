@@ -11,17 +11,17 @@ import _AuthenticationServices_SwiftUI
 struct RegistrationView: View {
     
     //MARK: - Properties
-    @State private var username                 = ""
-    @State private var fullName                 = ""
-    @State private var email                    = ""
-    @State private var mobile                   = ""
-    @State private var password                 = ""
-    @State private var confirmPassword          = ""
-    @State private var agreeTerms               = false
-    @StateObject private var registerVM         = RegistrationViewModel()
-    @EnvironmentObject var appDelegate          : AppDelegate
-    @Binding var path                           : NavigationPath
-    @State private var familyMembers: [FamilyMember] = [FamilyMember()]
+    @State private var username                         = ""
+    @State private var fullName                         = ""
+    @State private var email                            = ""
+    @State private var mobile                           = ""
+    @State private var password                         = ""
+    @State private var confirmPassword                  = ""
+    @State private var agreeTerms                       = false
+    @StateObject private var registerVM                 = RegistrationViewModel()
+    @EnvironmentObject var appDelegate                  : AppDelegate
+    @Binding var path                                   : NavigationPath
+    @State private var familyMembers                    : [FamilyMember]?
     
     //MARK: - body
     var body: some View{
@@ -38,6 +38,7 @@ struct RegistrationView: View {
                         .font(.appRegular(24))
                         .foregroundColor(Color.neutralMain700)
                         .multilineTextAlignment(.center)
+                        .padding(.top, 50)
                     
                     Image("logo_svg")
                         .resizable()
@@ -50,30 +51,25 @@ struct RegistrationView: View {
                         ReusableTextField(placeholder: "name@example.com", text: $email, isEmail: true,header: "Email [Optional]")
                     }
                     
-                    ForEach(familyMembers.indices, id: \.self) { index in
-                        VStack {
-                            FamilyMemberView(member: $familyMembers[index])
-                            
-                            if familyMembers.count > 1 {
-                                Button(action: {
-                                    familyMembers.remove(at: index)
-                                }) {
-                                    Image(systemName: "minus.circle")
-                                        .foregroundColor(.red)
-                                    Text("Remove")
-                                        .foregroundColor(.red)
-                                }
-                                .padding(.bottom, 8)
-                            }
-                        }
-                    }
-                    
-                    underlineText(text: "Add Family Member", image: "profile_add") {
-                        familyMembers.append(FamilyMember())
-                    }
+//                    if familyMembers?.count != 0 {
+//                        ForEach(familyMembers?.indices, id: \.self) { index in
+//                            VStack {
+//                                FamilyMemberView(member: $familyMembers?[index], action: {
+//                                    if familyMembers?.count > 0 {
+//                                        familyMembers.remove(at: index)
+//                                    }
+//                                })
+//                            }
+//                        }
+//                    }
+//
+//                    underlineText(text: "Add Family Member", image: "profile_add") {
+//                        familyMembers.append(FamilyMember())
+//                    }
                     
                     CustomButton(title: "Finish Sign Up") {
                     }
+
                     Spacer()
                     TermsAndPrivacyText(
                         onTapTerms: {
@@ -82,12 +78,14 @@ struct RegistrationView: View {
                         onTapPrivacy: {
                             path.append(PendingRoute.termsAndPrivacy(isTerm: false))
                         },
-                        bottomPadding: 38
+                        bottomPadding: 28
                     )
                 }
+                .frame(minHeight: UIScreen.main.bounds.height)
                 .padding(20)
                 .navigationBarBackButtonHidden(true)
             }
+            .ignoresSafeArea()
         }
     }
     

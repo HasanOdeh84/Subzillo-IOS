@@ -67,6 +67,10 @@ struct LoginView: View {
                     }
                 }
                 
+                Button("signup"){
+                    path.append(PendingRoute.signup)
+                }
+                
                 // Social logins
                 VStack(spacing: 8) {
                     SignInWithAppleButton(.continue, onRequest: { request in

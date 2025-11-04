@@ -31,7 +31,14 @@ extension Color {
     static let neutral300Border         = Color(hex: "#DAE2ED")
     static let blue500                  = Color(hex: "#028DB4")
     static let grayCapsule              = Color(hex: "#DFDFDF")
-    
+    static let border                   = Color(hex: "#E5E7EB")
+    static let linearGradient1          = Color(hex: "#F842E6")
+    static let linearGradient2          = Color(hex: "#005C9D")
+    static let purple501                = Color(hex: "#212529", alpha: 0.18)
+    static let borderColor              = Color(hex: "#E5E7EB")
+    static let dropShadowColor          = Color(hex: "#212529", alpha: 0.08)
+    static let linearGradient3          = Color(hex: "#A719DD")
+    static let linearGradient4          = Color(hex: "#623BD8")
     static let purple500                = Color(hex: "#8766CE")
     static let green                    = Color(hex: "#9AC473")
     static let orange                   = Color(hex: "#E9D2A1")
@@ -41,29 +48,55 @@ extension Color {
     static let neutral_2_200            = Color("appNeutral2_200")
     static let appBg                    = Color("AppBackground")
     static let black_white              = Color("appBlack_white")
-
-    init(hex: String) {
-        let hex = hex.trimmingCharacters(in: CharacterSet.alphanumerics.inverted)
-        var int: UInt64 = 0
-        Scanner(string: hex).scanHexInt64(&int)
-        let alpha, red, green, blue: UInt64
-        switch hex.count {
-        case 3: // RGB (12-bit)
-            (alpha, red, green, blue) = (255, (int >> 8) * 17, (int >> 4 & 0xF) * 17, (int & 0xF) * 17)
-        case 6: // RGB (24-bit)
-            (alpha, red, green, blue) = (255, int >> 16, int >> 8 & 0xFF, int & 0xFF)
-        case 8: // ARGB (32-bit)
-            (alpha, red, green, blue) = (int >> 24, int >> 16 & 0xFF, int >> 8 & 0xFF, int & 0xFF)
-        default:
-            (alpha, red, green, blue) = (1, 1, 1, 0)
+    
+    init(hex: String, alpha: CGFloat = 1.0) {
+        let hexString: String = hex.trimmingCharacters(in: CharacterSet.whitespacesAndNewlines)
+        let scanner = Scanner(string: hexString)
+        if (hexString.hasPrefix("#")) {
+            scanner.scanLocation = 1
         }
+        var color: UInt32 = 0
+        scanner.scanHexInt32(&color)
+        let mask = 0x000000FF
+        let r = Int(color >> 16) & mask
+        let g = Int(color >> 8) & mask
+        let b = Int(color) & mask
+        let red   = CGFloat(r) / 255.0
+        let green = CGFloat(g) / 255.0
+        let blue  = CGFloat(b) / 255.0
         
         self.init(
             .sRGB,
-            red: Double(red) / 255,
-            green: Double(green) / 255,
-            blue: Double(blue) / 255,
-            opacity: Double(alpha) / 255
+            red: red,
+            green: green,
+            blue: blue,
+            opacity: alpha
         )
+        
     }
+
+//    init(hex: String) {
+//        let hex = hex.trimmingCharacters(in: CharacterSet.alphanumerics.inverted)
+//        var int: UInt64 = 0
+//        Scanner(string: hex).scanHexInt64(&int)
+//        let alpha, red, green, blue: UInt64
+//        switch hex.count {
+//        case 3: // RGB (12-bit)
+//            (alpha, red, green, blue) = (255, (int >> 8) * 17, (int >> 4 & 0xF) * 17, (int & 0xF) * 17)
+//        case 6: // RGB (24-bit)
+//            (alpha, red, green, blue) = (255, int >> 16, int >> 8 & 0xFF, int & 0xFF)
+//        case 8: // ARGB (32-bit)
+//            (alpha, red, green, blue) = (int >> 24, int >> 16 & 0xFF, int >> 8 & 0xFF, int & 0xFF)
+//        default:
+//            (alpha, red, green, blue) = (1, 1, 1, 0)
+//        }
+//        
+//        self.init(
+//            .sRGB,
+//            red: Double(red) / 255,
+//            green: Double(green) / 255,
+//            blue: Double(blue) / 255,
+//            opacity: Double(alpha) / 255
+//        )
+//    }
 }

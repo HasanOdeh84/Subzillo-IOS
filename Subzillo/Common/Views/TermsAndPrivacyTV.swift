@@ -16,7 +16,7 @@ struct TermsAndPrivacyText: View {
         Text(getAttriText())
             .font(.appRegular(14))
             .padding(.horizontal, 20)
-            .padding(.bottom, bottomPadding)
+//            .padding(.bottom, bottomPadding)
             .multilineTextAlignment(.center)
             .environment(\.openURL, OpenURLAction { url in
                 if url.absoluteString.contains("privacy") {
