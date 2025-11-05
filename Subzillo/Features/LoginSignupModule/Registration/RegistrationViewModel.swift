@@ -14,6 +14,11 @@ class RegistrationViewModel: ObservableObject {
     private var subscriptions           = Set<AnyCancellable>()
     var apiReference                    = NetworkRequest.shared
     @Published var registerResponse     : RegisterResponse?
+    private let router                  : AppIntentRouter
+    
+    init(router: AppIntentRouter = .shared) {
+        self.router = router
+    }
     
     func register(input:RegisterRequest, path: Binding<NavigationPath>) {
         apiReference.postApi(endPoint: APIEndpoint.registration, method: .POST,token: defaultAuthKey,body: input,showLoader: true, responseType: RegisterResponse.self)

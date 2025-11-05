@@ -10,13 +10,14 @@ import SwiftUI
 struct ProfileView: View {
     
     //MARK: - Properties
-    @Binding var path                       : NavigationPath
+//    @Binding var path                       : NavigationPath
     @StateObject var loginVM                = LoginViewModel()
     @StateObject var profileVM              = ProfileViewModel()
     @EnvironmentObject var picker           : MediaPickerManager
     @State private var selectedImage        : UIImage?
     @State private var selectedDocumentName : String?
     @StateObject private var commonApiVM    = CommonAPIViewModel()
+    @EnvironmentObject var router           : AppIntentRouter
     
     //MARK: - Body
     var body: some View {
@@ -28,8 +29,7 @@ struct ProfileView: View {
                     message     : "Are you sure you want to logout?",
                     cancelText  : "Cancel",
                     okAction    : {
-                        loginVM.logout(input: LogoutRequest(userId: Constants.getUserId()),
-                                       path : $path)
+                        loginVM.logout(input: LogoutRequest(userId: Constants.getUserId()))
                     }
                 )
             }
@@ -108,7 +108,7 @@ struct ProfileView: View {
             }
             
             Button("get categories api"){
-                commonApiVM.getCategories(path: $path)
+                commonApiVM.getCategories()
             }
             
             Spacer()
@@ -118,5 +118,5 @@ struct ProfileView: View {
 }
 
 #Preview {
-    ProfileView(path: .constant(NavigationPath()))
+    ProfileView()
 }

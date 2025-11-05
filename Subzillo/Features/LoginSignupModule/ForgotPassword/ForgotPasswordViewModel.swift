@@ -15,6 +15,11 @@ class ForgotPasswordViewModel: ObservableObject {
     private var subscriptions           = Set<AnyCancellable>()
     var apiReference                    = NetworkRequest.shared
     @Published var forgotResponse       : GeneralResponse?
+    private let router                  : AppIntentRouter
+    
+    init(router: AppIntentRouter = .shared) {
+        self.router = router
+    }
     
     func forgotPassword(input:ForgotPasswordRequest, path: Binding<NavigationPath>) {
         apiReference.postApi(endPoint: APIEndpoint.forgotPassword, method: .POST,token: defaultAuthKey,body: input,showLoader: true, responseType: GeneralResponse.self)

@@ -139,8 +139,10 @@ struct SubzilloApp: App {
 }
 
 struct RootView: View {
-    @StateObject var appState   = AppState.shared
-    @State private var path     = NavigationPath()
+    @StateObject var appState       = AppState.shared
+    @State private var path         = NavigationPath()
+    @EnvironmentObject var router   : AppIntentRouter
+    
     var body: some View {
         NavigationStack(path: $path) {
             Group {
@@ -154,7 +156,9 @@ struct RootView: View {
 //                            }
 //                        }
 //                }
-                SplashView(path: $path)
+//                LoginView(path: $path)
+//                RootTabBar(path: $path)
+                SplashView()
             }
             .navigationDestination(for: PendingRoute.self) { screen in
                 switch screen {
@@ -181,7 +185,7 @@ struct RootView: View {
                 case .notifications:
                     Text("Test")
                 case .home:
-                    RootTabBar(path: $path)
+                    RootTabBar()
                 case .signup:
                     RegistrationView(path: $path)
                 case .login:
@@ -205,5 +209,10 @@ struct RootView: View {
             }
         }
         .environmentObject(appState)
+        .onChange(of: router.pendingRoute) { new in
+            guard let new = new else { return }
+            path.append(new)
+            router.pendingRoute = nil
+        }
     }
 }

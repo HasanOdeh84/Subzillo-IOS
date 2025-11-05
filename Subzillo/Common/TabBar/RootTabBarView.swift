@@ -8,99 +8,43 @@
 import SwiftUI
 
 struct RootTabBar: View {
-    @State private var selectedTab              : Tab = .home
-    @EnvironmentObject var router               : AppIntentRouter
-    @Binding var path                           : NavigationPath
     
+    //MARK: - Properties
+    @State private var selectedTab              : Tab = .home
+//    @EnvironmentObject var router               : AppIntentRouter
+//    @Binding var path                           : NavigationPath
+    
+    //MARK: - Body
     var body: some View {
         ZStack(alignment: .bottom) {
             Group {
                 switch selectedTab {
                 case .home:
-                    //                        HomeView()
-                    VoiceCommandView(path:$path)
+                    VoiceCommandView()
                 case .subscriptions:
                     SubscriptionsView()
-                case .analytics:
+                case .addSubscription:
                     AnalyticsView()
-                case .activity:
+                case .smartAI:
                     ActivityView()
                 case .profile:
-                    ProfileView(path: $path)
+                    ProfileView()
                 }
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .background(Color(.systemGray6))
             
-            tabBar
+            CurvedTabBar(selectedTab: $selectedTab)
+                .padding(.bottom, 20)
         }
         .ignoresSafeArea(edges: .bottom)
-        .onChange(of: router.pendingRoute) { new in
-            if let new = new {
-                path.append(new)
-                router.pendingRoute = nil
-            }
-        }
+//        .onChange(of: router.pendingRoute) { new in
+//            if let new = new {
+//                path.append(new)
+//                router.pendingRoute = nil
+//            }
+//        }
         .navigationBarBackButtonHidden(true)
-    }
-    
-    private var tabBar: some View {
-        HStack {
-            tabButton(.home, icon: "house.fill", title: "Home")
-            Spacer()
-            tabButton(.subscriptions, icon: "shippingbox.fill")
-            
-            Spacer().frame(width: 120) // space for center button
-            
-            tabButton(.activity, icon: "chart.bar.fill")
-            Spacer()
-            tabButton(.profile, icon: "arrow.clockwise")
-        }
-        .padding(.horizontal, 30)
-        .frame(height: 75)
-        .background(
-            RoundedRectangle(cornerRadius: 25)
-                .fill(Color.white)
-                .shadow(color: Color.black.opacity(0.1), radius: 5, x: 0, y: -2)
-        )
-        .overlay(centerButton, alignment: .top)
-    }
-    
-    // Center floating button
-    private var centerButton: some View {
-        Button(action: {
-            selectedTab = .analytics
-        }) {
-            Image(systemName: "plus")
-                .font(.system(size: 28, weight: .bold))
-                .foregroundColor(.white)
-                .frame(width: 65, height: 65)
-                .background(
-                    LinearGradient(gradient: Gradient(colors: [Color.blue, Color.purple]),
-                                   startPoint: .top, endPoint: .bottom)
-                )
-                .clipShape(Circle())
-                .shadow(color: Color.purple.opacity(0.4), radius: 10, x: 0, y: 5)
-        }
-        .offset(y: -30)
-    }
-    
-    // Tab button
-    private func tabButton(_ tab: Tab, icon: String, title: String? = nil) -> some View {
-        Button(action: {
-            selectedTab = tab
-        }) {
-            VStack {
-                Image(systemName: icon)
-                    .font(.system(size: 22))
-                    .foregroundColor(selectedTab == tab ? .blue : .gray)
-                if let title = title {
-                    Text(LocalizedStringKey(title))
-                        .font(.caption)
-                        .foregroundColor(selectedTab == tab ? .blue : .gray)
-                }
-            }
-        }
     }
     
     //Local push for testing
@@ -123,5 +67,181 @@ struct RootTabBar: View {
 }
 
 #Preview {
-    //    RootTabBar()
+    //        RootTabBar(path: .constant(NavigationPath()))
+    //    CurvedTabBar()
 }
+
+import SwiftUI
+
+struct CurvedTabBar: View {
+    @Binding var selectedTab : Tab
+    var body: some View {
+        GeometryReader { proxy in
+            HStack(alignment: .bottom) {
+                TabBarItem(label: "Home", iconName: selectedTab == .home ? "home-tabSelected" : "home-tab", action: {
+                    selectedTab = .home
+                }, selectedTab: $selectedTab, tab: .home)
+                TabBarItem(label: "My Subs", iconName: selectedTab == .subscriptions ? "mySubs-tabSelected" : "mySubs-tab", action: {
+                    selectedTab = .subscriptions
+                }, selectedTab: $selectedTab, tab: .subscriptions)
+                
+                VStack {
+                    Button {
+                        print("Create Button Action")
+                    } label: {
+                        ZStack {
+                            Circle()
+                                .fill(
+                                    LinearGradient(colors: [Color.linearGradient3, Color.linearGradient4, Color.blueMain700],
+                                                   startPoint: .leading,
+                                                   endPoint: .trailing)
+                                )
+                                .frame(width: 55, height: 55)
+                            
+                            Image("plus-tab")
+                                .frame(width: 55/2, height: 55/2)
+                        }
+                    }
+                    Spacer()
+                }
+                .padding(.top, 14)
+                .frame(height: 86)
+                
+                TabBarItem(label: "Smart AI", iconName: selectedTab == .smartAI ? "smartAI-tabSelected" : "smartAI-tab", action: {
+                    selectedTab = .smartAI
+                }, selectedTab: $selectedTab, tab: .smartAI)
+                TabBarItem(label: "My Profile", iconName: selectedTab == .profile ? "profile-tabSelected" : "profile-tab", action: {
+                    selectedTab = .profile
+                }, selectedTab: $selectedTab, tab: .profile)
+            }
+            .font(.footnote)
+            .padding(.horizontal, 10)
+            .padding(.bottom, max(0, 8 - proxy.safeAreaInsets.bottom))
+            .background {
+                CurvedShape()
+                    .fill(.white)
+                    .shadow(color: .black.opacity(0.1), radius: 5)
+                    .ignoresSafeArea()
+            }
+            .frame(maxHeight: .infinity, alignment: .bottom)
+        }
+    }
+}
+
+struct TabBarItem: View {
+    let label                   : String
+    let iconName                : String
+    let action                  : () -> Void
+    @Binding var selectedTab    : Tab
+    @State var tab              : Tab
+    
+    var body: some View {
+        
+        Button(action: action) {
+            VStack(spacing: 4) {
+                Image(iconName)
+                    .frame(width: 24,height: 24)
+//                    .foregroundStyle(
+//                        selectedTab == tab
+//                        ? AnyShapeStyle(
+//                            LinearGradient(colors: [Color.linearGradient3, Color.linearGradient4, Color.blueMain700],
+//                                           startPoint: .leading,
+//                                           endPoint: .trailing)
+//                        )
+//                        : AnyShapeStyle(Color.neutral400)
+//                    )
+                Text(label)
+                    .foregroundStyle(
+                        selectedTab == tab
+                        ? AnyShapeStyle(
+                            LinearGradient(colors: [Color.linearGradient3, Color.linearGradient4, Color.blueMain700],
+                                           startPoint: .leading,
+                                           endPoint: .trailing)
+                        )
+                        : AnyShapeStyle(Color.neutral400)
+                    )
+            }
+        }
+        .frame(maxWidth: .infinity)
+    }
+}
+
+struct CurvedShape: Shape {
+    private enum Constants {
+        static let cornerRadius: CGFloat = 0
+        static let smallCornerRadius: CGFloat = 20
+        static let buttonRadius: CGFloat = 35
+        static let buttonPadding: CGFloat = 9
+    }
+    
+    func path(in rect: CGRect) -> Path {
+        var path = Path()
+        
+        // Move to the starting point at the bottom-left corner
+        var x = rect.minX
+        var y = rect.maxY
+        path.move(to: CGPoint(x: x, y: y))
+        
+        // Add the rounded corner on the top-left corner
+        x += Constants.cornerRadius
+        y = Constants.buttonRadius + Constants.cornerRadius - 10
+        path.addArc(
+            center: CGPoint(x: x, y: y),
+            radius: Constants.cornerRadius,
+            startAngle: .degrees(180),
+            endAngle: .degrees(270),
+            clockwise: false
+        )
+        // Add a small corner leading to the main half-circle
+        x = rect.midX - Constants.buttonRadius - (Constants.buttonPadding / 2) - Constants.smallCornerRadius + 9
+        y = Constants.buttonRadius - Constants.smallCornerRadius - 10
+        path.addArc(
+            center: CGPoint(x: x, y: y),
+            radius: Constants.smallCornerRadius,
+            startAngle: .degrees(90),
+            endAngle: .degrees(35), // 0
+            clockwise: true
+        )
+        // Add the main half-circle
+        x = rect.midX
+        y += Constants.smallCornerRadius + Constants.buttonPadding
+        y = y + 11
+        path.addArc(
+            center: CGPoint(x: x, y: y),
+            radius: Constants.buttonRadius + Constants.buttonPadding,
+            startAngle: .degrees(215), // 180
+            endAngle: .degrees(325), // 0
+            clockwise: false
+        )
+        // Add a trailing small corner
+        x += Constants.buttonRadius + (Constants.buttonPadding / 2) + Constants.smallCornerRadius - 9
+        y = Constants.buttonRadius - Constants.smallCornerRadius - 10
+        path.addArc(
+            center: CGPoint(x: x, y: y),
+            radius: Constants.smallCornerRadius,
+            startAngle: .degrees(145), // 180
+            endAngle: .degrees(90),
+            clockwise: true
+        )
+        // Add the rounded corner on the top-right corner
+        x = rect.maxX - Constants.cornerRadius
+        y = Constants.buttonRadius + Constants.cornerRadius - 10
+        path.addArc(
+            center: CGPoint(x: x, y: y),
+            radius: Constants.cornerRadius,
+            startAngle: .degrees(270),
+            endAngle: .degrees(0),
+            clockwise: false
+        )
+        // Connect the bottom corner
+        x = rect.maxX
+        y = rect.maxY
+        path.addLine(to: CGPoint(x: x, y: y))
+        
+        // Close the path to complete the shape
+        path.closeSubpath()
+        return path
+    }
+}
+
+

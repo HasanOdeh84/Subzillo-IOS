@@ -15,8 +15,13 @@ class CommonAPIViewModel: ObservableObject {
     var apiReference                    = NetworkRequest.shared
     @Published var currencyResponse     : [Currency]?
     @Published var error                : Error?
+    private let router                  : AppIntentRouter
     
-    func getCategories(path: Binding<NavigationPath>) {
+    init(router: AppIntentRouter = .shared) {
+        self.router = router
+    }
+    
+    func getCategories() {
         apiReference.getApi(endPoint: APIEndpoint.getCategories, token: defaultAuthKey, responseType: getCategoriesResponse.self)
             .sink { [unowned self] completion in
                 if case let .failure(error) = completion {

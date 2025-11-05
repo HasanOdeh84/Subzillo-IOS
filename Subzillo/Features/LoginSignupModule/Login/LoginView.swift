@@ -47,6 +47,8 @@ struct LoginView: View {
                         .multilineTextAlignment(.center)
                 }
                 
+                subscriptionListCard(title: "Netflix | Premium", description: "Monthly • Tomorrow", imageUrl: "", currency: "$15.99", price: "$15.99", relation: "son")
+                
                 PhoneNumberField(phoneNumber        : $phoneNumber,
                                  header             : "Enter your phone number",
                                  placeholder        : "000 000 000",
@@ -63,12 +65,8 @@ struct LoginView: View {
                             deviceId: appDelegate.deviceToken ?? ""
                             //                            pushMode: 1
                         )
-                        loginVM.login(input: input,path:$path)
+                        loginVM.login(input: input)
                     }
-                }
-                
-                Button("signup"){
-                    path.append(PendingRoute.signup)
                 }
                 
                 // Social logins

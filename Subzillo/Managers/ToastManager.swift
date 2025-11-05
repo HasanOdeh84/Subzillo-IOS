@@ -7,20 +7,55 @@
 
 import SwiftUI
 
+enum ToastStyle {
+  case error
+  case success
+  case info
+}
+
+extension ToastStyle {
+    var themeColor: Color {
+        switch self {
+        case .error: return Color.deepTerracotta400
+        case .info: return Color.neutral600
+        case .success: return Color.success
+        }
+    }
+    
+    var iconFileName: String {
+        switch self {
+        case .info: return "info"
+        case .success: return "check"
+        case .error: return "warning"
+        }
+    }
+    
+    var textColor: Color {
+        switch self {
+        case .error: return Color.white
+        case .info: return Color.white
+        case .success: return Color.toastSuccessGreen
+        }
+    }
+}
+
 struct ToastView: View {
     let message: String
-    let backgroundColor: Color
-    let textColor: Color
+    var style: ToastStyle
     
     var body: some View {
-        Text(message)
-            .font(.footnote)
-            .padding(.horizontal, 16)
-            .padding(.vertical, 10)
-            .background(backgroundColor)
-            .foregroundColor(textColor)
-            .cornerRadius(10)
-            .transition(.opacity)
+        HStack(alignment: .center, spacing: 8) {
+            Image(style.iconFileName)
+                .padding(.leading,20)
+            Text(message)
+                .foregroundColor(style.textColor)
+            Spacer()
+        }
+        .padding(.vertical,12)
+        .frame(minWidth: 0, maxWidth: .infinity)
+        .background(style.themeColor)
+        .cornerRadius(8)
+        .padding(.horizontal, 20)
     }
 }
 
@@ -33,21 +68,19 @@ class ToastManager: ObservableObject {
     struct Toast: Identifiable {
         let id = UUID()
         let message: String
-        let backgroundColor: Color
-        let textColor: Color
+        var style: ToastStyle
         let duration: TimeInterval
         
-        init(message: String, backgroundColor: Color = .black.opacity(0.7), textColor: Color = .white, duration: TimeInterval = 3) {
+        init(message: String,style: ToastStyle, duration: TimeInterval = 3) {
             self.message = message
-            self.backgroundColor = backgroundColor
-            self.textColor = textColor
             self.duration = duration
+            self.style = style
         }
     }
     
-    func showToast(message: String, backgroundColor: Color = .black.opacity(0.7), textColor: Color = .white, duration: TimeInterval = 2) {
+    func showToast(message: String, style:ToastStyle = .success , duration: TimeInterval = 2) {
         hideTimer?.invalidate()
-        currentToast = Toast(message: message, backgroundColor: backgroundColor, textColor: textColor, duration: duration)
+        currentToast = Toast(message: message,style: style, duration: duration)
         isShowingToast = true
         
         hideTimer = Timer.scheduledTimer(withTimeInterval: duration, repeats: false) { [weak self] _ in
@@ -63,11 +96,11 @@ struct ToastModifier: ViewModifier {
     func body(content: Content) -> some View {
         ZStack {
             content
-            if toast.isShowingToast, let msg = toast.currentToast?.message {
+            if toast.isShowingToast, let msg = toast.currentToast?.message, let style = toast.currentToast?.style {
                 VStack {
+                    ToastView(message: msg, style: style)
+                        .padding(.top, 20)
                     Spacer()
-                    ToastView(message: msg, backgroundColor: toast.currentToast!.backgroundColor, textColor: toast.currentToast!.textColor)
-                        .padding(.bottom, 20)
                 }
                 .zIndex(1)
             }

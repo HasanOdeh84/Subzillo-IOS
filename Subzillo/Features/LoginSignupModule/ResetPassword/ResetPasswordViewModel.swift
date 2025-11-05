@@ -14,6 +14,11 @@ class ResetPasswordViewModel: ObservableObject {
     private var subscriptions           = Set<AnyCancellable>()
     var apiReference                    = NetworkRequest.shared
     @Published var resetResponse        : GeneralResponse?
+    private let router                  : AppIntentRouter
+    
+    init(router: AppIntentRouter = .shared) {
+        self.router = router
+    }
     
     func resetPassword(input:ResetPasswordRequest, path: Binding<NavigationPath>) {
         apiReference.postApi(endPoint: APIEndpoint.resetPassword, method: .POST,token: defaultAuthKey,body: input,showLoader: true, responseType: GeneralResponse.self)

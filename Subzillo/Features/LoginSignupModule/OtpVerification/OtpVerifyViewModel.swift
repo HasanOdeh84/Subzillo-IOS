@@ -15,6 +15,11 @@ class OtpVerifyViewModel: ObservableObject {
     var apiReference                    = NetworkRequest.shared
     @Published var otpVerifyResponse    : GeneralResponse?
     @Published var resendOtpResponse    : Bool = false
+    private let router                  : AppIntentRouter
+    
+    init(router: AppIntentRouter = .shared) {
+        self.router = router
+    }
     
     func verifyOtp(input:OtpVerifyRequest, path: Binding<NavigationPath>,from:ToVerify?) {
         apiReference.postApi(endPoint: APIEndpoint.verifyOtp, method: .POST, token: defaultAuthKey, body: input, showLoader: true, responseType: GeneralResponse.self)

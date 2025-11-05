@@ -15,8 +15,13 @@ class LoginViewModel: ObservableObject {
     var apiReference                    = NetworkRequest.shared
     @Published var loginResponse        : LoginResponse?
     @Published var isLoading            : Bool = false
+    private let router                  : AppIntentRouter
     
-    func login(input:LoginRequest, path:Binding<NavigationPath>) {
+    init(router: AppIntentRouter = .shared) {
+        self.router = router
+    }
+    
+    func login(input:LoginRequest) {
         isLoading = true
         apiReference.postApi(endPoint: APIEndpoint.login, method: .POST,token: defaultAuthKey,body: input,showLoader: true, responseType: LoginResponse.self)
             .sink { [unowned self] completion in
@@ -40,14 +45,14 @@ class LoginViewModel: ObservableObject {
                 AppState.shared.login()
             }else{
                 DispatchQueue.main.async {
-                    path.wrappedValue.append(PendingRoute.verifyOtp(emailId: response.data?.email, from: .login, username: response.data?.username))
+                    self.router.navigate(to: PendingRoute.verifyOtp(emailId: response.data?.email, from: .login, username: response.data?.username))
                 }
             }
         }
         .store(in: &self.subscriptions)
     }
     
-    func socialLogin(loginType:loginType, path:Binding<NavigationPath>){
+    func socialLogin(loginType:loginType){
         if loginType == .google{
             SocialLogins.shared.signInWithGoogle()
         }else{
@@ -60,12 +65,11 @@ class LoginViewModel: ObservableObject {
                                                      email          : data?.emailAddress ?? "",
                                                      fullName       : data?.fullName ?? "",
                                                      username       : data?.fullName ?? "",
-                                                     deviceId       : AppDelegate.shared.deviceToken ?? ""),
-                           path: path)
+                                                     deviceId       : AppDelegate.shared.deviceToken ?? ""))
         }
     }
     
-    func socialLoginApi(input:SocialLoginRequest, path:Binding<NavigationPath>) {
+    func socialLoginApi(input:SocialLoginRequest) {
         isLoading = true
         apiReference.postApi(endPoint: APIEndpoint.socialLogin, method: .POST,token: defaultAuthKey,body: input,showLoader: true, responseType: LoginResponse.self)
             .sink { [unowned self] completion in
@@ -82,14 +86,14 @@ class LoginViewModel: ObservableObject {
             Constants.saveDefaults(value: response.data?.id, key: Constants.userId)
             Constants.saveDefaults(value: response.data?.username, key: Constants.username)
             DispatchQueue.main.async {
-                path.wrappedValue.append(PendingRoute.home)
+                self.router.navigate(to: PendingRoute.home)
             }
             AppState.shared.login()
         }
         .store(in: &self.subscriptions)
     }
     
-    func logout(input:LogoutRequest, path:Binding<NavigationPath>) {
+    func logout(input:LogoutRequest) {
         apiReference.postApi(endPoint: APIEndpoint.logout, method: .POST,token: authKey,body: input,showLoader: true, responseType: GeneralResponse.self)
             .sink { [unowned self] completion in
                 self.isLoading = false

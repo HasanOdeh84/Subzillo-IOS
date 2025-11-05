@@ -14,3 +14,9 @@ final class AppIntentRouter: ObservableObject {
 
     @Published var pendingRoute: PendingRoute? = nil
 }
+
+extension AppIntentRouter {
+    func navigate(to route: PendingRoute) {
+        pendingRoute = route
+    }
+}

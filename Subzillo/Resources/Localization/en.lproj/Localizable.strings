@@ -75,3 +75,34 @@
 "Account created successfully" = "Account created successfully";
 "Quick tip" = "Quick tip";
 "Start by adding your first subscription to see how Subzillo helps you stay organized." = "Start by adding your first subscription to see how Subzillo helps you stay organized.";
+
+//VoiceCommandView
+"Add by Voice" = "Add by Voice";
+"in Ut laoreet porta at, nec facilisi" = "in Ut laoreet porta at, nec facilisi";
+"Transcript will be appeared here" = "Transcript will be appeared here";
+"How it work?" = "How it work?";
+"Press & Hold to Speak, remove finger to pause, submit when you finish." = "Press & Hold to Speak, remove finger to pause, submit when you finish.";
+"Submit" = "Submit";
+"Discard" = "Discard";
+
+//AddSubscriptions List View
+"Add subscription" = "Add subscription";
+"Choose how you'd like to add your subscription" = "Choose how you'd like to add your subscription";
+"Smart Assistant" = "Smart Assistant";
+"Conversational flow to guide and confirm details" = "Conversational flow to guide and confirm details";
+"Connect Email" = "Connect Email";
+"Upload Screenshot" = "Upload Screenshot";
+"Manual Entry" = "Manual Entry";
+"Upload Bank Notification" = "Upload Bank Notification";
+"Try voice recording for the fastest way to add multiple subscriptions at once." = "Try voice recording for the fastest way to add multiple subscriptions at once.";
+
+//WelcomeHomeView
+"Track all your subscriptions in one place" = "Track all your subscriptions in one place";
+"You are in the free plan" = "You are in the free plan";
+"Upgrade Today" = "Upgrade Today";
+"No subscriptions yet" = "No subscriptions yet";
+"Add your first subscription to start tracking your recurring payments" = "Add your first subscription to start tracking your recurring payments";
+"Add Subscription by AI Agent" = "Add Subscription by AI Agent";
+"Upload Image" = "Upload Image";
+"Pro tip" = "Pro tip";
+"Start with your most expensive subscriptions first. Connect your email to automatically find more." = "Start with your most expensive subscriptions first. Connect your email to automatically find more.";

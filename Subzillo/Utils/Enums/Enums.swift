@@ -6,7 +6,7 @@
 //
 
 enum Tab {
-    case home, subscriptions, analytics, activity, profile
+    case home, subscriptions, addSubscription, smartAI, profile
 }
 
 enum PendingRoute: Hashable {

@@ -13,7 +13,6 @@ import AVFoundation
 struct VoiceCommandView: View {
     @StateObject private var audioManager   = AudioRecorderManager()
     @StateObject private var viewModel      = VoiceCommandViewModel()
-    @Binding var path                       : NavigationPath
     
     @State private var previousText = ""
     @State private var recognizedText = ""
@@ -309,5 +308,5 @@ struct VoiceCommandView: View {
 }
 
 #Preview {
-    VoiceCommandView(path:  .constant(NavigationPath()))
+    VoiceCommandView()
 }

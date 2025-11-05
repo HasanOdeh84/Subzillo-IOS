@@ -24,7 +24,7 @@ struct BottomSheetView: View {
             
             Text(LocalizedStringKey(header ?? ""))
                 .font(.appRegular(24))
-                .foregroundColor(.appNeutralMain700)
+                .foregroundStyle(.appNeutralMain700)
                 .padding(.top,24)
             
             PhoneNumberField(phoneNumber        : $phoneNumber,
