@@ -15,7 +15,6 @@ struct ResetPasswordView: View {
     @State private var confirmPassword  = ""
     @Environment(\.dismiss) private var dismiss   // To go back
     @StateObject var resetVM            = ResetPasswordViewModel()
-    @Binding var path                   : NavigationPath
     
     //MARK: - Body
     var body: some View {
@@ -62,7 +61,7 @@ struct ResetPasswordView: View {
                         if let errorMessage = LoginSignupValidations().validateResetPassword(password: password, confirmPassword: confirmPassword) {
                             ToastManager.shared.showToast(message: errorMessage)
                         } else {
-                            resetVM.resetPassword(input: ResetPasswordRequest(username: username,newPassword: password), path: $path)
+                            resetVM.resetPassword(input: ResetPasswordRequest(username: username,newPassword: password))
                         }
                     }
                     Spacer()
@@ -75,5 +74,5 @@ struct ResetPasswordView: View {
 }
 
 #Preview {
-    ResetPasswordView(username: "", path: .constant(NavigationPath()))
+    ResetPasswordView(username: "")
 }

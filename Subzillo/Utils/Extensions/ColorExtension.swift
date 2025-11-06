@@ -32,6 +32,7 @@ extension Color {
     static let underlineGray            = Color(hex: "#111827")
     static let grayCapsule              = Color(hex: "#DFDFDF")
     static let border                   = Color(hex: "#E5E7EB")
+    static let lineGray                 = Color(hex: "#BDBDBD")
     static let borderColor              = Color(hex: "#E5E7EB")
     static let dropShadowColor          = Color(hex: "#212529", alpha: 0.08)
     static let linearGradient1          = Color(hex: "#F842E6")

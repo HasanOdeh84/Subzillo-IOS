@@ -6,22 +6,19 @@
 //
 
 import SwiftUI
-import _AuthenticationServices_SwiftUI
 
 struct RegistrationView: View {
     
     //MARK: - Properties
-    @State private var username                         = ""
+    @State private var phoneNumber                      : String = ""
     @State private var fullName                         = ""
     @State private var email                            = ""
-    @State private var mobile                           = ""
-    @State private var password                         = ""
-    @State private var confirmPassword                  = ""
     @State private var agreeTerms                       = false
     @StateObject private var registerVM                 = RegistrationViewModel()
     @EnvironmentObject var appDelegate                  : AppDelegate
-    @Binding var path                                   : NavigationPath
     @State private var familyMembers                    : [FamilyMember]?
+    @State private var selectedCurrency                 : Currency? = Currency(id: "7603cf97-e39c-48b8-86ec-629429072761", name: "United States Dollarr", symbol: "$", code: "USD")
+    @State var verifyData                               : LoginSignupVerifyData
     
     //MARK: - body
     var body: some View{
@@ -38,7 +35,7 @@ struct RegistrationView: View {
                         .font(.appRegular(24))
                         .foregroundColor(Color.neutralMain700)
                         .multilineTextAlignment(.center)
-                        .padding(.top, 50)
+                        .padding(.top, 40)
                     
                     Image("logo_svg")
                         .resizable()
@@ -47,8 +44,15 @@ struct RegistrationView: View {
                         .padding(.vertical,24)
                     
                     Group {
+                        PhoneNumberField(phoneNumber        : $phoneNumber,
+                                         header             : "Enter your phone number",
+                                         placeholder        : "000 000 000",
+                                         selectedCurrency   : $selectedCurrency)
+                        .opacity(verifyData.verifyType == 1 ? 0.5 : 1.0)
+                        .disabled(verifyData.verifyType == 1 ? true : false)
+                        
                         ReusableTextField(placeholder: "Enter your full name", text: $fullName,header:"Full Name")
-                        ReusableTextField(placeholder: "name@example.com", text: $email, isEmail: true,header: "Email [Optional]")
+                        ReusableTextField(placeholder: "name@example.com", text: $email, isEmail: true,header: "Email")
                     }
                     
 //                    if familyMembers?.count != 0 {
@@ -70,42 +74,47 @@ struct RegistrationView: View {
                     CustomButton(title: "Finish Sign Up") {
                     }
 
-                    Spacer()
                     TermsAndPrivacyText(
                         onTapTerms: {
-                            path.append(PendingRoute.termsAndPrivacy(isTerm: true))
+                            registerVM.navigate(to: NavigationRoute.termsAndPrivacy(isTerm: true))
                         },
                         onTapPrivacy: {
-                            path.append(PendingRoute.termsAndPrivacy(isTerm: false))
+                            registerVM.navigate(to: NavigationRoute.termsAndPrivacy(isTerm: false))
                         },
                         bottomPadding: 28
                     )
+                    Spacer()
                 }
-                .frame(minHeight: UIScreen.main.bounds.height)
+//                .frame(minHeight: UIScreen.main.bounds.height)
                 .padding(20)
                 .navigationBarBackButtonHidden(true)
+                .onAppear{
+                    if verifyData.verifyType == 1{
+                        phoneNumber = verifyData.phoneNumber ?? ""
+                    }
+                }
             }
             .ignoresSafeArea()
         }
     }
     
-    //MARK: - Methods
-    // MARK: - Validation
-    private var isFormValid: Bool {
-        let hasUppercase = password.range(of: "[A-Z]", options: .regularExpression) != nil
-        let hasNumber = password.range(of: "\\d", options: .regularExpression) != nil
-        let hasSpecial = password.range(of: "[^A-Za-z0-9]", options: .regularExpression) != nil
-        
-        return !username.isEmpty &&
-        !fullName.isEmpty &&
-        !email.isEmpty &&
-        password.count >= 8 &&
-        hasUppercase &&
-        hasNumber &&
-        hasSpecial &&
-        password == confirmPassword &&
-        agreeTerms
-    }
+//    //MARK: - Methods
+//    // MARK: - Validation
+//    private var isFormValid: Bool {
+//        let hasUppercase = password.range(of: "[A-Z]", options: .regularExpression) != nil
+//        let hasNumber = password.range(of: "\\d", options: .regularExpression) != nil
+//        let hasSpecial = password.range(of: "[^A-Za-z0-9]", options: .regularExpression) != nil
+//        
+//        return !username.isEmpty &&
+//        !fullName.isEmpty &&
+//        !email.isEmpty &&
+//        password.count >= 8 &&
+//        hasUppercase &&
+//        hasNumber &&
+//        hasSpecial &&
+//        password == confirmPassword &&
+//        agreeTerms
+//    }
 }
 
 struct PasswordRuleView: View {
@@ -117,22 +126,6 @@ struct PasswordRuleView: View {
             Image(systemName: isValid ? "checkmark" : "checkmark")
                 .foregroundColor(isValid ? .green : Color.black)
             Text(rule)
-        }
-    }
-}
-
-struct SocialButton: View {
-    var title: String
-    let action: () -> Void
-    
-    var body: some View {
-        Button(action: action){
-            Text(title)
-                .frame(maxWidth: .infinity)
-                .padding()
-                .background(Color(.systemGray6))
-                .foregroundColor(Color.black)
-                .cornerRadius(8)
         }
     }
 }
@@ -149,7 +142,7 @@ struct CheckboxToggleStyle: ToggleStyle {
         }
     }
 }
-
-#Preview {
-    RegistrationView(path: .constant(NavigationPath()))
-}
+//
+//#Preview {
+//    RegistrationView()
+//}

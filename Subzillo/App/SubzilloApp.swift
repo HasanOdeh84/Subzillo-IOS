@@ -74,11 +74,11 @@ class AppDelegate: NSObject, ObservableObject, UIApplicationDelegate, UNUserNoti
         if let type = userInfo["type"] as? String {
             DispatchQueue.main.async {
                 switch type {
-                case "email":  AppIntentRouter.shared.pendingRoute = .emailIntegration
-                case "bank":   AppIntentRouter.shared.pendingRoute = .bankStatement
-                case "chat":   AppIntentRouter.shared.pendingRoute = .chat
-                case "appearance": AppIntentRouter.shared.pendingRoute = .appearance
-                case "notifications": AppIntentRouter.shared.pendingRoute = .notifications
+                case "email":  AppIntentRouter.shared.navigatingRoute = .emailIntegration
+                case "bank":   AppIntentRouter.shared.navigatingRoute = .bankStatement
+                case "chat":   AppIntentRouter.shared.navigatingRoute = .chat
+                case "appearance": AppIntentRouter.shared.navigatingRoute = .appearance
+                case "notifications": AppIntentRouter.shared.navigatingRoute = .notifications
                 default: break
                 }
             }
@@ -90,15 +90,16 @@ class AppDelegate: NSObject, ObservableObject, UIApplicationDelegate, UNUserNoti
 @main
 struct SubzilloApp: App {
     
-    @StateObject private var router         = AppIntentRouter.shared
+    @StateObject private var router             = AppIntentRouter.shared
     @UIApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
     @Environment(\.scenePhase) private var scenePhase
-    @StateObject private var audioManager   = AudioRecorderManager()
-    @StateObject private var networkMonitor = NetworkMonitor()
-    @StateObject private var toastManager   = ToastManager()
-    @StateObject var mediaPicker            = MediaPickerManager.shared
-    @StateObject private var themeManager   = ThemeManager()
-    @StateObject private var sharedViewModel = CommonAPIViewModel()
+    @StateObject private var audioManager       = AudioRecorderManager()
+    @StateObject private var networkMonitor     = NetworkMonitor()
+    @StateObject private var toastManager       = ToastManager()
+    @StateObject var mediaPicker                = MediaPickerManager.shared
+    @StateObject private var themeManager       = ThemeManager()
+    @StateObject private var sharedViewModel    = CommonAPIViewModel()
+    @StateObject private var sessionManager     = SessionManager()
     
     var body: some Scene {
         WindowGroup {
@@ -110,6 +111,7 @@ struct SubzilloApp: App {
                 .environmentObject(mediaPicker)
                 .environmentObject(themeManager)
                 .environmentObject(sharedViewModel)
+                .environmentObject(sessionManager)
                 .preferredColorScheme(
                                     themeManager.userChangedTheme
                                     ? (themeManager.isDarkMode ? .dark : .light)
@@ -159,8 +161,9 @@ struct RootView: View {
 //                LoginView(path: $path)
 //                RootTabBar(path: $path)
                 SplashView()
+//                RegistrationView(verifyData: LoginSignupVerifyData(verifyType: 0, email: "", phoneNumber: "", countryCode: "", userId: "", isNewUser: false, isSignupCompleted: false))
             }
-            .navigationDestination(for: PendingRoute.self) { screen in
+            .navigationDestination(for: NavigationRoute.self) { screen in
                 switch screen {
                 case .addSubscription(let service, let plan, let price, let cycle):
                     AddSubscriptionView(
@@ -186,21 +189,21 @@ struct RootView: View {
                     Text("Test")
                 case .home:
                     RootTabBar()
-                case .signup:
-                    RegistrationView(path: $path)
+                case .signup(let verifyData):
+                    RegistrationView(verifyData: verifyData)
                 case .login:
-                    LoginView(path: $path)
+                    LoginView()
 //                        .onAppear {
 //                            if !path.isEmpty {
 //                                path.removeLast(path.count) // reset stack on login view
 //                            }
 //                        }
                 case .onboarding:
-                    OnboardingView(path: $path)
-                case .verifyOtp(let emailId, let from, let username):
-                    OtpVerifyView(path:$path, email:emailId ?? "", username:username ?? "", from:from)
+                    OnboardingView()
+                case .verifyOtp(let verifyData):
+                    OtpVerifyView(verifyData: verifyData)
                 case .resetPassword(let username):
-                    ResetPasswordView(username:username ?? "", path:$path)
+                    ResetPasswordView(username:username ?? "")
                 case .termsAndPrivacy(isTerm: let isTerm):
                     TermsAndPrivacyView(isTerm:isTerm ?? false)
                 case .SuccessView(isOtp: let isOtp):
@@ -209,10 +212,10 @@ struct RootView: View {
             }
         }
         .environmentObject(appState)
-        .onChange(of: router.pendingRoute) { new in
+        .onChange(of: router.navigatingRoute) { new in
             guard let new = new else { return }
             path.append(new)
-            router.pendingRoute = nil
+            router.navigatingRoute = nil
         }
     }
 }

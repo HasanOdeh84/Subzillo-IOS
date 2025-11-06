@@ -10,7 +10,9 @@ enum HTTPMethod: String {
 }
 
 enum APIEndpoint: String {
-    case login                          = "/login"
+    case checkLogin                     = "/checkLogin"
+    
+    
     case registration                   = "/register"
     case voiceSubscription              = "/voiceSubscription"
     case regenerateAccessToken          = "/regenerateAccessToken"

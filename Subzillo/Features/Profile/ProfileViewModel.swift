@@ -14,6 +14,11 @@ class ProfileViewModel: ObservableObject {
     
     private var subscriptions           = Set<AnyCancellable>()
     var apiReference                    = NetworkRequest.shared
+    private let router                  : AppIntentRouter
+    
+    init(router: AppIntentRouter = .shared) {
+        self.router = router
+    }
     
     func updateUserInfo(input:UpdateUserInfoRequest) {
         apiReference.postApi(endPoint: APIEndpoint.updateUserInfo, method: .POST,token: authKey,body: input,showLoader: true, responseType: GeneralResponse.self)
@@ -67,6 +72,10 @@ class ProfileViewModel: ObservableObject {
             PrintLogger.modelLog(response, type: .response, isInput: false)
         }
         .store(in: &self.subscriptions)
+    }
+    
+    func navigate(to route: NavigationRoute){
+        self.router.navigate(to: route)
     }
     
     // MARK: - Handle errors

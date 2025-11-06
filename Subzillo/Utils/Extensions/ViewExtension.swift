@@ -20,4 +20,29 @@ extension View {
     func withToast() -> some View {
         self.modifier(ToastModifier())
     }
+    
+    func hideKeyboard() {
+#if canImport(UIKit)
+        UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder),
+                                        to: nil, from: nil, for: nil)
+#endif
+    }
+    
+    func doneOnSubmit() -> some View {
+        self.modifier(DoneOnSubmit())
+    }
+}
+
+struct DoneOnSubmit: ViewModifier {
+    func body(content: Content) -> some View {
+        content
+            .toolbar {
+                ToolbarItemGroup(placement: .keyboard) {
+                    Spacer()
+                    Button("Done") {
+                        content.hideKeyboard()
+                    }
+                }
+            }
+    }
 }

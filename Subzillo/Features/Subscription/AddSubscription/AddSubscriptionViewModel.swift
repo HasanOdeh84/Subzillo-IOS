@@ -14,6 +14,11 @@ class AddSubscriptionViewModel: ObservableObject {
     
     private var subscriptions           = Set<AnyCancellable>()
     var apiReference                    = NetworkRequest.shared
+    private let router                  : AppIntentRouter
+    
+    init(router: AppIntentRouter = .shared) {
+        self.router = router
+    }
     
     func addSubscription(input:AddSubscriptionRequest) {
         apiReference.postApi(endPoint: APIEndpoint.addSubscription, method: .POST,token: authKey,body: input,showLoader: true, responseType: AddSubscriptionResponse.self)
@@ -27,6 +32,10 @@ class AddSubscriptionViewModel: ObservableObject {
             ToastManager.shared.showToast(message: response.message ?? "")
         }
         .store(in: &self.subscriptions)
+    }
+    
+    func navigate(to route: NavigationRoute){
+        self.router.navigate(to: route)
     }
     
     // MARK: - Handle errors

@@ -15,6 +15,11 @@ class VoiceCommandViewModel: NSObject, ObservableObject, AVAudioPlayerDelegate, 
     private var subscriptions                   = Set<AnyCancellable>()
     var apiReference                            = NetworkRequest.shared
     @Published var voiceSubscriptionResponse    : VoiceSubscriptionResponse?
+    private let router                          : AppIntentRouter
+    
+    init(router: AppIntentRouter = .shared) {
+        self.router = router
+    }
     
     func voiceSubscription(input:VoiceSubscriptionRequest,fileData:[MultiPartFileInput]){
         apiReference.postMultipartApi(endPoint: APIEndpoint.voiceSubscription, method: .POST,token: authKey,body: MultipartInput(parameters: input, fileInput: fileData),showLoader: true, responseType: VoiceSubscriptionResponse.self)
@@ -28,6 +33,10 @@ class VoiceCommandViewModel: NSObject, ObservableObject, AVAudioPlayerDelegate, 
             voiceSubscriptionResponse = response
         }
         .store(in: &self.subscriptions)
+    }
+    
+    func navigate(to route: NavigationRoute){
+        self.router.navigate(to: route)
     }
     
     // MARK: - Handle errors

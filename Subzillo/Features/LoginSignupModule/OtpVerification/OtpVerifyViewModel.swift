@@ -21,8 +21,8 @@ class OtpVerifyViewModel: ObservableObject {
         self.router = router
     }
     
-    func verifyOtp(input:OtpVerifyRequest, path: Binding<NavigationPath>,from:ToVerify?) {
-        apiReference.postApi(endPoint: APIEndpoint.verifyOtp, method: .POST, token: defaultAuthKey, body: input, showLoader: true, responseType: GeneralResponse.self)
+    func verifyOtp(input:OtpVerifyRequest,verifyData:LoginSignupVerifyData) {
+        apiReference.postApi(endPoint: APIEndpoint.verifyOtp, method: .POST, token: authKey, body: input, showLoader: true, responseType: GeneralResponse.self)
             .sink { [unowned self] completion in
                 if case let .failure(error) = completion {
                     self.handleError(error,endPoint: APIEndpoint.verifyOtp)
@@ -32,12 +32,17 @@ class OtpVerifyViewModel: ObservableObject {
             PrintLogger.modelLog(response, type: .response, isInput: false)
             ToastManager.shared.showToast(message: response.message ?? "")
             self.otpVerifyResponse = response
-            DispatchQueue.main.async {
-                if from == .forgot{
-                    path.wrappedValue.append(PendingRoute.resetPassword(username: input.username))
+            DispatchQueue.main.async { [self] in
+                if verifyData.isNewUser{
+                    router.navigate(to: .SuccessView(isOtp: true))
+                    router.navigate(to: .signup(verifyData: verifyData))
                 }else{
-                    AppState.shared.login()
-                    path.wrappedValue.append(PendingRoute.home)
+                    if verifyData.isSignupCompleted{
+                        AppState.shared.login()
+                        router.navigate(to: .home)
+                    }else{
+                        router.navigate(to: .signup(verifyData: verifyData))
+                    }
                 }
             }
         }
@@ -45,7 +50,7 @@ class OtpVerifyViewModel: ObservableObject {
     }
     
     func resendOtp(input:ResendOtpRequest) {
-        apiReference.postApi(endPoint: APIEndpoint.resendOtp, method: .POST, token: defaultAuthKey, body: input, showLoader: true, responseType: GeneralResponse.self)
+        apiReference.postApi(endPoint: APIEndpoint.resendOtp, method: .POST, token: authKey, body: input, showLoader: true, responseType: GeneralResponse.self)
             .sink { [unowned self] completion in
                 if case let .failure(error) = completion {
                     self.handleError(error,endPoint: APIEndpoint.resendOtp)
@@ -57,6 +62,10 @@ class OtpVerifyViewModel: ObservableObject {
             self.resendOtpResponse = true
         }
         .store(in: &self.subscriptions)
+    }
+    
+    func navigate(to route: NavigationRoute){
+        self.router.navigate(to: route)
     }
     
     // MARK: - Handle errors

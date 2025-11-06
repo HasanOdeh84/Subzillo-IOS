@@ -56,15 +56,17 @@ struct LoginSignupValidations {
     }
     
     //MARK: - Login
-    func validateLogin(username: String, password: String) -> String? {
-        if username.trimmed.isEmpty{
-            return "Please enter username"
-        }
-        if username.trimmed.count < 3 {
-            return "Username must be at least 3 characters"
-        }
-        if password.trimmed.isEmpty{
-            return "Please enter password"
+    func validateLogin(input: checkLoginRequest) -> String? {
+        if input.loginType == 1{
+            if input.phoneNumber.trimmed.isEmpty || !Validations().isValidMobile(input.phoneNumber.trimmed){
+                return "Enter a valid phone number"
+            }
+        }else{
+            if input.email.trimmed.isEmpty {
+                return "Email is required"
+            }else if !Validations().isValidEmail(input.email.trimmed){
+                return "Enter valid email"
+            }
         }
         return nil // All validations passed
     }

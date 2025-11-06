@@ -10,7 +10,6 @@ import SwiftUI
 struct ProfileView: View {
     
     //MARK: - Properties
-//    @Binding var path                       : NavigationPath
     @StateObject var loginVM                = LoginViewModel()
     @StateObject var profileVM              = ProfileViewModel()
     @EnvironmentObject var picker           : MediaPickerManager

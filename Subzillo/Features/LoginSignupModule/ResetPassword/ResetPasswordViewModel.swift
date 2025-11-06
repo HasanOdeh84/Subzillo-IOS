@@ -20,7 +20,7 @@ class ResetPasswordViewModel: ObservableObject {
         self.router = router
     }
     
-    func resetPassword(input:ResetPasswordRequest, path: Binding<NavigationPath>) {
+    func resetPassword(input:ResetPasswordRequest) {
         apiReference.postApi(endPoint: APIEndpoint.resetPassword, method: .POST,token: defaultAuthKey,body: input,showLoader: true, responseType: GeneralResponse.self)
             .sink { [unowned self] completion in
                 if case let .failure(error) = completion {
@@ -32,7 +32,7 @@ class ResetPasswordViewModel: ObservableObject {
             ToastManager.shared.showToast(message: response.message ?? "")
             self.resetResponse = response
             DispatchQueue.main.async {
-                path.wrappedValue.append(PendingRoute.login)
+//                router.navigate(to: .login)
             }
         }
         .store(in: &self.subscriptions)

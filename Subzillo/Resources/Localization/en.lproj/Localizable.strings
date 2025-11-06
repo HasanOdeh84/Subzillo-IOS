@@ -34,6 +34,10 @@
 "Privacy Policy" = "Privacy Policy";
 "Terms of Service" = "Terms of Service";
 "Enter your phone number" = "Enter your phone number";
+"Login your account using your preferred method" = "Login your account using your preferred method";
+"or" = "or";
+"Continue with Microsoft" = "Continue with Microsoft";
+"Enter your email address" = "Enter your email address";
 
 //Currency and number bottom sheet
 "search" = "search";
@@ -63,7 +67,7 @@
 //signup
 "Full Name" = "Full Name";
 "Enter your full name" = "Enter your full name";
-"Email [Optional]" = "Email [Optional]";
+"Email" = "Email";
 "name@example.com" = "name@example.com";
 "Family Member" = "Family Member";
 "Family Nickname" = "Family Nickname";

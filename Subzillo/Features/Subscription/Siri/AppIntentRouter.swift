@@ -12,11 +12,11 @@ final class AppIntentRouter: ObservableObject {
     static let shared = AppIntentRouter()
     private init() {}
 
-    @Published var pendingRoute: PendingRoute? = nil
+    @Published var navigatingRoute: NavigationRoute? = nil
 }
 
 extension AppIntentRouter {
-    func navigate(to route: PendingRoute) {
-        pendingRoute = route
+    func navigate(to route: NavigationRoute) {
+        navigatingRoute = route
     }
 }

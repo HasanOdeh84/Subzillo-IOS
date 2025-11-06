@@ -20,7 +20,7 @@ class RegistrationViewModel: ObservableObject {
         self.router = router
     }
     
-    func register(input:RegisterRequest, path: Binding<NavigationPath>) {
+    func register(input:RegisterRequest) {
         apiReference.postApi(endPoint: APIEndpoint.registration, method: .POST,token: defaultAuthKey,body: input,showLoader: true, responseType: RegisterResponse.self)
             .sink { [unowned self] completion in
                 if case let .failure(error) = completion {
@@ -35,11 +35,15 @@ class RegistrationViewModel: ObservableObject {
             Constants.saveDefaults(value: response.data?.id, key: Constants.userId)
             Constants.saveDefaults(value: response.data?.username, key: Constants.username)
             self.registerResponse = response
-            DispatchQueue.main.async {
-                path.wrappedValue.append(PendingRoute.verifyOtp(emailId:input.email, from: .register))
+            DispatchQueue.main.async { [self] in
+//                router.navigate(to: .verifyOtp(emailId:input.email, from: .register))
             }
         }
         .store(in: &self.subscriptions)
+    }
+    
+    func navigate(to route: NavigationRoute){
+        self.router.navigate(to: route)
     }
     
     // MARK: - Handle errors

@@ -51,7 +51,7 @@ struct AddSubscriptionIntent: AppIntent {
     func perform() async throws -> some IntentResult {
         //    func perform() async throws -> some IntentResult & ProvidesDialog{
         // Save into router (instead of deep link)
-        AppIntentRouter.shared.pendingRoute = .addSubscription(
+        AppIntentRouter.shared.navigatingRoute = .addSubscription(
             serviceName: serviceName,
             planName: planName,
             price: price,

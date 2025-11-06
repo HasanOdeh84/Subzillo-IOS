@@ -55,12 +55,12 @@ struct SplashView: View {
     
     private func navigateToNextScreen() {
         if appState.isLoggedIn {
-            router.pendingRoute = .home
+            router.navigatingRoute = .home
         } else {
             if hasSeenOnboarding {
-                router.pendingRoute = .login
+                router.navigatingRoute = .login
             } else {
-                router.pendingRoute = .onboarding
+                router.navigatingRoute = .onboarding
             }
         }
     }

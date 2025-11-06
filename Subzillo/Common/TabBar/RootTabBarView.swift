@@ -11,8 +11,6 @@ struct RootTabBar: View {
     
     //MARK: - Properties
     @State private var selectedTab              : Tab = .home
-//    @EnvironmentObject var router               : AppIntentRouter
-//    @Binding var path                           : NavigationPath
     
     //MARK: - Body
     var body: some View {
@@ -38,12 +36,6 @@ struct RootTabBar: View {
                 .padding(.bottom, 20)
         }
         .ignoresSafeArea(edges: .bottom)
-//        .onChange(of: router.pendingRoute) { new in
-//            if let new = new {
-//                path.append(new)
-//                router.pendingRoute = nil
-//            }
-//        }
         .navigationBarBackButtonHidden(true)
     }
     
@@ -67,8 +59,7 @@ struct RootTabBar: View {
 }
 
 #Preview {
-    //        RootTabBar(path: .constant(NavigationPath()))
-    //    CurvedTabBar()
+    RootTabBar()
 }
 
 import SwiftUI
@@ -141,15 +132,6 @@ struct TabBarItem: View {
             VStack(spacing: 4) {
                 Image(iconName)
                     .frame(width: 24,height: 24)
-//                    .foregroundStyle(
-//                        selectedTab == tab
-//                        ? AnyShapeStyle(
-//                            LinearGradient(colors: [Color.linearGradient3, Color.linearGradient4, Color.blueMain700],
-//                                           startPoint: .leading,
-//                                           endPoint: .trailing)
-//                        )
-//                        : AnyShapeStyle(Color.neutral400)
-//                    )
                 Text(label)
                     .foregroundStyle(
                         selectedTab == tab

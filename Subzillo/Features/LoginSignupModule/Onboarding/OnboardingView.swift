@@ -17,7 +17,6 @@ struct OnboardingView: View {
     
     //MARK: - Properties
     @State private var currentPage                                  = 0
-    @Binding var path                                               : NavigationPath
     @AppStorage("hasSeenOnboarding") private var hasSeenOnboarding  = false
     @State private var selectedSubscriptions                        : String? = nil
     @State private var selectedSpending                             : String? = nil
@@ -70,6 +69,8 @@ struct OnboardingView: View {
                 HStack(spacing: 10) {
                     Spacer()
                     Button {
+                        //need to change
+                        AppIntentRouter.shared.navigatingRoute = .login
                         hasSeenOnboarding = true
                     } label: {
                         HStack(spacing: 4) {
@@ -218,7 +219,7 @@ struct OnboardingView: View {
 
 struct OnboardingView_Previews: PreviewProvider {
     static var previews: some View {
-        OnboardingView(path: .constant(NavigationPath()))
+        OnboardingView()
     }
 }
 

@@ -13,21 +13,18 @@ struct OtpVerifyView: View {
     
     //MARK: - Properties
     @StateObject private var otpVerifyVM    = OtpVerifyViewModel()
-    @Binding var path                       : NavigationPath
     @State private var otpFields            : [String] = Array(repeating: "", count: 6)
     @FocusState private var focusedField    : Int?
     @State private var timer                = 60
     @State private var isTimerRunning       = true
     @State private var timerCancellable     : AnyCancellable?
     @FocusState private var pinFocusState   : FocusPin?
-    @Environment(\.dismiss) private var dismiss   // To go back
-    @State var email                        : String = ""
-    @State var username                     : String = ""
-    @State var from                         : ToVerify
+    @Environment(\.dismiss) private var dismiss
     @State private var isPasting            = false
-    @State private var showNumberSheet      = false
+//    @State private var showNumberSheet      = false
     @State private var phoneNumber          : String = ""
     @State private var selectedCurrency     : Currency? = Currency(id: "7603cf97-e39c-48b8-86ec-629429072761", name: "United States Dollarr", symbol: "$", code: "USD")
+    @State var verifyData                   : LoginSignupVerifyData
     
     //MARK: - Body
     var body: some View {
@@ -93,15 +90,17 @@ struct OtpVerifyView: View {
                             let otp = otpFields.joined()
                             print("Entered OTP: \(otp)")
                             if let errorMessage = LoginSignupValidations().validateVerifyOtp(otp: otp) {
-                                ToastManager.shared.showToast(message: errorMessage)
+                                ToastManager.shared.showToast(message: errorMessage,style: ToastStyle.error)
                             } else {
-                                let input = OtpVerifyRequest(email      : email,
-                                                             otp        : Int(otp) ?? 0,
-                                                             userId     : Constants.getUserId(),
-                                                             username   : username)
-                                otpVerifyVM.verifyOtp(input : input,
-                                                      path  : $path,
-                                                      from  : from)
+                                let input = OtpVerifyRequest(
+                                    verifyType  : verifyData.verifyType,
+                                    email       : verifyData.email ?? "",
+                                    phoneNumber : verifyData.phoneNumber ?? "",
+                                    countryCode : verifyData.countryCode ?? "",
+                                    otp         : Int(otp) ?? 0,
+                                    userId      : verifyData.userId
+                                )
+                                otpVerifyVM.verifyOtp(input : input, verifyData: verifyData)
                             }
                         }
                         Spacer()
@@ -139,23 +138,25 @@ struct OtpVerifyView: View {
                         .padding(.vertical,24)
                     
                     underlineText(text: "Resend Code", image: "resend") {
-                        otpVerifyVM.resendOtp(input: ResendOtpRequest(userId: Constants.getUserId(), username: username))
-                        timerFun()
+                        otpVerifyVM.resendOtp(input: ResendOtpRequest(userId        : Constants.getUserId(),
+                                                                      verifyType    : verifyData.verifyType))
                     }
                     .disabled(timer == 0 ? false : true)
+                    .opacity(timer == 0 ? 1.0 : 0.6)
                     
                     underlineText(text: "Change number", image: "phone") {
-                        showNumberSheet = true
+                        dismiss()
+//                        showNumberSheet = true
                     }
                     .padding(.top,24)
                     .padding(.bottom,30)
                     
                     TermsAndPrivacyText(
                         onTapTerms: {
-                            path.append(PendingRoute.termsAndPrivacy(isTerm: true))
+                            otpVerifyVM.navigate(to: NavigationRoute.termsAndPrivacy(isTerm: true))
                         },
                         onTapPrivacy: {
-                            path.append(PendingRoute.termsAndPrivacy(isTerm: false))
+                            otpVerifyVM.navigate(to: NavigationRoute.termsAndPrivacy(isTerm: false))
                         }
                     )
                     
@@ -166,20 +167,21 @@ struct OtpVerifyView: View {
                     startTimer()
                     focusedField = 0
                 }
-                .navigationBarBackButtonHidden(true)
-                .sheet(isPresented: $showNumberSheet) {
-                    BottomSheetView(header:"Change mobile number",selectedCurrency: $selectedCurrency, phoneNumber: $phoneNumber)
-                        .presentationDragIndicator(.hidden)
-                    //                        .presentationDetents([.medium])
-                        .presentationDetents([.height(320)])
+                .onChange(of: otpVerifyVM.resendOtpResponse) { newValue in
+                    if newValue {
+                        otpFields = Array(repeating: "", count: 6)
+                        startTimer()                 // ⏱ restart timer
+                        otpVerifyVM.resendOtpResponse = false // reset flag
+                    }
                 }
+                .navigationBarBackButtonHidden(true)
+//                .sheet(isPresented: $showNumberSheet) {
+//                    BottomSheetView(header:"Change mobile number",selectedCurrency: $selectedCurrency, phoneNumber: $phoneNumber)
+//                        .presentationDragIndicator(.hidden)
+//                    //                        .presentationDetents([.medium])
+//                        .presentationDetents([.height(320)])
+//                }
             }
-        }
-    }
-    
-    func timerFun(){
-        if otpVerifyVM.resendOtpResponse{
-            startTimer()
         }
     }
     
@@ -258,6 +260,7 @@ struct OTPTextField: View {
         )
         .multilineTextAlignment(.center)
         .keyboardType(.numberPad)
+        .textContentType(.oneTimeCode)
         .focused($focusedField, equals: index)
         .onChange(of: text) { newValue in
             guard !isPasting else { return } // skip auto-focus if we just pasted
@@ -284,6 +287,7 @@ struct UITextFieldWrapper: UIViewRepresentable {
         textField.textAlignment = .center
         textField.keyboardType = .numberPad
         textField.delegate = context.coordinator
+        textField.isSecureTextEntry = true
         
         // Add Done button toolbar
         let toolbar = UIToolbar()
@@ -344,6 +348,6 @@ struct UITextFieldWrapper: UIViewRepresentable {
     }
 }
 
-#Preview {
-    OtpVerifyView(path: .constant(NavigationPath()), from: .register)
-}
+//#Preview {
+//    OtpVerifyView()
+//}

@@ -21,13 +21,13 @@ class LoginViewModel: ObservableObject {
         self.router = router
     }
     
-    func login(input:LoginRequest) {
+    func login(input:checkLoginRequest) {
         isLoading = true
-        apiReference.postApi(endPoint: APIEndpoint.login, method: .POST,token: defaultAuthKey,body: input,showLoader: true, responseType: LoginResponse.self)
+        apiReference.postApi(endPoint: APIEndpoint.checkLogin, method: .POST,token: defaultAuthKey,body: input,showLoader: true, responseType: LoginResponse.self)
             .sink { [unowned self] completion in
                 self.isLoading = false
                 if case let .failure(error) = completion {
-                    self.handleError(error,endPoint: APIEndpoint.login)
+                    self.handleError(error,endPoint: APIEndpoint.checkLogin)
                 }
             }
         receiveValue: { [unowned self] response in
@@ -35,19 +35,26 @@ class LoginViewModel: ObservableObject {
             ToastManager.shared.showToast(message: response.message ?? "")
             KeychainHelper.save(response.data?.accessToken, account: Constants.authKey)
             KeychainHelper.save(response.data?.refreshToken, account: Constants.refreshKey)
-            Constants.saveDefaults(value: response.data?.id, key: Constants.userId)
-            Constants.saveDefaults(value: response.data?.username, key: Constants.username)
+            Constants.saveDefaults(value: response.data?.userId, key: Constants.userId)
             self.loginResponse = response
-            if response.data?.emailOtpVerified ?? false{
-//                DispatchQueue.main.async {
-//                    path.wrappedValue.append(PendingRoute.home)
-//                }
-                AppState.shared.login()
-            }else{
-                DispatchQueue.main.async {
-                    self.router.navigate(to: PendingRoute.verifyOtp(emailId: response.data?.email, from: .login, username: response.data?.username))
-                }
-            }
+//            if response.data?.emailOtpVerified ?? false{
+//                //                DispatchQueue.main.async {
+//                //                self.router.navigate(to: .home)
+//                //                }
+//                AppState.shared.login()
+//            }else{
+//                
+//            }
+//            DispatchQueue.main.async {
+//                self.router.navigate(to: .verifyOtp(emailId: response.data?.email, from: .login, username: response.data?.username))
+//            }
+            self.router.navigate(to: .verifyOtp(verifyData: LoginSignupVerifyData(verifyType   : input.loginType,
+                                                                                   email        : input.email,
+                                                                                   phoneNumber  : input.phoneNumber,
+                                                                                   countryCode  : input.countryCode,
+                                                                                   userId       : response.data?.userId ?? "",
+                                                                                   isNewUser: response.data?.isNewUser ?? false,
+                                                                                   isSignupCompleted: response.data?.signupCompleted ?? false)))
         }
         .store(in: &self.subscriptions)
     }
@@ -83,10 +90,9 @@ class LoginViewModel: ObservableObject {
             ToastManager.shared.showToast(message: response.message ?? "")
             KeychainHelper.save(response.data?.accessToken, account: Constants.authKey)
             KeychainHelper.save(response.data?.refreshToken, account: Constants.refreshKey)
-            Constants.saveDefaults(value: response.data?.id, key: Constants.userId)
-            Constants.saveDefaults(value: response.data?.username, key: Constants.username)
+            Constants.saveDefaults(value: response.data?.userId, key: Constants.userId)
             DispatchQueue.main.async {
-                self.router.navigate(to: PendingRoute.home)
+                self.router.navigate(to: .home)
             }
             AppState.shared.login()
         }
@@ -105,11 +111,15 @@ class LoginViewModel: ObservableObject {
             PrintLogger.modelLog(response, type: .response, isInput: false)
             ToastManager.shared.showToast(message: response.message ?? "")
             AppState.shared.logout()
-//            DispatchQueue.main.async {
-//                path.wrappedValue.append(PendingRoute.login)
-//            }
+            //            DispatchQueue.main.async {
+            //            self.router.navigate(to: .login)
+            //            }
         }
         .store(in: &self.subscriptions)
+    }
+    
+    func navigate(to route: NavigationRoute){
+        self.router.navigate(to: route)
     }
     
     // MARK: - Handle errors

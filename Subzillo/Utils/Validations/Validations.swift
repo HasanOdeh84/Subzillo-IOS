@@ -22,8 +22,10 @@ struct Validations{
     }
     
     func isValidMobile(_ number: String) -> Bool {
-        // ^\d{5,13}$ → start to end, only digits, length 5-13
-        let regex = "^[0-9]{5,13}$"
+        // Explanation:
+        // ^(?!0+$)       → ensures the number is not all zeros
+        // [0-9]{6,15}$   → only digits, length between 6 and 15
+        let regex = "^(?!0+$)[0-9]{6,15}$"
         let predicate = NSPredicate(format: "SELF MATCHES %@", regex)
         return predicate.evaluate(with: number)
     }

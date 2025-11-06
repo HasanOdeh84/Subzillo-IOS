@@ -7,58 +7,41 @@
 
 import Foundation
 
-public struct LoginRequest: Codable {
-    let username    : String
-    let password    : String
-    let deviceId    : String
-    var platform    : Int = Constants.platform
-    //  let pushMode    : Int?
-    var uniqueId    : String = UUID().uuidString
+public struct checkLoginRequest: Codable {
+    let loginType       : Int
+    let email           : String
+    let phoneNumber     : String
+    let countryCode     : String
+    var platform        : Int = Constants.platform
+    let deviceId        : String
+    var uniqueId        : String = UUID().uuidString
+    var pushMode        : Int = Constants.shared.pushMode
 }
 
 public struct LoginResponse: Codable {
-    var message: String?
-    var data: LoginResponseData?
+    var message : String?
+    var data    : LoginResponseData?
 }
 
 public struct LoginResponseData: Codable {
-    var id                          : String?
-    var username                    : String?
-    var email                       : String?
-    var country                     : String?
-    var preferredCurrency           : String?
-    var onboardingStep              : Int?
-    var onboardingCompleted         : Bool?
-    var emailNotifications          : Bool?
-    var smsNotifications            : Bool?
-    var pushNotifications           : Bool?
-    var emailOtpVerified            : Bool?
+    var userId                      : String?
+    var fullName                    : String?
+    var isNewUser                   : Bool?
+    var signupCompleted             : Bool?
     var accessToken                 : String?
     var refreshToken                : String?
     public init(
-        id                          : String? = nil,
-        username                    : String? = nil,
-        email                       : String? = nil,
-        country                     : String? = nil,
-        preferredCurrency           : String? = nil,
-        onboardingStep              : Int? = nil,
-        emailNotifications          : Bool? = nil,
-        smsNotifications            : Bool? = nil,
-        pushNotifications           : Bool? = nil,
-        emailOtpVerified            : Bool? = nil,
-        accessToken                 : String? = nil,
-        refreshToken                : String? = nil
+        userId          : String? = nil,
+        fullName        : String? = nil,
+        isNewUser       : Bool? = nil,
+        signupCompleted : Bool? = nil,
+        accessToken     : String? = nil,
+        refreshToken    : String? = nil
     ) {
-        self.id                         = id
-        self.username                   = username
-        self.email                      = email
-        self.country                    = country
-        self.preferredCurrency          = preferredCurrency
-        self.onboardingStep             = onboardingStep
-        self.emailNotifications         = emailNotifications
-        self.smsNotifications           = smsNotifications
-        self.pushNotifications          = pushNotifications
-        self.emailOtpVerified           = emailOtpVerified
+        self.userId                     = userId
+        self.fullName                   = fullName
+        self.isNewUser                  = isNewUser
+        self.signupCompleted            = signupCompleted
         self.accessToken                = accessToken
         self.refreshToken               = refreshToken
     }

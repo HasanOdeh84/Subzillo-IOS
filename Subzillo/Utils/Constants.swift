@@ -8,6 +8,9 @@
 import SwiftUI
 
 struct Constants{
+    static let shared = Constants()
+    private init() {}
+    
     static let platform                             = 2
     static let deviceType                           = 2
     static let authKey                              = "authKey"
@@ -29,6 +32,16 @@ struct Constants{
     static let googleToken                          = "AIzaSyC8QkcmKT-p9tpMnamwLZ3xY4RSTxcvaKk"
     static let googleSigninId                       = "353333226738-1htnc4n6tddp5pbm78e3e9qbceeui88u.apps.googleusercontent.com"
     static let userDefaults                         = UserDefaults.standard
+    
+    var pushMode:Int{
+#if DEBUG
+        print("Running in development environment")
+        return 0
+#else
+        print("Running in production environment")
+        return 1
+#endif
+    }
     
     static func saveDefaults(value: Any?, key: String) {
         if value != nil {
@@ -109,52 +122,17 @@ class DeviceType{
     }
 }
 
-//class LoginStatus {
-//    static let shared = LoginStatus()
-//    private init() {}
-//
-//    private let key = "loginstatus"
-//
-//    func loginUpdate(isLogin: Bool) {
-//        UserDefaults.standard.setValue(isLogin, forKey: key)
-//    }
-//
-//    func isLogin() -> Bool {
-//        return UserDefaults.standard.bool(forKey: key)
-//    }
-//}
-
-//class AppState: ObservableObject {
-//    
-//    static let shared = AppState()
-//    private init() {}
-//    @Published var isLoggedIn: Bool = LoginStatus.shared.isLogin()
-//
-//    func resetDefaults() {
-//        let defaults = UserDefaults.standard
-//        let dictionary = defaults.dictionaryRepresentation()
-//        dictionary.keys.forEach { key in
-//            if key == Constants.deviceToken || key ==  Bundle.main.bundleIdentifier ?? AppInfo.bundleId {
-//            } else {
-//                defaults.removeObject(forKey: key)
-//            }
-//        }
-//        KeychainHelper().deleteAllKeychainItems()
-//        isLoggedIn = false
-//    }
-//}
-
 class AppState: ObservableObject {
     static let shared = AppState()
     init() {
         // Initialize from UserDefaults
         isLoggedIn = UserDefaults.standard.bool(forKey: key)
     }
-
+    
     private let key = "loginstatus"
     
     @Published var isLoggedIn: Bool = false
-
+    
     // MARK: - Login/Logout
     func login() {
         isLoggedIn = true

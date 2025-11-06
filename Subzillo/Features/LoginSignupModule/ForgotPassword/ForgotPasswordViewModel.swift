@@ -21,7 +21,7 @@ class ForgotPasswordViewModel: ObservableObject {
         self.router = router
     }
     
-    func forgotPassword(input:ForgotPasswordRequest, path: Binding<NavigationPath>) {
+    func forgotPassword(input:ForgotPasswordRequest) {
         apiReference.postApi(endPoint: APIEndpoint.forgotPassword, method: .POST,token: defaultAuthKey,body: input,showLoader: true, responseType: GeneralResponse.self)
             .sink { [unowned self] completion in
                 if case let .failure(error) = completion {
@@ -33,7 +33,7 @@ class ForgotPasswordViewModel: ObservableObject {
             ToastManager.shared.showToast(message: response.message ?? "")
             self.forgotResponse = response
             DispatchQueue.main.async {
-                path.wrappedValue.append(PendingRoute.verifyOtp(emailId: "", from: .forgot, username: input.username))
+//                self.router.navigate(to: .verifyOtp(emailId: "", from: .forgot, username: input.username))
             }
         }
         .store(in: &self.subscriptions)

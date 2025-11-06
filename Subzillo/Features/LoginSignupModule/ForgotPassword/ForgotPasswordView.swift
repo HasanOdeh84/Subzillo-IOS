@@ -12,7 +12,6 @@ struct ForgotPasswordView: View {
     //MARK: - Properties
     @State private var username         : String = ""
     @Environment(\.dismiss) private var dismiss   // To go back
-    @Binding var path                   : NavigationPath
     @StateObject var forgotVM           = ForgotPasswordViewModel()
     
     //MARK: - Body
@@ -44,7 +43,7 @@ struct ForgotPasswordView: View {
                     if let errorMessage = LoginSignupValidations().validateForgotPassword(username: username) {
                         ToastManager.shared.showToast(message: errorMessage)
                     } else {
-                        forgotVM.forgotPassword(input: ForgotPasswordRequest(username: username), path: $path)
+                        forgotVM.forgotPassword(input: ForgotPasswordRequest(username: username))
                     }
                 }
                 Spacer()
@@ -57,5 +56,5 @@ struct ForgotPasswordView: View {
 }
 
 #Preview {
-    ForgotPasswordView(path: .constant(NavigationPath()))
+    ForgotPasswordView()
 }
