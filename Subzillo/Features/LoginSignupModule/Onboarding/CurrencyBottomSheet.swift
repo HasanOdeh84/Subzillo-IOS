@@ -6,14 +6,18 @@
 //
 
 import SwiftUI
+import SDWebImageSwiftUI
 
 struct CountriesBottomSheet: View {
     @Environment(\.dismiss) private var dismiss
     @Binding var selectedCurrency           : Currency?
-    @State private var searchText           = ""
+    @Binding var selectedCountry            : Country?
+    @State var isCountry                    : Bool
     var currencyResponse                    : [Currency]?
+    var countryResponse                     : [Country]?
     var header                              : String?
     var placeholder                         : String?
+    @State private var searchText           = ""
     
     var filteredCurrencies: [Currency] {
         if searchText.isEmpty {
@@ -22,6 +26,16 @@ struct CountriesBottomSheet: View {
         return currencyResponse?.filter {
             $0.code?.localizedCaseInsensitiveContains(searchText) ?? false ||
             $0.name?.localizedCaseInsensitiveContains(searchText) ?? false
+        } ?? []
+    }
+    
+    var filteredCountries: [Country] {
+        if searchText.isEmpty {
+            return countryResponse ?? []
+        }
+        return countryResponse?.filter {
+            $0.countryCode?.localizedCaseInsensitiveContains(searchText) ?? false ||
+            $0.countryName?.localizedCaseInsensitiveContains(searchText) ?? false
         } ?? []
     }
     
@@ -57,27 +71,88 @@ struct CountriesBottomSheet: View {
             .padding(.horizontal,24)
             
             VStack(spacing: 0) {
-                List(filteredCurrencies, id: \.self) { currency in
-                    Button {
-                        selectedCurrency = currency
-                        dismiss()
-                    } label: {
-                        HStack {
-                            Text(currency.symbol ?? "")
-                                .font(.system(size: 30))
-                                .padding(.leading, -12)
-                            Text(currency.code ?? "")
-                                .font(.appRegular(16))
-                                .foregroundColor(.appNeutralMain700)
-                            Text(currency.name ?? "")
-                                .font(.appRegular(16))
-                                .foregroundColor(.appNeutralMain700)
-                            Spacer()
+                if isCountry{
+                    List(filteredCountries, id: \.self) { country in
+                        VStack(spacing: 0){
+                            Button {
+                                selectedCountry = country
+                                dismiss()
+                            } label: {
+                                    HStack {
+                                        WebImage(url: URL(string: country.countryFlag ?? ""))
+                                            .resizable()
+                                        //                                    .scaledToFit()
+                                            .scaledToFill()
+                                            .frame(width: 30, height: 30)
+                                            .cornerRadius(4)
+                                            .clipped()
+                                        Text(country.countryCode ?? "")
+                                            .font(.appRegular(16))
+                                            .foregroundColor(.appNeutralMain700)
+                                            .padding(.horizontal, 14)
+                                        Text(country.countryName ?? "")
+                                            .font(.appRegular(16))
+                                            .foregroundColor(.appNeutralMain700)
+                                        Spacer()
+                                    }
+                                    .frame(height: 40)
+                            }
+                            .buttonStyle(.plain)
+                            
+                            if country != filteredCountries.last {
+                                Rectangle()
+                                    .fill(Color.neutralDisabled200)
+                                    .frame(height: 1)
+                                    .padding(.horizontal, -20)
+                            }
                         }
-                        .frame(height: 40)
+                        .listRowInsets(EdgeInsets(top: 18, leading: 16, bottom: 18, trailing: 16))
+                        .listRowSeparator(.hidden)
                     }
+                    .listStyle(.plain)
+                }else{
+                    List(filteredCurrencies, id: \.self) { currency in
+                        VStack(spacing: 0){
+                            Button {
+                                selectedCurrency = currency
+                                dismiss()
+                            } label: {
+                                HStack {
+//                                    Text(currency.flag ?? "")
+//                                        .font(.system(size: 30))
+//                                        .padding(.leading, -12)
+                                    WebImage(url: URL(string: currency.flag ?? ""))
+                                        .resizable()
+                                    //                                    .scaledToFit()
+                                        .scaledToFill()
+                                        .frame(width: 30, height: 30)
+                                        .cornerRadius(4)
+                                        .clipped()
+                                    Text(currency.code ?? "")
+                                        .font(.appRegular(16))
+                                        .foregroundColor(.appNeutralMain700)
+                                    Text(currency.name ?? "")
+                                        .font(.appRegular(16))
+                                        .foregroundColor(.appNeutralMain700)
+                                    Spacer()
+                                }
+                                .frame(height: 40)
+                            }
+                            .buttonStyle(.plain)
+                            
+                            if currency != filteredCurrencies.last {
+                                Rectangle()
+                                    .fill(Color.neutralDisabled200)
+                                    .frame(height: 1)
+                                    .padding(.horizontal, -20)
+                            }
+                            
+                        }
+                        .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0))
+                        .listRowSeparator(.hidden)
+                    }
+                    .listStyle(.plain)
                 }
-                .listStyle(.plain)
             }
             .background(.clear)
             .cornerRadius(12)
@@ -94,6 +169,6 @@ struct CountriesBottomSheet: View {
 
 #Preview {
     CountriesBottomSheet(
-        selectedCurrency: .constant(nil)
+        selectedCurrency: .constant(nil), selectedCountry: .constant(nil), isCountry: false
     )
 }

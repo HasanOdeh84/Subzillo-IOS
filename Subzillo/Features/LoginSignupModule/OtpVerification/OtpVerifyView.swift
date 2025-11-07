@@ -23,9 +23,14 @@ struct OtpVerifyView: View {
     @State private var isPasting            = false
 //    @State private var showNumberSheet      = false
     @State private var phoneNumber          : String = ""
-    @State private var selectedCurrency     : Currency? = Currency(id: "7603cf97-e39c-48b8-86ec-629429072761", name: "United States Dollarr", symbol: "$", code: "USD")
+    @State private var selectedCurrency     : Currency?
     @State var verifyData                   : LoginSignupVerifyData?
     @EnvironmentObject var sessionManager   : SessionManager
+    @State var fromLogin                    : Bool
+    @State var verifyText                   : String = "Verify Phone Number"
+    @State var sendCodeText                 : String = "phone number"
+    @State var changeNumberEmail            : String = "number"
+    @State var buttonText                   : String = "Phone Number"
     
     //MARK: - Body
     var body: some View {
@@ -49,11 +54,11 @@ struct OtpVerifyView: View {
                         .padding(.vertical,24)
                     
                     VStack(spacing: 4) {
-                        Text("Verify Phone Number")
+                        Text(verifyText)
                             .font(.appRegular(24))
                             .foregroundColor(Color.gray)
                             .multilineTextAlignment(.center)
-                        Text("We send a code to your phone number")
+                        Text("We send a code to your \(sendCodeText)")
                             .font(.appRegular(16))
                             .foregroundColor(Color.gray)
                             .multilineTextAlignment(.center)
@@ -87,7 +92,7 @@ struct OtpVerifyView: View {
                     
                     HStack(){
                         Spacer()
-                        CustomButton(title: "Verify Phone Number") {
+                        CustomButton(title: "Verify \(buttonText)") {
                             let otp = otpFields.joined()
                             print("Entered OTP: \(otp)")
                             if let errorMessage = LoginSignupValidations().validateVerifyOtp(otp: otp) {
@@ -145,7 +150,7 @@ struct OtpVerifyView: View {
                     .disabled(timer == 0 ? false : true)
                     .opacity(timer == 0 ? 1.0 : 0.6)
                     
-                    underlineText(text: "Change number", image: "phone") {
+                    underlineText(text: "Change \(changeNumberEmail)", image: "phone") {
                         dismiss()
 //                        showNumberSheet = true
                     }
@@ -169,6 +174,31 @@ struct OtpVerifyView: View {
                     focusedField = 0
                     if let data = SessionManager.shared.loginData {
                         verifyData = data
+                        if fromLogin{
+                            if verifyData?.verifyType == 1{
+                               verifyText = "Verify Phone Number"
+                                sendCodeText = "phone number"
+                                changeNumberEmail = "number"
+                                buttonText = "Phone Number"
+                            }else{
+                                verifyText = "Verify Email Address"
+                                sendCodeText = "email"
+                                changeNumberEmail = "email"
+                                buttonText = "Email"
+                            }
+                        }else{
+                            if verifyData?.verifyType == 1{
+                                verifyText = "Verify Email Address"
+                                sendCodeText = "email"
+                                changeNumberEmail = "email"
+                                buttonText = "Email"
+                            }else{
+                                verifyText = "Verify Phone Number"
+                                sendCodeText = "phone number"
+                                changeNumberEmail = "number"
+                                buttonText = "Phone Number"
+                            }
+                        }
                     }
                 }
                 .onChange(of: otpVerifyVM.resendOtpResponse) { newValue in

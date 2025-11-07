@@ -14,7 +14,9 @@ class CommonAPIViewModel: ObservableObject {
     private var subscriptions           = Set<AnyCancellable>()
     var apiReference                    = NetworkRequest.shared
     @Published var currencyResponse     : [Currency]?
-    @Published var error                : Error?
+    @Published var countriesResponse    : [Country]?
+    @Published var currencyError        : Error?
+    @Published var countryError         : Error?
     private let router                  : AppIntentRouter
     
     init(router: AppIntentRouter = .shared) {
@@ -38,13 +40,28 @@ class CommonAPIViewModel: ObservableObject {
         apiReference.getApi(endPoint: APIEndpoint.getCurrencies, token: defaultAuthKey, responseType: getCurrenciesResponse.self)
             .sink { [unowned self] completion in
                 if case let .failure(error) = completion {
-                    self.error = error
+                    self.currencyError = error
                     self.handleError(error,endPoint: APIEndpoint.getCurrencies)
                 }
             }
         receiveValue: { [self] response in
             PrintLogger.modelLog(response, type: .response, isInput: false)
             currencyResponse = response.data
+        }
+        .store(in: &self.subscriptions)
+    }
+    
+    func getCountries() {
+        apiReference.getApi(endPoint: APIEndpoint.getCountryCodes, token: defaultAuthKey, responseType: getCountriesResponse.self)
+            .sink { [unowned self] completion in
+                if case let .failure(error) = completion {
+                    self.countryError = error
+                    self.handleError(error,endPoint: APIEndpoint.getCountryCodes)
+                }
+            }
+        receiveValue: { [self] response in
+            PrintLogger.modelLog(response, type: .response, isInput: false)
+            countriesResponse = response.data
         }
         .store(in: &self.subscriptions)
     }

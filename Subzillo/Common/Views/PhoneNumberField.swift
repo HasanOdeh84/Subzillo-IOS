@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import SDWebImageSwiftUI
 
 struct PhoneNumberField: View {
     
@@ -15,7 +16,9 @@ struct PhoneNumberField: View {
     var placeholder                         : String?
     @State private var showCurrencySheet    = false
     @Binding var selectedCurrency           : Currency?
+    @Binding var selectedCountry            : Country?
     @EnvironmentObject var commonApiVM      : CommonAPIViewModel
+    @State var isCountry                    : Bool
     
     //MARK: - body
     var body: some View {
@@ -26,19 +29,35 @@ struct PhoneNumberField: View {
             
             HStack(spacing: 0) {
                 Button {
-                    if let error = commonApiVM.error {
-                        commonApiVM.getCurrencies()
-                    } else if let data = commonApiVM.currencyResponse {
-                        showCurrencySheet = true
+                    if isCountry{
+                        if let error = commonApiVM.countryError {
+                            commonApiVM.getCountries()
+                        } else if let data = commonApiVM.countriesResponse {
+                            showCurrencySheet = true
+                        }
+                    }else{
+                        if let error = commonApiVM.currencyError {
+                            commonApiVM.getCurrencies()
+                        } else if let data = commonApiVM.currencyResponse {
+                            showCurrencySheet = true
+                        }
                     }
                 } label: {
                     HStack(spacing: 4) {
-                        Text(selectedCurrency?.symbol ?? "")
+                        WebImage(url: URL(string: isCountry ? selectedCountry?.countryFlag ?? "" : selectedCurrency?.flag ?? ""))
+                            .resizable()
+                        //                        .indicator(.activity)
+                        //                        .transition(.fade(duration: 0.5))
+                            .scaledToFit()
                             .frame(width: 24, height: 18)
+                            .cornerRadius(5)
+                        
+                        //                        Text(isCountry ? selectedCountry?.countryFlag ?? "" : selectedCurrency?.flag ?? "")
+                        //                            .frame(width: 24, height: 18)
                         Image(systemName: "chevron.down")
                             .frame(width: 20, height: 20)
                             .foregroundColor(.primaryText)
-                        Text(selectedCurrency?.code ?? "")
+                        Text(isCountry ? selectedCountry?.dialCode ?? "" : selectedCurrency?.code ?? "")
                             .font(.appRegular(14))
                             .foregroundColor(.neutral_2_500)
                     }
@@ -49,7 +68,7 @@ struct PhoneNumberField: View {
                     .frame(height: 52)
                     .foregroundColor(.appNeutral100)
                 
-                if placeholder == "United States Dollarr"{
+                if !isCountry{
                     TextField(LocalizedStringKey(placeholder ?? ""), text: Binding(
                         get: { selectedCurrency?.name ?? "" },
                         set: { selectedCurrency?.name = $0 }
@@ -90,9 +109,15 @@ struct PhoneNumberField: View {
             )
         }
         .sheet(isPresented: $showCurrencySheet) {
-            CountriesBottomSheet(selectedCurrency: $selectedCurrency,currencyResponse: commonApiVM.currencyResponse,header: placeholder == "United States Dollarr" ? "Your payment currency" : "Your Country",placeholder: placeholder == "United States Dollarr" ? "Search currency" : "Search country")
-                .presentationDetents([.medium, .large])
-                .presentationDragIndicator(.hidden)
+            CountriesBottomSheet(selectedCurrency   : $selectedCurrency,
+                                 selectedCountry    : $selectedCountry,
+                                 isCountry          : isCountry,
+                                 currencyResponse   : commonApiVM.currencyResponse,
+                                 countryResponse    : commonApiVM.countriesResponse,
+                                 header             : isCountry ? "Your Country" : "Your payment currency",
+                                 placeholder        : isCountry ? "Search country" : "Search currency")
+            .presentationDetents([.medium, .large])
+            .presentationDragIndicator(.hidden)
         }
     }
 }

@@ -17,12 +17,11 @@ struct OnboardingView: View {
     
     //MARK: - Properties
     @State private var currentPage                                  = 0
-    @AppStorage("hasSeenOnboarding") private var hasSeenOnboarding  = false
     @State private var selectedSubscriptions                        : String? = nil
     @State private var selectedSpending                             : String? = nil
     private let subscriptionOptions                                 = ["5 - 10", "10 - 20", "20 - 30", "More than 30"]
     private let spendingOptions                                     = ["Less than $50", "Less than $150", "More than $150"]
-    @State private var selectedCurrency                             : Currency? = Currency(id: "7603cf97-e39c-48b8-86ec-629429072761", name: "United States Dollarr", symbol: "$", code: "USD")
+    @State private var selectedCurrency                             : Currency?
     
     // controls the SwiftUI offset animation
     @State private var animateIn    = false
@@ -71,7 +70,6 @@ struct OnboardingView: View {
                     Button {
                         //need to change
                         AppIntentRouter.shared.navigatingRoute = .login
-                        hasSeenOnboarding = true
                     } label: {
                         HStack(spacing: 4) {
                             Text("Skip Onboarding")
@@ -89,36 +87,7 @@ struct OnboardingView: View {
                     ForEach(0..<pages.count, id: \.self) { index in
                         VStack {
                             if currentPage == pages.count - 1{
-                                ScrollView{
-                                    VStack(spacing: 32){
-                                        Text("Tell us about yourself")
-                                            .font(.appRegular(28))
-                                            .foregroundColor(.appNeutralMain700)
-                                        
-                                        VStack(alignment: .leading, spacing: 12) {
-                                            Text("How many subscriptions do you have?")
-                                                .font(.appRegular(18))
-                                                .foregroundColor(.appNeutralMain700)
-                                            WrapButtonsView(options: subscriptionOptions,
-                                                            selected: $selectedSubscriptions)
-                                        }
-                                        
-                                        VStack(alignment: .leading, spacing: 12) {
-                                            Text("How much you spend on subscription monthly?")
-                                                .font(.appRegular(18))
-                                                .foregroundColor(.appNeutralMain700)
-                                            WrapButtonsView(options: spendingOptions,
-                                                            selected: $selectedSpending)
-                                        }
-                                        
-                                        PhoneNumberField(phoneNumber        : .constant(""),
-                                                         header             : "Your payment currency",
-                                                         placeholder        : "United States Dollarr",
-                                                         selectedCurrency   : $selectedCurrency)
-                                        Spacer()
-                                    }
-                                    .padding(.horizontal,2)
-                                }
+                                tellUsAbtYourselfView()
                             }else{
                                 if currentPage == 0{
                                     Image(pages[index].lottie)
@@ -203,7 +172,6 @@ struct OnboardingView: View {
                 GradientBorderButton(title: currentPage == pages.count - 1 ?
                                      "Lets Go!" : "Next") {
                     if currentPage == pages.count - 1{
-                        hasSeenOnboarding = true
                     }else{
                         currentPage += 1
                     }
@@ -213,6 +181,39 @@ struct OnboardingView: View {
             }
             .padding(.horizontal, 20)
             .navigationBarBackButtonHidden(true)
+        }
+    }
+    
+    func tellUsAbtYourselfView() -> some View {
+        ScrollView{
+            VStack(spacing: 32){
+                Text("Tell us about yourself")
+                    .font(.appRegular(28))
+                    .foregroundColor(.appNeutralMain700)
+                
+                VStack(alignment: .leading, spacing: 12) {
+                    Text("How many subscriptions do you have?")
+                        .font(.appRegular(18))
+                        .foregroundColor(.appNeutralMain700)
+                    WrapButtonsView(options: subscriptionOptions,
+                                    selected: $selectedSubscriptions)
+                }
+                
+                VStack(alignment: .leading, spacing: 12) {
+                    Text("How much you spend on subscription monthly?")
+                        .font(.appRegular(18))
+                        .foregroundColor(.appNeutralMain700)
+                    WrapButtonsView(options: spendingOptions,
+                                    selected: $selectedSpending)
+                }
+                
+//                PhoneNumberField(phoneNumber        : .constant(""),
+//                                 header             : "Your payment currency",
+//                                 placeholder        : "United States Dollarr",
+//                                 selectedCurrency   : $selectedCurrency)
+                Spacer()
+            }
+            .padding(.horizontal,2)
         }
     }
 }

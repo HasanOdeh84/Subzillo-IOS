@@ -33,6 +33,9 @@ struct Constants{
     static let googleSigninId                       = "353333226738-1htnc4n6tddp5pbm78e3e9qbceeui88u.apps.googleusercontent.com"
     static let userDefaults                         = UserDefaults.standard
     
+    let regionCode      = Locale.current.region?.identifier ?? "US"
+    let currencyCode    = Locale.current.currency?.identifier ?? "USD"
+    
     var pushMode:Int{
 #if DEBUG
         print("Running in development environment")

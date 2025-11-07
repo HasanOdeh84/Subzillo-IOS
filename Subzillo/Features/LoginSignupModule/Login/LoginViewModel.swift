@@ -58,7 +58,7 @@ class LoginViewModel: ObservableObject {
                                              isNewUser: response.data?.isNewUser ?? false,
                                              isSignupCompleted: response.data?.signupCompleted ?? false)
             self.sessionManager.saveLoginData(data)
-            self.router.navigate(to: .verifyOtp)
+            self.router.navigate(to: .verifyOtp(fromLogin: true))
         }
         .store(in: &self.subscriptions)
     }

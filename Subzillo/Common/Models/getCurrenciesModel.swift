@@ -13,8 +13,9 @@ public struct getCurrenciesResponse: Codable {
 }
 
 public struct Currency: Codable, Hashable {
-    var id          : String?
+    var id          : Int?
     var name        : String?
     var symbol      : String?
     var code        : String?
+    var flag        : String?
 }

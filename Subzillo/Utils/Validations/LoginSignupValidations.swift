@@ -10,39 +10,24 @@ import Foundation
 struct LoginSignupValidations {
     
     //MARK: - SignUp
-    func validateSignup(username: String, fullName:String, email: String, mobile: String, password: String, confirmPassword: String,termsPrivacy: Bool) -> String? {
-        if username.trimmed.isEmpty{
-            return "Please enter username"
+    func validateSignup(input: RegisterRequest) -> String? {
+        if input.fullName.trimmed.isEmpty{
+            return "Please enter your full name"
         }
-        if username.trimmed.count < 3 {
+        if input.fullName.trimmed.count < 3 {
             return "Username must be at least 3 characters"
         }
-        if fullName.trimmed.isEmpty{
-            return "Please enter full name"
+        if !Validations().isValidName(input.fullName.trimmed){
+            return "Enter a valid name"
         }
-        if email.trimmed.isEmpty{
+        if input.email.trimmed.isEmpty{
             return "Please enter email"
         }
-        if !Validations().isValidEmail(email.trimmed) {
-            return "Please enter valid email"
+        if !input.email.trimmed.isEmpty && !Validations().isValidEmail(input.email.trimmed) {
+            return "Enter a valid email address"
         }
-        if !mobile.trimmed.isEmpty && !Validations().isValidMobile(mobile.trimmed){
-            return "Please enter valid mobile number"
-        }
-        if password.trimmed.isEmpty{
-            return "Please enter password"
-        }
-        if !Validations().isValidPassword(password.trimmed) {
-            return "Please enter valid password"
-        }
-        if confirmPassword.trimmed.isEmpty{
-            return "Please enter confirm password"
-        }
-        if password.trimmed != confirmPassword.trimmed {
-            return "Password and confirm password should be same"
-        }
-        if !termsPrivacy{
-            return "Please accept terms and conditions"
+        if !input.phoneNumber.trimmed.isEmpty && !Validations().isValidMobile(input.phoneNumber.trimmed){
+            return "Enter a valid phone number"
         }
         return nil // All validations passed
     }

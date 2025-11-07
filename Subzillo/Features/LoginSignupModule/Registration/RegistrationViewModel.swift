@@ -21,7 +21,7 @@ class RegistrationViewModel: ObservableObject {
     }
     
     func register(input:RegisterRequest) {
-        apiReference.postApi(endPoint: APIEndpoint.registration, method: .POST,token: defaultAuthKey,body: input,showLoader: true, responseType: RegisterResponse.self)
+        apiReference.postApi(endPoint: APIEndpoint.registration, method: .POST,token: authKey,body: input,showLoader: true, responseType: RegisterResponse.self)
             .sink { [unowned self] completion in
                 if case let .failure(error) = completion {
                     self.handleError(error,endPoint: APIEndpoint.registration)
@@ -30,13 +30,10 @@ class RegistrationViewModel: ObservableObject {
         receiveValue: { [unowned self] response in
             PrintLogger.modelLog(response, type: .response, isInput: false)
             ToastManager.shared.showToast(message: response.message ?? "")
-            KeychainHelper.save(response.data?.accessToken, account: Constants.authKey)
-            KeychainHelper.save(response.data?.refreshToken, account: Constants.refreshKey)
-            Constants.saveDefaults(value: response.data?.id, key: Constants.userId)
-            Constants.saveDefaults(value: response.data?.username, key: Constants.username)
             self.registerResponse = response
             DispatchQueue.main.async { [self] in
-//                router.navigate(to: .verifyOtp(emailId:input.email, from: .register))
+                router.navigate(to: .verifyOtp(fromLogin: false))
+//                router.navigate(to: .SuccessView(isOtp: false))
             }
         }
         .store(in: &self.subscriptions)

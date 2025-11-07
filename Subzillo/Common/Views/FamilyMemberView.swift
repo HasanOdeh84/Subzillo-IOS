@@ -12,7 +12,7 @@ struct FamilyMember: Identifiable {
     var nickname: String = ""
     var phoneNumber: String = ""
     var color: Color? = nil
-    var selectedCurrency : Currency? = Currency(id: "7603cf97-e39c-48b8-86ec-629429072761", name: "United States Dollarr", symbol: "$", code: "USD")
+    var selectedCurrency : Currency?
 }
 
 struct FamilyMemberView: View {
@@ -41,10 +41,10 @@ struct FamilyMemberView: View {
                               header        : "Family Nickname")
             .padding(.top,-8)
             
-            PhoneNumberField(phoneNumber        : $member.phoneNumber,
-                             header             : "Family Member phone number",
-                             placeholder        : "000 000 000",
-                             selectedCurrency   : $member.selectedCurrency)
+//            PhoneNumberField(phoneNumber        : $member.phoneNumber,
+//                             header             : "Family Member phone number",
+//                             placeholder        : "000 000 000",
+//                             selectedCurrency   : $member.selectedCurrency)
             
             Text("Color (To distinguish color family subscriptions)")
                 .font(.caption)

@@ -18,11 +18,11 @@ struct RootTabBar: View {
             Group {
                 switch selectedTab {
                 case .home:
-                    VoiceCommandView()
+                    HomeView()
                 case .subscriptions:
                     SubscriptionsView()
                 case .addSubscription:
-                    AnalyticsView()
+                    AddSubscriptionsView()
                 case .smartAI:
                     ActivityView()
                 case .profile:

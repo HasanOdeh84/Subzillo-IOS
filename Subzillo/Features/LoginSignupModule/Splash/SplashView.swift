@@ -11,7 +11,6 @@ struct SplashView: View {
     @State private var animateBubbles = false
     @State var isActive               : Bool = false
     @StateObject var appState         = AppState.shared
-    @AppStorage("hasSeenOnboarding") private var hasSeenOnboarding = false
     @EnvironmentObject var router     : AppIntentRouter
     
     var body: some View {
@@ -57,11 +56,7 @@ struct SplashView: View {
         if appState.isLoggedIn {
             router.navigatingRoute = .home
         } else {
-            if hasSeenOnboarding {
-                router.navigatingRoute = .login
-            } else {
-                router.navigatingRoute = .onboarding
-            }
+            router.navigatingRoute = .login
         }
     }
 }

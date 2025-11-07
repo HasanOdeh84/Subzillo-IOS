@@ -7,10 +7,16 @@
 
 import SwiftUI
 
+enum SuccessRedirection{
+    case signup
+    case onboarding
+}
+
 struct SuccessView: View {
     
     //MARK: - Properties
     var isOtp: Bool?
+    var toScreen: SuccessRedirection = .signup
     
     var body: some View {
         ZStack{
@@ -20,34 +26,75 @@ struct SuccessView: View {
             .ignoresSafeArea()
             
             VStack() {
-                Text("Welcome to")
-                    .font(.appRegular(24))
-                    .foregroundColor(Color.neutralMain700)
-                    .multilineTextAlignment(.center)
-                    .padding(.top,20)
-                
-                Image("logo_svg")
-                    .resizable()
-                    .scaledToFit()
-                    .frame(width: 128,height: 88)
-                    .padding(.top,24)
-                    .padding(.bottom,106)
-                
-                LottieView(name: "success")
-                    .frame(width: 127,height: 127)
-                
-                Text("Phone Number\n Verified")
-                    .font(.appRegular(24))
-                    .foregroundColor(Color.neutralMain700)
-                    .multilineTextAlignment(.center)
-                    .padding(.top,24)
-                Spacer()
+                if isOtp ?? false{
+                    Text("Welcome to")
+                        .font(.appRegular(24))
+                        .foregroundColor(Color.neutralMain700)
+                        .multilineTextAlignment(.center)
+                        .padding(.top,20)
+                    
+                    Image("logo_svg")
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 128,height: 88)
+                        .padding(.top,24)
+                        .padding(.bottom,106)
+                    
+                    Text("Phone Number\n Verified")
+                        .font(.appRegular(24))
+                        .foregroundColor(Color.neutralMain700)
+                        .multilineTextAlignment(.center)
+                        .padding(.top,24)
+                    Spacer()
+                }else{
+                    SignupSuccessView()
+                }
             }
             .navigationBarBackButtonHidden(true)
+            .onAppear{
+                DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
+                    if self.isOtp ?? false{
+                    }else{
+                        AppIntentRouter.shared.navigate(to: .onboarding)
+                    }
+                }
+            }
         }
     }
 }
 
 #Preview {
     SuccessView()
+}
+
+
+struct SignupSuccessView: View {
+    
+    var body: some View {
+        VStack(spacing: 24) {
+            Spacer()
+            Image("logo_svg")
+                .resizable()
+                .scaledToFit()
+                .frame(width: 128,height: 88)
+            
+            Text("Welcome to")
+                .font(.appRegular(24))
+                .foregroundColor(Color.neutralMain700)
+                .multilineTextAlignment(.center)
+            
+            LottieView(name: "success")
+                .frame(width: 127,height: 127)
+            
+            Text("Phone Number\n Verified")
+                .font(.appRegular(24))
+                .foregroundColor(Color.neutralMain700)
+                .multilineTextAlignment(.center)
+            
+            GradienCustomeView(title: "Quick tip", subTitle: "Start by adding your first subscription to see how Subzillo helps you stay organized.",isBtn: false) {
+            }
+            .padding(.horizontal,24)
+            Spacer()
+        }
+    }
 }

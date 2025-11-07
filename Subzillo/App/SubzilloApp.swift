@@ -120,7 +120,10 @@ struct SubzilloApp: App {
                 .withLoader()
                 .withAlert()
                 .withToast()
-                .onAppear { sharedViewModel.getCurrencies() }
+                .onAppear {
+                    sharedViewModel.getCurrencies()
+                    sharedViewModel.getCountries()
+                }
         }
         .onChange(of: scenePhase) { phase in
             switch phase {
@@ -158,8 +161,7 @@ struct RootView: View {
 //                            }
 //                        }
 //                }
-//                SplashView()
-                WelcomeHomeView()
+                SplashView()
             }
             .navigationDestination(for: NavigationRoute.self) { screen in
                 switch screen {
@@ -198,8 +200,8 @@ struct RootView: View {
 //                        }
                 case .onboarding:
                     OnboardingView()
-                case .verifyOtp:
-                    OtpVerifyView()
+                case .verifyOtp(let fromLogin):
+                    OtpVerifyView(fromLogin:fromLogin ?? false)
                 case .resetPassword(let username):
                     ResetPasswordView(username:username ?? "")
                 case .termsAndPrivacy(isTerm: let isTerm):

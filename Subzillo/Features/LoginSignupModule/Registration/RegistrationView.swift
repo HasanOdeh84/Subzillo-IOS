@@ -17,7 +17,7 @@ struct RegistrationView: View {
     @StateObject private var registerVM                 = RegistrationViewModel()
     @EnvironmentObject var appDelegate                  : AppDelegate
     @State private var familyMembers                    : [FamilyMember]?
-    @State private var selectedCurrency                 : Currency? = Currency(id: "7603cf97-e39c-48b8-86ec-629429072761", name: "United States Dollarr", symbol: "$", code: "USD")
+    @State private var selectedCountry                  : Country?
     @State var verifyData                               : LoginSignupVerifyData?
     @EnvironmentObject var sessionManager               : SessionManager
     
@@ -45,15 +45,17 @@ struct RegistrationView: View {
                         .padding(.vertical,24)
                     
                     Group {
-                        PhoneNumberField(phoneNumber        : $phoneNumber,
-                                         header             : "Enter your phone number",
-                                         placeholder        : "000 000 000",
-                                         selectedCurrency   : $selectedCurrency)
-                        .opacity(verifyData?.verifyType == 1 ? 0.5 : 1.0)
-                        .disabled(verifyData?.verifyType == 1 ? true : false)
+//                        PhoneNumberField(phoneNumber        : $phoneNumber,
+//                                         header             : "Enter your phone number",
+//                                         placeholder        : "000 000 000",
+//                                         selectedCountry    : $selectedCountry)
+//                        .opacity(verifyData?.verifyType == 1 ? 0.5 : 1.0)
+//                        .disabled(verifyData?.verifyType == 1 ? true : false)
                         
                         ReusableTextField(placeholder: "Enter your full name", text: $fullName,header:"Full Name")
                         ReusableTextField(placeholder: "name@example.com", text: $email, isEmail: true,header: "Email")
+                            .opacity(verifyData?.verifyType == 2 ? 0.5 : 1.0)
+                            .disabled(verifyData?.verifyType == 2 ? true : false)
                     }
                     
 //                    if familyMembers?.count != 0 {
@@ -73,14 +75,24 @@ struct RegistrationView: View {
 //                    }
                     
                     CustomButton(title: "Finish Sign Up") {
+                        let input = RegisterRequest(userId              : verifyData?.userId ?? "",
+                                                    fullName            : fullName,
+                                                    email               : verifyData?.verifyType == 1 ? email : verifyData?.email ?? "",
+                                                    countryCode         : verifyData?.verifyType == 1 ? verifyData?.countryCode ?? "" : selectedCountry?.countryCode ?? "",
+                                                    phoneNumber         : verifyData?.verifyType == 1 ? verifyData?.phoneNumber ?? "" : phoneNumber)
+                        if let errorMessage = LoginSignupValidations().validateSignup(input: input) {
+                            ToastManager.shared.showToast(message: errorMessage,style: ToastStyle.error)
+                        } else {
+                            registerVM.register(input: input)
+                        }
                     }
 
                     TermsAndPrivacyText(
                         onTapTerms: {
-                            registerVM.navigate(to: NavigationRoute.termsAndPrivacy(isTerm: true))
+                            registerVM.navigate(to: .termsAndPrivacy(isTerm: true))
                         },
                         onTapPrivacy: {
-                            registerVM.navigate(to: NavigationRoute.termsAndPrivacy(isTerm: false))
+                            registerVM.navigate(to: .termsAndPrivacy(isTerm: false))
                         },
                         bottomPadding: 28
                     )
@@ -94,6 +106,8 @@ struct RegistrationView: View {
                         verifyData = data
                         if verifyData?.verifyType == 1{
                             phoneNumber = verifyData?.phoneNumber ?? ""
+                        }else{
+                            email       = verifyData?.email ?? ""
                         }
                     }
                 }

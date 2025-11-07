@@ -29,4 +29,13 @@ struct Validations{
         let predicate = NSPredicate(format: "SELF MATCHES %@", regex)
         return predicate.evaluate(with: number)
     }
+    
+    func isValidName(_ name: String) -> Bool {
+        // Explanation:
+        // ^[A-Za-z]+(?: [A-Za-z]+)*$
+        // → Starts with letters, optional single spaces followed by more letters
+        let regex = "^[A-Za-z]+(?: [A-Za-z]+)*$"
+        let predicate = NSPredicate(format: "SELF MATCHES %@", regex)
+        return predicate.evaluate(with: name)
+    }
 }

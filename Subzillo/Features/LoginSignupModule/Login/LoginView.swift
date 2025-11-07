@@ -18,9 +18,10 @@ struct LoginView: View {
     @State private var loginType                : loginType = .google
     @State private var isPasswordVisible        : Bool = false
     @EnvironmentObject var appDelegate          : AppDelegate
-    @State private var selectedCurrency         : Currency? = Currency(id: "7603cf97-e39c-48b8-86ec-629429072761", name: "United States Dollarr", symbol: "$", code: "USD")
-    //    @State private var selectedCountry          : Currency? = Currency(id: "7603cf97-e39c-48b8-86ec-629429072761", name: "United States Dollarr", symbol: "$", code: "USD")
-    @State var segmentSelected  : Segment = .first
+    @State private var selectedCurrency         : Currency?
+    @State private var selectedCountry          : Country?
+    @State var segmentSelected                  : Segment = .first
+    @EnvironmentObject var commonApiVM          : CommonAPIViewModel
     
     //MARK: - Body
     var body: some View {
@@ -69,7 +70,8 @@ struct LoginView: View {
                         PhoneNumberField(phoneNumber        : $phoneNumber,
                                          header             : "Enter your phone number",
                                          placeholder        : "000 000 000",
-                                         selectedCurrency   : $selectedCurrency)
+                                         selectedCurrency   : $selectedCurrency, selectedCountry  : $selectedCountry,
+                                         isCountry          : true)
                     }else{
                         ReusableTextField(placeholder   : "name@example.com",
                                           text          : $email,
@@ -82,7 +84,7 @@ struct LoginView: View {
                             loginType       : (segmentSelected == .first ? loginCheckType.mobile : loginCheckType.email).rawValue,
                             email           : email,
                             phoneNumber     : phoneNumber,
-                            countryCode     : "91",
+                            countryCode     : selectedCountry?.countryCode ?? "",
                             deviceId        : appDelegate.deviceToken ?? ""
                         )
                         if let errorMessage = LoginSignupValidations().validateLogin(input: input) {
@@ -154,7 +156,13 @@ struct LoginView: View {
 //            .frame(minHeight: UIScreen.main.bounds.height)
             .padding(.horizontal, 20)
             .navigationBarBackButtonHidden(true)
-            Spacer()
+            .onAppear{
+                if let error = commonApiVM.countryError {
+                    commonApiVM.getCountries()
+                } else if let data = commonApiVM.countriesResponse {
+                    selectedCountry = data.first(where: { $0.countryCode == Constants.shared.regionCode })
+                }
+            }
         }
         .background(.appBackground)
         .ignoresSafeArea()

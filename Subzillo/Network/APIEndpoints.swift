@@ -11,15 +11,16 @@ enum HTTPMethod: String {
 
 enum APIEndpoint: String {
     case checkLogin                     = "/checkLogin"
-    
-    
-    case registration                   = "/register"
+    case verifyOtp                      = "/verifyOtp"
+    case resendOtp                      = "/resendOtp"
+    case registration                   = "/completeRegistration"
+    case getCurrencies                  = "/getCurrencies"
+    case getCountryCodes                = "/getCountryCodes"
+
     case voiceSubscription              = "/voiceSubscription"
     case regenerateAccessToken          = "/regenerateAccessToken"
-    case verifyOtp                      = "/verifyOtp"
     case forgotPassword                 = "/forgotPassword"
     case resetPassword                  = "/resetPassword"
-    case resendOtp                      = "/resendOtp"
     case logout                         = "/logout"
     case addSubscription                = "/addSubscription"
     case updateUserInfo                 = "/updateUserInfo"
@@ -28,7 +29,6 @@ enum APIEndpoint: String {
     case imageSubscription              = "/imageSubscription"
     case socialLogin                    = "/socialLogin"
     case getCategories                  = "/getCategories"
-    case getCurrencies                  = "/getCurrencies"
 }
 
 var authKey: String {

@@ -13,6 +13,7 @@ struct BottomSheetView: View {
     @Environment(\.dismiss) private var dismiss
     var header                              : String?
     @Binding var selectedCurrency           : Currency?
+    @Binding var selectedCountry            : Country?
     @Binding var phoneNumber                : String
     
     //MARK: - body
@@ -30,7 +31,9 @@ struct BottomSheetView: View {
             PhoneNumberField(phoneNumber        : $phoneNumber,
                              header             : "Enter your phone number",
                              placeholder        : "000 000 000",
-                             selectedCurrency   : $selectedCurrency)
+                             selectedCurrency   : $selectedCurrency,
+                             selectedCountry    : $selectedCountry,
+                             isCountry          : true)
             .padding(.vertical,36)
             
             GradientBorderButton(title: "Update",isBtn:true, buttonImage: "update") {

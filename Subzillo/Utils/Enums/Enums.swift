@@ -20,7 +20,7 @@ enum NavigationRoute: Hashable{
     case signup
     case login
     case onboarding
-    case verifyOtp
+    case verifyOtp(fromLogin: Bool)
     case resetPassword(username:String? = "")
     case termsAndPrivacy(isTerm:Bool?)
     case SuccessView(isOtp:Bool?)
