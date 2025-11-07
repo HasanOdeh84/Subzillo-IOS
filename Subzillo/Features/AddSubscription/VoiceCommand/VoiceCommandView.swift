@@ -84,46 +84,10 @@ struct VoiceCommandView: View {
                 .padding(.top, 24)
                 
                 // MARK: - How It Works
-                HStack(spacing: 0) {
-                    VStack() {
-                        HStack {
-                            Image("bulb")
-                        }
-                    }
-                    .frame(height: 48)
-                    .frame(width: 48)
-                    .background(Color.purple501)
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 12)
-                            .stroke(Color.borderColor, lineWidth: 0)
-                    )
-                    .cornerRadius(12)
-                    .padding(.trailing, 16)
-                    
-                    
-                    VStack(alignment: .leading, spacing: 6) {
-                        Text("How it work?")
-                            .font(.appSemiBold(16))
-                            .foregroundColor(.white)
-                        Text("Press & Hold to Speak, remove finger to pause, submit when you finish.")
-                            .font(.appRegular(14))
-                            .foregroundColor(.white)
-                    }
-                    Spacer()
-                }
-                .padding()
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .background(
-                    LinearGradient(
-                        colors: [Color.linearGradient2, Color.linearGradient1],
-                        startPoint: .leading,
-                        endPoint: .topTrailing
-                    )
-                )
-                .cornerRadius(12)
-                .padding(.horizontal, 20)
-                .padding(.top, 24)
-                .padding(.bottom, 24)
+                GradienCustomeView(title: "How it work?", subTitle: "Press & Hold to Speak, remove finger to pause, submit when you finish.", action: clickOnHowItWorks, isBtn: false)
+                    .padding(.horizontal, 20)
+                    .padding(.top, 24)
+                    .padding(.bottom, 24)
                 
                 // MARK: - Start Button
                 ZStack {
@@ -190,6 +154,9 @@ struct VoiceCommandView: View {
             requestSpeechPermission()
         }
         .animation(.easeInOut, value: isRecording)
+    }
+    
+    private func clickOnHowItWorks() {
     }
     
     //MARK: - Back action

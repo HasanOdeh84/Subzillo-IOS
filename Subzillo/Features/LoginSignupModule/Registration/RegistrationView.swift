@@ -18,7 +18,8 @@ struct RegistrationView: View {
     @EnvironmentObject var appDelegate                  : AppDelegate
     @State private var familyMembers                    : [FamilyMember]?
     @State private var selectedCurrency                 : Currency? = Currency(id: "7603cf97-e39c-48b8-86ec-629429072761", name: "United States Dollarr", symbol: "$", code: "USD")
-    @State var verifyData                               : LoginSignupVerifyData
+    @State var verifyData                               : LoginSignupVerifyData?
+    @EnvironmentObject var sessionManager               : SessionManager
     
     //MARK: - body
     var body: some View{
@@ -48,8 +49,8 @@ struct RegistrationView: View {
                                          header             : "Enter your phone number",
                                          placeholder        : "000 000 000",
                                          selectedCurrency   : $selectedCurrency)
-                        .opacity(verifyData.verifyType == 1 ? 0.5 : 1.0)
-                        .disabled(verifyData.verifyType == 1 ? true : false)
+                        .opacity(verifyData?.verifyType == 1 ? 0.5 : 1.0)
+                        .disabled(verifyData?.verifyType == 1 ? true : false)
                         
                         ReusableTextField(placeholder: "Enter your full name", text: $fullName,header:"Full Name")
                         ReusableTextField(placeholder: "name@example.com", text: $email, isEmail: true,header: "Email")
@@ -89,8 +90,11 @@ struct RegistrationView: View {
                 .padding(20)
                 .navigationBarBackButtonHidden(true)
                 .onAppear{
-                    if verifyData.verifyType == 1{
-                        phoneNumber = verifyData.phoneNumber ?? ""
+                    if let data = SessionManager.shared.loginData{
+                        verifyData = data
+                        if verifyData?.verifyType == 1{
+                            phoneNumber = verifyData?.phoneNumber ?? ""
+                        }
                     }
                 }
             }

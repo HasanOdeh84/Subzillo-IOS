@@ -24,7 +24,8 @@ struct OtpVerifyView: View {
 //    @State private var showNumberSheet      = false
     @State private var phoneNumber          : String = ""
     @State private var selectedCurrency     : Currency? = Currency(id: "7603cf97-e39c-48b8-86ec-629429072761", name: "United States Dollarr", symbol: "$", code: "USD")
-    @State var verifyData                   : LoginSignupVerifyData
+    @State var verifyData                   : LoginSignupVerifyData?
+    @EnvironmentObject var sessionManager   : SessionManager
     
     //MARK: - Body
     var body: some View {
@@ -93,14 +94,14 @@ struct OtpVerifyView: View {
                                 ToastManager.shared.showToast(message: errorMessage,style: ToastStyle.error)
                             } else {
                                 let input = OtpVerifyRequest(
-                                    verifyType  : verifyData.verifyType,
-                                    email       : verifyData.email ?? "",
-                                    phoneNumber : verifyData.phoneNumber ?? "",
-                                    countryCode : verifyData.countryCode ?? "",
+                                    verifyType  : verifyData?.verifyType ?? 0,
+                                    email       : verifyData?.email ?? "",
+                                    phoneNumber : verifyData?.phoneNumber ?? "",
+                                    countryCode : verifyData?.countryCode ?? "",
                                     otp         : Int(otp) ?? 0,
-                                    userId      : verifyData.userId
+                                    userId      : verifyData?.userId ?? ""
                                 )
-                                otpVerifyVM.verifyOtp(input : input, verifyData: verifyData)
+                                otpVerifyVM.verifyOtp(input : input)
                             }
                         }
                         Spacer()
@@ -139,7 +140,7 @@ struct OtpVerifyView: View {
                     
                     underlineText(text: "Resend Code", image: "resend") {
                         otpVerifyVM.resendOtp(input: ResendOtpRequest(userId        : Constants.getUserId(),
-                                                                      verifyType    : verifyData.verifyType))
+                                                                      verifyType    : verifyData?.verifyType))
                     }
                     .disabled(timer == 0 ? false : true)
                     .opacity(timer == 0 ? 1.0 : 0.6)
@@ -166,6 +167,9 @@ struct OtpVerifyView: View {
                 .onAppear {
                     startTimer()
                     focusedField = 0
+                    if let data = SessionManager.shared.loginData {
+                        verifyData = data
+                    }
                 }
                 .onChange(of: otpVerifyVM.resendOtpResponse) { newValue in
                     if newValue {

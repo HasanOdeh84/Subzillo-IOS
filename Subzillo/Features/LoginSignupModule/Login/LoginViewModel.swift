@@ -16,9 +16,11 @@ class LoginViewModel: ObservableObject {
     @Published var loginResponse        : LoginResponse?
     @Published var isLoading            : Bool = false
     private let router                  : AppIntentRouter
-    
-    init(router: AppIntentRouter = .shared) {
+    private let sessionManager          : SessionManager
+
+    init(router: AppIntentRouter = .shared,sessionManager: SessionManager = .shared) {
         self.router = router
+        self.sessionManager = sessionManager
     }
     
     func login(input:checkLoginRequest) {
@@ -48,13 +50,15 @@ class LoginViewModel: ObservableObject {
 //            DispatchQueue.main.async {
 //                self.router.navigate(to: .verifyOtp(emailId: response.data?.email, from: .login, username: response.data?.username))
 //            }
-            self.router.navigate(to: .verifyOtp(verifyData: LoginSignupVerifyData(verifyType   : input.loginType,
-                                                                                   email        : input.email,
-                                                                                   phoneNumber  : input.phoneNumber,
-                                                                                   countryCode  : input.countryCode,
-                                                                                   userId       : response.data?.userId ?? "",
-                                                                                   isNewUser: response.data?.isNewUser ?? false,
-                                                                                   isSignupCompleted: response.data?.signupCompleted ?? false)))
+            let data = LoginSignupVerifyData(verifyType   : input.loginType,
+                                             email        : input.email,
+                                             phoneNumber  : input.phoneNumber,
+                                             countryCode  : input.countryCode,
+                                             userId       : response.data?.userId ?? "",
+                                             isNewUser: response.data?.isNewUser ?? false,
+                                             isSignupCompleted: response.data?.signupCompleted ?? false)
+            self.sessionManager.saveLoginData(data)
+            self.router.navigate(to: .verifyOtp)
         }
         .store(in: &self.subscriptions)
     }

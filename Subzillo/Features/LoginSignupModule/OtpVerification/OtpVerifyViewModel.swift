@@ -16,12 +16,14 @@ class OtpVerifyViewModel: ObservableObject {
     @Published var otpVerifyResponse    : GeneralResponse?
     @Published var resendOtpResponse    : Bool = false
     private let router                  : AppIntentRouter
-    
-    init(router: AppIntentRouter = .shared) {
+    private let sessionManager          : SessionManager
+
+    init(router: AppIntentRouter = .shared,sessionManager: SessionManager = .shared) {
         self.router = router
+        self.sessionManager = sessionManager
     }
     
-    func verifyOtp(input:OtpVerifyRequest,verifyData:LoginSignupVerifyData) {
+    func verifyOtp(input:OtpVerifyRequest) {
         apiReference.postApi(endPoint: APIEndpoint.verifyOtp, method: .POST, token: authKey, body: input, showLoader: true, responseType: GeneralResponse.self)
             .sink { [unowned self] completion in
                 if case let .failure(error) = completion {
@@ -33,15 +35,14 @@ class OtpVerifyViewModel: ObservableObject {
             ToastManager.shared.showToast(message: response.message ?? "")
             self.otpVerifyResponse = response
             DispatchQueue.main.async { [self] in
-                if verifyData.isNewUser{
+                if sessionManager.loginData?.isNewUser == true{
                     router.navigate(to: .SuccessView(isOtp: true))
-                    router.navigate(to: .signup(verifyData: verifyData))
                 }else{
-                    if verifyData.isSignupCompleted{
+                    if sessionManager.loginData?.isSignupCompleted == true{
                         AppState.shared.login()
                         router.navigate(to: .home)
                     }else{
-                        router.navigate(to: .signup(verifyData: verifyData))
+                        router.navigate(to: .signup)
                     }
                 }
             }

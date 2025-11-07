@@ -158,10 +158,8 @@ struct RootView: View {
 //                            }
 //                        }
 //                }
-//                LoginView(path: $path)
-//                RootTabBar(path: $path)
-                SplashView()
-//                RegistrationView(verifyData: LoginSignupVerifyData(verifyType: 0, email: "", phoneNumber: "", countryCode: "", userId: "", isNewUser: false, isSignupCompleted: false))
+//                SplashView()
+                WelcomeHomeView()
             }
             .navigationDestination(for: NavigationRoute.self) { screen in
                 switch screen {
@@ -189,8 +187,8 @@ struct RootView: View {
                     Text("Test")
                 case .home:
                     RootTabBar()
-                case .signup(let verifyData):
-                    RegistrationView(verifyData: verifyData)
+                case .signup:
+                    RegistrationView()
                 case .login:
                     LoginView()
 //                        .onAppear {
@@ -200,8 +198,8 @@ struct RootView: View {
 //                        }
                 case .onboarding:
                     OnboardingView()
-                case .verifyOtp(let verifyData):
-                    OtpVerifyView(verifyData: verifyData)
+                case .verifyOtp:
+                    OtpVerifyView()
                 case .resetPassword(let username):
                     ResetPasswordView(username:username ?? "")
                 case .termsAndPrivacy(isTerm: let isTerm):

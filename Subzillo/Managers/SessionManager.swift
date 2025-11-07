@@ -9,6 +9,7 @@ import Foundation
 import Combine
 
 final class SessionManager: ObservableObject {
+    static let shared = SessionManager()
     @Published var loginData: LoginSignupVerifyData?
 
     private let key = "LoginSignupVerifyData"

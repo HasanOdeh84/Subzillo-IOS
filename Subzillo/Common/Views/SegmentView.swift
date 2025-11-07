@@ -7,14 +7,10 @@
 
 import SwiftUI
 
-enum Segment {
-    case first, second
-}
-
 struct RoundedCorner: Shape {
     var radius: CGFloat = .infinity
     var corners: UIRectCorner = .allCorners
-
+    
     func path(in rect: CGRect) -> Path {
         let path = UIBezierPath(
             roundedRect: rect,
@@ -77,7 +73,6 @@ struct SegmentView: View {
                         .opacity(selectedSegment == .first ? 0 : 1) // <- hide border when selected (without changing layout)
                 )
             }
-            
             
             // MARK: - Calendar View Button
             Button {

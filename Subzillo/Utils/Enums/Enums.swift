@@ -17,10 +17,10 @@ enum NavigationRoute: Hashable{
     case appearance
     case notifications
     case home
-    case signup(verifyData:LoginSignupVerifyData)
+    case signup
     case login
     case onboarding
-    case verifyOtp(verifyData:LoginSignupVerifyData)
+    case verifyOtp
     case resetPassword(username:String? = "")
     case termsAndPrivacy(isTerm:Bool?)
     case SuccessView(isOtp:Bool?)
@@ -48,4 +48,8 @@ enum loginType:Int,Codable {
 enum loginCheckType: Int, Codable{
     case mobile   = 1
     case email    = 2
+}
+
+enum Segment {
+    case first, second
 }

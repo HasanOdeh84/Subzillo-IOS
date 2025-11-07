@@ -53,6 +53,7 @@ extension Color {
     static let navyBlueCTA700           = Color(hex: "#3260BB")
     static let secondaryNavyBlue400     = Color(hex: "#70A3C4")
     static let primeryBlue900           = Color(hex: "#20368A")
+    static let primeryBlue100           = Color(hex: "#F2F7FF")
     static let redBadge                 = Color(hex: "#FF0000")
     static let gradientPurple           = Color(hex: "#EA85E0")
     static let secondaryPurple700       = Color(hex: "#5532A1")
@@ -62,6 +63,7 @@ extension Color {
     static let secondaryPurple400       = Color(hex: "#A890DC")
     static let secondaryPurple300       = Color(hex: "#B78BFF")
     static let secondaryPurple600       = Color(hex: "#6B47B8")
+    static let cardBorder               = Color(hex: "#E8E8E8")
         
     static let neutral_2_500            = Color("appNeutral2_500")
     static let neutral_2_200            = Color("appNeutral2_200")
