@@ -51,7 +51,6 @@ struct FieldView: View
                         .keyboardType(.default)
                         .padding(6)
                         .autocapitalization(.none)
-                        .doneOnSubmit()
                         .multilineTextAlignment(.leading)
                         .font(.appRegular(14))
                         .foregroundColor(.neutral2_500)
@@ -70,6 +69,7 @@ struct FieldView: View
                     .stroke(Color.neutral_2_200, lineWidth: 1)
             )
         }
+        .addDoneButtonToKeyboard()
     }
 }
 

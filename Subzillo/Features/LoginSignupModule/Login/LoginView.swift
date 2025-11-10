@@ -119,8 +119,8 @@ struct LoginView: View {
                     
                     GradientBorderButton(title: "Continue with Google",isBtn:true, buttonImage: "google") {
                         //Need to configure
-                        //                        loginVM.socialLogin(loginType: .google, path: $path)
-                        ToastManager.shared.showToast(message: "coming soon")
+                        loginVM.socialLogin(loginType: .google)
+//                        ToastManager.shared.showToast(message: "coming soon")
                     }
                     .background(.appBlackWhite)
                     
@@ -144,6 +144,7 @@ struct LoginView: View {
                 .padding(.bottom,20)
                 Spacer()
             }
+            .addDoneButtonToKeyboard()
             .padding(.horizontal, 20)
             .navigationBarBackButtonHidden(true)
             .onAppear{
@@ -163,8 +164,8 @@ struct LoginView: View {
     func loginApi(){
         let input = checkLoginRequest(
             loginType       : (segmentSelected == .first ? loginCheckType.mobile : loginCheckType.email).rawValue,
-            email           : email,
-            phoneNumber     : phoneNumber,
+            email           : email.trimmed,
+            phoneNumber     : phoneNumber.trimmed,
             countryCode     : selectedCountry?.dialCode ?? "",
             deviceId        : appDelegate.deviceToken ?? ""
         )

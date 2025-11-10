@@ -79,7 +79,6 @@ struct PhoneNumberField: View {
                     .foregroundColor(.black)
                     .font(.appRegular(14))
                     .disabled(true)
-                    .doneOnSubmit()
                 }else{
                     TextField(LocalizedStringKey(placeholder ?? ""), text: $phoneNumber)
                         .keyboardType(.numberPad)
@@ -89,7 +88,6 @@ struct PhoneNumberField: View {
                         .foregroundColor(.black)
                         .font(.appRegular(14))
                         .disabled(false)
-                        .doneOnSubmit()
                         .onChange(of: phoneNumber) { newValue in
                             // Allow only digits (0–9)
                             let filtered = newValue.filter { $0.isNumber }

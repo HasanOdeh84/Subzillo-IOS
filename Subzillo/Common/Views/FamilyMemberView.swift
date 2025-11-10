@@ -11,7 +11,7 @@ struct FamilyMember: Identifiable {
     var id = UUID()
     var nickname: String = ""
     var phoneNumber: String = ""
-    var color: Color? = nil
+    var color: Color
     var selectedCurrency : Currency?
 }
 
@@ -64,27 +64,28 @@ struct FamilyMemberView: View {
 }
 
 struct ColorPickerGrid: View {
-    let colors: [Color] = [.neutral500, .purple500, .navyBlueCTA700, .green, .orange, .red]
-    @Binding var selectedColor: Color?
+    let colors: [Color] = [.neutral500, .purple500, .blue600, .green, .orange, .red]
+    @Binding var selectedColor: Color
     
     var body: some View {
         ScrollView(.horizontal, showsIndicators: false){
             HStack {
                 ForEach(colors, id: \.self) { color in
                     Rectangle()
-                        .fill(color)
                         .frame(width: 45, height: 48)
-                        .cornerRadius(4)
+                        .foregroundStyle(color)
+                        .clipShape(.rect(cornerRadius: 4)) // shorthand for RoundedRectangle(cornerRadius: 6)
                         .overlay(
-                            Rectangle()
+                            RoundedRectangle(cornerRadius: 4)
                                 .stroke(selectedColor == color ? Color.navyBlueCTA700 : Color.clear, lineWidth: 2)
-                                .cornerRadius(4)
                         )
                         .onTapGesture {
                             selectedColor = color
                         }
                 }
             }
+            .padding(.vertical,10)
+            .padding(.leading,3)
         }
     }
 }

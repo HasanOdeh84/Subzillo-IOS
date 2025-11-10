@@ -47,6 +47,7 @@ extension Color {
     static let toastSuccessGreen        = Color(hex: "#658B61")
     static let blue300                  = Color(hex: "#B8D2F8")
     static let blue500                  = Color(hex: "#028DB4")
+    static let blue600                  = Color(hex: "#619BEE")
     static let blueMain700              = Color(hex: "#4489EB")
     static let blue900                  = Color(hex: "#20368A")
     static let gradientBlue             = Color(hex: "#8FCBF2")

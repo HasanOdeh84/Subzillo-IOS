@@ -46,7 +46,7 @@ struct RegistrationView: View {
                     
                     Group {
                         PhoneNumberField(phoneNumber        : $phoneNumber,
-                                         header             : "Enter your phone number",
+                                         header             : verifyData?.verifyType == 1 ? "Enter your phone number" : "Enter your phone number [Optional]",
                                          placeholder        : "000 000 000",
                                          selectedCurrency   : $selectedCurrency,
                                          selectedCountry    : $selectedCountry,
@@ -55,7 +55,7 @@ struct RegistrationView: View {
                         .disabled(verifyData?.verifyType == 1 ? true : false)
                         
                         ReusableTextField(placeholder: "Enter your full name", text: $fullName,header:"Full Name")
-                        ReusableTextField(placeholder: "name@example.com", text: $email, isEmail: true,header: "Email")
+                        ReusableTextField(placeholder: "name@example.com", text: $email, isEmail: true,header: verifyData?.verifyType == 1 ? "Email [Optional]" : "Email")
                             .opacity(verifyData?.verifyType == 2 ? 0.5 : 1.0)
                             .disabled(verifyData?.verifyType == 2 ? true : false)
                     }
@@ -75,6 +75,7 @@ struct RegistrationView: View {
                     )
                     Spacer()
                 }
+//                .addDoneButtonToKeyboard()
                 .padding(20)
                 .navigationBarBackButtonHidden(true)
                 .onAppear{
@@ -97,10 +98,10 @@ struct RegistrationView: View {
     //MARK: - Signup API
     func signupApi(){
         let input = RegisterRequest(userId              : verifyData?.userId ?? "",
-                                    fullName            : fullName,
-                                    email               : verifyData?.verifyType == 1 ? email : verifyData?.email ?? "",
+                                    fullName            : fullName.trimmed,
+                                    email               : verifyData?.verifyType == 1 ? email.trimmed : verifyData?.email ?? "",
                                     countryCode         : verifyData?.verifyType == 1 ? verifyData?.countryCode ?? "" : selectedCountry?.dialCode ?? "",
-                                    phoneNumber         : verifyData?.verifyType == 1 ? verifyData?.phoneNumber ?? "" : phoneNumber)
+                                    phoneNumber         : verifyData?.verifyType == 1 ? verifyData?.phoneNumber ?? "" : phoneNumber.trimmed)
         if let errorMessage = LoginSignupValidations().validateSignup(input: input) {
             ToastManager.shared.showToast(message: errorMessage,style: ToastStyle.error)
         } else {

@@ -42,6 +42,7 @@ struct BottomSheetView: View {
             }
             Spacer()
         }
+        .addDoneButtonToKeyboard()
         .padding(24)
     }
 }

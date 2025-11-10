@@ -21,30 +21,28 @@ extension View {
         self.modifier(ToastModifier())
     }
     
-    func hideKeyboard() {
-#if canImport(UIKit)
-        UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder),
-                                        to: nil, from: nil, for: nil)
-#endif
-    }
-    
-    func doneOnSubmit() -> some View {
-        self.modifier(DoneOnSubmit())
-    }
-    
+    //scroll issue when keyboard is open
     func keyboardAdaptive() -> some View {
         self.modifier(KeyboardAdaptive())
     }
+    
+    //Done button for textfields
+    func addDoneButtonToKeyboard() -> some View {
+        self.modifier(DoneButtonToolbar())
+    }
 }
 
-struct DoneOnSubmit: ViewModifier {
+struct DoneButtonToolbar: ViewModifier {
+    @FocusState private var isFocused: Bool
+
     func body(content: Content) -> some View {
         content
+            .focused($isFocused)
             .toolbar {
                 ToolbarItemGroup(placement: .keyboard) {
                     Spacer()
                     Button("Done") {
-                        content.hideKeyboard()
+                        isFocused = false
                     }
                 }
             }

@@ -172,7 +172,6 @@ struct ManualEntryView: View {
                                 TextField("Add any additional notes about this subscription...", text: $notes)
                                     .keyboardType(.default)
                                     .autocapitalization(.none)
-                                    .doneOnSubmit()
                                     .frame(maxWidth: .infinity, alignment: .leading)
                                     .multilineTextAlignment(.leading)
                                     .font(.appRegular(14))
@@ -251,6 +250,7 @@ struct ManualEntryView: View {
                     CustomButton(title: "Save Subscription", action: saveAction)
                         .padding(.horizontal, 0)
                 }
+                .addDoneButtonToKeyboard()
             }
             .padding(.horizontal, 20)
             .padding(.top, 24)

@@ -8,6 +8,7 @@
 import SwiftUI
 import Combine
 
+//This is for scroll issue when keyboard is open
 final class KeyboardManager: ObservableObject {
     @Published var height: CGFloat = 0
     private var cancellables = Set<AnyCancellable>()

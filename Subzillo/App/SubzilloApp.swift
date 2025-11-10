@@ -161,7 +161,7 @@ struct RootView: View {
 //                            }
 //                        }
 //                }
-                SplashView()
+                LoginView()
             }
             .navigationDestination(for: NavigationRoute.self) { screen in
                 switch screen {

@@ -38,7 +38,6 @@ struct ReusableTextField: View {
                     .keyboardType(isEmail ? .emailAddress : .default)
                     .padding(6)
                     .autocapitalization(.none)
-                    .doneOnSubmit()
             }
             .padding(16)
             .frame(height: 52)
