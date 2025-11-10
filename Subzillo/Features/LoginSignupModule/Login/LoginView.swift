@@ -31,7 +31,7 @@ struct LoginView: View {
                     .font(.appRegular(24))
                     .foregroundColor(Color.neutralMain700)
                     .multilineTextAlignment(.center)
-                    .padding(.top, 40)
+                    .padding(.top, 60)
                 
                 Image("logo_svg")
                     .resizable()
@@ -70,7 +70,8 @@ struct LoginView: View {
                         PhoneNumberField(phoneNumber        : $phoneNumber,
                                          header             : "Enter your phone number",
                                          placeholder        : "000 000 000",
-                                         selectedCurrency   : $selectedCurrency, selectedCountry  : $selectedCountry,
+                                         selectedCurrency   : $selectedCurrency,
+                                         selectedCountry    : $selectedCountry,
                                          isCountry          : true)
                     }else{
                         ReusableTextField(placeholder   : "name@example.com",
@@ -80,18 +81,7 @@ struct LoginView: View {
                     }
                     
                     CustomButton(title: "Log In"){
-                        let input = checkLoginRequest(
-                            loginType       : (segmentSelected == .first ? loginCheckType.mobile : loginCheckType.email).rawValue,
-                            email           : email,
-                            phoneNumber     : phoneNumber,
-                            countryCode     : selectedCountry?.countryCode ?? "",
-                            deviceId        : appDelegate.deviceToken ?? ""
-                        )
-                        if let errorMessage = LoginSignupValidations().validateLogin(input: input) {
-                            ToastManager.shared.showToast(message: errorMessage,style: ToastStyle.error)
-                        } else {
-                            loginVM.login(input: input)
-                        }
+                        loginApi()
                     }
                 }
                 .padding(.vertical, 15)
@@ -142,30 +132,47 @@ struct LoginView: View {
                 }
                 .padding(.top, 10)
                 
-                Spacer()
                 TermsAndPrivacyText(
                     onTapTerms: {
                         loginVM.navigate(to: NavigationRoute.termsAndPrivacy(isTerm: true))
                     },
                     onTapPrivacy: {
                         loginVM.navigate(to: NavigationRoute.termsAndPrivacy(isTerm: false))
-                    },
-                    bottomPadding: 48
+                    }
                 )
+                .padding(.top,6)
+                .padding(.bottom,20)
+                Spacer()
             }
-//            .frame(minHeight: UIScreen.main.bounds.height)
             .padding(.horizontal, 20)
             .navigationBarBackButtonHidden(true)
             .onAppear{
-                if let error = commonApiVM.countryError {
+                if commonApiVM.countryError != nil {
                     commonApiVM.getCountries()
                 } else if let data = commonApiVM.countriesResponse {
                     selectedCountry = data.first(where: { $0.countryCode == Constants.shared.regionCode })
                 }
             }
         }
+        .keyboardAdaptive()
         .background(.appBackground)
         .ignoresSafeArea()
+    }
+    
+    //MARK: - User defined methods
+    func loginApi(){
+        let input = checkLoginRequest(
+            loginType       : (segmentSelected == .first ? loginCheckType.mobile : loginCheckType.email).rawValue,
+            email           : email,
+            phoneNumber     : phoneNumber,
+            countryCode     : selectedCountry?.dialCode ?? "",
+            deviceId        : appDelegate.deviceToken ?? ""
+        )
+        if let errorMessage = LoginSignupValidations().validateLogin(input: input) {
+            ToastManager.shared.showToast(message: errorMessage,style: ToastStyle.error)
+        } else {
+            loginVM.login(input: input)
+        }
     }
 }
 

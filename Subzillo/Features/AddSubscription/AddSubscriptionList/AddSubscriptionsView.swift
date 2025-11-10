@@ -69,7 +69,7 @@ struct AddSubscriptionsView: View {
                 GradientBorderView(title: "Upload Bank Notification", subTitle: "Conversational flow to guide and confirm details", buttonImage: "uploadBankIcon", action: clickOnUploasBankNotification, titleColor: Color.purple500)
                     .padding(.bottom, 16)
                 
-                GradienCustomeView(title: "Upload Bank Notification", subTitle: "Try voice recording for the fastest way to add multiple subscriptions at once.", action: clickOnUploasBankNotification, isBtn: true)
+                GradienCustomeView(title: "Upload Bank Notification", subTitle: "Try voice recording for the fastest way to add multiple subscriptions at once.", isBtn: true, action: clickOnUploasBankNotification)
                     .padding(.bottom, 16)
                 
             }

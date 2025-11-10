@@ -10,20 +10,21 @@ enum Tab {
 }
 
 enum NavigationRoute: Hashable{
+    case login
+    case termsAndPrivacy(isTerm:Bool?)
+    case verifyOtp(fromLogin: Bool,verifyMergeType:Int = 1)
+    case SuccessView(isOtp:Bool?,isMobile:Bool = true)
+    case signup
+    case onboarding
+    case welcome
+    case home
     case addSubscription(serviceName: String, planName: String, price: Double, billingCycle: String)
     case emailIntegration
     case bankStatement
     case chat
     case appearance
     case notifications
-    case home
-    case signup
-    case login
-    case onboarding
-    case verifyOtp(fromLogin: Bool)
-    case resetPassword(username:String? = "")
-    case termsAndPrivacy(isTerm:Bool?)
-    case SuccessView(isOtp:Bool?)
+//    case resetPassword(username:String? = "")
 }
 
 enum FocusPin {

@@ -200,14 +200,16 @@ struct RootView: View {
 //                        }
                 case .onboarding:
                     OnboardingView()
-                case .verifyOtp(let fromLogin):
-                    OtpVerifyView(fromLogin:fromLogin ?? false)
-                case .resetPassword(let username):
-                    ResetPasswordView(username:username ?? "")
+                case .verifyOtp(let fromLogin, let verifyMergeType):
+                    OtpVerifyView(fromLogin:fromLogin ?? false, verifyMergeType:verifyMergeType)
+//                case .resetPassword(let username):
+//                    ResetPasswordView(username:username ?? "")
                 case .termsAndPrivacy(isTerm: let isTerm):
                     TermsAndPrivacyView(isTerm:isTerm ?? false)
-                case .SuccessView(isOtp: let isOtp):
-                    SuccessView(isOtp:isOtp ?? false)
+                case .SuccessView(isOtp: let isOtp,let isMobile):
+                    SuccessView(isOtp:isOtp ?? false,isMobile:isMobile)
+                case .welcome:
+                    WelcomeHomeView()
                 }
             }
         }

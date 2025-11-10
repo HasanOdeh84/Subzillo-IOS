@@ -115,9 +115,7 @@ class LoginViewModel: ObservableObject {
             PrintLogger.modelLog(response, type: .response, isInput: false)
             ToastManager.shared.showToast(message: response.message ?? "")
             AppState.shared.logout()
-            //            DispatchQueue.main.async {
-            //            self.router.navigate(to: .login)
-            //            }
+            self.router.navigate(to: .login)
         }
         .store(in: &self.subscriptions)
     }

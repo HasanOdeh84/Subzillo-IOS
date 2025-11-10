@@ -15,14 +15,14 @@ struct LoginSignupValidations {
             return "Please enter your full name"
         }
         if input.fullName.trimmed.count < 3 {
-            return "Username must be at least 3 characters"
+            return "Full name must be at least 3 characters"
         }
         if !Validations().isValidName(input.fullName.trimmed){
             return "Enter a valid name"
         }
-        if input.email.trimmed.isEmpty{
-            return "Please enter email"
-        }
+//        if input.email.trimmed.isEmpty{
+//            return "Please enter email"
+//        }
         if !input.email.trimmed.isEmpty && !Validations().isValidEmail(input.email.trimmed) {
             return "Enter a valid email address"
         }
@@ -37,7 +37,7 @@ struct LoginSignupValidations {
         if otp.isEmpty || otp.count != 6{
             return "Please enter OTP"
         }
-        return nil // All validations passed
+        return nil
     }
     
     //MARK: - Login
@@ -53,7 +53,15 @@ struct LoginSignupValidations {
                 return "Enter valid email"
             }
         }
-        return nil // All validations passed
+        return nil
+    }
+    
+    //MARK: - Onboarding
+    func validateOnboarding(input: UpdateOnboardingRequest) -> String? {
+        if input.noofSubscriptions == 0 || input.averageMonthlySpend == 0{
+            return "Please answer all questions"
+        }
+        return nil
     }
     
     //MARK: - Forgot Password

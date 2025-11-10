@@ -24,10 +24,14 @@ struct SubscriptionsView: View {
         return formatter.string(from: currentDate)
     }
     
-    let subscriptions = [
-        SubscriptionInfo(id: "1", amount: 18.0, currency: "$", createdAt: "2025-10-06", plans:[PlanInfo(id: "1", image: "google"),PlanInfo(id: "1", image: "google"),PlanInfo(id: "1", image: "google"),PlanInfo(id: "1", image: "google")], relations: [RelationsInfo(id: "1", name: "Mon", color: "#AF0000"),RelationsInfo(id: "1", name: "Son", color: "#20368A"),RelationsInfo(id: "1", name: "Me", color: "#619BEE"),RelationsInfo(id: "1", name: "Father", color: "#619BEE")], cardsCount: 1),
-        SubscriptionInfo(id: "2", amount: 48.0, currency: "$", createdAt: "2025-10-14", plans:[PlanInfo(id: "1", image: "google"),PlanInfo(id: "1", image: "google")], relations: [RelationsInfo(id: "1", name: "Me", color: "#619BEE")], cardsCount: 3),
-        SubscriptionInfo(id: "3", amount: 8.0, currency: "$", createdAt: "2025-10-20", plans:[PlanInfo(id: "1", image: "google"),PlanInfo(id: "1", image: "google"),PlanInfo(id: "1", image: "google"),PlanInfo(id: "1", image: "google"),PlanInfo(id: "1", image: "google"),PlanInfo(id: "1", image: "google"),PlanInfo(id: "1", image: "google")], relations: [RelationsInfo(id: "1", name: "Son", color: "#20368A")], cardsCount: 4)
+    @State private var subscriptions = [
+        SubscriptionInfo(id: "1", amount: 18.0, currency: "$", createdAt: "2025-10-06", plans:[PlanInfo(id: "1", image: "google", amount: 15.99, currency: "$", card:"Card 1"),PlanInfo(id: "1", image: "google", amount: 6.00, currency: "$", card:"Card 1"),PlanInfo(id: "1", image: "google", amount: 11.50, currency: "$", card:"Card 1"),PlanInfo(id: "1", image: "google", amount: 4.8, currency: "$", card:"Card 1"),PlanInfo(id: "1", image: "google", amount: 21.0, currency: "$", card:"Card 1"),PlanInfo(id: "1", image: "google", amount: 16.00, currency: "$", card:"Card 1")], relations: [RelationsInfo(id: "1", name: "Mon", color: "#AF0000", plans:[PlanInfo(id: "1", image: "google", amount: 15.99, currency: "$", card:"Card 1")]), RelationsInfo(id: "1", name: "Son", color: "#20368A",  plans:[PlanInfo(id: "1", image: "google", amount: 6.00, currency: "$", card:"Card 1"),PlanInfo(id: "1", image: "google", amount: 11.50, currency: "$", card:"Card 1")]),  RelationsInfo(id: "1", name: "Me", color: "#619BEE", plans:[PlanInfo(id: "1", image: "google", amount: 4.8, currency: "$", card:"Card 1"),PlanInfo(id: "1", image: "google", amount: 21.00, currency: "$", card:"Card 1")]),  RelationsInfo(id: "1", name: "Father", color: "#619BEE",plans:[PlanInfo(id: "1", image: "google", amount: 16.00, currency: "$", card:"Card 1")])], cardsCount: 1),
+        
+        SubscriptionInfo(id: "2", amount: 48.0, currency: "$", createdAt: "2025-10-14", plans:[PlanInfo(id: "1", image: "google", amount: 15.99, currency: "$" , card:"Card 1"),PlanInfo(id: "1", image: "google", amount: 6.00, currency: "$" , card:"Card 2")], relations: [RelationsInfo(id: "1", name: "Me", color: "#619BEE", plans:[PlanInfo(id: "1", image: "google", amount: 15.99, currency: "$", card:"Card 1"),PlanInfo(id: "1", image: "google", amount: 6.00, currency: "$", card:"Card 2")])], cardsCount: 2),
+        
+        SubscriptionInfo(id: "3", amount: 8.0, currency: "$", createdAt: "2025-10-20", plans:[PlanInfo(id: "1", image: "google", amount: 15.99, currency: "$", card:"Card 1"),PlanInfo(id: "1", image: "google", amount: 6.00, currency: "$", card:"Card 1"),PlanInfo(id: "1", image: "google", amount: 11.50, currency: "$", card:"Card 3"),PlanInfo(id: "1", image: "google", amount: 4.8, currency: "$", card:"Card 4"),PlanInfo(id: "1", image: "google", amount: 21.0, currency: "$", card:"Card 2"),PlanInfo(id: "1", image: "google", amount: 16.00, currency: "$", card:"Card 4")], relations: [RelationsInfo(id: "1", name: "Son", color: "#20368A", plans:[PlanInfo(id: "1", image: "google", amount: 15.99, currency: "$", card:"Card 1"),PlanInfo(id: "1", image: "google", amount: 6.00, currency: "$", card:"Card 1"),PlanInfo(id: "1", image: "google", amount: 11.50, currency: "$", card:"Card 3")]), RelationsInfo(id: "1", name: "Grand Son", color: "#CA72EA",  plans:[PlanInfo(id: "1", image: "google", amount: 4.8, currency: "$", card:"Card 4"),PlanInfo(id: "1", image: "google", amount: 21.0, currency: "$", card:"Card 2"),PlanInfo(id: "1", image: "google", amount: 16.00, currency: "$", card:"Card 4")])], cardsCount: 4),
+        
+        SubscriptionInfo(id: "3", amount: 25.0, currency: "$", createdAt: "2025-10-25", plans:[PlanInfo(id: "1", image: "google", amount: 15.99, currency: "$", card:"Card 1"),PlanInfo(id: "1", image: "google", amount: 6.00, currency: "$", card:"Card 1"),PlanInfo(id: "1", image: "google", amount: 11.50, currency: "$", card:"Card 1"),PlanInfo(id: "1", image: "google", amount: 4.8, currency: "$", card:"Card 1")], relations: [RelationsInfo(id: "1", name: "Grand Son", color: "#CA72EA", plans:[PlanInfo(id: "1", image: "google", amount: 15.99, currency: "$", card:"Card 1"),PlanInfo(id: "1", image: "google", amount: 6.00, currency: "$", card:"Card 1"),PlanInfo(id: "1", image: "google", amount: 11.50, currency: "$", card:"Card 1"),PlanInfo(id: "1", image: "google", amount: 4.8, currency: "$", card:"Card 1")])], cardsCount: 1)
     ]
     
     var body: some View {
@@ -269,27 +273,40 @@ struct SubscriptionsView: View {
             }
             .padding(.bottom, 24)
             
-            List(subscriptions) { subscription in
-                SubscriptionRow(subscriptionData: subscription)
-                    .onTapGesture {
-                        print("Tapped on: \(subscription)")
-                    }
-                    .listRowSeparator(.hidden)
-                    .listRowInsets(EdgeInsets())
-                    .listRowBackground(Color.clear)
+            List {
+                ForEach(Array(subscriptions.enumerated()), id: \.offset) { index, subscription in
+                    SubscriptionRow(subscriptionData: subscription)
+                        .onTapGesture {
+                            toggleSubscription(at: index)
+                        }
+                        .listRowSeparator(.hidden)
+                        .listRowInsets(EdgeInsets())
+                        .listRowBackground(Color.clear)
+                }
             }
             .listStyle(.plain)
             .frame(maxWidth: .infinity)
             .scrollContentBackground(.hidden)
-            .background(Color.neutralBg100)
+            .background(.appBackground)
         }
         .frame(maxWidth: .infinity)
         .padding(.horizontal, 20)
-        .background(Color.neutralBg100)
+        .background(.appBackground)
         
     }
     
     //MARK: - Button actions
+    private func toggleSubscription(at index: Int) {
+        var obj = subscriptions[index]
+        if (obj.isOpen ?? false ) == true
+        {
+            obj.isOpen = false
+        }
+        else{
+            obj.isOpen = true
+        }
+        subscriptions[index] = obj
+    }
     private func goToNotifications() {
     }
     private func clickOnListView() {

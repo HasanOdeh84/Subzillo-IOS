@@ -15,12 +15,14 @@ class RegistrationViewModel: ObservableObject {
     var apiReference                    = NetworkRequest.shared
     @Published var registerResponse     : RegisterResponse?
     private let router                  : AppIntentRouter
-    
-    init(router: AppIntentRouter = .shared) {
+    private let sessionManager          : SessionManager
+
+    init(router: AppIntentRouter = .shared,sessionManager: SessionManager = .shared) {
         self.router = router
+        self.sessionManager = sessionManager
     }
     
-    func register(input:RegisterRequest) {
+    func register(input:RegisterRequest,verifyType:Int) {
         apiReference.postApi(endPoint: APIEndpoint.registration, method: .POST,token: authKey,body: input,showLoader: true, responseType: RegisterResponse.self)
             .sink { [unowned self] completion in
                 if case let .failure(error) = completion {
@@ -29,12 +31,55 @@ class RegistrationViewModel: ObservableObject {
             }
         receiveValue: { [unowned self] response in
             PrintLogger.modelLog(response, type: .response, isInput: false)
-            ToastManager.shared.showToast(message: response.message ?? "")
             self.registerResponse = response
-            DispatchQueue.main.async { [self] in
-                router.navigate(to: .verifyOtp(fromLogin: false))
-//                router.navigate(to: .SuccessView(isOtp: false))
+            if response.data?.status == 0{
+                AlertManager.shared.showAlert(title: "Merge account", message: response.message ?? "",cancelText: "Cancel",isDestructive: true, okAction: {
+                    self.mergeAccount(input: SendMergeOtpRequest(mergeLoginType  : verifyType == 1 ? 2 : 1,
+                                                                 email           : input.email,
+                                                                 countryCode     : input.countryCode,
+                                                                 phoneNumber     : input.phoneNumber))
+                })
+            }else{
+                ToastManager.shared.showToast(message: response.message ?? "")
+                if input.email != "" && input.phoneNumber != ""{
+                    let verifyType = (SessionManager.shared.loginData?.verifyType ?? 0) == 1 ? 2 : 1
+                    let data = LoginSignupVerifyData(verifyType         : verifyType,
+                                                     email              : input.email,
+                                                     phoneNumber        : input.phoneNumber,
+                                                     countryCode        : input.countryCode,
+                                                     userId             : SessionManager.shared.loginData?.userId ?? "",
+                                                     isNewUser          : SessionManager.shared.loginData?.isNewUser ?? false,
+                                                     isSignupCompleted  : SessionManager.shared.loginData?.isSignupCompleted ?? false)
+                    self.sessionManager.saveLoginData(data)
+                    router.navigate(to: .verifyOtp(fromLogin: false))
+                }else{
+                    router.navigate(to: .SuccessView(isOtp: false))
+                }
             }
+        }
+        .store(in: &self.subscriptions)
+    }
+    
+    func mergeAccount(input:SendMergeOtpRequest) {
+        apiReference.postApi(endPoint: APIEndpoint.sendMergeOtp, method: .POST,token: authKey,body: input,showLoader: true, responseType: GeneralResponse.self)
+            .sink { [unowned self] completion in
+                if case let .failure(error) = completion {
+                    self.handleError(error,endPoint: APIEndpoint.sendMergeOtp)
+                }
+            }
+        receiveValue: { [unowned self] response in
+            PrintLogger.modelLog(response, type: .response, isInput: false)
+            ToastManager.shared.showToast(message: response.message ?? "")
+            let verifyType = (SessionManager.shared.loginData?.verifyType ?? 0) == 1 ? 2 : 1
+            let data = LoginSignupVerifyData(verifyType         : verifyType,
+                                             email              : input.email,
+                                             phoneNumber        : input.phoneNumber,
+                                             countryCode        : input.countryCode,
+                                             userId             : SessionManager.shared.loginData?.userId ?? "",
+                                             isNewUser          : SessionManager.shared.loginData?.isNewUser ?? false,
+                                             isSignupCompleted  : SessionManager.shared.loginData?.isSignupCompleted ?? false)
+            self.sessionManager.saveLoginData(data)
+            router.navigate(to: .verifyOtp(fromLogin: false,verifyMergeType: 2))
         }
         .store(in: &self.subscriptions)
     }

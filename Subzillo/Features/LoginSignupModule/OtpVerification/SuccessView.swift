@@ -16,6 +16,7 @@ struct SuccessView: View {
     
     //MARK: - Properties
     var isOtp: Bool?
+    var isMobile: Bool?
     var toScreen: SuccessRedirection = .signup
     
     var body: some View {
@@ -40,7 +41,10 @@ struct SuccessView: View {
                         .padding(.top,24)
                         .padding(.bottom,106)
                     
-                    Text("Phone Number\n Verified")
+                    LottieView(name: "success")
+                        .frame(width: 127,height: 127)
+                    
+                    Text((isMobile ?? false) ? "Phone Number\n Verified" : "Email\n Verified")
                         .font(.appRegular(24))
                         .foregroundColor(Color.neutralMain700)
                         .multilineTextAlignment(.center)
@@ -54,6 +58,7 @@ struct SuccessView: View {
             .onAppear{
                 DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
                     if self.isOtp ?? false{
+                        AppIntentRouter.shared.navigate(to: .signup)
                     }else{
                         AppIntentRouter.shared.navigate(to: .onboarding)
                     }
@@ -62,11 +67,6 @@ struct SuccessView: View {
         }
     }
 }
-
-#Preview {
-    SuccessView()
-}
-
 
 struct SignupSuccessView: View {
     
@@ -86,15 +86,22 @@ struct SignupSuccessView: View {
             LottieView(name: "success")
                 .frame(width: 127,height: 127)
             
-            Text("Phone Number\n Verified")
+            Text("Account created successfully")
                 .font(.appRegular(24))
                 .foregroundColor(Color.neutralMain700)
                 .multilineTextAlignment(.center)
             
-            GradienCustomeView(title: "Quick tip", subTitle: "Start by adding your first subscription to see how Subzillo helps you stay organized.",isBtn: false) {
-            }
+            GradienCustomeView(title    : "Quick tip",
+                               subTitle : "Start by adding your first subscription to see how Subzillo helps you stay organized.",
+                               isBtn    : false,
+                               action   :  {
+            })
             .padding(.horizontal,24)
             Spacer()
         }
     }
+}
+
+#Preview {
+    SuccessView()
 }

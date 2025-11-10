@@ -23,7 +23,7 @@ class OtpVerifyViewModel: ObservableObject {
         self.sessionManager = sessionManager
     }
     
-    func verifyOtp(input:OtpVerifyRequest) {
+    func verifyOtp(input:OtpVerifyRequest,fromLogin:Bool) {
         apiReference.postApi(endPoint: APIEndpoint.verifyOtp, method: .POST, token: authKey, body: input, showLoader: true, responseType: GeneralResponse.self)
             .sink { [unowned self] completion in
                 if case let .failure(error) = completion {
@@ -34,15 +34,17 @@ class OtpVerifyViewModel: ObservableObject {
             PrintLogger.modelLog(response, type: .response, isInput: false)
             ToastManager.shared.showToast(message: response.message ?? "")
             self.otpVerifyResponse = response
-            DispatchQueue.main.async { [self] in
-                if sessionManager.loginData?.isNewUser == true{
-                    router.navigate(to: .SuccessView(isOtp: true))
+            if sessionManager.loginData?.isNewUser == true && fromLogin{
+                router.navigate(to: .SuccessView(isOtp: true,isMobile: input.verifyType == 1 ? true : false))
+            }else{
+                if sessionManager.loginData?.isSignupCompleted == true{
+                    AppState.shared.login()
+                    router.navigate(to: .home)
                 }else{
-                    if sessionManager.loginData?.isSignupCompleted == true{
-                        AppState.shared.login()
-                        router.navigate(to: .home)
-                    }else{
+                    if fromLogin{
                         router.navigate(to: .signup)
+                    }else{
+                        router.navigate(to: .SuccessView(isOtp: false))
                     }
                 }
             }

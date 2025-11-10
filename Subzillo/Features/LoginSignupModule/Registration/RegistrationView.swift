@@ -18,12 +18,12 @@ struct RegistrationView: View {
     @EnvironmentObject var appDelegate                  : AppDelegate
     @State private var familyMembers                    : [FamilyMember]?
     @State private var selectedCountry                  : Country?
+    @State private var selectedCurrency                 : Currency?
     @State var verifyData                               : LoginSignupVerifyData?
     @EnvironmentObject var sessionManager               : SessionManager
     
     //MARK: - body
     var body: some View{
-        
         ZStack{
             Group {
                 Color(.appBackground)
@@ -45,12 +45,14 @@ struct RegistrationView: View {
                         .padding(.vertical,24)
                     
                     Group {
-//                        PhoneNumberField(phoneNumber        : $phoneNumber,
-//                                         header             : "Enter your phone number",
-//                                         placeholder        : "000 000 000",
-//                                         selectedCountry    : $selectedCountry)
-//                        .opacity(verifyData?.verifyType == 1 ? 0.5 : 1.0)
-//                        .disabled(verifyData?.verifyType == 1 ? true : false)
+                        PhoneNumberField(phoneNumber        : $phoneNumber,
+                                         header             : "Enter your phone number",
+                                         placeholder        : "000 000 000",
+                                         selectedCurrency   : $selectedCurrency,
+                                         selectedCountry    : $selectedCountry,
+                                         isCountry          : true)
+                        .opacity(verifyData?.verifyType == 1 ? 0.5 : 1.0)
+                        .disabled(verifyData?.verifyType == 1 ? true : false)
                         
                         ReusableTextField(placeholder: "Enter your full name", text: $fullName,header:"Full Name")
                         ReusableTextField(placeholder: "name@example.com", text: $email, isEmail: true,header: "Email")
@@ -58,35 +60,10 @@ struct RegistrationView: View {
                             .disabled(verifyData?.verifyType == 2 ? true : false)
                     }
                     
-//                    if familyMembers?.count != 0 {
-//                        ForEach(familyMembers?.indices, id: \.self) { index in
-//                            VStack {
-//                                FamilyMemberView(member: $familyMembers?[index], action: {
-//                                    if familyMembers?.count > 0 {
-//                                        familyMembers.remove(at: index)
-//                                    }
-//                                })
-//                            }
-//                        }
-//                    }
-//
-//                    underlineText(text: "Add Family Member", image: "profile_add") {
-//                        familyMembers.append(FamilyMember())
-//                    }
-                    
                     CustomButton(title: "Finish Sign Up") {
-                        let input = RegisterRequest(userId              : verifyData?.userId ?? "",
-                                                    fullName            : fullName,
-                                                    email               : verifyData?.verifyType == 1 ? email : verifyData?.email ?? "",
-                                                    countryCode         : verifyData?.verifyType == 1 ? verifyData?.countryCode ?? "" : selectedCountry?.countryCode ?? "",
-                                                    phoneNumber         : verifyData?.verifyType == 1 ? verifyData?.phoneNumber ?? "" : phoneNumber)
-                        if let errorMessage = LoginSignupValidations().validateSignup(input: input) {
-                            ToastManager.shared.showToast(message: errorMessage,style: ToastStyle.error)
-                        } else {
-                            registerVM.register(input: input)
-                        }
+                        signupApi()
                     }
-
+                    
                     TermsAndPrivacyText(
                         onTapTerms: {
                             registerVM.navigate(to: .termsAndPrivacy(isTerm: true))
@@ -98,7 +75,6 @@ struct RegistrationView: View {
                     )
                     Spacer()
                 }
-//                .frame(minHeight: UIScreen.main.bounds.height)
                 .padding(20)
                 .navigationBarBackButtonHidden(true)
                 .onAppear{
@@ -112,27 +88,25 @@ struct RegistrationView: View {
                     }
                 }
             }
+            .keyboardAdaptive()
             .ignoresSafeArea()
         }
     }
     
-//    //MARK: - Methods
-//    // MARK: - Validation
-//    private var isFormValid: Bool {
-//        let hasUppercase = password.range(of: "[A-Z]", options: .regularExpression) != nil
-//        let hasNumber = password.range(of: "\\d", options: .regularExpression) != nil
-//        let hasSpecial = password.range(of: "[^A-Za-z0-9]", options: .regularExpression) != nil
-//        
-//        return !username.isEmpty &&
-//        !fullName.isEmpty &&
-//        !email.isEmpty &&
-//        password.count >= 8 &&
-//        hasUppercase &&
-//        hasNumber &&
-//        hasSpecial &&
-//        password == confirmPassword &&
-//        agreeTerms
-//    }
+    //MARK: - Methods
+    //MARK: - Signup API
+    func signupApi(){
+        let input = RegisterRequest(userId              : verifyData?.userId ?? "",
+                                    fullName            : fullName,
+                                    email               : verifyData?.verifyType == 1 ? email : verifyData?.email ?? "",
+                                    countryCode         : verifyData?.verifyType == 1 ? verifyData?.countryCode ?? "" : selectedCountry?.dialCode ?? "",
+                                    phoneNumber         : verifyData?.verifyType == 1 ? verifyData?.phoneNumber ?? "" : phoneNumber)
+        if let errorMessage = LoginSignupValidations().validateSignup(input: input) {
+            ToastManager.shared.showToast(message: errorMessage,style: ToastStyle.error)
+        } else {
+            registerVM.register(input: input, verifyType: verifyData?.verifyType ?? 0)
+        }
+    }
 }
 
 struct PasswordRuleView: View {
@@ -160,7 +134,7 @@ struct CheckboxToggleStyle: ToggleStyle {
         }
     }
 }
-//
+
 //#Preview {
 //    RegistrationView()
 //}

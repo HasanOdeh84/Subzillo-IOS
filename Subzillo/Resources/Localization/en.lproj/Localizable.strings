@@ -9,6 +9,65 @@
 //Splash
 "One place for\n all your subscriptions" = "One place for\n all your subscriptions";
 
+//Login
+"Welcome to" = "Welcome to";
+"You're not logged in" = "You're not logged in";
+"Sign in to your Subzillo account" = "Sign in to your Subzillo account";
+"Log In" = "Log In";
+"Continue with Google" = "Continue with Google";
+"By continuing, you agree to our Terms of Service and Privacy Policy" = "By continuing, you agree to our Terms of Service and Privacy Policy";
+"Privacy Policy" = "Privacy Policy";
+"Terms of Service" = "Terms of Service";
+"Enter your phone number" = "Enter your phone number";
+"Login your account using your preferred method" = "Login your account using your preferred method";
+"or" = "or";
+"Continue with Microsoft" = "Continue with Microsoft";
+"Enter your email address" = "Enter your email address";
+"Phone Number" = "Phone Number";
+
+//Terms and conditions and privacy policy
+"Share" = "Share";
+
+//Currency and number bottom sheet
+"search" = "search";
+"Search country" = "Search country";
+"Search currency" = "Search currency";
+"Select your Country" = "Select your Country";
+
+//Otp verification
+"Verify Phone Number" = "Verify Phone Number";
+"We send a code to your phone number" = "We send a code to your phone number";
+"We send a code to your email" = "We send a code to your email";
+"Enter validation code" = "Enter validation code";
+"Verify Email Address" = "Verify Email Address";
+"Verify Email" = "Verify Email";
+"Resend code in" = "Resend code in";
+"Didn't receive the code?" = "Didn't receive the code?";
+"Resend Code" = "Resend Code";
+"Change number" = "Change number";
+"Change email" = "Change email";
+
+//Otp Success
+"Phone Number Verified" = "Phone Number Verified";
+"Email Verified" = "Email Verified";
+
+//signup
+"Full Name" = "Full Name";
+"Enter your full name" = "Enter your full name";
+"Email" = "Email";
+"name@example.com" = "name@example.com";
+"Family Member" = "Family Member";
+"Family Nickname" = "Family Nickname";
+"Nickname" = "Nickname";
+"Family Member phone number" = "Family Member phone number";
+"Color (To distinguish color family subscriptions)" = "Color (To distinguish color family subscriptions)";
+"Finish Sign Up" = "Finish Sign Up";
+
+//Signup success
+"Account created successfully" = "Account created successfully";
+"Quick tip" = "Quick tip";
+"Start by adding your first subscription to see how Subzillo helps you stay organized." = "Start by adding your first subscription to see how Subzillo helps you stay organized.";
+
 //Onboarding
 "Manage your and your family's subscriptions in one place" = "Manage your and your family's subscriptions in one place";
 "Track Netflix, Spotify, gym memberships, and more in one organized dashboard. Never lose track again." = "Track Netflix, Spotify, gym memberships, and more in one organized dashboard. Never lose track again.";
@@ -24,61 +83,9 @@
 "How much you spend on subscription monthly?" = "How much you spend on subscription monthly?";
 "Your payment currency" = "Your payment currency";
 
-//Login
-"Welcome to" = "Welcome to";
-"You're not logged in" = "You're not logged in";
-"Sign in to your Subzillo account" = "Sign in to your Subzillo account";
-"Log In" = "Log In";
-"Continue with Google" = "Continue with Google";
-"By continuing, you agree to our Terms of Service and Privacy Policy" = "By continuing, you agree to our Terms of Service and Privacy Policy";
-"Privacy Policy" = "Privacy Policy";
-"Terms of Service" = "Terms of Service";
-"Enter your phone number" = "Enter your phone number";
-"Login your account using your preferred method" = "Login your account using your preferred method";
-"or" = "or";
-"Continue with Microsoft" = "Continue with Microsoft";
-"Enter your email address" = "Enter your email address";
-
-//Currency and number bottom sheet
-"search" = "search";
-"Search country" = "Search country";
-"Search currency" = "Search currency";
-
-//Terms and conditions and privacy policy
-"Share" = "Share";
-
-//Otp verification
-"Verify Phone Number" = "Verify Phone Number";
-"We send a code to your phone number" = "We send a code to your phone number";
-"Enter validation code" = "Enter validation code";
-"Verify Phone Number" = "Verify Phone Number";
-"Resend code in" = "Resend code in";
-"Didn't receive the code?" = "Didn't receive the code?";
-"Resend Code" = "Resend Code";
-"Change number" = "Change number";
-
-//Otp Success
-"Phone Number Verified" = "Phone Number Verified";
-
 //Change mobile number bottom sheet
 "Change mobile number" = "Change mobile number";
 "Update" = "Update";
-
-//signup
-"Full Name" = "Full Name";
-"Enter your full name" = "Enter your full name";
-"Email" = "Email";
-"name@example.com" = "name@example.com";
-"Family Member" = "Family Member";
-"Family Nickname" = "Family Nickname";
-"Nickname" = "Nickname";
-"Family Member phone number" = "Family Member phone number";
-"Color (To distinguish color family subscriptions)" = "Color (To distinguish color family subscriptions)";
-
-//Signup success
-"Account created successfully" = "Account created successfully";
-"Quick tip" = "Quick tip";
-"Start by adding your first subscription to see how Subzillo helps you stay organized." = "Start by adding your first subscription to see how Subzillo helps you stay organized.";
 
 //VoiceCommandView
 "Add by Voice" = "Add by Voice";

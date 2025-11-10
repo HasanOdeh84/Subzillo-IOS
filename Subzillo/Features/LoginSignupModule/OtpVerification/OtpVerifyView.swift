@@ -31,6 +31,7 @@ struct OtpVerifyView: View {
     @State var sendCodeText                 : String = "phone number"
     @State var changeNumberEmail            : String = "number"
     @State var buttonText                   : String = "Phone Number"
+    @State var verifyMergeType              : Int = 1
     
     //MARK: - Body
     var body: some View {
@@ -93,21 +94,7 @@ struct OtpVerifyView: View {
                     HStack(){
                         Spacer()
                         CustomButton(title: "Verify \(buttonText)") {
-                            let otp = otpFields.joined()
-                            print("Entered OTP: \(otp)")
-                            if let errorMessage = LoginSignupValidations().validateVerifyOtp(otp: otp) {
-                                ToastManager.shared.showToast(message: errorMessage,style: ToastStyle.error)
-                            } else {
-                                let input = OtpVerifyRequest(
-                                    verifyType  : verifyData?.verifyType ?? 0,
-                                    email       : verifyData?.email ?? "",
-                                    phoneNumber : verifyData?.phoneNumber ?? "",
-                                    countryCode : verifyData?.countryCode ?? "",
-                                    otp         : Int(otp) ?? 0,
-                                    userId      : verifyData?.userId ?? ""
-                                )
-                                otpVerifyVM.verifyOtp(input : input)
-                            }
+                            verifyOtp()
                         }
                         Spacer()
                     }
@@ -187,16 +174,27 @@ struct OtpVerifyView: View {
                                 buttonText = "Email"
                             }
                         }else{
+//                            if verifyData?.verifyType == 1{
+//                                verifyText = "Verify Email Address"
+//                                sendCodeText = "email"
+//                                changeNumberEmail = "email"
+//                                buttonText = "Email"
+//                            }else{
+//                                verifyText = "Verify Phone Number"
+//                                sendCodeText = "phone number"
+//                                changeNumberEmail = "number"
+//                                buttonText = "Phone Number"
+//                            }
                             if verifyData?.verifyType == 1{
+                               verifyText = "Verify Phone Number"
+                                sendCodeText = "phone number"
+                                changeNumberEmail = "number"
+                                buttonText = "Phone Number"
+                            }else{
                                 verifyText = "Verify Email Address"
                                 sendCodeText = "email"
                                 changeNumberEmail = "email"
                                 buttonText = "Email"
-                            }else{
-                                verifyText = "Verify Phone Number"
-                                sendCodeText = "phone number"
-                                changeNumberEmail = "number"
-                                buttonText = "Phone Number"
                             }
                         }
                     }
@@ -261,6 +259,25 @@ struct OtpVerifyView: View {
             }
             // Reset the flag after focus update
             isPasting = false
+        }
+    }
+    
+    func verifyOtp(){
+        let otp = otpFields.joined()
+        print("Entered OTP: \(otp)")
+        if let errorMessage = LoginSignupValidations().validateVerifyOtp(otp: otp) {
+            ToastManager.shared.showToast(message: errorMessage,style: ToastStyle.error)
+        } else {
+            let input = OtpVerifyRequest(
+                verifyType          : verifyData?.verifyType ?? 0,
+                email               : verifyData?.email ?? "",
+                phoneNumber         : verifyData?.phoneNumber ?? "",
+                countryCode         : verifyData?.countryCode ?? "",
+                otp                 : Int(otp) ?? 0,
+                userId              : verifyData?.userId ?? "",
+                verifyMergeType     : verifyMergeType
+            )
+            otpVerifyVM.verifyOtp(input : input, fromLogin: fromLogin)
         }
     }
 }

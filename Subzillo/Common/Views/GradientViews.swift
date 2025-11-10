@@ -66,9 +66,9 @@ struct GradientBorderView: View {
 struct GradienCustomeView: View {
     var title           : String
     var subTitle        : String
-    var action          : () -> Void
     var isBtn           : Bool = false
-    
+    var action          : () -> Void
+
     var body: some View {
         Button(action: action) {
             

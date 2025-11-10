@@ -16,13 +16,16 @@ struct OnboardingPage {
 struct OnboardingView: View {
     
     //MARK: - Properties
-    @State private var currentPage                                  = 0
-    @State private var selectedSubscriptions                        : String? = nil
-    @State private var selectedSpending                             : String? = nil
-    private let subscriptionOptions                                 = ["5 - 10", "10 - 20", "20 - 30", "More than 30"]
-    private let spendingOptions                                     = ["Less than $50", "Less than $150", "More than $150"]
-    @State private var selectedCurrency                             : Currency?
-    
+    @State private var currentPage                      = 0
+    @State private var selectedSubscriptions            : Int? = nil
+    @State private var selectedSpending                 : Int? = nil
+    private let subscriptionOptions                     = ["5 - 10", "10 - 20", "20 - 30", "More than 30"]
+    private let spendingOptions                         = ["Less than $50", "Less than $150", "More than $150"]
+    @State private var selectedCurrency                 : Currency?
+    @State private var selectedCountry                  : Country?
+    @EnvironmentObject var commonApiVM                  : CommonAPIViewModel
+    @StateObject private var onboardingVM               = OnboardingViewModel()
+
     // controls the SwiftUI offset animation
     @State private var animateIn    = false
     // delay and distance
@@ -68,8 +71,7 @@ struct OnboardingView: View {
                 HStack(spacing: 10) {
                     Spacer()
                     Button {
-                        //need to change
-                        AppIntentRouter.shared.navigatingRoute = .login
+                        onboardingVM.navigate(to: .welcome)
                     } label: {
                         HStack(spacing: 4) {
                             Text("Skip Onboarding")
@@ -172,6 +174,7 @@ struct OnboardingView: View {
                 GradientBorderButton(title: currentPage == pages.count - 1 ?
                                      "Lets Go!" : "Next") {
                     if currentPage == pages.count - 1{
+                        updateOnboardingApi()
                     }else{
                         currentPage += 1
                     }
@@ -181,9 +184,19 @@ struct OnboardingView: View {
             }
             .padding(.horizontal, 20)
             .navigationBarBackButtonHidden(true)
+            .onAppear{
+                AppState.shared.login()
+                if let error = commonApiVM.currencyError {
+                    commonApiVM.getCurrencies()
+                } else if let data = commonApiVM.currencyResponse {
+                    selectedCurrency = data.first(where: { $0.code == Constants.shared.currencyCode })
+                }
+            }
         }
     }
     
+    //MARK: - User defined methods
+    //MARK: Tell us about yourself view
     func tellUsAbtYourselfView() -> some View {
         ScrollView{
             VStack(spacing: 32){
@@ -196,7 +209,7 @@ struct OnboardingView: View {
                         .font(.appRegular(18))
                         .foregroundColor(.appNeutralMain700)
                     WrapButtonsView(options: subscriptionOptions,
-                                    selected: $selectedSubscriptions)
+                                    selectedIndex: $selectedSubscriptions)
                 }
                 
                 VStack(alignment: .leading, spacing: 12) {
@@ -204,16 +217,30 @@ struct OnboardingView: View {
                         .font(.appRegular(18))
                         .foregroundColor(.appNeutralMain700)
                     WrapButtonsView(options: spendingOptions,
-                                    selected: $selectedSpending)
+                                    selectedIndex: $selectedSpending)
                 }
-                
-//                PhoneNumberField(phoneNumber        : .constant(""),
-//                                 header             : "Your payment currency",
-//                                 placeholder        : "United States Dollarr",
-//                                 selectedCurrency   : $selectedCurrency)
+                PhoneNumberField(phoneNumber        : .constant(""),
+                                 header             : "Your payment currency",
+                                 placeholder        : selectedCurrency?.name,
+                                 selectedCurrency   : $selectedCurrency,
+                                 selectedCountry    : $selectedCountry,
+                                 isCountry          : false)
                 Spacer()
             }
             .padding(.horizontal,2)
+        }
+    }
+    
+    //MARK: - Update onboarding API
+    func updateOnboardingApi(){
+        let input = UpdateOnboardingRequest(userId              : Constants.getUserId(),
+                                            preferredCurrency   : selectedCurrency?.code ?? "",
+                                            noofSubscriptions   : (selectedSubscriptions ?? 0),
+                                            averageMonthlySpend : (selectedSpending ?? 0))
+        if let errorMessage = LoginSignupValidations().validateOnboarding(input: input) {
+            ToastManager.shared.showToast(message: errorMessage,style: ToastStyle.error)
+        } else {
+            onboardingVM.updateOnboarding(input: input)
         }
     }
 }
@@ -224,31 +251,62 @@ struct OnboardingView_Previews: PreviewProvider {
     }
 }
 
+//struct WrapButtonsView: View {
+//    let options: [String]
+//    @Binding var selected: String?
+//    
+//    var body: some View {
+//        LazyVGrid(columns: [GridItem(.adaptive(minimum: 100), spacing: 8)], spacing: 8) {
+//            ForEach(options, id: \.self) { option in
+//                Button {
+//                    selected = option
+//                } label: {
+//                    Text(LocalizedStringKey(option))
+//                        .font(.appRegular(18))
+//                    //                        .lineLimit(1)
+//                    //                        .fixedSize(horizontal: true, vertical: false)
+//                        .foregroundColor(selected == option ? .white : .appNeutralMain700)
+//                        .padding(.vertical, 6)
+//                        .padding(.horizontal, 12)
+//                        .frame(maxWidth: .infinity)
+//                        .background(
+//                            Capsule()
+//                                .fill(selected == option ? Color.blueMain700 : .appNeutral900)
+//                        )
+//                        .overlay(
+//                            Capsule()
+//                                .stroke(selected == option ? Color.clear : .appNeutral800, lineWidth: 1)
+//                        )
+//                }
+//            }
+//        }
+//    }
+//}
+
 struct WrapButtonsView: View {
-    let options: [String]
-    @Binding var selected: String?
+    let options                 : [String]
+    @Binding var selectedIndex  : Int? // 👈 store index instead of value
     
     var body: some View {
         LazyVGrid(columns: [GridItem(.adaptive(minimum: 100), spacing: 8)], spacing: 8) {
-            ForEach(options, id: \.self) { option in
+            ForEach(Array(options.enumerated()), id: \.offset) { index, option in
                 Button {
-                    selected = option
+                    selectedIndex = index + 1 // 👈 track which one was tapped
                 } label: {
+                    var selectedIndexVal = (selectedIndex ?? 0) - 1
                     Text(LocalizedStringKey(option))
                         .font(.appRegular(18))
-                    //                        .lineLimit(1)
-                    //                        .fixedSize(horizontal: true, vertical: false)
-                        .foregroundColor(selected == option ? .white : .appNeutralMain700)
+                        .foregroundColor(selectedIndexVal == index ? .white : .appNeutralMain700)
                         .padding(.vertical, 6)
                         .padding(.horizontal, 12)
                         .frame(maxWidth: .infinity)
                         .background(
                             Capsule()
-                                .fill(selected == option ? Color.blueMain700 : .appNeutral900)
+                                .fill(selectedIndexVal == index ? Color.blueMain700 : .appNeutral900)
                         )
                         .overlay(
                             Capsule()
-                                .stroke(selected == option ? Color.clear : .appNeutral800, lineWidth: 1)
+                                .stroke(selectedIndexVal == index ? Color.clear : .appNeutral800, lineWidth: 1)
                         )
                 }
             }

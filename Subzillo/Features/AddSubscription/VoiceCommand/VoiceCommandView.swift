@@ -84,7 +84,10 @@ struct VoiceCommandView: View {
                 .padding(.top, 24)
                 
                 // MARK: - How It Works
-                GradienCustomeView(title: "How it work?", subTitle: "Press & Hold to Speak, remove finger to pause, submit when you finish.", action: clickOnHowItWorks, isBtn: false)
+                GradienCustomeView(title    : "How it work?",
+                                   subTitle : "Press & Hold to Speak, remove finger to pause, submit when you finish.",
+                                   isBtn    : false,
+                                   action   : clickOnHowItWorks)
                     .padding(.horizontal, 20)
                     .padding(.top, 24)
                     .padding(.bottom, 24)

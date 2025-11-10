@@ -17,26 +17,21 @@ public struct RegisterRequest: Codable {
 
 public struct RegisterResponse: Codable {
     var message : String?
-//    var data    : RegisterResponseData?
+    var data    : RegisterResponseData?
 }
 
 public struct RegisterResponseData: Codable {
-  var id                    : String?
-  var username              : String?
-  var email                 : String?
-  var accessToken           : String?
-  var refreshToken          : String?
+  var status                    : Int?
   public init(
-    id                      : String? = nil,
-    username                : String? = nil,
-    email                   : String? = nil,
-    accessToken             : String? = nil,
-    refreshToken            : String? = nil
+    status                      : Int? = nil
   ) {
-    self.id                 = id
-    self.username           = username
-    self.email              = email
-    self.accessToken        = accessToken
-    self.refreshToken       = refreshToken
+    self.status                 = status
   }
+}
+
+public struct SendMergeOtpRequest: Codable {
+    let mergeLoginType          : Int
+    let email                   : String
+    let countryCode             : String
+    let phoneNumber             : String
 }

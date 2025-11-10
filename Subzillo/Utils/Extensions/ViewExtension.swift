@@ -31,6 +31,10 @@ extension View {
     func doneOnSubmit() -> some View {
         self.modifier(DoneOnSubmit())
     }
+    
+    func keyboardAdaptive() -> some View {
+        self.modifier(KeyboardAdaptive())
+    }
 }
 
 struct DoneOnSubmit: ViewModifier {

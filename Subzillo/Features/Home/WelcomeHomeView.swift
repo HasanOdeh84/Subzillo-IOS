@@ -246,6 +246,7 @@ struct WelcomeHomeView: View {
         .frame(maxWidth: .infinity)
         .padding(.horizontal, 20)
         .background(Color.neutralBg100)
+        .navigationBarBackButtonHidden(true)
     }
     
     //MARK: - Button actions

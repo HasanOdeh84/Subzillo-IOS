@@ -18,12 +18,13 @@ public struct LoginSignupVerifyData: Codable, Hashable {
 }
 
 public struct OtpVerifyRequest: Codable {
-    let verifyType  : Int
-    let email       : String
-    let phoneNumber : String
-    let countryCode : String
-    let otp         : Int
-    let userId      : String
+    let verifyType           : Int
+    let email                : String
+    let phoneNumber          : String
+    let countryCode          : String
+    let otp                  : Int
+    let userId               : String
+    var verifyMergeType      : Int = 1
 }
 
 public struct ResendOtpRequest: Codable {
