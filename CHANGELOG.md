@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
-## [1.1.0] - 2025-11-25
+## [1.1.0] (Alpha) - 2025-11-25
 
 ### Fixed
 - Sprint 3 bug fixes
@@ -10,7 +10,10 @@ All notable changes to this project will be documented in this file.
 ### Added
 - Dark mode
 
-## [1.0.0] - 2025-11-21
+### Changed
+- Dev to staging server
+
+## [1.0.0] (Alpha) - 2025-11-21
 
 ### Added
 Sprint 3 features:
