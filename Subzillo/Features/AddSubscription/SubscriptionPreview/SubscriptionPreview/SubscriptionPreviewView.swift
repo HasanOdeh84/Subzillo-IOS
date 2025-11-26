@@ -115,7 +115,6 @@ struct SubscriptionPreviewView: View {
                         }
                         .frame(height: 148)
                         .frame(maxWidth: .infinity)
-                        .background(Color.white)
                         .overlay(
                             RoundedRectangle(cornerRadius: 12)
                                 .stroke(
@@ -123,6 +122,7 @@ struct SubscriptionPreviewView: View {
                                     style: StrokeStyle(lineWidth: 1, dash: [4])
                                 )
                         )
+                        .background(Color.whiteNeutralCardBG)
                         .cornerRadius(12)
                     }
                     VStack(alignment: .leading, spacing: 8) {
@@ -213,15 +213,14 @@ struct SubscriptionPreviewView: View {
                                 }
                                 Spacer()
                                 Text(confidenceStr)
-                                    .frame(maxWidth: .infinity)
+//                                    .frame(maxWidth: .infinity)
                                     .frame(height: 24)
-                                    .font(.appRegular(10))
+                                    .font(.appRegular(14))
                                     .foregroundColor(.neutralMain700)
                                     .multilineTextAlignment(.center)
                                     .padding(.horizontal, 16)
                                     .background(colorValue)
                                     .cornerRadius(8)
-                                
                             }
                             VStack(alignment: .leading, spacing: 4) {
                                 HStack(spacing: 8) {
@@ -315,7 +314,7 @@ struct SubscriptionPreviewView: View {
                             Image("IconCross")
                                 .frame(width: 20, height: 20)
                             Text("Discard Entry")
-                                .font(.appSemiBold(18))
+                                .font(.appRegular(14))
                                 .foregroundColor(Color.disCardRed)
                         }
                     }
@@ -615,7 +614,7 @@ struct SubscriptionDetailsItem: View {
                 Text(confidenceStr)
                     .frame(maxWidth: .infinity)
                     .frame(height: 28)
-                    .font(.appRegular(12))
+                    .font(.appRegular(14))
                     .foregroundColor(.neutralMain700)
                     .multilineTextAlignment(.center)
                     .padding(.horizontal, 16)

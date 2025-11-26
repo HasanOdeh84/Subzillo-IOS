@@ -12,7 +12,7 @@ struct RootTabBar: View {
     //MARK: - Properties
     @State var selectedTab                      : Tab = .home
     @StateObject var homeVM                     = HomeViewModel()
-    @State var isHome                           = false
+    @State private var isHome                   : Bool? = nil
     
     //MARK: - Body
     var body: some View {
@@ -21,7 +21,9 @@ struct RootTabBar: View {
                 Color(.neutralBg100)
                 switch selectedTab {
                 case .home:
-                    if isHome{
+                    if isHome == nil{
+                        ProgressView()
+                    }else if isHome == true{
                         HomeView(tabSelected:$selectedTab)
                     }else{
                         WelcomeHomeView()

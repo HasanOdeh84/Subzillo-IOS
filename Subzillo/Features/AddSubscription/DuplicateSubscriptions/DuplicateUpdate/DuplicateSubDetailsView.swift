@@ -77,7 +77,7 @@ struct DuplicateSubDetailsView: View {
                         SubscriptionDetailsPlainItem(title: "Currency", value: subscriptionData?.currency ?? Constants.shared.currencyCode)
                         SubscriptionDetailsPlainItem(title: "Billing Cycle", value: subscriptionData?.billingCycle ?? "")
                         //SubscriptionDetailsPlainItem(title: "Subscription start", value: (subscriptionData?.lastPaymentDate ?? "").formattedDate())
-                        SubscriptionDetailsPlainItem(title: "Next Payment Date", value: (subscriptionData?.nextPaymentDate ?? "").formattedDate())
+                        SubscriptionDetailsPlainItem(title: "Next Payment Date", value: (subscriptionData?.nextPaymentDate ?? "").formattedDate(to: "d MMM yyyy"))
                         SubscriptionDetailsPlainItem(title: "Payment Method", value: subscriptionData?.paymentMethodName ?? "")
                         SubscriptionDetailsPlainItem(title: "Card Linked", value: "\(subscriptionData?.cardName ?? "")****\(subscriptionData?.cardNumber ?? "")")
                         SubscriptionDetailsPlainItem(title: "Benefit From", value: subscriptionData?.subscriptionFor ?? "" == "" ? "Me" : subscriptionData?.subscriptionFor ?? "")
@@ -86,7 +86,7 @@ struct DuplicateSubDetailsView: View {
                         SubscriptionDetailsPlainItem(title: "Note", value: subscriptionData?.notes ?? "")
                     }
                     .padding(24)
-                    .background(.white)
+                    .background(.whiteNeutralCardBG)
                     .cornerRadius(12)
                     .shadow(color: Color.dropShadowColor1, radius: 2, x: 0, y: 2)
                 }

@@ -35,7 +35,7 @@ struct OnboardingView: View {
     let pages: [OnboardingPage] = [
         OnboardingPage(
             lottie: "onboarding",
-            title: "Manage your and your family'ssubscriptions in one place",
+            title: "Manage your and your family's subscriptions in one place",
             description: "Track Netflix, Spotify, gym memberships, and more in one organized dashboard. Never lose track again."
         ),
         OnboardingPage(

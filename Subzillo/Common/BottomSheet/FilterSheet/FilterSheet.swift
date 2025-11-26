@@ -25,7 +25,7 @@ struct FilterSheet: View {
                     .padding(.vertical, 24)
                     .frame(alignment: .center)
                 
-                if !(filterData.includeFamilySubscriptions == false && filterData.includeExpiredSubscriptions == false && filterData.costOrder == .none && filterData.renewalDateOrder == .none){
+//                if !(filterData.includeFamilySubscriptions == false && filterData.includeExpiredSubscriptions == false && filterData.costOrder == .none && filterData.renewalDateOrder == .none){
                     HStack{
                         Spacer()
                         Button{
@@ -43,7 +43,9 @@ struct FilterSheet: View {
                             }
                         }
                     }
-                }
+                    .opacity((filterData.includeFamilySubscriptions == false && filterData.includeExpiredSubscriptions == false && filterData.costOrder == .none && filterData.renewalDateOrder == .none) ? 0.5 : 1.0)
+                    .disabled((filterData.includeFamilySubscriptions == false && filterData.includeExpiredSubscriptions == false && filterData.costOrder == .none && filterData.renewalDateOrder == .none) ? true : false)
+//                }
             }
             
             VStack(alignment: .leading, spacing: 32) {

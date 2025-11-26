@@ -31,12 +31,13 @@ class SubscriptionPreviewViewModel: NSObject, ObservableObject {
             }
         receiveValue: { response in
             PrintLogger.modelLog(response, type: .response, isInput: false)
+            ToastManager.shared.showToast(message: response.message ?? "")
             if response.data != nil {
                 self.addSubscriptionResponse = response.data
             }
-            else{
-                ToastManager.shared.showToast(message: response.message ?? "")
-            }
+//            else{
+//                ToastManager.shared.showToast(message: response.message ?? "")
+//            }
             self.isEntrySuccess = true
         }
         .store(in: &self.subscriptions)

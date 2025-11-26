@@ -32,6 +32,7 @@ struct ReusableTextField: View {
     @Binding var text   : String
     var isEmail         : Bool = false
     var header          : String?
+    var isDisabled      : Bool = false
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
@@ -44,6 +45,7 @@ struct ReusableTextField: View {
                     .keyboardType(isEmail ? .emailAddress : .default)
                     .padding(6)
                     .autocapitalization(.none)
+                    .disabled(isDisabled)
             }
             .padding(16)
             .frame(height: 52)

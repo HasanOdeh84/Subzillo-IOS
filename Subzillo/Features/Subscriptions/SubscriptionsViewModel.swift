@@ -232,7 +232,7 @@ struct DashedVerticalDivider: View {
                 path.move(to: .zero)
                 path.addLine(to: CGPoint(x: 0, y: geometry.size.height))
             }
-            .stroke(Color.cardBorder, style: StrokeStyle(lineWidth: 1, dash: [3, 3]))
+            .stroke(Color.dottedLine, style: StrokeStyle(lineWidth: 1, dash: [3, 3]))
         }
         .frame(width: 1)
     }
@@ -246,7 +246,7 @@ struct DashedHorizontalDivider: View {
                 path.move(to: .zero)
                 path.addLine(to: CGPoint(x: geometry.size.width, y: 0))
             }
-            .stroke(Color.cardBorder, style: StrokeStyle(lineWidth: 1, dash: dash))
+            .stroke(Color.dottedLine, style: StrokeStyle(lineWidth: 1, dash: dash))
         }
         .frame(height: 1)
     }

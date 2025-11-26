@@ -63,8 +63,9 @@ struct DuplicateSubscriptionsView: View {
                 .padding(.horizontal, 20)
                 .padding(.vertical, 16)
             }
-            .background(Color.white.ignoresSafeArea(edges: .top))
-            .shadow(color: Color.dropShadowColor1, radius: 2, x: 0, y: 2)
+            .background(Color.clear)
+//            .background(Color.white.ignoresSafeArea(edges: .top))
+//            .shadow(color: Color.dropShadowColor1, radius: 2, x: 0, y: 2)
             
             ScrollView(showsIndicators: false) {
                 
@@ -359,12 +360,12 @@ struct DuplicateListItem: View {
             }
         }
         .frame(height: item.existingSubscriptions?.count ?? 0 == 0 ? getCellHeight()+100 : getCellHeight()+45)
-        .background(.white)
-        .cornerRadius(16)
         .overlay(
             RoundedRectangle(cornerRadius: 16)
-                .stroke(Color.neutral2200, lineWidth: 1)
+                .stroke(Color.neutral300Border, lineWidth: 1)
         )
+        .background(.whiteNeutralCardBG)
+        .cornerRadius(16)
         .padding(.bottom, 16)
     }
     
@@ -468,7 +469,7 @@ struct SubItem: View {
                     }
                     VStack(alignment: .leading, spacing: 9) {
                         HStack(spacing: 10) {
-                            Text(item.serviceName ?? "")
+                            Text("\(item.serviceName ?? "") \(item.subscriptionType ?? "")")
                                 .font(.appRegular(16))
                                 .foregroundColor(.neutralMain700)
                             Spacer()

@@ -103,7 +103,7 @@ struct SubscriptionMatchView: View {
                         SubscriptionDetailsPlainItem(title: "Currency", value: subscriptionData?.currency ?? Constants.shared.currencyCode)
                         SubscriptionDetailsPlainItem(title: "Billing Cycle", value: subscriptionData?.billingCycle ?? "")
 //                        SubscriptionDetailsPlainItem(title: "Subscription Start  Date", value: (subscriptionData?.lastPaymentDate ?? "").formattedDate())
-                        SubscriptionDetailsPlainItem(title: "Next Charge Date", value: (subscriptionData?.nextPaymentDate ?? "").formattedDate())
+                        SubscriptionDetailsPlainItem(title: "Next Charge Date", value: (subscriptionData?.nextPaymentDate ?? "").formattedDate(to: "d MMM yyyy"))
                         SubscriptionDetailsPlainItem(title: "Payment Method", value: subscriptionData?.paymentMethodName ?? "")
                         if fromList{
                             if subscriptionData?.paymentMethodStatus == true{

@@ -58,9 +58,9 @@ struct RegistrationView: View {
                                              isCountry          : true)
                             .addDoneButton()
                             ReusableTextField(placeholder: "Enter your full name", text: $fullName,header:"Full Name")
-                                .disabled(isEmailDisabled)
-                            ReusableTextField(placeholder: "name@example.com", text: $email, isEmail: true,header: "Email")
                                 .disabled(isNameDisabled)
+                            ReusableTextField(placeholder: "name@example.com", text: $email, isEmail: true,header: "Email")
+                                .disabled(isEmailDisabled)
                         }else{
                             PhoneNumberField(phoneNumber        : $phoneNumber,
                                              header             : verifyData?.verifyType == 1 ? "Phone number" : "Phone number [Optional]",
@@ -119,9 +119,10 @@ struct RegistrationView: View {
                                 isEmailDisabled = true
                             }else{
                                 email       = verifyData?.email ?? ""
+                                isEmailDisabled = email == "" ? false : true
                             }
-                            isNameDisabled = fullName == "" ? false : true
                             fullName        = verifyData?.fullName ?? ""
+                            isNameDisabled = fullName == "" ? false : true
                         }
                     }
                 }
@@ -150,7 +151,7 @@ struct RegistrationView: View {
         if let errorMessage = LoginSignupValidations().validateSignup(input: input,isSocialLogin: fromSocialLogin) {
             ToastManager.shared.showToast(message: errorMessage,style: ToastStyle.error)
         } else {
-            registerVM.register(input: input, verifyType: verifyData?.verifyType ?? 0,fromSocialLogin:fromSocialLogin,appleEmail: appleEmail)
+            registerVM.register(input: input, verifyType: verifyData?.verifyType ?? 0,fromSocialLogin:fromSocialLogin,appleEmail: appleEmail, verifyData: verifyData)
         }
     }
 }

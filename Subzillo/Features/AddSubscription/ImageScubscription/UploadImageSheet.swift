@@ -33,7 +33,7 @@ struct UploadImageSheet: View {
                 
                 HStack {
                     Spacer()
-                    Text(LocalizedStringKey("Upload a List"))
+                    Text(LocalizedStringKey("Upload a Screenshot"))
                         .font(.appSemiBold(24))
                         .foregroundColor(Color.neutralMain700)
                         .multilineTextAlignment(.center)

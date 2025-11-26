@@ -90,6 +90,12 @@ class AppDelegate: NSObject, ObservableObject, UIApplicationDelegate, UNUserNoti
 @main
 struct SubzilloApp: App {
     
+    init() {
+        let item = UITextField.appearance().inputAssistantItem
+        item.leadingBarButtonGroups = []
+        item.trailingBarButtonGroups = []
+    }
+    
     @StateObject private var router             = AppIntentRouter.shared
     @UIApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
     @Environment(\.scenePhase) private var scenePhase

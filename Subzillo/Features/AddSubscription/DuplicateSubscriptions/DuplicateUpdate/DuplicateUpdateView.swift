@@ -14,7 +14,7 @@ struct DuplicateUpdateView: View {
     @Environment(\.dismiss) private var dismiss
     @State var duplicateSubsList            : DuplicateDataInfo?
     @State var selectedIndex                : Int = 0
-    @State private var existingSubIndex     : Int = -1
+    @State private var existingSubIndex     : Int = 0//-1
     @StateObject var dupSubscriptionVM      = DuplicateSubscriptionsViewModel()
     
     //MARK: - body
@@ -38,8 +38,9 @@ struct DuplicateUpdateView: View {
                 .padding(.horizontal, 20)
                 .padding(.vertical, 16)
             }
-            .background(Color.white.ignoresSafeArea(edges: .top))
-            .shadow(color: Color.dropShadowColor1, radius: 2, x: 0, y: 2)
+            .background(Color.clear)
+//            .background(Color.white.ignoresSafeArea(edges: .top))
+//            .shadow(color: Color.dropShadowColor1, radius: 2, x: 0, y: 2)
             
             ScrollView(showsIndicators: false) {
                 Button(action: goToDetials) {
@@ -75,7 +76,7 @@ struct DuplicateUpdateView: View {
                 CustomButton(title: "Update Existing Subscription", buttonImage: "settingsicon", action: onUpdateAction)
                     .padding(.top, 10)
                 
-                GradientBorderButton(title: "Keep All Subscriptions", isBtn: true, buttonImage: "keepIcon", action: onKeepAction, backgroundColor: .white)
+                GradientBorderButton(title: "Keep All Subscriptions", isBtn: true, buttonImage: "keepIcon", action: onKeepAction, backgroundColor: .whiteBlack)
                     .padding(.vertical, 10)
             }
             .padding(.horizontal, 19.5)
@@ -230,7 +231,7 @@ struct SubOldItem: View {
                 }
                 VStack(alignment: .leading, spacing: 9) {
                     HStack(spacing: 10) {
-                        Text(item.serviceName ?? "")
+                        Text("\(item.serviceName ?? "") \(item.subscriptionType ?? "")")
                             .font(.appRegular(16))
                             .foregroundColor(.neutralMain700)
                         Spacer()
@@ -263,12 +264,12 @@ struct SubOldItem: View {
         }
         .frame(height: 108)
         .padding(.horizontal, 16)
-        .background(.white)
-        .cornerRadius(8)
         .overlay(
             RoundedRectangle(cornerRadius: 8)
                 .stroke(Color.neutral300Border, lineWidth: 1)
         )
+        .background(.whiteNeutralCardBG)
+        .cornerRadius(8)
         .padding(.bottom, 10)
     }
     

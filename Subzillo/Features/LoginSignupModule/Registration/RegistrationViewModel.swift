@@ -22,7 +22,7 @@ class RegistrationViewModel: ObservableObject {
         self.sessionManager = sessionManager
     }
     
-    func register(input:RegisterRequest,verifyType:Int,fromSocialLogin:Bool = false,appleEmail:String = "") {
+    func register(input:RegisterRequest,verifyType:Int,fromSocialLogin:Bool = false,appleEmail:String = "",verifyData: LoginSignupVerifyData?) {
         apiReference.postApi(endPoint: APIEndpoint.registration, method: .POST,token: authKey,body: input,showLoader: true, responseType: RegisterResponse.self)
             .sink { [unowned self] completion in
                 if case let .failure(error) = completion {
@@ -41,7 +41,7 @@ class RegistrationViewModel: ObservableObject {
                 })
             }else{
                 ToastManager.shared.showToast(message: response.message ?? "")
-                if fromSocialLogin{
+                if fromSocialLogin && verifyData?.socialLoginType == loginType.apple{
                     if response.data?.emailOtpVerifiedStatus == false && response.data?.mobileOtpVerifiedStatus == false{
                         if input.email != appleEmail{
                             var isMobileVerify = false
@@ -89,6 +89,23 @@ class RegistrationViewModel: ObservableObject {
                     }else if response.data?.emailOtpVerifiedStatus == true && response.data?.mobileOtpVerifiedStatus == false{
                         let verifyType = 1
                         let data = LoginSignupVerifyData(verifyType         : verifyType,
+                                                         email              : input.email,
+                                                         phoneNumber        : input.phoneNumber,
+                                                         countryCode        : input.countryCode,
+                                                         userId             : SessionManager.shared.loginData?.userId ?? "",
+                                                         isNewUser          : SessionManager.shared.loginData?.isNewUser ?? false,
+                                                         isSignupCompleted  : SessionManager.shared.loginData?.isSignupCompleted ?? false,
+                                                         fullName           : input.fullName,
+                                                         socialLogin        : false)
+                        self.sessionManager.saveLoginData(data)
+                        router.navigate(to: .verifyOtp(fromLogin: false))
+                    }
+                    else{
+                        router.navigate(to: .SuccessView(isOtp: false))
+                    }
+                }else if verifyData?.socialLoginType == loginType.google{
+                    if input.phoneNumber != ""{
+                        let data = LoginSignupVerifyData(verifyType         : 1,
                                                          email              : input.email,
                                                          phoneNumber        : input.phoneNumber,
                                                          countryCode        : input.countryCode,

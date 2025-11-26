@@ -52,6 +52,7 @@ enum loginType:Int,Codable {
     case google    = 1
     case apple     = 2
     case microsoft = 3
+    case none      = 4
 }
 
 enum loginCheckType: Int, Codable{
