@@ -10,27 +10,44 @@ import UIKit
 
 struct ManualEntryView: View {
     
-    @State private var showActionSheet = false
-    @State private var showImagePicker = false
-    @State private var selectedImage: UIImage? = nil
-    @State private var pickerSource: UIImagePickerController.SourceType = .photoLibrary
-
+    //MARK: - Properties
+    @State var isFromEdit                       = false
+    @State var isFromListEdit                   = false
     
-    @State private var serviceName         : String = ""
-    @State private var amount              : String = ""
-    @State private var currency            : String = ""
-    @State private var planType            : String = ""
-    @State private var chargeDate          : String = ""
-    @State private var catrgory            : String = ""
-    @State private var paymentMethod       : String = ""
-    @State private var notes               : String = ""
-    @State private var isDatePickerPresented = false
-    @State private var tempDate = Date()
-    @State private var billingIndex        : Int = 0
-    @State private var cardIndex           : Int = 0
-    @State private var relationIndex       : Int = 0
-    @State private var reminderInedex      : Int = 0
-    @State private var isMoreEnable        : Bool = false
+    @State private var showActionSheet          = false
+    @State private var showImagePicker          = false
+    @State private var selectedImage            : UIImage? = nil
+    @State private var pickerSource             : UIImagePickerController.SourceType = .photoLibrary
+    @State private var showCurrencySheet        = false
+    @State var selectedCurrency                 : Currency?
+    @State var selectedCountry                  : Country?
+    @State private var showCategorySheet        = false
+    @State var selectedCategory                 : Category?
+    @State private var isCards                  = false
+    @State var showPaymentMethodSheet           = false
+    @State var selectedPayment                  : PaymentMethod?
+    @State var canAddMembers                    = false
+    @EnvironmentObject var commonApiVM          : CommonAPIViewModel
+    @StateObject var addSubscriptionVM          = ManualEntryViewModel()
+    
+    @State private var serviceName              : String = ""
+    @State private var amount                   : String = ""
+    @State private var currency                 : String = ""
+    @State private var planType                 : String = ""
+    @State private var chargeDate               : String = ""
+    @State private var category                 : String = ""
+    @State private var paymentMethod            : String = ""
+    @State private var notes                    : String = ""
+    @State private var isDatePickerPresented    = false
+    @State private var tempDate                 = Date()
+    @State private var billingIndex             : Int = -1
+    @State private var cardIndex                : Int = -1
+    @State private var relationIndex            : Int = 0
+    @State private var reminderInedex           : Int = -1
+    @State private var isMoreEnable             : Bool = false
+    @State var subscriptionId                   = ""
+    @State var fromSiri                         = false
+    @Environment(\.dismiss) private var dismiss
     
     @State private var billingData = [
         ManualDataInfo(id: "1", title: "Daily", subtitle: "Every 24 hours"),
@@ -38,28 +55,23 @@ struct ManualEntryView: View {
         ManualDataInfo(id: "3", title: "Monthly", subtitle: "Every 30 Days"),
         ManualDataInfo(id: "4", title: "Quarterly", subtitle: "Every 90 Days"),
         ManualDataInfo(id: "5", title: "Biannually", subtitle: "Every 180 Days"),
-        ManualDataInfo(id: "6", title: "Yearly", subtitle: "Every 360 Days"),
-        ManualDataInfo(id: "7", title: "Lifetime", subtitle: "Limitless")
+        ManualDataInfo(id: "6", title: "Yearly", subtitle: "Every 360 Days")
+        //        ManualDataInfo(id: "7", title: "Lifetime", subtitle: "Limitless")
     ]
     
-    @State private var cardsData = [
-        ManualDataInfo(id: "1", title: "My VISA", subtitle: "471 *********1234"),
-        ManualDataInfo(id: "2", title: "MOM CARD", subtitle: "477 *********4321"),
-        ManualDataInfo(id: "3", title: "MASTE CARD", subtitle: "480 *********1234")
-    ]
+    @State private var cardsData : [ManualDataInfo] = []
     
     @State private var relationsData = [
-        ManualDataInfo(id: "1", title: "Me"),
-        ManualDataInfo(id: "2", title: "Mom"),
-        ManualDataInfo(id: "3", title: "Son")
+        ManualDataInfo(id: Constants.getUserId(), title: "Me")
     ]
     
     @State private var remindersData = [
-        ManualDataInfo(id: "1", title: "3 days before renewal"),
-        ManualDataInfo(id: "2", title: "1 day before renewal"),
-        ManualDataInfo(id: "3", title: "On renewal day")
+        ManualDataInfo(id: "1", title: "3 days before renewal", value: "-3d"),
+        ManualDataInfo(id: "2", title: "1 day before renewal", value: "-1d"),
+        ManualDataInfo(id: "3", title: "On renewal day", value:"0d")
     ]
     
+    //MARK: - body
     var body: some View {
         VStack(alignment: .leading,spacing: 0) {
             
@@ -75,13 +87,13 @@ struct ManualEntryView: View {
                 
                 VStack(alignment: .leading, spacing: 2) {
                     // MARK: - Title
-                    Text("Manual Entry")
+                    Text(isFromEdit == true ? "Edit Details" : "Manual Entry")
                         .font(.appRegular(24))
                         .foregroundColor(Color.neutralMain700)
                         .padding(.top, 20)
                     
                     // MARK: - SubTitle
-                    Text("in Ut laoreet porta at, nec facilisi")
+                    Text(isFromEdit == true ? "Update your details" : "Add your subscription details manually.")
                         .font(.appRegular(18))
                         .foregroundColor(Color.neutral500)
                 }
@@ -90,198 +102,1048 @@ struct ManualEntryView: View {
             .padding(.horizontal)
             .padding(.top, 0)
             
-            ScrollView {
+            ScrollView(showsIndicators: false) {
                 VStack(spacing: 24) {
                     Text("Required Information")
                         .font(.appRegular(18))
-                        .foregroundColor(.black)
+                        .foregroundColor(.underlineGray)
                         .lineLimit(1)
                         .layoutPriority(1)
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .frame(height: 28)
                     
                     FieldView(text: $serviceName, title: "Service Name", image: "gridIcon", placeHolder: "e.g. Netflix, Spotify, Adobe")
-
+                        .addDoneButton()
+                    
+                    Button(action: selectCategory) {
+                        FieldView(text: $category, textValue: selectedCategory?.name ?? "", title: "Category", image: "gridIcon", placeHolder: "Please select", isButton: true, isText: true)
+                    }
+                    .sheet(isPresented: $showCategorySheet) {
+                        CategoriesBottomSheet(selectedCategory: $selectedCategory, categoryResponse:commonApiVM.categoriesResponse, header: "Select Category", placeholder: "Search Category")
+                            .presentationDetents([.medium, .large])
+                            .presentationDragIndicator(.hidden)
+                    }
+                    
                     HStack(spacing: 24) {
-                        FieldView(text: $amount, title: "Amount", image: "currencyIcon", placeHolder: "0.00")
+                        FieldView(text: $amount, title: "Amount", image: "currencyIcon", placeHolder: "0.00",isNumberPad: true)
                         Button(action: currencySelection) {
-                            FieldView(text: $currency, title: "Currency", image: "globeIcon", placeHolder: "USD", isButton: true, isText: true)
+                            FieldView(text: $currency, textValue: selectedCurrency?.code ?? "", title: "Currency", image: "globeIcon", placeHolder: "USD", isButton: true, isText: true)
                                 .frame(width: 140, alignment: .trailing)
+                        }
+                        .sheet(isPresented: $showCurrencySheet) {
+                            CountriesBottomSheet(selectedCurrency   : $selectedCurrency,
+                                                 selectedCountry    : $selectedCountry,
+                                                 isCountry          : false,
+                                                 currencyResponse   : commonApiVM.currencyResponse,
+                                                 countryResponse    : commonApiVM.countriesResponse,
+                                                 header             : "Currency",
+                                                 placeholder        : "Search currency")
+                            .presentationDetents([.medium, .large])
+                            .presentationDragIndicator(.hidden)
                         }
                     }
                     
                     FieldView(text: $planType, title: "Plan Type", image: "gridicon2", placeHolder: "e.g. Free, Pro, Premium")
                     
                     ListView(type: .billing, title: "Billing Cycle", addMore: false, data: $billingData, selectedIndex: $billingIndex)
-                        .frame(height: Double(23 + (52 * billingData.count)))
-                  
+                        .frame(height: Double(30 + (52 * billingData.count)))
+                    
                     Button(action: dateSelection) {
-                        FieldView(text: $chargeDate, title: "Next Charge Date", image: "Calendar1", placeHolder: "dd/mm/yyyy", isButton: true, isText: true)
+                        FieldView(text: $chargeDate, textValue: "", title: "Next Charge Date", image: "Calendar1", placeHolder: "dd/mm/yyyy", isButton: false, isText: true, isDate:true)
                     }
                     .background(
                         DatePickerPopup(isPresented: $isDatePickerPresented, selectedDate: $tempDate) { date in
                             let formatter = DateFormatter()
-                            formatter.dateFormat = "dd/MM/yyyy"
-                            chargeDate = formatter.string(from: date)
+                            formatter.dateFormat = "dd/MM/yyyy"//"yyyy-MM-dd"
+                            self.chargeDate = formatter.string(from: date)
                             print(chargeDate)
                         }
                     )
                     
-                    HStack(spacing: 8) {
-                        Text("Optional Details")
-                            .font(.appRegular(18))
-                            .foregroundColor(.black)
-                            .lineLimit(1)
-                            .layoutPriority(1)
-                        DashedHorizontalDivider()
-                        Button(action: optionalDetailsAction) {
+                    Button(action: optionalDetailsAction) {
+                        HStack(spacing: 8) {
+                            Text("Optional Details")
+                                .font(.appRegular(18))
+                                .foregroundColor(.whiteBlackBGnoPic)
+                                .lineLimit(1)
+                                .layoutPriority(1)
+                            DashedHorizontalDivider(dash: [3,3])
                             HStack {
                                 Image("downArrow")
-                                    .rotationEffect(.degrees(isMoreEnable ? 0 : 180))
+                                    .rotationEffect(.degrees(isMoreEnable ? 180 : 0))
                                     .animation(.easeInOut(duration: 0.25), value: isMoreEnable)
                             }
+                            .frame(width: 12, height: 7, alignment: .trailing)
                         }
-                        .frame(width: 12, height: 7, alignment: .trailing)
+                        .frame(height: 28)
                     }
-                    .frame(height: 28)
                     
                     if isMoreEnable == true {
-                        Button(action: dateSelection) {
-                            FieldView(text: $catrgory, title: "Category", image: "gridIcon", placeHolder: "Please select", isButton: true, isText: true)
-                        }
                         
-                        Button(action: dateSelection) {
-                            FieldView(text: $paymentMethod, title: "Payment Method", image: "Calendar2", placeHolder: "Select payment method", isButton: true, isText: true)
+                        Button(action: selectpaymentMethod) {
+                            FieldView(text: $paymentMethod, textValue: paymentMethod, title: "Payment Method", image: "Calendar2", placeHolder: "Select payment method", isButton: true, isText: true)
                         }
-                        
-                        ListView(type: .cards, title: "Which card is linked to this subscription?", addMore: true, data: $cardsData, selectedIndex: $cardIndex)
+                        .sheet(isPresented: $showPaymentMethodSheet) {
+                            PaymentMethodsSheet(selectedPaymentMethod: $selectedPayment, paymentMethodResponse:commonApiVM.paymentMethodResponse, header: "Select Payment Method", placeholder: "Search Payment Method")
+                                .presentationDetents([.medium, .large])
+                                .presentationDragIndicator(.hidden)
+                        }
+                        .onChange(of: selectedPayment) { newValue in
+                            guard let newValue = newValue else { return }
+//                            if newValue.name!.lowercased().contains("card") {
+//                                isCards = true
+//                            } else {
+//                                isCards = false
+//                            }
+                            isCards = newValue.status ?? false
+                            paymentMethod = newValue.name!
+                        }
+                        if isCards == true {
+                            ListView(type: .cards, title: "Which card is linked to this subscription?", addMore: true, data: $cardsData, selectedIndex: $cardIndex,onDismiss: {
+                                addSubscriptionVM.listUserCards(input: ListUserCardsRequest(userId: Constants.getUserId()))
+                            } )
                             .frame(height: Double(75 + (52 * cardsData.count)))
+                        }
                         
-                        ListView(type: .relations, title: "Who will benefit from this subscription?", addMore: true, data: $relationsData, selectedIndex: $relationIndex)
-                            .frame(height: Double(75 + (52 * relationsData.count)))
+                        ListView(type: .relations, title: "Who will benefit from this subscription?", addMore: canAddMembers, data: $relationsData, selectedIndex: $relationIndex)
+                            .frame(height: canAddMembers == true ? Double(75 + (52 * relationsData.count)) : Double(30 + (52 * relationsData.count)))
                         
                         ListView(type: .reminders, title: "Renewal Reminders", addMore: false, data: $remindersData, selectedIndex: $reminderInedex)
-                            .frame(height: Double(23 + (52 * remindersData.count)))
-                        
+                            .frame(height: Double(30 + (52 * remindersData.count)))
                         
                         VStack(alignment: .leading, spacing: 4) {
                             Text("Notes")
                                 .font(.appRegular(14))
-                                .foregroundColor(.appNeutralMain700)
+                                .foregroundColor(Color.neutralMain700)
                             VStack{
-                                TextField("Add any additional notes about this subscription...", text: $notes)
+                                
+                                if notes.isEmpty {
+                                    Text("Add any additional notes about this subscription...")
+                                        .background(Color.clear)
+                                        .font(.appRegular(14))
+                                        .foregroundColor(.neutral500)
+                                        .frame(maxWidth: .infinity, alignment: .leading)
+                                }
+                                TextEditor(text: $notes)
+                                    .scrollContentBackground(.hidden)
+                                    .background(Color.clear)
                                     .keyboardType(.default)
                                     .autocapitalization(.none)
                                     .frame(maxWidth: .infinity, alignment: .leading)
                                     .multilineTextAlignment(.leading)
                                     .font(.appRegular(14))
-                                    .foregroundColor(.neutral2_500)
-                                Spacer(minLength: 0)
+                                    .foregroundColor(Color.neutralMain700)
+                                    .padding(.horizontal, -5)
+                                    .padding(.top, -8)
+                                    .offset(x: 0, y: notes.isEmpty ? -25 : 0)
                                 
+                                Spacer(minLength: 0)
                             }
                             .padding(16)
                             .frame(height: 110)
-                            .background(.appBlackWhite)
-                            .cornerRadius(12)
+                            //                            .overlay(
+                            //                                RoundedRectangle(cornerRadius: 12)
+                            //                                    .stroke(Color.neutral2200, lineWidth: 1)
+                            //                            )
                             .overlay(
                                 RoundedRectangle(cornerRadius: 12)
-                                    .stroke(Color.neutral_2_200, lineWidth: 1)
+                                    .stroke(.neutral300Border, lineWidth: 1)
                             )
+                            .background(Color.whiteNeutralCardBG)
+                            .cornerRadius(12)
                         }
+                        .padding(5)
                         
-                        VStack(spacing: 4) {
-                            Text("Receipt or Screenshot")
-                                .font(.appRegular(14))
-                                .foregroundColor(.appNeutralMain700)
-                                .frame(maxWidth:.infinity, alignment: .leading)
-                            VStack(spacing: 0){
-                                Button(action: uploadImage) {
-                                    if let image = selectedImage {
-                                        Image(uiImage: image)
-                                            .resizable()
-                                            .scaledToFill()
-                                            .clipShape(RoundedRectangle(cornerRadius: 12))
-                                    }
-                                    else {
-                                        VStack(spacing: 8){
-                                            Image("uploadImage")
-                                            Text("Upload receipt or screenshot")
-                                                .font(.appRegular(14))
-                                                .foregroundColor(.neutral400)
-                                            
-                                            Text("Choose file")
-                                                .font(.appRegular(16))
-                                                .foregroundColor(.blueMain700)
-                                        }
-                                        .padding(16)
-                                    }
-                                }
-                                .confirmationDialog("Select Image", isPresented: $showActionSheet, titleVisibility: .visible) {
-                                    Button("Camera") {
-                                        pickerSource = .camera
-                                        showImagePicker = true
-                                    }
-                                    Button("Photo Library") {
-                                        pickerSource = .photoLibrary
-                                        showImagePicker = true
-                                    }
-                                    Button("Cancel", role: .cancel) { }
-                                }
-                                .sheet(isPresented: $showImagePicker) {
-                                    if pickerSource == .camera {
-                                        ImagePicker(sourceType: .camera, selectedImage: $selectedImage)
-                                            .edgesIgnoringSafeArea(.all)
-                                            .ignoresSafeArea()
-                                    } else {
-                                        ImagePicker(sourceType: .photoLibrary, selectedImage: $selectedImage)
-                                    }
-                                }
-                            }
-                            .frame(maxWidth:.infinity)
-                            .frame(height: 110)
-                            .background(.appBlackWhite)
-                            .cornerRadius(12)
-                            .overlay(
-                                RoundedRectangle(cornerRadius: 12)
-                                    .stroke(Color.neutral_2_200, lineWidth: 1)
-                            )
-                        }
+                        /*VStack(spacing: 4) {
+                         Text("Receipt or Screenshot")
+                         .font(.appRegular(14))
+                         .foregroundColor(Color.neutralMain700)
+                         .frame(maxWidth:.infinity, alignment: .leading)
+                         VStack(spacing: 0){
+                         Button(action: uploadImage) {
+                         if let image = selectedImage {
+                         Image(uiImage: image)
+                         .resizable()
+                         .scaledToFill()
+                         .clipShape(RoundedRectangle(cornerRadius: 12))
+                         }
+                         else {
+                         VStack(spacing: 8){
+                         Image("uploadImage")
+                         Text("Upload receipt or screenshot")
+                         .font(.appRegular(14))
+                         .foregroundColor(.neutral400)
+                         
+                         Text("Choose file")
+                         .font(.appRegular(16))
+                         .foregroundColor(.blueMain700)
+                         }
+                         .padding(16)
+                         }
+                         }
+                         .confirmationDialog("Select Image", isPresented: $showActionSheet, titleVisibility: .visible) {
+                         Button("Camera") {
+                         pickerSource = .camera
+                         showImagePicker = true
+                         }
+                         Button("Photo Library") {
+                         pickerSource = .photoLibrary
+                         showImagePicker = true
+                         }
+                         Button("Cancel", role: .cancel) { }
+                         }
+                         .sheet(isPresented: $showImagePicker) {
+                         if pickerSource == .camera {
+                         ImagePicker(sourceType: .camera, selectedImage: $selectedImage)
+                         .edgesIgnoringSafeArea(.all)
+                         .ignoresSafeArea()
+                         } else {
+                         ImagePicker(sourceType: .photoLibrary, selectedImage: $selectedImage)
+                         }
+                         }
+                         }
+                         .frame(maxWidth:.infinity)
+                         .frame(height: 110)
+                         .background(.white)
+                         .cornerRadius(12)
+                         .overlay(
+                         RoundedRectangle(cornerRadius: 12)
+                         .stroke(Color.neutral2200, lineWidth: 1)
+                         )
+                         }
+                         */
                     }
-                    CustomButton(title: "Save Subscription", action: saveAction)
+                    CustomButton(title: isFromEdit == true ? "Save changes" : "Save Subscription", action: saveAction)
                         .padding(.horizontal, 0)
                 }
-                .addDoneButtonToKeyboard()
             }
-            .padding(.horizontal, 20)
+            .padding(.horizontal, 15)
             .padding(.top, 24)
         }
+        .navigationBarBackButtonHidden()
         .padding(.top, 10)
-        .background(.appBackground)
+        .background(.neutralBg100)
+        .onAppear{
+            updateSubDetailsTOView()
+            commonApiVM.getCurrencies()
+            commonApiVM.getUserInfo(input: getUserInfoRequest(userId: Constants.getUserId()))
+            commonApiVM.getCategories()
+            commonApiVM.getPaymentMethods()
+            addSubscriptionVM.listUserCards(input: ListUserCardsRequest(userId: Constants.getUserId()))
+            addSubscriptionVM.listFamilyMembers(input: ListFamilyMembersRequest(userId: Constants.getUserId()))
+            updateCountryAndCurrency()
+        }
+        .onChange(of: commonApiVM.paymentMethodResponse) { _ in updatePaymentInfo() }
+        .onChange(of: commonApiVM.categoriesResponse) { _ in updateCatInfo() }
+        .onChange(of: commonApiVM.userInfoResponse) { _ in updateUserInfo() }
+        .onChange(of: addSubscriptionVM.listFamilyMembersResponse) { _ in updateRelationInfo() }
+        .onChange(of: addSubscriptionVM.listUserCardsResponse) { _ in updateCardsInfo() }
+        .onChange(of: commonApiVM.currencyResponse) { _ in updateCountryAndCurrency() }
+        .onChange(of: addSubscriptionVM.isManualEntrySuccess) { _ in
+            self.addSubApiResponseHandling(isAdd:true)
+        }
+        .onChange(of: addSubscriptionVM.isEditEntrySuccess) { _ in
+            self.addSubApiResponseHandling(isAdd:false)
+        }
+    }
+    
+    //MARK: - addSubApiRespons
+    private func addSubApiResponseHandling(isAdd:Bool) {
+        if addSubscriptionVM.addSubscriptionResponse != nil {
+            
+            let duplicates =  addSubscriptionVM.addSubscriptionResponse!.duplicates ?? []
+            if duplicates.count > 0
+            {
+                var updatedDuplicates: [DuplicateDataInfo] = []
+                
+                for (index, item) in duplicates.enumerated() {
+                    
+                    var newSubs = item.newSubscription ?? []
+                    for i in 0..<newSubs.count {
+                        let currentID = newSubs[i].id ?? ""
+                        if currentID.isEmpty {
+                            newSubs[i].id = "\(i + 1)"
+                        }
+                    }
+                    
+                    let oldSubs = item.oldSubscription
+                    let name: String? = newSubs.first?.serviceName ?? ""
+                    
+                    let info = DuplicateDataInfo(
+                        id: String(index + 1),
+                        serviceName: name,
+                        newSubscriptions: newSubs,
+                        existingSubscriptions: oldSubs
+                    )
+                    updatedDuplicates.append(info)
+                }
+                isFromAdd = isAdd
+                AppIntentRouter.shared.navigate(to: .duplicateSubscriptionsView(duplicateSubsList: updatedDuplicates))
+            }
+            else{
+//                if isAdd == true {
+//                    AppIntentRouter.shared.navigate(to: .addSubscriptionsView)
+//                }
+//                else{
+//                    AppIntentRouter.shared.navigate(to: .subscriptionsListView)
+//                }
+                if isFromListEdit{
+                    dismiss()
+                }else{
+                    AppIntentRouter.shared.navigate(to: .subscriptionsListView)
+                }
+            }
+        }
+        else{
+//            if isAdd == true {
+//                AppIntentRouter.shared.navigate(to: .addSubscriptionsView)
+//            }
+//            else{
+//                AppIntentRouter.shared.navigate(to: .subscriptionsListView)
+//            }
+            if isFromListEdit{
+                dismiss()
+            }else{
+                AppIntentRouter.shared.navigate(to: .subscriptionsListView)
+            }
+        }
+    }
+    //MARK: - bind sub data
+    private func updatePaymentInfo() {
+        if isFromEdit == true
+        {
+            if globalSubscriptionData?.paymentMethodId ?? "" != "" {
+                if let paymentMethod1 = commonApiVM.paymentMethodResponse {
+                    selectedPayment = paymentMethod1.first(where: { $0.id == globalSubscriptionData?.paymentMethodId ?? ""})
+//                    if (selectedPayment?.name ?? "").lowercased().contains("card") {
+//                        isCards = true
+//                    } else {
+//                        isCards = false
+//                    }
+                    isCards = selectedPayment?.status ?? false
+                    paymentMethod = selectedPayment?.name ?? ""
+                }
+            }
+        }
+    }
+    
+    private func updateCatInfo() {
+        if isFromEdit == true
+        {
+            if globalSubscriptionData?.categoryId ?? "" != "" {
+                if let categories = commonApiVM.categoriesResponse {
+                    selectedCategory = categories.first(where: { $0.id == globalSubscriptionData?.categoryId ?? ""})
+                }
+            }
+        }
+        if category != ""
+        {
+            if let categories = commonApiVM.categoriesResponse {
+                selectedCategory = categories.first(where: { $0.name?.lowercased() == category.lowercased()})
+            }
+        }
+    }
+    
+    private func updateSubDetailsTOView() {
+        if siriData != nil
+        {
+            fromSiri = true
+            print(siriData)
+            serviceName = siriData["serviceName"] as? String ?? ""
+            amount = "\(siriData["price"] as? Double ?? 0.00)"
+            planType = siriData["planName"] as? String ?? ""
+            currency = siriData["currencyCode"] as? String ?? ""
+            category = siriData["category"] as? String ?? ""
+            let formatter = DateFormatter()
+            formatter.dateFormat = "dd/MM/yyyy"
+            self.chargeDate = formatter.string(from: siriData["nextChargeDate"] as? Date ?? Date())
+            var billing = siriData["billingCycle"] as? String ?? ""
+            if billing.lowercased() == "annual" {
+                billing = "yearly"
+            }
+            if let index = billingData.firstIndex(where: {
+                $0.title!.lowercased() == billing.lowercased()
+            }) {
+                billingIndex = index
+            }
+            selectedCurrency = Currency(id: 0, name: "", symbol: siriData["currencySymbol"] as? String ?? "", code: currency, flag: "")
+            siriData = nil
+        }
+        if isFromEdit == true
+        {
+            let renewalReminder = globalSubscriptionData?.renewalReminder ?? []
+            for i in remindersData.indices {
+                remindersData[i].isSelected = renewalReminder.contains(remindersData[i].value ?? "")
+            }
+            notes = globalSubscriptionData?.notes ?? ""
+            serviceName = globalSubscriptionData?.serviceName ?? ""
+            amount = "\(globalSubscriptionData?.amount ?? 0.00)"
+            currency = globalSubscriptionData?.currency ?? ""
+            planType = globalSubscriptionData?.subscriptionType ?? ""
+            chargeDate = (globalSubscriptionData?.nextPaymentDate ?? "").formattedDate(to: "dd/MM/yyyy")
+            let billing = globalSubscriptionData?.billingCycle ?? ""
+            if let index = billingData.firstIndex(where: {
+                $0.title!.lowercased() == billing.lowercased()
+            }) {
+                billingIndex = index
+            }
+        }
     }
     
     //MARK: - Button actions
     private func goBack() {
-        print(billingData)
+        dismiss()
     }
+    
     private func infoButtonAction() {
     }
+    
     private func currencySelection() {
+        if commonApiVM.currencyError != nil {
+            commonApiVM.getCurrencies()
+        } else if commonApiVM.currencyResponse != nil {
+            showCurrencySheet = true
+        }
     }
+    
+    private func selectCategory()
+    {
+        showCategorySheet = true
+    }
+    
+    private func selectpaymentMethod()
+    {
+        showPaymentMethodSheet = true
+    }
+    
     private func dateSelection() {
         withAnimation(.easeInOut) {
             isDatePickerPresented = true
         }
     }
+    
     private func optionalDetailsAction() {
         isMoreEnable.toggle()
     }
+    
     private func uploadImage() {
         showActionSheet = true
     }
+    
     private func saveAction() {
+        var billingCycle            = ""
+        if billingIndex != -1{
+            billingCycle            = billingData[billingIndex].title ?? ""
+        }
+        let paymentMethod           = selectedPayment?.id ?? ""
+        var paymentMethodDataId     = ""
+        var paymentMethodDataName   = ""
+        if cardIndex != -1 && isCards == true {
+            paymentMethodDataId     = cardsData[cardIndex].id
+            paymentMethodDataName   = "\(cardsData[cardIndex].title ?? "")****\(cardsData[cardIndex].subtitle ?? "")"
+        }
+        let category                = selectedCategory?.id ?? ""
+        let subscriptionFor         = Constants.getUserId()
+        let subscriptionForName     = "Me"
+        var renewalReminder         :[String] = []
+        var renewalReminderValue = ""
+        for item in remindersData
+        {
+            if item.isSelected ?? false == true
+            {
+                renewalReminder.append(item.value!)
+                if renewalReminderValue != "" {
+                    renewalReminderValue = "\(renewalReminderValue)\n\(item.title ?? "")"
+                }
+                else{
+                    renewalReminderValue = item.title ?? ""
+                }
+            }
+        }
+        
+        let input = AddSubscriptionRequest(userId               : Constants.getUserId(),
+                                           serviceName          : serviceName.trimmed,
+                                           amount               : Double(amount.trimmed) ?? 0.0,
+                                           currency             : selectedCurrency?.code ?? "",
+                                           billingCycle         : billingCycle,
+                                           nextPaymentDate      : chargeDate.formattedDate(from: "dd/MM/yyyy", to: "yyyy-MM-dd"),
+                                           subscriptionType     : planType.trimmed,
+                                           paymentMethod        : paymentMethod,
+                                           paymentMethodDataId  : paymentMethodDataId,
+                                           category             : category,
+                                           subscriptionFor      : subscriptionFor,
+                                           renewalReminder      : renewalReminder,
+                                           notes                : notes.trimmed,
+                                           currencySymbol       : selectedCurrency?.symbol ?? "")
+        
+        let editInput = EditSubscriptionRequest(userId               : Constants.getUserId(),
+                                                subscriptionId       : subscriptionId,
+                                                serviceName          : serviceName.trimmed,
+                                                amount               : Double(amount.trimmed) ?? 0.0,
+                                                currency             : selectedCurrency?.code ?? "",
+                                                billingCycle         : billingCycle,
+                                                nextPaymentDate      : chargeDate.formattedDate(from: "dd/MM/yyyy", to: "yyyy-MM-dd"),
+                                                subscriptionType     : planType.trimmed,
+                                                paymentMethod        : paymentMethod,
+                                                paymentMethodDataId  : paymentMethodDataId,
+                                                category             : category,
+                                                subscriptionFor      : subscriptionFor,
+                                                renewalReminder      : renewalReminder,
+                                                notes                : notes.trimmed,
+                                                currencySymbol       : selectedCurrency?.symbol ?? "")
+        
+        if let errorMessage = ManualEntryValidations.shared.manualEntry(input: input) {
+            ToastManager.shared.showToast(message: errorMessage,style:ToastStyle.error)
+        } else {
+            if isFromListEdit{
+                addSubscriptionVM.editSubscription(input: editInput)
+            }
+            else if isFromEdit == true
+            {
+                
+                globalSubscriptionData?.serviceName = serviceName.trimmed
+                globalSubscriptionData?.amount = Double(amount.trimmed) ?? 0.0
+                globalSubscriptionData?.currency = selectedCurrency?.code ?? ""
+                globalSubscriptionData?.currencySymbol = selectedCurrency?.symbol ?? ""
+                globalSubscriptionData?.subscriptionType = planType.trimmed
+                globalSubscriptionData?.nextPaymentDate = chargeDate//.formattedDate(from: "dd/MM/yyyy", to: "yyyy-MM-dd")
+                globalSubscriptionData?.billingCycle = billingCycle.lowercased()
+                globalSubscriptionData?.categoryId = category
+                globalSubscriptionData?.categoryName = selectedCategory?.name ?? ""
+                globalSubscriptionData?.paymentMethodId = paymentMethod
+                globalSubscriptionData?.paymentMethodName = selectedPayment?.name ?? ""
+                globalSubscriptionData?.paymentMethodDataId = paymentMethodDataId
+                globalSubscriptionData?.paymentMethodDataName = paymentMethodDataName
+                globalSubscriptionData?.subscriptionFor = subscriptionFor
+                globalSubscriptionData?.subscriptionForName = subscriptionForName
+                globalSubscriptionData?.notes = notes.trimmed
+                globalSubscriptionData?.renewalReminder = renewalReminder
+                globalSubscriptionData?.renewalReminderValue = renewalReminderValue
+                self.goBack()
+            }
+            else{
+                addSubscriptionVM.addSubscription(input: input)
+            }
+        }
+    }
+    
+    //MARK: - updateUserInfo
+    func updateUserInfo()
+    {
+        //print(commonApiVM.userInfoResponse)
+        if commonApiVM.userInfoResponse?.tierName?.lowercased() == "family plan"
+        {
+            let familyMembersLimit = commonApiVM.userInfoResponse?.familyMembersLimit ?? 0
+            if familyMembersLimit > relationsData.count - 1
+            {
+                canAddMembers = true
+            }
+        }
+    }
+    
+    //MARK: - updateRelationInfo
+    func updateRelationInfo()
+    {
+        relationsData.removeAll()
+        if let familyCards = addSubscriptionVM.listFamilyMembersResponse {
+            for family in familyCards {
+                relationsData.append(
+                    ManualDataInfo(
+                        id      : family.id ?? "",
+                        title   : family.nickName
+                    )
+                )
+            }
+            updateUserInfo()
+        }
+    }
+    
+    //MARK: - updateCardsInfo
+    func updateCardsInfo()
+    {
+        cardsData.removeAll()
+        if let cards = addSubscriptionVM.listUserCardsResponse {
+            for card in cards {
+                cardsData.append(
+                    ManualDataInfo(
+                        id      : card.id ?? "",
+                        title   : card.nickName,
+                        subtitle: card.cardNumber
+                    )
+                )
+            }
+        }
+        if isFromEdit == true
+        {
+            let id = globalSubscriptionData?.paymentMethodDataId ?? ""
+            if let index = cardsData.firstIndex(where: {
+                $0.id == id
+            }) {
+                cardIndex = index
+            }
+        }
+    }
+    
+    //MARK: - updateCountryAndCurrency
+    func updateCountryAndCurrency() {
+        if !fromSiri{
+            selectedCurrency = Currency(id      : nil,
+                                        name    : Constants.shared.currencyCode,
+                                        symbol  : Constants.shared.currencySymbol,
+                                        code    : Constants.shared.currencyCode,
+                                        flag    : Constants.shared.flag(from: Constants.shared.regionCode))
+            if let currencies = commonApiVM.currencyResponse {
+                selectedCurrency = currencies.first(where: { $0.code == Constants.shared.currencyCode })
+            }else{
+                commonApiVM.getCurrencies()
+            }
+        }else{
+            fromSiri = false
+        }
+        if isFromEdit == true
+        {
+            if globalSubscriptionData?.currency ?? "" != "" {
+                if let currencies = commonApiVM.currencyResponse {
+                    selectedCurrency = currencies.first(where: { $0.code == globalSubscriptionData?.currency ?? ""})
+                }
+            }
+        }
     }
 }
 
-#Preview {
-    ManualEntryView()
+struct SecureCCVField: View
+{
+    @Binding var ccv    : String
+    var title           : String?
+    var placeHolder     : String?
+    var maxDigits       : Int = 3
+    
+    var masked: String {
+        String(repeating: "•", count: ccv.count)
+    }
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Text(LocalizedStringKey(title ?? ""))
+                .font(.appRegular(14))
+                .foregroundColor(.neutralMain700)
+            HStack{
+                
+                SecureField(placeHolder ?? "", text: $ccv)
+                    .keyboardType(.numberPad)
+                    .padding(6)
+                    .textContentType(.oneTimeCode)
+                    .disableAutocorrection(true)
+                    .onChange(of: ccv) { newValue in
+                        filterDigitsAndLimit(maxDigits: maxDigits)
+                    }
+                    .font(.appRegular(14))
+                    .foregroundColor(.neutral2500)
+                
+            }
+            .padding(16)
+            .frame(height: 52)
+            .background(.whiteNeutralCardBG)
+            .cornerRadius(12)
+            .overlay(
+                RoundedRectangle(cornerRadius: 12)
+                    .stroke(Color.neutral2200, lineWidth: 1)
+            )
+        }
+    }
+    
+    private func filterDigitsAndLimit(maxDigits: Int) {
+        // keep digits only and limit length
+        let digitsOnly = ccv.filter { $0.isNumber }
+        if digitsOnly.count > maxDigits {
+            ccv = String(digitsOnly.prefix(maxDigits))
+        } else {
+            ccv = digitsOnly
+        }
+    }
 }
+
+struct FieldView: View
+{
+    @Binding var text   : String
+    var textValue       : String?
+    var title           : String?
+    var image           : String?
+    var placeHolder     : String?
+    var isButton        : Bool    = false
+    var isText          : Bool    = false
+    var maxDigits       : Int = 0
+    var isNumberPad     : Bool = false
+    var maxCharacters   : Int = 0
+    var isDate          = false
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Text(LocalizedStringKey(title ?? ""))
+                .font(.appRegular(14))
+                .foregroundColor(.neutralMain700)
+            HStack{
+                Image(image ?? "")
+                if isText == true {
+                    if isDate{
+                        if text != ""
+                        {
+                            Text(text)
+                                .padding(6)
+                                .multilineTextAlignment(.leading)
+                                .font(.appRegular(14))
+                                .foregroundColor(Color.neutralMain700)
+                                .frame(maxWidth:.infinity, alignment: .leading)
+                        }
+                        else{
+                            Text(placeHolder ?? "")
+                                .padding(6)
+                                .multilineTextAlignment(.leading)
+                                .font(.appRegular(14))
+                                .foregroundColor(Color.neutral2500)
+                                .frame(maxWidth:.infinity, alignment: .leading)
+                        }
+                    }else{
+                        if textValue != ""
+                        {
+                            Text(textValue ?? "")
+                                .padding(6)
+                                .multilineTextAlignment(.leading)
+                                .font(.appRegular(14))
+                                .foregroundColor(Color.neutralMain700)
+                                .frame(maxWidth:.infinity, alignment: .leading)
+                        }
+                        else{
+                            Text(placeHolder ?? "")
+                                .padding(6)
+                                .multilineTextAlignment(.leading)
+                                .font(.appRegular(14))
+                                .foregroundColor(Color.neutral2500)
+                                .frame(maxWidth:.infinity, alignment: .leading)
+                        }
+                    }
+                }
+                else{
+                    if isNumberPad{
+                        HStack{
+                            if maxDigits == 4{
+                                Text("**** **** ****")
+                                    .foregroundColor(.whiteBlackBGnoPic)
+                            }
+                            TextField(maxDigits == 4 ? "" : placeHolder ?? "", text: $text)
+                                .keyboardType(isNumberPad == true ? .decimalPad : .default)
+                                .keyboardType(.default)
+                                .autocapitalization(.none)
+                                .multilineTextAlignment(.leading)
+                                .font(.appRegular(14))
+                                .foregroundColor(.whiteBlackBGnoPic)
+                                .onChange(of: text) { newValue in
+                                    filterDigitsAndLimit(maxDigits: maxDigits)
+                                }
+                        }
+                        .padding(6)
+                    }else{
+                        HStack{
+                            if maxDigits == 4{
+                                Text("**** **** ****")
+                                    .foregroundColor(.whiteBlackBGnoPic)
+                            }
+                            TextField(maxDigits == 4 ? "" : placeHolder ?? "", text: $text)
+                                .keyboardType(isNumberPad == true ? .numberPad : .default)
+                                .keyboardType(.default)
+                                .autocapitalization(.none)
+                                .multilineTextAlignment(.leading)
+                                .font(.appRegular(14))
+                                .foregroundColor(.whiteBlackBGnoPic)
+                                .onChange(of: text) { newValue in
+                                    filterDigitsAndLimit(maxDigits: maxDigits)
+                                }
+                        }
+                        .padding(6)
+                    }
+                }
+                if isButton == true
+                {
+                    Image("downArrow")
+                }
+            }
+            .padding(16)
+            .frame(height: 52)
+            //            .overlay(
+            //                RoundedRectangle(cornerRadius: 12)
+            //                    .stroke(Color.neutral2200, lineWidth: 1)
+            //            )
+            .overlay(
+                RoundedRectangle(cornerRadius: 12)
+                    .stroke(.neutral300Border, lineWidth: 1)
+            )
+            .background(Color.whiteNeutralCardBG)
+            .cornerRadius(12)
+        }
+        .padding(5)
+    }
+    
+    private func filterDigitsAndLimit(maxDigits: Int) {
+        // keep digits only and limit length
+        if maxDigits > 0
+        {
+            let digitsOnly = text.filter { $0.isNumber }
+            if digitsOnly.count > maxDigits {
+                text = String(digitsOnly.prefix(maxDigits))
+            } else {
+                text = digitsOnly
+            }
+        }
+    }
+}
+
+struct ListView: View {
+    var type                    : ListType = .billing
+    var title                   : String?
+    var addMore                 : Bool = false
+    @Binding var data           : [ManualDataInfo]
+    @Binding var selectedIndex  : Int
+    @State private var showNewCardSheet    = false
+    var onDismiss: (() -> Void)?
+    @State private var shouldCallAPI = false
+    
+    var body: some View {
+        VStack(spacing: 0) {
+            Text(LocalizedStringKey(title ?? ""))
+                .font(.appRegular(14))
+                .foregroundColor(.neutralMain700)
+                .padding(.bottom, 4)
+                .frame(maxWidth:.infinity, alignment: .leading)
+            VStack(alignment: .leading, spacing: 0) {
+                List {
+                    ForEach(Array(data.enumerated()), id: \.offset) { index, objc in
+                        VStack(spacing: 0) {
+                            rowView(for: objc, at: index)
+                            
+                            if index < data.count - 1 {
+                                Divider()
+                                    .overlay(Color.neutral2200)
+                            }
+                            
+                        }
+                        .listRowSeparator(.hidden)
+                        .listRowInsets(EdgeInsets())
+                        .listRowBackground(Color.clear)
+                    }
+                }
+                .scrollDisabled(true)
+                .listStyle(.plain)
+                .frame(maxWidth: .infinity)
+                .scrollContentBackground(.hidden)
+                .frame(height: CGFloat((52 * data.count)))
+                
+                if addMore == true
+                {
+                    Divider()
+                        .overlay(Color.neutral2200)
+                    VStack(alignment: .center, spacing: 0) {
+                        Button(action: addMoreAction) {
+                            HStack(spacing: 8) {
+                                Image("AddMore")
+                                    .frame(width: 20, height: 20)
+                                Text(type == .cards ? "Add New Card" : "Add New Member")
+                                    .font(.appRegular(14))
+                                    .foregroundColor(Color.blueMain700)
+                            }
+                            .frame(maxWidth:.infinity, alignment: .center)
+                            .frame(height: 52)
+                        }
+                        .sheet(isPresented: $showNewCardSheet,onDismiss:{
+                            if shouldCallAPI {
+                                onDismiss?()
+                                shouldCallAPI = false
+                            }
+                        }) {
+                            AddNewCardSheet(shouldCallAPI:$shouldCallAPI)
+                                .presentationDetents([.height(500), .large])
+                                .presentationDragIndicator(.hidden)
+                        }
+                        //                        .onChange(of: showNewCardSheet) { newValue in
+                        //                            if newValue == false {
+                        //                                onDismiss?()
+                        //                            }
+                        //                        }
+                    }
+                }
+            }
+            //            .overlay(
+            //                RoundedRectangle(cornerRadius: 12)
+            //                    .stroke(Color.neutral2200, lineWidth: 1)
+            //            )
+            .overlay(
+                RoundedRectangle(cornerRadius: 16)
+                    .stroke(.neutral300Border, lineWidth: 1)
+            )
+            .background(Color.whiteNeutralCardBG)
+            .cornerRadius(16)
+        }
+        .padding(5)
+    }
+    
+    // MARK: - Extracted subview
+    @ViewBuilder
+    private func rowView(for objc: ManualDataInfo, at index: Int) -> some View {
+        if type == .billing {
+            BillingCycleItem(title: objc.title ?? "", subtitle: objc.subtitle ?? "", isSelected: index == selectedIndex ? true : false)
+                .onTapGesture {
+                    selectedAction(at: index)
+                }
+        }
+        if type == .cards {
+            SubscriptionItem(title: objc.title ?? "", subtitle: objc.subtitle ?? "", isSelected: index == selectedIndex ? true : false, isSubTitlePresent: true)
+                .onTapGesture {
+                    selectedAction(at: index)
+                }
+        }
+        if type == .relations {
+            SubscriptionItem(title: objc.title ?? "", subtitle: objc.subtitle ?? "", isSelected: index == selectedIndex ? true : false)
+                .onTapGesture {
+                    selectedAction(at: index)
+                }
+        }
+        if type == .reminders {
+            ReminderItem(title: objc.title ?? "", isSelected: objc.isSelected ?? false)
+                .onTapGesture {
+                    selectedAction(at: index)
+                }
+        }
+    }
+    
+    // MARK: - Button actions
+    private func selectedAction(at index: Int) {
+        selectedIndex = index
+        if type == .reminders {
+            var obj = data[index]
+            if (obj.isSelected ?? false ) == true
+            {
+                obj.isSelected = false
+            }
+            else{
+                obj.isSelected = true
+            }
+            data[index] = obj
+        }
+    }
+    
+    private func addMoreAction() {
+        if type == .cards
+        {
+            showNewCardSheet = true
+        }
+    }
+}
+
+struct BillingCycleItem: View {
+    var title           : String?
+    var subtitle        : String?
+    var isSelected      : Bool = false
+    
+    var body: some View {
+        HStack(spacing: 12) {
+            HStack(spacing: 12) {
+                Image(isSelected == true ? "SelectedRadio" : "UnSelectedRadio")
+                Text(title ?? "")
+                    .font(.appRegular(14))
+                    .foregroundColor(.neutralMain700)
+            }
+            Spacer()
+            Text(subtitle ?? "")
+                .font(.appRegular(14))
+                .foregroundColor(.neutral500)
+                .multilineTextAlignment(.trailing)
+        }
+        .padding(16)
+        .frame(height: 52)
+        .background(.whiteNeutralCardBG)
+    }
+}
+
+struct SubscriptionItem: View {
+    var title                   : String?
+    var subtitle                : String?
+    var isSelected              : Bool = false
+    var isSubTitlePresent       : Bool = false
+    
+    var body: some View {
+        HStack(spacing: 12) {
+            Image(isSelected == true ? "SelectedRadio" : "UnSelectedRadio")
+            Text(title ?? "")
+                .font(.appRegular(14))
+                .foregroundColor(.neutralMain700)
+            if isSubTitlePresent == true {
+                Text("**** **** **** \(subtitle ?? "")")
+                    .font(.appRegular(14))
+                    .foregroundColor(.neutral500)
+                    .multilineTextAlignment(.trailing)
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(16)
+        .frame(height: 52)
+        .background(.whiteNeutralCardBG)
+    }
+}
+
+struct ReminderItem: View {
+    var title                   : String?
+    var isSelected              : Bool = false
+    
+    var body: some View {
+        HStack(spacing: 12) {
+            Image(isSelected == true ? "Checkmark" : "UnCheckmark")
+            Text(title ?? "")
+                .font(.appRegular(14))
+                .foregroundColor(.neutralMain700)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(16)
+        .frame(height: 52)
+        .background(.whiteNeutralCardBG)
+    }
+}
+
+struct OriginalImageView: View {
+    @Environment(\.dismiss) private var dismiss
+    var image: UIImage
+    
+    // Calculate the aspect ratio height for available width
+    private func imageHeight(for width: CGFloat) -> CGFloat {
+        let aspectRatio = image.size.height / image.size.width
+        return width * aspectRatio
+    }
+    
+    var body: some View {
+        GeometryReader { geometry in
+            VStack {
+                Capsule()
+                    .fill(Color.grayCapsule)
+                    .frame(width: 150, height: 5)
+                    .padding(.vertical, 24)
+                
+                VStack(alignment: .center, spacing: 8) {
+                    Text(LocalizedStringKey("Review Original Image"))
+                        .font(.appRegular(24))
+                        .foregroundColor(Color.neutralMain700)
+                }
+                .padding(.bottom, 24)
+                
+                Image(uiImage: image)
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: geometry.size.width - 40,
+                           height: imageHeight(for: geometry.size.width - 40))
+                    .cornerRadius(22)
+                    .padding(.bottom, 16)
+                
+                Spacer()
+            }
+            .padding(.horizontal, 20)
+        }
+    }
+}
+

@@ -2,7 +2,24 @@ import Foundation
 import UIKit
 import Combine
 
-let baseurl         = "https://devsubzillo.krify.com/api"
+enum urlType:Int{
+    case dev   = 0
+    case stage = 1
+    case prod  = 2
+}
+
+let Environment = urlType.stage
+var baseurl: String {
+    switch Environment {
+    case .dev:
+        return "https://devsubzillo.krify.com/api"
+    case .stage:
+        return "https://stagingsubzillo.krify.com/api/"
+    case .prod:
+        return ""
+    }
+}
+
 let defaultAuthKey  = "CeZwFhHrhiK8bBG2sH9XuwGbsHfeRp0kdTr6ZAwZzxP5jOLbCRBtfaz3qHLPhg1v"
 
 enum HTTPMethod: String {
@@ -14,21 +31,42 @@ enum APIEndpoint: String {
     case verifyOtp                      = "/verifyOtp"
     case resendOtp                      = "/resendOtp"
     case registration                   = "/completeRegistration"
+    case sendMergeOtp                   = "/sendMergeOtp"
+    case socialLogin                    = "/socialLogin"
+    case logout                         = "/logout"
+    case updateOnboarding               = "/updateOnboarding"
+    case regenerateAccessToken          = "/regenerateAccessToken"
+    case addSubscription                = "/addSubscription"
+    case imageSubscription              = "/imageSubscription"
+    case voiceSubscription              = "/voiceSubscription"
+    case pendingSubscriptionConfirm     = "/pendingSubscriptionConfirm"
+    case getUserInfo                    = "/getUserInfo"
+    case addCard                        = "/addCard"
+    case listUserCards                  = "/listUserCards"
+    case addFamilyMember                = "/addFamilyMember"
+    case listFamilyMembers              = "/listFamilyMembers"
+    case home                           = "/home"
+    case listSubscriptions              = "/listSubscriptions"
+    case getSubscriptionsByMonth        = "/getSubscriptionsByMonth"
+    case deleteSubscription             = "/deleteSubscription"
+    case getSubscriptionDetails         = "/getSubscriptionDetails"
+    case editSubscription               = "/editSubscription"
+    case resolveDuplicateSubscription   = "/resolveDuplicateSubscription"
+
+    //common api's
+    case getCategories                  = "/getCategories"
+    case getPaymentMethods              = "/getPaymentMethods"
     case getCurrencies                  = "/getCurrencies"
     case getCountryCodes                = "/getCountryCodes"
-    case regenerateAccessToken          = "/regenerateAccessToken"
-    case updateOnboarding               = "/updateOnboarding"
-    case sendMergeOtp                   = "/sendMergeOtp"
 
-    case voiceSubscription              = "/voiceSubscription"
-    case logout                         = "/logout"
-    case addSubscription                = "/addSubscription"
+    //need to implement
+    case deleteCard                     = "/deleteCard"
+    case editCard                       = "/editCard"
+    
+    //old api's
     case updateUserInfo                 = "/updateUserInfo"
     case updatePassword                 = "/updatePassword"
     case updateProfileImage             = "/updateProfileImage"
-    case imageSubscription              = "/imageSubscription"
-    case socialLogin                    = "/socialLogin"
-    case getCategories                  = "/getCategories"
 }
 
 var authKey: String {

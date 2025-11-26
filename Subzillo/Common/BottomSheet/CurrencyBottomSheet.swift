@@ -9,6 +9,8 @@ import SwiftUI
 import SDWebImageSwiftUI
 
 struct CountriesBottomSheet: View {
+    
+    //MARK: - Properties
     @Environment(\.dismiss) private var dismiss
     @Binding var selectedCurrency           : Currency?
     @Binding var selectedCountry            : Country?
@@ -40,6 +42,7 @@ struct CountriesBottomSheet: View {
         } ?? []
     }
     
+    //MARK: - body
     var body: some View {
         VStack {
             Capsule()
@@ -49,7 +52,7 @@ struct CountriesBottomSheet: View {
             
             Text(LocalizedStringKey(header ?? ""))
                 .font(.appRegular(24))
-                .foregroundColor(.appNeutralMain700)
+                .foregroundColor(Color.neutralMain700)
                 .padding(.vertical,24)
             
             HStack {
@@ -59,10 +62,11 @@ struct CountriesBottomSheet: View {
                     .padding(.leading,16)
                 TextField(LocalizedStringKey(placeholder ?? ""), text: $searchText)
                     .padding(.trailing,10)
-                    .foregroundColor(.primaryText)
+                    .foregroundStyle(Color.whiteBlackBGnoPic)
+                    .addDoneButton()
             }
             .frame(height: 52)
-            .background(.appBackground)
+            .background(.neutralBg100)
             .cornerRadius(12)
             .overlay(
                 RoundedRectangle(cornerRadius: 12)
@@ -89,11 +93,11 @@ struct CountriesBottomSheet: View {
                                             .padding(.leading,16)
                                         Text(country.dialCode ?? "")
                                             .font(.appRegular(16))
-                                            .foregroundColor(.appNeutralMain700)
+                                            .foregroundColor(.neutralMain700)
                                             .padding(.horizontal, 14)
                                         Text(country.countryName ?? "")
                                             .font(.appRegular(16))
-                                            .foregroundColor(.appNeutralMain700)
+                                            .foregroundColor(.neutralMain700)
                                         Spacer()
                                     }
                                     .frame(maxWidth: .infinity, minHeight: 56)
@@ -146,11 +150,11 @@ struct CountriesBottomSheet: View {
                                             .padding(.leading,16)
                                         Text(currency.code ?? "")
                                             .font(.appRegular(16))
-                                            .foregroundColor(.appNeutralMain700)
+                                            .foregroundColor(.neutralMain700)
                                             .padding(.horizontal, 14)
                                         Text(currency.name ?? "")
                                             .font(.appRegular(16))
-                                            .foregroundColor(.appNeutralMain700)
+                                            .foregroundColor(.neutralMain700)
                                         Spacer()
                                     }
                                     .frame(maxWidth: .infinity, minHeight: 56)

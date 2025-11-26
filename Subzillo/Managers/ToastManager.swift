@@ -34,7 +34,7 @@ extension ToastStyle {
         switch self {
         case .error: return Color.white
         case .info: return Color.white
-        case .success: return Color.toastSuccessGreen
+        case .success: return Color.secondaryPurple500
         }
     }
 }

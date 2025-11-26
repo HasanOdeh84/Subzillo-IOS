@@ -24,7 +24,7 @@ struct FamilyMemberView: View {
             HStack{
                 Text("Family Member 1")
                     .font(.appRegular(16))
-                    .foregroundColor(.appNeutralMain700)
+                    .foregroundColor(Color.neutralMain700)
                 Spacer()
                 Button(action: action) {
                     Image("cancel")
@@ -54,7 +54,7 @@ struct FamilyMemberView: View {
             ColorPickerGrid(selectedColor: $member.color)
         }
         .padding(18)
-        .background(.appBlackWhite)
+        .background(.white)
         .cornerRadius(16)
         .overlay(
             RoundedRectangle(cornerRadius: 12)

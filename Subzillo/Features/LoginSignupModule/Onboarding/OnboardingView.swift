@@ -35,22 +35,22 @@ struct OnboardingView: View {
     let pages: [OnboardingPage] = [
         OnboardingPage(
             lottie: "onboarding",
-            title: "Manage your and your family's subscriptions in one place",
+            title: "Manage your and your family'ssubscriptions in one place",
             description: "Track Netflix, Spotify, gym memberships, and more in one organized dashboard. Never lose track again."
         ),
         OnboardingPage(
             lottie: "onboarding",
-            title: "Manage your and your family's subscriptions in one place",
+            title: "Add Subscriptions Using Voice Commands",
             description: "Track Netflix, Spotify, gym memberships, and more in one organized dashboard. Never lose track again."
         ),
         OnboardingPage(
             lottie: "onboarding2",
-            title: "Manage your and your family's subscriptions in one place",
+            title: "Add Subscription by email integration",
             description: "Track Netflix, Spotify, gym memberships, and more in one organized dashboard. Never lose track again."
         ),
         OnboardingPage(
             lottie: "onboarding3",
-            title: "Manage your and your family's subscriptions in one place",
+            title: "Add Subscription by AI Assistant",
             description: "Track Netflix, Spotify, gym memberships, and more in one organized dashboard. Never lose track again."
         ),
         OnboardingPage(
@@ -64,14 +64,14 @@ struct OnboardingView: View {
     var body: some View {
         ZStack{
             Group {
-                Color(.appBackground)
+                Color(.neutralBg100)
             }
             .ignoresSafeArea()
             VStack {
                 HStack(spacing: 10) {
                     Spacer()
                     Button {
-                        onboardingVM.navigate(to: .welcome)
+                        onboardingVM.navigate(to: .home)
                     } label: {
                         HStack(spacing: 4) {
                             Text("Skip Onboarding")
@@ -137,11 +137,11 @@ struct OnboardingView: View {
                                     .multilineTextAlignment(.center)
                                     .padding(.horizontal)
                                     .padding(.top,64)
-                                    .foregroundColor(.appNeutralMain700)
+                                    .foregroundColor(.neutralMain700)
                                 
                                 Text(LocalizedStringKey(pages[index].description))
                                     .font(.appRegular(18))
-                                    .foregroundColor(.appNeutral500)
+                                    .foregroundColor(.neutral500)
                                     .multilineTextAlignment(.center)
                                     .padding(.horizontal)
                                     .padding(.top,32)
@@ -186,10 +186,22 @@ struct OnboardingView: View {
             .navigationBarBackButtonHidden(true)
             .onAppear{
                 AppState.shared.login()
+                selectedCurrency = Currency(id      : nil,
+                                            name    : Constants.shared.currencyCode,
+                                            symbol  : Constants.shared.currencySymbol,
+                                            code    : Constants.shared.currencyCode,
+                                            flag    : Constants.shared.flag(from: Constants.shared.regionCode))
                 if let error = commonApiVM.currencyError {
                     commonApiVM.getCurrencies()
                 } else if let data = commonApiVM.currencyResponse {
                     selectedCurrency = data.first(where: { $0.code == Constants.shared.currencyCode })
+                }
+                else{
+                    selectedCurrency = Currency(id      : nil,
+                                                name    : Constants.shared.currencyCode,
+                                                symbol  : Constants.shared.currencySymbol,
+                                                code    : Constants.shared.currencyCode,
+                                                flag    : Constants.shared.flag(from: Constants.shared.regionCode))
                 }
             }
         }
@@ -202,12 +214,12 @@ struct OnboardingView: View {
             VStack(spacing: 32){
                 Text("Tell us about yourself")
                     .font(.appRegular(28))
-                    .foregroundColor(.appNeutralMain700)
+                    .foregroundColor(.neutralMain700)
                 
                 VStack(alignment: .leading, spacing: 12) {
                     Text("How many subscriptions do you have?")
                         .font(.appRegular(18))
-                        .foregroundColor(.appNeutralMain700)
+                        .foregroundColor(.neutralMain700)
                     WrapButtonsView(options: subscriptionOptions,
                                     selectedIndex: $selectedSubscriptions)
                 }
@@ -215,7 +227,7 @@ struct OnboardingView: View {
                 VStack(alignment: .leading, spacing: 12) {
                     Text("How much you spend on subscription monthly?")
                         .font(.appRegular(18))
-                        .foregroundColor(.appNeutralMain700)
+                        .foregroundColor(.neutralMain700)
                     WrapButtonsView(options: spendingOptions,
                                     selectedIndex: $selectedSpending)
                 }
@@ -233,10 +245,11 @@ struct OnboardingView: View {
     
     //MARK: - Update onboarding API
     func updateOnboardingApi(){
-        let input = UpdateOnboardingRequest(userId              : Constants.getUserId(),
-                                            preferredCurrency   : selectedCurrency?.code ?? "",
-                                            noofSubscriptions   : (selectedSubscriptions ?? 0),
-                                            averageMonthlySpend : (selectedSpending ?? 0))
+        let input = UpdateOnboardingRequest(userId                  : Constants.getUserId(),
+                                            preferredCurrency       : selectedCurrency?.code ?? "",
+                                            preferredCurrencySymbol : selectedCurrency?.symbol ?? "",
+                                            noofSubscriptions       : (selectedSubscriptions ?? 0),
+                                            averageMonthlySpend     : (selectedSpending ?? 0))
         if let errorMessage = LoginSignupValidations().validateOnboarding(input: input) {
             ToastManager.shared.showToast(message: errorMessage,style: ToastStyle.error)
         } else {
@@ -265,7 +278,7 @@ struct OnboardingView_Previews: PreviewProvider {
 //                        .font(.appRegular(18))
 //                    //                        .lineLimit(1)
 //                    //                        .fixedSize(horizontal: true, vertical: false)
-//                        .foregroundColor(selected == option ? .white : .appNeutralMain700)
+//                        .foregroundColor(selected == option ? .white : .neutralMain700)
 //                        .padding(.vertical, 6)
 //                        .padding(.horizontal, 12)
 //                        .frame(maxWidth: .infinity)
@@ -296,17 +309,17 @@ struct WrapButtonsView: View {
                     var selectedIndexVal = (selectedIndex ?? 0) - 1
                     Text(LocalizedStringKey(option))
                         .font(.appRegular(18))
-                        .foregroundColor(selectedIndexVal == index ? .white : .appNeutralMain700)
+                        .foregroundColor(selectedIndexVal == index ? .white : .neutralMain700)
                         .padding(.vertical, 6)
                         .padding(.horizontal, 12)
                         .frame(maxWidth: .infinity)
                         .background(
                             Capsule()
-                                .fill(selectedIndexVal == index ? Color.blueMain700 : .appNeutral900)
+                                .fill(selectedIndexVal == index ? Color.blueMain700 : .whiteBlackBG)
                         )
                         .overlay(
                             Capsule()
-                                .stroke(selectedIndexVal == index ? Color.clear : .appNeutral800, lineWidth: 1)
+                                .stroke(selectedIndexVal == index ? Color.clear : .neutral300Border, lineWidth: 1)
                         )
                 }
             }

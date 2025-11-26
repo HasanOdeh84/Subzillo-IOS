@@ -16,11 +16,11 @@ struct TermsAndPrivacyView: View {
     var body: some View {
         ZStack{
             Group{
-                Color(.appBackground)
+                Color(.neutralBg100)
             }
             .ignoresSafeArea()
             VStack{
-                HeaderView(
+                ProfileHeaderView(
                     title           : isTerm ? "Terms of service" : "Privacy Policy",
                     trailingTitle   : "Share",
                     onBack          : { dismiss() },
@@ -52,45 +52,4 @@ struct TermsAndPrivacyView: View {
 
 #Preview {
     TermsAndPrivacyView()
-}
-
-
-import SwiftUI
-
-struct HeaderView: View {
-    var title: String
-    var trailingTitle: String? = nil
-    var onBack: (() -> Void)? = nil
-    var onTrailingAction: (() -> Void)? = nil
-
-    var body: some View {
-        HStack {
-            Button(action: {
-                onBack?()
-            }) {
-                Image("back_gray")
-                    .frame(width: 24,height: 24)
-            }
-
-            Text(title)
-                .font(.appRegular(24))
-                .foregroundColor(.appNeutralMain700)
-
-            Spacer()
-
-            if let trailingTitle = trailingTitle {
-                Button(action: {
-                    onTrailingAction?()
-                }) {
-                    Text(trailingTitle)
-                        .font(.appRegular(14))
-                        .foregroundColor(.blueMain700)
-                }
-            } else {
-                // To keep layout balanced when no trailing item
-                Color.clear.frame(width: 44, height: 44)
-            }
-        }
-        .frame(height: 32)
-    }
 }

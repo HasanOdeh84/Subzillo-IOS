@@ -8,8 +8,9 @@
 import Foundation
 
 public struct UpdateOnboardingRequest: Codable {
-    let userId              : String
-    let preferredCurrency   : String
-    let noofSubscriptions   : Int
-    let averageMonthlySpend : Int
+    let userId                  : String
+    let preferredCurrency       : String
+    let preferredCurrencySymbol : String
+    let noofSubscriptions       : Int
+    let averageMonthlySpend     : Int
 }

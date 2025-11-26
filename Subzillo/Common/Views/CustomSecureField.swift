@@ -8,8 +8,8 @@
 import SwiftUI
 
 struct CustomSecureField: View {
-    let placeholder: String
-    @Binding var text: String
+    let placeholder     : String
+    @Binding var text   : String
     
     @State private var isSecured: Bool = true
 

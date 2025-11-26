@@ -13,8 +13,6 @@ class OnboardingViewModel: ObservableObject {
     
     private var subscriptions           = Set<AnyCancellable>()
     var apiReference                    = NetworkRequest.shared
-//    @Published var otpVerifyResponse    : GeneralResponse?
-//    @Published var resendOtpResponse    : Bool = false
     private let router                  : AppIntentRouter
     private let sessionManager          : SessionManager
 
@@ -33,7 +31,7 @@ class OnboardingViewModel: ObservableObject {
         receiveValue: { [unowned self] response in
             PrintLogger.modelLog(response, type: .response, isInput: false)
             ToastManager.shared.showToast(message: response.message ?? "")
-            router.navigate(to: .welcome)
+            router.navigate(to: .home)
         }
         .store(in: &self.subscriptions)
     }

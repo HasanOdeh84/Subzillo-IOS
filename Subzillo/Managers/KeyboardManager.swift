@@ -35,9 +35,9 @@ struct KeyboardAdaptive: ViewModifier {
         content
             .padding(.bottom, keyboard.height)
             .animation(.easeOut(duration: 0.25), value: keyboard.height)
-            .onTapGesture {
-                UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder),
-                                                to: nil, from: nil, for: nil)
-            }
+//            .onTapGesture {
+//                UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder),
+//                                                to: nil, from: nil, for: nil)
+//            }
     }
 }

@@ -37,7 +37,7 @@ struct OtpVerifyView: View {
     var body: some View {
         ZStack{
             Group {
-                Color(.appBackground)
+                Color(.neutralBg100)
             }
             .ignoresSafeArea()
             
@@ -67,7 +67,7 @@ struct OtpVerifyView: View {
                     
                     Text("Enter validation code")
                         .font(.appRegular(14))
-                        .foregroundColor(.appNeutralMain700)
+                        .foregroundColor(Color.neutralMain700)
                         .multilineTextAlignment(.center)
                         .padding(.top,24)
                         .padding(.bottom,4)
@@ -110,23 +110,23 @@ struct OtpVerifyView: View {
                         .cornerRadius(12)
                         .overlay(
                             RoundedRectangle(cornerRadius: 12)
-                                .stroke(Color.neutral_2_200, lineWidth: 1)
+                                .stroke(Color.neutral2200, lineWidth: 1)
                         )
                         VStack{
                             Text("Resend code in")
                                 .font(.appRegular(14))
-                                .foregroundColor(.appNeutral500)
+                                .foregroundColor(Color.neutral500)
                                 .multilineTextAlignment(.center)
                                 .padding(.horizontal,8)
                                 .padding(.vertical,3)
-                                .background(.appBlackWhite)
+                                .background(.whiteNeutralCardBG)
                         }
                         .padding(.top,-44)
                     }
                     
                     Text("Didn't receive the code?")
                         .font(.appRegular(16))
-                        .foregroundColor(.appNeutralMain700)
+                        .foregroundColor(Color.neutralMain700)
                         .multilineTextAlignment(.center)
                         .padding(.vertical,24)
                     
@@ -138,18 +138,29 @@ struct OtpVerifyView: View {
                     .opacity(timer == 0 ? 1.0 : 0.6)
                     
                     underlineText(text: "Change \(changeNumberEmail)", image: "phone") {
+                        let data = LoginSignupVerifyData(verifyType         : verifyData?.verifyType == 2 ? 1 : 2,
+                                                         email              : SessionManager.shared.loginData?.email,
+                                                         phoneNumber        : SessionManager.shared.loginData?.phoneNumber,
+                                                         countryCode        : SessionManager.shared.loginData?.countryCode,
+                                                         userId             : SessionManager.shared.loginData?.userId ?? "",
+                                                         isNewUser          : SessionManager.shared.loginData?.isNewUser ?? false,
+                                                         isSignupCompleted  : SessionManager.shared.loginData?.isSignupCompleted ?? false,
+                                                         fullName           : SessionManager.shared.loginData?.fullName,
+                                                         socialLogin        : verifyData?.socialLogin ?? false)
+                        SessionManager.shared.saveLoginData(data)
                         dismiss()
-//                        showNumberSheet = true
                     }
                     .padding(.top,24)
                     .padding(.bottom,30)
                     
                     TermsAndPrivacyText(
                         onTapTerms: {
-                            otpVerifyVM.navigate(to: NavigationRoute.termsAndPrivacy(isTerm: true))
+                            ToastManager.shared.showToast(message: "Coming soon",style:ToastStyle.info)
+//                            otpVerifyVM.navigate(to: NavigationRoute.termsAndPrivacy(isTerm: true))
                         },
                         onTapPrivacy: {
-                            otpVerifyVM.navigate(to: NavigationRoute.termsAndPrivacy(isTerm: false))
+                            ToastManager.shared.showToast(message: "Coming soon",style:ToastStyle.info)
+//                            otpVerifyVM.navigate(to: NavigationRoute.termsAndPrivacy(isTerm: false))
                         }
                     )
                     
@@ -204,6 +215,19 @@ struct OtpVerifyView: View {
                         otpFields = Array(repeating: "", count: 6)
                         startTimer()                 // ⏱ restart timer
                         otpVerifyVM.resendOtpResponse = false // reset flag
+                    }
+                }
+                .onChange(of: otpVerifyVM.otpVerified) { verified in
+                    if verified {
+                        if let data = SessionManager.shared.loginData {
+                            verifyData = data
+                        }
+                        verifyText          = "Verify Phone Number"
+                        sendCodeText        = "phone number"
+                        changeNumberEmail   = "number"
+                        buttonText          = "Phone Number"
+                        otpFields = Array(repeating: "", count: 6)
+                        startTimer()                 // ⏱ restart timer
                     }
                 }
                 .navigationBarBackButtonHidden(true)
@@ -277,7 +301,9 @@ struct OtpVerifyView: View {
                 userId              : verifyData?.userId ?? "",
                 verifyMergeType     : verifyMergeType
             )
-            otpVerifyVM.verifyOtp(input : input, fromLogin: fromLogin)
+            otpVerifyVM.verifyOtp(input             : input,
+                                  fromLogin         : fromLogin,
+                                  fromSocialLogin   : verifyData?.socialLogin ?? false)
         }
     }
 }
@@ -303,11 +329,11 @@ struct OTPTextField: View {
         })
         //        .frame(width: 63, height: 62)
         .frame(width: UIScreen.main.bounds.width * 0.12, height: UIScreen.main.bounds.width * 0.12)
-        .background(.appNeutral900)
+        .background(Color.whiteBlackBG)
         .cornerRadius(12)
         .overlay(
             RoundedRectangle(cornerRadius: 12)
-                .stroke(Color.neutral_2_200, lineWidth: 1)
+                .stroke(Color.neutral2200, lineWidth: 1)
         )
         .multilineTextAlignment(.center)
         .keyboardType(.numberPad)

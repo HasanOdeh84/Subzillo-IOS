@@ -13,6 +13,19 @@
 		C5E4178C2E9A73BF00E739A3 /* GoogleSignInSwift in Frameworks */ = {isa = PBXBuildFile; productRef = C5E4178B2E9A73BF00E739A3 /* GoogleSignInSwift */; };
 /* End PBXBuildFile section */
 
+/* Begin PBXCopyFilesBuildPhase section */
+		52EACC642ECAFB38003C16BC /* Embed ExtensionKit Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "$(EXTENSIONS_FOLDER_PATH)";
+			dstSubfolderSpec = 16;
+			files = (
+			);
+			name = "Embed ExtensionKit Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
 /* Begin PBXFileReference section */
 		C5DA9EED2E7A7B38008901A6 /* Subzillo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Subzillo.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -79,6 +92,7 @@
 				C5DA9EE92E7A7B38008901A6 /* Sources */,
 				C5DA9EEA2E7A7B38008901A6 /* Frameworks */,
 				C5DA9EEB2E7A7B38008901A6 /* Resources */,
+				52EACC642ECAFB38003C16BC /* Embed ExtensionKit Extensions */,
 			);
 			buildRules = (
 			);
@@ -99,7 +113,7 @@
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
-				LastSwiftUpdateCheck = 1620;
+				LastSwiftUpdateCheck = 1640;
 				LastUpgradeCheck = 1620;
 				TargetAttributes = {
 					C5DA9EEC2E7A7B38008901A6 = {
@@ -282,13 +296,14 @@
 				CODE_SIGN_ENTITLEMENTS = Subzillo/SubzilloDebug.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1.0.0;
+				CURRENT_PROJECT_VERSION = 1.1.0;
 				DEVELOPMENT_ASSET_PATHS = "\"Subzillo/Resources/Preview Content\"";
-				DEVELOPMENT_TEAM = S7KJCQYHM8;
+				DEVELOPMENT_TEAM = B48NJV8578;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Subzillo/Resources/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = Subzillo;
+				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 				INFOPLIST_KEY_NSCameraUsageDescription = "This app requires access to your camera to let you capture photos or documents for your profile and uploads.";
 				INFOPLIST_KEY_NSMicrophoneUsageDescription = "We need access to the microphone to record your voice to add subscription.";
 				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "This app requires access to your photo library so you can select and upload existing images from your device.";
@@ -303,7 +318,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.subzillo.app;
+				PRODUCT_BUNDLE_IDENTIFIER = com.krify.Subzillo;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
@@ -324,13 +339,14 @@
 				CODE_SIGN_ENTITLEMENTS = Subzillo/Subzillo.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1.0.0;
+				CURRENT_PROJECT_VERSION = 1.1.0;
 				DEVELOPMENT_ASSET_PATHS = "\"Subzillo/Resources/Preview Content\"";
-				DEVELOPMENT_TEAM = S7KJCQYHM8;
+				DEVELOPMENT_TEAM = B48NJV8578;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Subzillo/Resources/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = Subzillo;
+				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 				INFOPLIST_KEY_NSCameraUsageDescription = "This app requires access to your camera to let you capture photos or documents for your profile and uploads.";
 				INFOPLIST_KEY_NSMicrophoneUsageDescription = "We need access to the microphone to record your voice to add subscription.";
 				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "This app requires access to your photo library so you can select and upload existing images from your device.";
@@ -345,7 +361,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.subzillo.app;
+				PRODUCT_BUNDLE_IDENTIFIER = com.krify.Subzillo;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";

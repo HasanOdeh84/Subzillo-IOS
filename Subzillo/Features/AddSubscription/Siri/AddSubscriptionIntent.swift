@@ -8,9 +8,12 @@
 import SwiftUI
 import AppIntents
 
+var siriData : [String:Any]!
+
 struct AddSubscriptionIntent: AppIntent {
+    
     static var title: LocalizedStringResource = "Add Subscription"
-    static var description = IntentDescription("Add a subscription by specifying name, plan, price, and billing cycle.")
+    static var description = IntentDescription("Add a subscription by specifying name, category, plan, price, currency and billing cycle.")
     static var openAppWhenRun: Bool = true
     
     static var parameterSummary: some ParameterSummary {
@@ -43,25 +46,54 @@ struct AddSubscriptionIntent: AppIntent {
     }
     
     @Parameter(title: "Service Name") var serviceName: String
-    @Parameter(title: "Plan Name") var planName: String
-    @Parameter(title: "Price") var price: Double
+    @Parameter(title: "Category") var category: String
+    @Parameter(title: "Plan Type") var planName: String
+    @Parameter(title: "Amount") var price: Double
+    @Parameter(title: "Currency") var currency: String
     @Parameter(title: "Billing Cycle") var billingCycle: String
+    @Parameter(
+        title: "Next Charge Date",
+        requestValueDialog: "When is the next charge date?"
+    )
+    var nextChargeDate: Date
     
     @MainActor
     func perform() async throws -> some IntentResult {
         //    func perform() async throws -> some IntentResult & ProvidesDialog{
-        // Save into router (instead of deep link)
-        AppIntentRouter.shared.navigatingRoute = .addSubscription(
-            serviceName: serviceName,
-            planName: planName,
-            price: price,
-            billingCycle: billingCycle
-        )
+        var currencyCode    = ""
+        var currencySymbol  = ""
+        if let currency = Constants.shared.getCurrencyDetails(from: currency) {
+            print(currency.code)
+            print(currency.symbol)
+            currencyCode    = currency.code
+            currencySymbol  = currency.symbol
+        }
+        
+        siriData = ["serviceName":serviceName,"planName":planName,"price":price,"billingCycle":billingCycle,"category":category,"currencyCode":currencyCode, "currencySymbol": currencySymbol, "nextChargeDate": nextChargeDate]
+        if AppState.shared.isLoggedIn{
+            AppIntentRouter.shared.navigatingRoute = .manualEntry(isFromEdit: false)
+        }
+        
         return .result()
         //        return .result(
         //            dialog: "Opening Subzillo to add your Netflix Basic subscription."
         //        )
     }
+    
+    /*
+     do {
+     let success =  await CommonAPIViewModel().getCurrencies1()
+     
+     if success {
+     return .result(dialog: "Subscription added successfully!")
+     } else {
+     return .result(dialog: "Failed to add subscription.")
+     }
+     
+     } catch {
+     return .result(dialog: "Something went wrong while adding your subscription.")
+     }
+     */
 }
 
 struct SubzilloShortcuts: AppShortcutsProvider {

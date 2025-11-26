@@ -16,7 +16,7 @@ struct SplashView: View {
     var body: some View {
         ZStack {
             Group {
-                Color("appBlack_white")
+                Color(.white)
             }
             .ignoresSafeArea()
             

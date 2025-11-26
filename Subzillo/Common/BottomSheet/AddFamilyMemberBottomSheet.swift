@@ -29,7 +29,7 @@ struct AddFamilyMemberBottomSheet: View {
             
             Text(LocalizedStringKey(header ?? ""))
                 .font(.appRegular(24))
-                .foregroundStyle(.appNeutralMain700)
+                .foregroundStyle(.neutralMain700)
                 .padding(.top,24)
             
             Text("Sed ex elit scelerisque Nullam turpis viverra")
@@ -50,6 +50,7 @@ struct AddFamilyMemberBottomSheet: View {
                                  selectedCurrency   : $selectedCurrency,
                                  selectedCountry    : $selectedCountry,
                                  isCountry          : true)
+                .addDoneButton()
                 
                 Text("Color (To distinguish color family subscriptions)")
                     .font(.caption)
@@ -59,14 +60,13 @@ struct AddFamilyMemberBottomSheet: View {
                 ColorPickerGrid(selectedColor: $familyColor)
                 
                 GradientBorderButton(title: "Save",isBtn:true, buttonImage: "profile_add") {
-                    ToastManager.shared.showToast(message: "coming soon")
+                    ToastManager.shared.showToast(message: "Coming soon",style:ToastStyle.info)
                     action()
                     dismiss()
                 }
             }
             Spacer()
         }
-        .addDoneButtonToKeyboard()
         .padding(24)
     }
 }

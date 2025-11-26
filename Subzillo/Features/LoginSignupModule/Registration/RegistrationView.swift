@@ -21,12 +21,16 @@ struct RegistrationView: View {
     @State private var selectedCurrency                 : Currency?
     @State var verifyData                               : LoginSignupVerifyData?
     @EnvironmentObject var sessionManager               : SessionManager
+    @State var fromSocialLogin                          = false
+    @State var isEmailDisabled                          = false
+    @State var isNameDisabled                           = false
+    @State var appleEmail                               = ""
     
     //MARK: - body
     var body: some View{
         ZStack{
             Group {
-                Color(.appBackground)
+                Color(.neutralBg100)
             }
             .ignoresSafeArea()
             
@@ -45,19 +49,38 @@ struct RegistrationView: View {
                         .padding(.vertical,24)
                     
                     Group {
-                        PhoneNumberField(phoneNumber        : $phoneNumber,
-                                         header             : verifyData?.verifyType == 1 ? "Enter your phone number" : "Enter your phone number [Optional]",
-                                         placeholder        : "000 000 000",
-                                         selectedCurrency   : $selectedCurrency,
-                                         selectedCountry    : $selectedCountry,
-                                         isCountry          : true)
-                        .opacity(verifyData?.verifyType == 1 ? 0.5 : 1.0)
-                        .disabled(verifyData?.verifyType == 1 ? true : false)
-                        
-                        ReusableTextField(placeholder: "Enter your full name", text: $fullName,header:"Full Name")
-                        ReusableTextField(placeholder: "name@example.com", text: $email, isEmail: true,header: verifyData?.verifyType == 1 ? "Email [Optional]" : "Email")
-                            .opacity(verifyData?.verifyType == 2 ? 0.5 : 1.0)
-                            .disabled(verifyData?.verifyType == 2 ? true : false)
+                        if fromSocialLogin{
+                            PhoneNumberField(phoneNumber        : $phoneNumber,
+                                             header             : email == "" ? "Phone number" : "Phone number [Optional]",
+                                             placeholder        : "000 000 000",
+                                             selectedCurrency   : $selectedCurrency,
+                                             selectedCountry    : $selectedCountry,
+                                             isCountry          : true)
+                            .addDoneButton()
+                            ReusableTextField(placeholder: "Enter your full name", text: $fullName,header:"Full Name")
+                                .disabled(isEmailDisabled)
+                            ReusableTextField(placeholder: "name@example.com", text: $email, isEmail: true,header: "Email")
+                                .disabled(isNameDisabled)
+                        }else{
+                            PhoneNumberField(phoneNumber        : $phoneNumber,
+                                             header             : verifyData?.verifyType == 1 ? "Phone number" : "Phone number [Optional]",
+                                             placeholder        : "000 000 000",
+                                             selectedCurrency   : $selectedCurrency,
+                                             selectedCountry    : $selectedCountry,
+                                             isCountry          : true)
+                            .opacity(verifyData?.verifyType == 1 ? 0.5 : 1.0)
+                            .disabled(verifyData?.verifyType == 1 ? true : false)
+                            .if(verifyData?.verifyType != 1) { view in
+                                view.addDoneButton()
+                            }
+                            ReusableTextField(placeholder: "Enter your full name", text: $fullName,header:"Full Name")
+                                .if(verifyData?.verifyType == 1) { view in
+                                    view.addDoneButton()
+                                }
+                            ReusableTextField(placeholder: "name@example.com", text: $email, isEmail: true,header: verifyData?.verifyType == 1 ? "Email [Optional]" : "Email")
+                                .opacity(verifyData?.verifyType == 2 ? 0.5 : 1.0)
+                                .disabled(verifyData?.verifyType == 2 ? true : false)
+                        }
                     }
                     
                     CustomButton(title: "Finish Sign Up") {
@@ -66,16 +89,18 @@ struct RegistrationView: View {
                     
                     TermsAndPrivacyText(
                         onTapTerms: {
-                            registerVM.navigate(to: .termsAndPrivacy(isTerm: true))
+                            ToastManager.shared.showToast(message: "Coming soon",style:ToastStyle.info)
+                            //                            registerVM.navigate(to: .termsAndPrivacy(isTerm: true))
                         },
                         onTapPrivacy: {
-                            registerVM.navigate(to: .termsAndPrivacy(isTerm: false))
+                            ToastManager.shared.showToast(message: "Coming soon",style:ToastStyle.info)
+                            //                            registerVM.navigate(to: .termsAndPrivacy(isTerm: false))
                         },
                         bottomPadding: 28
                     )
                     Spacer()
                 }
-//                .addDoneButtonToKeyboard()
+                //                .addDoneButtonToKeyboard()
                 .padding(20)
                 .navigationBarBackButtonHidden(true)
                 .onAppear{
@@ -85,6 +110,18 @@ struct RegistrationView: View {
                             phoneNumber = verifyData?.phoneNumber ?? ""
                         }else{
                             email       = verifyData?.email ?? ""
+                        }
+                        if fromSocialLogin{
+                            isEmailDisabled = email == "" ? false : true
+                            if verifyData?.email?.contains("@privaterelay.appleid.com") == true{
+                                appleEmail  = verifyData?.email ?? ""
+                                email       = ""
+                                isEmailDisabled = true
+                            }else{
+                                email       = verifyData?.email ?? ""
+                            }
+                            isNameDisabled = fullName == "" ? false : true
+                            fullName        = verifyData?.fullName ?? ""
                         }
                     }
                 }
@@ -97,15 +134,23 @@ struct RegistrationView: View {
     //MARK: - Methods
     //MARK: - Signup API
     func signupApi(){
-        let input = RegisterRequest(userId              : verifyData?.userId ?? "",
+        let countryCode = phoneNumber.trimmed == "" ? "" : (verifyData?.verifyType == 1 ? verifyData?.countryCode ?? "" : selectedCountry?.dialCode ?? "")
+        var input = RegisterRequest(userId              : verifyData?.userId ?? "",
                                     fullName            : fullName.trimmed,
                                     email               : verifyData?.verifyType == 1 ? email.trimmed : verifyData?.email ?? "",
-                                    countryCode         : verifyData?.verifyType == 1 ? verifyData?.countryCode ?? "" : selectedCountry?.dialCode ?? "",
+                                    countryCode         : countryCode,
                                     phoneNumber         : verifyData?.verifyType == 1 ? verifyData?.phoneNumber ?? "" : phoneNumber.trimmed)
-        if let errorMessage = LoginSignupValidations().validateSignup(input: input) {
+        if fromSocialLogin{
+            input = RegisterRequest(userId              : verifyData?.userId ?? "",
+                                    fullName            : fullName.trimmed,
+                                    email               : email.trimmed,
+                                    countryCode         : phoneNumber.trimmed == "" ? "" : selectedCountry?.dialCode ?? "",
+                                    phoneNumber         : phoneNumber.trimmed)
+        }
+        if let errorMessage = LoginSignupValidations().validateSignup(input: input,isSocialLogin: fromSocialLogin) {
             ToastManager.shared.showToast(message: errorMessage,style: ToastStyle.error)
         } else {
-            registerVM.register(input: input, verifyType: verifyData?.verifyType ?? 0)
+            registerVM.register(input: input, verifyType: verifyData?.verifyType ?? 0,fromSocialLogin:fromSocialLogin,appleEmail: appleEmail)
         }
     }
 }

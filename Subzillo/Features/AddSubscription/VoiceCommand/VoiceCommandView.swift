@@ -11,25 +11,32 @@ import Speech
 import AVFoundation
 
 struct VoiceCommandView: View {
-    @StateObject private var audioManager   = AudioRecorderManager()
+    
+    //MARK: - Properties
+    //    @StateObject private var audioManager   = AudioRecorderManager()
     @StateObject private var viewModel      = VoiceCommandViewModel()
     
-    @State private var previousText = ""
-    @State private var recognizedText = ""
-    @State private var isRecording = false
-    @State private var countdown = 0
+    @State private var permissionType       = ""
+    @State private var previousText         = ""
+    @State private var recognizedText       = ""//"Hello, i have taken Netflix premium auto renuwal subscription for quarterly using my moms debit card and i have paid 12.99 USD on 1st November 2025 also i have taken another subscription for monthly using my dads credit card and i have paid 11.99"
+    @State private var isRecording          = false
+    @State private var countdown            = 0
+    @StateObject var voiceCommandVM         = VoiceCommandViewModel()
+    @State private var showPermissionAlert  = false
+    @State private var speechRecognizer     = SFSpeechRecognizer(locale: Locale(identifier: "en-US"))
+    @State private var recognitionRequest   : SFSpeechAudioBufferRecognitionRequest?
+    @State private var recognitionTask      : SFSpeechRecognitionTask?
+    @State private var audioEngine          = AVAudioEngine()
+    @State private var timer                : Timer?
+    @State var showDiscardPopup             : Bool = false
+    @Environment(\.dismiss) private var dismiss
     
-    @State private var speechRecognizer = SFSpeechRecognizer(locale: Locale(identifier: "en-US"))
-    @State private var recognitionRequest: SFSpeechAudioBufferRecognitionRequest?
-    @State private var recognitionTask: SFSpeechRecognitionTask?
-    @State private var audioEngine = AVAudioEngine()
-    @State private var timer: Timer?
-    
+    //MARK: - body
     var body: some View {
         VStack(alignment: .leading,spacing: 0) {
             
             // MARK: - Header
-            HStack(spacing: 0) {
+            HStack(spacing: 8) {
                 // MARK: - back
                 Button(action: goBack) {
                     HStack {
@@ -46,7 +53,7 @@ struct VoiceCommandView: View {
                         .padding(.top, 20)
                     
                     // MARK: - SubTitle
-                    Text("in Ut laoreet porta at, nec facilisi")
+                    Text("Add your subscriptions using simple voice commands")
                         .font(.appRegular(18))
                         .foregroundColor(Color.neutral500)
                 }
@@ -64,33 +71,33 @@ struct VoiceCommandView: View {
                             .frame(maxWidth: .infinity, alignment: .leading)
                             .padding(16)
                     } else {
-                        Text(recognizedText)
-                            .foregroundColor(Color.neutralMain700)
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                            .padding(16)
+                        ScrollView(showsIndicators: false) {
+                            Text(recognizedText)
+                                .foregroundColor(Color.neutralMain700)
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                                .padding(16)
+                        }
                     }
                     Spacer(minLength: 0)
                 }
                 .frame(height: 115)
                 .frame(maxWidth: .infinity)
                 .font(.appRegular(16))
-                .background(Color.white)
                 .overlay(
                     RoundedRectangle(cornerRadius: 12)
                         .stroke(Color.neutral300Border, lineWidth: 1)
                 )
+                .background(Color.whiteNeutralCardBG)
                 .cornerRadius(12)
                 .padding(.horizontal, 20)
                 .padding(.top, 24)
                 
                 // MARK: - How It Works
                 GradienCustomeView(title    : "How it work?",
-                                   subTitle : "Press & Hold to Speak, remove finger to pause, submit when you finish.",
-                                   isBtn    : false,
-                                   action   : clickOnHowItWorks)
-                    .padding(.horizontal, 20)
-                    .padding(.top, 24)
-                    .padding(.bottom, 24)
+                                   subTitle : "Press & Hold to Speak in English, remove finger to pause, submit when you finish.")
+                .padding(.horizontal, 20)
+                .padding(.top, 24)
+                .padding(.bottom, 24)
                 
                 // MARK: - Start Button
                 ZStack {
@@ -100,7 +107,7 @@ struct VoiceCommandView: View {
                                            startPoint: .top,
                                            endPoint: .bottom)
                         )
-                        .frame(width: 100, height: 100)
+                        .frame(width: 120, height: 120)
                     
                     Image(isRecording ? "Recording" : "mic-01")
                         .font(.system(size: 63))
@@ -112,7 +119,7 @@ struct VoiceCommandView: View {
                         .fill(Color.white)
                 )
                 .cornerRadius(137/2)
-                .shadow(color: Color.dropShadowColor, radius: 2, x: 0, y: 2)
+                .shadow(color: Color.dropShadow, radius: 2, x: 0, y: 2)
                 .frame(maxWidth: .infinity, alignment: .center)
                 .simultaneousGesture(
                     DragGesture(minimumDistance: 0)
@@ -143,9 +150,11 @@ struct VoiceCommandView: View {
                         .padding(.bottom, 24)
                 }
                 
-                
                 // MARK: - Reset Button
-                GradientBorderButton(title: "Discard",isBtn:true, buttonImage: "cancel", action:resetAll)
+                GradientBorderButton(title: "Discard",isBtn:true, buttonImage: "discardIcon", action:{
+                    showDiscardPopup = true})
+                .opacity(recognizedText.isEmpty ? 0.5 : 1.0)
+                .disabled(recognizedText.isEmpty ? true : false)
                     .padding(.horizontal)
                 
                 Spacer()
@@ -154,9 +163,58 @@ struct VoiceCommandView: View {
         .padding(.top, 10)
         .background(Color.neutralBg100)
         .onAppear {
+            print(countdown)
             requestSpeechPermission()
         }
         .animation(.easeInOut, value: isRecording)
+        .navigationBarBackButtonHidden(true)
+        .sheet(isPresented: $voiceCommandVM.showErrorPopup) {
+            InfoVoiceAlertSheet(
+                onDelegate: {
+                    voiceCommandVM.showErrorPopup = false
+                    self.resetAll()
+                },
+                title       : "I'm Not Sure I Heard That Right",
+                imageName   : "earIcon",
+                buttonIcon  : "tryIcon",
+                buttonTitle : "Try Again",
+                titleFont   : .appSemiBold(24),
+                imageSize   : 84
+            )
+            .presentationDragIndicator(.hidden)
+            .presentationDetents([.height(300)])
+        }
+        .sheet(isPresented: $showPermissionAlert) {
+            if permissionType == "Speech Recognition"
+            {
+                PermissionSheet(onDelegate: {
+                    //dismiss()
+                }, title: "We need speech recognition access to add subscriptions by voice", type: "voice", value: "Tap Speech Recognition")
+                .presentationDragIndicator(.hidden)
+                .presentationDetents([.height(580)])
+            }
+            else{
+                PermissionSheet(onDelegate: {
+                    //dismiss()
+                }, title: "We need microphone access to add subscriptions by voice", type: "voice", value: "Tap Microphone")
+                .presentationDragIndicator(.hidden)
+                .presentationDetents([.height(580)])
+            }
+        }
+        .sheet(isPresented: $showDiscardPopup) {
+            InfoAlertSheet(
+                onDelegate: {
+                    resetAll()
+                }, title    : "Are you sure you want to discard the recording?",
+                subTitle    : "",
+                imageName   : "infoIcon",
+                buttonIcon  : "deleteIcon",
+                buttonTitle : "Discard"
+            )
+            .presentationDragIndicator(.hidden)
+            .presentationDetents([.height(350)])
+        }
+        .modifier(LoaderModifier())
     }
     
     private func clickOnHowItWorks() {
@@ -164,10 +222,18 @@ struct VoiceCommandView: View {
     
     //MARK: - Back action
     private func goBack() {
+        dismiss()
     }
     
     //MARK: - Submit action
     private func submitAction() {
+        if recognizedText.isEmpty {
+        }
+        else{
+            stopListening()
+            let input = VoiceSubscriptionRequest(userId: Constants.getUserId(), text: recognizedText)
+            voiceCommandVM.voiceSubscription(input: input)
+        }
     }
     
     // MARK: - Format Time
@@ -186,6 +252,13 @@ struct VoiceCommandView: View {
     
     // MARK: - Permissions
     private func requestSpeechPermission() {
+        AVAudioSession.sharedInstance().requestRecordPermission { micGranted in
+            
+            guard micGranted else {
+                return
+            }
+            
+        }
         SFSpeechRecognizer.requestAuthorization { status in
             switch status {
             case .authorized:
@@ -196,55 +269,106 @@ struct VoiceCommandView: View {
         }
     }
     
-    // MARK: - Start Listening
-    private func startListening() {
-        guard !isRecording else { return }
-        isRecording = true
-        // recognizedText = ""
-        let audioSession = AVAudioSession.sharedInstance()
-        do {
-            try audioSession.setCategory(.record, mode: .measurement, options: .duckOthers)
-            try audioSession.setActive(true, options: .notifyOthersOnDeactivation)
-        } catch {
-            print("Audio session setup failed: \(error)")
-        }
-        
-        recognitionRequest = SFSpeechAudioBufferRecognitionRequest()
-        guard let recognitionRequest = recognitionRequest else { return }
-        
-        let inputNode = audioEngine.inputNode
-        recognitionRequest.shouldReportPartialResults = true
-        
-        recognitionTask = speechRecognizer?.recognitionTask(with: recognitionRequest) { result, error in
-            if let result = result {
-                if self.timer != nil {
-                    let newSegment = result.bestTranscription.formattedString
-                    recognizedText = [self.previousText, newSegment]
-                        .filter { !$0.isEmpty }
-                        .joined(separator: " ")
+    private func requestSpeechAndMicPermissions(completion: @escaping (Bool) -> Void) {
+        // Check microphone permission first
+        AVAudioSession.sharedInstance().requestRecordPermission { micGranted in
+            guard micGranted else {
+                DispatchQueue.main.async {
+                    self.permissionType = "Microphone"
+                    //ToastManager.shared.showToast(message: "Microphone access is denied. Enable it in Settings.", style: .error)
+                    self.showPermissionAlert = true
+                }
+                completion(false)
+                return
+            }
+            
+            // Then check speech recognition permission
+            SFSpeechRecognizer.requestAuthorization { authStatus in
+                DispatchQueue.main.async {
+                    switch authStatus {
+                    case .authorized:
+                        completion(true)
+                    case .denied:
+                        self.permissionType = "Speech Recognition"
+                        // ToastManager.shared.showToast(message: "Speech Recognition access is denied. Enable it in Settings.", style: .error)
+                        self.showPermissionAlert = true
+                        completion(false)
+                    case .restricted, .notDetermined:
+                        self.permissionType = "Speech Recognition"
+                        //ToastManager.shared.showToast(message: "Speech Recognition is not available or permission not granted.", style: .error)
+                        self.showPermissionAlert = true
+                        completion(false)
+                    @unknown default:
+                        completion(false)
+                    }
                 }
             }
-            if error != nil {
-                self.stopListening()
+        }
+    }
+    
+    // MARK: - Start Listening
+    private func startListening()
+    {
+        requestSpeechAndMicPermissions { granted in
+            guard granted else { return }
+            if countdown > 119
+            {
+                ToastManager.shared.showToast(message: "You can't record more then 2mins",style:ToastStyle.error)
+                return
             }
-        }
-        
-        let recordingFormat = inputNode.outputFormat(forBus: 0)
-        inputNode.removeTap(onBus: 0)
-        inputNode.installTap(onBus: 0, bufferSize: 1024, format: recordingFormat) {
-            buffer, _ in
-            recognitionRequest.append(buffer)
-        }
-        
-        audioEngine.prepare()
-        do {
-            try audioEngine.start()
-        } catch {
-            print("AudioEngine start failed: \(error)")
-        }
-        
-        timer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { _ in
-            countdown += 1
+            guard !isRecording else { return }
+            isRecording = true
+            // recognizedText = ""
+            let audioSession = AVAudioSession.sharedInstance()
+            do {
+                try audioSession.setCategory(.record, mode: .measurement, options: .duckOthers)
+                try audioSession.setActive(true, options: .notifyOthersOnDeactivation)
+            } catch {
+                print("Audio session setup failed: \(error)")
+            }
+            
+            recognitionRequest = SFSpeechAudioBufferRecognitionRequest()
+            guard let recognitionRequest = recognitionRequest else { return }
+            
+            let inputNode = audioEngine.inputNode
+            recognitionRequest.shouldReportPartialResults = true
+            
+            recognitionTask = speechRecognizer?.recognitionTask(with: recognitionRequest) { result, error in
+                if let result = result {
+                    if self.timer != nil {
+                        let newSegment = result.bestTranscription.formattedString
+                        recognizedText = [self.previousText, newSegment]
+                            .filter { !$0.isEmpty }
+                            .joined(separator: " ")
+                    }
+                }
+                if error != nil {
+                    self.stopListening()
+                }
+            }
+            
+            let recordingFormat = inputNode.outputFormat(forBus: 0)
+            inputNode.removeTap(onBus: 0)
+            inputNode.installTap(onBus: 0, bufferSize: 1024, format: recordingFormat) {
+                buffer, _ in
+                recognitionRequest.append(buffer)
+            }
+            
+            audioEngine.prepare()
+            do {
+                try audioEngine.start()
+            } catch {
+                print("AudioEngine start failed: \(error)")
+            }
+            
+            timer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { _ in
+                countdown += 1
+                if countdown > 119
+                {
+                    stopListening()
+                    ToastManager.shared.showToast(message: "You can't record more then 2mins",style:ToastStyle.error)
+                }
+            }
         }
     }
     

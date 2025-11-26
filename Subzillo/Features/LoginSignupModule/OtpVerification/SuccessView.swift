@@ -22,7 +22,7 @@ struct SuccessView: View {
     var body: some View {
         ZStack{
             Group {
-                Color(.appBackground)
+                Color(.neutralBg100)
             }
             .ignoresSafeArea()
             
@@ -58,7 +58,7 @@ struct SuccessView: View {
             .onAppear{
                 DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
                     if self.isOtp ?? false{
-                        AppIntentRouter.shared.navigate(to: .signup)
+                        AppIntentRouter.shared.navigate(to: .signup())
                     }else{
                         AppIntentRouter.shared.navigate(to: .onboarding)
                     }
@@ -92,10 +92,7 @@ struct SignupSuccessView: View {
                 .multilineTextAlignment(.center)
             
             GradienCustomeView(title    : "Quick tip",
-                               subTitle : "Start by adding your first subscription to see how Subzillo helps you stay organized.",
-                               isBtn    : false,
-                               action   :  {
-            })
+                               subTitle : "Start by adding your first subscription to see how Subzillo helps you stay organized.")
             .padding(.horizontal,24)
             Spacer()
         }

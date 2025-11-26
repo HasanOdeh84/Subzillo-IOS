@@ -62,6 +62,8 @@
 "Family Member phone number" = "Family Member phone number";
 "Color (To distinguish color family subscriptions)" = "Color (To distinguish color family subscriptions)";
 "Finish Sign Up" = "Finish Sign Up";
+"Phone number [Optional]" = "Phone number [Optional]";
+"Email [Optional]" = "Email [Optional]";
 
 //Signup success
 "Account created successfully" = "Account created successfully";
@@ -123,3 +125,6 @@
 "Here's your subscription overview" = "Here's your subscription overview";
 "List View" = "List View";
 "Calendar" = "Calendar";
+
+//Home screen
+"Your subscriptions at a glance" = "Your subscriptions at a glance";

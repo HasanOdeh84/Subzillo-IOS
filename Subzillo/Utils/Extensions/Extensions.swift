@@ -33,6 +33,16 @@ extension String {
     var trimmed: String {
         self.trimmingCharacters(in: .whitespacesAndNewlines)
     }
+    func formattedDate(from inputFormat: String = "yyyy-MM-dd",
+                       to outputFormat: String = "MMM d, yyyy") -> String {
+        let inputFormatter = DateFormatter()
+        inputFormatter.dateFormat = inputFormat
+        guard let date = inputFormatter.date(from: self) else { return self }
+        
+        let outputFormatter = DateFormatter()
+        outputFormatter.dateFormat = outputFormat
+        return outputFormatter.string(from: date)
+    }
 }
 
 func formatTime(_ time: TimeInterval) -> String {

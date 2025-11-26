@@ -10,7 +10,10 @@ import Foundation
 struct LoginSignupValidations {
     
     //MARK: - SignUp
-    func validateSignup(input: RegisterRequest) -> String? {
+    func validateSignup(input: RegisterRequest,isSocialLogin:Bool = false) -> String? {
+        if !input.phoneNumber.trimmed.isEmpty && !Validations().isValidMobile(input.phoneNumber.trimmed){
+            return "Enter a valid phone number"
+        }
         if input.fullName.trimmed.isEmpty{
             return "Please enter your full name"
         }
@@ -20,22 +23,61 @@ struct LoginSignupValidations {
         if !Validations().isValidName(input.fullName.trimmed){
             return "Enter a valid name"
         }
-//        if input.email.trimmed.isEmpty{
-//            return "Please enter email"
-//        }
+        if isSocialLogin{
+            if input.email.trimmed.isEmpty{
+                return "Please enter email address"
+            }
+        }
         if !input.email.trimmed.isEmpty && !Validations().isValidEmail(input.email.trimmed) {
             return "Enter a valid email address"
         }
-        if !input.phoneNumber.trimmed.isEmpty && !Validations().isValidMobile(input.phoneNumber.trimmed){
-            return "Enter a valid phone number"
-        }
-        return nil // All validations passed
+        return nil
+        //        if isSocialLogin{
+        //            if !input.phoneNumber.trimmed.isEmpty && !Validations().isValidMobile(input.phoneNumber.trimmed){
+        //                return "Enter a valid phone number"
+        //            }
+        //            if input.fullName.trimmed.isEmpty{
+        //                return "Please enter your full name"
+        //            }
+        //            if input.fullName.trimmed.count < 3 {
+        //                return "Full name must be at least 3 characters"
+        //            }
+        //            if !Validations().isValidName(input.fullName.trimmed){
+        //                return "Enter a valid name"
+        //            }
+        //            if input.email.trimmed.isEmpty{
+        //                return "Please enter email address"
+        //            }
+        //            if !input.email.trimmed.isEmpty && !Validations().isValidEmail(input.email.trimmed) {
+        //                return "Enter a valid email address"
+        //            }
+        //            return nil
+        //        }else{
+        //            if !input.phoneNumber.trimmed.isEmpty && !Validations().isValidMobile(input.phoneNumber.trimmed){
+        //                return "Enter a valid phone number"
+        //            }
+        //            if input.fullName.trimmed.isEmpty{
+        //                return "Please enter your full name"
+        //            }
+        //            if input.fullName.trimmed.count < 3 {
+        //                return "Full name must be at least 3 characters"
+        //            }
+        //            if !Validations().isValidName(input.fullName.trimmed){
+        //                return "Enter a valid name"
+        //            }
+        //            if !input.email.trimmed.isEmpty && !Validations().isValidEmail(input.email.trimmed) {
+        //                return "Enter a valid email address"
+        //            }
+        //        }
+        //        return nil // All validations passed
     }
     
     //MARK: - Verify OTP
     func validateVerifyOtp(otp: String) -> String? {
-        if otp.isEmpty || otp.count != 6{
-            return "Please enter OTP"
+        if otp.isEmpty{
+            return "Please enter the OTP"
+        }else if otp.count != 6{
+            return "Please enter a 6-digit code"
         }
         return nil
     }
@@ -44,7 +86,7 @@ struct LoginSignupValidations {
     func validateLogin(input: checkLoginRequest) -> String? {
         if input.loginType == 1{
             if input.phoneNumber.trimmed.isEmpty || !Validations().isValidMobile(input.phoneNumber.trimmed){
-                return "Enter a valid phone number"
+                return "Phone number is required"
             }
         }else{
             if input.email.trimmed.isEmpty {

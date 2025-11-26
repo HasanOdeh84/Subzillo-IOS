@@ -21,11 +21,18 @@ public struct RegisterResponse: Codable {
 }
 
 public struct RegisterResponseData: Codable {
-  var status                    : Int?
+  var status                       : Int?
+  var emailOtpVerifiedStatus       : Bool?
+  var mobileOtpVerifiedStatus      : Bool?
   public init(
-    status                      : Int? = nil
+    status                      : Int? = nil,
+    emailOtpVerifiedStatus      : Bool? = false,
+    mobileOtpVerifiedStatus     : Bool? = false
+    
   ) {
-    self.status                 = status
+    self.status                     = status
+    self.emailOtpVerifiedStatus     = emailOtpVerifiedStatus
+    self.mobileOtpVerifiedStatus    = mobileOtpVerifiedStatus
   }
 }
 

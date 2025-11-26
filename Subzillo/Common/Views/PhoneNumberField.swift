@@ -10,7 +10,7 @@ import SDWebImageSwiftUI
 
 struct PhoneNumberField: View {
     
-    //MMARK: - Properties
+    //MARK: - Properties
     @Binding var phoneNumber                : String
     var header                              : String?
     var placeholder                         : String?
@@ -25,7 +25,7 @@ struct PhoneNumberField: View {
         VStack(alignment: .leading, spacing: 8) {
             Text(LocalizedStringKey(header ?? ""))
                 .font(.appRegular(14))
-                .foregroundColor(.appNeutralMain700)
+                .foregroundColor(Color.neutralMain700)
             
             HStack(spacing: 0) {
                 Button {
@@ -52,31 +52,30 @@ struct PhoneNumberField: View {
                         //                            .frame(width: 24, height: 18)
                             .frame(width: 24, height: 24)
                             .cornerRadius(5)
-                        Image(systemName: "chevron.down")
+                        Image("dropDown_blackWhite")
                             .frame(width: 20, height: 20)
-                            .foregroundColor(.primaryText)
+                            .foregroundColor(.black)
                         Text(isCountry ? selectedCountry?.dialCode ?? "" : selectedCurrency?.code ?? "")
                             .font(.appRegular(14))
-                            .foregroundColor(.neutral_2_500)
+                            .foregroundColor(.neutral2500)
                     }
                     .padding(.horizontal, 10)
                 }
                 
                 Divider()
                     .frame(height: 52)
-                    .foregroundColor(.appNeutral100)
+                    .foregroundColor(.neutral100)
                 
                 if !isCountry{
                     TextField(LocalizedStringKey(placeholder ?? ""), text: Binding(
                         get: { selectedCurrency?.name ?? "" },
                         set: { selectedCurrency?.name = $0 }
                     ))
-                    .keyboardType(.numberPad)
                     .padding(.horizontal, 16)
                     .frame(height: 52)
-                    .background(.appNeutral900)
+                    .background(.whiteBlackBG)
                     //                    .foregroundColor(.neutral_2_500)
-                    .foregroundColor(.black)
+                    .foregroundStyle(Color.whiteBlackBGnoPic)
                     .font(.appRegular(14))
                     .disabled(true)
                 }else{
@@ -84,8 +83,8 @@ struct PhoneNumberField: View {
                         .keyboardType(.numberPad)
                         .padding(.horizontal, 16)
                         .frame(height: 52)
-                        .background(.appNeutral900)
-                        .foregroundColor(.black)
+                        .background(.whiteBlackBG)
+                        .foregroundStyle(Color.whiteBlackBGnoPic)
                         .font(.appRegular(14))
                         .disabled(false)
                         .onChange(of: phoneNumber) { newValue in
@@ -98,11 +97,11 @@ struct PhoneNumberField: View {
                 }
             }
             .frame(height: 52)
-            .background(.appNeutralBg100)
+            .background(.neutralBg100)
             .cornerRadius(12)
             .overlay(
                 RoundedRectangle(cornerRadius: 12)
-                    .stroke(Color.neutral_2_200, lineWidth: 1)
+                    .stroke(Color.neutral2200, lineWidth: 1)
             )
             .onAppear(perform: updateCountryAndCurrency)
             .onChange(of: commonApiVM.countriesResponse) { _ in updateCountryAndCurrency() }
@@ -124,6 +123,12 @@ struct PhoneNumberField: View {
     //MARK: - User defined methods
     //MARK: - updateCountryAndCurrency
     func updateCountryAndCurrency() {
+        selectedCurrency = Currency(id      : nil,
+                                    name    : Constants.shared.currencyCode,
+                                    symbol  : Constants.shared.currencySymbol,
+                                    code    : Constants.shared.currencyCode,
+                                    flag    : Constants.shared.flag(from: Constants.shared.regionCode))
+        selectedCountry = Country(id: 0, countryName: "", countryCode: Constants.shared.regionCode, dialCode: "", countryFlag: Constants.shared.flag(from: Constants.shared.regionCode))
         if let countries = commonApiVM.countriesResponse {
             selectedCountry = countries.first(where: { $0.countryCode == Constants.shared.regionCode })
         }

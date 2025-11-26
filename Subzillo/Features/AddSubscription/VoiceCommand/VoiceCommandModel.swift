@@ -6,51 +6,63 @@
 //
 
 import Foundation
+
 public struct VoiceSubscriptionRequest: Codable {
-  let userId : String
-  public init(
-    userId: String) {
-      self.userId   = userId
-    }
+    var userId                      : String
+    var text                        : String
 }
 
 public struct VoiceSubscriptionResponse: Codable {
-    var message : String?
-    var data    : VoiceSubscriptionData?
+    var message                     : String?
+    var providerLogoBaseUrl         : String?
+    var data                        : VoiceSubscriptionResponseData?
 }
 
-public struct VoiceSubscriptionData: Codable {
-  var serviceName                   : String?
-  var subscriptionType              : String?
-  var amount                        : Double?
-  var currency                      : String?
-  var billingCycle                  : String?
-  var nextPaymentDate               : String?
-  var paymentMethod                 : String?
-  var category                      : String?
-  var status                        : String?
-  var email                         : String?
-  public init(
-    serviceName                      : String? = nil,
-    subscriptionType                 : String? = nil,
-    amount                           : Double? = nil,
-    currency                         : String? = nil,
-    billingCycle                     : String? = nil,
-    nextPaymentDate                  : String? = nil,
-    paymentMethod                    : String? = nil,
-    category                         : String? = nil,
-    status                           : String? = nil,
-    email                            : String? = nil
-  ) {
-    self.serviceName                = serviceName
-    self.subscriptionType           = subscriptionType
-    self.amount                     = amount
-    self.currency                   = currency
-    self.billingCycle               = billingCycle
-    self.nextPaymentDate            = nextPaymentDate
-    self.paymentMethod              = paymentMethod
-    self.category                   = category
-    self.status                     = status
-    self.email                      = email
-  }
+public struct VoiceSubscriptionResponseData: Codable, Hashable {
+    var subscriptions               : [SubscriptionData]?
+    var hasMultipleSubscriptions    : Bool?
+}
+
+public struct SubscriptionData: Codable, Hashable {
+    var id                          : String?
+    var serviceName                 : String?
+    var serviceNameConfidence       : Double?
+    var serviceLogo                 : String?
+    var subscriptionType            : String?
+    var subscriptionTypeConfidence  : Double?
+    var amount                      : Double?
+    var amountConfidence            : Double?
+    var currency                    : String?
+    var currencySymbol              : String?
+    var currencyConfidence          : Double?
+    var billingCycle                : String?
+    var billingCycleConfidence      : Double?
+    var lastPaymentDate             : String?
+    var nextPaymentDate             : String?
+    var nextPaymentDateConfidence   : Double?
+    var paymentMethodId             : String?
+    var paymentMethod               : String?
+    var paymentMethodName           : String?
+    var paymentMethodStatus         : Bool?
+    var paymentMethodConfidence     : Double?
+    var categoryId                  : String?
+    var category                    : String?
+    var categoryName                : String?
+    var categoryConfidence          : Double?
+    var confidenceOverall           : Double?
+    var isSubscription              : Bool?
+    var reason                      : String?
+    var subscriptionForName         : String?
+    var subscriptionFor             : String?
+    var paymentMethodDataId         : String?
+    var paymentMethodDataName       : String?
+    var renewalReminder             : [String]?
+    var renewalReminders            : [String]?
+    var renewalReminderValue        : String?
+    var notes                       : String?
+    var status                      : String?
+    var cardName                    : String?
+    var cardNumber                  : String?
+    var nickName                    : String?
+    var color                       : String?
 }

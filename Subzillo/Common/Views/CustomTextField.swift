@@ -7,10 +7,13 @@
 
 import SwiftUI
 
+//MARK: - CustomTextField
 struct CustomTextField: View {
-    var placeholder: String
-    @Binding var text: String
-    var keyboardType: UIKeyboardType = .default
+    
+    //MARK: - Properties
+    var placeholder     : String
+    @Binding var text   : String
+    var keyboardType    : UIKeyboardType = .default
     
     var body: some View {
         TextField(placeholder, text: $text)
@@ -21,7 +24,10 @@ struct CustomTextField: View {
     }
 }
 
+//MARK: - ReusableTextField
 struct ReusableTextField: View {
+    
+    //MARK: - Properties
     var placeholder     : String
     @Binding var text   : String
     var isEmail         : Bool = false
@@ -31,7 +37,7 @@ struct ReusableTextField: View {
         VStack(alignment: .leading, spacing: 8) {
             Text(LocalizedStringKey(header ?? ""))
                 .font(.appRegular(14))
-                .foregroundColor(.appNeutralMain700)
+                .foregroundColor(Color.neutralMain700)
             HStack{
                 Image("profile")
                 TextField(placeholder, text: $text)
@@ -41,12 +47,12 @@ struct ReusableTextField: View {
             }
             .padding(16)
             .frame(height: 52)
-            .background(.appBlackWhite)
-            .cornerRadius(12)
             .overlay(
                 RoundedRectangle(cornerRadius: 12)
-                    .stroke(Color.neutral_2_200, lineWidth: 1)
+                    .stroke(.neutral300Border, lineWidth: 1)
             )
+            .background(Color.whiteNeutralCardBG)
+            .cornerRadius(12)
         }
     }
 }

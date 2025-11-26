@@ -45,7 +45,7 @@ struct SegmentView: View {
                     
                     Text(LocalizedStringKey(leftText))
                         .font(.appSemiBold(14))
-                        .foregroundColor(selectedSegment == .first ? Color.black_white : .navyBlueCTA700)
+                        .foregroundColor(selectedSegment == .first ? Color.white : .navyBlueCTA700)
                 }
                 .frame(maxWidth: .infinity, minHeight: 40)
                 .background(
@@ -87,7 +87,7 @@ struct SegmentView: View {
                     
                     Text(LocalizedStringKey(rightText))
                         .font(.appSemiBold(14))
-                        .foregroundColor(selectedSegment == .second ? Color.black_white : .navyBlueCTA700)
+                        .foregroundColor(selectedSegment == .second ? Color.white : .navyBlueCTA700)
                 }
                 .frame(maxWidth: .infinity, minHeight: 40)
                 .background(

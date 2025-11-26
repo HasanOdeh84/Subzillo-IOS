@@ -30,11 +30,12 @@ struct Constants{
     static let systemVersion                        = UIDevice.current.systemVersion
     static let googleMapApiKey                      = "AIzaSyAjueXZzKodaxXdG2mZYG21_Jaf_ikFicQ"
     static let googleToken                          = "AIzaSyC8QkcmKT-p9tpMnamwLZ3xY4RSTxcvaKk"
-    static let googleSigninId                       = "353333226738-1htnc4n6tddp5pbm78e3e9qbceeui88u.apps.googleusercontent.com"
+    static let googleSigninId                       = "955282043815-5tm4dfjcs5uv5qkvne9uv6jkf64div4a.apps.googleusercontent.com"
     static let userDefaults                         = UserDefaults.standard
     
     let regionCode      = Locale.current.region?.identifier ?? "US"
     let currencyCode    = Locale.current.currency?.identifier ?? "USD"
+    let currencySymbol  = Locale.current.currencySymbol ?? "$"
     
     var pushMode:Int{
 #if DEBUG
@@ -94,6 +95,211 @@ struct Constants{
         let defaults = UserDefaults.standard
         _ = defaults.dictionaryRepresentation()
         defaults.removeObject(forKey: key)
+    }
+    
+    static func confidenceInfo(isAssumed:Bool,confidence:Double) -> (String, Color) {
+        if isAssumed {
+            return ("Assumed", Color.warning)
+        } else if confidence <= 0.0 {
+            return ("------------", Color.empty)
+        } else if confidence < 0.4 {
+            return ("Low confidence", Color.error)
+        } else if confidence < 0.7 {
+            return ("Medium confidence", Color.info)
+        } else if confidence < 1 {
+            return ("High confidence", Color.high)
+        } else {
+            return ("Perfect match", Color.success)
+        }
+    }
+    
+    func dateConversion(_ apiDate: String) -> String {
+        // 1. Convert "yyyy-MM-dd" string to Date
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd"
+        formatter.timeZone = .current
+        
+        guard let date = formatter.date(from: apiDate) else {
+            return apiDate  // fallback if date parsing fails
+        }
+        
+        let calendar = Calendar.current
+        
+        // 2. Check for today
+        if calendar.isDateInToday(date) {
+            return "Today"
+        }
+        
+        // 3. Check for tomorrow
+        if calendar.isDateInTomorrow(date) {
+            return "Tomorrow"
+        }
+        
+        // 4. Otherwise return dd/MM/yyyy
+        let outputFormatter = DateFormatter()
+        outputFormatter.dateFormat = "dd/MM/yyyy"
+        
+        return outputFormatter.string(from: date)
+    }
+}
+
+//MARK: - Currency and country codes and flags
+extension Constants{
+    
+    func flag(from countryCode: String) -> String {
+        countryCode
+            .uppercased()
+            .unicodeScalars
+            .map { 127397 + $0.value }
+            .compactMap(UnicodeScalar.init)
+            .map(String.init)
+            .joined()
+    }
+    
+    func getCurrencyCode(from input: String) -> String? {
+        let key = input.lowercased().trimmingCharacters(in: .whitespaces)
+        let currencyNameToCode: [String: String] = [
+            
+            // USD
+            "dollar": "USD",
+            "dollars": "USD",
+            "us dollar": "USD",
+            "american dollar": "USD",
+            "usd": "USD",
+            
+            // EUR
+            "euro": "EUR",
+            "euros": "EUR",
+            "eur": "EUR",
+            
+            // GBP
+            "pound": "GBP",
+            "pounds": "GBP",
+            "british pound": "GBP",
+            "gbp": "GBP",
+            
+            // CAD
+            "canadian dollar": "CAD",
+            "cad": "CAD",
+            
+            // AUD
+            "australian dollar": "AUD",
+            "aud": "AUD",
+            
+            // JPY
+            "yen": "JPY",
+            "japanese yen": "JPY",
+            "jpy": "JPY",
+            
+            // CNY
+            "yuan": "CNY",
+            "chinese yuan": "CNY",
+            "renminbi": "CNY",
+            "cny": "CNY",
+            
+            // INR
+            "rupee": "INR",
+            "rupees": "INR",
+            "indian rupee": "INR",
+            "inr": "INR",
+            
+            // BRL
+            "real": "BRL",
+            "reals": "BRL",
+            "brazilian real": "BRL",
+            "brl": "BRL",
+            
+            // MXN
+            "peso": "MXN",
+            "pesos": "MXN",
+            "mexican peso": "MXN",
+            "mxn": "MXN",
+            
+            // SGD
+            "singapore dollar": "SGD",
+            "sgd": "SGD",
+            
+            // CHF
+            "swiss franc": "CHF",
+            "franc": "CHF",
+            "chf": "CHF",
+            
+            // NZD
+            "new zealand dollar": "NZD",
+            "nzd": "NZD",
+            
+            // SEK
+            "swedish krona": "SEK",
+            "krona": "SEK",
+            "sek": "SEK",
+            
+            // NOK
+            "norwegian krone": "NOK",
+            "krone": "NOK",
+            "nok": "NOK",
+            
+            // DKK
+            "danish krone": "DKK",
+            "dkk": "DKK",
+            
+            // HKD
+            "hong kong dollar": "HKD",
+            "hkd": "HKD",
+            
+            // KRW
+            "won": "KRW",
+            "korean won": "KRW",
+            "krw": "KRW",
+            
+            // ZAR
+            "rand": "ZAR",
+            "south african rand": "ZAR",
+            "zar": "ZAR",
+            
+            // AED
+            "dirham": "AED",
+            "uae dirham": "AED",
+            "aed": "AED",
+            
+            // SAR
+            "riyal": "SAR",
+            "saudi riyal": "SAR",
+            "sar": "SAR",
+            
+            // KWD
+            "dinar": "KWD",
+            "kuwaiti dinar": "KWD",
+            "kwd": "KWD"
+        ]
+        return currencyNameToCode[key]
+    }
+    
+    func detectCurrencyCode(from text: String) -> String? {
+        let words = text.lowercased().split(separator: " ")
+        
+        for word in words {
+            if let code = getCurrencyCode(from: String(word)) {
+                return code
+            }
+        }
+        return nil
+    }
+    
+    func symbolForCurrencyCode(_ code: String) -> String {
+        let locale = Locale.availableIdentifiers
+            .map { Locale(identifier: $0) }
+            .first { $0.currency?.identifier == code }
+        
+        return locale?.currencySymbol ?? ""
+    }
+    
+    func getCurrencyDetails(from userInput: String) -> (code: String, symbol: String)? {
+        guard let code = detectCurrencyCode(from: userInput) else {
+            return nil
+        }
+        
+        let symbol = symbolForCurrencyCode(code)
+        return (code, symbol)
     }
 }
 

@@ -10,33 +10,48 @@ import SwiftUI
 struct RootTabBar: View {
     
     //MARK: - Properties
-    @State private var selectedTab              : Tab = .home
+    @State var selectedTab                      : Tab = .home
+    @StateObject var homeVM                     = HomeViewModel()
+    @State var isHome                           = false
     
     //MARK: - Body
     var body: some View {
         ZStack(alignment: .bottom) {
             Group {
+                Color(.neutralBg100)
                 switch selectedTab {
                 case .home:
-                    HomeView()
+                    if isHome{
+                        HomeView(tabSelected:$selectedTab)
+                    }else{
+                        WelcomeHomeView()
+                    }
                 case .subscriptions:
                     SubscriptionsView()
                 case .addSubscription:
                     AddSubscriptionsView()
                 case .smartAI:
-                    ActivityView()
+                    AnalyticsView()
                 case .profile:
                     ProfileView()
                 }
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
-            .background(Color(.systemGray6))
+            .ignoresSafeArea()
             
             CurvedTabBar(selectedTab: $selectedTab)
                 .padding(.bottom, 20)
         }
         .ignoresSafeArea(edges: .bottom)
         .navigationBarBackButtonHidden(true)
+        .onAppear{
+            homeVM.home(input: HomeRequest(userId: Constants.getUserId()))
+        }
+        .onChange(of: homeVM.homeResponse){ _ in updateHomeResponse() }
+    }
+    
+    private func updateHomeResponse() {
+        isHome = homeVM.homeResponse?.totalSubscriptions == 0 ? false : true
     }
     
     //Local push for testing
@@ -62,8 +77,7 @@ struct RootTabBar: View {
     RootTabBar()
 }
 
-import SwiftUI
-
+//MARK: - Curved tab bar
 struct CurvedTabBar: View {
     @Binding var selectedTab : Tab
     var body: some View {
@@ -78,7 +92,7 @@ struct CurvedTabBar: View {
                 
                 VStack {
                     Button {
-                        print("Create Button Action")
+                        selectedTab = .addSubscription
                     } label: {
                         ZStack {
                             Circle()
@@ -99,7 +113,8 @@ struct CurvedTabBar: View {
                 .frame(height: 86)
                 
                 TabBarItem(label: "Smart AI", iconName: selectedTab == .smartAI ? "smartAI-tabSelected" : "smartAI-tab", action: {
-                    selectedTab = .smartAI
+                    ToastManager.shared.showToast(message: "Coming soon",style:ToastStyle.info)
+                    //                    selectedTab = .smartAI
                 }, selectedTab: $selectedTab, tab: .smartAI)
                 TabBarItem(label: "My Profile", iconName: selectedTab == .profile ? "profile-tabSelected" : "profile-tab", action: {
                     selectedTab = .profile
@@ -110,7 +125,7 @@ struct CurvedTabBar: View {
             .padding(.bottom, max(0, 8 - proxy.safeAreaInsets.bottom))
             .background {
                 CurvedShape()
-                    .fill(.white)
+                    .fill(Color.whiteNeutralCardBG)
                     .shadow(color: .black.opacity(0.1), radius: 5)
                     .ignoresSafeArea()
             }
@@ -119,6 +134,7 @@ struct CurvedTabBar: View {
     }
 }
 
+//MARK: - TabBarItem
 struct TabBarItem: View {
     let label                   : String
     let iconName                : String
@@ -148,6 +164,7 @@ struct TabBarItem: View {
     }
 }
 
+//MARK: - Curved shape
 struct CurvedShape: Shape {
     private enum Constants {
         static let cornerRadius: CGFloat = 0
@@ -225,5 +242,3 @@ struct CurvedShape: Shape {
         return path
     }
 }
-
-

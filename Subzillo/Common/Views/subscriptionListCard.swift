@@ -9,65 +9,105 @@ import SwiftUI
 import SDWebImageSwiftUI
 
 struct subscriptionListCard: View {
-    var title       : String = "sdfsdf"
-    var description : String = "sfsdf"
-    var imageUrl    : String = ""
-    var currency    : String = "sdfsdf"
-    var price       : String = "sdfsdf"
-    var relation    : String = "sdfsdfs"
     
+    //MARK: - Properties
+    var subscriptionData    : SubscriptionListData
+    var isActive            : Bool = false
+    @State var title        = ""
+    @State var subTitle     = ""
+    @State var nextPayment  = ""
+    @State var relation     = ""
+    @State var colour       = ""
+    var selectionMode       : Bool = false
+    var onSelect            : () -> Void = {}
+    var onLongPress         : () -> Void = {}
+    @State var isExpired    = false
+    
+    //MARK: - body
     var body: some View {
         HStack{
-//            WebImage(url: URL(string: imageUrl))
-            Image("netflix")
-                        .resizable()
-//                        .indicator(.activity)
-//                        .transition(.fade(duration: 0.5))
-                        .scaledToFit()
-                        .frame(width: 48, height: 48)
-                        .cornerRadius(8)
+            if selectionMode {
+                Button(action: onSelect) {
+                    Image(subscriptionData.isSelected == true ? "Checkmark" : "UnCheckmark")
+                        .font(.system(size: 24))
+                }
+                .padding(.horizontal,12)
+            }
+            
+            AvatarView(serviceName: subscriptionData.serviceName ?? "", serviceLogo: subscriptionData.serviceLogo ?? "", size: 48)
+            
             VStack(alignment: .leading,spacing: 4){
-                Text("\(title) | \(title)")
+                Text(isActive ? "Next renewal" : "\(subscriptionData.serviceName ?? "") | \(subscriptionData.subscriptionType ?? "")")
                     .font(.appRegular(12))
-                    .foregroundColor(.appNeutral600)
+                    .foregroundColor(Color.neutral600)
                     .multilineTextAlignment(.leading)
-                Text("\(description) • \(description)")
-                    .font(.appRegular(14))
-                    .foregroundColor(.navyBlueCTA700)
-                    .multilineTextAlignment(.leading)
+                HStack(spacing: 3){
+                    Text("\(isActive ? subscriptionData.serviceName ?? "" : subscriptionData.billingCycle ?? "") •")
+                        .font(.appRegular(14))
+                        .foregroundColor(.navyBlueCTA700)
+                        .multilineTextAlignment(.leading)
+                    Text(subscriptionData.status == "expired" ? "Expired" : Constants.shared.dateConversion(subscriptionData.nextPaymentDate ?? ""))
+                        .font(subscriptionData.status == "expired" ? .appBold(14) : .appRegular(14))
+                        .foregroundColor(subscriptionData.status == "expired" ? .disCardRed : .navyBlueCTA700)
+                        .multilineTextAlignment(.leading)
+                }
             }
             
             Spacer()
             
-            VStack(spacing: 8){
-                Text(price)
+            VStack(alignment: .trailing,spacing: 8){
+                Text("\(subscriptionData.currencySymbol ?? "")\(String(describing: subscriptionData.amount ?? 0.0))")
                     .font(.appSemiBold(16))
                     .foregroundColor(.navyBlueCTA700)
-                VStack{
-                    Text(relation)
-                        .font(.appRegular(12))
-                        .foregroundColor(.blue900)
+                if !isActive{
+                    if subscriptionData.nickName == "" && subscriptionData.color == ""{
+                        RelationView(isMore: false, name: "Me", color: "#619BEE")
+                    }else{
+                        RelationView(isMore: false, name: subscriptionData.nickName ?? "Me", color: subscriptionData.color ?? "#619BEE")
+                    }
                 }
-                .padding(.vertical,4)
-                .padding(.horizontal,8)
-                .frame(height: 24)
-                .cornerRadius(4)
-                .overlay(
-                    RoundedRectangle(cornerRadius: 4)
-                        .stroke(Color.blue300, lineWidth: 1)
-                )
             }
         }
         .padding(12)
         .overlay(
             RoundedRectangle(cornerRadius: 8)
-                .stroke(.appNeutral800, lineWidth: 1)
+                .stroke(Color.neutral300Border, lineWidth: 1)
         )
-        .background(.appNeutral900)
+        .background(.whiteBlackBG)
         .cornerRadius(8)
+        //        .onAppear{
+        //            print("load data")
+        //            updateData()
+        //        }
+        //        .onChange(of: subscriptionData) { _ in
+        //            print("load data in onchange")
+        //            updateData()
+        //        }
+        .onLongPressGesture {
+            onLongPress()
+        }
     }
-}
-
-#Preview {
-    subscriptionListCard()
+    
+    //MARK: - User defined methods
+    func updateData(){
+        if subscriptionData.nickName == "" && subscriptionData.color == ""{
+            relation    = "Me"
+            colour      = "#619BEE"
+        }else{
+            relation = subscriptionData.nickName ?? "Me"
+            colour   = subscriptionData.color ?? "#619BEE"
+        }
+        nextPayment = Constants.shared.dateConversion(subscriptionData.nextPaymentDate ?? "")
+        if subscriptionData.status == "expired"{
+            nextPayment = "Expired"
+            isExpired   = true
+        }
+        if isActive{
+            title       = "Next renewal"
+            subTitle    = "\(subscriptionData.serviceName ?? "") •"
+        }else{
+            title       = "\(subscriptionData.serviceName ?? "") | \(subscriptionData.subscriptionType ?? "")"
+            subTitle    = "\(subscriptionData.billingCycle ?? "") •"
+        }
+    }
 }

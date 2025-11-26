@@ -15,6 +15,29 @@ public struct LoginSignupVerifyData: Codable, Hashable {
     let userId              : String
     let isNewUser           : Bool
     let isSignupCompleted   : Bool
+    let fullName            : String?
+    let socialLogin         : Bool?
+    init(
+        verifyType          : Int,
+        email               : String? = nil,
+        phoneNumber         : String? = nil,
+        countryCode         : String? = nil,
+        userId              : String,
+        isNewUser           : Bool,
+        isSignupCompleted   : Bool,
+        fullName            : String? = nil,
+        socialLogin         : Bool? = false
+    ) {
+        self.verifyType         = verifyType
+        self.email              = email
+        self.phoneNumber        = phoneNumber
+        self.countryCode        = countryCode
+        self.userId             = userId
+        self.isNewUser          = isNewUser
+        self.isSignupCompleted  = isSignupCompleted
+        self.fullName           = fullName
+        self.socialLogin        = socialLogin
+    }
 }
 
 public struct OtpVerifyRequest: Codable {

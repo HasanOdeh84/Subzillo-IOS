@@ -14,23 +14,30 @@ class VoiceCommandViewModel: NSObject, ObservableObject, AVAudioPlayerDelegate, 
     
     private var subscriptions                   = Set<AnyCancellable>()
     var apiReference                            = NetworkRequest.shared
-    @Published var voiceSubscriptionResponse    : VoiceSubscriptionResponse?
     private let router                          : AppIntentRouter
+    @Published var showErrorPopup               : Bool = false
     
     init(router: AppIntentRouter = .shared) {
         self.router = router
     }
     
-    func voiceSubscription(input:VoiceSubscriptionRequest,fileData:[MultiPartFileInput]){
-        apiReference.postMultipartApi(endPoint: APIEndpoint.voiceSubscription, method: .POST,token: authKey,body: MultipartInput(parameters: input, fileInput: fileData),showLoader: true, responseType: VoiceSubscriptionResponse.self)
+    func voiceSubscription(input:VoiceSubscriptionRequest) {
+        apiReference.postApi(endPoint: APIEndpoint.voiceSubscription, method: .POST,token: authKey,body: input,showLoader: true, responseType: VoiceSubscriptionResponse.self)
             .sink { [unowned self] completion in
                 if case let .failure(error) = completion {
                     self.handleError(error,endPoint: APIEndpoint.voiceSubscription)
+                     self.showErrorPopup = true
                 }
             }
-        receiveValue: { [unowned self] response in
+        receiveValue: { response in
             PrintLogger.modelLog(response, type: .response, isInput: false)
-            voiceSubscriptionResponse = response
+            if response.data?.subscriptions?.count == 0
+            {
+                self.showErrorPopup = true
+            }
+            else{
+                self.router.navigate(to: .subscriptionPreviewView(subscriptionsData: response.data?.subscriptions, content: input.text, isFromImage:false))
+            }
         }
         .store(in: &self.subscriptions)
     }

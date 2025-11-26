@@ -22,7 +22,7 @@ class RegistrationViewModel: ObservableObject {
         self.sessionManager = sessionManager
     }
     
-    func register(input:RegisterRequest,verifyType:Int) {
+    func register(input:RegisterRequest,verifyType:Int,fromSocialLogin:Bool = false,appleEmail:String = "") {
         apiReference.postApi(endPoint: APIEndpoint.registration, method: .POST,token: authKey,body: input,showLoader: true, responseType: RegisterResponse.self)
             .sink { [unowned self] completion in
                 if case let .failure(error) = completion {
@@ -41,19 +41,85 @@ class RegistrationViewModel: ObservableObject {
                 })
             }else{
                 ToastManager.shared.showToast(message: response.message ?? "")
-                if input.email != "" && input.phoneNumber != ""{
-                    let verifyType = (SessionManager.shared.loginData?.verifyType ?? 0) == 1 ? 2 : 1
-                    let data = LoginSignupVerifyData(verifyType         : verifyType,
-                                                     email              : input.email,
-                                                     phoneNumber        : input.phoneNumber,
-                                                     countryCode        : input.countryCode,
-                                                     userId             : SessionManager.shared.loginData?.userId ?? "",
-                                                     isNewUser          : SessionManager.shared.loginData?.isNewUser ?? false,
-                                                     isSignupCompleted  : SessionManager.shared.loginData?.isSignupCompleted ?? false)
-                    self.sessionManager.saveLoginData(data)
-                    router.navigate(to: .verifyOtp(fromLogin: false))
-                }else{
-                    router.navigate(to: .SuccessView(isOtp: false))
+                if fromSocialLogin{
+                    if response.data?.emailOtpVerifiedStatus == false && response.data?.mobileOtpVerifiedStatus == false{
+                        if input.email != appleEmail{
+                            var isMobileVerify = false
+                            let verifyType = 2
+                            if input.phoneNumber != ""{
+                                isMobileVerify = true
+                            }
+                            let data = LoginSignupVerifyData(verifyType         : verifyType,
+                                                             email              : input.email,
+                                                             phoneNumber        : input.phoneNumber,
+                                                             countryCode        : input.countryCode,
+                                                             userId             : SessionManager.shared.loginData?.userId ?? "",
+                                                             isNewUser          : SessionManager.shared.loginData?.isNewUser ?? false,
+                                                             isSignupCompleted  : SessionManager.shared.loginData?.isSignupCompleted ?? false,
+                                                             fullName           : input.fullName,
+                                                             socialLogin        : isMobileVerify)
+                            self.sessionManager.saveLoginData(data)
+                            router.navigate(to: .verifyOtp(fromLogin: false))
+                        }
+                        else{
+                            router.navigate(to: .SuccessView(isOtp: false))
+                        }
+                    }else if response.data?.emailOtpVerifiedStatus == false && response.data?.mobileOtpVerifiedStatus == true{
+                        if input.email != appleEmail{
+                            var isMobileVerify = false
+                            let verifyType = 2
+                            if input.phoneNumber != ""{
+                                isMobileVerify = true
+                            }
+                            let data = LoginSignupVerifyData(verifyType         : verifyType,
+                                                             email              : input.email,
+                                                             phoneNumber        : input.phoneNumber,
+                                                             countryCode        : input.countryCode,
+                                                             userId             : SessionManager.shared.loginData?.userId ?? "",
+                                                             isNewUser          : SessionManager.shared.loginData?.isNewUser ?? false,
+                                                             isSignupCompleted  : SessionManager.shared.loginData?.isSignupCompleted ?? false,
+                                                             fullName           : input.fullName,
+                                                             socialLogin        : false)
+                            self.sessionManager.saveLoginData(data)
+                            router.navigate(to: .verifyOtp(fromLogin: false))
+                        }
+                        else{
+                            router.navigate(to: .SuccessView(isOtp: false))
+                        }
+                    }else if response.data?.emailOtpVerifiedStatus == true && response.data?.mobileOtpVerifiedStatus == false{
+                        let verifyType = 1
+                        let data = LoginSignupVerifyData(verifyType         : verifyType,
+                                                         email              : input.email,
+                                                         phoneNumber        : input.phoneNumber,
+                                                         countryCode        : input.countryCode,
+                                                         userId             : SessionManager.shared.loginData?.userId ?? "",
+                                                         isNewUser          : SessionManager.shared.loginData?.isNewUser ?? false,
+                                                         isSignupCompleted  : SessionManager.shared.loginData?.isSignupCompleted ?? false,
+                                                         fullName           : input.fullName,
+                                                         socialLogin        : false)
+                        self.sessionManager.saveLoginData(data)
+                        router.navigate(to: .verifyOtp(fromLogin: false))
+                    }
+                    else{
+                        router.navigate(to: .SuccessView(isOtp: false))
+                    }
+                }
+                else{
+                    if input.email != "" && input.phoneNumber != ""{
+                        let verifyType = (SessionManager.shared.loginData?.verifyType ?? 0) == 1 ? 2 : 1
+                        let data = LoginSignupVerifyData(verifyType         : verifyType,
+                                                         email              : input.email,
+                                                         phoneNumber        : input.phoneNumber,
+                                                         countryCode        : input.countryCode,
+                                                         userId             : SessionManager.shared.loginData?.userId ?? "",
+                                                         isNewUser          : SessionManager.shared.loginData?.isNewUser ?? false,
+                                                         isSignupCompleted  : SessionManager.shared.loginData?.isSignupCompleted ?? false,
+                                                         fullName           : input.fullName)
+                        self.sessionManager.saveLoginData(data)
+                        router.navigate(to: .verifyOtp(fromLogin: false))
+                    }else{
+                        router.navigate(to: .SuccessView(isOtp: false))
+                    }
                 }
             }
         }

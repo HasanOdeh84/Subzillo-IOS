@@ -17,6 +17,8 @@ struct ProfileView: View {
     @State private var selectedDocumentName : String?
     @StateObject private var commonApiVM    = CommonAPIViewModel()
     @EnvironmentObject var router           : AppIntentRouter
+    @State var appVersion = ""
+    @State var buildNumber = ""
     
     //MARK: - Body
     var body: some View {
@@ -32,48 +34,49 @@ struct ProfileView: View {
                     }
                 )
             }
-            Button("Update user info"){
-                let input = UpdateUserInfoRequest(userId        : Constants.getUserId(),
-                                                  fullName      : "alekya",
-                                                  email         : "alekhya@krify.com",
-                                                  type          : 1,
-                                                  phoneNumber   : "9676442388",
-                                                  countryCode   : "91")
-                profileVM.updateUserInfo(input: input)
-            }
-            Button("Update password"){
-                let input = UpdatePasswordRequest(userId            : Constants.getUserId(),
-                                                  currentPassword   : "Krify@123",
-                                                  newPassword       : "krify@123")
-                profileVM.updatePassword(input: input)
-            }
-            if let image = selectedImage {
-                Image(uiImage: image)
-                    .resizable()
-                    .scaledToFit()
-                    .frame(height: 250)
-                    .cornerRadius(10)
-            }
+            .padding(20)
+//            Button("Update user info"){
+//                let input = UpdateUserInfoRequest(userId        : Constants.getUserId(),
+//                                                  fullName      : "alekya",
+//                                                  email         : "alekhya@krify.com",
+//                                                  type          : 1,
+//                                                  phoneNumber   : "9676442388",
+//                                                  countryCode   : "91")
+//                profileVM.updateUserInfo(input: input)
+//            }
+//            Button("Update password"){
+//                let input = UpdatePasswordRequest(userId            : Constants.getUserId(),
+//                                                  currentPassword   : "Krify@123",
+//                                                  newPassword       : "krify@123")
+//                profileVM.updatePassword(input: input)
+//            }
+//            if let image = selectedImage {
+//                Image(uiImage: image)
+//                    .resizable()
+//                    .scaledToFit()
+//                    .frame(height: 250)
+//                    .cornerRadius(10)
+//            }
+//            
+//            if let doc = selectedDocumentName {
+//                Text("Selected document: \(doc)")
+//                    .font(.footnote)
+//                    .foregroundColor(.gray)
+//            }
+//                        
+//            Button("camera image picker") {
+//                picker.present(allowDocument: false,onImageData: {image, data, filename, mimeType in
+//                    profileVM.updateProfileImage(input: UpdateProfileImageRequest(userId: Constants.getUserId()), fileData: [MultiPartFileInput(
+//                        fieldName   : "profile",
+//                        fileName    : filename,
+//                        mimeType    : mimeType,//"image/jpeg",
+//                        fileData    : data
+//                    )])
+//                    selectedImage = image
+//                })
+//            }
             
-            if let doc = selectedDocumentName {
-                Text("Selected document: \(doc)")
-                    .font(.footnote)
-                    .foregroundColor(.gray)
-            }
-                        
-            Button("camera image picker") {
-                picker.present(allowDocument: false,onImageData: {image, data, filename, mimeType in
-                    profileVM.updateProfileImage(input: UpdateProfileImageRequest(userId: Constants.getUserId()), fileData: [MultiPartFileInput(
-                        fieldName   : "profile",
-                        fileName    : filename,
-                        mimeType    : mimeType,//"image/jpeg",
-                        fileData    : data
-                    )])
-                    selectedImage = image
-                })
-            }
-            
-            Spacer()
+//            Spacer()
             
             /* picker with document
             Button("camera image document picker") {
@@ -94,25 +97,39 @@ struct ProfileView: View {
             Spacer()
             */
             
-            Button("Image subscription") {
-                picker.present(allowDocument: false,onImageData: {image, data, filename, mimeType in
-                    profileVM.imageSubscription(input: ImageSubscriptionRequest(userId: Constants.getUserId()), fileData: [MultiPartFileInput(
-                        fieldName   : "screenshot",
-                        fileName    : filename,
-                        mimeType    : mimeType,
-                        fileData    : data
-                    )])
-                    selectedImage = image
-                })
-            }
-            
-            Button("get categories api"){
-                commonApiVM.getCategories()
-            }
+//            Button("Image subscription") {
+//                picker.present(allowDocument: false,onImageData: {image, data, filename, mimeType in
+//                    profileVM.imageSubscription(input: ImageSubscriptionRequest(userId: Constants.getUserId()), fileData: [MultiPartFileInput(
+//                        fieldName   : "screenshot",
+//                        fileName    : filename,
+//                        mimeType    : mimeType,
+//                        fileData    : data
+//                    )])
+//                    selectedImage = image
+//                })
+//            }
+//            
+//            Button("get categories api"){
+//                commonApiVM.getCategories()
+//            }
             
             Spacer()
+            HStack(spacing: 4) {
+                Text("Version \(appVersion)")
+                    .font(.footnote)
+                    .foregroundColor(.gray)
+
+                Text("Build \(buildNumber)")
+                    .font(.footnote)
+                    .foregroundColor(.gray)
+            }
+            .padding(.bottom, 120)
         }
         .background(MediaPickerHost().allowsHitTesting(false)) // host
+        .onAppear{
+            appVersion = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? ""
+            buildNumber = Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? ""
+        }
     }
 }
 

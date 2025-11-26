@@ -19,7 +19,7 @@ class AppDelegate: NSObject, ObservableObject, UIApplicationDelegate, UNUserNoti
         _ application: UIApplication,
         didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey : Any]? = nil
     ) -> Bool {
-//        sleep(1)
+        //        sleep(1)
         UNUserNotificationCenter.current().delegate = self
         return true
     }
@@ -64,9 +64,9 @@ class AppDelegate: NSObject, ObservableObject, UIApplicationDelegate, UNUserNoti
     }
     
     func userNotificationCenter(
-            _ center: UNUserNotificationCenter,
-            didReceive response: UNNotificationResponse,
-            withCompletionHandler completionHandler: @escaping () -> Void
+        _ center: UNUserNotificationCenter,
+        didReceive response: UNNotificationResponse,
+        withCompletionHandler completionHandler: @escaping () -> Void
     ) {
         let userInfo = response.notification.request.content.userInfo
         print("Push payload: \(userInfo)")
@@ -93,9 +93,9 @@ struct SubzilloApp: App {
     @StateObject private var router             = AppIntentRouter.shared
     @UIApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
     @Environment(\.scenePhase) private var scenePhase
-    @StateObject private var audioManager       = AudioRecorderManager()
     @StateObject private var networkMonitor     = NetworkMonitor()
     @StateObject private var toastManager       = ToastManager()
+    @StateObject private var bottomToastManager = BottomToastManager()
     @StateObject var mediaPicker                = MediaPickerManager.shared
     @StateObject private var themeManager       = ThemeManager()
     @StateObject private var sharedViewModel    = CommonAPIViewModel()
@@ -108,18 +108,20 @@ struct SubzilloApp: App {
                 .environmentObject(appDelegate)
                 .environmentObject(networkMonitor)
                 .environmentObject(toastManager)
+                .environmentObject(bottomToastManager)
                 .environmentObject(mediaPicker)
                 .environmentObject(themeManager)
                 .environmentObject(sharedViewModel)
                 .environmentObject(sessionManager)
                 .preferredColorScheme(
-                                    themeManager.userChangedTheme
-                                    ? (themeManager.isDarkMode ? .dark : .light)
-                                    : nil // nil = follow system theme
-                                )
+                    themeManager.userChangedTheme
+                    ? (themeManager.isDarkMode ? .dark : .light)
+                    : nil // nil = follow system theme
+                )
                 .withLoader()
                 .withAlert()
                 .withToast()
+                .withBottomToast()
                 .onAppear {
                     sharedViewModel.getCurrencies()
                     sharedViewModel.getCountries()
@@ -128,14 +130,12 @@ struct SubzilloApp: App {
         .onChange(of: scenePhase) { phase in
             switch phase {
             case .active:
-//                print("✅ App is in Foreground (Active)")
+                //                print("✅ App is in Foreground (Active)")
                 appDelegate.requestAuthorization()
             case .inactive:
-//                print("⚠️ App is Inactive (e.g., transitioning)")
-                audioManager.clearAll()
+                print("⚠️ App is Inactive (e.g., transitioning)")
             case .background:
-//                print("🌙 App is in Background")
-                audioManager.clearAll()
+                print("🌙 App is in Background")
             default:
                 break
             }
@@ -147,38 +147,17 @@ struct RootView: View {
     @StateObject var appState       = AppState.shared
     @State private var path         = NavigationPath()
     @EnvironmentObject var router   : AppIntentRouter
+    @StateObject var sheetManager   = SheetManager.shared
     
     var body: some View {
         NavigationStack(path: $path) {
             Group {
-//                if appState.isLoggedIn {
-//                    RootTabBar(path: $path)
-//                } else {
-//                    LoginView(path: $path)
-//                        .onAppear {
-//                            if !path.isEmpty {
-//                                path.removeLast(path.count) // reset stack on login view
-//                            }
-//                        }
-//                }
-                LoginView()
+                SplashView()
             }
             .navigationDestination(for: NavigationRoute.self) { screen in
                 switch screen {
-                case .addSubscription(let service, let plan, let price, let cycle):
-                    AddSubscriptionView(
-                        serviceName: service,
-                        planName: plan,
-                        price: price,
-                        billingCycle: cycle
-                    )
                 case .emailIntegration:
-                    AddSubscriptionView(
-                        serviceName: "service",
-                        planName: "plan",
-                        price: 990,
-                        billingCycle: "cycle"
-                    )
+                    Text("Test")
                 case .bankStatement:
                     Text("Test")
                 case .chat:
@@ -189,27 +168,45 @@ struct RootView: View {
                     Text("Test")
                 case .home:
                     RootTabBar()
-                case .signup:
-                    RegistrationView()
+                case .signup(let fromSocialLogin):
+                    RegistrationView(fromSocialLogin: fromSocialLogin)
                 case .login:
                     LoginView()
-//                        .onAppear {
-//                            if !path.isEmpty {
-//                                path.removeLast(path.count) // reset stack on login view
-//                            }
-//                        }
+                    //                        .onAppear {
+                    //                            if !path.isEmpty {
+                    //                                path.removeLast(path.count) // reset stack on login view
+                    //                            }
+                    //                        }
                 case .onboarding:
                     OnboardingView()
                 case .verifyOtp(let fromLogin, let verifyMergeType):
-                    OtpVerifyView(fromLogin:fromLogin ?? false, verifyMergeType:verifyMergeType)
-//                case .resetPassword(let username):
-//                    ResetPasswordView(username:username ?? "")
+                    OtpVerifyView(fromLogin:fromLogin, verifyMergeType:verifyMergeType)
                 case .termsAndPrivacy(isTerm: let isTerm):
                     TermsAndPrivacyView(isTerm:isTerm ?? false)
                 case .SuccessView(isOtp: let isOtp,let isMobile):
                     SuccessView(isOtp:isOtp ?? false,isMobile:isMobile)
                 case .welcome:
                     WelcomeHomeView()
+                case .manualEntry(let isFromEdit, let isFromListEdit, let subscriptionId):
+                    ManualEntryView(isFromEdit: isFromEdit, isFromListEdit: isFromListEdit, subscriptionId: subscriptionId)
+                case .voiceCommandView:
+                    VoiceCommandView()
+                case .subscriptionPreviewView(let subscriptionsData, let content, let isFromImage):
+                    SubscriptionPreviewView(isFromImage:isFromImage, subscriptionsData: subscriptionsData, content: content)
+                case .subscriptionMatchView(let subscriptionData, let fromList, let subscriptionId):
+                    SubscriptionMatchView(subscriptionData: subscriptionData, subscriptionId: subscriptionId, fromList: fromList)
+                case .pasteTextView:
+                    PasteTextView()
+                case .duplicateSubscriptionsView(let duplicateSubsList):
+                    DuplicateSubscriptionsView(duplicateSubsList: duplicateSubsList)
+                case .duplicateUpdateView(let duplicateSubsList, let selectedIndex):
+                    DuplicateUpdateView(duplicateSubsList: duplicateSubsList, selectedIndex: selectedIndex)
+                case .addSubscriptionsView:
+                    RootTabBar(selectedTab: .addSubscription)
+                case .duplicateSubDetailsView(let subscriptionData):
+                    DuplicateSubDetailsView(subscriptionData: subscriptionData)
+                case .subscriptionsListView:
+                    RootTabBar(selectedTab: .subscriptions)
                 }
             }
         }
@@ -219,5 +216,23 @@ struct RootView: View {
             path.append(new)
             router.navigatingRoute = nil
         }
+        .sheet(isPresented: $sheetManager.isOfflineSheetVisible) {
+            OfflineSheet()
+                .presentationDragIndicator(.hidden)
+                .presentationDetents([.height(540)])
+        }
+    }
+}
+
+final class AppIntentRouter: ObservableObject {
+    static let shared = AppIntentRouter()
+    private init() {}
+
+    @Published var navigatingRoute: NavigationRoute? = nil
+}
+
+extension AppIntentRouter {
+    func navigate(to route: NavigationRoute) {
+        navigatingRoute = route
     }
 }

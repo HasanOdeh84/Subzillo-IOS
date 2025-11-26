@@ -25,7 +25,7 @@ struct BottomSheetView: View {
             
             Text(LocalizedStringKey(header ?? ""))
                 .font(.appRegular(24))
-                .foregroundStyle(.appNeutralMain700)
+                .foregroundStyle(.neutralMain700)
                 .padding(.top,24)
             
             PhoneNumberField(phoneNumber        : $phoneNumber,
@@ -37,16 +37,11 @@ struct BottomSheetView: View {
             .padding(.vertical,36)
             
             GradientBorderButton(title: "Update",isBtn:true, buttonImage: "update") {
-                ToastManager.shared.showToast(message: "coming soon")
+                ToastManager.shared.showToast(message: "Coming soon",style:ToastStyle.info)
                 dismiss()
             }
             Spacer()
         }
-        .addDoneButtonToKeyboard()
         .padding(24)
     }
 }
-
-//#Preview {
-//    BottomSheetView()
-//}

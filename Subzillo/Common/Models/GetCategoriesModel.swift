@@ -12,10 +12,7 @@ public struct getCategoriesResponse: Codable {
     let data    : [Category]?
 }
 
-public struct Category: Codable {
+public struct Category: Codable, Hashable {
     let id          : String?
     let name        : String?
-    let icon_name   : String?
-    let color_theme : String?
-    let description : String?
 }

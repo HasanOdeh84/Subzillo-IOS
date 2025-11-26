@@ -14,15 +14,28 @@ struct CustomButton: View {
     var width       : CGFloat = 160
     var height      : CGFloat = 56
     var cornerRadius: CGFloat = 8
+    var buttonImage : String = ""
     let action      : () -> Void
     
     var body: some View {
         Button(action: action) {
-            Text(LocalizedStringKey(title))
-                .multilineTextAlignment(.center)
-                .foregroundColor(textColor)
-                .font(.appSemiBold(18))
+            if buttonImage != "" {
+                HStack {
+                    Image(buttonImage)
+                        .frame(width: 20, height: 20)
+                    Text(LocalizedStringKey(title))
+                        .multilineTextAlignment(.center)
+                        .foregroundColor(textColor)
+                        .font(.appSemiBold(18))
+                }
                 .frame(maxWidth: .infinity, minHeight: height)
+            } else {
+                Text(LocalizedStringKey(title))
+                    .multilineTextAlignment(.center)
+                    .foregroundColor(textColor)
+                    .font(.appSemiBold(18))
+                    .frame(maxWidth: .infinity, minHeight: height)
+            }
         }
         .frame(maxWidth: .infinity, minHeight: height)
         .background(background)
