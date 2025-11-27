@@ -217,9 +217,19 @@ struct SubscriptionsView: View {
                                                      selectionMode      : selectionMode,
                                                      onSelect           : { toggleSelection(at: index) },
                                                      onLongPress        : { selectionMode = true })
-                                .onTapGesture {
-                                    AppIntentRouter.shared.navigate(to: .subscriptionMatchView(fromList: true, subscriptionId: sub.id ?? ""))
-                                }
+//                                .contentShape(Rectangle())
+                                .simultaneousGesture(
+                                        TapGesture().onEnded {
+                                            if !selectionMode{
+                                                AppIntentRouter.shared.navigate(
+                                                    to: .subscriptionMatchView(fromList: true, subscriptionId: sub.id ?? "")
+                                                )
+                                            }
+                                        }
+                                    )
+//                                .onTapGesture {
+//                                    AppIntentRouter.shared.navigate(to: .subscriptionMatchView(fromList: true, subscriptionId: sub.id ?? ""))
+//                                }
                                 .onAppear{
                                     if index == subscriptionsList.count - 1 {
                                         loadNextPageIfNeeded()
@@ -348,7 +358,8 @@ struct SubscriptionsView: View {
                 if let subscriptions = day.subscriptions{
                     var relations           : [String] = []
                     for subscription in subscriptions{
-                        let relation = subscription.subscriptionFor == "" ? "Me" : subscription.subscriptionFor
+                        //subscriptionFor Need to change with nickName
+                        let relation = (subscription.subscriptionFor == "" || subscription.subscriptionFor == Constants.getUserId()) ? "Me" : subscription.subscriptionFor
                         if !relations.contains(relation ?? "Me") {
                             relations.append(relation ?? "Me")
                         }
@@ -358,7 +369,9 @@ struct SubscriptionsView: View {
                         var color       = ""
                         var relationId  = ""
                         for sub in subscriptions {
-                            let rel     = sub.subscriptionFor == "" ? "Me" : sub.subscriptionFor
+                            //subscriptionFor Need to change with nickName
+//                            let rel     = sub.subscriptionFor == "" ? "Me" : sub.subscriptionFor
+                            let rel     = (sub.subscriptionFor == "" || sub.subscriptionFor == Constants.getUserId()) ? "Me" : sub.subscriptionFor
                             relationId  = (sub.subscriptionFor == "" ? Constants.getUserId() : sub.subscriptionFor) ?? ""
                             if rel == relation {
                                 plans.append(PlanInfo(id        : sub.id ?? "",

@@ -37,7 +37,7 @@ struct AddSubscriptionsView: View {
                     .padding(.bottom, 16)
                 
                 GradientBorderView(title: "Manual Entry", subTitle: "Fill in your subscription details manually", buttonImage: "ManuvalEntryIcon", action: clickOnManuvalEntry, titleColor: Color.secondaryNavyBlue400)
-                    .padding(.bottom, 16)
+                    .padding(.bottom,90)
                 
 //                GradientBorderView(title: "Upload Bank Notification", subTitle: "Add subscriptions from your bank messages or alerts", buttonImage: "uploadBankIcon", action: clickOnUploasBankNotification, titleColor: Color.purple500)
 //                    .padding(.bottom, 16)

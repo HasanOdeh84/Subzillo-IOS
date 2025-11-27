@@ -109,6 +109,7 @@ struct LoginView: View {
                 // Social logins
                 VStack(spacing: 8) {
                     AppleSignInButtonView {
+                        AlertManager.shared.showAlert(title: "apple", message: "response")
                         loginVM.socialLogin(loginType: .apple,deviceId: appDelegate.deviceToken ?? "")
                     }
                     

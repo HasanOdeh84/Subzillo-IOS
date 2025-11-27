@@ -109,7 +109,13 @@ struct SubscriptionMatchView: View {
                             if subscriptionData?.paymentMethodStatus == true{
                                 SubscriptionDetailsPlainItem(title: "Card Linked", value: paymentMethodDataName)
                             }
-                            SubscriptionDetailsPlainItem(title: "Benefit From", value: subscriptionData?.subscriptionFor ?? "" == "" ? "Me" : subscriptionData?.subscriptionFor ?? "")
+                            //subscriptionFor Need to change with nickName
+                            if subscriptionData?.subscriptionFor ?? "" == "" || subscriptionData?.subscriptionFor ?? "" == Constants.getUserId(){
+                                SubscriptionDetailsPlainItem(title: "Benefit From", value: "Me")
+                            }else{
+                                SubscriptionDetailsPlainItem(title: "Benefit From", value: "")
+                            }
+//                            SubscriptionDetailsPlainItem(title: "Benefit From", value: subscriptionData?.subscriptionFor ?? "" == "" ? "Me" : subscriptionData?.subscriptionFor ?? "")
                             SubscriptionDetailsPlainItem(title: "Renewal Reminders", value: renewalReminderValue)
                         }else{
                             SubscriptionDetailsPlainItem(title: "Card Linked", value: subscriptionData?.paymentMethodDataName ?? "")
@@ -160,10 +166,12 @@ struct SubscriptionMatchView: View {
                         GradientBorderButton(title: "Edit", isBtn: true, buttonImage: "EditIcon", action: onEdit, backgroundColor: .whiteBlack, buttonHeight: 56)
                     }
                     .padding(.horizontal)
+                    .padding(.bottom,20)
                 }else{
                     //MARK: Edit button
                     GradientBorderButton(title: "Edit", isBtn: true, buttonImage: "EditIcon", action: onEdit, backgroundColor: .whiteBlack, buttonHeight: 56)
                         .padding(.horizontal)
+                        .padding(.bottom,20)
                 }
             }
             .padding(.top, 10)

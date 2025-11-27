@@ -296,7 +296,7 @@
 				CODE_SIGN_ENTITLEMENTS = Subzillo/SubzilloDebug.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1.1.0;
+				CURRENT_PROJECT_VERSION = 1.2.0;
 				DEVELOPMENT_ASSET_PATHS = "\"Subzillo/Resources/Preview Content\"";
 				DEVELOPMENT_TEAM = B48NJV8578;
 				ENABLE_PREVIEWS = YES;
@@ -310,6 +310,7 @@
 				INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = "This app requires access of speech to add subscription through voice.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = "Launch Screen";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
 				IPHONEOS_DEPLOYMENT_TARGET = 16;
@@ -339,7 +340,7 @@
 				CODE_SIGN_ENTITLEMENTS = Subzillo/Subzillo.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1.1.0;
+				CURRENT_PROJECT_VERSION = 1.2.0;
 				DEVELOPMENT_ASSET_PATHS = "\"Subzillo/Resources/Preview Content\"";
 				DEVELOPMENT_TEAM = B48NJV8578;
 				ENABLE_PREVIEWS = YES;
@@ -353,6 +354,7 @@
 				INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = "This app requires access of speech to add subscription through voice.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = "Launch Screen";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
 				IPHONEOS_DEPLOYMENT_TARGET = 16;

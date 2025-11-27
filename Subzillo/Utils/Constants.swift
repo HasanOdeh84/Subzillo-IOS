@@ -331,6 +331,19 @@ class DeviceType{
     }
 }
 
+extension UIDevice {
+    static var isFullScreeniPhone: Bool {
+        let window = UIApplication.shared
+            .connectedScenes
+            .compactMap { $0 as? UIWindowScene }
+            .flatMap { $0.windows }
+            .first
+
+        let topInset = window?.safeAreaInsets.top ?? 0
+        return topInset > 20   // Full-screen iPhones have large notch inset
+    }
+}
+
 class AppState: ObservableObject {
     static let shared = AppState()
     init() {

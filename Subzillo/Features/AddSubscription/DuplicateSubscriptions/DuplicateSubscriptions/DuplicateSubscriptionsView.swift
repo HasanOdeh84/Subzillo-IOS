@@ -417,10 +417,19 @@ struct DuplicateListItem: View {
     
     private func oldRowView(for objc: SubscriptionInfo, at index: Int) -> some View {
         let isNoColor = (item.existingSubscriptions?.isEmpty ?? true)
-        return SubItem(item: objc, isNoColor:isNoColor, isNew: false)
-            .onTapGesture {
-                onDelegate?(item, [index], "gotoDetails")
-            }
+//        return SubItem(item: objc, isNoColor:isNoColor, isNew: false)
+//            .contentShape(Rectangle())
+//            .onTapGesture {
+//                onDelegate?(item, [index], "gotoDetails")
+//            }
+        return ZStack {
+            SubItem(item: objc, isNoColor: isNoColor, isNew: false)
+                .allowsHitTesting(false)
+        }
+        .contentShape(Rectangle())
+        .onTapGesture {
+            onDelegate?(item, [index], "gotoDetails")
+        }
     }
     
     // MARK: - Button actions

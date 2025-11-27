@@ -315,6 +315,7 @@ struct ManualEntryView: View {
                     }
                     CustomButton(title: isFromEdit == true ? "Save changes" : "Save Subscription", action: saveAction)
                         .padding(.horizontal, 0)
+                        .padding(.bottom, 20)
                 }
             }
             .padding(.horizontal, 15)

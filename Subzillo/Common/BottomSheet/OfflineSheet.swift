@@ -85,6 +85,7 @@ struct OfflineSheet: View {
             
             CustomButton(title: "Ok", action: onOkAction)
                 .padding(.top, 24)
+                .padding(.bottom,20)
         }
         .padding(.horizontal, 20)
     }

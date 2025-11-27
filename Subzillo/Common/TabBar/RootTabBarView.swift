@@ -42,7 +42,8 @@ struct RootTabBar: View {
             .ignoresSafeArea()
             
             CurvedTabBar(selectedTab: $selectedTab)
-                .padding(.bottom, 20)
+                .padding(.bottom,UIDevice.isFullScreeniPhone ? 20 : 0)
+//                .padding(.bottom, 20)
         }
         .ignoresSafeArea(edges: .bottom)
         .navigationBarBackButtonHidden(true)

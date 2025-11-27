@@ -17,6 +17,8 @@
 	</array>
 	<key>GIDClientID</key>
 	<string>955282043815-5tm4dfjcs5uv5qkvne9uv6jkf64div4a.apps.googleusercontent.com</string>
+	<key>ITSAppUsesNonExemptEncryption</key>
+	<false/>
 	<key>UIAppFonts</key>
 	<array>
 		<string>Roboto-Thin.ttf</string>
@@ -38,10 +40,5 @@
 		<string>Roboto-ExtraBoldItalic.ttf</string>
 		<string>Roboto-BlackItalic.ttf</string>
 	</array>
-	<key>UILaunchScreen</key>
-	<dict>
-		<key>UIImageName</key>
-		<string>launch_png</string>
-	</dict>
 </dict>
 </plist>

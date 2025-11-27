@@ -80,7 +80,13 @@ struct DuplicateSubDetailsView: View {
                         SubscriptionDetailsPlainItem(title: "Next Payment Date", value: (subscriptionData?.nextPaymentDate ?? "").formattedDate(to: "d MMM yyyy"))
                         SubscriptionDetailsPlainItem(title: "Payment Method", value: subscriptionData?.paymentMethodName ?? "")
                         SubscriptionDetailsPlainItem(title: "Card Linked", value: "\(subscriptionData?.cardName ?? "")****\(subscriptionData?.cardNumber ?? "")")
-                        SubscriptionDetailsPlainItem(title: "Benefit From", value: subscriptionData?.subscriptionFor ?? "" == "" ? "Me" : subscriptionData?.subscriptionFor ?? "")
+                        //subscriptionFor Need to change with nickName
+                        if subscriptionData?.subscriptionFor ?? "" == "" || subscriptionData?.subscriptionFor ?? "" == Constants.getUserId(){
+//                            SubscriptionDetailsPlainItem(title: "Benefit From", value: subscriptionData?.subscriptionFor ?? "" == "" ? "Me" : subscriptionData?.subscriptionFor ?? "")
+                            SubscriptionDetailsPlainItem(title: "Benefit From", value: "Me")
+                        }else{
+                            SubscriptionDetailsPlainItem(title: "Benefit From", value: "")
+                        }
                         SubscriptionDetailsPlainItem(title: "Renewal Reminders", value: renewalReminderValue)
                         SubscriptionDetailsPlainItem(title: "Status", value: subscriptionData?.status ?? "Active")
                         SubscriptionDetailsPlainItem(title: "Note", value: subscriptionData?.notes ?? "")
