@@ -118,7 +118,9 @@ struct SubscriptionMatchView: View {
 //                            SubscriptionDetailsPlainItem(title: "Benefit From", value: subscriptionData?.subscriptionFor ?? "" == "" ? "Me" : subscriptionData?.subscriptionFor ?? "")
                             SubscriptionDetailsPlainItem(title: "Renewal Reminders", value: renewalReminderValue)
                         }else{
-                            SubscriptionDetailsPlainItem(title: "Card Linked", value: subscriptionData?.paymentMethodDataName ?? "")
+                            if subscriptionData?.paymentMethodName ?? "" != ""{
+                                SubscriptionDetailsPlainItem(title: "Card Linked", value: subscriptionData?.paymentMethodDataName ?? "")
+                            }
                             SubscriptionDetailsPlainItem(title: "Benefit From", value: subscriptionData?.subscriptionForName ?? "")
                             SubscriptionDetailsPlainItem(title: "Renewal Reminders", value: subscriptionData?.renewalReminderValue ?? "")
                         }
@@ -150,7 +152,7 @@ struct SubscriptionMatchView: View {
                                     .foregroundColor(Color.disCardRed)
                             }
                             .frame(maxWidth: .infinity, minHeight: 56)
-                            .background(Color.systemError)
+                            .background(Color.whiteBlack)
                             .cornerRadius(8)
                             .overlay(
                                 // keep the stroke visually inside by padding the shape inward

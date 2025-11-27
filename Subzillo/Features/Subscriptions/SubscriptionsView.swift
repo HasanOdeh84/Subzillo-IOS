@@ -216,7 +216,7 @@ struct SubscriptionsView: View {
                                 subscriptionListCard(subscriptionData   : sub,
                                                      selectionMode      : selectionMode,
                                                      onSelect           : { toggleSelection(at: index) },
-                                                     onLongPress        : { selectionMode = true })
+                                                     onLongPress        : { handleLongPress(at: index) })
 //                                .contentShape(Rectangle())
                                 .simultaneousGesture(
                                         TapGesture().onEnded {
@@ -287,6 +287,7 @@ struct SubscriptionsView: View {
                     self.filterData = filterData
                     print(filterData)
                     page = 0
+                    self.subscriptionsList.removeAll()
                     listSubsApi()
                 },
                 filterData: self.filterData
@@ -310,6 +311,7 @@ struct SubscriptionsView: View {
     func callApis(){
         if selectedSegment == .first{
             page = 0
+            self.subscriptionsList.removeAll()
             listSubsApi()
         }else{
             getSubsByMonthApi()
@@ -424,6 +426,13 @@ struct SubscriptionsView: View {
         else{
             obj.isSelected = true
         }
+        subscriptionsList[index] = obj
+    }
+    
+    func handleLongPress(at index: Int) {
+        selectionMode = true
+        var obj = subscriptionsList[index]
+        obj.isSelected = true
         subscriptionsList[index] = obj
     }
     

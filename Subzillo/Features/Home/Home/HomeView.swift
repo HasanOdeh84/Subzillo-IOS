@@ -25,6 +25,7 @@ struct HomeView: View {
     @StateObject var homeVM                 = HomeViewModel()
     @State var homeResponse                 : HomeResponseData?
     @State var fullName                     = ""
+    @State private var isHome               : Bool? = nil
     
     private var currentSubscriptions: [SubscriptionListData] {
         showAll ? activeSubsList : Array(activeSubsList.prefix(1))
@@ -39,197 +40,206 @@ struct HomeView: View {
     
     //MARK: - body
     var body: some View {
-        VStack(spacing: 16){
-            // MARK: - Header
-            HeaderView(title: "Hi \(fullName)") {
-                goToNotifications()
-            }
-            .padding(.top, 50)
-            .frame(alignment: .leading)
-            
-            //MARK: Scroll view
-            ScrollView(showsIndicators: false){
-                VStack(alignment: .leading,spacing: 18){
-                    HStack(spacing: 16){
-                        Image("info")
-                        Text("Your subscriptions at a glance")
-                            .font(.appRegular(16))
-                            .foregroundColor(Color.neutralMain700)
-                    }
-                    
-                    DashedHorizontalDivider(dash: [2,2])
-                    
-                    HStack(){
-                        Spacer()
-                        VStack(spacing: 8){
-                            Text(monthlySpend)
-                                .font(.appSemiBold(28))
-                                .foregroundStyle(Color.blue800)
-                            Text("Monthly spend")
-                                .font(.appRegular(14))
-                                .foregroundStyle(Color.neutral500)
+        Group {
+            if isHome == nil{
+                ProgressView()
+                }else if isHome == true{
+                    VStack(spacing: 16){
+                        // MARK: - Header
+                        HeaderView(title: "Hi \(fullName)") {
+                            goToNotifications()
                         }
-                        Spacer()
-                        Divider()
-                            .frame(width: 1)
-                            .overlay(.neutralDisabled200)
-                        Spacer()
-                        VStack(spacing: 8){
-                            Text("\(activeSubs)")
-                                .font(.appSemiBold(28))
-                                .foregroundStyle(Color.blue800)
-                            Text("Active Subscriptions")
-                                .font(.appRegular(14))
-                                .foregroundStyle(Color.neutral500)
-                        }
-                        Spacer()
-                    }
-                    .frame(alignment: .center)
-                    
-                    //MARK: - Active subscriptions list
-                    if showAll{
-                        ScrollView {
-                            VStack(spacing: 14) {
-                                ForEach(currentSubscriptions) { sub in
-                                    subscriptionListCard(subscriptionData: sub,isActive:true)
+                        .padding(.top, 50)
+                        .frame(alignment: .leading)
+                        
+                        //MARK: Scroll view
+                        ScrollView(showsIndicators: false){
+                            VStack(alignment: .leading,spacing: 18){
+                                HStack(spacing: 16){
+                                    Image("info")
+                                    Text("Your subscriptions at a glance")
+                                        .font(.appRegular(16))
+                                        .foregroundColor(Color.neutralMain700)
+                                }
+                                
+                                DashedHorizontalDivider(dash: [2,2])
+                                
+                                HStack(){
+                                    Spacer()
+                                    VStack(spacing: 8){
+                                        Text(monthlySpend)
+                                            .font(.appSemiBold(28))
+                                            .foregroundStyle(Color.blue800)
+                                        Text("Monthly spend")
+                                            .font(.appRegular(14))
+                                            .foregroundStyle(Color.neutral500)
+                                    }
+                                    Spacer()
+                                    Divider()
+                                        .frame(width: 1)
+                                        .overlay(.neutralDisabled200)
+                                    Spacer()
+                                    VStack(spacing: 8){
+                                        Text("\(activeSubs)")
+                                            .font(.appSemiBold(28))
+                                            .foregroundStyle(Color.blue800)
+                                        Text("Active Subscriptions")
+                                            .font(.appRegular(14))
+                                            .foregroundStyle(Color.neutral500)
+                                    }
+                                    Spacer()
+                                }
+                                .frame(alignment: .center)
+                                
+                                //MARK: - Active subscriptions list
+                                if showAll{
+                                    ScrollView {
+                                        VStack(spacing: 14) {
+                                            ForEach(currentSubscriptions) { sub in
+                                                subscriptionListCard(subscriptionData: sub,isActive:true)
+                                            }
+                                        }
+                                    }
+                                    .frame(height: calculatedHeight)
+                                    .animation(.easeInOut, value: showAll)
+                                }else{
+                                    if let first = activeSubsList.first {
+                                        subscriptionListCard(subscriptionData: first,isActive:true)
+                                    }
+                                }
+                                
+                                //MARK: Show More / Less button
+                                if activeSubsList.count > 1 {
+                                    Button {
+                                        withAnimation(.easeInOut) {
+                                            showAll.toggle()
+                                        }
+                                    } label: {
+                                        Spacer()
+                                        Text(showAll ? "Show Less" : "Show More")
+                                            .font(.appRegular(16))
+                                            .foregroundColor(.blueMain700)
+                                        Image("dropDown_blue")
+                                            .frame(width: 24,height: 24, alignment: .trailing)
+                                            .rotationEffect(.degrees(showAll ? 0 : 180))
+                                            .animation(.easeInOut, value: showAll)
+                                        Spacer()
+                                    }
                                 }
                             }
-                        }
-                        .frame(height: calculatedHeight)
-                        .animation(.easeInOut, value: showAll)
-                    }else{
-                        if let first = activeSubsList.first {
-                            subscriptionListCard(subscriptionData: first,isActive:true)
-                        }
-                    }
-                    
-                    //MARK: Show More / Less button
-                    if activeSubsList.count > 1 {
-                        Button {
-                            withAnimation(.easeInOut) {
-                                showAll.toggle()
+                            .padding(.vertical, 16)
+                            .padding(.horizontal, 16)
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 12)
+                                    .stroke(.neutral300Border, lineWidth: 1)
+                            )
+                            .background(.whiteBlackBG)
+                            .cornerRadius(12)
+                            
+                            //MARK: Save cards
+                            GradientBorderView(title: savePercent, subTitle: saveExpiry, buttonImage: "percent-square",nextBtnImage: "arrow_blue", action: clickOnSave, titleColor: Color.blue800,minHeight: 75,titleFont: 18,subTitleFont: 14)
+                                .padding(.bottom, 16)
+                                .padding(.top,15)
+                            
+                            GradientBorderView(title: youSaved, subTitle: youSavedExpiry, buttonImage: "checkmark-badge",nextBtnImage: "arrow_blue", action: clickOnYouSaved, titleColor: Color.blue800,minHeight: 75,titleFont: 18,subTitleFont: 14)
+                            
+                            //MARK: Add / view subscriptions
+                            HStack(spacing:16){
+                                Button(action: {
+                                    goToAddSubscriptions()
+                                }) {
+                                    VStack(spacing:10){
+                                        Image("plus-sign-circle")
+                                        Text("Add new subscription")
+                                            .font(.appRegular(14))
+                                            .foregroundStyle(Color.blueMain700)
+                                    }
+                                    .frame(maxWidth: .infinity)
+                                    .frame(height: 100)
+                                }
+                                .padding(.vertical, 8)
+                                .padding(.horizontal, 8)
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 8)
+                                        .stroke(.neutral300Border, lineWidth: 1)
+                                )
+                                .background(.whiteBlackBG)
+                                .cornerRadius(8)
+                                
+                                Button(action: {
+                                    goToSubscriptions()
+                                }) {
+                                    VStack(spacing:10){
+                                        Image("subs")
+                                        Text("View all subscriptions")
+                                            .font(.appRegular(14))
+                                            .foregroundStyle(Color.amethystmain700)
+                                    }
+                                    .frame(maxWidth: .infinity)
+                                    .frame(height: 100)
+                                }
+                                .padding(.vertical, 8)
+                                .padding(.horizontal, 8)
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 8)
+                                        .stroke(.neutral300Border, lineWidth: 1)
+                                )
+                                .background(.whiteBlackBG)
+                                .cornerRadius(8)
                             }
-                        } label: {
-                            Spacer()
-                            Text(showAll ? "Show Less" : "Show More")
-                                .font(.appRegular(16))
-                                .foregroundColor(.blueMain700)
-                            Image("dropDown_blue")
-                                .frame(width: 24,height: 24, alignment: .trailing)
-                                .rotationEffect(.degrees(showAll ? 0 : 180))
-                                .animation(.easeInOut, value: showAll)
-                            Spacer()
-                        }
-                    }
-                }
-                .padding(.vertical, 16)
-                .padding(.horizontal, 16)
-                .overlay(
-                    RoundedRectangle(cornerRadius: 12)
-                        .stroke(.neutral300Border, lineWidth: 1)
-                )
-                .background(.whiteBlackBG)
-                .cornerRadius(12)
-                
-                //MARK: Save cards
-                GradientBorderView(title: savePercent, subTitle: saveExpiry, buttonImage: "percent-square",nextBtnImage: "arrow_blue", action: clickOnSave, titleColor: Color.blue800,minHeight: 75,titleFont: 18,subTitleFont: 14)
-                    .padding(.bottom, 16)
-                    .padding(.top,15)
-                
-                GradientBorderView(title: youSaved, subTitle: youSavedExpiry, buttonImage: "checkmark-badge",nextBtnImage: "arrow_blue", action: clickOnYouSaved, titleColor: Color.blue800,minHeight: 75,titleFont: 18,subTitleFont: 14)
-                
-                //MARK: Add / view subscriptions
-                HStack(spacing:16){
-                    Button(action: {
-                        goToAddSubscriptions()
-                    }) {
-                        VStack(spacing:10){
-                            Image("plus-sign-circle")
-                            Text("Add new subscription")
-                                .font(.appRegular(14))
-                                .foregroundStyle(Color.blueMain700)
-                        }
-                        .frame(maxWidth: .infinity)
-                        .frame(height: 100)
-                    }
-                    .padding(.vertical, 8)
-                    .padding(.horizontal, 8)
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 8)
-                            .stroke(.neutral300Border, lineWidth: 1)
-                    )
-                    .background(.whiteBlackBG)
-                    .cornerRadius(8)
-                    
-                    Button(action: {
-                        goToSubscriptions()
-                    }) {
-                        VStack(spacing:10){
-                            Image("subs")
-                            Text("View all subscriptions")
-                                .font(.appRegular(14))
-                                .foregroundStyle(Color.amethystmain700)
-                        }
-                        .frame(maxWidth: .infinity)
-                        .frame(height: 100)
-                    }
-                    .padding(.vertical, 8)
-                    .padding(.horizontal, 8)
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 8)
-                            .stroke(.neutral300Border, lineWidth: 1)
-                    )
-                    .background(.whiteBlackBG)
-                    .cornerRadius(8)
-                }
-                .frame(maxWidth: .infinity)
-                .frame(height: 100)
-                .padding(.vertical,16)
-                
-                //MARK: Subscriptions list
-                if subscriptionsList.count != 0{
-                    HStack(spacing: 8) {
-                        Text("Your subscriptions")
-                            .font(.appRegular(16))
-                            .foregroundColor(.neutralMain700)
-                        Spacer()
-                        Button(action: goToSubscriptions) {
-                            HStack{
-                                Text("View all")
-                                    .font(.appRegular(14))
-                                    .foregroundColor(.navyBlueCTA700)
-                                Image("arrow_blue")
-                                    .frame(width: 24,height: 24, alignment: .trailing)
+                            .frame(maxWidth: .infinity)
+                            .frame(height: 100)
+                            .padding(.vertical,16)
+                            
+                            //MARK: Subscriptions list
+                            if subscriptionsList.count != 0{
+                                HStack(spacing: 8) {
+                                    Text("Your subscriptions")
+                                        .font(.appRegular(16))
+                                        .foregroundColor(.neutralMain700)
+                                    Spacer()
+                                    Button(action: goToSubscriptions) {
+                                        HStack{
+                                            Text("View all")
+                                                .font(.appRegular(14))
+                                                .foregroundColor(.navyBlueCTA700)
+                                            Image("arrow_blue")
+                                                .frame(width: 24,height: 24, alignment: .trailing)
+                                        }
+                                    }
+                                    //                        .frame(width: 40, alignment: .trailing)
+                                }
                             }
+                            
+                            //MARK: - Your subscriptions list
+                            VStack(spacing: 14) {
+                                ForEach(subscriptionsList) { sub in
+                                    subscriptionListCard(subscriptionData: sub)
+                                }
+                            }
+                            
+                            //MARK: View analytics progress
+                            VStack(spacing: 14) {
+                                ForEach(topCategoriesList) { category in
+                                    SubscriptionAnalyticsCard(topCategory: category,
+                                                              action: {
+                                        //                            goToSubscriptions()
+                                        ToastManager.shared.showToast(message: "Coming soon",style:ToastStyle.info)
+                                    })
+                                }
+                            }
+                            .padding(.top,24)
+                            .padding(.bottom,90)
+                            Spacer()
                         }
-                        //                        .frame(width: 40, alignment: .trailing)
                     }
+                    .background(Color.neutralBg100)
+                    .padding(20)
                 }
-                
-                //MARK: - Your subscriptions list
-                VStack(spacing: 14) {
-                    ForEach(subscriptionsList) { sub in
-                        subscriptionListCard(subscriptionData: sub)
-                    }
-                }
-                
-                //MARK: View analytics progress
-                VStack(spacing: 14) {
-                    ForEach(topCategoriesList) { category in
-                        SubscriptionAnalyticsCard(topCategory: category,
-                                                  action: {
-//                            goToSubscriptions()
-                            ToastManager.shared.showToast(message: "Coming soon",style:ToastStyle.info)
-                        })
-                    }
-                }
-                .padding(.top,24)
-                .padding(.bottom,90)
-                Spacer()
+            else{
+                WelcomeHomeView()
             }
         }
-        .background(Color.neutralBg100)
-        .padding(20)
         .onAppear{
             if let fullName = SessionManager.shared.loginData?.fullName{
                 self.fullName = fullName
@@ -268,6 +278,7 @@ struct HomeView: View {
         activeSubsList      = homeResponse?.expiringSoon ?? []
         subscriptionsList   = homeResponse?.subscriptionList ?? []
         topCategoriesList   = homeResponse?.topCategories ?? []
+        isHome              = homeVM.homeResponse?.totalSubscriptions == 0 ? false : true
     }
 }
 

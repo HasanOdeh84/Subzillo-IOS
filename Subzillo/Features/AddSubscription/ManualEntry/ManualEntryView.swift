@@ -350,44 +350,59 @@ struct ManualEntryView: View {
     
     //MARK: - addSubApiRespons
     private func addSubApiResponseHandling(isAdd:Bool) {
-        if addSubscriptionVM.addSubscriptionResponse != nil {
-            
-            let duplicates =  addSubscriptionVM.addSubscriptionResponse!.duplicates ?? []
-            if duplicates.count > 0
-            {
-                var updatedDuplicates: [DuplicateDataInfo] = []
+        if addSubscriptionVM.isManualEntrySuccess == true && isAdd == true || addSubscriptionVM.isEditEntrySuccess == true && isAdd == false{
+            if addSubscriptionVM.addSubscriptionResponse != nil {
                 
-                for (index, item) in duplicates.enumerated() {
+                let duplicates =  addSubscriptionVM.addSubscriptionResponse!.duplicates ?? []
+                if duplicates.count > 0
+                {
+                    var updatedDuplicates: [DuplicateDataInfo] = []
                     
-                    var newSubs = item.newSubscription ?? []
-                    for i in 0..<newSubs.count {
-                        let currentID = newSubs[i].id ?? ""
-                        if currentID.isEmpty {
-                            newSubs[i].id = "\(i + 1)"
+                    for (index, item) in duplicates.enumerated() {
+                        
+                        var newSubs = item.newSubscription ?? []
+                        for i in 0..<newSubs.count {
+                            let currentID = newSubs[i].id ?? ""
+                            if currentID.isEmpty {
+                                newSubs[i].id = "\(i + 1)"
+                            }
                         }
+                        
+                        let oldSubs = item.oldSubscription
+                        let name: String? = newSubs.first?.serviceName ?? ""
+                        
+                        let info = DuplicateDataInfo(
+                            id: String(index + 1),
+                            serviceName: name,
+                            newSubscriptions: newSubs,
+                            existingSubscriptions: oldSubs
+                        )
+                        updatedDuplicates.append(info)
                     }
-                    
-                    let oldSubs = item.oldSubscription
-                    let name: String? = newSubs.first?.serviceName ?? ""
-                    
-                    let info = DuplicateDataInfo(
-                        id: String(index + 1),
-                        serviceName: name,
-                        newSubscriptions: newSubs,
-                        existingSubscriptions: oldSubs
-                    )
-                    updatedDuplicates.append(info)
+                    isFromAdd = isAdd
+                    AppIntentRouter.shared.navigate(to: .duplicateSubscriptionsView(duplicateSubsList: updatedDuplicates))
                 }
-                isFromAdd = isAdd
-                AppIntentRouter.shared.navigate(to: .duplicateSubscriptionsView(duplicateSubsList: updatedDuplicates))
+                else{
+                    //                if isAdd == true {
+                    //                    AppIntentRouter.shared.navigate(to: .addSubscriptionsView)
+                    //                }
+                    //                else{
+                    //                    AppIntentRouter.shared.navigate(to: .subscriptionsListView)
+                    //                }
+                    if isFromListEdit{
+                        dismiss()
+                    }else{
+                        AppIntentRouter.shared.navigate(to: .subscriptionsListView)
+                    }
+                }
             }
             else{
-//                if isAdd == true {
-//                    AppIntentRouter.shared.navigate(to: .addSubscriptionsView)
-//                }
-//                else{
-//                    AppIntentRouter.shared.navigate(to: .subscriptionsListView)
-//                }
+                //            if isAdd == true {
+                //                AppIntentRouter.shared.navigate(to: .addSubscriptionsView)
+                //            }
+                //            else{
+                //                AppIntentRouter.shared.navigate(to: .subscriptionsListView)
+                //            }
                 if isFromListEdit{
                     dismiss()
                 }else{
@@ -395,20 +410,8 @@ struct ManualEntryView: View {
                 }
             }
         }
-        else{
-//            if isAdd == true {
-//                AppIntentRouter.shared.navigate(to: .addSubscriptionsView)
-//            }
-//            else{
-//                AppIntentRouter.shared.navigate(to: .subscriptionsListView)
-//            }
-            if isFromListEdit{
-                dismiss()
-            }else{
-                AppIntentRouter.shared.navigate(to: .subscriptionsListView)
-            }
-        }
     }
+    
     //MARK: - bind sub data
     private func updatePaymentInfo() {
         if isFromEdit == true

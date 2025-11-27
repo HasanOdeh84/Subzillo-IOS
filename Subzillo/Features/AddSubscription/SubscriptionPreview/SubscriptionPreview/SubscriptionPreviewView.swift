@@ -224,7 +224,7 @@ struct SubscriptionPreviewView: View {
                             }
                             VStack(alignment: .leading, spacing: 4) {
                                 HStack(spacing: 8) {
-                                    Text("Expected amount:")
+                                    Text("Amount:")
                                         .font(.appRegular(14))
                                         .foregroundColor(.neutral500)
                                     Spacer()
@@ -246,7 +246,7 @@ struct SubscriptionPreviewView: View {
 //                                .frame(height: 20)
 //                                
                                 HStack(spacing: 8) {
-                                    Text("Next expected:")
+                                    Text("Next Charge Date:")
                                         .font(.appRegular(14))
                                         .foregroundColor(.neutral500)
                                     Spacer()
@@ -350,54 +350,54 @@ struct SubscriptionPreviewView: View {
         .onChange(of: globalSubscriptionData) { _ in updateSubDetails() }
         .onChange(of: commonApiVM.currencyResponse) { _ in getSubDetails() }
         .onChange(of: subscriptionPreviewVM.isEntrySuccess) { _ in
-            
             self.addSubApiResponseHandling()
         }
     }
     
     //MARK: - addSubApiRespons
     private func addSubApiResponseHandling() {
-        if subscriptionPreviewVM.addSubscriptionResponse != nil {
-            
-            let duplicates =  subscriptionPreviewVM.addSubscriptionResponse!.duplicates ?? []
-            if duplicates.count > 0
-            {
-                var updatedDuplicates: [DuplicateDataInfo] = []
+        if subscriptionPreviewVM.isEntrySuccess == true{
+            if subscriptionPreviewVM.addSubscriptionResponse != nil{
                 
-                for (index, item) in duplicates.enumerated() {
+                let duplicates =  subscriptionPreviewVM.addSubscriptionResponse!.duplicates ?? []
+                if duplicates.count > 0
+                {
+                    var updatedDuplicates: [DuplicateDataInfo] = []
                     
-                    var newSubs = item.newSubscription ?? []
-                    for i in 0..<newSubs.count {
-                        let currentID = newSubs[i].id ?? ""
-                        if currentID.isEmpty {
-                            newSubs[i].id = "\(i + 1)"
+                    for (index, item) in duplicates.enumerated() {
+                        
+                        var newSubs = item.newSubscription ?? []
+                        for i in 0..<newSubs.count {
+                            let currentID = newSubs[i].id ?? ""
+                            if currentID.isEmpty {
+                                newSubs[i].id = "\(i + 1)"
+                            }
                         }
+                        
+                        let oldSubs = item.oldSubscription
+                        let name: String? = newSubs.first?.serviceName ?? ""
+                        
+                        let info = DuplicateDataInfo(
+                            id: String(index + 1),
+                            serviceName: name,
+                            newSubscriptions: newSubs,
+                            existingSubscriptions: oldSubs
+                        )
+                        
+                        updatedDuplicates.append(info)
                     }
-                    
-                    let oldSubs = item.oldSubscription
-                    let name: String? = newSubs.first?.serviceName ?? ""
-                    
-                    let info = DuplicateDataInfo(
-                        id: String(index + 1),
-                        serviceName: name,
-                        newSubscriptions: newSubs,
-                        existingSubscriptions: oldSubs
-                    )
-                    
-                    updatedDuplicates.append(info)
+                    isFromAdd = true
+                    AppIntentRouter.shared.navigate(to: .duplicateSubscriptionsView(duplicateSubsList: updatedDuplicates))
                 }
-                isFromAdd = true
-                AppIntentRouter.shared.navigate(to: .duplicateSubscriptionsView(duplicateSubsList: updatedDuplicates))
+                else{
+                    //                AppIntentRouter.shared.navigate(to: .addSubscriptionsView)
+                    AppIntentRouter.shared.navigate(to: .subscriptionsListView)
+                }
             }
             else{
-//                AppIntentRouter.shared.navigate(to: .addSubscriptionsView)
+                //            AppIntentRouter.shared.navigate(to: .addSubscriptionsView)
                 AppIntentRouter.shared.navigate(to: .subscriptionsListView)
             }
-            
-        }
-        else{
-//            AppIntentRouter.shared.navigate(to: .addSubscriptionsView)
-            AppIntentRouter.shared.navigate(to: .subscriptionsListView)
         }
     }
     

@@ -11,8 +11,6 @@ struct RootTabBar: View {
     
     //MARK: - Properties
     @State var selectedTab                      : Tab = .home
-    @StateObject var homeVM                     = HomeViewModel()
-    @State private var isHome                   : Bool? = nil
     
     //MARK: - Body
     var body: some View {
@@ -21,13 +19,7 @@ struct RootTabBar: View {
                 Color(.neutralBg100)
                 switch selectedTab {
                 case .home:
-                    if isHome == nil{
-                        ProgressView()
-                    }else if isHome == true{
-                        HomeView(tabSelected:$selectedTab)
-                    }else{
-                        WelcomeHomeView()
-                    }
+                    HomeView(tabSelected:$selectedTab)
                 case .subscriptions:
                     SubscriptionsView()
                 case .addSubscription:
@@ -47,14 +39,6 @@ struct RootTabBar: View {
         }
         .ignoresSafeArea(edges: .bottom)
         .navigationBarBackButtonHidden(true)
-        .onAppear{
-            homeVM.home(input: HomeRequest(userId: Constants.getUserId()))
-        }
-        .onChange(of: homeVM.homeResponse){ _ in updateHomeResponse() }
-    }
-    
-    private func updateHomeResponse() {
-        isHome = homeVM.homeResponse?.totalSubscriptions == 0 ? false : true
     }
     
     //Local push for testing

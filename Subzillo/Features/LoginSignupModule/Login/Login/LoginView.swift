@@ -109,7 +109,6 @@ struct LoginView: View {
                 // Social logins
                 VStack(spacing: 8) {
                     AppleSignInButtonView {
-                        AlertManager.shared.showAlert(title: "apple", message: "response")
                         loginVM.socialLogin(loginType: .apple,deviceId: appDelegate.deviceToken ?? "")
                     }
                     
@@ -184,9 +183,40 @@ struct AppleSignInButtonView: View {
         SignInWithAppleButton(.continue, onRequest: { request in
             action()
         }, onCompletion: { result in
+            print("success")
             // handle result
         })
         .frame(height: 50)
         .signInWithAppleButtonStyle(.whiteOutline)
+        
+        //        SignInWithAppleButton(.signIn,
+        //                   onRequest: { request in
+        //                       // 👉 Requesting Email + Full Name
+        //                       request.requestedScopes = [.email, .fullName]
+        //                   },
+        //                   onCompletion: { result in
+        //                       switch result {
+        //                       case .success(let authResult):
+        //
+        //                           if let credential = authResult.credential as? ASAuthorizationAppleIDCredential {
+        //
+        //                               let userID     = credential.user
+        //                               let email      = credential.email          // First time only
+        //                               let fullName   = credential.fullName?.givenName
+        //                               AlertManager.shared.showAlert(title: "apple1", message: "\(userID)\(email ?? "")\(fullName ?? "")")
+        //                               // 👉 Pass values back to parent view
+        //
+        //                           }
+        //
+        //                       case .failure(let error):
+        //                           AlertManager.shared.showAlert(title: "apple2", message: "\(error)")
+        //                           print("Apple Sign-In Failed:", error)
+        //                       }
+        //                   }
+        //               )
+        //               .signInWithAppleButtonStyle(.black)
+        //               .frame(height: 50)
+        //               .cornerRadius(12)
+        //               .padding(.horizontal, 24)
     }
 }

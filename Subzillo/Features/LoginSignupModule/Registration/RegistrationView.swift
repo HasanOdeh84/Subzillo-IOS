@@ -116,7 +116,7 @@ struct RegistrationView: View {
                             if verifyData?.email?.contains("@privaterelay.appleid.com") == true{
                                 appleEmail  = verifyData?.email ?? ""
                                 email       = ""
-                                isEmailDisabled = true
+                                isEmailDisabled = false
                             }else{
                                 email       = verifyData?.email ?? ""
                                 isEmailDisabled = email == "" ? false : true

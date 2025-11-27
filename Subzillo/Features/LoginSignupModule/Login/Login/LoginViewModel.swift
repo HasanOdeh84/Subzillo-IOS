@@ -73,13 +73,10 @@ class LoginViewModel: ObservableObject {
                                                                fullName             : data.fullName ?? ""))
             }
         }else{
-            AlertManager.shared.showAlert(title: "apple", message: "response1")
             SocialLogins.shared.signInWithApple { [weak self] data in
                 guard let data else {
-                    AlertManager.shared.showAlert(title: "apple", message: "response2")
                     return
                 }
-                AlertManager.shared.showAlert(title: "apple", message: "response3")
                 self?.socialLoginApi(input: SocialLoginRequest(authProvider         : data.loginType,
                                                                email                : data.emailAddress ?? "",
                                                                socialId             : data.id ?? "",

@@ -23,6 +23,7 @@ class SubscriptionPreviewViewModel: NSObject, ObservableObject {
     
     func updateSubscriptions(input:PendingSubscriptionConfirmRequest) {
         addSubscriptionResponse = nil
+        self.isEntrySuccess = false
         apiReference.postApi(endPoint: APIEndpoint.pendingSubscriptionConfirm, method: .POST,token: authKey,body: input,showLoader: true, responseType: PendingSubscriptionConfirmResponse.self)
             .sink { [unowned self] completion in
                 if case let .failure(error) = completion {

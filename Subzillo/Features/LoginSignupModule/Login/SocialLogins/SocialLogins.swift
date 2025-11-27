@@ -45,7 +45,6 @@ class SocialLogins:NSObject, ObservableObject{
     
     // MARK: - Apple Sign In ------------
     func signInWithApple(completion: @escaping (SocialLoginModel?) -> Void) {
-        AlertManager.shared.showAlert(title: "apple", message: "response5")
         let provider = ASAuthorizationAppleIDProvider()
         let request = provider.createRequest()
         request.requestedScopes = [.fullName, .email]
@@ -71,14 +70,11 @@ extension SocialLogins:ASAuthorizationControllerDelegate, ASAuthorizationControl
     
     func authorizationController(controller: ASAuthorizationController, didCompleteWithError error: Error) {
         print("Apple Sign-in failed: \(error)")
-        AlertManager.shared.showAlert(title: "apple", message: "\(error)")
         appleSignInCompletion?(nil)
     }
     
     func authorizationController(controller: ASAuthorizationController, didCompleteWithAuthorization authorization: ASAuthorization) {
-        AlertManager.shared.showAlert(title: "apple", message: "response4\(authorization.credential)")
         if let appleIDCredential = authorization.credential as?  ASAuthorizationAppleIDCredential {
-            AlertManager.shared.showAlert(title: "apple", message: "response5")
             self.socialLoginData =  SocialLoginModel(id               : appleIDCredential.user,
                                                      loginType        : .apple,
                                                      fullName         : appleIDCredential.fullName?.givenName,

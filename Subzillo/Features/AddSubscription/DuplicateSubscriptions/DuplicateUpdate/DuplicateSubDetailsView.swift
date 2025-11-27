@@ -79,7 +79,9 @@ struct DuplicateSubDetailsView: View {
                         //SubscriptionDetailsPlainItem(title: "Subscription start", value: (subscriptionData?.lastPaymentDate ?? "").formattedDate())
                         SubscriptionDetailsPlainItem(title: "Next Payment Date", value: (subscriptionData?.nextPaymentDate ?? "").formattedDate(to: "d MMM yyyy"))
                         SubscriptionDetailsPlainItem(title: "Payment Method", value: subscriptionData?.paymentMethodName ?? "")
-                        SubscriptionDetailsPlainItem(title: "Card Linked", value: "\(subscriptionData?.cardName ?? "")****\(subscriptionData?.cardNumber ?? "")")
+                        if subscriptionData?.paymentMethodName ?? "" != ""{
+                            SubscriptionDetailsPlainItem(title: "Card Linked", value: "\(subscriptionData?.cardName ?? "")****\(subscriptionData?.cardNumber ?? "")")
+                        }
                         //subscriptionFor Need to change with nickName
                         if subscriptionData?.subscriptionFor ?? "" == "" || subscriptionData?.subscriptionFor ?? "" == Constants.getUserId(){
 //                            SubscriptionDetailsPlainItem(title: "Benefit From", value: subscriptionData?.subscriptionFor ?? "" == "" ? "Me" : subscriptionData?.subscriptionFor ?? "")
@@ -88,7 +90,8 @@ struct DuplicateSubDetailsView: View {
                             SubscriptionDetailsPlainItem(title: "Benefit From", value: "")
                         }
                         SubscriptionDetailsPlainItem(title: "Renewal Reminders", value: renewalReminderValue)
-                        SubscriptionDetailsPlainItem(title: "Status", value: subscriptionData?.status ?? "Active")
+//                        SubscriptionDetailsPlainItem(title: "Status", value: subscriptionData?.status ?? "Active")
+                        SubscriptionDetailsPlainItem(title: "Status", value: subscriptionData?.status ?? "")
                         SubscriptionDetailsPlainItem(title: "Note", value: subscriptionData?.notes ?? "")
                     }
                     .padding(24)

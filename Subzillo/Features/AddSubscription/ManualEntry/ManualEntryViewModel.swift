@@ -30,6 +30,7 @@ class ManualEntryViewModel: ObservableObject {
     
     func addSubscription(input:AddSubscriptionRequest) {
         addSubscriptionResponse = nil
+        isManualEntrySuccess = false
         apiReference.postApi(endPoint: APIEndpoint.addSubscription, method: .POST,token: authKey,body: input,showLoader: true, responseType: AddSubscriptionResponse.self)
             .sink { [unowned self] completion in
                 if case let .failure(error) = completion {
@@ -94,6 +95,7 @@ class ManualEntryViewModel: ObservableObject {
     
     func editSubscription(input:EditSubscriptionRequest) {
         addSubscriptionResponse = nil
+        isEditEntrySuccess = false
         apiReference.postApi(endPoint: APIEndpoint.editSubscription, method: .POST,token: authKey,body: input,showLoader: true, responseType: AddSubscriptionResponse.self)
             .sink { [unowned self] completion in
                 if case let .failure(error) = completion {
