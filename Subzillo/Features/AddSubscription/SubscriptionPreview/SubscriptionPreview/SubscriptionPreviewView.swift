@@ -352,6 +352,10 @@ struct SubscriptionPreviewView: View {
         .onChange(of: subscriptionPreviewVM.isEntrySuccess) { _ in
             self.addSubApiResponseHandling()
         }
+        .onReceive(NotificationCenter.default.publisher(for: .closeAllBottomSheets)) { _ in
+            showImagePopup = false
+            showDiscardPopup = false
+        }
     }
     
     //MARK: - addSubApiRespons
@@ -484,6 +488,7 @@ struct SubscriptionPreviewView: View {
         if numberOfSubscriptions > 0
         {
             if subscriptionData != nil {
+                subscriptionData?.notes = subscriptionData?.reason
                 globalSubscriptionData = subscriptionData!
                 AppIntentRouter.shared.navigate(to: .subscriptionMatchView(subscriptionData: subscriptionData!))
             }
@@ -549,7 +554,7 @@ struct SubscriptionPreviewView: View {
                                                         category            : objc.categoryId ?? "",
                                                         subscriptionFor     : objc.subscriptionFor ?? Constants.getUserId(),
                                                         renewalReminder     : objc.renewalReminder ?? [],
-                                                        notes               : objc.notes ?? "",
+                                                        notes               : objc.reason ?? "",
                                                         currencySymbol      : objc.currencySymbol ?? "",
                                                         source              : source)
                     subsctionsArray.append(subObjc)

@@ -234,7 +234,11 @@ struct DuplicateSubscriptionsView: View {
                     }
                     selectedObjectsNew.append(newitem)
                 }
-                self.makeApiCall(action: 2, existingSubscription: "", newSubscriptions: selectedObjectsNew)
+                if selectedObjectsNew.isEmpty{
+                    
+                }else{
+                    self.makeApiCall(action: 2, existingSubscription: "", newSubscriptions: selectedObjectsNew)
+                }
             }
             else if type == "keep" {
                 let newObject = ModifiedDuplicateDataInfo(originalData: data, isKeepAll: true)
@@ -289,11 +293,11 @@ struct DuplicateSubscriptionsView: View {
     //MARK: - apicall
     func makeApiCall(action:Int, existingSubscription:String, newSubscriptions:[SubscriptionInfo])
     {
-        let inoput = ResolveDuplicateSubscriptionRequest(userId: Constants.getUserId(),
+        let input = ResolveDuplicateSubscriptionRequest(userId: Constants.getUserId(),
                                                          action: action,
                                                          existingSubscription: existingSubscription,
                                                          newSubscriptions: newSubscriptions)
-        dupSubscriptionVM.resolveDuplicateSubscription(input: inoput)
+        dupSubscriptionVM.resolveDuplicateSubscription(input: input)
     }
 }
 
@@ -310,13 +314,16 @@ struct DuplicateListItem: View {
                     .font(.appBold(16))
                     .foregroundColor(.neutralMain700)
                 Spacer()
-                if (item.existingSubscriptions?.count ?? 0) > 0 {
-                    Button(action: keepAllBtnAction) {
+//                if (item.existingSubscriptions?.count ?? 0) > 0 {
+//                    Button(action: keepAllBtnAction) {
                         Text("Keep All")
                             .font(.appBold(16))
                             .foregroundColor(.navyBlueCTA700)
-                    }
-                }
+                            .onTapGesture {
+                                keepAllBtnAction()
+                            }
+//                    }
+//                }
             }
             .padding(.top, 10)
             .padding(.bottom, 6)
@@ -353,10 +360,12 @@ struct DuplicateListItem: View {
             .padding(.horizontal, 16.5)
             
             if item.existingSubscriptions?.count ?? 0 == 0 {
-                CustomButton(title: "Save", height: 49, action: saveAction)
+                CustomButton(title: "Save", height: 49)//, action: saveAction)
                     .frame(width: 124)
                     .padding(.bottom, 5)
-                
+                    .onTapGesture {
+                        saveAction()
+                    }
             }
         }
         .frame(height: item.existingSubscriptions?.count ?? 0 == 0 ? getCellHeight()+100 : getCellHeight()+45)
@@ -410,7 +419,6 @@ struct DuplicateListItem: View {
                         onDelegate?(item, [index], "update")
                     }
                 }
-                
             }
         }
     }
@@ -444,7 +452,11 @@ struct DuplicateListItem: View {
     }
     
     private func saveAction() {
-        onDelegate?(item, selectedIndex, "save")
+        if selectedIndex.count > 0{
+            onDelegate?(item, selectedIndex, "save")
+        }else{
+            ToastManager.shared.showToast(message: "",style: .error)
+        }
     }
     
     private func keepAllBtnAction() {

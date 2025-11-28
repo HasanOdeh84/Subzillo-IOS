@@ -71,6 +71,7 @@ struct AddSubscriptionIntent: AppIntent {
         
         siriData = ["serviceName":serviceName,"planName":planName,"price":price,"billingCycle":billingCycle,"category":category,"currencyCode":currencyCode, "currencySymbol": currencySymbol, "nextChargeDate": nextChargeDate]
         if AppState.shared.isLoggedIn{
+            NotificationCenter.default.post(name: .closeAllBottomSheets, object: nil)
             AppIntentRouter.shared.navigatingRoute = .manualEntry(isFromEdit: false)
         }
         

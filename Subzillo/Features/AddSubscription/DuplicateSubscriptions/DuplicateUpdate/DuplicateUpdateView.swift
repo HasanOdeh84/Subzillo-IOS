@@ -109,6 +109,7 @@ struct DuplicateUpdateView: View {
 //                else{
 //                    AppIntentRouter.shared.navigate(to: .subscriptionsListView)
 //                }
+                modifiedDuplicateDataInfo = nil
                 AppIntentRouter.shared.navigate(to: .subscriptionsListView)
             }
             else{

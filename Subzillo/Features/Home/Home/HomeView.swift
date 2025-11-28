@@ -349,7 +349,21 @@ struct HeaderView: View {
     let action          : () -> Void
     
     var body: some View {
-        HStack(spacing: 16) {
+        //MARK: notification btn
+        ZStack(alignment: .topTrailing) {
+            Button(action: action) {
+                Image("notification-03")
+                    .frame(width: 32, height: 32)
+            }
+            
+            //                Text("3")
+            //                    .font(.appBold(11))
+            //                    .foregroundColor(Color.white)
+            //                    .frame(width: 16, height: 16)
+            //                    .background(Color.redBadge)
+            //                    .cornerRadius(4)
+            //                    .offset(x: 0, y: -5)
+            
             VStack(alignment: .leading,spacing: 2) {
                 // MARK: - Title
                 Text(title)
@@ -363,26 +377,10 @@ struct HeaderView: View {
                     .multilineTextAlignment(.leading)
                     .foregroundColor(Color.neutral500)
             }
-            Spacer()
-            
-            //MARK: notification btn
-            ZStack(alignment: .topTrailing) {
-                Button(action: action) {
-                    Image("notification-03")
-                        .frame(width: 32, height: 32)
-                }
-                
-//                Text("3")
-//                    .font(.appBold(11))
-//                    .foregroundColor(Color.white)
-//                    .frame(width: 16, height: 16)
-//                    .background(Color.redBadge)
-//                    .cornerRadius(4)
-//                    .offset(x: 0, y: -5)
-                
-            }
-            .offset(x: 0, y: -5)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(.trailing,16)
         }
+        .offset(x: 0, y: -5)
     }
 }
 

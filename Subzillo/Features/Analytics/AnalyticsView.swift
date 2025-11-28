@@ -145,6 +145,9 @@ struct HomeView11: View {
                     showAddTask = false
                 }
             }
+            .onReceive(NotificationCenter.default.publisher(for: .closeAllBottomSheets)) { _ in
+                showAddTask = false
+            }
         }
     }
     

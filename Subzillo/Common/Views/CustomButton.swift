@@ -15,7 +15,7 @@ struct CustomButton: View {
     var height      : CGFloat = 56
     var cornerRadius: CGFloat = 8
     var buttonImage : String = ""
-    let action      : () -> Void
+    var action      : () -> Void = {}
     
     var body: some View {
         Button(action: action) {

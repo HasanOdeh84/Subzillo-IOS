@@ -97,10 +97,3 @@ struct OfflineSheet: View {
     }
 }
 
-final class SheetManager: ObservableObject {
-    static let shared = SheetManager()
-    
-    @Published var isOfflineSheetVisible = false
-    
-    private init() {}
-}

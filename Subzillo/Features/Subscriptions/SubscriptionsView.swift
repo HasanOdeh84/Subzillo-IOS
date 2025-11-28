@@ -299,6 +299,11 @@ struct SubscriptionsView: View {
         .onChange(of: subscriptionsVM.getSubsByMonthResponse) { _ in updateMonthSubsList() }
         .onChange(of: subscriptionsVM.isDeletedSubscription) { _ in updateDeleteSubscription() }
         .onChange(of: selectedSegment) { _ in callApis() }
+        .onReceive(NotificationCenter.default.publisher(for: .closeAllBottomSheets)) { _ in
+            isDatePickerPresented = false
+            showDeletePopup = false
+            showFilterSheet = false
+        }
     }
     
     private var dateFormatter: DateFormatter {

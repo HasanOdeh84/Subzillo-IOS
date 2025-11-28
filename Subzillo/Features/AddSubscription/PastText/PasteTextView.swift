@@ -113,7 +113,9 @@ struct PasteTextView: View {
             .presentationDragIndicator(.hidden)
             .presentationDetents([.height(380)])
         }
-        
+        .onReceive(NotificationCenter.default.publisher(for: .closeAllBottomSheets)) { _ in
+            voiceCommandVM.showErrorPopup = false
+        }
     }
     
     func hideKeyboard() {

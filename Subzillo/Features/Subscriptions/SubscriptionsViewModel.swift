@@ -52,6 +52,7 @@ class SubscriptionsViewModel: ObservableObject {
     }
     
     func deleteSubscription(input: DeleteSubscriptionRequest) {
+        isDeletedSubscription = false
         apiReference.postApi(endPoint: APIEndpoint.deleteSubscription, method: .POST,token: authKey,body: input,showLoader: true, responseType: GeneralResponse.self)
             .sink { [unowned self] completion in
                 if case let .failure(error) = completion {

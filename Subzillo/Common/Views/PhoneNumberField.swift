@@ -118,6 +118,9 @@ struct PhoneNumberField: View {
             .presentationDetents([.medium, .large])
             .presentationDragIndicator(.hidden)
         }
+        .onReceive(NotificationCenter.default.publisher(for: .closeAllBottomSheets)) { _ in
+            showCurrencySheet = false
+        }
     }
     
     //MARK: - User defined methods

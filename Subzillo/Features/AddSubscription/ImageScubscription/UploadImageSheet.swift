@@ -98,6 +98,11 @@ struct UploadImageSheet: View {
             .presentationDragIndicator(.hidden)
             .presentationDetents([.height(580)])
         }
+        .onReceive(NotificationCenter.default.publisher(for: .closeAllBottomSheets)) { _ in
+            showImagePicker = false
+            uploadImageVM.showErrorPopup = false
+            showPermissionAlert = false
+        }
         .onAppear{
             originalImage = nil
         }

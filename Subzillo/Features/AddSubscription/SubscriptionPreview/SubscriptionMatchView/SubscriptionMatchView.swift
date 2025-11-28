@@ -203,6 +203,9 @@ struct SubscriptionMatchView: View {
                 .presentationDragIndicator(.hidden)
                 .presentationDetents([.height(340)])
             }
+            .onReceive(NotificationCenter.default.publisher(for: .closeAllBottomSheets)) { _ in
+                showDeletePopup = false
+            }
         }
         .background(.neutralBg100)
     }

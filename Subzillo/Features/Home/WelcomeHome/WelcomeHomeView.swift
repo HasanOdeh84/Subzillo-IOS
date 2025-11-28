@@ -255,6 +255,9 @@ struct WelcomeHomeView: View {
             .presentationDragIndicator(.hidden)
             .presentationDetents([.height(630)])
         }
+        .onReceive(NotificationCenter.default.publisher(for: .closeAllBottomSheets)) { _ in
+            showUploadPopup = false
+        }
     }
     
     //MARK: - Button actions

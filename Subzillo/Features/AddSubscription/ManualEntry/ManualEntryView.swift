@@ -127,7 +127,7 @@ struct ManualEntryView: View {
                     HStack(spacing: 24) {
                         FieldView(text: $amount, title: "Amount", image: "currencyIcon", placeHolder: "0.00",isNumberPad: true)
                         Button(action: currencySelection) {
-                            FieldView(text: $currency, textValue: selectedCurrency?.code ?? "", title: "Currency", image: "globeIcon", placeHolder: "USD", isButton: true, isText: true)
+                            FieldView(text: $currency, textValue: selectedCurrency?.code ?? "", title: "Currency", image: "globeIcon", placeHolder: Constants.shared.currencyCode, isButton: true, isText: true)
                                 .frame(width: 140, alignment: .trailing)
                         }
                         .sheet(isPresented: $showCurrencySheet) {
@@ -345,6 +345,11 @@ struct ManualEntryView: View {
         }
         .onChange(of: addSubscriptionVM.isEditEntrySuccess) { _ in
             self.addSubApiResponseHandling(isAdd:false)
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .closeAllBottomSheets)) { _ in
+            showCategorySheet = false
+            showCurrencySheet = false
+            showPaymentMethodSheet = false
         }
     }
     
@@ -987,6 +992,9 @@ struct ListView: View {
             .cornerRadius(16)
         }
         .padding(5)
+        .onReceive(NotificationCenter.default.publisher(for: .closeAllBottomSheets)) { _ in
+            showNewCardSheet = false
+        }
     }
     
     // MARK: - Extracted subview

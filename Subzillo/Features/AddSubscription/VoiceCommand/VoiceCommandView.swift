@@ -215,6 +215,11 @@ struct VoiceCommandView: View {
             .presentationDetents([.height(350)])
         }
         .modifier(LoaderModifier())
+        .onReceive(NotificationCenter.default.publisher(for: .closeAllBottomSheets)) { _ in
+            voiceCommandVM.showErrorPopup = false
+            showPermissionAlert = false
+            showDiscardPopup = false
+        }
     }
     
     private func clickOnHowItWorks() {

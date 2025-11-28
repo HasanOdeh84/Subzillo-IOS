@@ -200,6 +200,7 @@ extension Constants{
             // INR
             "rupee": "INR",
             "rupees": "INR",
+            "india": "INR",
             "indian rupee": "INR",
             "inr": "INR",
             
@@ -301,6 +302,10 @@ extension Constants{
         let symbol = symbolForCurrencyCode(code)
         return (code, symbol)
     }
+}
+
+extension Notification.Name {
+    static let closeAllBottomSheets = Notification.Name("closeAllBottomSheets")
 }
 
 //MARK: AppInfo
