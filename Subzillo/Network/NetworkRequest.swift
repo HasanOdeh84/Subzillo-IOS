@@ -222,7 +222,7 @@ class NetworkRequest {
                         }
                     case 403: //Account blocked
                         DispatchQueue.main.async {
-                            AlertManager.shared.showAlert(title: "", message: "Account has been blocked.",okAction: {
+                            AlertManager.shared.showAlert(title: "", message: "Your account has been blocked by the admin",okAction: {
                                 AppState.shared.logout()
                                 AppIntentRouter.shared.navigate(to: .login)
                             })
@@ -380,7 +380,7 @@ class NetworkRequest {
                         }
                     case 403: //Account blocked
                         DispatchQueue.main.async {
-                            AlertManager.shared.showAlert(title: "", message: "Account has been blocked.",okAction: {
+                            AlertManager.shared.showAlert(title: "", message: "Your account has been blocked by the admin",okAction: {
                                 AppState.shared.logout()
                                 AppIntentRouter.shared.navigate(to: .login)
                             })
@@ -519,7 +519,7 @@ class NetworkRequest {
                         }
                     case 403: //Account blocked
                         DispatchQueue.main.async {
-                            AlertManager.shared.showAlert(title: "", message: "Account has been blocked.",okAction: {
+                            AlertManager.shared.showAlert(title: "", message: "Your account has been blocked by the admin",okAction: {
                                 AppState.shared.logout()
                                 AppIntentRouter.shared.navigate(to: .login)
                             })

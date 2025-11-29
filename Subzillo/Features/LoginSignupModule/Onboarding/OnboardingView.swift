@@ -36,22 +36,22 @@ struct OnboardingView: View {
         OnboardingPage(
             lottie: "onboarding",
             title: "Manage your and your family's subscriptions in one place",
-            description: "Track Netflix, Spotify, gym memberships, and more in one organized dashboard. Never lose track again."
+            description: "Keep all your subscriptions—Netflix, Spotify, Gym memberships, and more—in one simple place. Stay organised and never miss a renewal again."
         ),
         OnboardingPage(
             lottie: "onboarding",
             title: "Add Subscriptions Using Voice Commands",
-            description: "Track Netflix, Spotify, gym memberships, and more in one organized dashboard. Never lose track again."
+            description: "Add subscriptions with your voice in one step. Fast, simple, and convenient."
         ),
         OnboardingPage(
             lottie: "onboarding2",
             title: "Add Subscription by email integration",
-            description: "Track Netflix, Spotify, gym memberships, and more in one organized dashboard. Never lose track again."
+            description: "Add Netflix, Spotify, and more through email integration. Subscription details are captured automatically from your inbox."
         ),
         OnboardingPage(
             lottie: "onboarding3",
             title: "Add Subscription by AI Assistant",
-            description: "Track Netflix, Spotify, gym memberships, and more in one organized dashboard. Never lose track again."
+            description: "Your AI Assistant detects and adds Netflix, Spotify, Gym plans, and more. Managing subscriptions becomes smarter and effortless."
         ),
         OnboardingPage(
             lottie: "onboarding",
@@ -91,62 +91,65 @@ struct OnboardingView: View {
                             if currentPage == pages.count - 1{
                                 tellUsAbtYourselfView()
                             }else{
-                                if currentPage == 0{
-                                    Image(pages[index].lottie)
-                                        .resizable()
-                                        .scaledToFit()
-                                        .frame(height: 190)
-                                }else{
-                                    if currentPage == 3{
-                                        LottieView(name: pages[index].lottie)
+                                ScrollView{
+                                    if currentPage == 0{
+                                        Image(pages[index].lottie)
+                                            .resizable()
+                                            .scaledToFit()
                                             .frame(height: 190)
-                                            .frame(maxWidth: .infinity)
-                                            .offset(y: animateIn ? 0 : moveDistance)
-                                            .opacity(animateIn ? 1 : 0)
-                                            .id(currentPage)
-                                            .onAppear {
-                                                if currentPage == index {
-                                                    withAnimation(.interpolatingSpring(stiffness: 220, damping: 22).delay(appearDelay)) {
-                                                        animateIn = true
-                                                    }
-                                                }
-                                            }
-                                            .onChange(of: currentPage) { newValue in
-                                                if newValue == index {
-                                                    animateIn = false
-                                                    withAnimation(.interpolatingSpring(stiffness: 220, damping: 22).delay(appearDelay)) {
-                                                        animateIn = true
-                                                    }
-                                                }
-                                            }
-                                            .onDisappear {
-                                                if currentPage != 3{
-                                                    // Reset when leaving page
-                                                    animateIn = false
-                                                }
-                                            }
                                     }else{
-                                        LottieView(name: pages[index].lottie)
-                                            .frame(height: 190)
-                                            .frame(maxWidth: .infinity)
+                                        if currentPage == 3{
+                                            LottieView(name: pages[index].lottie)
+                                                .frame(height: 190)
+                                                .frame(maxWidth: .infinity)
+                                                .offset(y: animateIn ? 0 : moveDistance)
+                                                .opacity(animateIn ? 1 : 0)
+                                                .id(currentPage)
+                                                .onAppear {
+                                                    if currentPage == index {
+                                                        withAnimation(.interpolatingSpring(stiffness: 220, damping: 22).delay(appearDelay)) {
+                                                            animateIn = true
+                                                        }
+                                                    }
+                                                }
+                                                .onChange(of: currentPage) { newValue in
+                                                    if newValue == index {
+                                                        animateIn = false
+                                                        withAnimation(.interpolatingSpring(stiffness: 220, damping: 22).delay(appearDelay)) {
+                                                            animateIn = true
+                                                        }
+                                                    }
+                                                }
+                                                .onDisappear {
+                                                    if currentPage != 3{
+                                                        // Reset when leaving page
+                                                        animateIn = false
+                                                    }
+                                                }
+                                        }else{
+                                            LottieView(name: pages[index].lottie)
+                                                .frame(height: 190)
+                                                .frame(maxWidth: .infinity)
+                                        }
                                     }
+                                    
+                                    Text(LocalizedStringKey(pages[index].title))
+                                        .font(.appRegular(28))
+                                        .multilineTextAlignment(.center)
+                                        .padding(.horizontal)
+                                        .padding(.top,64)
+                                        .foregroundColor(.neutralMain700)
+                                    
+                                    Text(LocalizedStringKey(pages[index].description))
+                                        .font(.appRegular(18))
+                                        .foregroundColor(.neutral500)
+                                        .multilineTextAlignment(.center)
+                                        .padding(.horizontal)
+                                        .padding(.top,32)
+                                        .padding(.bottom,40)
+                                    
+                                    Spacer()
                                 }
-                                
-                                Text(LocalizedStringKey(pages[index].title))
-                                    .font(.appRegular(28))
-                                    .multilineTextAlignment(.center)
-                                    .padding(.horizontal)
-                                    .padding(.top,64)
-                                    .foregroundColor(.neutralMain700)
-                                
-                                Text(LocalizedStringKey(pages[index].description))
-                                    .font(.appRegular(18))
-                                    .foregroundColor(.neutral500)
-                                    .multilineTextAlignment(.center)
-                                    .padding(.horizontal)
-                                    .padding(.top,32)
-                                
-                                Spacer()
                             }
                         }
                         .tag(index)

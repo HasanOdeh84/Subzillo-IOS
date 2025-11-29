@@ -216,7 +216,7 @@ struct SubscriptionPreviewView: View {
 //                                    .frame(maxWidth: .infinity)
                                     .frame(height: 24)
                                     .font(.appRegular(14))
-                                    .foregroundColor(.neutralMain700)
+                                    .foregroundColor(.neutralMain700Gray)
                                     .multilineTextAlignment(.center)
                                     .padding(.horizontal, 16)
                                     .background(colorValue)
@@ -291,7 +291,7 @@ struct SubscriptionPreviewView: View {
                         if currentSubscriptions == numberOfSubscriptions
                         {
                             HStack(spacing: 0) {
-                                GradientBorderButton(title: "Previous", action:onPreviousAction, backgroundColor:.white)
+                                GradientBorderButton(title: "Previous", action:onPreviousAction, backgroundColor:.whiteBlack)
                                     .padding(.horizontal)
                                 CustomButton(title: "Save All", height:50, action: onSaveAction)
                                     .padding(.horizontal)
@@ -300,7 +300,7 @@ struct SubscriptionPreviewView: View {
                         }
                         else{
                             HStack(spacing: 0)  {
-                                GradientBorderButton(title: "Previous", action:onPreviousAction, backgroundColor:.white)
+                                GradientBorderButton(title: "Previous", action:onPreviousAction, backgroundColor:.whiteBlack)
                                     .padding(.horizontal)
                                 CustomButton(title: "Next", height:50, action: onNextAction)
                                     .padding(.horizontal)
@@ -542,10 +542,11 @@ struct SubscriptionPreviewView: View {
                 for i in 0..<subscriptionsData!.count
                 {
                     let objc = subscriptionsData![i]
+                    var currency = (objc.currency ?? "" == "") ? Constants.shared.currencyCode : (objc.currency ?? "")
                     let subObjc = ConfirmedSubscription(serviceName         : objc.serviceName ?? "",
                                                         serviceLogo         : objc.serviceLogo ?? "",
                                                         amount              : objc.amount ?? 0.0,
-                                                        currency            : objc.currency ?? "",
+                                                        currency            : currency,//objc.currency ?? "",
                                                         billingCycle        : objc.billingCycle ?? "",
                                                         nextPaymentDate     : (objc.nextPaymentDate ?? "").formattedDate(from: "dd/MM/yyyy", to: "yyyy-MM-dd"),
                                                         subscriptionType    : objc.subscriptionType ?? "",
@@ -620,7 +621,7 @@ struct SubscriptionDetailsItem: View {
                     .frame(maxWidth: .infinity)
                     .frame(height: 28)
                     .font(.appRegular(14))
-                    .foregroundColor(.neutralMain700)
+                    .foregroundColor(.neutralMain700Gray)
                     .multilineTextAlignment(.center)
                     .padding(.horizontal, 16)
                     .background(colorValue)

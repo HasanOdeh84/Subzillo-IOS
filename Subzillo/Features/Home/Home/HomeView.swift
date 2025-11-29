@@ -152,7 +152,7 @@ struct HomeView: View {
                                         Image("plus-sign-circle")
                                         Text("Add new subscription")
                                             .font(.appRegular(14))
-                                            .foregroundStyle(Color.blueMain700)
+                                            .foregroundStyle(Color.blueMain700White)
                                     }
                                     .frame(maxWidth: .infinity)
                                     .frame(height: 100)
@@ -202,7 +202,7 @@ struct HomeView: View {
                                         HStack{
                                             Text("View all")
                                                 .font(.appRegular(14))
-                                                .foregroundColor(.navyBlueCTA700)
+                                                .foregroundColor(.navyBlueCTA700White)
                                             Image("arrow_blue")
                                                 .frame(width: 24,height: 24, alignment: .trailing)
                                         }

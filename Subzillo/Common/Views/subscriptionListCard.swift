@@ -39,16 +39,16 @@ struct subscriptionListCard: View {
             VStack(alignment: .leading,spacing: 4){
                 Text(isActive ? "Next renewal" : "\(subscriptionData.serviceName ?? "") | \(subscriptionData.subscriptionType ?? "")")
                     .font(.appRegular(12))
-                    .foregroundColor(Color.neutral600)
+                    .foregroundColor(isActive ? Color.neutral600 : Color.neutral600White)
                     .multilineTextAlignment(.leading)
                 HStack(spacing: 3){
                     Text("\(isActive ? subscriptionData.serviceName ?? "" : subscriptionData.billingCycle ?? "") •")
                         .font(.appRegular(14))
-                        .foregroundColor(.navyBlueCTA700)
+                        .foregroundColor(isActive ? .navyBlueCTA700White : .navyBlueCTA700)
                         .multilineTextAlignment(.leading)
                     Text(subscriptionData.status == "expired" ? "Expired" : Constants.shared.dateConversion(subscriptionData.nextPaymentDate ?? ""))
                         .font(subscriptionData.status == "expired" ? .appBold(14) : .appRegular(14))
-                        .foregroundColor(subscriptionData.status == "expired" ? .disCardRed : .navyBlueCTA700)
+                        .foregroundColor(subscriptionData.status == "expired" ? .disCardRed : (isActive ? .navyBlueCTA700White : .navyBlueCTA700))
                         .multilineTextAlignment(.leading)
                 }
             }
@@ -58,7 +58,7 @@ struct subscriptionListCard: View {
             VStack(alignment: .trailing,spacing: 8){
                 Text("\(subscriptionData.currencySymbol ?? "")\(String(describing: subscriptionData.amount ?? 0.0))")
                     .font(.appSemiBold(16))
-                    .foregroundColor(.navyBlueCTA700)
+                    .foregroundColor(isActive ? .navyBlueCTA700White : .navyBlueCTA700)
                 if !isActive{
                     if subscriptionData.nickName == "" && subscriptionData.color == ""{
                         RelationView(isMore: false, name: "Me", color: "#619BEE")

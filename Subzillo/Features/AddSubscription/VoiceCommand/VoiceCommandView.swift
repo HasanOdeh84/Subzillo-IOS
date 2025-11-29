@@ -13,9 +13,7 @@ import AVFoundation
 struct VoiceCommandView: View {
     
     //MARK: - Properties
-    //    @StateObject private var audioManager   = AudioRecorderManager()
     @StateObject private var viewModel      = VoiceCommandViewModel()
-    
     @State private var permissionType       = ""
     @State private var previousText         = ""
     @State private var recognizedText       = ""//"Hello, i have taken Netflix premium auto renuwal subscription for quarterly using my moms debit card and i have paid 12.99 USD on 1st November 2025 also i have taken another subscription for monthly using my dads credit card and i have paid 11.99"
@@ -29,7 +27,12 @@ struct VoiceCommandView: View {
     @State private var audioEngine          = AVAudioEngine()
     @State private var timer                : Timer?
     @State var showDiscardPopup             : Bool = false
+//    @GestureState private var isPressing    = false
+    @GestureState private var longPressActivated = false
     @Environment(\.dismiss) private var dismiss
+    
+    @State private var isPressing = false
+        @State private var hasPerformedAction = false
     
     //MARK: - body
     var body: some View {
@@ -121,11 +124,27 @@ struct VoiceCommandView: View {
                 .cornerRadius(137/2)
                 .shadow(color: Color.dropShadow, radius: 2, x: 0, y: 2)
                 .frame(maxWidth: .infinity, alignment: .center)
-                .simultaneousGesture(
-                    DragGesture(minimumDistance: 0)
-                        .onChanged { _ in startListening() }
-                        .onEnded { _ in stopListening() }
-                )
+//                .simultaneousGesture(
+//                    DragGesture(minimumDistance: 0)
+//                        .onChanged { _ in startListening() }
+//                        .onEnded { _ in stopListening() }
+//                )
+//                .gesture(
+//                    LongPressGesture(minimumDuration: 0.4)
+//                        .sequenced(before: DragGesture(minimumDistance: 0))
+//                        .onChanged { value in
+//                            switch value {
+//                            case .first(true):       // long press recognised
+//                                startListening()
+//                            default:
+//                                break
+//                            }
+//                        }
+//                        .onEnded { value in
+//                            stopListening()
+//                        }
+//                )
+                .gesture(longPressThenTrackDrag)
                 
                 // MARK: - Countdown Label
                 VStack(spacing: 0) {
@@ -153,8 +172,8 @@ struct VoiceCommandView: View {
                 // MARK: - Reset Button
                 GradientBorderButton(title: "Discard",isBtn:true, buttonImage: "discardIcon", action:{
                     showDiscardPopup = true})
-                .opacity(recognizedText.isEmpty ? 0.5 : 1.0)
-                .disabled(recognizedText.isEmpty ? true : false)
+                .opacity(countdown == 0 ? 0.5 : 1.0)
+                .disabled(countdown == 0 ? true : false)
                     .padding(.horizontal)
                 
                 Spacer()
@@ -220,6 +239,36 @@ struct VoiceCommandView: View {
             showPermissionAlert = false
             showDiscardPopup = false
         }
+    }
+    
+    // Combined gestures: long press starts, simultaneous drag detects lift
+    private var longPressThenTrackDrag: some Gesture {
+        let longPress = LongPressGesture(minimumDuration: 0.35)
+            .updating($longPressActivated) { current, state, _ in
+                // called when the long-press requirement is satisfied (finger still down)
+                if current && !state {
+                    state = true
+                }
+            }
+            .onEnded { _ in
+                // onEnded of LongPressGesture fires when the long-press succeeded,
+                // but we don't stop here — stop will be handled by the drag's onEnded.
+                // We use this to set isRecording if not already set (defensive).
+                startListening()
+            }
+        
+        // This DragGesture runs simultaneously and its onEnded fires when finger lifts.
+        let drag = DragGesture(minimumDistance: 0)
+            .onChanged { _ in
+                // nothing needed here — movement while holding should not stop recording
+            }
+            .onEnded { _ in
+                // finger lifted — stop only if we were recording
+                stopListening()
+            }
+        
+        // Important: use simultaneous so drag doesn't cancel the long-press
+        return longPress.simultaneously(with: drag)
     }
     
     private func clickOnHowItWorks() {

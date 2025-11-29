@@ -10,7 +10,7 @@ import SwiftUI
 struct CustomButton: View {
     let title       : String
     var background  : Color = .navyBlueCTA700
-    var textColor   : Color = .neutralDisabled200
+    var textColor   : Color = .neutralDisabled200White
     var width       : CGFloat = 160
     var height      : CGFloat = 56
     var cornerRadius: CGFloat = 8

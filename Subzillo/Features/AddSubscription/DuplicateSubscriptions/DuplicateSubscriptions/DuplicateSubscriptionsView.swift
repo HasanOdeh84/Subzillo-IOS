@@ -21,18 +21,18 @@ struct DuplicateSubscriptionsView: View {
     @State var duplicateSubsList         : [DuplicateDataInfo]
     @StateObject var dupSubscriptionVM   = DuplicateSubscriptionsViewModel()
     /*@State private var duplicateSubsList = [
-        DuplicateDataInfo(id: "1", serviceName:"Netflix", newSubscriptions: [SubscriptionInfo(id: "1", serviceName: "Netflix", serviceLogo: "", amount: 17.99, currency: "INR", currencySymbol: "₹", billingCycle: "Monthly", subscriptionType: "Premium", subscriptionFor: "Me", nextPaymentDate: "Fed 15, 2025", status: "active")], existingSubscriptions: [SubscriptionInfo(id: "2", serviceName: "Netflix", serviceLogo: "", amount: 17.99, currency: "INR", currencySymbol: "₹", billingCycle: "Monthly", subscriptionType: "Premium", subscriptionFor: "Me", nextPaymentDate: "Fed 15, 2025", status: "active")]),
-        
-        DuplicateDataInfo(id: "2", serviceName:"Spotiy", newSubscriptions: [SubscriptionInfo(id: "3", serviceName: "Spotiy", serviceLogo: "", amount: 17.99, currency: "INR", currencySymbol: "₹", billingCycle: "Monthly", subscriptionType: "Premium", subscriptionFor: "Me", nextPaymentDate: "Fed 15, 2025", status: "active")], existingSubscriptions: [SubscriptionInfo(id: "4", serviceName: "Spotiy", serviceLogo: "", amount: 17.99, currency: "INR", currencySymbol: "₹", billingCycle: "Monthly", subscriptionType: "Premium", subscriptionFor: "Me", nextPaymentDate: "Fed 15, 2025", status: "active"),SubscriptionInfo(id: "2", serviceName: "Spotiy", serviceLogo: "", amount: 17.99, currency: "INR", currencySymbol: "₹", billingCycle: "Monthly", subscriptionType: "Premium", subscriptionFor: "Me", nextPaymentDate: "Fed 15, 2025", status: "active")]),
-        
-        DuplicateDataInfo(id: "3", serviceName:"YouTube", newSubscriptions: [SubscriptionInfo(id: "5", serviceName: "YouTube", serviceLogo: "", amount: 17.99, currency: "INR", currencySymbol: "₹", billingCycle: "Monthly", subscriptionType: "Premium", subscriptionFor: "Me", nextPaymentDate: "Fed 15, 2025", status: "active"),SubscriptionInfo(id: "6", serviceName: "YouTube", serviceLogo: "", amount: 17.99, currency: "INR", currencySymbol: "₹", billingCycle: "Monthly", subscriptionType: "Premium", subscriptionFor: "Me", nextPaymentDate: "Fed 15, 2025", status: "active")], existingSubscriptions: [SubscriptionInfo(id: "7", serviceName: "YouTube", serviceLogo: "", amount: 17.99, currency: "INR", currencySymbol: "₹", billingCycle: "Monthly", subscriptionType: "Premium", subscriptionFor: "Me", nextPaymentDate: "Fed 15, 2025", status: "active"),SubscriptionInfo(id: "2", serviceName: "YouTube", serviceLogo: "", amount: 17.99, currency: "INR", currencySymbol: "₹", billingCycle: "Monthly", subscriptionType: "Premium", subscriptionFor: "Me", nextPaymentDate: "Fed 15, 2025", status: "active")]),
-        
-        DuplicateDataInfo(id: "4", serviceName:"Prime video", newSubscriptions: [SubscriptionInfo(id: "8", serviceName: "Prime video", serviceLogo: "", amount: 17.99, currency: "INR", currencySymbol: "₹", billingCycle: "Monthly", subscriptionType: "Premium", subscriptionFor: "Me", nextPaymentDate: "Fed 15, 2025", status: "active"),SubscriptionInfo(id: "9", serviceName: "Prime video", serviceLogo: "", amount: 17.99, currency: "INR", currencySymbol: "₹", billingCycle: "Monthly", subscriptionType: "Premium", subscriptionFor: "Me", nextPaymentDate: "Fed 15, 2025", status: "active")], existingSubscriptions: [SubscriptionInfo(id: "10", serviceName: "Prime video", serviceLogo: "", amount: 17.99, currency: "INR", currencySymbol: "₹", billingCycle: "Monthly", subscriptionType: "Premium", subscriptionFor: "Me", nextPaymentDate: "Fed 15, 2025", status: "active")]),
-        
-        DuplicateDataInfo(id: "5", serviceName:"Hotstar", newSubscriptions: [SubscriptionInfo(id: "11", serviceName: "Hotstar", serviceLogo: "", amount: 17.99, currency: "INR", currencySymbol: "₹", billingCycle: "Monthly", subscriptionType: "Premium", subscriptionFor: "Me", nextPaymentDate: "Fed 15, 2025", status: "active"),SubscriptionInfo(id: "12", serviceName: "Hotstar", serviceLogo: "", amount: 17.99, currency: "INR", currencySymbol: "₹", billingCycle: "Monthly", subscriptionType: "Premium", subscriptionFor: "Me", nextPaymentDate: "Fed 15, 2025", status: "active"),SubscriptionInfo(id: "13", serviceName: "Hotstar", serviceLogo: "", amount: 17.99, currency: "INR", currencySymbol: "₹", billingCycle: "Monthly", subscriptionType: "Premium", subscriptionFor: "Me", nextPaymentDate: "Fed 15, 2025", status: "active")])
-        
-    ]
-    */
+     DuplicateDataInfo(id: "1", serviceName:"Netflix", newSubscriptions: [SubscriptionInfo(id: "1", serviceName: "Netflix", serviceLogo: "", amount: 17.99, currency: "INR", currencySymbol: "₹", billingCycle: "Monthly", subscriptionType: "Premium", subscriptionFor: "Me", nextPaymentDate: "Fed 15, 2025", status: "active")], existingSubscriptions: [SubscriptionInfo(id: "2", serviceName: "Netflix", serviceLogo: "", amount: 17.99, currency: "INR", currencySymbol: "₹", billingCycle: "Monthly", subscriptionType: "Premium", subscriptionFor: "Me", nextPaymentDate: "Fed 15, 2025", status: "active")]),
+     
+     DuplicateDataInfo(id: "2", serviceName:"Spotiy", newSubscriptions: [SubscriptionInfo(id: "3", serviceName: "Spotiy", serviceLogo: "", amount: 17.99, currency: "INR", currencySymbol: "₹", billingCycle: "Monthly", subscriptionType: "Premium", subscriptionFor: "Me", nextPaymentDate: "Fed 15, 2025", status: "active")], existingSubscriptions: [SubscriptionInfo(id: "4", serviceName: "Spotiy", serviceLogo: "", amount: 17.99, currency: "INR", currencySymbol: "₹", billingCycle: "Monthly", subscriptionType: "Premium", subscriptionFor: "Me", nextPaymentDate: "Fed 15, 2025", status: "active"),SubscriptionInfo(id: "2", serviceName: "Spotiy", serviceLogo: "", amount: 17.99, currency: "INR", currencySymbol: "₹", billingCycle: "Monthly", subscriptionType: "Premium", subscriptionFor: "Me", nextPaymentDate: "Fed 15, 2025", status: "active")]),
+     
+     DuplicateDataInfo(id: "3", serviceName:"YouTube", newSubscriptions: [SubscriptionInfo(id: "5", serviceName: "YouTube", serviceLogo: "", amount: 17.99, currency: "INR", currencySymbol: "₹", billingCycle: "Monthly", subscriptionType: "Premium", subscriptionFor: "Me", nextPaymentDate: "Fed 15, 2025", status: "active"),SubscriptionInfo(id: "6", serviceName: "YouTube", serviceLogo: "", amount: 17.99, currency: "INR", currencySymbol: "₹", billingCycle: "Monthly", subscriptionType: "Premium", subscriptionFor: "Me", nextPaymentDate: "Fed 15, 2025", status: "active")], existingSubscriptions: [SubscriptionInfo(id: "7", serviceName: "YouTube", serviceLogo: "", amount: 17.99, currency: "INR", currencySymbol: "₹", billingCycle: "Monthly", subscriptionType: "Premium", subscriptionFor: "Me", nextPaymentDate: "Fed 15, 2025", status: "active"),SubscriptionInfo(id: "2", serviceName: "YouTube", serviceLogo: "", amount: 17.99, currency: "INR", currencySymbol: "₹", billingCycle: "Monthly", subscriptionType: "Premium", subscriptionFor: "Me", nextPaymentDate: "Fed 15, 2025", status: "active")]),
+     
+     DuplicateDataInfo(id: "4", serviceName:"Prime video", newSubscriptions: [SubscriptionInfo(id: "8", serviceName: "Prime video", serviceLogo: "", amount: 17.99, currency: "INR", currencySymbol: "₹", billingCycle: "Monthly", subscriptionType: "Premium", subscriptionFor: "Me", nextPaymentDate: "Fed 15, 2025", status: "active"),SubscriptionInfo(id: "9", serviceName: "Prime video", serviceLogo: "", amount: 17.99, currency: "INR", currencySymbol: "₹", billingCycle: "Monthly", subscriptionType: "Premium", subscriptionFor: "Me", nextPaymentDate: "Fed 15, 2025", status: "active")], existingSubscriptions: [SubscriptionInfo(id: "10", serviceName: "Prime video", serviceLogo: "", amount: 17.99, currency: "INR", currencySymbol: "₹", billingCycle: "Monthly", subscriptionType: "Premium", subscriptionFor: "Me", nextPaymentDate: "Fed 15, 2025", status: "active")]),
+     
+     DuplicateDataInfo(id: "5", serviceName:"Hotstar", newSubscriptions: [SubscriptionInfo(id: "11", serviceName: "Hotstar", serviceLogo: "", amount: 17.99, currency: "INR", currencySymbol: "₹", billingCycle: "Monthly", subscriptionType: "Premium", subscriptionFor: "Me", nextPaymentDate: "Fed 15, 2025", status: "active"),SubscriptionInfo(id: "12", serviceName: "Hotstar", serviceLogo: "", amount: 17.99, currency: "INR", currencySymbol: "₹", billingCycle: "Monthly", subscriptionType: "Premium", subscriptionFor: "Me", nextPaymentDate: "Fed 15, 2025", status: "active"),SubscriptionInfo(id: "13", serviceName: "Hotstar", serviceLogo: "", amount: 17.99, currency: "INR", currencySymbol: "₹", billingCycle: "Monthly", subscriptionType: "Premium", subscriptionFor: "Me", nextPaymentDate: "Fed 15, 2025", status: "active")])
+     
+     ]
+     */
     
     //MARK: - body
     var body: some View {
@@ -64,8 +64,8 @@ struct DuplicateSubscriptionsView: View {
                 .padding(.vertical, 16)
             }
             .background(Color.clear)
-//            .background(Color.white.ignoresSafeArea(edges: .top))
-//            .shadow(color: Color.dropShadowColor1, radius: 2, x: 0, y: 2)
+            //            .background(Color.white.ignoresSafeArea(edges: .top))
+            //            .shadow(color: Color.dropShadowColor1, radius: 2, x: 0, y: 2)
             
             ScrollView(showsIndicators: false) {
                 
@@ -105,19 +105,19 @@ struct DuplicateSubscriptionsView: View {
             
             if duplicateSubsList.count == 0
             {
-//                if isFromAdd == true {
-//                    AppIntentRouter.shared.navigate(to: .addSubscriptionsView)
-//                }
-//                else{
-//                    AppIntentRouter.shared.navigate(to: .subscriptionsListView)
-//                }
+                //                if isFromAdd == true {
+                //                    AppIntentRouter.shared.navigate(to: .addSubscriptionsView)
+                //                }
+                //                else{
+                //                    AppIntentRouter.shared.navigate(to: .subscriptionsListView)
+                //                }
                 AppIntentRouter.shared.navigate(to: .subscriptionsListView)
             }
-           // print(dupSubscriptionVM.subscriptioIds)
+            // print(dupSubscriptionVM.subscriptioIds)
             //AppIntentRouter.shared.navigate(to: .addSubscriptionsView)
             //dismiss()
         }
-       // .onChange(of: modifiedDuplicateDataInfo) { _ in updateDetails() }
+        // .onChange(of: modifiedDuplicateDataInfo) { _ in updateDetails() }
     }
     
     private func updateDetails()
@@ -182,7 +182,7 @@ struct DuplicateSubscriptionsView: View {
                     if let index = oldItems.firstIndex(where: { $0.id == selected.id }) {
                         oldItems[index] = newItem
                     }
-                        
+                    
                     originalData.newSubscriptions = newItems
                     originalData.existingSubscriptions = oldItems
                     
@@ -281,12 +281,12 @@ struct DuplicateSubscriptionsView: View {
     }
     
     private func skipAll() {
-//        if isFromAdd == true {
-//            AppIntentRouter.shared.navigate(to: .addSubscriptionsView)
-//        }
-//        else{
-//            AppIntentRouter.shared.navigate(to: .subscriptionsListView)
-//        }
+        //        if isFromAdd == true {
+        //            AppIntentRouter.shared.navigate(to: .addSubscriptionsView)
+        //        }
+        //        else{
+        //            AppIntentRouter.shared.navigate(to: .subscriptionsListView)
+        //        }
         AppIntentRouter.shared.navigate(to: .subscriptionsListView)
     }
     
@@ -294,9 +294,9 @@ struct DuplicateSubscriptionsView: View {
     func makeApiCall(action:Int, existingSubscription:String, newSubscriptions:[SubscriptionInfo])
     {
         let input = ResolveDuplicateSubscriptionRequest(userId: Constants.getUserId(),
-                                                         action: action,
-                                                         existingSubscription: existingSubscription,
-                                                         newSubscriptions: newSubscriptions)
+                                                        action: action,
+                                                        existingSubscription: existingSubscription,
+                                                        newSubscriptions: newSubscriptions)
         dupSubscriptionVM.resolveDuplicateSubscription(input: input)
     }
 }
@@ -541,12 +541,12 @@ struct SubItem: View {
         .frame(height: 108)
         .padding(.horizontal, 16)
         .background(.clear)
-        .background(isNoColor == true ? .white : .neutralBg100)
-        .cornerRadius(8)
         .overlay(
             RoundedRectangle(cornerRadius: 8)
                 .stroke(Color.neutral300Border, lineWidth: 1)
         )
+        .background(isNoColor == true ? .whiteBlack : .neutralBg100)
+        .cornerRadius(8)
         .padding(.bottom, 10)
     }
     
