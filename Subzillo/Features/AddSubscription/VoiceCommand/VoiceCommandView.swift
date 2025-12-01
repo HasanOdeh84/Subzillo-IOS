@@ -4,12 +4,10 @@
 //
 //  Created by KSMACMINI-019 on 18/09/25.
 //
-
 import SwiftUI
 import Vision
 import Speech
 import AVFoundation
-
 struct VoiceCommandView: View {
     
     //MARK: - Properties
@@ -27,12 +25,14 @@ struct VoiceCommandView: View {
     @State private var audioEngine          = AVAudioEngine()
     @State private var timer                : Timer?
     @State var showDiscardPopup             : Bool = false
-//    @GestureState private var isPressing    = false
+    //    @GestureState private var isPressing    = false
     @GestureState private var longPressActivated = false
     @Environment(\.dismiss) private var dismiss
     
     @State private var isPressing = false
-        @State private var hasPerformedAction = false
+    @State private var hasPerformedAction = false
+    
+    @StateObject private var audioManager   = AudioRecorderManager()
     
     //MARK: - body
     var body: some View {
@@ -67,84 +67,150 @@ struct VoiceCommandView: View {
             
             ScrollView {
                 // MARK: - Transcript TextBox
-                VStack(alignment: .leading) {
-                    if recognizedText.isEmpty {
-                        Text("Transcript will be appeared here")
-                            .foregroundColor(Color.neutral400)
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                            .padding(16)
-                    } else {
-                        ScrollView(showsIndicators: false) {
-                            Text(recognizedText)
-                                .foregroundColor(Color.neutralMain700)
-                                .frame(maxWidth: .infinity, alignment: .leading)
-                                .padding(16)
-                        }
-                    }
-                    Spacer(minLength: 0)
-                }
-                .frame(height: 115)
-                .frame(maxWidth: .infinity)
-                .font(.appRegular(16))
-                .overlay(
-                    RoundedRectangle(cornerRadius: 12)
-                        .stroke(Color.neutral300Border, lineWidth: 1)
-                )
-                .background(Color.whiteNeutralCardBG)
-                .cornerRadius(12)
-                .padding(.horizontal, 20)
-                .padding(.top, 24)
+                /*
+                 VStack(alignment: .leading) {
+                 if recognizedText.isEmpty {
+                 Text("Transcript will be appeared here")
+                 .foregroundColor(Color.neutral400)
+                 .frame(maxWidth: .infinity, alignment: .leading)
+                 .padding(16)
+                 } else {
+                 ScrollView(showsIndicators: false) {
+                 Text(recognizedText)
+                 .foregroundColor(Color.neutralMain700)
+                 .frame(maxWidth: .infinity, alignment: .leading)
+                 .padding(16)
+                 }
+                 }
+                 Spacer(minLength: 0)
+                 }
+                 .frame(height: 115)
+                 .frame(maxWidth: .infinity)
+                 .font(.appRegular(16))
+                 .overlay(
+                 RoundedRectangle(cornerRadius: 12)
+                 .stroke(Color.neutral300Border, lineWidth: 1)
+                 )
+                 .background(Color.whiteNeutralCardBG)
+                 .cornerRadius(12)
+                 .padding(.horizontal, 20)
+                 .padding(.top, 24)
+                 */
                 
                 // MARK: - How It Works
                 GradienCustomeView(title    : "How it work?",
-                                   subTitle : "Press & Hold to Speak in English, remove finger to pause, submit when you finish.")
+                                   subTitle : "Tap the button below to start recording your subscription details, submit when you finish.")
                 .padding(.horizontal, 20)
                 .padding(.top, 24)
                 .padding(.bottom, 24)
                 
                 // MARK: - Start Button
-                ZStack {
-                    Circle()
-                        .fill(
-                            LinearGradient(colors: [Color.linearGradient3, Color.linearGradient4, Color.navyBlueCTA700],
-                                           startPoint: .top,
-                                           endPoint: .bottom)
-                        )
-                        .frame(width: 120, height: 120)
+                
+                //             Show player only if recording exists
+                if FileManager.default.fileExists(atPath: audioManager.audioURL.path()) && !audioManager.isRecording{
                     
-                    Image(isRecording ? "Recording" : "mic-01")
-                        .font(.system(size: 63))
-                        .foregroundColor(.white)
+                    // Play/Pause button
+                    Button(action: {
+                        if !audioManager.isRecording{
+                            if audioManager.isPlaying {
+                                audioManager.pausePlayback()
+                            } else {
+                                audioManager.playRecording()
+                            }
+                        }
+                    }) {
+                        Text(audioManager.isPlaying ? "Pause" : "Play")
+                            .padding()
+                            .background(audioManager.isPlaying ? Color.orange : Color.green)
+                            .foregroundColor(.white)
+                            .cornerRadius(10)
+                    }
+                    VStack(alignment: .leading,spacing: 15) {
+                        
+                        // Optional: slider for seeking
+                        Slider(value: Binding(
+                            get: { audioManager.currentTime },
+                            set: { newValue in
+                                audioManager.audioPlayer?.currentTime = newValue
+                                audioManager.currentTime = newValue
+                            }
+                        ), in: 0...audioManager.duration)
+                        
+                        // Playback progress
+                        Text("\(formatTime(Int(audioManager.currentTime))) / \(formatTime(Int(audioManager.duration)))")
+                            .font(.subheadline)
+                        
+                    }
+                    .padding()
+                    .background(Color(.secondarySystemBackground))
+                    .cornerRadius(12)
+                    
+//                    Button(action: {
+//                        let voiceData:Data = try! Data(contentsOf: audioManager.audioURL)
+//                        viewModel.voiceSubscription(input: VoiceSubscriptionRequest(userId: Constants.getUserId()), fileData: [MultiPartFileInput(
+//                            fieldName   : "audio",
+//                            fileName    : "recording.m4a",
+//                            mimeType    : "audio/m4a",
+//                            fileData    : voiceData
+//                        )])
+//                    }) {
+//                        Text("Submit")
+//                            .padding()
+//                            .background(Color.blue)
+//                            .foregroundColor(.white)
+//                            .cornerRadius(10)
+//                    }
+                }else{
+                    ZStack {
+                        Circle()
+                            .fill(
+                                LinearGradient(colors: [Color.linearGradient3, Color.linearGradient4, Color.navyBlueCTA700],
+                                               startPoint: .top,
+                                               endPoint: .bottom)
+                            )
+                            .frame(width: 120, height: 120)
+                        
+                        Image(audioManager.isRecording ? "Recording" : "mic-01")
+                            .font(.system(size: 63))
+                            .foregroundColor(.white)
+                    }
+                    .frame(width: 137, height: 137)
+                    .background(
+                        RoundedRectangle(cornerRadius: 137/2)
+                            .fill(Color.white)
+                    )
+                    .cornerRadius(137/2)
+                    .shadow(color: Color.dropShadow, radius: 2, x: 0, y: 2)
+                    .frame(maxWidth: .infinity, alignment: .center)
+                    //                .simultaneousGesture(
+                    //                    DragGesture(minimumDistance: 0)
+                    //                        .onChanged { _ in startListening() }
+                    //                        .onEnded { _ in stopListening() }
+                    //                )
+                    //                .gesture(
+                    //                    LongPressGesture(minimumDuration: 0.4)
+                    //                        .sequenced(before: DragGesture(minimumDistance: 0))
+                    //                        .onChanged { value in
+                    //                            switch value {
+                    //                            case .first(true):       // long press recognised
+                    //                                startListening()
+                    //                            default:
+                    //                                break
+                    //                            }
+                    //                        }
+                    //                        .onEnded { value in
+                    //                            stopListening()
+                    //                        }
+                    //                )
+                    //                .gesture(longPressThenTrackDrag)
+                    .onTapGesture {
+                        if audioManager.isRecording {
+                            audioManager.stopRecording()
+                        } else {
+                            audioManager.startRecording()
+                        }
+                    }
                 }
-                .frame(width: 137, height: 137)
-                .background(
-                    RoundedRectangle(cornerRadius: 137/2)
-                        .fill(Color.white)
-                )
-                .cornerRadius(137/2)
-                .shadow(color: Color.dropShadow, radius: 2, x: 0, y: 2)
-                .frame(maxWidth: .infinity, alignment: .center)
-//                .simultaneousGesture(
-//                    DragGesture(minimumDistance: 0)
-//                        .onChanged { _ in startListening() }
-//                        .onEnded { _ in stopListening() }
-//                )
-//                .gesture(
-//                    LongPressGesture(minimumDuration: 0.4)
-//                        .sequenced(before: DragGesture(minimumDistance: 0))
-//                        .onChanged { value in
-//                            switch value {
-//                            case .first(true):       // long press recognised
-//                                startListening()
-//                            default:
-//                                break
-//                            }
-//                        }
-//                        .onEnded { value in
-//                            stopListening()
-//                        }
-//                )
-                .gesture(longPressThenTrackDrag)
                 
                 // MARK: - Countdown Label
                 VStack(spacing: 0) {
@@ -158,7 +224,8 @@ struct VoiceCommandView: View {
                 }
                 
                 // MARK: - Submit Button
-                if recognizedText.isEmpty {
+//                if recognizedText.isEmpty {
+                if FileManager.default.fileExists(atPath: audioManager.audioURL.path()) && !audioManager.isRecording {
                     CustomButton(title: "Submit", background:Color.neutralDisabled200, textColor:Color.neutral500, action: submitAction)
                         .padding(.horizontal)
                         .padding(.bottom, 24)
@@ -174,7 +241,7 @@ struct VoiceCommandView: View {
                     showDiscardPopup = true})
                 .opacity(countdown == 0 ? 0.5 : 1.0)
                 .disabled(countdown == 0 ? true : false)
-                    .padding(.horizontal)
+                .padding(.horizontal)
                 
                 Spacer()
             }
@@ -184,6 +251,7 @@ struct VoiceCommandView: View {
         .onAppear {
             print(countdown)
             requestSpeechPermission()
+            audioManager.deleteRecordingFile()
         }
         .animation(.easeInOut, value: isRecording)
         .navigationBarBackButtonHidden(true)
@@ -454,7 +522,6 @@ struct VoiceCommandView: View {
         countdown = 0
     }
 }
-
 #Preview {
     VoiceCommandView()
 }
