@@ -2,6 +2,30 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.0.0] (Beta) - 2025-12-01
+
+### Delivered
+- Sprint 3 features
+
+## [1.5.0] (Alpha) - 2025-12-01
+
+### Fixed
+- Sprint 3 bug fixes
+
+## [1.4.0] (Alpha) - 2025-11-28
+
+### Fixed
+- Sprint 3 bug fixes
+- Apple signin issue in release mode
+
+## [1.2.0] (Alpha) - 2025-11-27
+
+### Fixed
+- Sprint 3 bug fixes
+
+### Added 
+- Kept alerts to check apple signin issue
+
 ## [1.1.0] (Alpha) - 2025-11-25
 
 ### Fixed
