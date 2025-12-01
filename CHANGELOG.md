@@ -28,6 +28,7 @@ Sprint 3 features:
 - Subscriptions List and calender view and filters
 - Manual Entry subscription
 - Voice subscription
+- Siri
 - Image subscription
 - Paste subscription
 - Subscriptions review screens
