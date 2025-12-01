@@ -60,7 +60,7 @@ struct AddFamilyMemberBottomSheet: View {
                 ColorPickerGrid(selectedColor: $familyColor)
                 
                 GradientBorderButton(title: "Save",isBtn:true, buttonImage: "profile_add") {
-                    ToastManager.shared.showToast(message: "Coming soon",style:ToastStyle.info)
+                    ToastManager.shared.showToast(message: "Coming soon in S4",style:ToastStyle.info)
                     action()
                     dismiss()
                 }

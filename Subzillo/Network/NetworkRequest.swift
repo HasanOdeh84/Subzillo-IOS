@@ -260,7 +260,7 @@ class NetworkRequest {
                         case let decodingError as DecodingError:
                             promise(.failure(.decodingError(decodingError)))
                         case let apiError as APIError:
-                            ToastManager.shared.showToast(message: apiError.localizedDescription)
+                            ToastManager.shared.showToast(message: apiError.localizedDescription,style: .error)
                             promise(.failure(apiError))
                         default:
                             promise(.failure(.unknown))
@@ -417,7 +417,7 @@ class NetworkRequest {
                         case let decodingError as DecodingError:
                             promise(.failure(.decodingError(decodingError)))
                         case let apiError as APIError:
-                            ToastManager.shared.showToast(message: apiError.localizedDescription)
+                            ToastManager.shared.showToast(message: apiError.localizedDescription,style: .error)
                             promise(.failure(apiError))
                         default:
                             promise(.failure(.unknown))
@@ -556,7 +556,7 @@ class NetworkRequest {
                         case let decodingError as DecodingError:
                             promise(.failure(.decodingError(decodingError)))
                         case let apiError as APIError:
-                            ToastManager.shared.showToast(message: apiError.localizedDescription)
+                            ToastManager.shared.showToast(message: apiError.localizedDescription,style: .error)
                             promise(.failure(apiError))
                         default:
                             promise(.failure(.unknown))

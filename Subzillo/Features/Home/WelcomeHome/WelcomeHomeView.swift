@@ -96,7 +96,7 @@ struct WelcomeHomeView: View {
                             .padding(.horizontal, 30)
                             .padding(.top, 8)
                         
-                        Button(action: goToAddSubscriptions) {
+                        Button(action: goToSmartAssistant) {
                             HStack(spacing: 5) {
                                 Image("robotic")
                                     .frame(width: 20, height: 20)
@@ -262,20 +262,20 @@ struct WelcomeHomeView: View {
     
     //MARK: - Button actions
     private func goToNotifications() {
-        ToastManager.shared.showToast(message: "Coming soon",style:ToastStyle.info)
+        ToastManager.shared.showToast(message: "Coming soon in S4",style:ToastStyle.info)
     }
     private func upgradePlan() {
-        ToastManager.shared.showToast(message: "Coming soon",style:ToastStyle.info)
+        ToastManager.shared.showToast(message: "Coming soon in S4",style:ToastStyle.info)
     }
-    private func goToAddSubscriptions() {
-        ToastManager.shared.showToast(message: "Coming soon",style:ToastStyle.info)
+    private func goToSmartAssistant() {
+        ToastManager.shared.showToast(message: "Coming soon in S5",style:ToastStyle.info)
     }
     private func goToUploadImage() {
         //ToastManager.shared.showToast(message: "Coming soon",style:ToastStyle.info)
         showUploadPopup = true
     }
     private func goToConnectEmail() {
-        ToastManager.shared.showToast(message: "Coming soon",style:ToastStyle.info)
+        ToastManager.shared.showToast(message: "Coming soon in S4",style:ToastStyle.info)
     }
     private func goToAddByVoice() {
        // ToastManager.shared.showToast(message: "Coming soon",style:ToastStyle.info)

@@ -155,11 +155,11 @@ struct OtpVerifyView: View {
                     
                     TermsAndPrivacyText(
                         onTapTerms: {
-                            ToastManager.shared.showToast(message: "Coming soon",style:ToastStyle.info)
+                            ToastManager.shared.showToast(message: "Coming soon in S4",style:ToastStyle.info)
 //                            otpVerifyVM.navigate(to: NavigationRoute.termsAndPrivacy(isTerm: true))
                         },
                         onTapPrivacy: {
-                            ToastManager.shared.showToast(message: "Coming soon",style:ToastStyle.info)
+                            ToastManager.shared.showToast(message: "Coming soon in S4",style:ToastStyle.info)
 //                            otpVerifyVM.navigate(to: NavigationRoute.termsAndPrivacy(isTerm: false))
                         }
                     )

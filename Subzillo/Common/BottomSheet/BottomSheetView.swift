@@ -37,7 +37,7 @@ struct BottomSheetView: View {
             .padding(.vertical,36)
             
             GradientBorderButton(title: "Update",isBtn:true, buttonImage: "update") {
-                ToastManager.shared.showToast(message: "Coming soon",style:ToastStyle.info)
+                ToastManager.shared.showToast(message: "Coming soon in S4",style:ToastStyle.info)
                 dismiss()
             }
             Spacer()

@@ -51,7 +51,7 @@ struct UploadImageSheet: View {
                     UploadItem(title: "Choose from Gallery", subTitle: "Select existing screenshot", image: "image-02", imageColor: Color.warning, action: galleryAction)
                     Divider()
                         .overlay(Color.neutral300Border)
-                    UploadItem(title: "Past Text", subTitle: "Copy and paste notification text", image: "text-creation", imageColor: Color.purple100, action: pastTextAction)
+                    UploadItem(title: "Paste Text", subTitle: "Copy and paste notification text", image: "text-creation", imageColor: Color.purple100, action: pastTextAction)
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .frame(height: 240)

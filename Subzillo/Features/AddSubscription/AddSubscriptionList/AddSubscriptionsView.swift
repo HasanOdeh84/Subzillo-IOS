@@ -62,16 +62,16 @@ struct AddSubscriptionsView: View {
     
     //MARK: - Button actions
     private func goToNotifications() {
-        ToastManager.shared.showToast(message: "Coming soon",style:ToastStyle.info)
+        ToastManager.shared.showToast(message: "Coming soon in S4",style:ToastStyle.info)
     }
     private func clickOnSmartAssistant() {
-        ToastManager.shared.showToast(message: "Coming soon",style:ToastStyle.info)
+        ToastManager.shared.showToast(message: "Coming soon in S5",style:ToastStyle.info)
     }
     private func clickOnAddByVoice() {
         AppIntentRouter.shared.navigate(to: .voiceCommandView)
     }
     private func clickOnConnectEmail() {
-        ToastManager.shared.showToast(message: "Coming soon",style:ToastStyle.info)
+        ToastManager.shared.showToast(message: "Coming soon in S4",style:ToastStyle.info)
     }
     private func clickOnUploadScreenshot() {
         showUploadPopup = true
@@ -80,7 +80,7 @@ struct AddSubscriptionsView: View {
         AppIntentRouter.shared.navigate(to: .manualEntry(isFromEdit: false))
     }
     private func clickOnUploasBankNotification() {
-        ToastManager.shared.showToast(message: "Coming soon",style:ToastStyle.info)
+        ToastManager.shared.showToast(message: "Coming soon in next version",style:ToastStyle.info)
     }
 }
 

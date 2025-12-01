@@ -224,7 +224,7 @@ struct HomeView: View {
                                     SubscriptionAnalyticsCard(topCategory: category,
                                                               action: {
                                         //                            goToSubscriptions()
-                                        ToastManager.shared.showToast(message: "Coming soon",style:ToastStyle.info)
+                                        ToastManager.shared.showToast(message: "Coming soon in S4",style:ToastStyle.info)
                                     })
                                 }
                             }
@@ -252,15 +252,15 @@ struct HomeView: View {
     //MARK: - User defined methods
     //MARK: goToNotifications
     private func goToNotifications() {
-        ToastManager.shared.showToast(message: "Coming soon",style:ToastStyle.info)
+        ToastManager.shared.showToast(message: "Coming soon in S4",style:ToastStyle.info)
     }
     
     private func clickOnSave() {
-        ToastManager.shared.showToast(message: "Coming soon",style:ToastStyle.info)
+        ToastManager.shared.showToast(message: "Coming soon in S4",style:ToastStyle.info)
     }
     
     private func clickOnYouSaved() {
-        ToastManager.shared.showToast(message: "Coming soon",style:ToastStyle.info)
+        ToastManager.shared.showToast(message: "Coming soon in S4",style:ToastStyle.info)
     }
     
     private func goToSubscriptions() {

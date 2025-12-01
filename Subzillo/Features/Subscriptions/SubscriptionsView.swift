@@ -465,11 +465,11 @@ struct SubscriptionsView: View {
     }
     
     private func goToNotifications() {
-        ToastManager.shared.showToast(message: "Coming soon",style:ToastStyle.info)
+        ToastManager.shared.showToast(message: "Coming soon in S4",style:ToastStyle.info)
     }
     
     private func clickOnChat() {
-        ToastManager.shared.showToast(message: "Coming soon",style:ToastStyle.info)
+        ToastManager.shared.showToast(message: "Coming soon in S4",style:ToastStyle.info)
     }
     
     private func clickOnFilter() {

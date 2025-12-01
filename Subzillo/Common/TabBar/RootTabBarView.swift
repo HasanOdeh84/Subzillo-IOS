@@ -100,7 +100,7 @@ struct CurvedTabBar: View {
                 .frame(height: 86)
                 
                 TabBarItem(label: "Smart AI", iconName: selectedTab == .smartAI ? "smartAI-tabSelected" : "smartAI-tab", action: {
-                    ToastManager.shared.showToast(message: "Coming soon",style:ToastStyle.info)
+                    ToastManager.shared.showToast(message: "Coming soon in S5",style:ToastStyle.info)
                     //                    selectedTab = .smartAI
                 }, selectedTab: $selectedTab, tab: .smartAI)
                 TabBarItem(label: "My Profile", iconName: selectedTab == .profile ? "profile-tabSelected" : "profile-tab", action: {

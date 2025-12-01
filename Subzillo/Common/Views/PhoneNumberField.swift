@@ -19,6 +19,8 @@ struct PhoneNumberField: View {
     @Binding var selectedCountry            : Country?
     @EnvironmentObject var commonApiVM      : CommonAPIViewModel
     @State var isCountry                    : Bool
+    @State var verifyData                   : LoginSignupVerifyData?
+    @State var fromSingup                   = false
     
     //MARK: - body
     var body: some View {
@@ -126,14 +128,24 @@ struct PhoneNumberField: View {
     //MARK: - User defined methods
     //MARK: - updateCountryAndCurrency
     func updateCountryAndCurrency() {
+        if let data = SessionManager.shared.loginData {
+            verifyData = data
+        }
         selectedCurrency = Currency(id      : nil,
                                     name    : Constants.shared.currencyCode,
                                     symbol  : Constants.shared.currencySymbol,
                                     code    : Constants.shared.currencyCode,
                                     flag    : Constants.shared.flag(from: Constants.shared.regionCode))
-        selectedCountry = Country(id: 0, countryName: "", countryCode: Constants.shared.regionCode, dialCode: "", countryFlag: Constants.shared.flag(from: Constants.shared.regionCode))
-        if let countries = commonApiVM.countriesResponse {
-            selectedCountry = countries.first(where: { $0.countryCode == Constants.shared.regionCode })
+        if fromSingup{
+            selectedCountry = Country(id: 0, countryName: "", countryCode: verifyData?.countryCode, dialCode: "", countryFlag: Constants.shared.flag(from: verifyData?.countryCode ?? ""))
+            if let countries = commonApiVM.countriesResponse {
+                selectedCountry = countries.first(where: { $0.dialCode == verifyData?.countryCode })
+            }
+        }else{
+            selectedCountry = Country(id: 0, countryName: "", countryCode: Constants.shared.regionCode, dialCode: "", countryFlag: Constants.shared.flag(from: Constants.shared.regionCode))
+            if let countries = commonApiVM.countriesResponse {
+                selectedCountry = countries.first(where: { $0.countryCode == Constants.shared.regionCode })
+            }
         }
         if let currencies = commonApiVM.currencyResponse {
             selectedCurrency = currencies.first(where: { $0.code == Constants.shared.currencyCode })

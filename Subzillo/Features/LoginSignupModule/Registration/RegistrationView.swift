@@ -55,7 +55,8 @@ struct RegistrationView: View {
                                              placeholder        : "000 000 000",
                                              selectedCurrency   : $selectedCurrency,
                                              selectedCountry    : $selectedCountry,
-                                             isCountry          : true)
+                                             isCountry          : true,
+                                             fromSingup         : true)
                             .addDoneButton()
                             ReusableTextField(placeholder: "Enter your full name", text: $fullName,header:"Full Name")
                                 .disabled(isNameDisabled)
@@ -67,7 +68,8 @@ struct RegistrationView: View {
                                              placeholder        : "000 000 000",
                                              selectedCurrency   : $selectedCurrency,
                                              selectedCountry    : $selectedCountry,
-                                             isCountry          : true)
+                                             isCountry          : true,
+                                             fromSingup         : true)
                             .opacity(verifyData?.verifyType == 1 ? 0.5 : 1.0)
                             .disabled(verifyData?.verifyType == 1 ? true : false)
                             .if(verifyData?.verifyType != 1) { view in
@@ -89,11 +91,11 @@ struct RegistrationView: View {
                     
                     TermsAndPrivacyText(
                         onTapTerms: {
-                            ToastManager.shared.showToast(message: "Coming soon",style:ToastStyle.info)
+                            ToastManager.shared.showToast(message: "Coming soon in S4",style:ToastStyle.info)
                             //                            registerVM.navigate(to: .termsAndPrivacy(isTerm: true))
                         },
                         onTapPrivacy: {
-                            ToastManager.shared.showToast(message: "Coming soon",style:ToastStyle.info)
+                            ToastManager.shared.showToast(message: "Coming soon in S4",style:ToastStyle.info)
                             //                            registerVM.navigate(to: .termsAndPrivacy(isTerm: false))
                         },
                         bottomPadding: 28

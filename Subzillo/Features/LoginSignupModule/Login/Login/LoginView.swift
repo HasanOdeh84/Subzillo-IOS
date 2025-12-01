@@ -118,7 +118,7 @@ struct LoginView: View {
                     .background(.whiteBlackBG)
                     
                     GradientBorderButton(title: "Continue with Microsoft",isBtn:true, buttonImage: "microsoft") {
-                        ToastManager.shared.showToast(message: "Coming soon",style:ToastStyle.info)
+                        ToastManager.shared.showToast(message: "Coming soon in S4",style:ToastStyle.info)
                     }
                     .background(.whiteBlackBG)
                 }
@@ -126,11 +126,11 @@ struct LoginView: View {
                 
                 TermsAndPrivacyText(
                     onTapTerms: {
-                        ToastManager.shared.showToast(message: "Coming soon",style:ToastStyle.info)
+                        ToastManager.shared.showToast(message: "Coming soon in S4",style:ToastStyle.info)
 //                        loginVM.navigate(to: NavigationRoute.termsAndPrivacy(isTerm: true))
                     },
                     onTapPrivacy: {
-                        ToastManager.shared.showToast(message: "Coming soon",style:ToastStyle.info)
+                        ToastManager.shared.showToast(message: "Coming soon in S4",style:ToastStyle.info)
 //                        loginVM.navigate(to: NavigationRoute.termsAndPrivacy(isTerm: false))
                     }
                 )

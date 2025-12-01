@@ -455,7 +455,7 @@ struct DuplicateListItem: View {
         if selectedIndex.count > 0{
             onDelegate?(item, selectedIndex, "save")
         }else{
-            ToastManager.shared.showToast(message: "",style: .error)
+            ToastManager.shared.showToast(message: "At least one subscription is required",style: .error)
         }
     }
     
