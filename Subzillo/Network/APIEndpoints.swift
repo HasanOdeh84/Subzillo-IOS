@@ -8,13 +8,13 @@ enum urlType:Int{
     case prod  = 2
 }
 
-let Environment = urlType.stage
+let Environment = urlType.dev
 var baseurl: String {
     switch Environment {
     case .dev:
         return "https://devsubzillo.krify.com/api"
     case .stage:
-        return "https://stagingsubzillo.krify.com/api/"
+        return "https://stagingsubzillo.krify.com/api"
     case .prod:
         return ""
     }

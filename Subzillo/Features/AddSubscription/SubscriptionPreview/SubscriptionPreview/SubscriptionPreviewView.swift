@@ -28,7 +28,17 @@ struct SubscriptionPreviewView: View {
     @State var showImagePopup                   : Bool = false
     @EnvironmentObject var commonApiVM          : CommonAPIViewModel
     @StateObject var subscriptionPreviewVM      = SubscriptionPreviewViewModel()
+    var audioURL                                : URL? = nil
+    @StateObject private var playerManager      = AudioRecorderManager()
     @Environment(\.dismiss) private var dismiss
+    
+    @State var showServiceBottom                : Bool = false
+    @State var showAmountBottom                 : Bool = false
+    @State var showNextChargeDateBottom         : Bool = false
+    @State var showCurrencyBottom               : Bool = false
+    @State var showCategoryBottom               : Bool = false
+    @State var showPlanTypeBottom               : Bool = false
+    @State var showBillingCycleBottom           : Bool = false
     
     //MARK: - body
     var body: some View {
@@ -103,17 +113,19 @@ struct SubscriptionPreviewView: View {
                                 .padding(.top, 16)
                                 .padding(.horizontal, 16)
                             
-                            ScrollView(showsIndicators: true) {
-                                Text(content)
-                                    .foregroundColor(Color.neutralMain700)
-                                    .font(.appRegular(16))
-                                    .frame(maxWidth: .infinity, alignment: .leading)
-                                    .padding(.horizontal, 16)
-                            }
-                            .padding(.bottom, 16)
+                            //                            ScrollView(showsIndicators: true) {
+                            //                                Text(content)
+                            //                                    .foregroundColor(Color.neutralMain700)
+                            //                                    .font(.appRegular(16))
+                            //                                    .frame(maxWidth: .infinity, alignment: .leading)
+                            //                                    .padding(.horizontal, 16)
+                            //                            }
+                            //                            .padding(.bottom, 16)
                             
+                            VoicePlayerUI(audioManager: playerManager)
+                                .padding(.horizontal, 16)
+                                .padding(.bottom,16)
                         }
-                        .frame(height: 148)
                         .frame(maxWidth: .infinity)
                         .overlay(
                             RoundedRectangle(cornerRadius: 12)
@@ -143,23 +155,81 @@ struct SubscriptionPreviewView: View {
                         VStack(alignment: .leading, spacing: 16) {
                             HStack(spacing: 16) {
                                 SubscriptionDetailsItem(title: "Service", value: subscriptionData?.serviceName ?? "", confidence: subscriptionData?.serviceNameConfidence ?? 0.0)
+                                    .onTapGesture {
+                                        showServiceBottom = true
+                                    }
+                                    .sheet(isPresented: $showServiceBottom) {
+                                        ReviewExtractedDetailsView(onDelegate: {
+                                        },
+                                                                   detailType   : ReviewExtractedType.service,
+                                                                   confidence   : subscriptionData?.serviceNameConfidence ?? 0.0,
+                                                                   extractedData: subscriptionData)
+                                        .presentationDragIndicator(.hidden)
+                                        .presentationDetents([.medium, .large])
+                                    }
+                                
                                 SubscriptionDetailsItem(title: "Amount", value: "\(subscriptionData?.currencySymbol ?? "")\(subscriptionData?.amount ?? 0.0)", confidence: subscriptionData?.amountConfidence ?? 0.0)
+                                    .onTapGesture {
+                                        showAmountBottom = true
+                                    }
+                                    .sheet(isPresented: $showAmountBottom) {
+                                        ReviewExtractedDetailsView(onDelegate: {
+                                        },
+                                                                   detailType   : ReviewExtractedType.amount,
+                                                                   confidence   : subscriptionData?.serviceNameConfidence ?? 0.0,
+                                                                   extractedData: subscriptionData)
+                                        .presentationDragIndicator(.hidden)
+                                        .presentationDetents([.medium, .large])
+                                    }
                             }
                             
                             HStack(spacing: 16) {
                                 SubscriptionDetailsItem(title: "Next Charge Date", value: (subscriptionData?.nextPaymentDate ?? "").formattedDate(), confidence: subscriptionData?.nextPaymentDateConfidence ?? 0.0)
+                                    .onTapGesture {
+                                        showNextChargeDateBottom = true
+                                    }
+                                    .sheet(isPresented: $showNextChargeDateBottom) {
+                                        ReviewExtractedDetailsView(onDelegate: {
+                                        },
+                                                                   detailType   : ReviewExtractedType.nextChargeDate,
+                                                                   confidence   : subscriptionData?.serviceNameConfidence ?? 0.0,
+                                                                   extractedData: subscriptionData)
+                                        .presentationDragIndicator(.hidden)
+                                        .presentationDetents([.medium, .large])
+                                    }
                                 if subscriptionData?.currency ?? "" == ""
                                 {
                                     SubscriptionDetailsItem(title: "Currency", value: Constants.shared.currencyCode, confidence: 0.0, isAssumed: true)
+                                        .onTapGesture {
+                                            showCurrencyBottom = true
+                                        }
                                 }
                                 else{
                                     SubscriptionDetailsItem(title: "Currency", value: subscriptionData?.currency ?? "", confidence: subscriptionData?.currencyConfidence ?? 0.0)
+                                        .onTapGesture {
+                                            showCurrencyBottom = true
+                                        }
                                 }
                             }
                             
                             HStack(spacing: 16) {
                                 SubscriptionDetailsItem(title: "Category", value: subscriptionData?.categoryName ?? "", confidence: subscriptionData?.categoryConfidence ?? 0.0)
+                                    .onTapGesture {
+                                        showCategoryBottom = true
+                                    }
+                                    .sheet(isPresented: $showCategoryBottom) {
+                                        ReviewExtractedDetailsView(onDelegate: {
+                                        },
+                                                                   detailType   : ReviewExtractedType.category,
+                                                                   confidence   : subscriptionData?.serviceNameConfidence ?? 0.0,
+                                                                   extractedData: subscriptionData)
+                                        .presentationDragIndicator(.hidden)
+                                        .presentationDetents([.medium, .large])
+                                    }
                                 SubscriptionDetailsItem(title: "Plan Type", value: subscriptionData?.subscriptionType ?? "", confidence: subscriptionData?.subscriptionTypeConfidence ?? 0.0)
+                                    .onTapGesture {
+                                        showPlanTypeBottom = true
+                                    }
                             }
                             
                             SubscriptionDetailsItem(title: "Billing Cycle", value: subscriptionData?.billingCycle ?? "", confidence: subscriptionData?.billingCycleConfidence ?? 0.0)
@@ -346,6 +416,12 @@ struct SubscriptionPreviewView: View {
             getSubDetails()
             numberOfSubscriptions = subscriptionsData?.count ?? 0
             getSubDetails()
+            if !isFromImage{
+                guard let url = audioURL else {
+                    return
+                }
+                playerManager.load(url: url)
+            }
         }
         .onChange(of: globalSubscriptionData) { _ in updateSubDetails() }
         .onChange(of: commonApiVM.currencyResponse) { _ in getSubDetails() }
@@ -355,6 +431,24 @@ struct SubscriptionPreviewView: View {
         .onReceive(NotificationCenter.default.publisher(for: .closeAllBottomSheets)) { _ in
             showImagePopup = false
             showDiscardPopup = false
+        }
+        .sheet(isPresented: $showCurrencyBottom) {
+            ReviewExtractedDetailsView(onDelegate: {
+            },
+                                       detailType   : ReviewExtractedType.currency,
+                                       confidence   : subscriptionData?.serviceNameConfidence ?? 0.0,
+                                       extractedData: subscriptionData)
+            .presentationDragIndicator(.hidden)
+            .presentationDetents([.medium, .large])
+        }
+        .sheet(isPresented: $showPlanTypeBottom) {
+            ReviewExtractedDetailsView(onDelegate: {
+            },
+                                       detailType   : ReviewExtractedType.planType,
+                                       confidence   : subscriptionData?.serviceNameConfidence ?? 0.0,
+                                       extractedData: subscriptionData)
+            .presentationDragIndicator(.hidden)
+            .presentationDetents([.medium, .large])
         }
     }
     
@@ -595,6 +689,7 @@ struct SubscriptionPreviewView: View {
     }
 }
 
+//MARK: - SubscriptionDetailsItem
 struct SubscriptionDetailsItem: View {
     var title                   : String
     var value                   : String?
@@ -637,5 +732,42 @@ struct SubscriptionDetailsItem: View {
         )
         .background(.whiteNeutralCardBG)
         .cornerRadius(12)
+    }
+}
+
+//MARK: - VoicePlayerUI
+struct VoicePlayerUI: View {
+
+    @ObservedObject var audioManager: AudioRecorderManager
+
+    var body: some View {
+        HStack(spacing: 5) {
+            
+            Button(action: {
+                if audioManager.isPlaying {
+                    audioManager.pausePlayback()
+                } else {
+                    audioManager.playRecording()
+                }
+            }) {
+                Image(audioManager.isPlaying ? "Pause" : "Play")
+                    .frame(width: 40, height: 40)
+            }
+
+            Slider(value: Binding(
+                get: { audioManager.currentTime },
+                set: { newValue in
+                    audioManager.currentTime = newValue
+                    audioManager.audioPlayer?.currentTime = newValue
+                }
+            ), in: 0...audioManager.duration)
+            .tint(.navyBlueCTA700)
+
+            Text("\(formatTime(TimeInterval(Int(audioManager.currentTime)))) / \(formatTime(TimeInterval(Int(audioManager.duration))))")
+                .font(.appRegular(14))
+                .foregroundStyle(Color.whiteBlackBGnoPic)
+
+            Spacer()
+        }
     }
 }

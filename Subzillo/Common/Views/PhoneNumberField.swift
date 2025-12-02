@@ -21,6 +21,7 @@ struct PhoneNumberField: View {
     @State var isCountry                    : Bool
     @State var verifyData                   : LoginSignupVerifyData?
     @State var fromSingup                   = false
+    @State var fromPreview                  = false
     
     //MARK: - body
     var body: some View {
@@ -131,11 +132,17 @@ struct PhoneNumberField: View {
         if let data = SessionManager.shared.loginData {
             verifyData = data
         }
-        selectedCurrency = Currency(id      : nil,
-                                    name    : Constants.shared.currencyCode,
-                                    symbol  : Constants.shared.currencySymbol,
-                                    code    : Constants.shared.currencyCode,
-                                    flag    : Constants.shared.flag(from: Constants.shared.regionCode))
+        if !fromPreview{
+            selectedCurrency = Currency(id      : nil,
+                                        name    : Constants.shared.currencyCode,
+                                        symbol  : Constants.shared.currencySymbol,
+                                        code    : Constants.shared.currencyCode,
+                                        flag    : Constants.shared.flag(from: Constants.shared.regionCode))
+            
+            if let currencies = commonApiVM.currencyResponse {
+                selectedCurrency = currencies.first(where: { $0.code == Constants.shared.currencyCode })
+            }
+        }
         if fromSingup{
             selectedCountry = Country(id: 0, countryName: "", countryCode: verifyData?.countryCode, dialCode: "", countryFlag: Constants.shared.flag(from: verifyData?.countryCode ?? ""))
             if let countries = commonApiVM.countriesResponse {
@@ -146,9 +153,6 @@ struct PhoneNumberField: View {
             if let countries = commonApiVM.countriesResponse {
                 selectedCountry = countries.first(where: { $0.countryCode == Constants.shared.regionCode })
             }
-        }
-        if let currencies = commonApiVM.currencyResponse {
-            selectedCurrency = currencies.first(where: { $0.code == Constants.shared.currencyCode })
         }
     }
 }

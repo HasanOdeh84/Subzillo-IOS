@@ -9,7 +9,7 @@ import Foundation
 
 public struct VoiceSubscriptionRequest: Codable {
     var userId                      : String
-    var text                        : String
+//    var text                        : String
 }
 
 public struct VoiceSubscriptionResponse: Codable {

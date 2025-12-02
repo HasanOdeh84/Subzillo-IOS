@@ -61,18 +61,18 @@ class ProfileViewModel: ObservableObject {
 //        .store(in: &self.subscriptions)
 //    }   
     
-    func imageSubscription(input:ImageSubscriptionRequest,fileData:[MultiPartFileInput]){
-        apiReference.postMultipartApi(endPoint: APIEndpoint.imageSubscription, method: .POST,token: authKey,body: MultipartInput(parameters: input, fileInput: fileData),showLoader: true, responseType: ImageSubscriptionResponse.self)
-            .sink { [unowned self] completion in
-                if case let .failure(error) = completion {
-                    self.handleError(error,endPoint: APIEndpoint.imageSubscription)
-                }
-            }
-        receiveValue: { response in
-            PrintLogger.modelLog(response, type: .response, isInput: false)
-        }
-        .store(in: &self.subscriptions)
-    }
+//    func imageSubscription(input:ImageSubscriptionRequest,fileData:[MultiPartFileInput]){
+//        apiReference.postMultipartApi(endPoint: APIEndpoint.imageSubscription, method: .POST,token: authKey,body: MultipartInput(parameters: input, fileInput: fileData),showLoader: true, responseType: ImageSubscriptionResponse.self)
+//            .sink { [unowned self] completion in
+//                if case let .failure(error) = completion {
+//                    self.handleError(error,endPoint: APIEndpoint.imageSubscription)
+//                }
+//            }
+//        receiveValue: { response in
+//            PrintLogger.modelLog(response, type: .response, isInput: false)
+//        }
+//        .store(in: &self.subscriptions)
+//    }
     
     func navigate(to route: NavigationRoute){
         self.router.navigate(to: route)

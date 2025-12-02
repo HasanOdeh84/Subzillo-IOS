@@ -40,7 +40,7 @@ struct UploadImageSheet: View {
                     Spacer()
                 }
                 
-                Text(LocalizedStringKey("Upload a screenshot or paste text from your bank email to automatically detect subscription payments."))
+                Text(LocalizedStringKey("Upload a screenshot from your bank email to automatically detect subscription payments."))
                     .font(.appRegular(16))
                     .foregroundColor(Color.gray)
                 
@@ -49,12 +49,12 @@ struct UploadImageSheet: View {
                     Divider()
                         .overlay(Color.neutral300Border)
                     UploadItem(title: "Choose from Gallery", subTitle: "Select existing screenshot", image: "image-02", imageColor: Color.warning, action: galleryAction)
-                    Divider()
-                        .overlay(Color.neutral300Border)
-                    UploadItem(title: "Paste Text", subTitle: "Copy and paste notification text", image: "text-creation", imageColor: Color.purple100, action: pastTextAction)
+//                    Divider()
+//                        .overlay(Color.neutral300Border)
+//                    UploadItem(title: "Paste Text", subTitle: "Copy and paste notification text", image: "text-creation", imageColor: Color.purple100, action: pastTextAction)
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
-                .frame(height: 240)
+                .frame(height: 160)
                 .cornerRadius(12)
                 .overlay(
                     RoundedRectangle(cornerRadius: 12)

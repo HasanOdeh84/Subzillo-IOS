@@ -5,6 +5,8 @@
 //  Created by KSMACMINI-019 on 17/09/25.
 //
 
+import Foundation
+
 enum Tab {
     case home, subscriptions, addSubscription, smartAI, profile
 }
@@ -25,7 +27,7 @@ enum NavigationRoute: Hashable{
     case notifications
     case manualEntry(isFromEdit:Bool = false, isFromListEdit: Bool = false, subscriptionId:String = "")
     case voiceCommandView
-    case subscriptionPreviewView(subscriptionsData:[SubscriptionData]?, content: String, isFromImage:Bool)
+    case subscriptionPreviewView(subscriptionsData:[SubscriptionData]?, content: String, isFromImage:Bool, audioUrl:URL?)
     case subscriptionMatchView(subscriptionData:SubscriptionData = SubscriptionData(), fromList:Bool = false, subscriptionId:String = "")
     case pasteTextView
     case duplicateSubscriptionsView(duplicateSubsList: [DuplicateDataInfo])
@@ -70,4 +72,8 @@ enum ListType {
 
 enum OrderType: String, Codable {
     case asc, desc, none
+}
+
+enum ReviewExtractedType: String, Codable {
+    case service, amount, nextChargeDate, currency, category, planType, billingCycle
 }

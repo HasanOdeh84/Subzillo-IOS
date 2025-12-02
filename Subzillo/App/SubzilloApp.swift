@@ -197,8 +197,8 @@ struct RootView: View {
                     ManualEntryView(isFromEdit: isFromEdit, isFromListEdit: isFromListEdit, subscriptionId: subscriptionId)
                 case .voiceCommandView:
                     VoiceCommandView()
-                case .subscriptionPreviewView(let subscriptionsData, let content, let isFromImage):
-                    SubscriptionPreviewView(isFromImage:isFromImage, subscriptionsData: subscriptionsData, content: content)
+                case .subscriptionPreviewView(let subscriptionsData, let content, let isFromImage, let audioUrl):
+                    SubscriptionPreviewView(isFromImage:isFromImage, subscriptionsData: subscriptionsData, content: content, audioURL: audioUrl)
                 case .subscriptionMatchView(let subscriptionData, let fromList, let subscriptionId):
                     SubscriptionMatchView(subscriptionData: subscriptionData, subscriptionId: subscriptionId, fromList: fromList)
                 case .pasteTextView:

@@ -21,8 +21,10 @@ class VoiceCommandViewModel: NSObject, ObservableObject, AVAudioPlayerDelegate, 
         self.router = router
     }
     
-    func voiceSubscription(input:VoiceSubscriptionRequest) {
-        apiReference.postApi(endPoint: APIEndpoint.voiceSubscription, method: .POST,token: authKey,body: input,showLoader: true, responseType: VoiceSubscriptionResponse.self)
+    func voiceSubscription(input:VoiceSubscriptionRequest,fileData:[MultiPartFileInput], audioUrl: URL?){
+        apiReference.postMultipartApi(endPoint: APIEndpoint.voiceSubscription, method: .POST,token: authKey,body: MultipartInput(parameters: input, fileInput: fileData),showLoader: true, responseType: VoiceSubscriptionResponse.self)
+//    func voiceSubscription(input:VoiceSubscriptionRequest) {
+//        apiReference.postApi(endPoint: APIEndpoint.voiceSubscription, method: .POST,token: authKey,body: input,showLoader: true, responseType: VoiceSubscriptionResponse.self)
             .sink { [unowned self] completion in
                 if case let .failure(error) = completion {
                     self.handleError(error,endPoint: APIEndpoint.voiceSubscription)
@@ -36,7 +38,7 @@ class VoiceCommandViewModel: NSObject, ObservableObject, AVAudioPlayerDelegate, 
                 self.showErrorPopup = true
             }
             else{
-                self.router.navigate(to: .subscriptionPreviewView(subscriptionsData: response.data?.subscriptions, content: input.text, isFromImage:false))
+                self.router.navigate(to: .subscriptionPreviewView(subscriptionsData: response.data?.subscriptions, content: "", isFromImage:false, audioUrl: audioUrl))
             }
         }
         .store(in: &self.subscriptions)
