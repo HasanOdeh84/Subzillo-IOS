@@ -89,7 +89,7 @@ struct UploadImageSheet: View {
                 }
             )
             .presentationDragIndicator(.hidden)
-            .presentationDetents([.height(580)])
+            .presentationDetents([.height(560)])
         }
         .sheet(isPresented: $showPermissionAlert) {
             PermissionSheet(onDelegate: {
@@ -255,14 +255,14 @@ struct UploadErrorImageSheet: View {
                         .foregroundColor(Color.neutralMain700)
                         .frame(maxWidth: .infinity, alignment: .leading)
                 }
-                HStack(spacing: 16) {
-                    Image("book-03")
-                        .frame(width: 24, height: 24)
-                    Text(LocalizedStringKey("Make sure text is in English"))
-                        .font(.appRegular(16))
-                        .foregroundColor(Color.neutralMain700)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                }
+//                HStack(spacing: 16) {
+//                    Image("book-03")
+//                        .frame(width: 24, height: 24)
+//                    Text(LocalizedStringKey("Make sure text is in English"))
+//                        .font(.appRegular(16))
+//                        .foregroundColor(Color.neutralMain700)
+//                        .frame(maxWidth: .infinity, alignment: .leading)
+//                }
                 
             }
             .frame(maxWidth: .infinity, alignment: .leading)

@@ -3,4 +3,116 @@
    uuid = "31EB8C49-0C3F-4CE1-9C9A-17A376A3ACD5"
    type = "1"
    version = "2.0">
+   <Breakpoints>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "B4424C77-30DC-4B7D-A15E-35B54B79E0C8"
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "Subzillo/Common/BottomSheet/ReviewExtractedDetailsView.swift"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "248"
+            endingLineNumber = "248"
+            landmarkName = "setupData()"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "5CEE8525-D2F1-4106-BCDC-63771D2DF15D"
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "Subzillo/Common/BottomSheet/ReviewExtractedDetailsView.swift"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "249"
+            endingLineNumber = "249"
+            landmarkName = "setupData()"
+            landmarkType = "7">
+            <Locations>
+               <Location
+                  uuid = "5CEE8525-D2F1-4106-BCDC-63771D2DF15D - 21aece9f1ea5cf51"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "Subzillo.ReviewExtractedDetailsView.setupData() -&gt; ()"
+                  moduleName = "Subzillo.debug.dylib"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/ksmacmini-019/Documents/Alekya_Files/GitProjects/subzillo_client/Subzillo-IOS/Subzillo/Common/BottomSheet/ReviewExtractedDetailsView.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "249"
+                  endingLineNumber = "249">
+               </Location>
+               <Location
+                  uuid = "5CEE8525-D2F1-4106-BCDC-63771D2DF15D - c9a99d03691e53ec"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "closure #2 (Subzillo.ManualDataInfo) -&gt; Swift.Bool in Subzillo.ReviewExtractedDetailsView.setupData() -&gt; ()"
+                  moduleName = "Subzillo.debug.dylib"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/ksmacmini-019/Documents/Alekya_Files/GitProjects/subzillo_client/Subzillo-IOS/Subzillo/Common/BottomSheet/ReviewExtractedDetailsView.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "249"
+                  endingLineNumber = "249">
+               </Location>
+            </Locations>
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "AEF29A4B-C1A6-4358-B689-BB31FCA2243D"
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "Subzillo/Common/BottomSheet/ReviewExtractedDetailsView.swift"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "169"
+            endingLineNumber = "169"
+            landmarkName = "body"
+            landmarkType = "24">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "563871AD-0AED-4469-AF8A-56E3526404A5"
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "Subzillo/Common/BottomSheet/ReviewExtractedDetailsView.swift"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "170"
+            endingLineNumber = "170"
+            landmarkName = "body"
+            landmarkType = "24">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "6EB2311C-E38C-47A7-8E57-6EC44E7988F6"
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "Subzillo/Features/AddSubscription/VoiceCommand/VoiceCommandViewModel.swift"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "41"
+            endingLineNumber = "41"
+            landmarkName = "voiceSubscription(input:fileData:audioUrl:)"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+   </Breakpoints>
 </Bucket>

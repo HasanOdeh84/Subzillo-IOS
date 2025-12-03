@@ -158,8 +158,11 @@ struct SubscriptionPreviewView: View {
                                     .onTapGesture {
                                         showServiceBottom = true
                                     }
-                                    .sheet(isPresented: $showServiceBottom) {
+                                    .sheet(isPresented: $showServiceBottom, onDismiss:{
+                                        print("sheet dismissed")
+                                    }) {
                                         ReviewExtractedDetailsView(onDelegate: {
+                                            print("clicked done")
                                         },
                                                                    detailType   : ReviewExtractedType.service,
                                                                    confidence   : subscriptionData?.serviceNameConfidence ?? 0.0,
@@ -233,6 +236,18 @@ struct SubscriptionPreviewView: View {
                             }
                             
                             SubscriptionDetailsItem(title: "Billing Cycle", value: subscriptionData?.billingCycle ?? "", confidence: subscriptionData?.billingCycleConfidence ?? 0.0)
+                                .onTapGesture {
+                                    showBillingCycleBottom = true
+                                }
+                                .sheet(isPresented: $showBillingCycleBottom) {
+                                    ReviewExtractedDetailsView(onDelegate: {
+                                    },
+                                                               detailType   : ReviewExtractedType.billingCycle,
+                                                               confidence   : subscriptionData?.serviceNameConfidence ?? 0.0,
+                                                               extractedData: subscriptionData)
+                                    .presentationDragIndicator(.hidden)
+                                    .presentationDetents([.medium, .large])
+                                }
                         }
                     }
                     
@@ -413,15 +428,16 @@ struct SubscriptionPreviewView: View {
         .navigationBarBackButtonHidden(true)
         .onAppear{
             //            commonApiVM.getCurrencies()
-            getSubDetails()
+//            getSubDetails()
             numberOfSubscriptions = subscriptionsData?.count ?? 0
             getSubDetails()
             if !isFromImage{
                 guard let url = audioURL else {
                     return
                 }
-                playerManager.load(url: url)
+//                playerManager.load(url: url)
             }
+            updateSubDetails()
         }
         .onChange(of: globalSubscriptionData) { _ in updateSubDetails() }
         .onChange(of: commonApiVM.currencyResponse) { _ in getSubDetails() }
@@ -695,13 +711,11 @@ struct SubscriptionDetailsItem: View {
     var value                   : String?
     var confidence              : Double = 0.0
     var isAssumed               : Bool = false
-    
-    @State var confidenceStr    : String = ""
-    @State var colorValue       : Color?
+//    @State var confidenceStr    : String = ""
+//    @State var colorValue       : Color?
     
     var body: some View {
         let (confidenceStr, colorValue) = Constants.confidenceInfo(isAssumed: isAssumed, confidence: confidence)
-        
         HStack(spacing: 0) {
             VStack(alignment: .leading, spacing: 9) {
                 Text(title)
@@ -728,7 +742,7 @@ struct SubscriptionDetailsItem: View {
         .frame(height: 106)
         .overlay(
             RoundedRectangle(cornerRadius: 12)
-                .stroke(Color.neutral300Border, lineWidth: 1)
+                .stroke(confidence <= 0.0 ? Color.disCardRed : Color.neutral300Border, lineWidth: 1)
         )
         .background(.whiteNeutralCardBG)
         .cornerRadius(12)

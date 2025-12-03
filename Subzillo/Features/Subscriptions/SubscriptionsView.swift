@@ -259,6 +259,8 @@ struct SubscriptionsView: View {
         .padding(20)
         .onAppear {
             selectedSegment = .first
+            page = 0
+            self.subscriptionsList.removeAll()
             listSubsApi()
             let now = Date()
             let formatter = DateFormatter()

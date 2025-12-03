@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct ManualDataInfo: Identifiable {
+struct ManualDataInfo: Identifiable, Hashable {
     var id                      : String
     var title                   : String?
     var subtitle                : String?

@@ -12,31 +12,36 @@ struct ReviewExtractedDetailsView: View {
     //MARK: - Properties
     var onDelegate: (() -> Void)?
     @Environment(\.dismiss) private var dismiss
-    var title                               : String? = "Review Extracted Details"
-    var detailType                          : ReviewExtractedType = .currency
-    var buttonIcon                          : String? = "update"
-    var buttonTitle                         : String? = "Update"
-    var confidence                          : Double = 0.0
-    var isAssumed                           : Bool = false
-    
-    var extractedData                       : SubscriptionData?
-    
-    @State private var selectedCurrency     : Currency?
-    @EnvironmentObject var commonApiVM      : CommonAPIViewModel
-    
-    @State private var serviceName          : String = ""
-    
-    @State private var category             : String = ""
-    @State var selectedCategory             : Category?
-    @State private var showCategorySheet    = false
-    
-    @State private var amount               : String = ""
-    
-    @State private var planType             : String = ""
-    
+    var title                                   : String? = "Review Extracted Details"
+    var detailType                              : ReviewExtractedType = .currency
+    var buttonIcon                              : String? = "update"
+    var buttonTitle                             : String? = "Update"
+    var confidence                              : Double = 0.0
+    var isAssumed                               : Bool = false
+    var extractedData                           : SubscriptionData?
+    @State private var selectedCurrency         : Currency?
+    @EnvironmentObject var commonApiVM          : CommonAPIViewModel
+    @State private var serviceName              : String = ""
+    @State private var category                 : String = ""
+    @State var selectedCategory                 : Category?
+    @State private var showCategorySheet        = false
+    @State private var amount                   : String = ""
+    @State private var planType                 : String = ""
     @State private var isDatePickerPresented    = false
     @State private var tempDate                 = Date()
     @State private var chargeDate               : String = ""
+    @StateObject private var toastManager       = ToastManager()
+    @State private var billingCycle             : String = ""
+    @State var selectedBilling                  : ManualDataInfo?
+    @State private var showBillingCycleSheet    = false
+    @State private var billingData              = [
+        ManualDataInfo(id: "1", title: "Daily", subtitle: "Every 24 hours"),
+        ManualDataInfo(id: "2", title: "Weekly", subtitle: "Every 7 Days"),
+        ManualDataInfo(id: "3", title: "Monthly", subtitle: "Every 30 Days"),
+        ManualDataInfo(id: "4", title: "Quarterly", subtitle: "Every 90 Days"),
+        ManualDataInfo(id: "5", title: "Biannually", subtitle: "Every 180 Days"),
+        ManualDataInfo(id: "6", title: "Yearly", subtitle: "Every 360 Days")
+    ]
     
     //MARK: - body
     var body: some View {
@@ -107,17 +112,14 @@ struct ReviewExtractedDetailsView: View {
             case .planType:
                 FieldView(text: $planType, title: "Plan Type", image: "gridicon2", placeHolder: "e.g. Free, Pro, Premium")
             case .billingCycle:
-                Button(action: dateSelection) {
-                    FieldView(text: $chargeDate, textValue: "", title: "Next Charge Date", image: "Calendar1", placeHolder: "dd/mm/yyyy", isButton: false, isText: true, isDate:true)
+                Button(action: selectBilling) {
+                    FieldView(text: $billingCycle, textValue: selectedBilling?.title ?? "", title: "Billing Cycle", image: "gridIcon", placeHolder: "Please select", isButton: true, isText: true)
                 }
-                .background(
-                    DatePickerPopup(isPresented: $isDatePickerPresented, selectedDate: $tempDate) { date in
-                        let formatter = DateFormatter()
-                        formatter.dateFormat = "dd/MM/yyyy"//"yyyy-MM-dd"
-                        self.chargeDate = formatter.string(from: date)
-                        print(chargeDate)
-                    }
-                )
+                .sheet(isPresented: $showBillingCycleSheet) {
+                    BillingCycleBottomSheet(selectedBilling: $selectedBilling, header: "Select Billing Cycle", placeholder: "Search billing cycle")
+                        .presentationDetents([.medium, .large])
+                        .presentationDragIndicator(.hidden)
+                }
             }
             
             GradientBorderButton(title          : buttonTitle ?? "",
@@ -125,22 +127,50 @@ struct ReviewExtractedDetailsView: View {
                                  buttonImage    : buttonIcon ?? "") {
                 switch detailType {
                 case .service:
+                    if serviceName.trimmed == ""{
+                        toastManager.showToast(message: "Please enter service name",style:ToastStyle.error)
+                        return
+                    }
                     globalSubscriptionData?.serviceName = serviceName.trimmed
                 case .amount:
-                    globalSubscriptionData?.amount = Double(amount.trimmed) ?? 0.0
+                    let amountDouble = Double(amount.trimmed) ?? 0.0
+                    if amountDouble == 0.0 || amount.trimmed == ""{
+                        toastManager.showToast(message: "Amount is required",style:ToastStyle.error)
+                        return
+                    }
+                    globalSubscriptionData?.amount = amountDouble
                 case .nextChargeDate:
-                    globalSubscriptionData?.nextPaymentDate = chargeDate
+                    if chargeDate == ""{
+                        toastManager.showToast(message: "Please select next charge date",style:ToastStyle.error)
+                        return
+                    }
+                    globalSubscriptionData?.nextPaymentDate = chargeDate.formattedDate(from: "dd/MM/yyyy", to: "yyyy-MM-dd")
                 case .currency:
+                    if selectedCurrency?.code ?? "" == ""{
+                        toastManager.showToast(message: "Currency selection required",style:ToastStyle.error)
+                        return
+                    }
                     globalSubscriptionData?.currency = selectedCurrency?.code ?? ""
                     globalSubscriptionData?.currencySymbol = selectedCurrency?.symbol ?? ""
                 case .category:
+                    if category == ""{
+                        toastManager.showToast(message: "Please select category",style:ToastStyle.error)
+                        return
+                    }
                     globalSubscriptionData?.categoryId = category
                     globalSubscriptionData?.categoryName = selectedCategory?.name ?? ""
                 case .planType:
+                    if planType.trimmed == ""{
+                        toastManager.showToast(message: "Please select plan type",style:ToastStyle.error)
+                        return
+                    }
                     globalSubscriptionData?.subscriptionType = planType.trimmed
                 case .billingCycle:
-                    globalSubscriptionData?.subscriptionType = planType.trimmed
-//                    globalSubscriptionData?.billingCycle = billingCycle.lowercased()
+                    if selectedBilling?.title ?? "" == ""{
+                        toastManager.showToast(message: "Please select a billing cycle",style:ToastStyle.error)
+                        return
+                    }
+                    globalSubscriptionData?.billingCycle = selectedBilling?.title ?? "".lowercased()
                 }
                 onDelegate?()
                 dismiss()
@@ -152,6 +182,7 @@ struct ReviewExtractedDetailsView: View {
         }
         .padding(.horizontal, 24)
         .onAppear{
+            globalSubscriptionData = extractedData
             if detailType == .category{
                 commonApiVM.getCategories()
             }else if detailType == .currency{
@@ -169,12 +200,18 @@ struct ReviewExtractedDetailsView: View {
             setupData()
         }
         .onChange(of: commonApiVM.categoriesResponse) { _ in updateCatInfo() }
+        .modifier(ToastModifier(toast: toastManager))
     }
     
     //MARK: - User defined methods
     private func selectCategory()
     {
         showCategorySheet = true
+    }
+    
+    private func selectBilling()
+    {
+        showBillingCycleSheet = true
     }
     
     private func dateSelection() {
@@ -200,7 +237,7 @@ struct ReviewExtractedDetailsView: View {
     func setupData(){
         serviceName = extractedData?.serviceName ?? ""
         amount      = "\(extractedData?.amount ?? 0.0)"
-        chargeDate  = extractedData?.nextPaymentDate ?? ""
+        chargeDate  = (extractedData?.nextPaymentDate ?? "").formattedDate(to: "dd/MM/yyyy")
         if extractedData?.currency ?? "" != ""{
             if let currencies = commonApiVM.currencyResponse {
                 selectedCurrency = currencies.first(where: { $0.code == extractedData?.currency ?? ""})
@@ -208,6 +245,9 @@ struct ReviewExtractedDetailsView: View {
         }
         category    = extractedData?.categoryName ?? ""
         planType    = extractedData?.subscriptionType ?? ""
+        if extractedData?.billingCycle ?? "" != "" {
+            selectedBilling = billingData.first(where: { $0.title == globalSubscriptionData?.billingCycle ?? ""})
+        }
     }
 }
 

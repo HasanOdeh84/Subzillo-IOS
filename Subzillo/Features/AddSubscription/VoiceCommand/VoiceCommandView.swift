@@ -64,12 +64,10 @@ struct VoiceCommandView: View {
                     HStack(spacing: 5){
                         // Play/Pause button
                         Button(action: {
-                            if !audioManager.isRecording{
-                                if audioManager.isPlaying {
-                                    audioManager.pausePlayback()
-                                } else {
-                                    audioManager.playRecording()
-                                }
+                            if audioManager.isPlaying {
+                                audioManager.pausePlayback()
+                            } else {
+                                audioManager.playRecording()
                             }
                         }) {
                             Image(audioManager.isPlaying ? "Pause" : "Play")
@@ -92,12 +90,13 @@ struct VoiceCommandView: View {
                         Spacer()
                     }
                     .padding(.horizontal, 20)
-                    
                 }else{
                     ZStack {
                         Circle()
                             .fill(
-                                LinearGradient(colors: [Color.linearGradient3, Color.linearGradient4, Color.navyBlueCTA700],
+                                LinearGradient(colors: [Color.linearGradient3,
+                                                        Color.linearGradient4,
+                                                        Color.navyBlueCTA700],
                                                startPoint: .top,
                                                endPoint: .bottom)
                             )
@@ -116,11 +115,7 @@ struct VoiceCommandView: View {
                     .shadow(color: Color.dropShadow, radius: 2, x: 0, y: 2)
                     .frame(maxWidth: .infinity, alignment: .center)
                     .onTapGesture {
-                        if audioManager.isRecording {
-                            audioManager.stopRecording()
-                        } else {
-                            audioManager.startRecording()
-                        }
+                        audioManager.isRecording ? audioManager.stopRecording() : audioManager.startRecording()
                     }
                 }
                 

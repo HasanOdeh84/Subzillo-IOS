@@ -51,6 +51,24 @@ class ManualEntryViewModel: ObservableObject {
         .store(in: &self.subscriptions)
     }
     
+    func addSubscriptionSiri(input:AddSubscriptionRequest) async -> Bool {
+        await withCheckedContinuation { continuation in
+            apiReference.postApi(endPoint: APIEndpoint.addSubscription, method: .POST,token: authKey,body: input,showLoader: true, responseType: AddSubscriptionResponse.self)
+                .sink { [weak self] completion in
+                    if case let .failure(error) = completion {
+                        self?.handleError(error, endPoint: APIEndpoint.addSubscription)
+                        
+                        continuation.resume(returning: false)   // ❌ failed
+                    }
+                } receiveValue: { [weak self] response in
+                    PrintLogger.modelLog(response, type: .response, isInput: false)
+                    
+                    continuation.resume(returning: true)  // ✅ success
+                }
+                .store(in: &self.subscriptions)
+        }
+    }
+    
     func listUserCards(input:ListUserCardsRequest) {
         apiReference.postApi(endPoint: APIEndpoint.listUserCards, method: .POST,token: authKey,body: input,showLoader: true, responseType: ListUserCardsResponse.self)
             .sink { [unowned self] completion in

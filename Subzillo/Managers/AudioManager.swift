@@ -9,28 +9,28 @@ import SwiftUI
 import AVFoundation
 
 class AudioRecorderManager: NSObject, ObservableObject, AVAudioPlayerDelegate {
-    var audioRecorder               : AVAudioRecorder!
-    var audioPlayer                 : AVAudioPlayer?
-    var timer                       : Timer?
     
-    @Published var isRecording      = false
-    @Published var isPlaying        = false
-    @Published var currentTime      : TimeInterval = 0
-    @Published var duration         : TimeInterval = 0
+    //MARK: - Properties
+    @Published var isRecording          = false
+    @Published var isPlaying            = false
+    @Published var currentTime          : TimeInterval = 0
+    @Published var duration             : TimeInterval = 0
+    @Published var hasRecording         : Bool = false
+    @Published var requiredPermission   = false
     
-    @Published var requiredPermission = false
+    var audioRecorder                   : AVAudioRecorder!
+    var audioPlayer                     : AVAudioPlayer?
+    var timer                           : Timer?
     
-    var audioURL    = FileManager.default.temporaryDirectory.appendingPathComponent("recording.m4a")
-    var audioData   = Data()
+    var audioURL                = FileManager.default.temporaryDirectory.appendingPathComponent("recording.m4a")
+    var audioData               = Data()
     
     @Published var recordTime   : TimeInterval = 0
     let maxRecordDuration       : TimeInterval = 120 // 2 minutes
     var recordTimer             : Timer?
     
-    @Published var hasRecording : Bool = false
-    
-    var pausedTime      : TimeInterval = 0
-    var isPaused        : Bool = false
+    var pausedTime              : TimeInterval = 0
+    var isPaused                : Bool = false
     
     func startRecording() {
         self.requiredPermission = false
@@ -52,17 +52,19 @@ class AudioRecorderManager: NSObject, ObservableObject, AVAudioPlayerDelegate {
         do {
             try session.setCategory(.playAndRecord, mode: .default,options: [.defaultToSpeaker])
             try session.setActive(true)
-            
             let settings: [String: Any] = [
                 AVFormatIDKey: Int(kAudioFormatMPEG4AAC),
                 AVSampleRateKey: 12000,
                 AVNumberOfChannelsKey: 1,
                 AVEncoderAudioQualityKey: AVAudioQuality.high.rawValue
             ]
-            
             audioRecorder = try AVAudioRecorder(url: audioURL, settings: settings)
+            guard audioRecorder?.record() == true else {
+                print("❌ Failed to start recording — audio file invalid")
+                isRecording = false
+                return
+            }
             audioRecorder?.record()
-            
             isRecording = true
             startRecordTimer()
             print("🎙 Recording started")
@@ -75,31 +77,47 @@ class AudioRecorderManager: NSObject, ObservableObject, AVAudioPlayerDelegate {
         audioRecorder?.stop()
         audioRecorder = nil
         isRecording = false
-        
         stopRecordTimer()
         recordTime = 0
-        
         hasRecording = FileManager.default.fileExists(atPath: audioURL.path)
-        
         // Update duration for UI
-        let asset = AVURLAsset(url: audioURL)
-        getAudioDuration(from: audioURL) { duration in
-            if let duration = duration {
-                DispatchQueue.main.async{
-                    self.duration = duration
-                }
-            } else {
-                print("❌ Could not get audio duration")
-            }
-        }
+        //        let asset = AVURLAsset(url: audioURL)
+        //        getAudioDuration(from: audioURL) { duration in
+        //            if let duration = duration {
+        //                DispatchQueue.main.async{
+        //                    self.duration = duration
+        //                }
+        //            } else {
+        //                print("❌ Could not get audio duration")
+        //            }
+        //        }
         currentTime = 0
-        
         print("🛑 Recording stopped")
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+            self.loadDurationSafely()
+        }
+    }
+    
+    private func loadDurationSafely() {
+        getAudioDuration(from: audioURL) { duration in
+            guard let duration = duration else {
+                print("❌ Could not get audio duration (file not finalized)")
+                return
+            }
+            DispatchQueue.main.async { self.duration = duration }
+        }
     }
     
     private func startRecordTimer() {
+        guard audioRecorder != nil else { return }
         recordTime = 0
+        recordTimer?.invalidate()
         recordTimer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { timer in
+            if !self.isRecording {
+                timer.invalidate()
+                return
+            }
             self.recordTime += 1
             if self.recordTime >= self.maxRecordDuration {
                 timer.invalidate()
@@ -115,6 +133,27 @@ class AudioRecorderManager: NSObject, ObservableObject, AVAudioPlayerDelegate {
     }
     
     // MARK: Playback
+    //    func playRecording() {
+    //        guard FileManager.default.fileExists(atPath: audioURL.path) else { return }
+    //        do {
+    //            if audioPlayer == nil {
+    //                audioPlayer = try AVAudioPlayer(contentsOf: audioURL)
+    //                audioPlayer?.delegate = self
+    //                audioPlayer?.prepareToPlay()
+    //                duration = audioPlayer?.duration ?? 0
+    //            }
+    //            if isPaused {
+    //                audioPlayer?.currentTime = pausedTime
+    //                isPaused = false
+    //            }
+    //            audioPlayer?.play()
+    //            isPlaying = true
+    //            startTimer()
+    //        } catch {
+    //            print("⚠️ Failed to play recording: \(error.localizedDescription)")
+    //        }
+    //    }
+    
     func playRecording() {
         guard FileManager.default.fileExists(atPath: audioURL.path) else { return }
         do {
@@ -125,7 +164,6 @@ class AudioRecorderManager: NSObject, ObservableObject, AVAudioPlayerDelegate {
                 duration = audioPlayer?.duration ?? 0
             }
             if isPaused {
-                audioPlayer?.currentTime = pausedTime
                 isPaused = false
             }
             audioPlayer?.play()
@@ -244,3 +282,4 @@ class AudioRecorderManager: NSObject, ObservableObject, AVAudioPlayerDelegate {
         }
     }
 }
+

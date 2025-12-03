@@ -1146,14 +1146,15 @@ struct OriginalImageView: View {
                 
                 Image(uiImage: image)
                     .resizable()
-                    .scaledToFit()
+                    .scaledToFill()
                     .frame(width: geometry.size.width - 40,
-                           height: imageHeight(for: geometry.size.width - 40))
-                    .cornerRadius(22)
+                           height: min(imageHeight(for: geometry.size.width - 40),geometry.size.height - 200))
+                    .clipShape(RoundedRectangle(cornerRadius: 22))
                     .padding(.bottom, 16)
                 
                 Spacer()
             }
+            .padding(.bottom,20)
             .padding(.horizontal, 20)
         }
     }
