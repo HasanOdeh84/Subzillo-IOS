@@ -141,7 +141,11 @@ struct VoiceCommandView: View {
                 
                 // MARK: - Reset Button
                 GradientBorderButton(title: "Discard",isBtn:true, buttonImage: "discardIcon", action:{
-                    showDiscardPopup = true})
+                    audioManager.pausePlayback()
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                        showDiscardPopup = true
+                    }
+                })
                 .opacity(audioManager.hasRecording && !audioManager.isRecording ? 1.0 : 0.5)
                 .disabled(audioManager.hasRecording && !audioManager.isRecording ? false : true)
                 .padding(.horizontal, 20)
@@ -189,6 +193,7 @@ struct VoiceCommandView: View {
                 buttonIcon  : "deleteIcon",
                 buttonTitle : "Discard"
             )
+            .id(UUID())
             .presentationDragIndicator(.hidden)
             .presentationDetents([.height(350)])
         }
@@ -212,11 +217,13 @@ struct VoiceCommandView: View {
     
     //MARK: - Back action
     private func goBack() {
+        audioManager.discardAll()
         dismiss()
     }
     
     //MARK: - Submit action
     private func submitAction() {
+        audioManager.pausePlayback()
         let voiceData:Data = try! Data(contentsOf: audioManager.audioURL)
         voiceCommandVM.voiceSubscription(input: VoiceSubscriptionRequest(userId: Constants.getUserId()), fileData: [MultiPartFileInput(
             fieldName   : "audio",

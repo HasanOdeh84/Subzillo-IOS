@@ -23,15 +23,15 @@ struct SubscriptionPreviewView: View {
     @State var confidenceStr                    : String = ""
     @State var colorValue                       : Color?
     var confidence                              : Double = 0.0
-    @State var showDiscardPopup                 : Bool = false
     @State var initials                         : String  = ""
-    @State var showImagePopup                   : Bool = false
     @EnvironmentObject var commonApiVM          : CommonAPIViewModel
     @StateObject var subscriptionPreviewVM      = SubscriptionPreviewViewModel()
     var audioURL                                : URL? = nil
     @StateObject private var playerManager      = AudioRecorderManager()
     @Environment(\.dismiss) private var dismiss
     
+    @State var showDiscardPopup                 : Bool = false
+    @State var showImagePopup                   : Bool = false
     @State var showServiceBottom                : Bool = false
     @State var showAmountBottom                 : Bool = false
     @State var showNextChargeDateBottom         : Bool = false
@@ -501,15 +501,18 @@ struct SubscriptionPreviewView: View {
                         updatedDuplicates.append(info)
                     }
                     isFromAdd = true
+                    playerManager.pausePlayback()
                     AppIntentRouter.shared.navigate(to: .duplicateSubscriptionsView(duplicateSubsList: updatedDuplicates))
                 }
                 else{
                     //                AppIntentRouter.shared.navigate(to: .addSubscriptionsView)
+                    playerManager.pausePlayback()
                     AppIntentRouter.shared.navigate(to: .subscriptionsListView)
                 }
             }
             else{
                 //            AppIntentRouter.shared.navigate(to: .addSubscriptionsView)
+                playerManager.pausePlayback()
                 AppIntentRouter.shared.navigate(to: .subscriptionsListView)
             }
         }
@@ -579,6 +582,7 @@ struct SubscriptionPreviewView: View {
     
     //MARK: - Button actions
     private func goBack() {
+        playerManager.discardAll()
         dismiss()
     }
     
@@ -590,6 +594,7 @@ struct SubscriptionPreviewView: View {
         if numberOfSubscriptions > 0
         {
             globalSubscriptionData = subscriptionData!
+            playerManager.pausePlayback()
             AppIntentRouter.shared.navigate(to: .manualEntry(isFromEdit: true))
         }
     }
@@ -600,12 +605,14 @@ struct SubscriptionPreviewView: View {
             if subscriptionData != nil {
                 subscriptionData?.notes = subscriptionData?.reason
                 globalSubscriptionData = subscriptionData!
+                playerManager.pausePlayback()
                 AppIntentRouter.shared.navigate(to: .subscriptionMatchView(subscriptionData: subscriptionData!))
             }
         }
     }
     
     private func onNextAction() {
+        playerManager.pausePlayback()
         if let errorMessage = ManualEntryValidations.shared.updateManualEntry(input: subscriptionData!) {
             ToastManager.shared.showToast(message: errorMessage,style:ToastStyle.error)
         }
@@ -638,6 +645,7 @@ struct SubscriptionPreviewView: View {
     private func onSaveAction() {
         if numberOfSubscriptions > 0
         {
+            playerManager.pausePlayback()
             if let errorMessage = ManualEntryValidations.shared.updateManualEntry(input: subscriptionData!) {
                 ToastManager.shared.showToast(message: errorMessage,style:ToastStyle.error)
             }
@@ -679,6 +687,7 @@ struct SubscriptionPreviewView: View {
     private func onDiscardAction() {
         if numberOfSubscriptions > 0
         {
+            playerManager.pausePlayback()
             showDiscardPopup = true
         }
     }
@@ -742,7 +751,7 @@ struct SubscriptionDetailsItem: View {
         .frame(height: 106)
         .overlay(
             RoundedRectangle(cornerRadius: 12)
-                .stroke(confidence <= 0.0 ? Color.disCardRed : Color.neutral300Border, lineWidth: 1)
+                .stroke(value == "" ? Color.disCardRed : Color.neutral300Border, lineWidth: 1)
         )
         .background(.whiteNeutralCardBG)
         .cornerRadius(12)

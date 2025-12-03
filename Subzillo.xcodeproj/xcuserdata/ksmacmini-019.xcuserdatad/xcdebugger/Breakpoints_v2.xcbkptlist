@@ -34,36 +34,6 @@
             endingLineNumber = "249"
             landmarkName = "setupData()"
             landmarkType = "7">
-            <Locations>
-               <Location
-                  uuid = "5CEE8525-D2F1-4106-BCDC-63771D2DF15D - 21aece9f1ea5cf51"
-                  shouldBeEnabled = "Yes"
-                  ignoreCount = "0"
-                  continueAfterRunningActions = "No"
-                  symbolName = "Subzillo.ReviewExtractedDetailsView.setupData() -&gt; ()"
-                  moduleName = "Subzillo.debug.dylib"
-                  usesParentBreakpointCondition = "Yes"
-                  urlString = "file:///Users/ksmacmini-019/Documents/Alekya_Files/GitProjects/subzillo_client/Subzillo-IOS/Subzillo/Common/BottomSheet/ReviewExtractedDetailsView.swift"
-                  startingColumnNumber = "9223372036854775807"
-                  endingColumnNumber = "9223372036854775807"
-                  startingLineNumber = "249"
-                  endingLineNumber = "249">
-               </Location>
-               <Location
-                  uuid = "5CEE8525-D2F1-4106-BCDC-63771D2DF15D - c9a99d03691e53ec"
-                  shouldBeEnabled = "Yes"
-                  ignoreCount = "0"
-                  continueAfterRunningActions = "No"
-                  symbolName = "closure #2 (Subzillo.ManualDataInfo) -&gt; Swift.Bool in Subzillo.ReviewExtractedDetailsView.setupData() -&gt; ()"
-                  moduleName = "Subzillo.debug.dylib"
-                  usesParentBreakpointCondition = "Yes"
-                  urlString = "file:///Users/ksmacmini-019/Documents/Alekya_Files/GitProjects/subzillo_client/Subzillo-IOS/Subzillo/Common/BottomSheet/ReviewExtractedDetailsView.swift"
-                  startingColumnNumber = "9223372036854775807"
-                  endingColumnNumber = "9223372036854775807"
-                  startingLineNumber = "249"
-                  endingLineNumber = "249">
-               </Location>
-            </Locations>
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
