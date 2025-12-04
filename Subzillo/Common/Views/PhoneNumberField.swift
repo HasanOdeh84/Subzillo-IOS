@@ -22,6 +22,7 @@ struct PhoneNumberField: View {
     @State var verifyData                   : LoginSignupVerifyData?
     @State var fromSingup                   = false
     @State var fromPreview                  = false
+    @State var fromSocailLogin              = false
     
     //MARK: - body
     var body: some View {
@@ -143,7 +144,7 @@ struct PhoneNumberField: View {
                 selectedCurrency = currencies.first(where: { $0.code == Constants.shared.currencyCode })
             }
         }
-        if fromSingup{
+        if fromSingup && !fromSocailLogin{
             selectedCountry = Country(id: 0, countryName: "", countryCode: verifyData?.countryCode, dialCode: "", countryFlag: Constants.shared.flag(from: verifyData?.countryCode ?? ""))
             if let countries = commonApiVM.countriesResponse {
                 selectedCountry = countries.first(where: { $0.dialCode == verifyData?.countryCode })

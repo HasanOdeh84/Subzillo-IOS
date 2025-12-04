@@ -114,7 +114,7 @@ class RegistrationViewModel: ObservableObject {
                     else{
                         router.navigate(to: .SuccessView(isOtp: false))
                     }
-                }else if verifyData?.socialLoginType == loginType.google{
+                }else if fromSocialLogin && (verifyData?.socialLoginType == loginType.google || verifyData?.socialLoginType == loginType.microsoft){
                     if input.phoneNumber != ""{
                         let data = LoginSignupVerifyData(verifyType         : 1,
                                                          email              : input.email,

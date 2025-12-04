@@ -118,7 +118,7 @@ struct LoginView: View {
                     .background(.whiteBlackBG)
                     
                     GradientBorderButton(title: "Continue with Microsoft",isBtn:true, buttonImage: "microsoft") {
-                        ToastManager.shared.showToast(message: "Coming soon in S4",style:ToastStyle.info)
+                        loginVM.socialLogin(loginType: .microsoft,deviceId: appDelegate.deviceToken ?? "")
                     }
                     .background(.whiteBlackBG)
                 }

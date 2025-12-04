@@ -9,6 +9,7 @@ import SwiftUI
 import UserNotifications
 import UIKit
 import Firebase
+import MSAL
 
 class AppDelegate: NSObject, ObservableObject, UIApplicationDelegate, UNUserNotificationCenterDelegate {
     @Published var deviceToken          : String? = nil
@@ -85,6 +86,13 @@ class AppDelegate: NSObject, ObservableObject, UIApplicationDelegate, UNUserNoti
             }
         }
         completionHandler()
+    }
+    
+    func application(_ app: UIApplication,
+                       open url: URL,
+                     options: [UIApplication.OpenURLOptionsKey : Any] = [:]) -> Bool {
+        // Pass the URL to MSAL so it can complete the auth flow
+        return MSALPublicClientApplication.handleMSALResponse(url, sourceApplication: options[.sourceApplication] as? String)
     }
 }
 

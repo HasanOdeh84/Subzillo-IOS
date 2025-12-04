@@ -56,7 +56,8 @@ struct RegistrationView: View {
                                              selectedCurrency   : $selectedCurrency,
                                              selectedCountry    : $selectedCountry,
                                              isCountry          : true,
-                                             fromSingup         : true)
+                                             fromSingup         : true,
+                                             fromSocailLogin    : fromSocialLogin)
                             .addDoneButton()
                             ReusableTextField(placeholder: "Enter your full name", text: $fullName,header:"Full Name")
                                 .disabled(isNameDisabled)
@@ -69,7 +70,8 @@ struct RegistrationView: View {
                                              selectedCurrency   : $selectedCurrency,
                                              selectedCountry    : $selectedCountry,
                                              isCountry          : true,
-                                             fromSingup         : true)
+                                             fromSingup         : true,
+                                             fromSocailLogin    : fromSocialLogin)
                             .opacity(verifyData?.verifyType == 1 ? 0.5 : 1.0)
                             .disabled(verifyData?.verifyType == 1 ? true : false)
                             .if(verifyData?.verifyType != 1) { view in

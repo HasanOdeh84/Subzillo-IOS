@@ -72,8 +72,19 @@ class LoginViewModel: ObservableObject {
                                                                deviceId             : deviceId,
                                                                fullName             : data.fullName ?? ""))
             }
-        }else{
+        }else if loginType == .apple{
             SocialLogins.shared.signInWithApple { [weak self] data in
+                guard let data else {
+                    return
+                }
+                self?.socialLoginApi(input: SocialLoginRequest(authProvider         : data.loginType,
+                                                               email                : data.emailAddress ?? "",
+                                                               socialId             : data.id ?? "",
+                                                               deviceId             : deviceId,
+                                                               fullName             : data.fullName ?? ""))
+            }
+        }else if loginType == .microsoft{
+            SocialLogins.shared.signInWithMicrosoft { [weak self] data in
                 guard let data else {
                     return
                 }
