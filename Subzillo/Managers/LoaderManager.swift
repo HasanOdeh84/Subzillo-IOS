@@ -9,9 +9,9 @@ import SwiftUI
 import Lottie
 
 struct LottieView: UIViewRepresentable {
-    var name: String
-    var loopMode: LottieLoopMode = .loop
-    var isAspectFit = true
+    var name            : String
+    var loopMode        : LottieLoopMode = .loop
+    var isAspectFit     = true
     
     private let animationView = LottieAnimationView()
     
@@ -35,7 +35,77 @@ struct LottieView: UIViewRepresentable {
         return view
     }
     
-    func updateUIView(_ uiView: UIView, context: Context) {}
+    func updateUIView(_ uiView: UIView, context: Context) {
+    }
+}
+
+//struct LottieViewPlayPause: UIViewRepresentable {
+//    var name            : String
+//    var loopMode        : LottieLoopMode = .loop
+//    var isAspectFit     = true
+//    @Binding var play   : Bool
+//    
+//    private let animationView = LottieAnimationView()
+//    
+//    func makeUIView(context: Context) -> UIView {
+//        let view = UIView(frame: .zero)
+//        
+//        animationView.animation = LottieAnimation.named(name)
+//        animationView.contentMode = isAspectFit ? .scaleAspectFit : .scaleAspectFill
+//        animationView.loopMode = loopMode
+////        animationView.play()
+//        
+//        view.addSubview(animationView)
+//        animationView.translatesAutoresizingMaskIntoConstraints = false
+//        NSLayoutConstraint.activate([
+//            animationView.widthAnchor.constraint(equalTo: view.widthAnchor),
+//            animationView.heightAnchor.constraint(equalTo: view.heightAnchor),
+//            animationView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+//            animationView.centerYAnchor.constraint(equalTo: view.centerYAnchor)
+//        ])
+//        
+//        return view
+//    }
+//    
+//    func updateUIView(_ uiView: UIView, context: Context) {
+//        if play {
+//            animationView.play()
+//        } else {
+//            animationView.stop()
+//        }
+//    }
+//}
+
+struct LottieViewPlayPause: UIViewRepresentable {
+    var name: String
+    var loopMode: LottieLoopMode = .loop
+    var isAspectFit: Bool = true
+    @Binding var play: Bool
+    
+    func makeCoordinator() -> Coordinator {
+        Coordinator()
+    }
+    
+    func makeUIView(context: Context) -> LottieAnimationView {
+        let animationView = LottieAnimationView(name: name)
+        animationView.contentMode = isAspectFit ? .scaleAspectFit : .scaleAspectFill
+        animationView.loopMode = loopMode
+        
+        context.coordinator.animationView = animationView
+        return animationView
+    }
+    
+    func updateUIView(_ uiView: LottieAnimationView, context: Context) {
+        if play {
+            uiView.play()
+        } else {
+            uiView.pause()   // ⬅ stop() resets to frame 0; pause keeps last frame
+        }
+    }
+    
+    class Coordinator {
+        var animationView: LottieAnimationView?
+    }
 }
 
 // MARK: - Global Loader Store (Singleton)
@@ -73,7 +143,7 @@ final class LoaderManager: ObservableObject {
 
 // MARK: - Overlay UI
 private struct LoaderOverlay: View {
-    @ObservedObject private var loader = LoaderManager.shared
+    @ObservedObject private var loader  = LoaderManager.shared
     
     var body: some View {
         Group {

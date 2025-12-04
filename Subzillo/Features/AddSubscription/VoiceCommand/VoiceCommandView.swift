@@ -8,6 +8,7 @@ import SwiftUI
 import Vision
 import Speech
 import AVFoundation
+
 struct VoiceCommandView: View {
     
     //MARK: - Properties
@@ -16,6 +17,7 @@ struct VoiceCommandView: View {
     @State private var showPermissionAlert  = false
     @State var showDiscardPopup             : Bool = false
     @StateObject private var audioManager   = AudioRecorderManager()
+    @State private var isPlaying            = false
     
     //MARK: - body
     var body: some View {
@@ -61,9 +63,49 @@ struct VoiceCommandView: View {
                 
                 //             Show player only if recording exists
                 if audioManager.hasRecording && !audioManager.isRecording{
-                    HStack(spacing: 5){
+                    VStack{
+                        
+                        // Optional: slider for seeking
+                        //                        Slider(value: Binding(
+                        //                            get: { audioManager.currentTime },
+                        //                            set: { newValue in
+                        //                                audioManager.audioPlayer?.currentTime = newValue
+                        //                                audioManager.currentTime = newValue
+                        //                            }
+                        //                        ), in: 0...audioManager.duration)
+                        //                        .tint(Color.navyBlueCTA700)
+                        
+                        LottieViewPlayPause(name: "soundWave",isAspectFit: false, play: $isPlaying)
+                            .frame(height: 176)
+                            .frame(maxWidth: .infinity)
+                        
+                        VStack(alignment: .trailing) {
+                            
+                            // Your custom slider
+                            GradientThumbSlider(
+                                value: Binding(
+                                    get: { audioManager.currentTime },
+                                    set: { newValue in
+                                        audioManager.audioPlayer?.currentTime = newValue
+                                        audioManager.currentTime = newValue
+                                    }
+                                ),
+                                range: 0...audioManager.duration,
+                                thumbImage: "sliderThumb"
+                            )
+                            .frame(height: 40)
+                            
+                            // Playback progress
+                            Text("\(formatTime(Int(audioManager.currentTime))) / \(formatTime(Int(audioManager.duration)))")
+                                .font(.appRegular(14))
+                                .foregroundStyle(Color.whiteBlackBGnoPic)
+                                .frame(alignment: .trailing)
+                                .padding(.top,-22)
+                        }
+                        
                         // Play/Pause button
                         Button(action: {
+                            isPlaying.toggle()
                             if audioManager.isPlaying {
                                 audioManager.pausePlayback()
                             } else {
@@ -71,22 +113,10 @@ struct VoiceCommandView: View {
                             }
                         }) {
                             Image(audioManager.isPlaying ? "Pause" : "Play")
-                                .frame(width: 40,height: 40)
+                                .frame(width: 72,height: 72)
+                                .frame(alignment: .center)
                         }
-                        // Optional: slider for seeking
-                        Slider(value: Binding(
-                            get: { audioManager.currentTime },
-                            set: { newValue in
-                                audioManager.audioPlayer?.currentTime = newValue
-                                audioManager.currentTime = newValue
-                            }
-                        ), in: 0...audioManager.duration)
-                        .tint(Color.navyBlueCTA700)
                         
-                        // Playback progress
-                        Text("\(formatTime(Int(audioManager.currentTime))) / \(formatTime(Int(audioManager.duration)))")
-                            .font(.appRegular(14))
-                            .foregroundStyle(Color.whiteBlackBGnoPic)
                         Spacer()
                     }
                     .padding(.horizontal, 20)
@@ -130,7 +160,7 @@ struct VoiceCommandView: View {
                         .padding(.top, 16)
                         .padding(.bottom, 24)
                 }
-             
+                
                 if audioManager.hasRecording && !audioManager.isRecording{
                     CustomButton(
                         title       : "Submit",
@@ -151,16 +181,6 @@ struct VoiceCommandView: View {
                     .padding(.vertical, 24)
                     .disabled(!audioManager.isRecording)
                 }
-                
-//                CustomButton(
-//                    title       : "Submit",
-//                    background  : audioManager.hasRecording ? .navyBlueCTA700 : Color.neutralDisabled200,
-//                    textColor   : audioManager.hasRecording ? .neutralDisabled200White : Color.neutral500,
-//                    action      : submitAction
-//                )
-//                .padding(.horizontal, 20)
-//                .padding(.vertical, 24)
-//                .disabled(!audioManager.hasRecording)
                 
                 // MARK: - Reset Button
                 GradientBorderButton(title: "Discard",isBtn:true, buttonImage: "discardIcon", action:{
@@ -233,6 +253,11 @@ struct VoiceCommandView: View {
                 }
             }
         }
+        .onChange(of: audioManager.isPlaying) { _ in
+            if !audioManager.isPlaying{
+                isPlaying = false
+            }
+        }
     }
     
     private func clickOnHowItWorks() {
@@ -278,3 +303,140 @@ struct VoiceCommandView: View {
 #Preview {
     VoiceCommandView()
 }
+
+//MARK: - GradientThumbSlider
+struct GradientThumbSlider: View {
+    
+    //MARK: - Properties
+    @Binding var value  : Double
+    var range           : ClosedRange<Double>
+    var thumbImage      : String
+    
+    var body: some View {
+        //        GeometryReader { geo in
+        //
+        //            let width = geo.size.width
+        //            let progress = CGFloat((value - range.lowerBound) /
+        //                                   (range.upperBound - range.lowerBound))
+        //
+        //            ZStack(alignment: .leading) {
+        //
+        //                // Background track
+        //                Capsule()
+        //                    .fill(Color.sliderBgTrack)
+        //                    .frame(height: 6)
+        //
+        //                // Gradient filled progress
+        ////                Capsule()
+        ////                    .fill(
+        ////                        LinearGradient(
+        ////                            colors: [
+        ////                                Color.linearGradient3,
+        ////                                Color.linearGradient4,
+        ////                                Color.blueMain700
+        ////                            ],
+        ////                            startPoint: .leading,
+        ////                            endPoint: .trailing
+        ////                        )
+        ////                    )
+        ////                    .frame(width: width * progress, height: 6)
+        //
+        //                Capsule()
+        //                    .fill(
+        //                        LinearGradient(
+        //                            colors: [
+        //                                Color.linearGradient3,
+        //                                Color.linearGradient4,
+        //                                Color.blueMain700
+        //                            ],
+        //                            startPoint: .leading,
+        //                            endPoint: .trailing
+        //                        )
+        //                    )
+        //                    .frame(
+        //                        width: max(0,
+        //                                   min(width,
+        //                                       width * (progress.isFinite ? progress : 0)
+        //                                   )
+        //                        ),
+        //                        height: 6
+        //                    )
+        //
+        //
+        //                // Custom thumb image
+        //                Image(thumbImage)
+        //                    .resizable()
+        //                    .frame(width: 24, height: 24)
+        //                    .offset(x: max(0, min(width - 24, width * progress - 12)))
+        //                    .gesture(
+        //                        DragGesture()
+        //                            .onChanged { gesture in
+        //                                let location = gesture.location.x
+        //                                let percent = min(max(location / width, 0), 1)
+        //                                value = Double(percent) *
+        //                                (range.upperBound - range.lowerBound) +
+        //                                range.lowerBound
+        //                            }
+        //                    )
+        //                    .shadow(color: .shadow, radius: 4)
+        //            }
+        //        }
+        GeometryReader { geo in
+            
+            let width = geo.size.width
+            
+            // 👉 ADD THIS HERE (before using progress)
+            let progressRaw = (value - range.lowerBound) /
+            (range.upperBound - range.lowerBound)
+            
+            let progress = progressRaw.isFinite
+            ? max(0, min(1, progressRaw))
+            : 0
+            
+            ZStack(alignment: .leading) {
+                
+                // Background track
+                Capsule()
+                    .fill(Color.gray.opacity(0.2))
+                    .frame(height: 6)
+                
+                // Filled gradient track
+                Capsule()
+                    .fill(
+                        LinearGradient(
+                            colors: [
+                                Color.linearGradient3,
+                                Color.linearGradient4,
+                                Color.blueMain700
+                            ],
+                            startPoint: .leading,
+                            endPoint: .trailing
+                        )
+                    )
+                    .frame(
+                        width: max(0, min(width, width * progress)),
+                        height: 6
+                    )
+                
+                // Thumb image
+                Image(thumbImage)
+                    .resizable()
+                    .frame(width: 24, height: 24)
+                    .offset(x: max(0, min(width - 24, width * progress - 12)))
+                    .gesture(
+                        DragGesture()
+                            .onChanged { gesture in
+                                let location = gesture.location.x
+                                let percent = min(max(location / width, 0), 1)
+                                value = Double(percent) *
+                                (range.upperBound - range.lowerBound) +
+                                range.lowerBound
+                            }
+                    )
+            }
+        }
+        .frame(height: 40)
+    }
+}
+
+
