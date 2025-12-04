@@ -115,7 +115,9 @@ struct VoiceCommandView: View {
                     .shadow(color: Color.dropShadow, radius: 2, x: 0, y: 2)
                     .frame(maxWidth: .infinity, alignment: .center)
                     .onTapGesture {
-                        audioManager.isRecording ? audioManager.stopRecording() : audioManager.startRecording()
+                        if !audioManager.isRecording{
+                            audioManager.startRecording()
+                        } //audioManager.isRecording ? audioManager.stopRecording() : audioManager.startRecording()
                     }
                 }
                 
@@ -129,15 +131,36 @@ struct VoiceCommandView: View {
                         .padding(.bottom, 24)
                 }
              
-                CustomButton(
-                    title       : "Submit",
-                    background  : audioManager.hasRecording ? .navyBlueCTA700 : Color.neutralDisabled200,
-                    textColor   : audioManager.hasRecording ? .neutralDisabled200White : Color.neutral500,
-                    action      : submitAction
-                )
-                .padding(.horizontal, 20)
-                .padding(.vertical, 24)
-                .disabled(!audioManager.hasRecording)
+                if audioManager.hasRecording && !audioManager.isRecording{
+                    CustomButton(
+                        title       : "Submit",
+                        background  : .navyBlueCTA700,
+                        textColor   : .neutralDisabled200White,
+                        action      : submitAction
+                    )
+                    .padding(.horizontal, 20)
+                    .padding(.vertical, 24)
+                }else{
+                    CustomButton(
+                        title       : "Stop",
+                        background  : audioManager.isRecording ? .navyBlueCTA700 : Color.neutralDisabled200,
+                        textColor   : audioManager.isRecording ? .neutralDisabled200White : Color.neutral500,
+                        action      : stopBtn
+                    )
+                    .padding(.horizontal, 20)
+                    .padding(.vertical, 24)
+                    .disabled(!audioManager.isRecording)
+                }
+                
+//                CustomButton(
+//                    title       : "Submit",
+//                    background  : audioManager.hasRecording ? .navyBlueCTA700 : Color.neutralDisabled200,
+//                    textColor   : audioManager.hasRecording ? .neutralDisabled200White : Color.neutral500,
+//                    action      : submitAction
+//                )
+//                .padding(.horizontal, 20)
+//                .padding(.vertical, 24)
+//                .disabled(!audioManager.hasRecording)
                 
                 // MARK: - Reset Button
                 GradientBorderButton(title: "Discard",isBtn:true, buttonImage: "discardIcon", action:{
@@ -231,6 +254,10 @@ struct VoiceCommandView: View {
             mimeType    : "audio/x-m4a",
             fileData    : voiceData
         )], audioUrl: audioManager.audioURL)
+    }
+    
+    func stopBtn(){
+        audioManager.stopRecording()
     }
     
     // MARK: - Format Time

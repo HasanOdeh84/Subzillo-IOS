@@ -8,6 +8,7 @@
 import SwiftUI
 import UserNotifications
 import UIKit
+import Firebase
 
 class AppDelegate: NSObject, ObservableObject, UIApplicationDelegate, UNUserNotificationCenterDelegate {
     @Published var deviceToken          : String? = nil
@@ -94,6 +95,7 @@ struct SubzilloApp: App {
         let item = UITextField.appearance().inputAssistantItem
         item.leadingBarButtonGroups = []
         item.trailingBarButtonGroups = []
+        FirebaseApp.configure()
     }
     
     @StateObject private var router             = AppIntentRouter.shared

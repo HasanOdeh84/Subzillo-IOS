@@ -81,13 +81,25 @@ struct SubscriptionRow: View {
     let subscriptionData: SubscriptionInfoo
     var body: some View {
         HStack(spacing: 0) {
-            Text(getDay(from: subscriptionData.createdAt ?? ""))
-                .font(.appSemiBold(24))
-                .foregroundColor(.navyBlueCTA700)
-                .multilineTextAlignment(.center)
-                .frame(width: 60, alignment: .center)
-                .frame(height: calculatedHeight(for: subscriptionData))
-                .background(Color.primeryBlue100)
+            VStack(alignment: .center,spacing: 5){
+                let result = getDayInfo(from: subscriptionData.createdAt ?? "")
+                Text(result.dayName.uppercased())
+                    .font(.appSemiBold(14))
+                    .foregroundColor(.navyBlueCTA700)
+                    .multilineTextAlignment(.center)
+                    .frame(width: 60, alignment: .center)
+                    .background(Color.primeryBlue100)
+                    .autocapitalization(.allCharacters)
+                
+                Text(result.dayNumber)
+                    .font(.appSemiBold(24))
+                    .foregroundColor(.navyBlueCTA700)
+                    .multilineTextAlignment(.center)
+                    .frame(width: 60, alignment: .center)
+                    .background(Color.primeryBlue100)
+            }
+            .frame(height: calculatedHeight(for: subscriptionData))
+            .background(Color.primeryBlue100)
             
             DashedVerticalDivider()
             
@@ -202,6 +214,7 @@ struct SubscriptionRow: View {
         .cornerRadius(8)
         .padding(.bottom, 8)
     }
+    
     func calculatedHeight(for subscriptionData: SubscriptionInfoo) -> Double {
         guard subscriptionData.isOpen ?? false else {
             return 76
@@ -217,6 +230,7 @@ struct SubscriptionRow: View {
         
         return 52 + heightValue
     }
+    
     func getDay(from dateString: String) -> String {
         let formatter = DateFormatter()
         formatter.dateFormat = "yyyy-MM-dd"
@@ -225,7 +239,22 @@ struct SubscriptionRow: View {
         let day = Calendar.current.component(.day, from: date)
         return String(day)
     }
+    
+    func getDayInfo(from dateString: String) -> (dayNumber: String, dayName: String) {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd"
+        guard let date = formatter.date(from: dateString) else {
+            return ("", "")
+        }
+        // Day number
+        let dayNumber = Calendar.current.component(.day, from: date)
+        // Day name (Mon, Tue, Wed...)
+        formatter.dateFormat = "EEE"   // 3-letter day name
+        let dayName = formatter.string(from: date)
+        return ("\(dayNumber)", dayName)
+    }
 }
+
 struct DashedVerticalDivider: View {
     var body: some View {
         GeometryReader { geometry in
@@ -238,6 +267,7 @@ struct DashedVerticalDivider: View {
         .frame(width: 1)
     }
 }
+
 struct DashedHorizontalDivider: View {
     var dash: [CGFloat] = [3, 3]
     
@@ -252,6 +282,7 @@ struct DashedHorizontalDivider: View {
         .frame(height: 1)
     }
 }
+
 struct PlanView: View {
     var isMore          : Bool = false
     var image           : String?
@@ -276,6 +307,7 @@ struct PlanView: View {
         .cornerRadius(12)
     }
 }
+
 struct RelationView: View {
     var isMore          : Bool = false
     var name            : String?
@@ -302,6 +334,7 @@ struct RelationView: View {
         
     }
 }
+
 struct PlanDetailsView: View {
     var image           : String?
     var serviceName     : String?

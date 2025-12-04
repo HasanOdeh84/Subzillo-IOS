@@ -849,6 +849,13 @@ struct FieldView: View
                                 .onChange(of: text) { newValue in
                                     filterDigitsAndLimit(maxDigits: maxDigits)
                                 }
+                                .onChange(of: text) { newValue in
+                                    let dotCount = newValue.filter { $0 == "." }.count
+                                    if dotCount > 1 {
+                                        // Remove the latest typed character
+                                        text.removeLast()
+                                    }
+                                }
                         }
                         .padding(6)
                     }else{

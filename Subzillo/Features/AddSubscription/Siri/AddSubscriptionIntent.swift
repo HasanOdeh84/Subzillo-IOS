@@ -77,56 +77,56 @@ struct AddSubscriptionIntent: AppIntent {
         return .result()
     }
     
-    /*
-     func perform() async throws -> some IntentResult & ProvidesDialog{
-     var currencyCode    = ""
-     var currencySymbol  = ""
-     if let currency = Constants.shared.getCurrencyDetails(from: currency) {
-     print(currency.code)
-     print(currency.symbol)
-     currencyCode    = currency.code
-     currencySymbol  = currency.symbol
-     }
+    
+//     func perform() async throws -> some IntentResult & ProvidesDialog{
+//     var currencyCode    = ""
+//     var currencySymbol  = ""
+//     if let currency = Constants.shared.getCurrencyDetails(from: currency) {
+//     print(currency.code)
+//     print(currency.symbol)
+//     currencyCode    = currency.code
+//     currencySymbol  = currency.symbol
+//     }
+//     
+//     siriData = ["serviceName":serviceName,"planName":planName,"price":price,"billingCycle":billingCycle,"category":category,"currencyCode":currencyCode, "currencySymbol": currencySymbol, "nextChargeDate": nextChargeDate]
+//     if AppState.shared.isLoggedIn{
+//     
+//     let formatter = DateFormatter()
+//     formatter.dateFormat = "dd/MM/yyyy"
+//     let chargeDate = formatter.string(from: nextChargeDate)
+//     
+//     let input = AddSubscriptionRequest(userId               : Constants.getUserId(),
+//     serviceName          : serviceName,
+//     amount               : Double(price),
+//     currency             : currencyCode,
+//     billingCycle         : billingCycle,
+//     nextPaymentDate      : chargeDate.formattedDate(from: "dd/MM/yyyy", to: "yyyy-MM-dd"),
+//     subscriptionType     : planName,
+//     paymentMethod        : "",
+//     paymentMethodDataId  : "",
+//     category             : category,
+//     subscriptionFor      : Constants.getUserId(),
+//     renewalReminder      : [""],
+//     notes                : "",
+//     currencySymbol       : currencySymbol)
+//     
+//     do{
+//     let success =  await ManualEntryViewModel().addSubscriptionSiri(input: input)
+//     
+//     if success {
+//     return .result(dialog: "Subscription added successfully!")
+//     } else {
+//     return .result(dialog: "Failed to add subscription.")
+//     }
+//     
+//     } catch {
+//     return .result(dialog: "Something went wrong while adding your subscription.")
+//     }
+//     }
+//     
+//     return .result(dialog: "")
+//     }
      
-     siriData = ["serviceName":serviceName,"planName":planName,"price":price,"billingCycle":billingCycle,"category":category,"currencyCode":currencyCode, "currencySymbol": currencySymbol, "nextChargeDate": nextChargeDate]
-     if AppState.shared.isLoggedIn{
-     
-     let formatter = DateFormatter()
-     formatter.dateFormat = "dd/MM/yyyy"
-     let chargeDate = formatter.string(from: nextChargeDate)
-     
-     let input = AddSubscriptionRequest(userId               : Constants.getUserId(),
-     serviceName          : serviceName,
-     amount               : Double(price),
-     currency             : currencyCode,
-     billingCycle         : billingCycle,
-     nextPaymentDate      : chargeDate.formattedDate(from: "dd/MM/yyyy", to: "yyyy-MM-dd"),
-     subscriptionType     : planName,
-     paymentMethod        : "",
-     paymentMethodDataId  : "",
-     category             : "",
-     subscriptionFor      : Constants.getUserId(),
-     renewalReminder      : [""],
-     notes                : "",
-     currencySymbol       : currencySymbol)
-     
-     do{
-     let success =  await ManualEntryViewModel().addSubscriptionSiri(input: input)
-     
-     if success {
-     return .result(dialog: "Subscription added successfully!")
-     } else {
-     return .result(dialog: "Failed to add subscription.")
-     }
-     
-     } catch {
-     return .result(dialog: "Something went wrong while adding your subscription.")
-     }
-     }
-     
-     return .result(dialog: "user is not logged in.")
-     }
-     */
     
     /*
      do {

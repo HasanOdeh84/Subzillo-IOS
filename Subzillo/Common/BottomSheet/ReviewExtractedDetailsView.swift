@@ -42,6 +42,8 @@ struct ReviewExtractedDetailsView: View {
         ManualDataInfo(id: "5", title: "Biannually", subtitle: "Every 180 Days"),
         ManualDataInfo(id: "6", title: "Yearly", subtitle: "Every 360 Days")
     ]
+    @FocusState private var isInputActive       : Bool
+
     
     //MARK: - body
     var body: some View {
@@ -70,16 +72,15 @@ struct ReviewExtractedDetailsView: View {
                 .padding(.horizontal, 16)
                 .background(colorValue)
                 .cornerRadius(4)
-                .padding(.top,3)
                 .padding(.bottom,36)
                 .padding(.horizontal, -5)
             
             switch detailType {
             case .service:
                 FieldView(text: $serviceName, title: "Service Name", image: "gridIcon", placeHolder: "e.g. Netflix, Spotify, Adobe")
-                    .addDoneButton()
             case .amount:
                 FieldView(text: $amount, title: "Amount", image: "currencyIcon", placeHolder: "0.00",isNumberPad: true)
+                    .focused($isInputActive)
             case .nextChargeDate:
                 Button(action: dateSelection) {
                     FieldView(text: $chargeDate, textValue: "", title: "Next Charge Date", image: "Calendar1", placeHolder: "dd/mm/yyyy", isButton: false, isText: true, isDate:true)
@@ -201,6 +202,14 @@ struct ReviewExtractedDetailsView: View {
         }
         .onChange(of: commonApiVM.categoriesResponse) { _ in updateCatInfo() }
         .modifier(ToastModifier(toast: toastManager))
+        .toolbar {
+            ToolbarItemGroup(placement: .keyboard) {
+                Spacer()
+                Button("Done") {
+                    isInputActive = false
+                }
+            }
+        }
     }
     
     //MARK: - User defined methods

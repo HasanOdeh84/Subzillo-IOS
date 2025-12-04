@@ -156,7 +156,9 @@ struct SubscriptionPreviewView: View {
                             HStack(spacing: 16) {
                                 SubscriptionDetailsItem(title: "Service", value: subscriptionData?.serviceName ?? "", confidence: subscriptionData?.serviceNameConfidence ?? 0.0)
                                     .onTapGesture {
-                                        showServiceBottom = true
+                                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                                            showServiceBottom = true
+                                        }
                                     }
                                     .sheet(isPresented: $showServiceBottom, onDismiss:{
                                         print("sheet dismissed")
@@ -167,13 +169,16 @@ struct SubscriptionPreviewView: View {
                                                                    detailType   : ReviewExtractedType.service,
                                                                    confidence   : subscriptionData?.serviceNameConfidence ?? 0.0,
                                                                    extractedData: subscriptionData)
+                                        .id(UUID())
                                         .presentationDragIndicator(.hidden)
-                                        .presentationDetents([.medium, .large])
+                                        .presentationDetents([.height(400)])
                                     }
                                 
                                 SubscriptionDetailsItem(title: "Amount", value: "\(subscriptionData?.currencySymbol ?? "")\(subscriptionData?.amount ?? 0.0)", confidence: subscriptionData?.amountConfidence ?? 0.0)
                                     .onTapGesture {
-                                        showAmountBottom = true
+                                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                                            showAmountBottom = true
+                                        }
                                     }
                                     .sheet(isPresented: $showAmountBottom) {
                                         ReviewExtractedDetailsView(onDelegate: {
@@ -181,15 +186,18 @@ struct SubscriptionPreviewView: View {
                                                                    detailType   : ReviewExtractedType.amount,
                                                                    confidence   : subscriptionData?.serviceNameConfidence ?? 0.0,
                                                                    extractedData: subscriptionData)
+                                        .id(UUID())
                                         .presentationDragIndicator(.hidden)
-                                        .presentationDetents([.medium, .large])
+                                        .presentationDetents([.height(400)])
                                     }
                             }
                             
                             HStack(spacing: 16) {
                                 SubscriptionDetailsItem(title: "Next Charge Date", value: (subscriptionData?.nextPaymentDate ?? "").formattedDate(), confidence: subscriptionData?.nextPaymentDateConfidence ?? 0.0)
                                     .onTapGesture {
-                                        showNextChargeDateBottom = true
+                                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                                            showNextChargeDateBottom = true
+                                        }
                                     }
                                     .sheet(isPresented: $showNextChargeDateBottom) {
                                         ReviewExtractedDetailsView(onDelegate: {
@@ -197,20 +205,25 @@ struct SubscriptionPreviewView: View {
                                                                    detailType   : ReviewExtractedType.nextChargeDate,
                                                                    confidence   : subscriptionData?.serviceNameConfidence ?? 0.0,
                                                                    extractedData: subscriptionData)
+                                        .id(UUID())
                                         .presentationDragIndicator(.hidden)
-                                        .presentationDetents([.medium, .large])
+                                        .presentationDetents([.height(400)])
                                     }
                                 if subscriptionData?.currency ?? "" == ""
                                 {
                                     SubscriptionDetailsItem(title: "Currency", value: Constants.shared.currencyCode, confidence: 0.0, isAssumed: true)
                                         .onTapGesture {
-                                            showCurrencyBottom = true
+                                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                                                showCurrencyBottom = true
+                                            }
                                         }
                                 }
                                 else{
                                     SubscriptionDetailsItem(title: "Currency", value: subscriptionData?.currency ?? "", confidence: subscriptionData?.currencyConfidence ?? 0.0)
                                         .onTapGesture {
-                                            showCurrencyBottom = true
+                                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                                                showCurrencyBottom = true
+                                            }
                                         }
                                 }
                             }
@@ -218,7 +231,9 @@ struct SubscriptionPreviewView: View {
                             HStack(spacing: 16) {
                                 SubscriptionDetailsItem(title: "Category", value: subscriptionData?.categoryName ?? "", confidence: subscriptionData?.categoryConfidence ?? 0.0)
                                     .onTapGesture {
-                                        showCategoryBottom = true
+                                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                                            showCategoryBottom = true
+                                        }
                                     }
                                     .sheet(isPresented: $showCategoryBottom) {
                                         ReviewExtractedDetailsView(onDelegate: {
@@ -226,18 +241,23 @@ struct SubscriptionPreviewView: View {
                                                                    detailType   : ReviewExtractedType.category,
                                                                    confidence   : subscriptionData?.serviceNameConfidence ?? 0.0,
                                                                    extractedData: subscriptionData)
+                                        .id(UUID())
                                         .presentationDragIndicator(.hidden)
-                                        .presentationDetents([.medium, .large])
+                                        .presentationDetents([.height(400)])
                                     }
                                 SubscriptionDetailsItem(title: "Plan Type", value: subscriptionData?.subscriptionType ?? "", confidence: subscriptionData?.subscriptionTypeConfidence ?? 0.0)
                                     .onTapGesture {
-                                        showPlanTypeBottom = true
+                                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                                            showPlanTypeBottom = true
+                                        }
                                     }
                             }
                             
                             SubscriptionDetailsItem(title: "Billing Cycle", value: subscriptionData?.billingCycle ?? "", confidence: subscriptionData?.billingCycleConfidence ?? 0.0)
                                 .onTapGesture {
-                                    showBillingCycleBottom = true
+                                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                                        showBillingCycleBottom = true
+                                    }
                                 }
                                 .sheet(isPresented: $showBillingCycleBottom) {
                                     ReviewExtractedDetailsView(onDelegate: {
@@ -245,8 +265,9 @@ struct SubscriptionPreviewView: View {
                                                                detailType   : ReviewExtractedType.billingCycle,
                                                                confidence   : subscriptionData?.serviceNameConfidence ?? 0.0,
                                                                extractedData: subscriptionData)
+                                    .id(UUID())
                                     .presentationDragIndicator(.hidden)
-                                    .presentationDetents([.medium, .large])
+                                    .presentationDetents([.height(400)])
                                 }
                         }
                     }
@@ -454,8 +475,9 @@ struct SubscriptionPreviewView: View {
                                        detailType   : ReviewExtractedType.currency,
                                        confidence   : subscriptionData?.serviceNameConfidence ?? 0.0,
                                        extractedData: subscriptionData)
+            .id(UUID())
             .presentationDragIndicator(.hidden)
-            .presentationDetents([.medium, .large])
+            .presentationDetents([.height(400)])
         }
         .sheet(isPresented: $showPlanTypeBottom) {
             ReviewExtractedDetailsView(onDelegate: {
@@ -463,8 +485,9 @@ struct SubscriptionPreviewView: View {
                                        detailType   : ReviewExtractedType.planType,
                                        confidence   : subscriptionData?.serviceNameConfidence ?? 0.0,
                                        extractedData: subscriptionData)
+            .id(UUID())
             .presentationDragIndicator(.hidden)
-            .presentationDetents([.medium, .large])
+            .presentationDetents([.height(400)])
         }
     }
     

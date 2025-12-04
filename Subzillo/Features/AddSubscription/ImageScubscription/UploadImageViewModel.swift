@@ -39,6 +39,7 @@ class UploadImageViewModel: ObservableObject {
                 self.showErrorPopup = true
             }
             else{
+                NotificationCenter.default.post(name: .closeAllBottomSheets, object: nil)
                 self.router.navigate(to: .subscriptionPreviewView(subscriptionsData: response.data?.subscriptions, content: "", isFromImage:true, audioUrl: nil))
             }
            // self.router.navigate(to: .subscriptionPreviewView(subscriptionsData: response.data?.subscriptions, content: "", isFromImage:true))
