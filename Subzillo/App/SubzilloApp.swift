@@ -204,6 +204,7 @@ struct RootView: View {
                 case .welcome:
                     WelcomeHomeView()
                 case .manualEntry(let isFromEdit, let isFromListEdit, let subscriptionId):
+                    
                     ManualEntryView(isFromEdit: isFromEdit, isFromListEdit: isFromListEdit, subscriptionId: subscriptionId)
                 case .voiceCommandView:
                     VoiceCommandView()

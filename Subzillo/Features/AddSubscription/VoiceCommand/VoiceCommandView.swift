@@ -66,14 +66,14 @@ struct VoiceCommandView: View {
                     VStack{
                         
                         // Optional: slider for seeking
-                        //                        Slider(value: Binding(
-                        //                            get: { audioManager.currentTime },
-                        //                            set: { newValue in
-                        //                                audioManager.audioPlayer?.currentTime = newValue
-                        //                                audioManager.currentTime = newValue
-                        //                            }
-                        //                        ), in: 0...audioManager.duration)
-                        //                        .tint(Color.navyBlueCTA700)
+                        //                                                Slider(value: Binding(
+                        //                                                    get: { audioManager.currentTime },
+                        //                                                    set: { newValue in
+                        //                                                        audioManager.audioPlayer?.currentTime = newValue
+                        //                                                        audioManager.currentTime = newValue
+                        //                                                    }
+                        //                                                ), in: 0...audioManager.duration)
+                        //                                                .tint(Color.navyBlueCTA700)
                         
                         LottieViewPlayPause(name: "soundWave",isAspectFit: false, play: $isPlaying)
                             .frame(height: 176)
@@ -100,7 +100,7 @@ struct VoiceCommandView: View {
                                 .font(.appRegular(14))
                                 .foregroundStyle(Color.whiteBlackBGnoPic)
                                 .frame(alignment: .trailing)
-                                .padding(.top,-22)
+                                .padding(.top, -22)
                         }
                         
                         // Play/Pause button
@@ -313,74 +313,6 @@ struct GradientThumbSlider: View {
     var thumbImage      : String
     
     var body: some View {
-        //        GeometryReader { geo in
-        //
-        //            let width = geo.size.width
-        //            let progress = CGFloat((value - range.lowerBound) /
-        //                                   (range.upperBound - range.lowerBound))
-        //
-        //            ZStack(alignment: .leading) {
-        //
-        //                // Background track
-        //                Capsule()
-        //                    .fill(Color.sliderBgTrack)
-        //                    .frame(height: 6)
-        //
-        //                // Gradient filled progress
-        ////                Capsule()
-        ////                    .fill(
-        ////                        LinearGradient(
-        ////                            colors: [
-        ////                                Color.linearGradient3,
-        ////                                Color.linearGradient4,
-        ////                                Color.blueMain700
-        ////                            ],
-        ////                            startPoint: .leading,
-        ////                            endPoint: .trailing
-        ////                        )
-        ////                    )
-        ////                    .frame(width: width * progress, height: 6)
-        //
-        //                Capsule()
-        //                    .fill(
-        //                        LinearGradient(
-        //                            colors: [
-        //                                Color.linearGradient3,
-        //                                Color.linearGradient4,
-        //                                Color.blueMain700
-        //                            ],
-        //                            startPoint: .leading,
-        //                            endPoint: .trailing
-        //                        )
-        //                    )
-        //                    .frame(
-        //                        width: max(0,
-        //                                   min(width,
-        //                                       width * (progress.isFinite ? progress : 0)
-        //                                   )
-        //                        ),
-        //                        height: 6
-        //                    )
-        //
-        //
-        //                // Custom thumb image
-        //                Image(thumbImage)
-        //                    .resizable()
-        //                    .frame(width: 24, height: 24)
-        //                    .offset(x: max(0, min(width - 24, width * progress - 12)))
-        //                    .gesture(
-        //                        DragGesture()
-        //                            .onChanged { gesture in
-        //                                let location = gesture.location.x
-        //                                let percent = min(max(location / width, 0), 1)
-        //                                value = Double(percent) *
-        //                                (range.upperBound - range.lowerBound) +
-        //                                range.lowerBound
-        //                            }
-        //                    )
-        //                    .shadow(color: .shadow, radius: 4)
-        //            }
-        //        }
         GeometryReader { geo in
             
             let width = geo.size.width
@@ -419,10 +351,25 @@ struct GradientThumbSlider: View {
                     )
                 
                 // Thumb image
-                Image(thumbImage)
-                    .resizable()
+                //                Image(thumbImage)
+                //                    .resizable()
+                //                    .frame(width: 24, height: 24)
+                //                    .offset(x: max(0, min(width - 24, width * progress - 12)))
+                //                    .gesture(
+                //                        DragGesture()
+                //                            .onChanged { gesture in
+                //                                let location = gesture.location.x
+                //                                let percent = min(max(location / width, 0), 1)
+                //                                value = Double(percent) *
+                //                                (range.upperBound - range.lowerBound) +
+                //                                range.lowerBound
+                //                            }
+                //                    )
+                //                    .shadow(color: .shadow, radius: 4)
+                
+                GradientThumb()
                     .frame(width: 24, height: 24)
-                    .offset(x: max(0, min(width - 24, width * progress - 12)))
+                    .offset(x: max(0, min(width - 28, width * progress - 14)))
                     .gesture(
                         DragGesture()
                             .onChanged { gesture in
@@ -433,10 +380,32 @@ struct GradientThumbSlider: View {
                                 range.lowerBound
                             }
                     )
+                
             }
         }
-        .frame(height: 40)
     }
 }
 
+struct GradientThumb: View {
+    var body: some View {
+        ZStack {
+            Circle()
+                .fill(
+                    LinearGradient(
+                        colors: [
+                            Color.linearGradient3,
+                            Color.linearGradient4,
+                            Color.blueMain700
+                        ],
+                        startPoint: .top,
+                        endPoint: .bottom
+                    )
+                )
+            
+            Circle()
+                .stroke(Color.white, lineWidth: 2)
+        }
+        .shadow(color: .shadow, radius: 4, x: 0, y: 2)
+    }
+}
 

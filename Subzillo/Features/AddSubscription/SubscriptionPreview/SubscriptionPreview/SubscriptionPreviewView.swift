@@ -103,7 +103,7 @@ struct SubscriptionPreviewView: View {
             
             ScrollView {
                 VStack(spacing: 24) {
-                    if isFromImage == false {
+                    if isFromImage == false && audioURL != nil{
                         VStack(alignment: .leading, spacing: 8) {
                             
                             Text("Original Content")
@@ -787,7 +787,7 @@ struct VoicePlayerUI: View {
     @ObservedObject var audioManager: AudioRecorderManager
 
     var body: some View {
-        HStack(spacing: 5) {
+        HStack(alignment: .center,spacing: 5) {
             
             Button(action: {
                 if audioManager.isPlaying {
@@ -796,22 +796,40 @@ struct VoicePlayerUI: View {
                     audioManager.playRecording()
                 }
             }) {
-                Image(audioManager.isPlaying ? "Pause" : "Play")
+                Image(audioManager.isPlaying ? "pause_review" : "play_review")
                     .frame(width: 40, height: 40)
             }
 
-            Slider(value: Binding(
-                get: { audioManager.currentTime },
-                set: { newValue in
-                    audioManager.currentTime = newValue
-                    audioManager.audioPlayer?.currentTime = newValue
-                }
-            ), in: 0...audioManager.duration)
-            .tint(.navyBlueCTA700)
+//            Slider(value: Binding(
+//                get: { audioManager.currentTime },
+//                set: { newValue in
+//                    audioManager.currentTime = newValue
+//                    audioManager.audioPlayer?.currentTime = newValue
+//                }
+//            ), in: 0...audioManager.duration)
+//            .tint(.navyBlueCTA700)
+            
+            VStack{
+                Spacer()
+                GradientThumbSlider(
+                    value: Binding(
+                        get: { audioManager.currentTime },
+                        set: { newValue in
+                            audioManager.audioPlayer?.currentTime = newValue
+                            audioManager.currentTime = newValue
+                        }
+                    ),
+                    range: 0...audioManager.duration,
+                    thumbImage: "sliderThumb"
+                )
+                Spacer()
+            }
+//            .frame(height: 40)
 
             Text("\(formatTime(TimeInterval(Int(audioManager.currentTime)))) / \(formatTime(TimeInterval(Int(audioManager.duration))))")
                 .font(.appRegular(14))
                 .foregroundStyle(Color.whiteBlackBGnoPic)
+                .padding(.leading, 10)
 
             Spacer()
         }

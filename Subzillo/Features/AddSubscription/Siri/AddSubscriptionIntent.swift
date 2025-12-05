@@ -48,7 +48,12 @@ struct AddSubscriptionIntent: AppIntent {
     @Parameter(title: "Service Name") var serviceName: String
     @Parameter(title: "Category") var category: String
     @Parameter(title: "Plan Type") var planName: String
-    @Parameter(title: "Amount") var price: Double
+    //    @Parameter(title: "Amount") var price: Double
+    @Parameter(
+        title: "Amount",
+        requestValueDialog: "What's the amount? (Say digits only)"
+    )
+    var price: Double
     @Parameter(title: "Currency") var currency: String
     @Parameter(title: "Billing Cycle") var billingCycle: String
     @Parameter(
@@ -59,6 +64,7 @@ struct AddSubscriptionIntent: AppIntent {
     
     @MainActor
     func perform() async throws -> some IntentResult {
+        
         var currencyCode    = ""
         var currencySymbol  = ""
         if let currency = Constants.shared.getCurrencyDetails(from: currency) {
@@ -69,64 +75,73 @@ struct AddSubscriptionIntent: AppIntent {
         }
         
         siriData = ["serviceName":serviceName,"planName":planName,"price":price,"billingCycle":billingCycle,"category":category,"currencyCode":currencyCode, "currencySymbol": currencySymbol, "nextChargeDate": nextChargeDate]
+        
+        let textValue = "My service name is \(serviceName), plan name is \(planName), price is \(price) , currency is \(currency), billing cycle is \(billingCycle), category is \(category), and next charge date is \(nextChargeDate)."
+        
         if AppState.shared.isLoggedIn{
             NotificationCenter.default.post(name: .closeAllBottomSheets, object: nil)
-            AppIntentRouter.shared.navigatingRoute = .manualEntry(isFromEdit: false)
+            do{
+                let input = TextSubscriptionRequest(userId: Constants.getUserId(), text: textValue)
+                let success =  await VoiceCommandViewModel.shared.textSubscription(input: input, fromSiri: true)
+                if success {
+                } else {
+                    AppIntentRouter.shared.navigatingRoute = .manualEntry(isFromEdit: false)
+                }
+            }
         }
-        
         return .result()
     }
     
     
-//     func perform() async throws -> some IntentResult & ProvidesDialog{
-//     var currencyCode    = ""
-//     var currencySymbol  = ""
-//     if let currency = Constants.shared.getCurrencyDetails(from: currency) {
-//     print(currency.code)
-//     print(currency.symbol)
-//     currencyCode    = currency.code
-//     currencySymbol  = currency.symbol
-//     }
-//     
-//     siriData = ["serviceName":serviceName,"planName":planName,"price":price,"billingCycle":billingCycle,"category":category,"currencyCode":currencyCode, "currencySymbol": currencySymbol, "nextChargeDate": nextChargeDate]
-//     if AppState.shared.isLoggedIn{
-//     
-//     let formatter = DateFormatter()
-//     formatter.dateFormat = "dd/MM/yyyy"
-//     let chargeDate = formatter.string(from: nextChargeDate)
-//     
-//     let input = AddSubscriptionRequest(userId               : Constants.getUserId(),
-//     serviceName          : serviceName,
-//     amount               : Double(price),
-//     currency             : currencyCode,
-//     billingCycle         : billingCycle,
-//     nextPaymentDate      : chargeDate.formattedDate(from: "dd/MM/yyyy", to: "yyyy-MM-dd"),
-//     subscriptionType     : planName,
-//     paymentMethod        : "",
-//     paymentMethodDataId  : "",
-//     category             : category,
-//     subscriptionFor      : Constants.getUserId(),
-//     renewalReminder      : [""],
-//     notes                : "",
-//     currencySymbol       : currencySymbol)
-//     
-//     do{
-//     let success =  await ManualEntryViewModel().addSubscriptionSiri(input: input)
-//     
-//     if success {
-//     return .result(dialog: "Subscription added successfully!")
-//     } else {
-//     return .result(dialog: "Failed to add subscription.")
-//     }
-//     
-//     } catch {
-//     return .result(dialog: "Something went wrong while adding your subscription.")
-//     }
-//     }
-//     
-//     return .result(dialog: "")
-//     }
-     
+    //     func perform() async throws -> some IntentResult & ProvidesDialog{
+    //     var currencyCode    = ""
+    //     var currencySymbol  = ""
+    //     if let currency = Constants.shared.getCurrencyDetails(from: currency) {
+    //     print(currency.code)
+    //     print(currency.symbol)
+    //     currencyCode    = currency.code
+    //     currencySymbol  = currency.symbol
+    //     }
+    //
+    //     siriData = ["serviceName":serviceName,"planName":planName,"price":price,"billingCycle":billingCycle,"category":category,"currencyCode":currencyCode, "currencySymbol": currencySymbol, "nextChargeDate": nextChargeDate]
+    //     if AppState.shared.isLoggedIn{
+    //
+    //     let formatter = DateFormatter()
+    //     formatter.dateFormat = "dd/MM/yyyy"
+    //     let chargeDate = formatter.string(from: nextChargeDate)
+    //
+    //     let input = AddSubscriptionRequest(userId               : Constants.getUserId(),
+    //     serviceName          : serviceName,
+    //     amount               : Double(price),
+    //     currency             : currencyCode,
+    //     billingCycle         : billingCycle,
+    //     nextPaymentDate      : chargeDate.formattedDate(from: "dd/MM/yyyy", to: "yyyy-MM-dd"),
+    //     subscriptionType     : planName,
+    //     paymentMethod        : "",
+    //     paymentMethodDataId  : "",
+    //     category             : category,
+    //     subscriptionFor      : Constants.getUserId(),
+    //     renewalReminder      : [""],
+    //     notes                : "",
+    //     currencySymbol       : currencySymbol)
+    //
+    //    do{
+    //        let success =  await ManualEntryViewModel().addSubscriptionSiri(input: input)
+    //        
+    //        if success {
+    //            return .result(dialog: "Subscription added successfully!")
+    //        } else {
+    //            return .result(dialog: "Failed to add subscription.")
+    //        }
+    //        
+    //    } catch {
+    //        return .result(dialog: "Something went wrong while adding your subscription.")
+    //    }
+    //}
+    //
+    //     return .result(dialog: "")
+    //     }
+    
     
     /*
      do {

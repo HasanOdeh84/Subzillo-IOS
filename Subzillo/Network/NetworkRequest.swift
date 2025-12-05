@@ -80,10 +80,11 @@ class NetworkRequest {
         method      : HTTPMethod,
         token       : String,
         body        : U?,
-        showLoader: Bool = false,
-        responseType: T.Type
+        showLoader  : Bool = false,
+        responseType: T.Type,
+        fromSiri    : Bool = false
     ) -> AnyPublisher<T, APIError> {
-        return self.postRequest(endPoint: endPoint, method: method,token: token,body: body,showLoader: showLoader, responseType: responseType)
+        return self.postRequest(endPoint: endPoint, method: method,token: token,body: body,showLoader: showLoader, responseType: responseType,fromSiri: fromSiri)
             .catch { error -> AnyPublisher<T, APIError> in
                 if case .unauthorized = error {
                     if endPoint == .regenerateAccessToken{
@@ -282,7 +283,8 @@ class NetworkRequest {
         token       : String,
         body        : U?,
         showLoader  : Bool = false,
-        responseType: T.Type
+        responseType: T.Type,
+        fromSiri    : Bool = false
     ) -> Future<T, APIError> {
         return Future<T, APIError> { [self] promise in
             
@@ -417,7 +419,9 @@ class NetworkRequest {
                         case let decodingError as DecodingError:
                             promise(.failure(.decodingError(decodingError)))
                         case let apiError as APIError:
-                            ToastManager.shared.showToast(message: apiError.localizedDescription,style: .error)
+                            if !fromSiri{
+                                ToastManager.shared.showToast(message: apiError.localizedDescription,style: .error)
+                            }
                             promise(.failure(apiError))
                         default:
                             promise(.failure(.unknown))

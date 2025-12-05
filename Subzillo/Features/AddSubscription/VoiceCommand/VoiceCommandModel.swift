@@ -66,3 +66,8 @@ public struct SubscriptionData: Codable, Hashable {
     var nickName                    : String?
     var color                       : String?
 }
+
+public struct TextSubscriptionRequest: Codable {
+    var userId                      : String
+    var text                        : String
+}
