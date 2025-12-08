@@ -31,6 +31,27 @@ This document lists all **dependencies** used in the project.
   - Simplifying authentication flows for iOS users.
 - **Resources**: [Google Sign-In github project](https://github.com/google/GoogleSignIn-iOS)
 
+## 4. FirebaseCrashlytics
+
+- **Dependency**: 'FirebaseCrashlytics'
+- **Purpose**: Firebase Crashlytics helps monitor app stability by capturing real-time crash reports. It enables developers to identify, prioritize, and fix issues that affect the user experience.
+- **Use Cases in Subzillo**:
+  - Tracking unexpected crashes and non-fatal errors occurring in the app.
+  - Providing detailed insights such as stack traces, logs, and device information to speed up debugging.
+  - Monitoring app stability trends and improving reliability across releases.
+- **Resources**: [FirebaseCrashlytics github project](https://github.com/firebase/firebase-ios-sdk)
+
+## 4. MSAL (microsoft-authentication-library-for-objc)
+
+- **Dependency**: 'MSAL'
+- **Purpose**: MSAL enables secure authentication using Microsoft accounts.
+- **Use Cases in Subzillo**:
+  - Allowing users to log in with their Microsoft accounts.
+- **Resources**: [MSAL github project](https://github.com/AzureAD/microsoft-authentication-library-for-objc)
+
+
+
+
 
 
 
