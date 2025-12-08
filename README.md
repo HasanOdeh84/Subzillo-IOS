@@ -25,7 +25,7 @@ Subzillo is a smart subscription management platform that helps users track, org
 
 
 # Dependencies used
-For the complete list of dependencies, see the [Dependencies Document](./Dependencies.md)
+For the complete list of dependencies, see the [Dependencies Document](./DEPENDENCIES.md)
 
 # Architecture
 The app follows **MVVM (Model-View-ViewModel)** pattern to ensure separation of concerns and maintainability. [Architecture Document](./Architecure.md)
