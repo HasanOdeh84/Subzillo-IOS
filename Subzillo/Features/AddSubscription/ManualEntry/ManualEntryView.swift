@@ -847,15 +847,16 @@ struct FieldView: View
                                 .font(.appRegular(14))
                                 .foregroundColor(.whiteBlackBGnoPic)
                                 .onChange(of: text) { newValue in
-                                    filterDigitsAndLimit(maxDigits: maxDigits)
+                                    //                                    filterDigitsAndLimit(maxDigits: maxDigits)
+                                    validateDecimalInput(maxDigits: maxDigits, maxDecimalPlaces: 2)
                                 }
-                                .onChange(of: text) { newValue in
-                                    let dotCount = newValue.filter { $0 == "." }.count
-                                    if dotCount > 1 {
-                                        // Remove the latest typed character
-                                        text.removeLast()
-                                    }
-                                }
+                            //                                .onChange(of: text) { newValue in
+                            //                                    let dotCount = newValue.filter { $0 == "." }.count
+                            //                                    if dotCount > 1 {
+                            //                                        // Remove the latest typed character
+                            //                                        text.removeLast()
+                            //                                    }
+                            //                                }
                         }
                         .padding(6)
                     }else{
@@ -910,6 +911,33 @@ struct FieldView: View
                 text = digitsOnly
             }
         }
+    }
+    
+    private func validateDecimalInput(maxDigits: Int, maxDecimalPlaces: Int = 2) {
+        var value = text
+        value = value.filter { $0.isNumber || $0 == "." }
+        if value.filter({ $0 == "." }).count > 1 {
+            var result = ""
+            var dotFound = false
+            for char in value {
+                if char == "." {
+                    if !dotFound {
+                        dotFound = true
+                        result.append(char)
+                    }
+                } else {
+                    result.append(char)
+                }
+            }
+            value = result
+        }
+        if let dotIndex = value.firstIndex(of: ".") {
+            let before = value[..<dotIndex]
+            let after  = value[value.index(after: dotIndex)...]
+            let limitedAfter = after.prefix(maxDecimalPlaces)
+            value = String(before) + "." + String(limitedAfter)
+        }
+        text = value
     }
 }
 

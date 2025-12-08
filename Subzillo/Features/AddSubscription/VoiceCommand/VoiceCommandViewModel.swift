@@ -58,8 +58,8 @@ class VoiceCommandViewModel: NSObject, ObservableObject, AVAudioPlayerDelegate, 
                 PrintLogger.modelLog(response, type: .response, isInput: false)
                 if response.data?.subscriptions?.count == 0
                 {
-                    self.showErrorPopup = true
-                    continuation.resume(returning: true)
+//                    self.showErrorPopup = true
+                    continuation.resume(returning: false)
                 }
                 else{
                     self.router.navigate(to: .subscriptionPreviewView(subscriptionsData: response.data?.subscriptions, content: "", isFromImage:false, audioUrl: nil))

@@ -141,6 +141,10 @@ struct Constants{
         
         return outputFormatter.string(from: date)
     }
+    
+    func OpenSubscriptionsInAppStore(){
+        
+    }
 }
 
 //MARK: - Currency and country codes and flags

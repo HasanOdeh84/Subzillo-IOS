@@ -181,6 +181,7 @@ struct SubscriptionMatchView: View {
             .navigationBarBackButtonHidden(true)
             .onAppear{
                 if fromList{
+                    self.showOfflineDetails()
                     subscriptionMatchVM.getSubscriptionDetails(input: GetSubscriptionDetailsRequest(userId: Constants.getUserId(), subscriptionId: subscriptionId ?? ""))
                 }else{
                     getSubDetails()
@@ -188,7 +189,12 @@ struct SubscriptionMatchView: View {
             }
             .onChange(of: globalSubscriptionData) { _ in updateSubDetails() }
             .onChange(of: subscriptionMatchVM.getSubsDetailsResponse) { _ in updateSubDetails() }
-            .onChange(of: subscriptionsVM.isDeletedSubscription) { _ in dismiss() }
+            .onChange(of: subscriptionsVM.isDeletedSubscription) { _ in
+                if subscriptionsVM.isDeletedSubscription == true {
+                    SubscriptionDBManager.shared.deleteSubscription(id: subscriptionData?.id ?? "")
+                }
+                dismiss()
+            }
             .sheet(isPresented: $showDeletePopup) {
                 InfoAlertSheet(
                     onDelegate: {
@@ -209,7 +215,44 @@ struct SubscriptionMatchView: View {
         }
         .background(.neutralBg100)
     }
-    
+    func showOfflineDetails()
+    {
+        if fromList{
+            let subDetails                  = SubscriptionDBManager.shared.getSubscriptions(value: subscriptionId ?? "", type: "byID").first
+            
+            guard let subData = subDetails else { return }
+            
+            subscriptionData =  SubscriptionData(id: subData.id, serviceName: subData.serviceName, serviceLogo: subData.serviceLogo, subscriptionType: subData.subscriptionType, amount: subData.amount, currency: subData.currency, currencySymbol: subData.currencySymbol, billingCycle: subData.billingCycle, nextPaymentDate: subData.nextPaymentDate, paymentMethodId: subData.paymentMethod, paymentMethod: subData.paymentMethodName, paymentMethodName: subData.paymentMethodName, category: subData.category, categoryName: subData.categoryName, isSubscription: true, subscriptionForName: subData.subscriptionFor, paymentMethodDataId: subData.paymentMethodDataId, paymentMethodDataName: subData.paymentMethodDataName, renewalReminder: subData.renewalReminder, renewalReminders: subData.renewalReminder, notes: subData.notes, status: subData.status, cardName: subData.cardName, cardNumber: subData.cardNumber, nickName: subData.nickName, color: subData.color)
+            
+            
+            var remindersData = [
+                ManualDataInfo(id: "1", title: "3 days before renewal", value: "-3d"),
+                ManualDataInfo(id: "2", title: "1 day before renewal", value: "-1d"),
+                ManualDataInfo(id: "3", title: "On renewal day", value:"0d")
+            ]
+            var renewalReminder = subscriptionData?.renewalReminders ?? []
+            for i in remindersData.indices {
+                remindersData[i].isSelected = renewalReminder.contains(remindersData[i].value ?? "")
+            }
+            renewalReminderValue = ""
+            for item in remindersData        {
+                if item.isSelected ?? false == true
+                {
+                    renewalReminder.append(item.value!)
+                    if renewalReminderValue != "" {
+                        renewalReminderValue = "\(renewalReminderValue)\n\(item.title ?? "")"
+                    }
+                    else{
+                        renewalReminderValue = item.title ?? ""
+                    }
+                }
+            }
+            if subscriptionData?.cardName != "" && subscriptionData?.cardNumber != ""{
+                paymentMethodDataName = "\(subscriptionData?.cardName ?? "")****\(subscriptionData?.cardNumber ?? "")"
+            }
+            getSubDetails()
+        }
+    }
     func updateSubDetails()
     {
         if fromList{

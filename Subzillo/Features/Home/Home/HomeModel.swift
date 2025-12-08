@@ -81,6 +81,10 @@ public struct SubscriptionListData: Codable, Hashable, Identifiable{
     let notes             : String?
     let status            : String?
     var isSelected        : Bool? = false
+    var cardNumber        : String?
+    var categoryName      : String?
+    var paymentMethodDataName: String?
+    
 }
 
 public struct TopCategoriesData: Codable, Hashable, Identifiable {

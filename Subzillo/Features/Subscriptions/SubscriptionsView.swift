@@ -326,6 +326,9 @@ struct SubscriptionsView: View {
     }
     
     func listSubsApi(showLoader:Bool = true){
+        if page == 0 {
+            self.showOfflineDetails()
+        }
         let input = ListSubscriptionsRequest(userId : Constants.getUserId(),
                                              page   : page,
                                              filter : SubscriptionFilter(includeFamilyMembers        : filterData.includeFamilySubscriptions,
@@ -347,10 +350,22 @@ struct SubscriptionsView: View {
         subscriptionsVM.getSubscriptionsByMonth(input: input)
     }
     
+    func showOfflineDetails()
+    {
+        self.subscriptionsList = SubscriptionDBManager.shared.getSubscriptions(value: "", type: "list")
+        print(self.subscriptionsList.count)
+    }
+    
     func updateSubsList(){
         DispatchQueue.main.async {
             if page == 0 {
                 self.subscriptionsList.removeAll()
+                SubscriptionDBManager.shared.deleteAllSubscription()
+            }
+            let listArray = self.subscriptionsVM.listSubsResponse?.subscriptions ?? []
+            for item in listArray
+            {
+                SubscriptionDBManager.shared.updateSubscription(params: item)
             }
             self.subscriptionsList.append(contentsOf: self.subscriptionsVM.listSubsResponse?.subscriptions ?? [])
             print("data from response")

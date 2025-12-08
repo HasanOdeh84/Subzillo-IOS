@@ -116,6 +116,7 @@ struct SubzilloApp: App {
     @StateObject private var themeManager       = ThemeManager()
     @StateObject private var sharedViewModel    = CommonAPIViewModel()
     @StateObject private var sessionManager     = SessionManager()
+    let persistenceController                   = PersistenceController.shared
     
     var body: some Scene {
         WindowGroup {
@@ -129,6 +130,7 @@ struct SubzilloApp: App {
                 .environmentObject(themeManager)
                 .environmentObject(sharedViewModel)
                 .environmentObject(sessionManager)
+                .environment(\.managedObjectContext, persistenceController.container.viewContext)
                 .preferredColorScheme(
                     themeManager.userChangedTheme
                     ? (themeManager.isDarkMode ? .dark : .light)
