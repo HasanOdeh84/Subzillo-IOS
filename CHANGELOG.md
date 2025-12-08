@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.0.0] (Alpha) - 2025-12-04
+
+### Updated
+- Sprint3 client feedback points.
+
+### Added
+- Microsoft social login
+
+### Pending
+- Prefill details in Manual Add and Preview screens.
+
 ## [1.0.0] (Beta) - 2025-12-01
 
 ### Delivered
