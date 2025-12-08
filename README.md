@@ -151,7 +151,7 @@ This project is maintained by the iOS development team of **Hasan Odeh** and **H
 Any contributions should be coordinated with the team lead before submitting changes.
 
 # Changelog
-For detailed updates, see the CHANGELOG.md
+For detailed updates, see the [CHANGELOG.md](./CHANGELOG.md)
 
 # License
 This project is proprietary and confidential. Unauthorized use, copying, or distribution is prohibited. 
