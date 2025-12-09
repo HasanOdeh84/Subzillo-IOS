@@ -2,7 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
-## [1.0.0] (Alpha) - 2025-12-04
+## [1.7.0] (Alpha) - 2025-12-09
+
+### Updated
+- Voice related UI changes.
+- Siri redirection changes to subscription preview and manual if fails.
+
+## [1.6.0] (Alpha) - 2025-12-04
 
 ### Updated
 - Sprint3 client feedback points.
