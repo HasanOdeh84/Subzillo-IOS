@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.8.0] (Alpha) - 2025-12-13
+
+### Added
+- Manual entry auto filling details.
+
 ## [1.7.0] (Alpha) - 2025-12-09
 
 ### Updated
