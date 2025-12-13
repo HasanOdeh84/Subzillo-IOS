@@ -63,7 +63,9 @@ struct CountriesBottomSheet: View {
                 TextField(LocalizedStringKey(placeholder ?? ""), text: $searchText)
                     .padding(.trailing,10)
                     .foregroundStyle(Color.whiteBlackBGnoPic)
-                    .addDoneButton()
+                    .addDoneButton{
+                        
+                    }
             }
             .frame(height: 52)
             .background(.neutralBg100)

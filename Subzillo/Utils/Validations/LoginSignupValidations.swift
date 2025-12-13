@@ -17,12 +17,12 @@ struct LoginSignupValidations {
         if input.fullName.trimmed.isEmpty{
             return "Please enter your full name"
         }
-        if input.fullName.trimmed.count < 3 {
-            return "Full name must be at least 3 characters"
-        }
-        if !Validations().isValidName(input.fullName.trimmed){
-            return "Enter a valid name"
-        }
+//        if input.fullName.trimmed.count < 3 {
+//            return "Full name must be at least 3 characters"
+//        }
+//        if !Validations().isValidName(input.fullName.trimmed){
+//            return "Enter a valid name"
+//        }
         if isSocialLogin{
             if input.email.trimmed.isEmpty{
                 return "Please enter email address"

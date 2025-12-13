@@ -111,3 +111,39 @@ public struct AddFamilyMemberRequest: Codable, Hashable  {
     var countryCode         : String
     var color               : String
 }
+
+public struct GetServiceProvidersListResponse: Codable {
+    var message                 : String?
+    var data                    : [GetServiceProvidersListData]?
+}
+
+public struct GetServiceProvidersListData: Codable, Hashable, Identifiable {
+    public var id           : String? = nil
+    var name                : String? = nil
+}
+
+public struct FetchProviderDataRequest: Codable {
+    let userId               : String
+    let serviceName          : String
+    let currencyCode         : String
+}
+
+public struct FetchProviderDataResponse: Codable {
+    var message                 : String?
+    var data                    : FetchProviderData?
+}
+
+struct FetchProviderData: Codable, Hashable, Identifiable {
+    var id                              : String? = nil
+    var categoryId                      : String? = nil
+    var categoryName                    : String? = nil
+    var providerSubscriptionPlansList   : [ProviderSubscriptionPlan]? = []
+}
+
+struct ProviderSubscriptionPlan: Codable, Identifiable, Hashable {
+    var id          : String? = nil
+    var planName    : String? = nil
+    var price       : Double? = nil
+    var billingCycle: String? = nil
+    var currencyCode: String? = nil
+}

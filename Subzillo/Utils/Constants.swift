@@ -145,6 +145,42 @@ struct Constants{
     func OpenSubscriptionsInAppStore(){
         
     }
+    
+    func getNextDateByFrequency(
+        frequency   : String,
+        baseDate    : Date = Date()
+    ) -> String {
+        
+        let calendar = Calendar.current
+        let nextDate: Date
+        
+        switch frequency {
+        case "Daily":
+            nextDate = calendar.date(byAdding: .day, value: 1, to: baseDate) ?? baseDate
+            
+        case "Weekly":
+            nextDate = calendar.date(byAdding: .weekOfYear, value: 1, to: baseDate) ?? baseDate
+            
+        case "Monthly":
+            nextDate = calendar.date(byAdding: .month, value: 1, to: baseDate) ?? baseDate
+            
+        case "Quarterly":
+            nextDate = calendar.date(byAdding: .month, value: 3, to: baseDate) ?? baseDate
+            
+        case "Biannually":
+            nextDate = calendar.date(byAdding: .month, value: 6, to: baseDate) ?? baseDate
+            
+        case "Yearly":
+            nextDate = calendar.date(byAdding: .year, value: 1, to: baseDate) ?? baseDate
+            
+        default:
+            nextDate = baseDate
+        }
+        
+        let formatter = DateFormatter()
+        formatter.dateFormat = "dd/MM/yyyy"
+        return formatter.string(from: nextDate)
+    }
 }
 
 //MARK: - Currency and country codes and flags

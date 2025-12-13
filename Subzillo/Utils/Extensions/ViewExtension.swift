@@ -46,8 +46,8 @@ extension View {
         self.modifier(DoneButtonToolbar())
     }
     
-    func addDoneButton() -> some View {
-        self.modifier(DoneButtonToolbar1())
+    func addDoneButton(onDone: @escaping () -> Void) -> some View {
+        self.modifier(DoneButtonToolbar1(onDone: onDone))
     }
     
     func cornerRadius(_ radius: CGFloat, corners: UIRectCorner) -> some View {
@@ -83,12 +83,14 @@ struct DoneButtonToolbar: ViewModifier {
 }
 
 struct DoneButtonToolbar1: ViewModifier {
+    let onDone: (() -> Void)?
     func body(content: Content) -> some View {
         content
             .toolbar {
                 ToolbarItemGroup(placement: .keyboard) {
                     Spacer()
                     Button("Done") {
+                        onDone?()
                         UIApplication.shared.sendAction(
                             #selector(UIResponder.resignFirstResponder),
                             to: nil,

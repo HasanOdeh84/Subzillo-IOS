@@ -23,6 +23,7 @@ public struct UserInfo: Codable, Hashable {
     var phoneNumber             : String?
     var countryCode             : String?
     var preferredCurrency       : String?
+    var preferredCurrencySymbol : String?
     var noofSubscriptions       : Int?
     var averageMonthlySpend     : Int?
     var profileImage            : String?

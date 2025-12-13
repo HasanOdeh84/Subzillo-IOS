@@ -1,5 +1,5 @@
 {
-  "originHash" : "ae1226b36980d00ff92c45999148bc661bc9ccdf8a8973ade250484b3cfa2c4a",
+  "originHash" : "ad505c224634129fe5f61ced31df6f171c5e5728364d0aeb564e00543fde115b",
   "pins" : [
     {
       "identity" : "abseil-cpp-binary",
@@ -152,6 +152,15 @@
       "state" : {
         "revision" : "b7e1104502eca3a213b46303391ca4d3bc8ddec1",
         "version" : "2.30910.0"
+      }
+    },
+    {
+      "identity" : "phonenumberkit",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/marmelroy/PhoneNumberKit",
+      "state" : {
+        "revision" : "f158939f66f4ef94512b7e6cd1e56057070a05e4",
+        "version" : "4.2.1"
       }
     },
     {

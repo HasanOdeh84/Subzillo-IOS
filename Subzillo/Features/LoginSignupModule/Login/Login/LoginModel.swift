@@ -30,20 +30,23 @@ public struct LoginResponseData: Codable {
     var fullName                    : String?
     var isNewUser                   : Bool?
     var signupCompleted             : Bool?
+    var onboardingCompleted         : Bool?
     var accessToken                 : String?
     var refreshToken                : String?
     public init(
-        userId          : String? = nil,
-        fullName        : String? = nil,
-        isNewUser       : Bool? = nil,
-        signupCompleted : Bool? = nil,
-        accessToken     : String? = nil,
-        refreshToken    : String? = nil
+        userId              : String? = nil,
+        fullName            : String? = nil,
+        isNewUser           : Bool? = nil,
+        signupCompleted     : Bool? = nil,
+        onboardingCompleted : Bool? = nil,
+        accessToken         : String? = nil,
+        refreshToken        : String? = nil
     ) {
         self.userId                     = userId
         self.fullName                   = fullName
         self.isNewUser                  = isNewUser
         self.signupCompleted            = signupCompleted
+        self.onboardingCompleted        = onboardingCompleted
         self.accessToken                = accessToken
         self.refreshToken               = refreshToken
     }

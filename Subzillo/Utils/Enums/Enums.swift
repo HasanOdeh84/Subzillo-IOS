@@ -77,3 +77,9 @@ enum OrderType: String, Codable {
 enum ReviewExtractedType: String, Codable {
     case service, amount, nextChargeDate, currency, category, planType, billingCycle
 }
+
+enum FieldType {
+    case serviceName
+    case planType
+    case amount
+}

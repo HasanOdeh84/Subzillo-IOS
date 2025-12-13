@@ -84,7 +84,6 @@ public struct SubscriptionListData: Codable, Hashable, Identifiable{
     var cardNumber        : String?
     var categoryName      : String?
     var paymentMethodDataName: String?
-    
 }
 
 public struct TopCategoriesData: Codable, Hashable, Identifiable {

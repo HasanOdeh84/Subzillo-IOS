@@ -31,6 +31,7 @@ class OnboardingViewModel: ObservableObject {
         receiveValue: { [unowned self] response in
             PrintLogger.modelLog(response, type: .response, isInput: false)
             ToastManager.shared.showToast(message: response.message ?? "")
+            AppState.shared.login()
             router.navigate(to: .home)
         }
         .store(in: &self.subscriptions)

@@ -49,3 +49,37 @@ struct GradientBorderButton: View {
         }
     }
 }
+
+struct SignInBorderButton: View {
+    var title           : String
+    var buttonImage     : String?
+    var backgroundColor : Color = .clear
+    var buttonHeight    : CGFloat = 44
+    var action          : () -> Void
+    
+    var body: some View {
+        Button(action: action) {
+            Group {
+                HStack {
+                    Image(buttonImage ?? "")
+                        .frame(height: buttonHeight)
+                    Text(LocalizedStringKey(title))
+                        .font(.system(size: 16, weight: .semibold))
+                        .foregroundColor(Color.whiteBlackBGnoPic)
+                }
+            }
+        }
+        .frame(maxWidth: .infinity, minHeight: buttonHeight)
+        .background(backgroundColor)
+        .overlay(
+            RoundedRectangle(cornerRadius: 8)
+                .stroke(
+                    Color.continueBtnBorder,
+                    lineWidth: 2
+                )
+        )
+        .cornerRadius(8)
+        .contentShape(RoundedRectangle(cornerRadius: 8)) // Ensures whole button is tappable
+    }
+}
+

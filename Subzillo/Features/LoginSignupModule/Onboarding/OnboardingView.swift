@@ -19,13 +19,13 @@ struct OnboardingView: View {
     @State private var currentPage                      = 0
     @State private var selectedSubscriptions            : Int? = nil
     @State private var selectedSpending                 : Int? = nil
-    private let subscriptionOptions                     = ["5 - 10", "10 - 20", "20 - 30", "More than 30"]
-    private let spendingOptions                         = ["Less than $50", "Less than $150", "More than $150"]
+    private let subscriptionOptions                     = ["5 - 10", "10 - 20", "20+"]
+    private let spendingOptions                         = ["$50 - $100", "$100 - $200", "$200+"]
     @State private var selectedCurrency                 : Currency?
     @State private var selectedCountry                  : Country?
     @EnvironmentObject var commonApiVM                  : CommonAPIViewModel
     @StateObject private var onboardingVM               = OnboardingViewModel()
-
+    
     // controls the SwiftUI offset animation
     @State private var animateIn    = false
     // delay and distance
@@ -36,27 +36,27 @@ struct OnboardingView: View {
         OnboardingPage(
             lottie: "onboarding",
             title: "Manage your and your family's subscriptions in one place",
-            description: "Keep all your subscriptions—Netflix, Spotify, Gym memberships, and more—in one simple place. Stay organised and never miss a renewal again."
+            description: ""
         ),
         OnboardingPage(
             lottie: "onboarding",
             title: "Add Subscriptions Using Voice Commands",
-            description: "Add subscriptions with your voice in one step. Fast, simple, and convenient."
+            description: ""
         ),
         OnboardingPage(
             lottie: "onboarding2",
             title: "Add Subscription by email integration",
-            description: "Add Netflix, Spotify, and more through email integration. Subscription details are captured automatically from your inbox."
+            description: ""
         ),
         OnboardingPage(
             lottie: "onboarding3",
             title: "Add Subscription by AI Assistant",
-            description: "Your AI Assistant detects and adds Netflix, Spotify, Gym plans, and more. Managing subscriptions becomes smarter and effortless."
+            description: ""
         ),
         OnboardingPage(
             lottie: "onboarding",
             title: "Manage your and your family's subscriptions in one place",
-            description: "Track Netflix, Spotify, gym memberships, and more in one organized dashboard. Never lose track again."
+            description: ""
         )
     ]
     
@@ -69,17 +69,23 @@ struct OnboardingView: View {
             .ignoresSafeArea()
             VStack {
                 HStack(spacing: 10) {
+                    Text("\(currentPage+1)/\(pages.count)")
+                        .font(.appRegular(18))
+                        .foregroundColor(.neutral500)
                     Spacer()
-                    Button {
-                        onboardingVM.navigate(to: .home)
-                    } label: {
-                        HStack(spacing: 4) {
-                            Text("Skip Onboarding")
-                                .foregroundColor(Color.navyBlueCTA700)
-                                .font(.appRegular(14))
-                            Image(systemName: "arrow.right")
-                                .foregroundColor(Color.blueMain700)
-                                .frame(width: 20, height: 20)
+                    if currentPage != 4{
+                        Button {
+                            //                        onboardingVM.navigate(to: .home)
+                            currentPage = 4
+                        } label: {
+                            HStack(spacing: 4) {
+                                Text("Skip Onboarding")
+                                    .foregroundColor(Color.navyBlueCTA700)
+                                    .font(.appRegular(14))
+                                Image(systemName: "arrow.right")
+                                    .foregroundColor(Color.blueMain700)
+                                    .frame(width: 20, height: 20)
+                            }
                         }
                     }
                 }
@@ -182,13 +188,13 @@ struct OnboardingView: View {
                         currentPage += 1
                     }
                 }
-                .background(Color.clear)
-                .padding(.bottom,48)
+                                     .background(Color.clear)
+                                     .padding(.bottom,48)
             }
             .padding(.horizontal, 20)
             .navigationBarBackButtonHidden(true)
             .onAppear{
-                AppState.shared.login()
+//                AppState.shared.login()
                 selectedCurrency = Currency(id      : nil,
                                             name    : Constants.shared.currencyCode,
                                             symbol  : Constants.shared.currencySymbol,
@@ -215,20 +221,21 @@ struct OnboardingView: View {
     func tellUsAbtYourselfView() -> some View {
         ScrollView{
             VStack(spacing: 32){
-                Text("Tell us about yourself")
+//                Text("Tell us about yourself")
+                Text("Almost Done")
                     .font(.appRegular(28))
                     .foregroundColor(.neutralMain700)
+                    .multilineTextAlignment(.center)
                 
                 VStack(alignment: .leading, spacing: 12) {
-                    Text("How many subscriptions do you have?")
+                    Text("How many subscriptions?")
                         .font(.appRegular(18))
                         .foregroundColor(.neutralMain700)
                     WrapButtonsView(options: subscriptionOptions,
                                     selectedIndex: $selectedSubscriptions)
                 }
-                
                 VStack(alignment: .leading, spacing: 12) {
-                    Text("How much you spend on subscription monthly?")
+                    Text("Monthly subscription cost?")
                         .font(.appRegular(18))
                         .foregroundColor(.neutralMain700)
                     WrapButtonsView(options: spendingOptions,
@@ -240,6 +247,7 @@ struct OnboardingView: View {
                                  selectedCurrency   : $selectedCurrency,
                                  selectedCountry    : $selectedCountry,
                                  isCountry          : false)
+                
                 Spacer()
             }
             .padding(.horizontal,2)
@@ -301,31 +309,212 @@ struct OnboardingView_Previews: PreviewProvider {
 
 struct WrapButtonsView: View {
     let options                 : [String]
-    @Binding var selectedIndex  : Int? // 👈 store index instead of value
+    @Binding var selectedIndex  : Int?
     
     var body: some View {
-        LazyVGrid(columns: [GridItem(.adaptive(minimum: 100), spacing: 8)], spacing: 8) {
+        FlowLayout {
             ForEach(Array(options.enumerated()), id: \.offset) { index, option in
+                
                 Button {
-                    selectedIndex = index + 1 // 👈 track which one was tapped
+                    selectedIndex = index + 1
                 } label: {
-                    var selectedIndexVal = (selectedIndex ?? 0) - 1
+                    let selectedIndexVal = (selectedIndex ?? 0) - 1
                     Text(LocalizedStringKey(option))
                         .font(.appRegular(18))
-                        .foregroundColor(selectedIndexVal == index ? .white : .neutralMain700)
-                        .padding(.vertical, 6)
                         .padding(.horizontal, 12)
-                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 6)
                         .background(
                             Capsule()
                                 .fill(selectedIndexVal == index ? Color.blueMain700 : .whiteBlackBG)
+                                .overlay(
+                                    Capsule()
+                                        .strokeBorder(Color.innerShadow, lineWidth: 2)
+                                        .blur(radius: 4)
+                                        .offset(.init(width: 0, height: 2))
+                                        .mask(Capsule())
+                                )
+//                                .if(selectedIndexVal != index) { view in
+//                                                view.capsuleInnerShadow(
+//                                                    color: Color.black.opacity(0.12),
+//                                                    radius: 6,
+//                                                    offset: -4
+//                                                )
+//                                            }
                         )
                         .overlay(
                             Capsule()
                                 .stroke(selectedIndexVal == index ? Color.clear : .neutral300Border, lineWidth: 1)
                         )
+                        .foregroundColor(selectedIndexVal == index ? .white : .neutralMain700)
                 }
             }
+        }
+    }
+}
+
+struct CapsuleInnerShadow: ViewModifier {
+    var color: Color = Color.black.opacity(0.12)
+    var radius: CGFloat = 6       // blur
+    var verticalOffset: CGFloat = -4   // pulls shadow to top
+    
+    func body(content: Content) -> some View {
+        content
+            .overlay(
+                Capsule()
+                    .fill(
+                        Color.clear
+                            .shadow(.inner(
+                                color: color,
+                                radius: radius,
+                                x: 0,
+                                y: verticalOffset
+                            ))
+                    )
+                    .mask(
+                        VStack(spacing: 0) {
+                            Color.white              // keep top shadow visible
+                            Color.clear.frame(height: 12) // cut bottom shadow
+                        }
+                            .mask(Capsule())
+                    )
+            )
+    }
+}
+
+extension View {
+    func capsuleInnerShadow(
+        color: Color = Color.black.opacity(0.12),
+        radius: CGFloat = 6,
+        offset: CGFloat = -4
+    ) -> some View {
+        modifier(CapsuleInnerShadow(color: color, radius: radius, verticalOffset: offset))
+    }
+}
+
+
+//struct ContentView: View {
+//    let cornerRadius: CGFloat = 20
+//    let shadowColor = Color.gray.opacity(0.5)
+//    let shadowRadius: CGFloat = 8
+//    // Offset the shadow down to hide the bottom edge
+//    let shadowYOffset: CGFloat = 10
+//    // Small offsets for left/right to ensure the shadow is visible there
+//    let shadowXOffset: CGFloat = 1
+//
+//    var body: some View {
+//        VStack{
+//            RoundedRectangle(cornerRadius: cornerRadius)
+//                .fill(Color.white.shadow(.inner(color: shadowColor, radius: shadowRadius, x: shadowXOffset, y: -shadowYOffset))) // Use -Y for top shadow
+//                .frame(width: 200, height: 150)
+//                .background(Color.white) // Ensure the background is white so the shadow is visible
+//                .cornerRadius(cornerRadius) // Clip the background to the corners        }
+//    }
+//}
+//    
+struct ContentView: View {
+    let cornerRadius: CGFloat = 20
+    let shadowColor = Color.gray.opacity(0.45)
+    let shadowRadius: CGFloat = 10
+
+    var body: some View {
+        RoundedRectangle(cornerRadius: cornerRadius)
+            .fill(Color.white)
+            .overlay(
+                RoundedRectangle(cornerRadius: cornerRadius)
+                    .fill(
+                        Color.white
+                            .shadow(.inner(
+                                color: shadowColor,
+                                radius: shadowRadius,
+                                x: 0,
+                                y: -4        // pulls shadow upward → top + sides
+                            ))
+                    )
+                    .mask(
+                        VStack(spacing: 0) {
+                            Rectangle()
+                                .fill(Color.white)
+                                .frame(height: 90) // top area where shadow should appear
+                            Rectangle()
+                                .fill(Color.clear) // remove shadow at bottom
+                        }
+                    )
+            )
+            .frame(width: 220, height: 120)
+    }
+}
+
+extension View {
+    func topSideInnerShadow(color: Color = .gray, radius: CGFloat = 5, x: CGFloat = 0, y: CGFloat = -3) -> some View {
+        self.overlay(
+            Rectangle()
+                .stroke(color, lineWidth: radius)
+                .offset(x: x, y: y)
+                .clipped()
+                .blur(radius: radius / 2) // Smooth blur effect
+                .mask(self) // Confine the effect to the shape of the original view
+        )
+    }
+}
+
+struct FlowLayout: Layout {
+    // Define spacing constants once
+    let horizontalSpacing: CGFloat = 8
+    let verticalSpacing: CGFloat = 8
+    
+    func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) -> CGSize {
+        let containerWidth = proposal.width ?? 0
+        var currentX: CGFloat = 0
+        var currentY: CGFloat = 0
+        var lineHeight: CGFloat = 0
+        
+        for subview in subviews {
+            let subviewSize = subview.sizeThatFits(proposal)
+            
+            if currentX + subviewSize.width > containerWidth {
+                // Wrap to the next line
+                currentX = 0
+                currentY += lineHeight + verticalSpacing
+                lineHeight = 0
+            }
+            
+            // Update positions
+            currentX += subviewSize.width + horizontalSpacing
+            lineHeight = max(lineHeight, subviewSize.height)
+        }
+        
+        // Return the actual calculated height required to fit all chips
+        // Add the last line's height to the total Y position
+        return CGSize(width: containerWidth, height: currentY + lineHeight)
+    }
+    
+    func placeSubviews(in bounds: CGRect, proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) {
+        let containerWidth = bounds.width
+        var currentX = bounds.minX
+        var currentY = bounds.minY
+        var lineHeight: CGFloat = 0
+        
+        for subview in subviews {
+            let subviewSize = subview.sizeThatFits(proposal)
+            
+            // Check if the current chip exceeds the container width
+            if currentX + subviewSize.width > containerWidth {
+                // Wrap to the next line
+                currentX = bounds.minX
+                currentY += lineHeight + verticalSpacing // Use consistent spacing
+                lineHeight = 0
+            }
+            
+            // Place the subview
+            subview.place(
+                at: CGPoint(x: currentX, y: currentY),
+                anchor: .topLeading,
+                proposal: ProposedViewSize(subviewSize)
+            )
+            
+            // Update the x position for the next chip
+            currentX += subviewSize.width + horizontalSpacing // Use consistent spacing
+            lineHeight = max(lineHeight, subviewSize.height)
         }
     }
 }

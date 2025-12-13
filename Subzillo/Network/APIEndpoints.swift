@@ -55,6 +55,8 @@ enum APIEndpoint: String {
     case editSubscription               = "/editSubscription"
     case resolveDuplicateSubscription   = "/resolveDuplicateSubscription"
     case textSubscription               = "/textSubscription"
+    case getServiceProvidersList        = "/getServiceProvidersList"
+    case fetchProviderData              = "/fetchProviderData"
 
     //common api's
     case getCategories                  = "/getCategories"

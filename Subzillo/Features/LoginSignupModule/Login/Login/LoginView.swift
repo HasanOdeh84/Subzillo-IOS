@@ -38,32 +38,31 @@ struct LoginView: View {
                     .scaledToFit()
                     .frame(width: 128,height: 88)
                 
-                VStack(spacing: 4) {
-                    Text("You're not logged in")
-                        .font(.appRegular(24))
-                        .foregroundColor(.neutralMain700)
-                        .multilineTextAlignment(.center)
-                    Text("Sign in to your Subzillo account")
-                        .font(.appRegular(16))
-                        .foregroundColor(Color.neutralMain700)
-                        .multilineTextAlignment(.center)
-                }
+//                VStack(spacing: 4) {
+//                    Text("You're not logged in")
+//                        .font(.appRegular(24))
+//                        .foregroundColor(.neutralMain700)
+//                        .multilineTextAlignment(.center)
+//                    Text("Sign in to your Subzillo account")
+//                        .font(.appRegular(16))
+//                        .foregroundColor(Color.neutralMain700)
+//                        .multilineTextAlignment(.center)
+//                }
                 
-                HStack(){
-                    Text("Login your account using your preferred method")
-                        .font(.appRegular(16))
-                        .foregroundColor(Color.neutralMain700)
-                        .padding(.bottom, -17)
-                        .multilineTextAlignment(.leading)
-                    Spacer()
-                }
+//                HStack(){
+//                    Text("Login your account using your preferred method")
+//                        .font(.appRegular(16))
+//                        .foregroundColor(Color.neutralMain700)
+//                        .padding(.bottom, -17)
+//                        .multilineTextAlignment(.leading)
+//                    Spacer()
+//                }
                 
                 SegmentView(selectedSegment : $segmentSelected,
                             leftImage       : "call",
                             rightImage      : "email",
                             leftText        : "Phone Number",
                             rightText       : "Email")
-                
                 
                 VStack(spacing: 16){
                     if segmentSelected == .first{
@@ -73,7 +72,9 @@ struct LoginView: View {
                                          selectedCurrency   : $selectedCurrency,
                                          selectedCountry    : $selectedCountry,
                                          isCountry          : true)
-                        .addDoneButton()
+                        .addDoneButton{
+                            
+                        }
                     }else{
                         ReusableTextField(placeholder   : "name@example.com",
                                           text          : $email,
@@ -108,6 +109,7 @@ struct LoginView: View {
                 
                 // Social logins
                 VStack(spacing: 8) {
+                    /*
                     AppleSignInButtonView {
                         loginVM.socialLogin(loginType: .apple,deviceId: appDelegate.deviceToken ?? "")
                     }
@@ -121,6 +123,22 @@ struct LoginView: View {
                         loginVM.socialLogin(loginType: .microsoft,deviceId: appDelegate.deviceToken ?? "")
                     }
                     .background(.whiteBlackBG)
+                     */
+                    
+                    SignInBorderButton(title: "Continue with Apple", buttonImage: "apple_withoutPadding"){
+                        loginVM.socialLogin(loginType: .apple,deviceId: appDelegate.deviceToken ?? "")
+                    }
+                    .background(.whiteBlack)
+                    
+                    SignInBorderButton(title: "Continue with Google", buttonImage: "google"){
+                        loginVM.socialLogin(loginType: .google,deviceId: appDelegate.deviceToken ?? "")
+                    }
+                    .background(.whiteBlack)
+                    
+                    SignInBorderButton(title: "Continue with Microsoft", buttonImage: "microsoft"){
+                        loginVM.socialLogin(loginType: .microsoft,deviceId: appDelegate.deviceToken ?? "")
+                    }
+                    .background(.whiteBlack)
                 }
                 .padding(.top, 10)
                 
@@ -190,36 +208,3 @@ struct AppleSignInButtonView: View {
         .signInWithAppleButtonStyle(.whiteOutline)
     }
 }
-
-
- 
-//         SignInWithAppleButton(.signIn,
-//                    onRequest: { request in
-//                        // 👉 Requesting Email + Full Name
-//                        request.requestedScopes = [.email, .fullName]
-//                    },
-//                    onCompletion: { result in
-//                        switch result {
-//                        case .success(let authResult):
-// 
-//                            if let credential = authResult.credential as? ASAuthorizationAppleIDCredential {
-// 
-//                                let userID     = credential.user
-//                                let email      = credential.email          // First time only
-//                                let fullName   = credential.fullName?.givenName
-//                                AlertManager.shared.showAlert(title: "apple1", message: "\(userID)\(email ?? "")\(fullName ?? "")")
-//                                // 👉 Pass values back to parent view
-// 
-//                            }
-// 
-//                        case .failure(let error):
-//                            AlertManager.shared.showAlert(title: "apple2", message: "\(error)")
-//                            print("Apple Sign-In Failed:", error)
-//                        }
-//                    }
-//                )
-//                .signInWithAppleButtonStyle(.black)
-//                .frame(height: 50)
-//                .cornerRadius(12)
-//                .padding(.horizontal, 24)
-

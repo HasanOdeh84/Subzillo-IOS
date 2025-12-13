@@ -420,7 +420,9 @@ class NetworkRequest {
                             promise(.failure(.decodingError(decodingError)))
                         case let apiError as APIError:
                             if !fromSiri{
-                                ToastManager.shared.showToast(message: apiError.localizedDescription,style: .error)
+                                if endPoint != .fetchProviderData{
+                                    ToastManager.shared.showToast(message: apiError.localizedDescription,style: .error)
+                                }
                             }
                             promise(.failure(apiError))
                         default:

@@ -43,7 +43,8 @@ struct ReviewExtractedDetailsView: View {
         ManualDataInfo(id: "6", title: "Yearly", subtitle: "Every 360 Days")
     ]
     @FocusState private var isInputActive       : Bool
-
+    @StateObject var manualEntryVM              = ManualEntryViewModel()
+    @State private var activeField              : FieldType?
     
     //MARK: - body
     var body: some View {
@@ -77,10 +78,38 @@ struct ReviewExtractedDetailsView: View {
             
             switch detailType {
             case .service:
-                FieldView(text: $serviceName, title: "Service Name", image: "gridIcon", placeHolder: "e.g. Netflix, Spotify, Adobe")
+                FieldSuggestionView(
+                    text        : $serviceName,
+                    title       : "Service Name",
+                    image       : "gridIcon",
+                    placeHolder : "e.g. Netflix, Spotify, Adobe",
+                    suggestions : manualEntryVM.servicesList ?? [],
+                    displayKey  : { $0.name ?? "" },
+                    fieldType   : FieldType.serviceName,
+                    activeField : $activeField,
+                    action      : {
+//                        fetchProviderDataApi()
+                    }
+                )
+//                FieldView(text: $serviceName, title: "Service Name", image: "gridIcon", placeHolder: "e.g. Netflix, Spotify, Adobe")
             case .amount:
-                FieldView(text: $amount, title: "Amount", image: "currencyIcon", placeHolder: "0.00",isNumberPad: true)
-                    .focused($isInputActive)
+//                FieldView(text: $amount, title: "Amount", image: "currencyIcon", placeHolder: "0.00",isNumberPad: true)
+                FieldSuggestionView(
+                    text        : $amount,
+                    title       : "Amount",
+                    image       : "currencyIcon",
+                    placeHolder : "0.00",
+                    currency    : selectedCurrency?.symbol ?? Constants.shared.currencySymbol,
+                    isNumberPad : true,
+                    suggestions : manualEntryVM.servicesList ?? [],
+                    displayKey  : { $0.name ?? "" },
+                    fieldType   : FieldType.amount,
+                    activeField : $activeField,
+                    action      : {
+//                        fetchProviderDataApi()
+                    }
+                )
+                .focused($isInputActive)
             case .nextChargeDate:
                 Button(action: dateSelection) {
                     FieldView(text: $chargeDate, textValue: "", title: "Next Charge Date", image: "Calendar1", placeHolder: "dd/mm/yyyy", isButton: false, isText: true, isDate:true)
@@ -111,10 +140,23 @@ struct ReviewExtractedDetailsView: View {
                         .presentationDragIndicator(.hidden)
                 }
             case .planType:
-                FieldView(text: $planType, title: "Plan Type", image: "gridicon2", placeHolder: "e.g. Free, Pro, Premium")
+//                FieldView(text: $planType, title: "Plan Type", image: "gridicon2", placeHolder: "e.g. Free, Pro, Premium")
+                FieldSuggestionView(
+                    text        : $planType,
+                    title       : "Plan Type",
+                    image       : "gridicon2",
+                    placeHolder : "e.g. Free, Pro, Premium",
+                    suggestions : manualEntryVM.servicesList ?? [],
+                    displayKey  : { $0.name ?? "" },
+                    fieldType   : FieldType.planType,
+                    activeField : $activeField,
+                    action      : {
+//                        fetchProviderDataApi()
+                    }
+                )
             case .billingCycle:
                 Button(action: selectBilling) {
-                    FieldView(text: $billingCycle, textValue: selectedBilling?.title ?? "", title: "Billing Cycle", image: "gridIcon", placeHolder: "Please select", isButton: true, isText: true)
+                    FieldView(text: $billingCycle, textValue: selectedBilling?.title ?? "", title: "Billing Cycle", image: "billing", placeHolder: "Select billing cycle", isButton: true, isText: true)
                 }
                 .sheet(isPresented: $showBillingCycleSheet) {
                     BillingCycleBottomSheet(selectedBilling: $selectedBilling, header: "Select Billing Cycle", placeholder: "Search billing cycle")
@@ -182,6 +224,7 @@ struct ReviewExtractedDetailsView: View {
             Spacer()
         }
         .padding(.horizontal, 24)
+        //MARK: OnAppear
         .onAppear{
             globalSubscriptionData = extractedData
             if detailType == .category{
@@ -199,6 +242,7 @@ struct ReviewExtractedDetailsView: View {
                 }
             }
             setupData()
+            manualEntryVM.getServiceProvidersList()
         }
         .onChange(of: commonApiVM.categoriesResponse) { _ in updateCatInfo() }
         .modifier(ToastModifier(toast: toastManager))
@@ -213,6 +257,13 @@ struct ReviewExtractedDetailsView: View {
     }
     
     //MARK: - User defined methods
+    
+    func fetchProviderDataApi(){
+        manualEntryVM.fetchProviderData(input: FetchProviderDataRequest(userId          : Constants.getUserId(),
+                                                                        serviceName     : serviceName,
+                                                                        currencyCode    : selectedCurrency?.code ?? "" == "" ? Constants.shared.regionCode : selectedCurrency?.code ?? ""))
+    }
+    
     private func selectCategory()
     {
         showCategorySheet = true

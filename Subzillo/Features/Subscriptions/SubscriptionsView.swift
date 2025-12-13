@@ -210,35 +210,128 @@ struct SubscriptionsView: View {
             }else if selectedSegment == .first{
                 if subscriptionsList.count != 0{
                     //MARK: - subscriptions list view
-                    ScrollView(showsIndicators: false){
-                        LazyVStack(spacing: 8) {
-                            ForEach(Array(subscriptionsList.enumerated()), id: \.offset) { index, sub in
-                                subscriptionListCard(subscriptionData   : sub,
-                                                     selectionMode      : selectionMode,
-                                                     onSelect           : { toggleSelection(at: index) },
-                                                     onLongPress        : { handleLongPress(at: index) })
-//                                .contentShape(Rectangle())
-                                .simultaneousGesture(
-                                        TapGesture().onEnded {
-                                            if !selectionMode{
-                                                AppIntentRouter.shared.navigate(
-                                                    to: .subscriptionMatchView(fromList: true, subscriptionId: sub.id ?? "")
-                                                )
-                                            }
-                                        }
-                                    )
-//                                .onTapGesture {
-//                                    AppIntentRouter.shared.navigate(to: .subscriptionMatchView(fromList: true, subscriptionId: sub.id ?? ""))
-//                                }
-                                .onAppear{
-                                    if index == subscriptionsList.count - 1 {
-                                        loadNextPageIfNeeded()
+                    //                    ScrollView(showsIndicators: false){
+                    //                        LazyVStack(spacing: 8) {
+                    //                            ForEach(Array(subscriptionsList.enumerated()), id: \.offset) { index, sub in
+                    //                                subscriptionListCard(subscriptionData   : sub,
+                    //                                                     selectionMode      : selectionMode,
+                    //                                                     onSelect           : { toggleSelection(at: index) },
+                    //                                                     onLongPress        : { handleLongPress(at: index) })
+                    //
+                    //                                //Swipe actions
+                    //                                .swipeActions(edge: .trailing) {
+                    //                                    Button(role: .destructive) {
+                    //                                        if let index = subscriptionsList.firstIndex(of: sub) {
+                    //                                            subscriptionsList.remove(at: index)
+                    //                                        }
+                    //                                    } label: {
+                    //                                        Label("Delete", systemImage: "trash.fill")
+                    //                                    }
+                    //
+                    //                                    Button {
+                    //                                        // Implement your edit logic here, e.g.,
+                    //                                        // showing a sheet to edit 'item'
+                    //                                        print("Edit \(sub)")
+                    //                                    } label: {
+                    //                                        Label("Edit", systemImage: "pencil")
+                    //                                    }
+                    //                                    .tint(.blue) // Customize the edit button's color
+                    //                                }
+                    ////                                .contentShape(Rectangle())
+                    //                                .simultaneousGesture(
+                    //                                        TapGesture().onEnded {
+                    //                                            if !selectionMode{
+                    //                                                AppIntentRouter.shared.navigate(
+                    //                                                    to: .subscriptionMatchView(fromList: true, subscriptionId: sub.id ?? "")
+                    //                                                )
+                    //                                            }
+                    //                                        }
+                    //                                    )
+                    ////                                .onTapGesture {
+                    ////                                    AppIntentRouter.shared.navigate(to: .subscriptionMatchView(fromList: true, subscriptionId: sub.id ?? ""))
+                    ////                                }
+                    //                                .onAppear{
+                    //                                    if index == subscriptionsList.count - 1 {
+                    //                                        loadNextPageIfNeeded()
+                    //                                    }
+                    //                                }
+                    //                            }
+                    //                        }
+                    //                        .padding(.bottom,90)
+                    //                    }
+                    
+                    List {
+                        ForEach(Array(subscriptionsList.enumerated()), id: \.offset) { index, sub in
+                            subscriptionListCard(subscriptionData   : sub,
+                                                 selectionMode      : selectionMode,
+                                                 onSelect           : { toggleSelection(at: index) },
+                                                 onLongPress        : { handleLongPress(at: index) })
+                            .listRowSeparator(.hidden)
+                            .listRowInsets(.init(top: 0, leading: 0, bottom: 8, trailing: 0))
+                            .listRowBackground(Color.clear)
+                            
+                            .swipeActions {
+                                Button(role: .destructive) {
+                                    var obj = subscriptionsList[index]
+                                    obj.isSelected = true
+                                    subscriptionsList[index] = obj
+                                    showDeletePopup = true
+                                } label: {
+                                    Label("Delete", systemImage: "trash.fill")
+                                }
+                                
+                                Button {
+                                    let subData = SubscriptionData(id               : sub.id ?? "",
+                                                                   serviceName      : sub.serviceName ?? "",
+                                                                   subscriptionType : sub.subscriptionType ?? "",
+                                                                   amount           : sub.amount ?? 0.0,
+                                                                   currency         : sub.currency ?? "",
+                                                                   currencySymbol   : sub.currencySymbol ?? "",
+                                                                   billingCycle     : sub.billingCycle ?? "",
+                                                                   nextPaymentDate  : sub.nextPaymentDate ?? "",
+                                                                   paymentMethodId  : sub.paymentMethodDataId ?? "",
+                                                                   paymentMethod    : sub.paymentMethod ?? "",
+                                                                   paymentMethodName: sub.paymentMethodName ?? "",
+                                                                   categoryId       : sub.category ?? "",
+//                                                                   category         : sub.category ?? "",
+                                                                   categoryName     : sub.categoryName ?? "",
+                                                                   reason           : sub.notes ?? "",
+                                                                   //                                                                   subscriptionForName: <#T##String?#>,
+                                                                   subscriptionFor      : sub.subscriptionFor ?? "",
+                                                                   paymentMethodDataId  : sub.paymentMethodDataId ?? "",
+                                                                   paymentMethodDataName: sub.paymentMethodDataName ?? "",
+                                                                   renewalReminder      : sub.renewalReminder,
+                                                                   renewalReminders     : sub.renewalReminder,
+                                                                   notes                : sub.notes ?? "")
+                                    globalSubscriptionData = subData
+                                    AppIntentRouter.shared.navigate(to: .manualEntry(isFromEdit     : true,
+                                                                                     isFromListEdit : true,
+                                                                                     subscriptionId : sub.id ?? ""))
+                                } label: {
+                                    Label("Edit", systemImage: "pencil")
+                                }
+                                .tint(.blue)
+                            }
+                            .simultaneousGesture(
+                                TapGesture().onEnded {
+                                    if !selectionMode{
+                                        AppIntentRouter.shared.navigate(
+                                            to: .subscriptionMatchView(fromList: true, subscriptionId: sub.id ?? "")
+                                        )
                                     }
+                                }
+                            )
+                            .onAppear {
+                                if index == subscriptionsList.count - 1 {
+                                    loadNextPageIfNeeded()
                                 }
                             }
                         }
-                        .padding(.bottom,90)
+                        .background(Color.clear)
                     }
+                    .listStyle(.plain)
+                    .background(Color.clear)
+                    .scrollContentBackground(.hidden)
                 }else{
                     Spacer()
                     VStack(){
@@ -269,7 +362,9 @@ struct SubscriptionsView: View {
             month   = Calendar.current.component(.month, from: now)
             self.chargeDate = formatter.string(from: now)
         }
-        .sheet(isPresented: $showDeletePopup) {
+        .sheet(isPresented: $showDeletePopup , onDismiss: {
+            for i in subscriptionsList.indices { subscriptionsList[i].isSelected = false }
+        }) {
             InfoAlertSheet(
                 onDelegate: {
                     deleteSubscription()
@@ -321,6 +416,8 @@ struct SubscriptionsView: View {
             self.subscriptionsList.removeAll()
             listSubsApi()
         }else{
+            page = 0
+            self.subscriptionsList.removeAll()
             getSubsByMonthApi()
         }
     }
@@ -394,7 +491,7 @@ struct SubscriptionsView: View {
                         var relationId  = ""
                         for sub in subscriptions {
                             //subscriptionFor Need to change with nickName
-//                            let rel     = sub.subscriptionFor == "" ? "Me" : sub.subscriptionFor
+                            //                            let rel     = sub.subscriptionFor == "" ? "Me" : sub.subscriptionFor
                             let rel     = (sub.subscriptionFor == "" || sub.subscriptionFor == Constants.getUserId()) ? "Me" : sub.subscriptionFor
                             relationId  = (sub.subscriptionFor == "" ? Constants.getUserId() : sub.subscriptionFor) ?? ""
                             if rel == relation {

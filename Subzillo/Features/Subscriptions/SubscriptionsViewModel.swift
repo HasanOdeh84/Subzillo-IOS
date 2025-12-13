@@ -24,6 +24,7 @@ class SubscriptionsViewModel: ObservableObject {
     }
     
     func listSubscriptions(input: ListSubscriptionsRequest,showLoader:Bool = true) {
+        self.listSubsResponse = nil
         apiReference.postApi(endPoint: APIEndpoint.listSubscriptions, method: .POST,token: authKey,body: input,showLoader: showLoader, responseType: ListSubscriptionsResponse.self)
             .sink { [unowned self] completion in
                 if case let .failure(error) = completion {
@@ -81,24 +82,13 @@ struct SubscriptionRow: View {
     let subscriptionData: SubscriptionInfoo
     var body: some View {
         HStack(spacing: 0) {
-            VStack(alignment: .center,spacing: 5){
+            VStack(alignment: .center){
                 let result = getDayInfo(from: subscriptionData.createdAt ?? "")
-                Text(result.dayName.uppercased())
-                    .font(.appSemiBold(14))
-                    .foregroundColor(.navyBlueCTA700)
-                    .multilineTextAlignment(.center)
-                    .frame(width: 60, alignment: .center)
-                    .background(Color.primeryBlue100)
-                    .autocapitalization(.allCharacters)
-                
-                Text(result.dayNumber)
-                    .font(.appSemiBold(24))
-                    .foregroundColor(.navyBlueCTA700)
-                    .multilineTextAlignment(.center)
-                    .frame(width: 60, alignment: .center)
-                    .background(Color.primeryBlue100)
+                CalendarCardView(month: result.monthName, day: result.dayNumber)
+                    .padding(.horizontal, 7)
+                    .padding(.vertical, 20)
             }
-            .frame(height: calculatedHeight(for: subscriptionData))
+            .frame(width: 65, height: (calculatedHeight(for: subscriptionData) + 10))
             .background(Color.primeryBlue100)
             
             DashedVerticalDivider()
@@ -193,6 +183,11 @@ struct SubscriptionRow: View {
                                     .offset(x: CGFloat(-10 * 5), y: 0)
                             }
                             
+                            Text("(\(subscriptionData.plans?.count ?? 0))")
+                                .foregroundStyle(Color.neutral500)
+                                .font(.appSemiBold(14))
+                                .padding(.leading, 4)
+                            
                             Spacer()
                         }
                     }
@@ -205,7 +200,8 @@ struct SubscriptionRow: View {
             .padding(.trailing, 12)
         }
         .frame(maxWidth: .infinity)
-        .frame(height: calculatedHeight(for: subscriptionData))
+//        .frame(height: calculatedHeight(for: subscriptionData))
+        .frame(height: (calculatedHeight(for: subscriptionData) + 10))
         .background(.whiteNeutralCardBG)
         .overlay(
             RoundedRectangle(cornerRadius: 8)
@@ -240,18 +236,56 @@ struct SubscriptionRow: View {
         return String(day)
     }
     
-    func getDayInfo(from dateString: String) -> (dayNumber: String, dayName: String) {
+    func getDayInfo(from dateString: String) -> (dayNumber: String, dayName: String, monthName: String) {
         let formatter = DateFormatter()
         formatter.dateFormat = "yyyy-MM-dd"
         guard let date = formatter.date(from: dateString) else {
-            return ("", "")
+            return ("", "", "")
         }
-        // Day number
-        let dayNumber = Calendar.current.component(.day, from: date)
-        // Day name (Mon, Tue, Wed...)
-        formatter.dateFormat = "EEE"   // 3-letter day name
+        let calendar = Calendar.current
+        let dayNumber = calendar.component(.day, from: date)
+        formatter.dateFormat = "EEE"
         let dayName = formatter.string(from: date)
-        return ("\(dayNumber)", dayName)
+        formatter.dateFormat = "MMM"
+        let monthName = formatter.string(from: date)
+        return ("\(dayNumber)", dayName, monthName)
+    }
+}
+
+struct CalendarCardView: View {
+    var month: String = "Dec"
+    var day: String = "01"
+    
+    var body: some View {
+        VStack(spacing: 0) {
+            // Top Month Section
+            Text(month)
+                .font(.appSemiBold(14))
+                .foregroundColor(.white)
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 2)
+                .background(Color.navyBlueCTA700)
+                .clipShape(RoundedCorner(radius: 7, corners: [.topLeft, .topRight]))
+                .multilineTextAlignment(.center)
+            
+            // Bottom Day Section
+            Text(day)
+                .font(.appSemiBold(16))
+                .foregroundColor(Color.navyBlueCTA700)
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 4)
+                .background(Color.white)
+                .multilineTextAlignment(.center)
+                .clipShape(RoundedCorner(radius: 7, corners: [.bottomLeft, .bottomRight]))
+        }
+        .frame(width: 46, height: 43)
+//        .background(Color.white)
+//        .cornerRadius(7)
+        .background(
+            RoundedRectangle(cornerRadius: 7)
+                .fill(Color.white)
+        )
+        .shadow(color: Color.black.opacity(0.10), radius: 4, x: 0, y: 2)
     }
 }
 

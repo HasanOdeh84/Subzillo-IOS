@@ -274,36 +274,6 @@
             endingLineNumber = "96"
             landmarkName = "getSubscriptions(query:)"
             landmarkType = "7">
-            <Locations>
-               <Location
-                  uuid = "0E5E7EAC-0323-484A-B684-624F187E7D3C - f708a1b01a1067cb"
-                  shouldBeEnabled = "Yes"
-                  ignoreCount = "0"
-                  continueAfterRunningActions = "No"
-                  symbolName = "Subzillo.DBManager.getSubscriptions(query: __C.NSPredicate) -&gt; Swift.Array&lt;Subzillo.SubscriptionListData&gt;"
-                  moduleName = "Subzillo.debug.dylib"
-                  usesParentBreakpointCondition = "Yes"
-                  urlString = "file:///Users/kavya/Documents/subzillo_ios/Subzillo/Database/DBManager.swift"
-                  startingColumnNumber = "9223372036854775807"
-                  endingColumnNumber = "9223372036854775807"
-                  startingLineNumber = "96"
-                  endingLineNumber = "96">
-               </Location>
-               <Location
-                  uuid = "0E5E7EAC-0323-484A-B684-624F187E7D3C - 134efb6fdfec2f8f"
-                  shouldBeEnabled = "Yes"
-                  ignoreCount = "0"
-                  continueAfterRunningActions = "No"
-                  symbolName = "closure #1 (Subzillo.SubscriptionEntity) -&gt; Subzillo.SubscriptionListData in Subzillo.DBManager.getSubscriptions(query: __C.NSPredicate) -&gt; Swift.Array&lt;Subzillo.SubscriptionListData&gt;"
-                  moduleName = "Subzillo.debug.dylib"
-                  usesParentBreakpointCondition = "Yes"
-                  urlString = "file:///Users/kavya/Documents/subzillo_ios/Subzillo/Database/DBManager.swift"
-                  startingColumnNumber = "9223372036854775807"
-                  endingColumnNumber = "9223372036854775807"
-                  startingLineNumber = "98"
-                  endingLineNumber = "98">
-               </Location>
-            </Locations>
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
@@ -335,6 +305,54 @@
             startingLineNumber = "355"
             endingLineNumber = "355"
             landmarkName = "showOfflineDetails()"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "9FE3D97F-2144-4C9E-AC90-870A69B45367"
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "Subzillo/Common/Views/PhoneNumberField.swift"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "214"
+            endingLineNumber = "214"
+            landmarkName = "makeUIView(context:)"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "9E45CF59-B161-4E4C-8A39-F71B80E811F9"
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "Subzillo/Common/Views/PhoneNumberField.swift"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "240"
+            endingLineNumber = "240"
+            landmarkName = "updateUIView(_:context:)"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "DE15FC24-98F4-47A2-AEC8-7A9404EFD367"
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "Subzillo/Common/Views/PhoneNumberField.swift"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "311"
+            endingLineNumber = "311"
+            landmarkName = "updatePlaceholder()"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>

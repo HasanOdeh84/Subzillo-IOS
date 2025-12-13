@@ -45,26 +45,26 @@ struct BillingCycleBottomSheet: View {
             Text(LocalizedStringKey(header ?? ""))
                 .font(.appRegular(24))
                 .foregroundColor(.neutralMain700)
-                .padding(.vertical,24)
+                .padding(.top,24)
             
-            HStack {
-                Image("search")
-                    .frame(width: 20,height: 20)
-                    .foregroundColor(.gray)
-                    .padding(.leading,16)
-                TextField(LocalizedStringKey(placeholder ?? ""), text: $searchText)
-                    .textFieldStyle(PlainTextFieldStyle())
-                    .padding(.trailing,10)
-                    .foregroundColor(.whiteBlackBGnoPic)
-            }
-            .frame(height: 52)
-            .background(.neutralBg100)
-            .cornerRadius(12)
-            .overlay(
-                RoundedRectangle(cornerRadius: 12)
-                    .stroke(Color.blue500, lineWidth: 1)
-            )
-            .padding(.horizontal,24)
+//            HStack {
+//                Image("search")
+//                    .frame(width: 20,height: 20)
+//                    .foregroundColor(.gray)
+//                    .padding(.leading,16)
+//                TextField(LocalizedStringKey(placeholder ?? ""), text: $searchText)
+//                    .textFieldStyle(PlainTextFieldStyle())
+//                    .padding(.trailing,10)
+//                    .foregroundColor(.whiteBlackBGnoPic)
+//            }
+//            .frame(height: 52)
+//            .background(.neutralBg100)
+//            .cornerRadius(12)
+//            .overlay(
+//                RoundedRectangle(cornerRadius: 12)
+//                    .stroke(Color.blue500, lineWidth: 1)
+//            )
+//            .padding(.horizontal,24)
             
             if filteredCategories.count != 0{
                 VStack(spacing: 0){

@@ -50,7 +50,8 @@ struct AddFamilyMemberBottomSheet: View {
                                  selectedCurrency   : $selectedCurrency,
                                  selectedCountry    : $selectedCountry,
                                  isCountry          : true)
-                .addDoneButton()
+                .addDoneButton{
+                }
                 
                 Text("Color (To distinguish color family subscriptions)")
                     .font(.caption)

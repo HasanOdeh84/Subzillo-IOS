@@ -17,13 +17,15 @@ class ManualEntryViewModel: ObservableObject {
     @Published var addSubscriptionResponse          : AddSubscriptionResponseData?
     @Published var listUserCardsResponse            : [ListUserCardsResponseData]?
     @Published var listFamilyMembersResponse        : [ListFamilyMembersResponseData]?
+    @Published var servicesList                     : [GetServiceProvidersListData]?
+    @Published var providerData                     : FetchProviderData?
     @Published var isLoading                        : Bool = false
     private let router                              : AppIntentRouter
     private let sessionManager                      : SessionManager
     @Published var isManualEntrySuccess             : Bool?
     @Published var isEditEntrySuccess               : Bool?
 
-    init(router: AppIntentRouter = .shared,sessionManager: SessionManager = .shared) {
+    init(router: AppIntentRouter = .shared,sessionManager: SessionManager = .shared){
         self.router = router
         self.sessionManager = sessionManager
     }
@@ -107,6 +109,34 @@ class ManualEntryViewModel: ObservableObject {
         receiveValue: { response in
             PrintLogger.modelLog(response, type: .response, isInput: false)
             ToastManager.shared.showToast(message: response.message ?? "")
+        }
+        .store(in: &self.subscriptions)
+    }
+    
+    func getServiceProvidersList() {
+        apiReference.getApi(endPoint: APIEndpoint.getServiceProvidersList, token: authKey, responseType: GetServiceProvidersListResponse.self)
+            .sink { [unowned self] completion in
+                if case let .failure(error) = completion {
+                    self.handleError(error,endPoint: APIEndpoint.getServiceProvidersList)
+                }
+            }
+        receiveValue: { response in
+            PrintLogger.modelLog(response, type: .response, isInput: false)
+            self.servicesList = response.data
+        }
+        .store(in: &self.subscriptions)
+    }
+    
+    func fetchProviderData(input:FetchProviderDataRequest) {
+        apiReference.postApi(endPoint: APIEndpoint.fetchProviderData, method: .POST,token: authKey,body: input,showLoader: true, responseType: FetchProviderDataResponse.self)
+            .sink { [unowned self] completion in
+                if case let .failure(error) = completion {
+                    self.handleError(error,endPoint: APIEndpoint.fetchProviderData)
+                }
+            }
+        receiveValue: { response in
+            PrintLogger.modelLog(response, type: .response, isInput: false)
+            self.providerData = response.data
         }
         .store(in: &self.subscriptions)
     }

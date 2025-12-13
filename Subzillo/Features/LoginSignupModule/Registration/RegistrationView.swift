@@ -58,7 +58,8 @@ struct RegistrationView: View {
                                              isCountry          : true,
                                              fromSingup         : true,
                                              fromSocailLogin    : fromSocialLogin)
-                            .addDoneButton()
+                            .addDoneButton{
+                            }
                             ReusableTextField(placeholder: "Enter your full name", text: $fullName,header:"Full Name")
                                 .disabled(isNameDisabled)
                             ReusableTextField(placeholder: "name@example.com", text: $email, isEmail: true,header: "Email")
@@ -75,11 +76,11 @@ struct RegistrationView: View {
                             .opacity(verifyData?.verifyType == 1 ? 0.5 : 1.0)
                             .disabled(verifyData?.verifyType == 1 ? true : false)
                             .if(verifyData?.verifyType != 1) { view in
-                                view.addDoneButton()
+                                view.addDoneButton{}
                             }
                             ReusableTextField(placeholder: "Enter your full name", text: $fullName,header:"Full Name")
                                 .if(verifyData?.verifyType == 1) { view in
-                                    view.addDoneButton()
+                                    view.addDoneButton{}
                                 }
                             ReusableTextField(placeholder: "name@example.com", text: $email, isEmail: true,header: verifyData?.verifyType == 1 ? "Email [Optional]" : "Email")
                                 .opacity(verifyData?.verifyType == 2 ? 0.5 : 1.0)

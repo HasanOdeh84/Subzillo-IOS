@@ -110,13 +110,14 @@ class LoginViewModel: ObservableObject {
             KeychainHelper.save(response.data?.accessToken, account: Constants.authKey)
             KeychainHelper.save(response.data?.refreshToken, account: Constants.refreshKey)
             Constants.saveDefaults(value: response.data?.id, key: Constants.userId)
-            let data = LoginSignupVerifyData(verifyType         : 2,//input.authProvider?.rawValue ?? 1,
-                                             email              : input.authProvider == loginType.apple ? response.data?.email : input.email,//input.email,
-                                             userId             : response.data?.id ?? "",
-                                             isNewUser          : response.data?.isNewUser ?? false,
-                                             isSignupCompleted  : response.data?.signupCompleted ?? false,
-                                             fullName           : input.authProvider == loginType.apple ? response.data?.fullName : input.fullName,
-                                             socialLoginType    : input.authProvider)
+            let data = LoginSignupVerifyData(verifyType             : 2,//input.authProvider?.rawValue ?? 1,
+                                             email                  : input.authProvider == loginType.apple ? response.data?.email : input.email,//input.email,
+                                             userId                 : response.data?.id ?? "",
+                                             isNewUser              : response.data?.isNewUser ?? false,
+                                             isSignupCompleted      : response.data?.signupCompleted ?? false,
+                                             fullName               : input.authProvider == loginType.apple ? response.data?.fullName : input.fullName,
+                                             socialLoginType        : input.authProvider,
+                                             isOnboarding           : response.data?.onboardingCompleted ?? false)
             self.sessionManager.saveLoginData(data)
             DispatchQueue.main.async { [self] in
                 if response.data?.isNewUser ?? false{
