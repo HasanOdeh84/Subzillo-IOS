@@ -41,7 +41,7 @@ This document lists all **dependencies** used in the project.
   - Monitoring app stability trends and improving reliability across releases.
 - **Resources**: [FirebaseCrashlytics github project](https://github.com/firebase/firebase-ios-sdk)
 
-## 4. MSAL (microsoft-authentication-library-for-objc)
+## 5. MSAL (microsoft-authentication-library-for-objc)
 
 - **Dependency**: 'MSAL'
 - **Purpose**: MSAL enables secure authentication using Microsoft accounts.
