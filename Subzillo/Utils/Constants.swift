@@ -19,6 +19,7 @@ struct Constants{
     static let isLoggedIn                           = "isLoggedIn"
     static let isFirstLoggedIn                      = "isFirstLoggedIn"
     static let userId                               = "userId"
+    static let providerBaseUrl                      = "providerBaseUrl"
     static let username                             = "username"
     static let latitude                             = "latitude"
     static let longitude                            = "longitude"
@@ -97,19 +98,39 @@ struct Constants{
         defaults.removeObject(forKey: key)
     }
     
-    static func confidenceInfo(isAssumed:Bool,confidence:Double) -> (String, Color) {
+//    static func confidenceInfo(isAssumed:Bool,confidence:Double) -> (String, Color) {
+//        if isAssumed {
+//            return ("Assumed", Color.warning)
+//        } else if confidence <= 0.0 {
+//            return ("------------", Color.empty)
+//        } else if confidence < 0.4 {
+//            return ("Low confidence", Color.error)
+//        } else if confidence < 0.7 {
+//            return ("Medium confidence", Color.info)
+//        } else if confidence < 1 {
+//            return ("High confidence", Color.high)
+//        } else {
+//            return ("Perfect match", Color.success)
+//        }
+//    }
+    
+    static func confidenceInfo(
+        isAssumed: Bool,
+        confidence: Double
+    ) -> (String, Color, CGFloat) {
+        let base = Color.confidenceBlue
         if isAssumed {
-            return ("Assumed", Color.warning)
-        } else if confidence <= 0.0 {
-            return ("------------", Color.empty)
+            return ("Assumed", base.opacity(0.4), 0.4)
+        } else if confidence <= 0 {
+            return ("------------", base.opacity(0.0), 0.0)
         } else if confidence < 0.4 {
-            return ("Low confidence", Color.error)
+            return ("Low confidence", base.opacity(0.2), 0.2)
         } else if confidence < 0.7 {
-            return ("Medium confidence", Color.info)
+            return ("Medium confidence", base.opacity(0.6), 0.6)
         } else if confidence < 1 {
-            return ("High confidence", Color.high)
+            return ("High confidence", base.opacity(0.8), 0.8)
         } else {
-            return ("Perfect match", Color.success)
+            return ("Perfect match", base.opacity(1.0), 1.0)
         }
     }
     
@@ -143,7 +164,8 @@ struct Constants{
     }
     
     func OpenSubscriptionsInAppStore(){
-        
+        let url = URL(string: "https://apps.apple.com/account/subscriptions")
+        UIApplication.shared.open(url!, options: [:])
     }
     
     func getNextDateByFrequency(

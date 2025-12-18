@@ -18,7 +18,7 @@ public struct LoginSignupVerifyData: Codable, Hashable {
     let fullName            : String?
     let socialLogin         : Bool?
     let socialLoginType     : loginType?
-    let isOnboarding        : Bool?
+    let onboardingStatus    : Bool?
     init(
         verifyType          : Int,
         email               : String? = nil,
@@ -30,7 +30,7 @@ public struct LoginSignupVerifyData: Codable, Hashable {
         fullName            : String? = nil,
         socialLogin         : Bool? = false,
         socialLoginType     : loginType? = loginType.none,
-        isOnboarding        : Bool? = false
+        onboardingStatus    : Bool? = false
     ) {
         self.verifyType         = verifyType
         self.email              = email
@@ -42,7 +42,7 @@ public struct LoginSignupVerifyData: Codable, Hashable {
         self.fullName           = fullName
         self.socialLogin        = socialLogin
         self.socialLoginType    = socialLoginType
-        self.isOnboarding       = isOnboarding
+        self.onboardingStatus   = onboardingStatus
     }
 }
 

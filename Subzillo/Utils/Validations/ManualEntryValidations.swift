@@ -40,7 +40,7 @@ struct ManualEntryValidations {
         if input.category.isEmpty{
             return "Please select category"
         }
-        if input.amount == 0.0 {
+        if input.amount == nil {
             return "Amount is required"
         }
         if input.currency == "" {
@@ -66,7 +66,7 @@ struct ManualEntryValidations {
         if (input.categoryId ?? "" == ""){
             return "Please select category"
         }
-        if input.amount == 0.0 || input.amount == nil{
+        if input.amount == nil{
             return "Amount is required"
         }
         if input.currency == "" {

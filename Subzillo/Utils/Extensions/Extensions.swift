@@ -43,6 +43,10 @@ extension String {
         outputFormatter.dateFormat = outputFormat
         return outputFormatter.string(from: date)
     }
+    
+    func normalizedPhoneNumber() -> String {
+        return self.filter { $0.isNumber }
+    }
 }
 
 func formatTime(_ time: TimeInterval) -> String {

@@ -43,13 +43,23 @@ struct ReviewExtractedDetailsView: View {
         ManualDataInfo(id: "6", title: "Yearly", subtitle: "Every 360 Days")
     ]
     @FocusState private var isInputActive       : Bool
-    @StateObject var manualEntryVM              = ManualEntryViewModel()
+    @FocusState private var dummyFocus          : Bool
     @State private var activeField              : FieldType?
+    
+    @State var isAmountUpdate                   = false
+    @State var isPlanTypeUpdate                 = false
+    @State var isPlanTypeError                  : Bool = false
+    @State var isAmountError                    : Bool = false
+    
+    @State var servicesList      : [GetServiceProvidersListData]?
+    @State var providerPlansList : [ProviderSubscriptionPlan]?
     
     //MARK: - body
     var body: some View {
-        let (confidenceStr, colorValue) = Constants.confidenceInfo(isAssumed: isAssumed, confidence: confidence)
-        
+//        let (confidenceStr, colorValue) = Constants.confidenceInfo(isAssumed: isAssumed, confidence: confidence)
+        let (confidenceStr, colorValue, fillRatio) =
+            Constants.confidenceInfo(isAssumed: isAssumed, confidence: confidence)
+
         VStack(alignment: .center) {
             Capsule()
                 .fill(Color.grayCapsule)
@@ -64,15 +74,20 @@ struct ReviewExtractedDetailsView: View {
                 .padding(.top,24)
                 .padding(.horizontal, -5)
             
-            Text(confidenceStr)
-                .frame(maxWidth: .infinity)
-                .frame(height: 28)
-                .font(.appRegular(14))
-                .foregroundColor(.neutralMain700)
-                .multilineTextAlignment(.center)
-                .padding(.horizontal, 16)
-                .background(colorValue)
-                .cornerRadius(4)
+//            Text(confidenceStr)
+//                .frame(maxWidth: .infinity)
+//                .frame(height: 28)
+//                .font(.appRegular(14))
+//                .foregroundColor(.neutralMain700)
+//                .multilineTextAlignment(.center)
+//                .padding(.horizontal, 16)
+//                .background(colorValue)
+//                .cornerRadius(4)
+            ConfidenceBarView(
+                text        : confidenceStr,
+                color       : colorValue,
+                fillRatio   : fillRatio
+            )
                 .padding(.bottom,36)
                 .padding(.horizontal, -5)
             
@@ -83,17 +98,15 @@ struct ReviewExtractedDetailsView: View {
                     title       : "Service Name",
                     image       : "gridIcon",
                     placeHolder : "e.g. Netflix, Spotify, Adobe",
-                    suggestions : manualEntryVM.servicesList ?? [],
+                    suggestions : servicesList ?? [],
                     displayKey  : { $0.name ?? "" },
+                    isFocused   : $dummyFocus,
                     fieldType   : FieldType.serviceName,
                     activeField : $activeField,
                     action      : {
-//                        fetchProviderDataApi()
                     }
                 )
-//                FieldView(text: $serviceName, title: "Service Name", image: "gridIcon", placeHolder: "e.g. Netflix, Spotify, Adobe")
             case .amount:
-//                FieldView(text: $amount, title: "Amount", image: "currencyIcon", placeHolder: "0.00",isNumberPad: true)
                 FieldSuggestionView(
                     text        : $amount,
                     title       : "Amount",
@@ -101,15 +114,32 @@ struct ReviewExtractedDetailsView: View {
                     placeHolder : "0.00",
                     currency    : selectedCurrency?.symbol ?? Constants.shared.currencySymbol,
                     isNumberPad : true,
-                    suggestions : manualEntryVM.servicesList ?? [],
-                    displayKey  : { $0.name ?? "" },
+                    suggestions : filteredPricePlans(),
+                    displayKey  : { plan in
+                        String(format: "%.2f", plan.price ?? 0)
+                    },
+                    isFocused   : $isInputActive,
                     fieldType   : FieldType.amount,
                     activeField : $activeField,
                     action      : {
-//                        fetchProviderDataApi()
+                        errorHint(isAmount: true)
+                        isAmountUpdate = true
                     }
                 )
-                .focused($isInputActive)
+//                .focused($isInputActive)
+                
+                if isAmountError{
+                    HStack(spacing: 6){
+                        Image("info")
+                            .frame(width: 24, height: 24)
+                        Text("This amount is not available for this service")
+                            .font(.appRegular(14))
+                            .foregroundColor(Color.systemInfoBlue)
+                        Spacer()
+                    }
+                    .padding(.leading, 5)
+                    .padding(.top, -5)
+                }
             case .nextChargeDate:
                 Button(action: dateSelection) {
                     FieldView(text: $chargeDate, textValue: "", title: "Next Charge Date", image: "Calendar1", placeHolder: "dd/mm/yyyy", isButton: false, isText: true, isDate:true)
@@ -140,31 +170,45 @@ struct ReviewExtractedDetailsView: View {
                         .presentationDragIndicator(.hidden)
                 }
             case .planType:
-//                FieldView(text: $planType, title: "Plan Type", image: "gridicon2", placeHolder: "e.g. Free, Pro, Premium")
                 FieldSuggestionView(
                     text        : $planType,
                     title       : "Plan Type",
                     image       : "gridicon2",
                     placeHolder : "e.g. Free, Pro, Premium",
-                    suggestions : manualEntryVM.servicesList ?? [],
-                    displayKey  : { $0.name ?? "" },
+                    suggestions : providerPlansList ?? [],
+                    displayKey  : { $0.planName ?? "" },
+                    isFocused   : $dummyFocus,
                     fieldType   : FieldType.planType,
                     activeField : $activeField,
                     action      : {
-//                        fetchProviderDataApi()
+                        errorHint(isAmount: false)
+                        isPlanTypeUpdate = true
                     }
                 )
+                if isPlanTypeError{
+                    HStack(spacing: 6){
+                        Image("info")
+                            .frame(width: 24, height: 24)
+                        Text("This plan is not available for this service")
+                            .font(.appRegular(14))
+                            .foregroundColor(Color.systemInfoBlue)
+                        Spacer()
+                    }
+                    .padding(.leading, 5)
+                    .padding(.top, -5)
+                }
             case .billingCycle:
                 Button(action: selectBilling) {
                     FieldView(text: $billingCycle, textValue: selectedBilling?.title ?? "", title: "Billing Cycle", image: "billing", placeHolder: "Select billing cycle", isButton: true, isText: true)
                 }
                 .sheet(isPresented: $showBillingCycleSheet) {
                     BillingCycleBottomSheet(selectedBilling: $selectedBilling, header: "Select Billing Cycle", placeholder: "Search billing cycle")
-                        .presentationDetents([.medium, .large])
+                        .presentationDetents([.height(500)])
                         .presentationDragIndicator(.hidden)
                 }
             }
             
+            //MARK: - Update button
             GradientBorderButton(title          : buttonTitle ?? "",
                                  isBtn          : true,
                                  buttonImage    : buttonIcon ?? "") {
@@ -174,7 +218,7 @@ struct ReviewExtractedDetailsView: View {
                         toastManager.showToast(message: "Please enter service name",style:ToastStyle.error)
                         return
                     }
-                    globalSubscriptionData?.serviceName = serviceName.trimmed
+                    globalSubscriptionData?.serviceName     = serviceName.trimmed
                 case .amount:
                     let amountDouble = Double(amount.trimmed) ?? 0.0
                     if amountDouble == 0.0 || amount.trimmed == ""{
@@ -182,6 +226,9 @@ struct ReviewExtractedDetailsView: View {
                         return
                     }
                     globalSubscriptionData?.amount = amountDouble
+                    if isAmountUpdate{
+                        autoFillDetails(isAmount: true)
+                    }
                 case .nextChargeDate:
                     if chargeDate == ""{
                         toastManager.showToast(message: "Please select next charge date",style:ToastStyle.error)
@@ -208,12 +255,15 @@ struct ReviewExtractedDetailsView: View {
                         return
                     }
                     globalSubscriptionData?.subscriptionType = planType.trimmed
+                    if isPlanTypeUpdate{
+                        autoFillDetails(isAmount: false)
+                    }
                 case .billingCycle:
                     if selectedBilling?.title ?? "" == ""{
                         toastManager.showToast(message: "Please select a billing cycle",style:ToastStyle.error)
                         return
                     }
-                    globalSubscriptionData?.billingCycle = selectedBilling?.title ?? "".lowercased()
+                    globalSubscriptionData?.billingCycle = selectedBilling?.title ?? ""//.lowercased()
                 }
                 onDelegate?()
                 dismiss()
@@ -229,20 +279,8 @@ struct ReviewExtractedDetailsView: View {
             globalSubscriptionData = extractedData
             if detailType == .category{
                 commonApiVM.getCategories()
-            }else if detailType == .currency{
-                selectedCurrency = Currency(id      : nil,
-                                            name    : Constants.shared.currencyCode,
-                                            symbol  : Constants.shared.currencySymbol,
-                                            code    : Constants.shared.currencyCode,
-                                            flag    : Constants.shared.flag(from: Constants.shared.regionCode))
-                if let data = commonApiVM.currencyResponse {
-                    selectedCurrency = data.first(where: { $0.code == Constants.shared.currencyCode })
-                }else{
-                    commonApiVM.getCurrencies()
-                }
             }
             setupData()
-            manualEntryVM.getServiceProvidersList()
         }
         .onChange(of: commonApiVM.categoriesResponse) { _ in updateCatInfo() }
         .modifier(ToastModifier(toast: toastManager))
@@ -251,17 +289,31 @@ struct ReviewExtractedDetailsView: View {
                 Spacer()
                 Button("Done") {
                     isInputActive = false
+                    if detailType == .amount{
+                        errorHint(isAmount: true)
+                        isAmountUpdate = true
+                    }
                 }
             }
         }
     }
     
     //MARK: - User defined methods
-    
-    func fetchProviderDataApi(){
-        manualEntryVM.fetchProviderData(input: FetchProviderDataRequest(userId          : Constants.getUserId(),
-                                                                        serviceName     : serviceName,
-                                                                        currencyCode    : selectedCurrency?.code ?? "" == "" ? Constants.shared.regionCode : selectedCurrency?.code ?? ""))
+    func filteredPricePlans() -> [ProviderSubscriptionPlan] {
+        guard let plans = providerPlansList else{//manualEntryVM.providerData?.providerSubscriptionPlansList else {
+            return []
+        }
+        return Array(
+            Dictionary(
+                grouping: plans.compactMap { plan in
+                    guard plan.price != nil else { return nil }
+                    return plan
+                },
+                by: { $0.price! }
+            )
+            .values
+                .compactMap { $0.first }
+        )
     }
     
     private func selectCategory()
@@ -302,11 +354,124 @@ struct ReviewExtractedDetailsView: View {
             if let currencies = commonApiVM.currencyResponse {
                 selectedCurrency = currencies.first(where: { $0.code == extractedData?.currency ?? ""})
             }
+        }else{
+            selectedCurrency = Currency(id      : nil,
+                                        name    : Constants.shared.currencyCode,
+                                        symbol  : Constants.shared.currencySymbol,
+                                        code    : Constants.shared.currencyCode,
+                                        flag    : Constants.shared.flag(from: Constants.shared.regionCode))
+            if let data = commonApiVM.currencyResponse {
+                selectedCurrency = data.first(where: { $0.code == Constants.shared.currencyCode })
+            }else{
+                commonApiVM.getCurrencies()
+            }
         }
         category    = extractedData?.categoryName ?? ""
         planType    = extractedData?.subscriptionType ?? ""
         if extractedData?.billingCycle ?? "" != "" {
             selectedBilling = billingData.first(where: { $0.title == globalSubscriptionData?.billingCycle ?? ""})
+        }
+    }
+    
+    private func autoFillDetails(isAmount:Bool = false){
+        if isAmount{
+            guard
+                let enteredAmount = Double(amount),
+                let plans = providerPlansList
+            else {
+                isAmountError = false
+                return
+            }
+            if let matchedPlan = plans.first(where: {
+                guard let price = $0.price else { return false }
+                return abs(price - enteredAmount) < 0.01
+            }) {
+                if globalSubscriptionData?.subscriptionType == ""{
+                    globalSubscriptionData?.subscriptionType = matchedPlan.planName ?? ""
+                }
+                if globalSubscriptionData?.billingCycle == ""{
+                    globalSubscriptionData?.billingCycle = matchedPlan.billingCycle ?? ""//.lowercased()
+                    chargeDate = Constants.shared.getNextDateByFrequency(
+                        frequency: matchedPlan.billingCycle ?? ""
+                    )
+                    globalSubscriptionData?.nextPaymentDate = chargeDate.formattedDate(from: "dd/MM/yyyy", to: "yyyy-MM-dd")
+                }
+                isAmountError = false
+            } else {
+                if providerPlansList?.count != 0{
+                    isAmountError = true
+                }
+            }
+        }else{
+            guard
+                !planType.isEmpty,
+                let plans = providerPlansList
+            else {
+                isPlanTypeError = false
+                return
+            }
+            if let matchedPlan = plans.first(where: {
+                ($0.planName ?? "")
+                    .trimmingCharacters(in: .whitespacesAndNewlines)
+                    .caseInsensitiveCompare(
+                        planType.trimmingCharacters(in: .whitespacesAndNewlines)
+                    ) == .orderedSame
+            }) {
+                if globalSubscriptionData?.amount == 0.0 || globalSubscriptionData?.amount == nil{
+                    globalSubscriptionData?.amount = matchedPlan.price
+                }
+                if globalSubscriptionData?.billingCycle == "" || globalSubscriptionData?.billingCycle == nil {
+                    globalSubscriptionData?.billingCycle = matchedPlan.billingCycle ?? ""//.lowercased()
+                    chargeDate = Constants.shared.getNextDateByFrequency(
+                        frequency: matchedPlan.billingCycle ?? ""
+                    )
+                    globalSubscriptionData?.nextPaymentDate = chargeDate.formattedDate(from: "dd/MM/yyyy", to: "yyyy-MM-dd")
+                }
+                isPlanTypeError = false
+            } else {
+                if !(providerPlansList?.isEmpty ?? true) {
+                    isPlanTypeError = true
+                }
+            }
+        }
+    }
+    
+    private func errorHint(isAmount: Bool = false) {
+        if isAmount {
+            guard
+                let enteredAmount = Double(amount),
+                let plans = providerPlansList,
+                !plans.isEmpty
+            else {
+                isAmountError = false
+                return
+            }
+            
+            let isMatched = plans.contains { plan in
+                guard let price = plan.price else { return false }
+                return abs(price - enteredAmount) < 0.01
+            }
+            
+            isAmountError = !isMatched
+        } else {
+            guard
+                !planType.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty,
+                let plans = providerPlansList,
+                !plans.isEmpty
+            else {
+                isPlanTypeError = false
+                return
+            }
+            
+            let isMatched = plans.contains { plan in
+                (plan.planName ?? "")
+                    .trimmingCharacters(in: .whitespacesAndNewlines)
+                    .caseInsensitiveCompare(
+                        planType.trimmingCharacters(in: .whitespacesAndNewlines)
+                    ) == .orderedSame
+            }
+            
+            isPlanTypeError = !isMatched
         }
     }
 }

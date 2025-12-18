@@ -40,6 +40,11 @@ struct SubscriptionPreviewView: View {
     @State var showPlanTypeBottom               : Bool = false
     @State var showBillingCycleBottom           : Bool = false
     
+    @StateObject var manualEntryVM              = ManualEntryViewModel()
+    
+    @State var fillRatio                        : CGFloat = 0.0
+    @State var isInitial                        = true
+    
     //MARK: - body
     var body: some View {
         
@@ -141,7 +146,8 @@ struct SubscriptionPreviewView: View {
                         HStack(spacing: 8) {
                             Text("Extracted Details")
                                 .font(.appRegular(18))
-                                .foregroundColor(.underlineGray)
+//                                .foregroundColor(.underlineGray)
+                                .foregroundColor(Color.buttonsText)
                             Spacer()
                             Button(action: onEditAction) {
                                 Text("Edit")
@@ -154,6 +160,8 @@ struct SubscriptionPreviewView: View {
                         
                         VStack(alignment: .leading, spacing: 16) {
                             HStack(spacing: 16) {
+                                
+                                //MARK: - Service
                                 SubscriptionDetailsItem(title: "Service", value: subscriptionData?.serviceName ?? "", confidence: subscriptionData?.serviceNameConfidence ?? 0.0)
                                     .onTapGesture {
                                         DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
@@ -168,31 +176,48 @@ struct SubscriptionPreviewView: View {
                                         },
                                                                    detailType   : ReviewExtractedType.service,
                                                                    confidence   : subscriptionData?.serviceNameConfidence ?? 0.0,
-                                                                   extractedData: subscriptionData)
-                                        .id(UUID())
+                                                                   extractedData: subscriptionData,
+                                                                   servicesList : manualEntryVM.servicesList ?? [])
+                                        .id(ReviewExtractedType.service)
                                         .presentationDragIndicator(.hidden)
                                         .presentationDetents([.height(400)])
                                     }
-                                
-                                SubscriptionDetailsItem(title: "Amount", value: "\(subscriptionData?.currencySymbol ?? "")\(subscriptionData?.amount ?? 0.0)", confidence: subscriptionData?.amountConfidence ?? 0.0)
-                                    .onTapGesture {
-                                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                                            showAmountBottom = true
+                                    .onChange(of: subscriptionData?.serviceName) { newValue in
+                                        guard
+                                            let serviceName = newValue,
+                                            !serviceName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+                                        else {
+                                            return
                                         }
+                                        fetchProviderDataApi()
                                     }
-                                    .sheet(isPresented: $showAmountBottom) {
+                                
+                                //MARK: - Amount
+                                SubscriptionDetailsItem(title       : "Amount",
+                                                        value       : "\(subscriptionData?.currencySymbol ?? "")\(subscriptionData?.amount ?? 0.0)",
+                                                        confidence  : subscriptionData?.amountConfidence ?? 0.0)
+                                .onTapGesture {
+                                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                                        showAmountBottom = true
+                                    }
+                                }
+                                .sheet(isPresented: $showAmountBottom) {
+                                    NavigationStack {
                                         ReviewExtractedDetailsView(onDelegate: {
                                         },
                                                                    detailType   : ReviewExtractedType.amount,
                                                                    confidence   : subscriptionData?.serviceNameConfidence ?? 0.0,
-                                                                   extractedData: subscriptionData)
-                                        .id(UUID())
+                                                                   extractedData: subscriptionData,
+                                                                   providerPlansList : manualEntryVM.providerData?.providerSubscriptionPlansList)
+                                        .id(ReviewExtractedType.amount)
                                         .presentationDragIndicator(.hidden)
-                                        .presentationDetents([.height(400)])
-                                    }
+                                        .presentationDetents([.height(400)])                                        }
+                                }
                             }
                             
                             HStack(spacing: 16) {
+                                
+                                //MARK: - Next Charge Date
                                 SubscriptionDetailsItem(title: "Next Charge Date", value: (subscriptionData?.nextPaymentDate ?? "").formattedDate(), confidence: subscriptionData?.nextPaymentDateConfidence ?? 0.0)
                                     .onTapGesture {
                                         DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
@@ -205,10 +230,12 @@ struct SubscriptionPreviewView: View {
                                                                    detailType   : ReviewExtractedType.nextChargeDate,
                                                                    confidence   : subscriptionData?.serviceNameConfidence ?? 0.0,
                                                                    extractedData: subscriptionData)
-                                        .id(UUID())
+                                        .id(ReviewExtractedType.nextChargeDate)
                                         .presentationDragIndicator(.hidden)
                                         .presentationDetents([.height(400)])
                                     }
+                                
+                                //MARK: - Currency
                                 if subscriptionData?.currency ?? "" == ""
                                 {
                                     SubscriptionDetailsItem(title: "Currency", value: Constants.shared.currencyCode, confidence: 0.0, isAssumed: true)
@@ -229,6 +256,7 @@ struct SubscriptionPreviewView: View {
                             }
                             
                             HStack(spacing: 16) {
+                                //MARK: - Category
                                 SubscriptionDetailsItem(title: "Category", value: subscriptionData?.categoryName ?? "", confidence: subscriptionData?.categoryConfidence ?? 0.0)
                                     .onTapGesture {
                                         DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
@@ -241,10 +269,12 @@ struct SubscriptionPreviewView: View {
                                                                    detailType   : ReviewExtractedType.category,
                                                                    confidence   : subscriptionData?.serviceNameConfidence ?? 0.0,
                                                                    extractedData: subscriptionData)
-                                        .id(UUID())
+                                        .id(ReviewExtractedType.category)
                                         .presentationDragIndicator(.hidden)
                                         .presentationDetents([.height(400)])
                                     }
+                                
+                                //MARK: - Plan Type
                                 SubscriptionDetailsItem(title: "Plan Type", value: subscriptionData?.subscriptionType ?? "", confidence: subscriptionData?.subscriptionTypeConfidence ?? 0.0)
                                     .onTapGesture {
                                         DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
@@ -253,6 +283,7 @@ struct SubscriptionPreviewView: View {
                                     }
                             }
                             
+                            //MARK: - Billing Cycle
                             SubscriptionDetailsItem(title: "Billing Cycle", value: subscriptionData?.billingCycle ?? "", confidence: subscriptionData?.billingCycleConfidence ?? 0.0)
                                 .onTapGesture {
                                     DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
@@ -265,9 +296,24 @@ struct SubscriptionPreviewView: View {
                                                                detailType   : ReviewExtractedType.billingCycle,
                                                                confidence   : subscriptionData?.serviceNameConfidence ?? 0.0,
                                                                extractedData: subscriptionData)
-                                    .id(UUID())
+                                    .id(ReviewExtractedType.billingCycle)
                                     .presentationDragIndicator(.hidden)
                                     .presentationDetents([.height(400)])
+                                }
+                                .onChange(of: subscriptionData?.billingCycle) { newValue in
+                                    guard
+                                        let billingCycle = newValue,
+                                        !billingCycle.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+                                    else {
+                                        return
+                                    }
+                                    if subscriptionData?.nextPaymentDate == "" && isInitial{
+                                        isInitial = false
+                                        let chargeDate = Constants.shared.getNextDateByFrequency(
+                                            frequency: subscriptionData?.billingCycle ?? ""
+                                        ).formattedDate(from: "dd/MM/yyyy", to: "yyyy-MM-dd")
+                                        subscriptionData?.nextPaymentDate = chargeDate
+                                    }
                                 }
                         }
                     }
@@ -281,7 +327,8 @@ struct SubscriptionPreviewView: View {
                             Button(action: onViewAction) {
                                 Text("View")
                                     .font(.appBold(18))
-                                    .foregroundColor(.underlineGray)
+//                                    .foregroundColor(.underlineGray)
+                                    .foregroundColor(Color.buttonsText)
                             }
                             .frame(width: 40, alignment: .trailing)
                         }
@@ -308,7 +355,7 @@ struct SubscriptionPreviewView: View {
                                 //                                        .cornerRadius(8)
                                 //                                        .clipped()
                                 //                                }
-                                AvatarView(serviceName: subscriptionData?.serviceName ?? "", serviceLogo: subscriptionData?.serviceLogo ?? "", size: 34, fontSize: 16)
+                                AvatarView(serviceName: subscriptionData?.serviceName ?? "", serviceLogo: subscriptionData?.serviceLogo ?? "", size: 34, fontSize: 16, fromPreview: true)
                                 VStack(alignment: .leading, spacing: 4) {
                                     Text("\(subscriptionData?.serviceName ?? "") \(subscriptionData?.subscriptionType ?? "")")
                                         .font(.appRegular(14))
@@ -318,8 +365,8 @@ struct SubscriptionPreviewView: View {
                                         .foregroundColor(.neutral500)
                                 }
                                 Spacer()
-                                Text(confidenceStr)
-//                                    .frame(maxWidth: .infinity)
+                                /*Text(confidenceStr)
+                                //                                    .frame(maxWidth: .infinity)
                                     .frame(height: 24)
                                     .font(.appRegular(14))
                                     .foregroundColor(.neutralMain700Gray)
@@ -327,6 +374,13 @@ struct SubscriptionPreviewView: View {
                                     .padding(.horizontal, 16)
                                     .background(colorValue)
                                     .cornerRadius(8)
+                                 */
+                                ConfidenceBarView(
+                                    text        : confidenceStr,
+                                    color       : colorValue ?? .confidenceBlue.opacity(0.2),
+                                    fillRatio   : fillRatio
+                                )
+                                .frame(width: 140)
                             }
                             VStack(alignment: .leading, spacing: 4) {
                                 HStack(spacing: 8) {
@@ -340,17 +394,17 @@ struct SubscriptionPreviewView: View {
                                 }
                                 .frame(height: 20)
                                 
-//                                HStack(spacing: 8) {
-//                                    Text("Subscription start:")
-//                                        .font(.appRegular(14))
-//                                        .foregroundColor(.neutral500)
-//                                    Spacer()
-//                                    Text("\(subscriptionData?.lastPaymentDate ?? "")".formattedDate())
-//                                        .font(.appBold(14))
-//                                        .foregroundColor(.blueMain700)
-//                                }
-//                                .frame(height: 20)
-//                                
+                                //                                HStack(spacing: 8) {
+                                //                                    Text("Subscription start:")
+                                //                                        .font(.appRegular(14))
+                                //                                        .foregroundColor(.neutral500)
+                                //                                    Spacer()
+                                //                                    Text("\(subscriptionData?.lastPaymentDate ?? "")".formattedDate())
+                                //                                        .font(.appBold(14))
+                                //                                        .foregroundColor(.blueMain700)
+                                //                                }
+                                //                                .frame(height: 20)
+                                //
                                 HStack(spacing: 8) {
                                     Text("Next Charge Date:")
                                         .font(.appRegular(14))
@@ -449,16 +503,17 @@ struct SubscriptionPreviewView: View {
         .navigationBarBackButtonHidden(true)
         .onAppear{
             //            commonApiVM.getCurrencies()
-//            getSubDetails()
+            //            getSubDetails()
             numberOfSubscriptions = subscriptionsData?.count ?? 0
             getSubDetails()
             if !isFromImage{
                 guard let url = audioURL else {
                     return
                 }
-//                playerManager.load(url: url)
+                //                playerManager.load(url: url)
             }
             updateSubDetails()
+            manualEntryVM.getServiceProvidersList()
         }
         .onChange(of: globalSubscriptionData) { _ in updateSubDetails() }
         .onChange(of: commonApiVM.currencyResponse) { _ in getSubDetails() }
@@ -475,20 +530,33 @@ struct SubscriptionPreviewView: View {
                                        detailType   : ReviewExtractedType.currency,
                                        confidence   : subscriptionData?.serviceNameConfidence ?? 0.0,
                                        extractedData: subscriptionData)
-            .id(UUID())
+            .id(ReviewExtractedType.currency)
             .presentationDragIndicator(.hidden)
             .presentationDetents([.height(400)])
         }
         .sheet(isPresented: $showPlanTypeBottom) {
             ReviewExtractedDetailsView(onDelegate: {
             },
-                                       detailType   : ReviewExtractedType.planType,
-                                       confidence   : subscriptionData?.serviceNameConfidence ?? 0.0,
-                                       extractedData: subscriptionData)
-            .id(UUID())
+                                       detailType           : ReviewExtractedType.planType,
+                                       confidence           : subscriptionData?.serviceNameConfidence ?? 0.0,
+                                       extractedData        : subscriptionData,
+                                       providerPlansList    : manualEntryVM.providerData?.providerSubscriptionPlansList)
+            .id(ReviewExtractedType.planType)
             .presentationDragIndicator(.hidden)
             .presentationDetents([.height(400)])
         }
+        .onChange(of: subscriptionData?.currency) { newValue in
+            guard
+                let currency = newValue,
+                !currency.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+            else {
+                return
+            }
+            if subscriptionData?.serviceName != ""{
+                fetchProviderDataApi()
+            }
+        }
+        .onChange(of: manualEntryVM.providerData) { _ in updateProviderData() }
     }
     
     //MARK: - addSubApiRespons
@@ -564,10 +632,12 @@ struct SubscriptionPreviewView: View {
         {
             subscriptionData = subscriptionsData?[currentSubscriptions-1]
             
-            let (confidenceStr1, colorValue1) = Constants.confidenceInfo(isAssumed: false, confidence: subscriptionData?.confidenceOverall ?? 0.0)
+//            let (confidenceStr1, colorValue1) = Constants.confidenceInfo(isAssumed: false, confidence: subscriptionData?.confidenceOverall ?? 0.0)
+            let (confidenceStr1, colorValue1, fillRatio1) =
+                Constants.confidenceInfo(isAssumed: false, confidence: subscriptionData?.confidenceOverall ?? 0.0)
             confidenceStr = confidenceStr1
             colorValue = colorValue1
-            
+            fillRatio = fillRatio1
             //            let serviceName = subscriptionData?.serviceName ?? ""
             //            let words = serviceName
             //                .split(separator: " ")
@@ -601,6 +671,16 @@ struct SubscriptionPreviewView: View {
         }else{
             commonApiVM.getCurrencies()
         }
+    }
+    
+    func fetchProviderDataApi(){
+        manualEntryVM.fetchProviderData(input: FetchProviderDataRequest(userId          : Constants.getUserId(),
+                                                                        serviceName     : subscriptionData?.serviceName ?? "",
+                                                                        currencyCode    : subscriptionData?.currency ?? "" == "" ? Constants.shared.currencyCode : subscriptionData?.currency ?? ""))
+    }
+    
+    private func updateProviderData() {
+        subscriptionData?.categoryName    = manualEntryVM.providerData?.categoryName ?? ""
     }
     
     //MARK: - Button actions
@@ -737,17 +817,57 @@ struct SubscriptionPreviewView: View {
     }
 }
 
+//MARK: - ConfidenceBarView
+struct ConfidenceBarView: View {
+
+    let text: String
+    let color: Color
+    let fillRatio: CGFloat
+
+    var body: some View {
+        ZStack(alignment: .leading) {
+          
+          let borderColor: Color =
+              text == "------------"
+              ? Color.lineGray
+              : Color.confidenceBlue
+
+
+            RoundedRectangle(cornerRadius: 6)
+                .stroke(borderColor, lineWidth: 1)
+                .frame(height: 28)
+
+            GeometryReader { geo in
+                RoundedRectangle(cornerRadius: 6)
+                    .fill(color)
+                    .frame(
+                        width: geo.size.width * fillRatio,
+                        height: 28
+                    )
+            }
+            .clipShape(RoundedRectangle(cornerRadius: 6))
+
+            Text(text)
+                .font(.appRegular(14))
+                .foregroundColor(.black)
+                .frame(maxWidth: .infinity)
+        }
+        .frame(height: 28)
+    }
+}
+
 //MARK: - SubscriptionDetailsItem
 struct SubscriptionDetailsItem: View {
     var title                   : String
     var value                   : String?
     var confidence              : Double = 0.0
     var isAssumed               : Bool = false
-//    @State var confidenceStr    : String = ""
-//    @State var colorValue       : Color?
+    //    @State var confidenceStr    : String = ""
+    //    @State var colorValue       : Color?
     
     var body: some View {
-        let (confidenceStr, colorValue) = Constants.confidenceInfo(isAssumed: isAssumed, confidence: confidence)
+//        let (confidenceStr, colorValue) = Constants.confidenceInfo(isAssumed: isAssumed, confidence: confidence)
+        let (confidenceStr, colorValue, fillRatio) = Constants.confidenceInfo(isAssumed: isAssumed, confidence: confidence)
         HStack(spacing: 0) {
             VStack(alignment: .leading, spacing: 9) {
                 Text(title)
@@ -758,15 +878,20 @@ struct SubscriptionDetailsItem: View {
                     .font(.appBold(16))
                     .foregroundColor(.neutralMain700)
                 
-                Text(confidenceStr)
-                    .frame(maxWidth: .infinity)
-                    .frame(height: 28)
-                    .font(.appRegular(14))
-                    .foregroundColor(.neutralMain700Gray)
-                    .multilineTextAlignment(.center)
-                    .padding(.horizontal, 16)
-                    .background(colorValue)
-                    .cornerRadius(4)
+//                Text(confidenceStr)
+//                    .frame(maxWidth: .infinity)
+//                    .frame(height: 28)
+//                    .font(.appRegular(14))
+//                    .foregroundColor(.neutralMain700Gray)
+//                    .multilineTextAlignment(.center)
+//                    .padding(.horizontal, 16)
+//                    .background(colorValue)
+//                    .cornerRadius(4)
+                ConfidenceBarView(
+                    text        : confidenceStr,
+                    color       : colorValue,
+                    fillRatio   : fillRatio
+                )
             }
         }
         .frame(maxWidth: .infinity)
@@ -783,9 +908,9 @@ struct SubscriptionDetailsItem: View {
 
 //MARK: - VoicePlayerUI
 struct VoicePlayerUI: View {
-
+    
     @ObservedObject var audioManager: AudioRecorderManager
-
+    
     var body: some View {
         HStack(alignment: .center,spacing: 5) {
             
@@ -799,15 +924,15 @@ struct VoicePlayerUI: View {
                 Image(audioManager.isPlaying ? "pause_review" : "play_review")
                     .frame(width: 40, height: 40)
             }
-
-//            Slider(value: Binding(
-//                get: { audioManager.currentTime },
-//                set: { newValue in
-//                    audioManager.currentTime = newValue
-//                    audioManager.audioPlayer?.currentTime = newValue
-//                }
-//            ), in: 0...audioManager.duration)
-//            .tint(.navyBlueCTA700)
+            
+            //            Slider(value: Binding(
+            //                get: { audioManager.currentTime },
+            //                set: { newValue in
+            //                    audioManager.currentTime = newValue
+            //                    audioManager.audioPlayer?.currentTime = newValue
+            //                }
+            //            ), in: 0...audioManager.duration)
+            //            .tint(.navyBlueCTA700)
             
             VStack{
                 Spacer()
@@ -824,13 +949,13 @@ struct VoicePlayerUI: View {
                 )
                 Spacer()
             }
-//            .frame(height: 40)
-
+            //            .frame(height: 40)
+            
             Text("\(formatTime(TimeInterval(Int(audioManager.currentTime)))) / \(formatTime(TimeInterval(Int(audioManager.duration))))")
                 .font(.appRegular(14))
                 .foregroundStyle(Color.whiteBlackBGnoPic)
                 .padding(.leading, 10)
-
+            
             Spacer()
         }
     }

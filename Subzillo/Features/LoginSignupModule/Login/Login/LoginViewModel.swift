@@ -55,7 +55,8 @@ class LoginViewModel: ObservableObject {
                                              userId             : response.data?.userId ?? "",
                                              isNewUser          : response.data?.isNewUser ?? false,
                                              isSignupCompleted  : response.data?.signupCompleted ?? false,
-                                             fullName           : response.data?.fullName)
+                                             fullName           : response.data?.fullName,
+                                             onboardingStatus   : response.data?.onboardingStatus ?? false)
             self.sessionManager.saveLoginData(data)
             self.router.navigate(to: .verifyOtp(fromLogin: true))
         }
@@ -117,7 +118,7 @@ class LoginViewModel: ObservableObject {
                                              isSignupCompleted      : response.data?.signupCompleted ?? false,
                                              fullName               : input.authProvider == loginType.apple ? response.data?.fullName : input.fullName,
                                              socialLoginType        : input.authProvider,
-                                             isOnboarding           : response.data?.onboardingCompleted ?? false)
+                                             onboardingStatus       : response.data?.onboardingStatus ?? false)
             self.sessionManager.saveLoginData(data)
             DispatchQueue.main.async { [self] in
                 if response.data?.isNewUser ?? false{

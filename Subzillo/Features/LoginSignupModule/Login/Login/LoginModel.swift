@@ -30,7 +30,7 @@ public struct LoginResponseData: Codable {
     var fullName                    : String?
     var isNewUser                   : Bool?
     var signupCompleted             : Bool?
-    var onboardingCompleted         : Bool?
+    var onboardingStatus            : Bool?
     var accessToken                 : String?
     var refreshToken                : String?
     public init(
@@ -38,7 +38,7 @@ public struct LoginResponseData: Codable {
         fullName            : String? = nil,
         isNewUser           : Bool? = nil,
         signupCompleted     : Bool? = nil,
-        onboardingCompleted : Bool? = nil,
+        onboardingStatus    : Bool? = nil,
         accessToken         : String? = nil,
         refreshToken        : String? = nil
     ) {
@@ -46,7 +46,7 @@ public struct LoginResponseData: Codable {
         self.fullName                   = fullName
         self.isNewUser                  = isNewUser
         self.signupCompleted            = signupCompleted
-        self.onboardingCompleted        = onboardingCompleted
+        self.onboardingStatus           = onboardingStatus
         self.accessToken                = accessToken
         self.refreshToken               = refreshToken
     }

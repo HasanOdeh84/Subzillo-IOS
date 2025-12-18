@@ -50,7 +50,6 @@ struct SubscriptionMatchView: View {
                 VStack(alignment: .leading,spacing: 16) {
                     ZStack(alignment: .topTrailing) {
                         if (subscriptionData?.serviceLogo ?? "").isEmpty {
-                            
                             ZStack {
                                 Color.whiteBlackBG
                                 Text(initials)
@@ -64,12 +63,21 @@ struct SubscriptionMatchView: View {
                             )
                             .cornerRadius(64)
                         } else {
-                            WebImage(url: URL(string: subscriptionData?.serviceLogo ?? ""))
-                                .resizable()
-                                .scaledToFill()
-                                .frame(width: 128, height: 128)
-                                .cornerRadius(64)
-                                .clipped()
+                            if fromList{
+                                WebImage(url: URL(string: subscriptionData?.serviceLogo ?? ""))
+                                    .resizable()
+                                    .scaledToFill()
+                                    .frame(width: 128, height: 128)
+                                    .cornerRadius(64)
+                                    .clipped()
+                            }else{
+                                WebImage(url: URL(string: "\(Constants.getUserDefaultsValue(for: Constants.providerBaseUrl))\(subscriptionData?.serviceLogo ?? "")"))
+                                    .resizable()
+                                    .scaledToFill()
+                                    .frame(width: 128, height: 128)
+                                    .cornerRadius(64)
+                                    .clipped()
+                            }
                         }
                         /*Image("netflix")
                          .resizable()
@@ -296,7 +304,9 @@ struct SubscriptionMatchView: View {
     
     func getSubDetails()
     {
-        let (confidenceStr1, colorValue1) = Constants.confidenceInfo(isAssumed: false, confidence: subscriptionData?.confidenceOverall ?? 0.0)
+//        let (confidenceStr1, colorValue1) = Constants.confidenceInfo(isAssumed: false, confidence: subscriptionData?.confidenceOverall ?? 0.0)
+        let (confidenceStr1, colorValue1, fillRatio) =
+            Constants.confidenceInfo(isAssumed: false, confidence: subscriptionData?.confidenceOverall ?? 0.0)
         confidenceStr = confidenceStr1
         colorValue = colorValue1
         
@@ -307,10 +317,12 @@ struct SubscriptionMatchView: View {
         
         if words.count == 1 {
             initials = String(words[0].prefix(1)).uppercased()
+            print("initial is \(initials)")
         } else {
             initials = words.prefix(2)
                 .map { String($0.prefix(1)).uppercased() }
                 .joined()
+            print("initial is else\(initials)")
         }
     }
     
@@ -335,18 +347,35 @@ struct SubscriptionDetailsPlainItem: View {
     
     var body: some View {
         
+        //        HStack(spacing: 8) {
+        //            Text(title)
+        //                .font(.appRegular(14))
+        //                .foregroundColor(.neutral500)
+        //                .lineLimit(1)
+        //                .layoutPriority(1)
+        //            DashedHorizontalDivider()
+        //            Text(value ?? "")
+        //                .font(.appBold(14))
+        //                .foregroundColor(.blueMain700)
+        //                .fixedSize(horizontal: false, vertical: true)
+        //                .layoutPriority(2)
+        //        }
+        //        .frame(maxWidth: .infinity, alignment: .leading)
+        
         HStack(spacing: 8) {
             Text(title)
                 .font(.appRegular(14))
                 .foregroundColor(.neutral500)
                 .lineLimit(1)
-                .layoutPriority(1)
+                .fixedSize(horizontal: true, vertical: false)
             DashedHorizontalDivider()
+                .layoutPriority(0)
             Text(value ?? "")
                 .font(.appBold(14))
                 .foregroundColor(.blueMain700)
-                .fixedSize(horizontal: false, vertical: true)
-                .layoutPriority(2)
+                .multilineTextAlignment(.trailing)
+                .lineLimit(nil)
+                .layoutPriority(1)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
     }

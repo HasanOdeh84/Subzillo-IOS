@@ -140,18 +140,19 @@ struct RegistrationView: View {
     //MARK: - Methods
     //MARK: - Signup API
     func signupApi(){
+        let phone = phoneNumber.normalizedPhoneNumber()
         let countryCode = phoneNumber.trimmed == "" ? "" : (verifyData?.verifyType == 1 ? verifyData?.countryCode ?? "" : selectedCountry?.dialCode ?? "")
         var input = RegisterRequest(userId              : verifyData?.userId ?? "",
                                     fullName            : fullName.trimmed,
                                     email               : verifyData?.verifyType == 1 ? email.trimmed : verifyData?.email ?? "",
                                     countryCode         : countryCode,
-                                    phoneNumber         : verifyData?.verifyType == 1 ? verifyData?.phoneNumber ?? "" : phoneNumber.trimmed)
+                                    phoneNumber         : verifyData?.verifyType == 1 ? verifyData?.phoneNumber ?? "" : phone.trimmed)
         if fromSocialLogin{
             input = RegisterRequest(userId              : verifyData?.userId ?? "",
                                     fullName            : fullName.trimmed,
                                     email               : email.trimmed,
                                     countryCode         : phoneNumber.trimmed == "" ? "" : selectedCountry?.dialCode ?? "",
-                                    phoneNumber         : phoneNumber.trimmed)
+                                    phoneNumber         : phone.trimmed)
         }
         if let errorMessage = LoginSignupValidations().validateSignup(input: input,isSocialLogin: fromSocialLogin) {
             ToastManager.shared.showToast(message: errorMessage,style: ToastStyle.error)

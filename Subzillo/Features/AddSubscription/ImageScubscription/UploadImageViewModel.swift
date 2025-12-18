@@ -40,6 +40,8 @@ class UploadImageViewModel: ObservableObject {
             }
             else{
                 NotificationCenter.default.post(name: .closeAllBottomSheets, object: nil)
+                Constants.saveDefaults(value: response.providerLogoBaseUrl, key: Constants.providerBaseUrl)
+                globalSubscriptionData = nil // i have added because previous data is displaying instead of new one
                 self.router.navigate(to: .subscriptionPreviewView(subscriptionsData: response.data?.subscriptions, content: "", isFromImage:true, audioUrl: nil))
             }
            // self.router.navigate(to: .subscriptionPreviewView(subscriptionsData: response.data?.subscriptions, content: "", isFromImage:true))

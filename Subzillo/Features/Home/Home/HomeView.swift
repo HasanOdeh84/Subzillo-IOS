@@ -41,9 +41,10 @@ struct HomeView: View {
     //MARK: - body
     var body: some View {
         Group {
-            if isHome == nil{
-                ProgressView()
-                }else if isHome == true{
+//            if isHome == nil{
+////                ProgressView()
+//                }else
+            if homeVM.homeResponse?.totalSubscriptions != 0{
                     VStack(spacing: 16){
                         // MARK: - Header
                         HeaderView(title: "Hi \(fullName)") {
@@ -391,6 +392,7 @@ struct AvatarView: View {
     var size            : CGFloat = 34
     var cornerRadius    : CGFloat = 8
     var fontSize        : CGFloat = 20
+    var fromPreview     : Bool = false
     
     private var initials: String {
         let words = serviceName
@@ -421,11 +423,29 @@ struct AvatarView: View {
                 )
                 .cornerRadius(cornerRadius)
             } else {
-                WebImage(url: URL(string: serviceLogo ?? ""))
-                    .resizable()
-                    .indicator(.activity)
-                    .transition(.fade(duration: 0.5))
-                    .scaledToFill()
+                if fromPreview{
+                    WebImage(url: URL(string: "\(Constants.getUserDefaultsValue(for: Constants.providerBaseUrl))\(serviceLogo ?? "")"))
+                        .resizable()
+                        .indicator(.activity)
+                        .transition(.fade(duration: 0.5))
+                        .scaledToFit()
+                        .overlay(
+                            RoundedRectangle(cornerRadius: cornerRadius)
+                                .stroke(.neutral300Border, lineWidth: 1)
+                        )
+                        .cornerRadius(cornerRadius)
+                }else{
+                    WebImage(url: URL(string: serviceLogo ?? ""))
+                        .resizable()
+                        .indicator(.activity)
+                        .transition(.fade(duration: 0.5))
+                        .scaledToFit()
+                        .overlay(
+                            RoundedRectangle(cornerRadius: cornerRadius)
+                                .stroke(.neutral300Border, lineWidth: 1)
+                        )
+                        .cornerRadius(cornerRadius)
+                }
             }
         }
         .frame(width: size, height: size)

@@ -85,9 +85,11 @@ struct LoginSignupValidations {
     //MARK: - Login
     func validateLogin(input: checkLoginRequest) -> String? {
         if input.loginType == 1{
-            if input.phoneNumber.trimmed.isEmpty{
+            if input.phoneNumber.isEmpty{
+                print("number is here\(input.phoneNumber)")
                 return "Phone number is required"
-            }else if !Validations().isValidMobile(input.phoneNumber.trimmed){
+            }else if !Validations().isValidMobile(input.phoneNumber){
+                print("number is \(input.phoneNumber)")
                 return "Mobile number must be between 6 to 15 digits"
             }
         }else{

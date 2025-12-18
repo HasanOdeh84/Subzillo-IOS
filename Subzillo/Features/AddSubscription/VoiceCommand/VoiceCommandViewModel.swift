@@ -37,6 +37,8 @@ class VoiceCommandViewModel: NSObject, ObservableObject, AVAudioPlayerDelegate, 
                 self.showErrorPopup = true
             }
             else{
+                Constants.saveDefaults(value: response.providerLogoBaseUrl, key: Constants.providerBaseUrl)
+                globalSubscriptionData = nil // i have added because previous data is displaying instead of new one
                 self.router.navigate(to: .subscriptionPreviewView(subscriptionsData: response.data?.subscriptions, content: "", isFromImage:false, audioUrl: audioUrl))
             }
         }
@@ -62,6 +64,8 @@ class VoiceCommandViewModel: NSObject, ObservableObject, AVAudioPlayerDelegate, 
                     continuation.resume(returning: false)
                 }
                 else{
+                    Constants.saveDefaults(value: response.providerLogoBaseUrl, key: Constants.providerBaseUrl)
+                    globalSubscriptionData = nil // i have added because previous data is displaying instead of new one
                     self.router.navigate(to: .subscriptionPreviewView(subscriptionsData: response.data?.subscriptions, content: "", isFromImage:false, audioUrl: nil))
                     continuation.resume(returning: true)
                 }

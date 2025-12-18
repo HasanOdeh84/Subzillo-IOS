@@ -64,7 +64,10 @@ extension Color {
 //    static let cardBorder               = Color(hex: "#E8E8E8")
 //    static let navyBlueCTA700               = Color(hex: "#3260BB")
 //    static let systemInfoBlue               = Color(hex: "#0B5997")
-        
+    
+//    static let confidenceBlue           = Color(hex: "#58A0D9")
+//    static let buttonsText              = Color(hex: "#033A65")
+    
 //    static let neutral_2_500            = Color("appNeutral2_500")
 //    static let neutral_2_200            = Color("appNeutral2_200")
 //    static let appBg                    = Color("AppBackground")

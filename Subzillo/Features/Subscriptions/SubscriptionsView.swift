@@ -26,12 +26,14 @@ struct SubscriptionsView: View {
     @State var showDeletePopup                  : Bool = false
     @State var filterData                       : FilterModel = FilterModel()
     @State private var subscriptions            = [SubscriptionInfoo]()
-    @State private var selectedDate = Date()
-    
+    @State private var openCardIndex            : Int?
+    @State var isLongPress                      = false
+    @State private var selectedDate             = Date()
+    @State private var filterSelect             : Bool = false
+    @State private var pendingFilterSelect      : Bool? = nil
     var hasSelection: Bool {
         subscriptionsList.contains(where: { $0.isSelected ?? false })
     }
-    
     // Date Formatter Helpers
     private var currentYear: Int {
         Calendar.current.component(.year, from: currentDate)
@@ -40,6 +42,11 @@ struct SubscriptionsView: View {
         let formatter = DateFormatter()
         formatter.dateFormat = "LLLL" // Full month name
         return formatter.string(from: currentDate)
+    }
+    private var dateFormatter: DateFormatter {
+        let formatter = DateFormatter()
+        formatter.dateStyle = .long
+        return formatter
     }
     
     //MARK: - body
@@ -66,6 +73,60 @@ struct SubscriptionsView: View {
                         }
                     }
                     .padding(.top, 16)
+                    //                }else{
+                    //                    // MARK: - Segment
+                    //                    HStack(spacing: 0) {
+                    //                        SegmentView(selectedSegment : $selectedSegment,
+                    //                                    leftImage       : "left-to-right-list-bullet",
+                    //                                    rightImage      : "calendar-04",
+                    //                                    leftText        : "List View",
+                    //                                    rightText       : "Calendar")
+                    //                        .padding(.trailing, 8)
+                    //
+                    //                        HStack(spacing: 8) {
+                    //                            Button(action: clickOnChat) {
+                    //
+                    //                                Image("chart-line-data-02")
+                    //                                    .frame(width: 20, height: 20)
+                    //                            }
+                    //                            .frame(width: 40, height: 40)
+                    //                            .overlay(
+                    //                                RoundedRectangle(cornerRadius: 8)
+                    //                                    .stroke(
+                    //                                        LinearGradient(
+                    //                                            gradient: Gradient(colors: [Color.gradientPurple, Color.gradientBlue]),
+                    //                                            startPoint: .top,
+                    //                                            endPoint: .bottom
+                    //                                        ),
+                    //                                        lineWidth: 2
+                    //                                    )
+                    //                            )
+                    //                            .cornerRadius(8)
+                    //
+                    //                            if selectedSegment == .first{
+                    //                                Button(action: clickOnFilter) {
+                    //                                    Image("filter")
+                    //                                        .frame(width: 20, height: 20)
+                    //                                }
+                    //                                .frame(width: 40, height: 40)
+                    //                                .overlay(
+                    //                                    RoundedRectangle(cornerRadius: 8)
+                    //                                        .stroke(
+                    //                                            LinearGradient(
+                    //                                                gradient: Gradient(colors: [Color.gradientPurple, Color.gradientBlue]),
+                    //                                                startPoint: .top,
+                    //                                                endPoint: .bottom
+                    //                                            ),
+                    //                                            lineWidth: 2
+                    //                                        )
+                    //                                )
+                    //                                .cornerRadius(8)
+                    //                            }
+                    //                        }
+                    //                    }
+                    //                    .frame(maxWidth: .infinity, alignment: .topTrailing)
+                    //                    .padding(.top, 16)
+                    //                }
                 }else{
                     // MARK: - Segment
                     HStack(spacing: 0) {
@@ -114,7 +175,30 @@ struct SubscriptionsView: View {
                                         )
                                 )
                                 .cornerRadius(8)
+                                
+                                // Sort Button
+                                
+                                Button(action: {
+                                    clickOnSort()
+                                }) {
+                                    Image("sort")
+                                        .frame(width: 20, height: 20)
+                                }
+                                .frame(width: 40, height: 40)
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 8)
+                                        .stroke(
+                                            LinearGradient(
+                                                gradient: Gradient(colors: [Color.gradientPurple, Color.gradientBlue]),
+                                                startPoint: .top,
+                                                endPoint: .bottom
+                                            ),
+                                            lineWidth: 2
+                                        )
+                                )
+                                .cornerRadius(8)
                             }
+                            
                         }
                     }
                     .frame(maxWidth: .infinity, alignment: .topTrailing)
@@ -260,67 +344,113 @@ struct SubscriptionsView: View {
                     //                        .padding(.bottom,90)
                     //                    }
                     
+                    //                    List {
+                    //                        ForEach(Array(subscriptionsList.enumerated()), id: \.offset) { index, sub in
+                    //                            SwipeActionCard(
+                    //                                id: index,
+                    //                                openCardIndex: $openCardIndex,
+                    //                                onEdit: {
+                    //                                    editSubscription(sub: sub)
+                    //                                },
+                    //                                onDelete: {
+                    //                                    var obj = subscriptionsList[index]
+                    //                                    obj.isSelected = true
+                    //                                    subscriptionsList[index] = obj
+                    //                                    showDeletePopup = true
+                    //                                }
+                    //                            ) {
+                    //                                subscriptionListCard(subscriptionData   : sub,
+                    //                                                     selectionMode      : selectionMode,
+                    //                                                     onSelect           : { toggleSelection(at: index) },
+                    //                                                     onLongPress        : { handleLongPress(at: index) })
+                    //                            }
+                    //                            .listRowSeparator(.hidden)
+                    //                            .listRowInsets(.init(top: 0, leading: 0, bottom: 8, trailing: 0))
+                    //                            .listRowBackground(Color.clear)
+                    ////                            .highPriorityGesture(
+                    ////                                TapGesture().onEnded {
+                    ////                                    if openCardIndex == nil && !selectionMode {
+                    ////                                        AppIntentRouter.shared.navigate(
+                    ////                                            to: .subscriptionMatchView(fromList: true, subscriptionId: sub.id ?? "")
+                    ////                                        )
+                    ////                                    }
+                    ////                                }
+                    ////                            )
+                    //                            .simultaneousGesture(
+                    //                                TapGesture().onEnded {
+                    //                                    if !selectionMode{
+                    //                                        AppIntentRouter.shared.navigate(
+                    //                                            to: .subscriptionMatchView(fromList: true, subscriptionId: sub.id ?? "")
+                    //                                        )
+                    //                                    }
+                    //                                }
+                    //                            )
+                    //                            .onAppear {
+                    //                                if index == subscriptionsList.count - 1 {
+                    //                                    loadNextPageIfNeeded()
+                    //                                }
+                    //                            }
+                    //                        }
+                    //                        .background(Color.clear)
+                    //                    }
+                    //                    .listStyle(.plain)
+                    //                    .background(Color.clear)
+                    //                    .scrollContentBackground(.hidden)
+                    
+                    
                     List {
                         ForEach(Array(subscriptionsList.enumerated()), id: \.offset) { index, sub in
-                            subscriptionListCard(subscriptionData   : sub,
-                                                 selectionMode      : selectionMode,
-                                                 onSelect           : { toggleSelection(at: index) },
-                                                 onLongPress        : { handleLongPress(at: index) })
-                            .listRowSeparator(.hidden)
-                            .listRowInsets(.init(top: 0, leading: 0, bottom: 8, trailing: 0))
-                            .listRowBackground(Color.clear)
-                            
-                            .swipeActions {
-                                Button(role: .destructive) {
+                            SwipeActionCard(
+                                id: index,
+                                openCardIndex: $openCardIndex,
+                                onEdit: {
+                                    editSubscription(sub: sub)
+                                },
+                                onDelete: {
                                     var obj = subscriptionsList[index]
                                     obj.isSelected = true
                                     subscriptionsList[index] = obj
                                     showDeletePopup = true
-                                } label: {
-                                    Label("Delete", systemImage: "trash.fill")
                                 }
-                                
-                                Button {
-                                    let subData = SubscriptionData(id               : sub.id ?? "",
-                                                                   serviceName      : sub.serviceName ?? "",
-                                                                   subscriptionType : sub.subscriptionType ?? "",
-                                                                   amount           : sub.amount ?? 0.0,
-                                                                   currency         : sub.currency ?? "",
-                                                                   currencySymbol   : sub.currencySymbol ?? "",
-                                                                   billingCycle     : sub.billingCycle ?? "",
-                                                                   nextPaymentDate  : sub.nextPaymentDate ?? "",
-                                                                   paymentMethodId  : sub.paymentMethodDataId ?? "",
-                                                                   paymentMethod    : sub.paymentMethod ?? "",
-                                                                   paymentMethodName: sub.paymentMethodName ?? "",
-                                                                   categoryId       : sub.category ?? "",
-//                                                                   category         : sub.category ?? "",
-                                                                   categoryName     : sub.categoryName ?? "",
-                                                                   reason           : sub.notes ?? "",
-                                                                   //                                                                   subscriptionForName: <#T##String?#>,
-                                                                   subscriptionFor      : sub.subscriptionFor ?? "",
-                                                                   paymentMethodDataId  : sub.paymentMethodDataId ?? "",
-                                                                   paymentMethodDataName: sub.paymentMethodDataName ?? "",
-                                                                   renewalReminder      : sub.renewalReminder,
-                                                                   renewalReminders     : sub.renewalReminder,
-                                                                   notes                : sub.notes ?? "")
-                                    globalSubscriptionData = subData
-                                    AppIntentRouter.shared.navigate(to: .manualEntry(isFromEdit     : true,
-                                                                                     isFromListEdit : true,
-                                                                                     subscriptionId : sub.id ?? ""))
-                                } label: {
-                                    Label("Edit", systemImage: "pencil")
-                                }
-                                .tint(.blue)
-                            }
-                            .simultaneousGesture(
-                                TapGesture().onEnded {
-                                    if !selectionMode{
-                                        AppIntentRouter.shared.navigate(
-                                            to: .subscriptionMatchView(fromList: true, subscriptionId: sub.id ?? "")
-                                        )
+                            ) {
+                                subscriptionListCard(
+                                    subscriptionData   : sub,
+                                    selectionMode      : selectionMode,
+                                    onSelect           : {
+                                        toggleSelection(at: index)
+                                    },
+                                    onLongPress        : {
+                                        isLongPress = true
+                                        handleLongPress(at: index) }
+                                )
+                                .contentShape(Rectangle())
+                                //                                .onTapGesture {
+                                //                                    if openCardIndex == nil && !selectionMode {
+                                //                                        AppIntentRouter.shared.navigate(
+                                //                                            to: .subscriptionMatchView(
+                                //                                                fromList: true,
+                                //                                                subscriptionId: sub.id ?? ""
+                                //                                            )
+                                //                                        )
+                                //                                    }
+                                //                                }
+                                .simultaneousGesture(
+                                    TapGesture().onEnded {
+                                        if !selectionMode{
+                                            AppIntentRouter.shared.navigate(
+                                                to: .subscriptionMatchView(fromList: true, subscriptionId: sub.id ?? "")
+                                            )
+                                        }else{
+                                            if !isLongPress{
+                                                toggleSelection(at: index)
+                                            }
+                                        }
                                     }
-                                }
-                            )
+                                )
+                            }
+                            .listRowSeparator(.hidden)
+                            .listRowInsets(.init(top: 0, leading: 0, bottom: 8, trailing: 0))
+                            .listRowBackground(Color.clear)
                             .onAppear {
                                 if index == subscriptionsList.count - 1 {
                                     loadNextPageIfNeeded()
@@ -378,19 +508,53 @@ struct SubscriptionsView: View {
             .presentationDragIndicator(.hidden)
             .presentationDetents([.height(340)])
         }
+        //        .sheet(isPresented: $showFilterSheet) {
+        //            FilterSheet(
+        //                onDelegate: { filterData in
+        //                    self.filterData = filterData
+        //                    print(filterData)
+        //                    page = 0
+        //                    self.subscriptionsList.removeAll()
+        //                    listSubsApi()
+        //                },
+        //                filterData: self.filterData
+        //            )
+        //            .presentationDragIndicator(.hidden)
+        //            .presentationDetents([.height(500)])
+        //        }
         .sheet(isPresented: $showFilterSheet) {
             FilterSheet(
                 onDelegate: { filterData in
                     self.filterData = filterData
-                    print(filterData)
+                    print("Filter Data : \(filterData)")
                     page = 0
                     self.subscriptionsList.removeAll()
                     listSubsApi()
                 },
-                filterData: self.filterData
+                filterData: self.filterData,
+                filterSelect: filterSelect
             )
             .presentationDragIndicator(.hidden)
-            .presentationDetents([.height(500)])
+            .presentationDetents([.medium,.large])
+//            .presentationDetents(filterDetents)
+//            .presentationDetents(pendingFilterSelect ? [.medium,.large] : [.height(250)])
+//            .presentationDetents(
+//                pendingFilterSelect
+//                ? Set<PresentationDetent>([.medium, .large])
+//                : Set<PresentationDetent>([.height(250)])
+//            )
+        }
+        .onChange(of: pendingFilterSelect) { value in
+            guard let value else { return }
+            
+            // 1️⃣ update the real flag
+            filterSelect = value
+            
+            // 2️⃣ open sheet AFTER state is updated
+            showFilterSheet = true
+            
+            // 3️⃣ reset
+            pendingFilterSelect = nil
         }
         .onChange(of: subscriptionsVM.listSubsResponse) { _ in updateSubsList() }
         .onChange(of: subscriptionsVM.getSubsByMonthResponse) { _ in updateMonthSubsList() }
@@ -403,11 +567,6 @@ struct SubscriptionsView: View {
         }
     }
     
-    private var dateFormatter: DateFormatter {
-        let formatter = DateFormatter()
-        formatter.dateStyle = .long
-        return formatter
-    }
     
     //MARK: - User defined methods
     func callApis(){
@@ -426,12 +585,23 @@ struct SubscriptionsView: View {
         if page == 0 {
             self.showOfflineDetails()
         }
+        //        let input = ListSubscriptionsRequest(userId : Constants.getUserId(),
+        //                                             page   : page,
+        //                                             filter : SubscriptionFilter(includeFamilyMembers        : filterData.includeFamilySubscriptions,
+        //                                                                         includeExpiredSubscriptions : filterData.includeExpiredSubscriptions,
+        //                                                                         amountOrder                 : filterData.costOrder.rawValue,
+        //                                                                         nextPaymentDateOrder        : filterData.renewalDateOrder.rawValue))
+        //        subscriptionsVM.listSubscriptions(input: input, showLoader: showLoader)
         let input = ListSubscriptionsRequest(userId : Constants.getUserId(),
                                              page   : page,
                                              filter : SubscriptionFilter(includeFamilyMembers        : filterData.includeFamilySubscriptions,
                                                                          includeExpiredSubscriptions : filterData.includeExpiredSubscriptions,
                                                                          amountOrder                 : filterData.costOrder.rawValue,
-                                                                         nextPaymentDateOrder        : filterData.renewalDateOrder.rawValue))
+                                                                         nextPaymentDateOrder        : filterData.renewalDateOrder.rawValue,
+                                                                         categoryId                  : filterData.categoryId,
+                                                                         familyMemberIds             : filterData.familyMemberIds,
+                                                                         month                       : filterData.month,
+                                                                         year                        : filterData.year))
         subscriptionsVM.listSubscriptions(input: input, showLoader: showLoader)
     }
     
@@ -523,6 +693,35 @@ struct SubscriptionsView: View {
         }
     }
     
+    func editSubscription(sub: SubscriptionListData){
+        let subData = SubscriptionData(id               : sub.id ?? "",
+                                       serviceName      : sub.serviceName ?? "",
+                                       subscriptionType : sub.subscriptionType ?? "",
+                                       amount           : sub.amount ?? 0.0,
+                                       currency         : sub.currency ?? "",
+                                       currencySymbol   : sub.currencySymbol ?? "",
+                                       billingCycle     : sub.billingCycle ?? "",
+                                       nextPaymentDate  : sub.nextPaymentDate ?? "",
+                                       paymentMethodId  : sub.paymentMethodDataId ?? "",
+                                       paymentMethod    : sub.paymentMethod ?? "",
+                                       paymentMethodName: sub.paymentMethodName ?? "",
+                                       categoryId       : sub.category ?? "",
+                                       //                                                                   category         : sub.category ?? "",
+                                       categoryName     : sub.categoryName ?? "",
+                                       reason           : sub.notes ?? "",
+                                       //                                                                   subscriptionForName: <#T##String?#>,
+                                       subscriptionFor      : sub.subscriptionFor ?? "",
+                                       paymentMethodDataId  : sub.paymentMethodDataId ?? "",
+                                       paymentMethodDataName: sub.paymentMethodDataName ?? "",
+                                       renewalReminder      : sub.renewalReminder,
+                                       renewalReminders     : sub.renewalReminder,
+                                       notes                : sub.notes ?? "")
+        globalSubscriptionData = subData
+        AppIntentRouter.shared.navigate(to: .manualEntry(isFromEdit     : true,
+                                                         isFromListEdit : true,
+                                                         subscriptionId : sub.id ?? ""))
+    }
+    
     //MARK: - Button actions
     private func toggleSubscription(at index: Int) {
         var obj = subscriptions[index]
@@ -586,8 +785,16 @@ struct SubscriptionsView: View {
         ToastManager.shared.showToast(message: "Coming soon in S4",style:ToastStyle.info)
     }
     
+    //    private func clickOnFilter() {
+    //        showFilterSheet = true
+    //    }
+    
     private func clickOnFilter() {
-        showFilterSheet = true
+        pendingFilterSelect = true
+    }
+    
+    private func clickOnSort() {
+        pendingFilterSelect = false
     }
     
     private func clickOnYearLeft() {
@@ -624,3 +831,308 @@ struct SubscriptionsView: View {
 #Preview {
     SubscriptionsView()
 }
+
+//MARK: - Swipe Action card
+//struct SwipeActionCard<Content: View>: View {
+//
+//    let id: Int
+//    @Binding var openCardIndex: Int?
+//    let onEdit: () -> Void
+//    let onDelete: () -> Void
+//    let content: Content
+//    @State private var offsetX: CGFloat = 0
+//    private let maxOffset: CGFloat = -135
+//    @State private var cardHeight: CGFloat = 0
+//
+//    init(
+//        id: Int,
+//        openCardIndex: Binding<Int?>,
+//        onEdit: @escaping () -> Void,
+//        onDelete: @escaping () -> Void,
+//        @ViewBuilder content: () -> Content
+//    ) {
+//        self.id = id
+//        self._openCardIndex = openCardIndex
+//        self.onEdit = onEdit
+//        self.onDelete = onDelete
+//        self.content = content()
+//    }
+//
+//    var body: some View {
+//        ZStack(alignment: .trailing) {
+//            ZStack(alignment: .trailing) {
+//                VStack{
+//                    Button {
+//                        onDelete()
+//                        closeCard()
+//                    } label: {
+//                        VStack(spacing: 8) {
+//                            Image("del_white")
+//                                .frame(width: 24, height: 24)
+//                            Text("Delete")
+//                                .font(.appSemiBold(14))
+//                                .foregroundColor(.white)
+//                        }
+//                        .frame(width: 70, height: 72)
+//                        .background(Color("redColor"))
+//                    }
+//                    .contentShape(Rectangle())
+//
+//                }
+//                .background(Color("redColor"))
+//                .clipShape(
+//                    RoundedCorner(
+//                        radius: 8,
+//                        corners: [.topRight, .bottomRight]
+//                    )
+//                )
+//                .overlay(
+//                    RoundedCorner(
+//                        radius: 8,
+//                        corners: [.topRight, .bottomRight]
+//                    )
+//                    .stroke(Color.neutral300Border, lineWidth: 1)
+//                )
+//                .frame(width: 80)
+//
+//                VStack{
+//                    Button {
+//                        onEdit()
+//                        closeCard()
+//                    } label: {
+//                        VStack(spacing: 8) {
+//                            Image("edit_white")
+//                                .frame(width: 24, height: 24)
+//                            Text("Edit")
+//                                .font(.appSemiBold(14))
+//                                .foregroundColor(.white)
+//                        }
+//                        .frame(width: 70, height: 72)
+//                        .background(Color("green"))
+//                    }
+//                    .contentShape(Rectangle())
+//
+//                }
+//                .background(Color("green"))
+//                .clipShape(
+//                    RoundedCorner(
+//                        radius: 8,
+//                        corners: [.topRight, .bottomRight]
+//                    )
+//                )
+//                .overlay(
+//                    RoundedCorner(
+//                        radius: 8,
+//                        corners: [.topRight, .bottomRight]
+//                    )
+//                    .stroke(Color.neutral300Border, lineWidth: 1)
+//                )
+//                .frame(width: 70)
+//                .offset(x: -70)
+//            }
+//            .contentShape(Rectangle())
+//
+//            content
+//                .offset(x: offsetX)
+////                .contentShape(Rectangle())
+//                .gesture(
+//                    DragGesture()
+//                        .onChanged { value in
+//                            if openCardIndex != id {
+//                                openCardIndex = id
+//                            }
+//
+//                            let translation = value.translation.width
+//                            if translation < 0 {
+//                                offsetX = max(translation, maxOffset)
+//                            } else {
+//                                offsetX = min(translation, 0)
+//                            }
+//                        }
+//                        .onEnded { value in
+//                            if value.translation.width < -60 {
+//                                openCard()
+//                            } else {
+//                                closeCard()
+//                            }
+//                        }
+//                )
+//                .onChange(of: openCardIndex) { newValue in
+//                    if newValue != id {
+//                        closeCard(animated: true)
+//                    }
+//                }
+//        }
+//        .animation(.easeInOut(duration: 0.25), value: offsetX)
+//    }
+//
+//    private func openCard() {
+//        offsetX = maxOffset
+//        openCardIndex = id
+//    }
+//
+//    private func closeCard(animated: Bool = false) {
+//        if animated {
+//            withAnimation {
+//                offsetX = 0
+//            }
+//        } else {
+//            offsetX = 0
+//        }
+//        if openCardIndex == id {
+//            openCardIndex = nil
+//        }
+//    }
+//}
+
+struct SwipeActionCard<Content: View>: View {
+    
+    let id: Int
+    @Binding var openCardIndex: Int?
+    let onEdit: () -> Void
+    let onDelete: () -> Void
+    let content: Content
+    
+    @State private var offsetX: CGFloat = 0
+    private let maxOffset: CGFloat = -135
+    
+    init(
+        id: Int,
+        openCardIndex: Binding<Int?>,
+        onEdit: @escaping () -> Void,
+        onDelete: @escaping () -> Void,
+        @ViewBuilder content: () -> Content
+    ) {
+        self.id = id
+        self._openCardIndex = openCardIndex
+        self.onEdit = onEdit
+        self.onDelete = onDelete
+        self.content = content()
+    }
+    
+    var body: some View {
+        ZStack(alignment: .trailing) {
+            
+            // Trailing buttons (no gestures here, just Buttons)
+            ZStack(alignment: .trailing) {
+                // Delete
+                Button {
+                    onDelete()
+                    closeCard()
+                } label: {
+                    VStack(spacing: 8) {
+                        Image("del_white")
+                            .frame(width: 24, height: 24)
+                        Text("Delete")
+                            .font(.appSemiBold(14))
+                            .foregroundColor(.white)
+                    }
+                    .frame(width: 70, height: 72)
+                    .background(Color("redColor"))
+                }
+                .background(Color("redColor"))
+                .clipShape(
+                    RoundedCorner(
+                        radius: 8,
+                        corners: [.topRight, .bottomRight]
+                    )
+                )
+                .overlay(
+                    RoundedCorner(
+                        radius: 8,
+                        corners: [.topRight, .bottomRight]
+                    )
+                    .stroke(Color.neutral300Border, lineWidth: 1)
+                )
+                .frame(width: 80)
+                
+                // Edit
+                Button {
+                    onEdit()
+                    closeCard()
+                } label: {
+                    VStack(spacing: 8) {
+                        Image("edit_white")
+                            .frame(width: 24, height: 24)
+                        Text("Edit")
+                            .font(.appSemiBold(14))
+                            .foregroundColor(.white)
+                    }
+                    .frame(width: 70, height: 72)
+                    .background(Color("green"))
+                }
+                .background(Color("green"))
+                .clipShape(
+                    RoundedCorner(
+                        radius: 8,
+                        corners: [.topRight, .bottomRight]
+                    )
+                )
+                .overlay(
+                    RoundedCorner(
+                        radius: 8,
+                        corners: [.topRight, .bottomRight]
+                    )
+                    .stroke(Color.neutral300Border, lineWidth: 1)
+                )
+                .frame(width: 70)
+                .offset(x: -70)
+            }
+            //            .contentShape(Rectangle())
+            
+            // Foreground card with drag
+            content
+                .offset(x: offsetX)
+            //                .contentShape(Rectangle())
+                .gesture(
+                    DragGesture()
+                        .onChanged { value in
+                            if openCardIndex != id {
+                                openCardIndex = id
+                            }
+                            
+                            let translation = value.translation.width
+                            if translation < 0 {
+                                offsetX = max(translation, maxOffset)
+                            } else {
+                                offsetX = min(translation, 0)
+                            }
+                        }
+                        .onEnded { value in
+                            if value.translation.width < -60 {
+                                openCard()
+                            } else {
+                                closeCard()
+                            }
+                        }
+                )
+                .onChange(of: openCardIndex) { newValue in
+                    if newValue != id {
+                        closeCard(animated: true)
+                    }
+                }
+        }
+        .animation(.easeInOut(duration: 0.25), value: offsetX)
+    }
+    
+    private func openCard() {
+        offsetX = maxOffset
+        openCardIndex = id
+    }
+    
+    private func closeCard(animated: Bool = false) {
+        if animated {
+            withAnimation {
+                offsetX = 0
+            }
+        } else {
+            offsetX = 0
+        }
+        if openCardIndex == id {
+            openCardIndex = nil
+        }
+    }
+}
+
+
+

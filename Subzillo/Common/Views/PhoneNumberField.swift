@@ -52,18 +52,35 @@ struct PhoneNumberField: View {
                     }
                 } label: {
                     HStack(spacing: 4) {
-                        if selectedCountry?.countryFlag ?? "" == "" || selectedCurrency?.flag ?? "" == ""{
-                            Text(flag)
-                                .frame(width: 24, height: 24)
-                        }else{
-                            WebImage(url: URL(string: isCountry ? flag : selectedCurrency?.flag ?? ""))
-                                .resizable()
-                                .indicator(.activity)
-                                .transition(.fade(duration: 0.5))
-                                .scaledToFit()
-                            //                            .frame(width: 24, height: 18)
-                                .frame(width: 24, height: 24)
-                                .cornerRadius(5)
+                        if isCountry{
+                            if selectedCountry?.countryFlag ?? "" == ""{
+                                Text(flag)
+                                    .frame(width: 24, height: 24)
+                            }else{
+                                WebImage(url: URL(string: isCountry ? flag : selectedCurrency?.flag ?? ""))
+                                    .resizable()
+                                    .indicator(.activity)
+                                    .transition(.fade(duration: 0.5))
+                                    .scaledToFit()
+                                //                            .frame(width: 24, height: 18)
+                                    .frame(width: 24, height: 24)
+                                    .cornerRadius(5)
+                            }
+                        }else
+                        {
+                            if selectedCurrency?.flag ?? "" == ""{
+                                Text(Constants.shared.flag(from: Constants.shared.regionCode))
+                                    .frame(width: 24, height: 24)
+                            }else{
+                                WebImage(url: URL(string: isCountry ? flag : selectedCurrency?.flag ?? ""))
+                                    .resizable()
+                                    .indicator(.activity)
+                                    .transition(.fade(duration: 0.5))
+                                    .scaledToFit()
+                                //                            .frame(width: 24, height: 18)
+                                    .frame(width: 24, height: 24)
+                                    .cornerRadius(5)
+                            }
                         }
                         Image("dropDown_blackWhite")
                             .frame(width: 20, height: 20)
@@ -127,6 +144,7 @@ struct PhoneNumberField: View {
             .onAppear(perform: updateCountryAndCurrency)
             .onChange(of: commonApiVM.countriesResponse) { _ in updateCountryAndCurrency() }
             .onChange(of: commonApiVM.currencyResponse) { _ in updateCountryAndCurrency() }
+            .onChange(of: selectedCountry) { _ in countryChange() }
         }
         .sheet(isPresented: $showCurrencySheet) {
             CountriesBottomSheet(selectedCurrency   : $selectedCurrency,
@@ -184,6 +202,20 @@ struct PhoneNumberField: View {
                 countryCode = Constants.shared.regionCode
                 flag        = Constants.shared.flag(from: Constants.shared.regionCode)
             }
+        }
+    }
+    
+    func countryChange(){
+        countryCode         = selectedCountry?.dialCode ?? ""
+        flag                = selectedCountry?.countryFlag ?? ""
+        if isCountry{
+            if selectedCountry?.countryFlag ?? "" == "" && selectedCountry?.dialCode ?? "" == ""{
+                countryCode = Constants.shared.regionCode
+                flag        = Constants.shared.flag(from: Constants.shared.regionCode)
+            }
+        }
+        if !fromSingup{
+            phoneNumber = ""
         }
     }
 }
@@ -278,15 +310,7 @@ struct PhoneNumberTextFieldView: UIViewRepresentable {
                 textField.text = formatted
             }
             // Update binding
-            //            parent.phoneNumber = formatted
-            do {
-                let phoneNumber = try phoneNumberUtility.parse(textField.text ?? "")
-                //                textField.text = phoneNumberUtility.format(phoneNumber, toType: .national)
-                parent.phoneNumber = String(phoneNumber.nationalNumber)
-            }
-            catch {
-                print("Generic parser error")
-            }
+            parent.phoneNumber = formatted
         }
         
         // Optional: update region dynamically
@@ -342,3 +366,128 @@ class RegionPhoneTextField: PhoneNumberTextField {
     }
 }
 
+//struct PhoneNumberTextFieldView: UIViewRepresentable {
+//    
+//    @Binding var phoneNumber: String
+//    var region: String
+//    
+//    func makeCoordinator() -> Coordinator {
+//        Coordinator(self)
+//    }
+//    
+//    func makeUIView(context: Context) -> PhoneNumberTextField {
+//       // print(region)
+//        let textField = RegionPhoneTextField()//PhoneNumberTextField()
+//        
+//        textField.withExamplePlaceholder = false
+//        textField.withPrefix = false
+//        textField.withFlag = false
+//        textField.selectedRegion = region
+//        textField.font = UIFont(name: "Roboto-Regular", size: 14)
+//        
+//        // Add target for updates
+//        textField.addTarget(
+//            context.coordinator,
+//            action: #selector(Coordinator.textDidChange(_:)),
+//            for: .editingChanged
+//        )
+//        
+//        return textField
+//    }
+//    
+//    func updateUIView(_ uiView: PhoneNumberTextField, context: Context) {
+//        // Keep text updated from SwiftUI (avoid replacing during typing)
+//        //print(region)
+//        let regionPhoneTF = uiView as! RegionPhoneTextField
+//        
+//        // 1. Update region dynamically
+//        if regionPhoneTF.selectedRegion != region {
+//            regionPhoneTF.selectedRegion = region    // <-- triggers placeholder update
+//            context.coordinator.updateRegion(region)
+//        }
+//        if uiView.text != phoneNumber {
+//            let formatter = PartialFormatter(defaultRegion: region)
+//            uiView.text = formatter.formatPartial(phoneNumber)
+//        }
+//    }
+//    
+//    class Coordinator: NSObject {
+//        var parent: PhoneNumberTextFieldView
+//        private var formatter: PartialFormatter
+//
+//        init(_ parent: PhoneNumberTextFieldView) {
+//            self.parent = parent
+//            self.formatter = PartialFormatter(
+//                defaultRegion: parent.region,
+//                withPrefix: false
+//            )
+//        }
+//
+//        @objc func textDidChange(_ textField: UITextField) {
+//            guard let text = textField.text else { return }
+//
+//            let digits = text.filter { $0.isNumber }
+//            let maxDigits = textField.placeholder!.filter { $0.isNumber }.count
+//            
+//            var trimmedText = digits
+//            if digits.count > maxDigits {
+//                trimmedText = String(digits.prefix(maxDigits))
+//            }
+//            
+//            // Format text according to the selected region
+//            let formatted = formatter.formatPartial(trimmedText)
+//
+//            // Update the UITextField text directly
+//            if textField.text != formatted {
+//                textField.text = formatted
+//            }
+//
+//            // Update binding
+//            parent.phoneNumber = formatted
+//        }
+//        
+//
+//        // Optional: update region dynamically
+//        func updateRegion(_ region: String) {
+//            formatter = PartialFormatter(
+//                defaultRegion: region,
+//                withPrefix: false
+//            )
+//        }
+//    }
+//}
+//
+//class RegionPhoneTextField: PhoneNumberTextField {
+//    
+//    var selectedRegion: String = "IN" {
+//        didSet {
+//            updatePlaceholder()
+//        }
+//    }
+//    
+//    private let phoneUtil = PhoneNumberUtility()
+//    
+//    override var defaultRegion: String {
+//        get {
+//            return selectedRegion
+//        }
+//        set {} // exists for backward compatibility
+//    }
+//    
+//    override func updatePlaceholder() {
+//        
+//        if let example = phoneUtil.metadata(for: selectedRegion)?.mobile?.exampleNumber {
+//            let formatter = PartialFormatter(defaultRegion: selectedRegion)
+//            // self.placeholder = formatter.formatPartial(example)
+//            var placeholder = ""
+//            for char in formatter.formatPartial(example) {
+//                placeholder += char.isNumber ? "0" : String(char)
+//            }
+//            self.placeholder = placeholder
+//            
+//        } else {
+//            self.placeholder = "Enter phone number"
+//        }
+//    }
+//    
+//}

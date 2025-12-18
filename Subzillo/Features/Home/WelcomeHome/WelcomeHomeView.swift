@@ -33,13 +33,13 @@ struct WelcomeHomeView: View {
                                         .frame(width: 32, height: 32)
                                 }
                                 
-//                                Text("3")
-//                                    .font(.appBold(11))
-//                                    .foregroundColor(Color.white)
-//                                    .frame(width: 16, height: 16)
-//                                    .background(Color.redBadge)
-//                                    .cornerRadius(4)
-//                                    .offset(x: 0, y: -5)
+                                //                                Text("3")
+                                //                                    .font(.appBold(11))
+                                //                                    .foregroundColor(Color.white)
+                                //                                    .frame(width: 16, height: 16)
+                                //                                    .background(Color.redBadge)
+                                //                                    .cornerRadius(4)
+                                //                                    .offset(x: 0, y: -5)
                             }
                         }
                         .offset(x: 0, y: 10)
@@ -54,6 +54,321 @@ struct WelcomeHomeView: View {
                         .font(.appRegular(18))
                         .foregroundColor(Color.neutral500)
                         .multilineTextAlignment(.center)
+                    
+                    //                    Text("You are in the free plan")
+                    //                        .font(.appRegular(18))
+                    //                        .foregroundColor(Color.neutralMain700)
+                    //                        .multilineTextAlignment(.center)
+                    //                        .padding(.top, 32)
+                    //
+                    //                    Button(action: upgradePlan) {
+                    //                        Text("Upgrade Today")
+                    //                            .font(.appSemiBold(18))
+                    //                            .foregroundColor(Color.secondaryPurple700)
+                    //                            .multilineTextAlignment(.center)
+                    //                    }
+                    //                    .frame(height: 56)
+                    //                    .frame(maxWidth: .infinity)
+                    //                    .overlay(
+                    //                        RoundedRectangle(cornerRadius: 8)
+                    //                            .stroke(Color.secondaryPurple400, lineWidth: 1)
+                    //                    )
+                    //                    .cornerRadius(8)
+                    //                    .padding(.top, 8)
+                    //
+                    //                    VStack(spacing: 0) {
+                    //                        Image("box")
+                    //                            .resizable()
+                    //                            .scaledToFit()
+                    //                            .frame(width: 91,height: 80)
+                    //                            .padding(.top, 32)
+                    //
+                    //                        Text("No subscriptions yet")
+                    //                            .font(.appRegular(18))
+                    //                            .foregroundColor(Color.neutralMain700)
+                    //                            .multilineTextAlignment(.center)
+                    //                            .padding(.top, 24)
+                    //
+                    //                        Text("Add your first subscription to start tracking your recurring payments")
+                    //                            .font(.appRegular(16))
+                    //                            .foregroundColor(Color.neutral500)
+                    //                            .multilineTextAlignment(.center)
+                    //                            .padding(.horizontal, 30)
+                    //                            .padding(.top, 8)
+                    //
+                    //                        Button(action: goToSmartAssistant) {
+                    //                            HStack(spacing: 5) {
+                    //                                Image("robotic")
+                    //                                    .frame(width: 20, height: 20)
+                    //                                Text("Add Subscription by AI Agent")
+                    //                                    .font(.appSemiBold(14))
+                    //                                    .foregroundColor(.white)
+                    //                            }
+                    //                            .padding()
+                    //                            .frame(maxWidth: .infinity, alignment: .center)
+                    //                            .background(
+                    //                                LinearGradient(
+                    //                                    colors: [Color.linearGradient3, Color.linearGradient4, Color.navyBlueCTA700],
+                    //                                    startPoint: .leading,
+                    //                                    endPoint: .trailing
+                    //                                )
+                    //                            )
+                    //                            .cornerRadius(8)
+                    //                        }
+                    //                        .padding(.horizontal, 16)
+                    //                        .padding(.top, 24)
+                    //
+                    //                        VStack(spacing: 8) {
+                    //
+                    //                            HStack(spacing: 8) {
+                    //                                Button(action: goToUploadImage) {
+                    //                                    HStack(spacing: 5) {
+                    //                                        Image("image-upload")
+                    //                                            .resizable()
+                    //                                            .frame(width: 20, height: 20)
+                    //                                        Text("Upload Image")
+                    //                                            .font(.appSemiBold(14))
+                    //                                            .foregroundColor(.neutralMain700)
+                    //                                    }
+                    //                                    .frame(maxWidth: .infinity, minHeight: 48)
+                    //                                    .overlay(
+                    //                                        RoundedRectangle(cornerRadius: 8)
+                    //                                            .stroke(Color.gradientPurple, lineWidth: 2)
+                    //                                    )
+                    //                                    .background(Color.whiteNeutralCardBG)
+                    //                                    .cornerRadius(8)
+                    //                                }
+                    //
+                    //                                Button(action: goToConnectEmail) {
+                    //                                    HStack(spacing: 5) {
+                    //                                        Image("mail-at-sign-01")
+                    //                                            .resizable()
+                    //                                            .frame(width: 20, height: 20)
+                    //                                        Text("Connect Email")
+                    //                                            .font(.appSemiBold(14))
+                    //                                            .foregroundColor(.neutralMain700)
+                    //                                    }
+                    //                                    .frame(maxWidth: .infinity, minHeight: 48)
+                    //                                    .overlay(
+                    //                                        RoundedRectangle(cornerRadius: 8)
+                    //                                            .stroke(Color.gradientBlue, lineWidth: 2)
+                    //                                    )
+                    //                                    .background(Color.whiteNeutralCardBG)
+                    //                                    .cornerRadius(8)
+                    //                                }
+                    //                            }
+                    //                            .frame(maxWidth: .infinity)
+                    //
+                    //
+                    //                            HStack(spacing: 8) {
+                    //                                Button(action: goToAddByVoice) {
+                    //                                    HStack(spacing: 5) {
+                    //                                        Image("mic-01-2")
+                    //                                            .resizable()
+                    //                                            .frame(width: 20, height: 20)
+                    //                                        Text("Add by Voice")
+                    //                                            .font(.appSemiBold(14))
+                    //                                            .foregroundColor(.neutralMain700)
+                    //                                    }
+                    //                                    .frame(maxWidth: .infinity, minHeight: 48)
+                    //                                    .overlay(
+                    //                                        RoundedRectangle(cornerRadius: 8)
+                    //                                            .stroke(Color.secondaryPurple300, lineWidth: 2)
+                    //                                    )
+                    //                                    .background(Color.whiteNeutralCardBG)
+                    //                                    .cornerRadius(8)
+                    //                                }
+                    //
+                    //                                Button(action: goToManualEntry) {
+                    //                                    HStack(spacing: 5) {
+                    //                                        Image("keyboard")
+                    //                                            .resizable()
+                    //                                            .frame(width: 20, height: 20)
+                    //                                        Text("Manual Entry")
+                    //                                            .font(.appSemiBold(14))
+                    //                                            .foregroundColor(.neutralMain700)
+                    //                                    }
+                    //                                    .frame(maxWidth: .infinity, minHeight: 48)
+                    //                                    .overlay(
+                    //                                        RoundedRectangle(cornerRadius: 8)
+                    //                                            .stroke(Color.secondaryPurple600, lineWidth: 2)
+                    //                                    )
+                    //                                    .background(Color.whiteNeutralCardBG)
+                    //                                    .cornerRadius(8)
+                    //                                }
+                    //                            }
+                    //                            .frame(maxWidth: .infinity)
+                    //                        }
+                    //                        .frame(maxWidth: .infinity, alignment: .center)
+                    //                        .padding(.horizontal, 16)
+                    //                        .padding(.top, 8)
+                    //                        .padding(.bottom, 16)
+                    //                    }
+                    //                    .frame(height: 411)
+                    //                    .frame(maxWidth: .infinity)
+                    //                    .overlay(
+                    //                        RoundedRectangle(cornerRadius: 16)
+                    //                            .stroke(Color.neutral300Border, lineWidth: 1)
+                    //                    )
+                    //                    .background(Color.whiteNeutralCardBG)
+                    //                    .cornerRadius(16)
+                    //                    .padding(.top, 24)
+                    
+                    VStack(spacing: 0) {
+                        VStack(spacing: 12) {
+                            Spacer()
+                            Button(action: goToSmartAssistant) {
+                                HStack(spacing: 5) {
+                                    Image("robotic")
+                                        .frame(width: 20, height: 20)
+                                    Text("Add Subscription by AI Agent")
+                                        .font(.appSemiBold(16))
+                                        .foregroundColor(.white)
+                                }
+                                .padding()
+                                .frame(maxWidth: .infinity, alignment: .center)
+                                .background(
+                                    LinearGradient(
+                                        colors: [Color.linearGradient3, Color.linearGradient4, Color.navyBlueCTA700],
+                                        startPoint: .leading,
+                                        endPoint: .trailing
+                                    )
+                                )
+                                .cornerRadius(8)
+                            }
+                            //                            .padding(.horizontal, 16)
+                            //                      .padding(.top, 24)
+                            
+                            VStack(spacing: 8) {
+                                
+                                HStack(spacing: 8) {
+                                    Button(action: goToUploadImage) {
+                                        HStack(spacing: 5) {
+                                            Image("image-upload")
+                                                .resizable()
+                                                .frame(width: 20, height: 20)
+                                            Text("Upload Image")
+                                                .font(.appSemiBold(16))
+                                                .foregroundColor(.neutralMain700)
+                                        }
+                                        .frame(maxWidth: .infinity, minHeight: 48)
+                                        .overlay(
+                                            RoundedRectangle(cornerRadius: 8)
+                                                .stroke(Color.gradientPurple, lineWidth: 1)
+                                        )
+                                        .background(Color.whiteNeutralCardBG)
+                                        .innerBorder(
+                                            cornerRadius: 8,
+                                            color: Color.gradientPurple.opacity(0.6)
+                                        )
+                                    }
+                                    
+                                    Button(action: goToConnectEmail) {
+                                        HStack(spacing: 5) {
+                                            Image("mail-at-sign-01")
+                                                .resizable()
+                                                .frame(width: 20, height: 20)
+                                            Text("Connect Email")
+                                                .font(.appSemiBold(16))
+                                                .foregroundColor(.neutralMain700)
+                                        }
+                                        .frame(maxWidth: .infinity, minHeight: 48)
+                                        .overlay(
+                                            RoundedRectangle(cornerRadius: 8)
+                                                .stroke(Color.gradientBlue, lineWidth: 1)
+                                        )
+                                        .background(Color.whiteNeutralCardBG)
+                                        .innerBorder(
+                                            cornerRadius: 8,
+                                            color: Color.gradientBlue.opacity(0.6)
+                                        )
+                                    }
+                                }
+                                .frame(maxWidth: .infinity)
+                                
+                                
+                                HStack(spacing: 8) {
+                                    Button(action: goToAddByVoice) {
+                                        HStack(spacing: 5) {
+                                            Image("mic-01-2")
+                                                .resizable()
+                                                .frame(width: 20, height: 20)
+                                            Text("Add by Voice")
+                                                .font(.appSemiBold(16))
+                                                .foregroundColor(.neutralMain700)
+                                        }
+                                        .frame(maxWidth: .infinity, minHeight: 48)
+                                        .overlay(
+                                            RoundedRectangle(cornerRadius: 8)
+                                                .stroke(Color.secondaryPurple300, lineWidth: 1)
+                                        )
+                                        .background(Color.whiteNeutralCardBG)
+                                        .innerBorder(
+                                            cornerRadius: 8,
+                                            color: Color.gradientBlue.opacity(0.6)
+                                        )
+                                    }
+                                    
+                                    Button(action: goToManualEntry) {
+                                        HStack(spacing: 5) {
+                                            Image("keyboard")
+                                                .resizable()
+                                                .frame(width: 20, height: 20)
+                                            Text("Manual Entry")
+                                                .font(.appSemiBold(16))
+                                                .foregroundColor(.neutralMain700)
+                                        }
+                                        .frame(maxWidth: .infinity, minHeight: 48)
+                                        .overlay(
+                                            RoundedRectangle(cornerRadius: 8)
+                                                .stroke(Color.secondaryPurple600, lineWidth: 1)
+                                        )
+                                        .background(Color.whiteNeutralCardBG)
+                                        .innerBorder(
+                                            cornerRadius: 8,
+                                            color: Color.gradientBlue.opacity(0.6)
+                                        )
+                                    }
+                                }
+                                .frame(maxWidth: .infinity)
+                            }
+                        }
+                        .frame(maxWidth: .infinity, alignment: .center)
+                        .padding(.horizontal, 16)
+                        .padding(.top, 0)
+                        .padding(.bottom, 12)
+                        .background(
+                            Color.whiteNeutralCardBG
+                                .cornerRadius(16)
+                        )
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 16)
+                                .stroke(Color.neutral300Border, lineWidth: 1)
+                                .cornerRadius(16)
+                        )
+                        Image("box")
+                            .resizable()
+                            .scaledToFill()
+                            .frame(width: 91,height: 80)
+                            .padding(.top, 32)
+                        
+                        Text("No subscriptions yet")
+                            .font(.appRegular(18))
+                            .foregroundColor(Color.neutralMain700)
+                            .multilineTextAlignment(.center)
+                            .padding(.top, 24)
+                        
+                        Text("Add your first subscription to start tracking your recurring payments")
+                            .font(.appRegular(16))
+                            .foregroundColor(Color.neutral500)
+                            .multilineTextAlignment(.center)
+                            .padding(.horizontal, 30)
+                            .padding(.top, 8)
+                        
+                    }
+                    .frame(height: 411)
+                    .frame(maxWidth: .infinity)
+                    .padding(.top, 32)
                     
                     Text("You are in the free plan")
                         .font(.appRegular(18))
@@ -75,144 +390,6 @@ struct WelcomeHomeView: View {
                     )
                     .cornerRadius(8)
                     .padding(.top, 8)
-                    
-                    VStack(spacing: 0) {
-                        Image("box")
-                            .resizable()
-                            .scaledToFit()
-                            .frame(width: 91,height: 80)
-                            .padding(.top, 32)
-                        
-                        Text("No subscriptions yet")
-                            .font(.appRegular(18))
-                            .foregroundColor(Color.neutralMain700)
-                            .multilineTextAlignment(.center)
-                            .padding(.top, 24)
-                        
-                        Text("Add your first subscription to start tracking your recurring payments")
-                            .font(.appRegular(16))
-                            .foregroundColor(Color.neutral500)
-                            .multilineTextAlignment(.center)
-                            .padding(.horizontal, 30)
-                            .padding(.top, 8)
-                        
-                        Button(action: goToSmartAssistant) {
-                            HStack(spacing: 5) {
-                                Image("robotic")
-                                    .frame(width: 20, height: 20)
-                                Text("Add Subscription by AI Agent")
-                                    .font(.appSemiBold(14))
-                                    .foregroundColor(.white)
-                            }
-                            .padding()
-                            .frame(maxWidth: .infinity, alignment: .center)
-                            .background(
-                                LinearGradient(
-                                    colors: [Color.linearGradient3, Color.linearGradient4, Color.navyBlueCTA700],
-                                    startPoint: .leading,
-                                    endPoint: .trailing
-                                )
-                            )
-                            .cornerRadius(8)
-                        }
-                        .padding(.horizontal, 16)
-                        .padding(.top, 24)
-                        
-                        VStack(spacing: 8) {
-                            
-                            HStack(spacing: 8) {
-                                Button(action: goToUploadImage) {
-                                    HStack(spacing: 5) {
-                                        Image("image-upload")
-                                            .resizable()
-                                            .frame(width: 20, height: 20)
-                                        Text("Upload Image")
-                                            .font(.appSemiBold(14))
-                                            .foregroundColor(.neutralMain700)
-                                    }
-                                    .frame(maxWidth: .infinity, minHeight: 48)
-                                    .overlay(
-                                        RoundedRectangle(cornerRadius: 8)
-                                            .stroke(Color.gradientPurple, lineWidth: 2)
-                                    )
-                                    .background(Color.whiteNeutralCardBG)
-                                    .cornerRadius(8)
-                                }
-                                
-                                Button(action: goToConnectEmail) {
-                                    HStack(spacing: 5) {
-                                        Image("mail-at-sign-01")
-                                            .resizable()
-                                            .frame(width: 20, height: 20)
-                                        Text("Connect Email")
-                                            .font(.appSemiBold(14))
-                                            .foregroundColor(.neutralMain700)
-                                    }
-                                    .frame(maxWidth: .infinity, minHeight: 48)
-                                    .overlay(
-                                        RoundedRectangle(cornerRadius: 8)
-                                            .stroke(Color.gradientBlue, lineWidth: 2)
-                                    )
-                                    .background(Color.whiteNeutralCardBG)
-                                    .cornerRadius(8)
-                                }
-                            }
-                            .frame(maxWidth: .infinity)
-                            
-                            
-                            HStack(spacing: 8) {
-                                Button(action: goToAddByVoice) {
-                                    HStack(spacing: 5) {
-                                        Image("mic-01-2")
-                                            .resizable()
-                                            .frame(width: 20, height: 20)
-                                        Text("Add by Voice")
-                                            .font(.appSemiBold(14))
-                                            .foregroundColor(.neutralMain700)
-                                    }
-                                    .frame(maxWidth: .infinity, minHeight: 48)
-                                    .overlay(
-                                        RoundedRectangle(cornerRadius: 8)
-                                            .stroke(Color.secondaryPurple300, lineWidth: 2)
-                                    )
-                                    .background(Color.whiteNeutralCardBG)
-                                    .cornerRadius(8)
-                                }
-                                
-                                Button(action: goToManualEntry) {
-                                    HStack(spacing: 5) {
-                                        Image("keyboard")
-                                            .resizable()
-                                            .frame(width: 20, height: 20)
-                                        Text("Manual Entry")
-                                            .font(.appSemiBold(14))
-                                            .foregroundColor(.neutralMain700)
-                                    }
-                                    .frame(maxWidth: .infinity, minHeight: 48)
-                                    .overlay(
-                                        RoundedRectangle(cornerRadius: 8)
-                                            .stroke(Color.secondaryPurple600, lineWidth: 2)
-                                    )
-                                    .background(Color.whiteNeutralCardBG)
-                                    .cornerRadius(8)
-                                }
-                            }
-                            .frame(maxWidth: .infinity)
-                        }
-                        .frame(maxWidth: .infinity, alignment: .center)
-                        .padding(.horizontal, 16)
-                        .padding(.top, 8)
-                        .padding(.bottom, 16)
-                    }
-                    .frame(height: 411)
-                    .frame(maxWidth: .infinity)
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 16)
-                            .stroke(Color.neutral300Border, lineWidth: 1)
-                    )
-                    .background(Color.whiteNeutralCardBG)
-                    .cornerRadius(16)
-                    .padding(.top, 24)
                     
                     VStack(alignment: .leading, spacing: 0) {
                         HStack(spacing: 10) {
@@ -252,8 +429,8 @@ struct WelcomeHomeView: View {
         .navigationBarBackButtonHidden(true)
         .sheet(isPresented: $showUploadPopup) {
             UploadImageSheet()
-            .presentationDragIndicator(.hidden)
-            .presentationDetents([.height(630)])
+                .presentationDragIndicator(.hidden)
+                .presentationDetents([.height(630)])
         }
         .onReceive(NotificationCenter.default.publisher(for: .closeAllBottomSheets)) { _ in
             showUploadPopup = false
@@ -278,7 +455,7 @@ struct WelcomeHomeView: View {
         ToastManager.shared.showToast(message: "Coming soon in S4",style:ToastStyle.info)
     }
     private func goToAddByVoice() {
-       // ToastManager.shared.showToast(message: "Coming soon",style:ToastStyle.info)
+        // ToastManager.shared.showToast(message: "Coming soon",style:ToastStyle.info)
         AppIntentRouter.shared.navigate(to: .voiceCommandView)
     }
     private func goToManualEntry() {

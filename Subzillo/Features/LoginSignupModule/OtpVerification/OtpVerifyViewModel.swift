@@ -52,17 +52,24 @@ class OtpVerifyViewModel: ObservableObject {
                     router.navigate(to: .SuccessView(isOtp: true,isMobile: input.verifyType == 1 ? true : false))
                 }else{
                     if sessionManager.loginData?.isSignupCompleted == true{
-                        AppState.shared.login()
-                        router.navigate(to: .home)
-                    }else if !(sessionManager.loginData?.isOnboarding ?? false){
-                        AppIntentRouter.shared.navigate(to: .onboarding)
-                    }else{
+                        if !(sessionManager.loginData?.onboardingStatus ?? false) && sessionManager.loginData?.isSignupCompleted == true{
+                            AppIntentRouter.shared.navigate(to: .onboarding)
+                        }else{
+                            AppState.shared.login()
+                            router.navigate(to: .home)
+                        }
+                    }
+//                    else if !(sessionManager.loginData?.onboardingStatus ?? false) && sessionManager.loginData?.isSignupCompleted == true{
+//                        AppIntentRouter.shared.navigate(to: .onboarding)
+//                    }
+                    else{
                         if fromLogin{
                             router.navigate(to: .signup())
                         }else{
                             router.navigate(to: .SuccessView(isOtp: false))
                         }
                     }
+                    
                 }
             }
         }

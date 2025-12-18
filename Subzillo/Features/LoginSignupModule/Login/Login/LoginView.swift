@@ -175,10 +175,14 @@ struct LoginView: View {
     
     //MARK: - User defined methods
     func loginApi(){
+        let phone = phoneNumber.normalizedPhoneNumber()
+//            .components(separatedBy: .whitespacesAndNewlines)
+//            .joined()
+        print("phone no is \(phone)")
         let input = checkLoginRequest(
             loginType       : (segmentSelected == .first ? loginCheckType.mobile : loginCheckType.email).rawValue,
             email           : email.trimmed,
-            phoneNumber     : phoneNumber.trimmed,
+            phoneNumber     : phone,
             countryCode     : selectedCountry?.dialCode ?? "",
             deviceId        : appDelegate.deviceToken ?? ""
         )

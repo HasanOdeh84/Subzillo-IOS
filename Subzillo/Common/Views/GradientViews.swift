@@ -113,3 +113,56 @@ struct GradienCustomeView: View {
         }
    // }
 }
+
+//MARK: - NormalOptionView
+struct NormalOptionView: View {
+    
+    var title       : String
+    var subTitle    : String
+    var buttonImage : String
+    var titleColor  : Color
+    var action      : () -> Void
+    
+    var body: some View {
+        Button(action: action) {
+            HStack(spacing: 16) {
+                
+                Image(buttonImage)
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 28, height: 28)
+                
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(title)
+                        .font(.appSemiBold(16))
+                        .foregroundColor(titleColor)
+                    
+                    Text(subTitle)
+                        .font(.appRegular(14))
+                        .foregroundColor(Color.neutral500)
+                        .multilineTextAlignment(.leading)
+                }
+                
+                Spacer()
+                
+                Image(systemName: "chevron.right")
+                    .foregroundColor(titleColor)
+            }
+            .padding(16)
+            .frame(maxWidth: .infinity)
+            .overlay(
+                RoundedRectangle(cornerRadius: 8)
+                    .strokeBorder(Color.black.opacity(0.08), lineWidth: 2)
+                    .blur(radius: 4)
+                    .offset(y: 2)
+                    .mask(RoundedRectangle(cornerRadius: 8))
+            )
+            .overlay(
+                RoundedRectangle(cornerRadius: 8)
+                    .stroke(titleColor, lineWidth: 1)
+            )
+            .background(Color.whiteBlack)
+            .cornerRadius(8)
+        }
+    }
+}

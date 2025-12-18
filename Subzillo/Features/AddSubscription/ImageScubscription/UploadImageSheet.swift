@@ -49,12 +49,14 @@ struct UploadImageSheet: View {
                     Divider()
                         .overlay(Color.neutral300Border)
                     UploadItem(title: "Choose from Gallery", subTitle: "Select existing screenshot", image: "image-02", imageColor: Color.warning, action: galleryAction)
-//                    Divider()
-//                        .overlay(Color.neutral300Border)
-//                    UploadItem(title: "Paste Text", subTitle: "Copy and paste notification text", image: "text-creation", imageColor: Color.purple100, action: pastTextAction)
+                    //                    Divider()
+                    //                        .overlay(Color.neutral300Border)
+                    //                    UploadItem(title: "Paste Text", subTitle: "Copy and paste notification text", image: "text-creation", imageColor: Color.purple100, action: pastTextAction)
+                    Divider()
+                    UploadItem(title: "Text Screenshot", subTitle: "Take Screenshot for subscriptions", image: "text-creation", imageColor: Color.purple100, action: openSubscriptionsAction)
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
-                .frame(height: 160)
+                .frame(height: 240)
                 .cornerRadius(12)
                 .overlay(
                     RoundedRectangle(cornerRadius: 12)
@@ -199,6 +201,11 @@ struct UploadImageSheet: View {
         //pickerSource = .photoLibrary
         //showImagePicker = true
         checkPhotoLibraryPermission()
+    }
+    
+    private func openSubscriptionsAction() {
+        dismiss()
+        Constants.shared.OpenSubscriptionsInAppStore()
     }
     
     private func pastTextAction() {

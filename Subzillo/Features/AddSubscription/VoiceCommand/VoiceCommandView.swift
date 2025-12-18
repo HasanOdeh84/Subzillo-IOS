@@ -173,12 +173,22 @@ struct VoiceCommandView: View {
                 }else{
                     CustomButton(
                         title       : "Stop",
-                        background  : audioManager.isRecording ? .navyBlueCTA700 : Color.neutralDisabled200,
-                        textColor   : audioManager.isRecording ? .neutralDisabled200White : Color.neutral500,
+                        //                        background  : audioManager.isRecording ? .systemError : Color.neutralDisabled200,
+                        //                        textColor   : audioManager.isRecording ? .disCardRed : Color.neutral500,
+                        background  : .systemError,
+                        textColor   : .disCardRed,
                         action      : stopBtn
+                    )
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 8)
+                            .stroke(
+                                Color("redColor"),
+                                lineWidth: 1
+                            )
                     )
                     .padding(.horizontal, 20)
                     .padding(.vertical, 24)
+                    .opacity(!audioManager.isRecording ? 0.5 : 1.0)
                     .disabled(!audioManager.isRecording)
                 }
                 
@@ -386,6 +396,7 @@ struct GradientThumbSlider: View {
     }
 }
 
+//MARK: - GradientThumb
 struct GradientThumb: View {
     var body: some View {
         ZStack {

@@ -62,6 +62,24 @@ extension View {
             self
         }
     }
+    
+    func innerBorder(
+        cornerRadius: CGFloat,
+        color: Color = Color.black.opacity(0.12),
+        lineWidth: CGFloat = 2,
+        blur: CGFloat = 4,
+        yOffset: CGFloat = 2
+    ) -> some View {
+        self.overlay(
+            RoundedRectangle(cornerRadius: cornerRadius)
+                .strokeBorder(color, lineWidth: lineWidth)
+                .blur(radius: blur)
+                .offset(y: yOffset)
+                .mask(
+                    RoundedRectangle(cornerRadius: cornerRadius)
+                )
+        )
+    }
 }
 
 struct DoneButtonToolbar: ViewModifier {

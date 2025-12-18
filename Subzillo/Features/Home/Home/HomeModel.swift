@@ -53,7 +53,7 @@ public struct HomeResponse: Codable {
 public struct HomeResponseData: Codable, Hashable{
     let monthlySpend          : Double?
     let monthlySpendCurrency  : String?
-    let totalSubscriptions    : Int?
+    var totalSubscriptions    : Int? = nil
     let subscriptionList      : [SubscriptionListData]?
     let topCategories         : [TopCategoriesData]?
     let expiringSoon          : [SubscriptionListData]?
