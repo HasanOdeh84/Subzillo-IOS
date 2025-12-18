@@ -5,12 +5,14 @@ All notable changes to this project will be documented in this file.
 ## [1.9.0] (Alpha) - 2025-12-17
 
 ### Updated
-- Filter and sort Bottom UI changes.
+- Filter and sort separation for subscriptions.
 - Welcome screen UI changes.
 - Login screen UI changes.
 - Onboardings screen UI changes.
 - Add subscriptions UI changes.
 - Calender view UI changes.
+- Manual add subscriptions UI changes.
+- Subscription preview UI changes
 
 ### Added
 - Country based phone number formatting.
