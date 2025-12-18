@@ -2,6 +2,22 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.9.0] (Alpha) - 2025-12-17
+
+### Updated
+- Filter and sort Bottom UI changes.
+- Welcome screen UI changes.
+- Login screen UI changes.
+- Onboardings screen UI changes.
+- Add subscriptions UI changes.
+- Calender view UI changes.
+
+### Added
+- Country based phone number formatting.
+- List swipe edit and delete UI.
+- Subscription preview Auto filling details.
+- Redirection to subscriptions screen in appstore.
+
 ## [1.8.0] (Alpha) - 2025-12-13
 
 ### Added
