@@ -14,7 +14,7 @@ struct ManualEntryValidations {
         if input.nickName.isEmpty{
             return "Card Nickname is required"
         }
-        if !Validations().isValidName(input.nickName){
+        if !Validations().isValidNickName(input.nickName){
             return "Invalid characters not allowed"
         }
         if input.cardNumber.isEmpty {

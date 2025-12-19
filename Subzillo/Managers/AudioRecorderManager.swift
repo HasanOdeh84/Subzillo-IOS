@@ -78,7 +78,7 @@ class AudioRecorderManager: NSObject, ObservableObject, AVAudioPlayerDelegate {
         audioRecorder = nil
         isRecording = false
         stopRecordTimer()
-        recordTime = 0
+//        recordTime = 0
         hasRecording = FileManager.default.fileExists(atPath: audioURL.path)
         // Update duration for UI
         //        let asset = AVURLAsset(url: audioURL)

@@ -11,6 +11,11 @@ import SwiftUI
 extension Color {
     
     static let transparentColor         = Color(hex: "#00000000")
+    static let graphText                = Color(hex: "#353F54")
+    static let graphGradient1           = Color(hex: "#6D28D9")
+    static let graphGradient2           = Color(hex: "#06B6D4")
+    static let graphBorder              = Color(hex: "#DBDBDB")
+
 //    static let black                    = Color(hex: "#000000")
 //    static let white                    = Color(hex: "#FFFFFF")
 //    

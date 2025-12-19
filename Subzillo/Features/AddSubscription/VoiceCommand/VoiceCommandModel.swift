@@ -21,6 +21,7 @@ public struct VoiceSubscriptionResponse: Codable {
 public struct VoiceSubscriptionResponseData: Codable, Hashable {
     var subscriptions               : [SubscriptionData]?
     var hasMultipleSubscriptions    : Bool?
+    var userFinalRecordingCount     : Int?
 }
 
 public struct SubscriptionData: Codable, Hashable {
@@ -65,6 +66,31 @@ public struct SubscriptionData: Codable, Hashable {
     var cardNumber                  : String?
     var nickName                    : String?
     var color                       : String?
+}
+
+extension SubscriptionData {
+    func missingRequiredFields() -> [String] {
+        var missing: [String] = []
+
+        if amount == nil {
+            missing.append("Amount")
+        }
+        if categoryName == nil || categoryName?.isEmpty == true {
+            missing.append("Category name")
+        }
+        if subscriptionType == nil || subscriptionType?.isEmpty == true {
+            missing.append("Plan type")
+        }
+        if billingCycle == nil || billingCycle?.isEmpty == true {
+            missing.append("Billing Cycle")
+        }
+
+        return missing
+    }
+
+    func hasAllRequiredFields() -> Bool {
+        return missingRequiredFields().isEmpty
+    }
 }
 
 public struct TextSubscriptionRequest: Codable {

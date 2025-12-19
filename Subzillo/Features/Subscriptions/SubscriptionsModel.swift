@@ -11,6 +11,7 @@ struct ListSubscriptionsRequest: Codable{
     let userId : String
     let page   : Int
     let filter : SubscriptionFilter
+    let sortBy : Int
 }
 
 //public struct SubscriptionFilter: Codable {

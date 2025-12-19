@@ -581,6 +581,30 @@ struct SubscriptionsView: View {
         }
     }
     
+//    func listSubsApi(showLoader:Bool = true){
+//        if page == 0 {
+//            self.showOfflineDetails()
+//        }
+//        //        let input = ListSubscriptionsRequest(userId : Constants.getUserId(),
+//        //                                             page   : page,
+//        //                                             filter : SubscriptionFilter(includeFamilyMembers        : filterData.includeFamilySubscriptions,
+//        //                                                                         includeExpiredSubscriptions : filterData.includeExpiredSubscriptions,
+//        //                                                                         amountOrder                 : filterData.costOrder.rawValue,
+//        //                                                                         nextPaymentDateOrder        : filterData.renewalDateOrder.rawValue))
+//        //        subscriptionsVM.listSubscriptions(input: input, showLoader: showLoader)
+//        let input = ListSubscriptionsRequest(userId : Constants.getUserId(),
+//                                             page   : page,
+//                                             filter : SubscriptionFilter(includeFamilyMembers        : filterData.includeFamilySubscriptions,
+//                                                                         includeExpiredSubscriptions : filterData.includeExpiredSubscriptions,
+//                                                                         amountOrder                 : filterData.costOrder.rawValue,
+//                                                                         nextPaymentDateOrder        : filterData.renewalDateOrder.rawValue,
+//                                                                         categoryId                  : filterData.categoryId,
+//                                                                         familyMemberIds             : filterData.familyMemberIds,
+//                                                                         month                       : filterData.month,
+//                                                                         year                        : filterData.year))
+//        subscriptionsVM.listSubscriptions(input: input, showLoader: showLoader)
+//    }
+    
     func listSubsApi(showLoader:Bool = true){
         if page == 0 {
             self.showOfflineDetails()
@@ -596,12 +620,11 @@ struct SubscriptionsView: View {
                                              page   : page,
                                              filter : SubscriptionFilter(includeFamilyMembers        : filterData.includeFamilySubscriptions,
                                                                          includeExpiredSubscriptions : filterData.includeExpiredSubscriptions,
-                                                                         amountOrder                 : filterData.costOrder.rawValue,
-                                                                         nextPaymentDateOrder        : filterData.renewalDateOrder.rawValue,
+                                                                         
                                                                          categoryId                  : filterData.categoryId,
                                                                          familyMemberIds             : filterData.familyMemberIds,
                                                                          month                       : filterData.month,
-                                                                         year                        : filterData.year))
+                                                                         year                        : filterData.year), sortBy: filterData.costOrder)
         subscriptionsVM.listSubscriptions(input: input, showLoader: showLoader)
     }
     

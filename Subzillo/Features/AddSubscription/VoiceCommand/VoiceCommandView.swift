@@ -19,6 +19,10 @@ struct VoiceCommandView: View {
     @StateObject private var audioManager   = AudioRecorderManager()
     @State private var isPlaying            = false
     
+    //Missing details
+//    @State var missingDetailsList           : [MissingDetails] = []
+    @State var showMissingDetailsPopup      : Bool = false
+
     //MARK: - body
     var body: some View {
         VStack(alignment: .leading,spacing: 0) {
@@ -210,6 +214,7 @@ struct VoiceCommandView: View {
         .background(Color.neutralBg100)
         .onAppear {
             audioManager.discardAll()
+            showMissingDetailsPopup = true
         }
         .navigationBarBackButtonHidden(true)
         .sheet(isPresented: $voiceCommandVM.showErrorPopup) {
@@ -250,6 +255,18 @@ struct VoiceCommandView: View {
             .presentationDragIndicator(.hidden)
             .presentationDetents([.height(350)])
         }
+        .sheet(isPresented: $voiceCommandVM.showMissingDetailsBottomSheet, onDismiss: {
+        }) {
+            VoiceMissingDetailsSheet(missingDetailsList : voiceCommandVM.missingDetailsList,
+                                     onSubmit           : {
+                submitAction()
+            },
+                                     onSkipToContinue   : {
+                reviewScreen()
+            })
+            .presentationDragIndicator(.hidden)
+            .presentationDetents([.large])
+        }
         .modifier(LoaderModifier())
         .onReceive(NotificationCenter.default.publisher(for: .closeAllBottomSheets)) { _ in
             voiceCommandVM.showErrorPopup = false
@@ -267,6 +284,9 @@ struct VoiceCommandView: View {
             if !audioManager.isPlaying{
                 isPlaying = false
             }
+        }
+        .onDisappear {
+            voiceCommandVM.resetVoiceFlow()
         }
     }
     
@@ -293,6 +313,17 @@ struct VoiceCommandView: View {
     
     func stopBtn(){
         audioManager.stopRecording()
+    }
+    
+    func reviewScreen(){
+        AppIntentRouter.shared.navigate(
+            to: .subscriptionPreviewView(
+                subscriptionsData   : voiceCommandVM.storedSubscriptions,
+                content             : "",
+                isFromImage         : false,
+                audioUrl            : voiceCommandVM.mergedAudioURL
+            )
+        )
     }
     
     // MARK: - Format Time

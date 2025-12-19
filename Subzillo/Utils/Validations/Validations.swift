@@ -38,4 +38,8 @@ struct Validations{
         let predicate = NSPredicate(format: "SELF MATCHES %@", regex)
         return predicate.evaluate(with: name)
     }
+    
+    func isValidNickName(_ name: String) -> Bool {
+        return !name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+    }
 }

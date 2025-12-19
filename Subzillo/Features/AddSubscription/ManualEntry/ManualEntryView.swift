@@ -1026,6 +1026,169 @@ struct SecureCCVField: View
     }
 }
 
+////MARK: - FieldView
+//struct FieldView: View
+//{
+//    @Binding var text   : String
+//    var textValue       : String?
+//    var title           : String?
+//    var image           : String?
+//    var placeHolder     : String?
+//    var isButton        : Bool    = false
+//    var isText          : Bool    = false
+//    var maxDigits       : Int = 0
+//    var isNumberPad     : Bool = false
+//    var maxCharacters   : Int = 0
+//    var isDate          = false
+//    
+//    var body: some View {
+//        VStack(alignment: .leading, spacing: 4) {
+//            Text(LocalizedStringKey(title ?? ""))
+//                .font(.appRegular(14))
+//                .foregroundColor(.neutralMain700)
+//            HStack{
+//                Image(image ?? "")
+//                if isText == true {
+//                    if isDate{
+//                        if text != ""
+//                        {
+//                            Text(text)
+//                                .padding(6)
+//                                .multilineTextAlignment(.leading)
+//                                .font(.appRegular(14))
+//                                .foregroundColor(Color.neutralMain700)
+//                                .frame(maxWidth:.infinity, alignment: .leading)
+//                        }
+//                        else{
+//                            Text(placeHolder ?? "")
+//                                .padding(6)
+//                                .multilineTextAlignment(.leading)
+//                                .font(.appRegular(14))
+//                                .foregroundColor(Color.neutral2500)
+//                                .frame(maxWidth:.infinity, alignment: .leading)
+//                        }
+//                    }else{
+//                        if textValue != ""
+//                        {
+//                            Text(textValue ?? "")
+//                                .padding(6)
+//                                .multilineTextAlignment(.leading)
+//                                .font(.appRegular(14))
+//                                .foregroundColor(Color.neutralMain700)
+//                                .frame(maxWidth:.infinity, alignment: .leading)
+//                        }
+//                        else{
+//                            Text(placeHolder ?? "")
+//                                .padding(6)
+//                                .multilineTextAlignment(.leading)
+//                                .font(.appRegular(14))
+//                                .foregroundColor(Color.neutral2500)
+//                                .frame(maxWidth:.infinity, alignment: .leading)
+//                        }
+//                    }
+//                }
+//                else{
+//                    if isNumberPad{
+//                        HStack{
+//                            if maxDigits == 4{
+//                                Text("**** **** ****")
+//                                    .foregroundColor(.whiteBlackBGnoPic)
+//                            }
+//                            TextField(maxDigits == 4 ? "" : placeHolder ?? "", text: $text)
+//                                .keyboardType(isNumberPad == true ? .decimalPad : .default)
+//                                .keyboardType(.default)
+//                                .autocapitalization(.none)
+//                                .multilineTextAlignment(.leading)
+//                                .font(.appRegular(14))
+//                                .foregroundColor(.whiteBlackBGnoPic)
+//                                .onChange(of: text) { newValue in
+//                                    //                                    filterDigitsAndLimit(maxDigits: maxDigits)
+//                                    validateDecimalInput(maxDigits: maxDigits, maxDecimalPlaces: 2)
+//                                }
+//                        }
+//                        .padding(6)
+//                    }else{
+//                        HStack{
+//                            if maxDigits == 4{
+//                                Text("**** **** ****")
+//                                    .foregroundColor(.whiteBlackBGnoPic)
+//                            }
+//                            TextField(maxDigits == 4 ? "" : placeHolder ?? "", text: $text)
+//                                .keyboardType(isNumberPad == true ? .numberPad : .default)
+//                                .keyboardType(.default)
+//                                .autocapitalization(.none)
+//                                .multilineTextAlignment(.leading)
+//                                .font(.appRegular(14))
+//                                .foregroundColor(.whiteBlackBGnoPic)
+//                                .onChange(of: text) { newValue in
+//                                    filterDigitsAndLimit(maxDigits: maxDigits)
+//                                }
+//                        }
+//                        .padding(6)
+//                    }
+//                }
+//                if isButton == true
+//                {
+//                    Image("downArrow")
+//                }
+//            }
+//            .padding(16)
+//            .frame(height: 52)
+//            //            .overlay(
+//            //                RoundedRectangle(cornerRadius: 12)
+//            //                    .stroke(Color.neutral2200, lineWidth: 1)
+//            //            )
+//            .overlay(
+//                RoundedRectangle(cornerRadius: 12)
+//                    .stroke(.neutral300Border, lineWidth: 1)
+//            )
+//            .background(Color.whiteNeutralCardBG)
+//            .cornerRadius(12)
+//        }
+//        .padding(5)
+//    }
+//    
+//    private func filterDigitsAndLimit(maxDigits: Int) {
+//        // keep digits only and limit length
+//        if maxDigits > 0
+//        {
+//            let digitsOnly = text.filter { $0.isNumber }
+//            if digitsOnly.count > maxDigits {
+//                text = String(digitsOnly.prefix(maxDigits))
+//            } else {
+//                text = digitsOnly
+//            }
+//        }
+//    }
+//    
+//    private func validateDecimalInput(maxDigits: Int, maxDecimalPlaces: Int = 2) {
+//        var value = text
+//        value = value.filter { $0.isNumber || $0 == "." }
+//        if value.filter({ $0 == "." }).count > 1 {
+//            var result = ""
+//            var dotFound = false
+//            for char in value {
+//                if char == "." {
+//                    if !dotFound {
+//                        dotFound = true
+//                        result.append(char)
+//                    }
+//                } else {
+//                    result.append(char)
+//                }
+//            }
+//            value = result
+//        }
+//        if let dotIndex = value.firstIndex(of: ".") {
+//            let before = value[..<dotIndex]
+//            let after  = value[value.index(after: dotIndex)...]
+//            let limitedAfter = after.prefix(maxDecimalPlaces)
+//            value = String(before) + "." + String(limitedAfter)
+//        }
+//        text = value
+//    }
+//}
+
 //MARK: - FieldView
 struct FieldView: View
 {
@@ -1040,6 +1203,7 @@ struct FieldView: View
     var isNumberPad     : Bool = false
     var maxCharacters   : Int = 0
     var isDate          = false
+    var isCardNo        = false
     
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
@@ -1102,8 +1266,11 @@ struct FieldView: View
                                 .font(.appRegular(14))
                                 .foregroundColor(.whiteBlackBGnoPic)
                                 .onChange(of: text) { newValue in
-                                    //                                    filterDigitsAndLimit(maxDigits: maxDigits)
-                                    validateDecimalInput(maxDigits: maxDigits, maxDecimalPlaces: 2)
+                                    if isCardNo{
+                                        filterDigitsAndLimit(maxDigits: maxDigits)
+                                    }else{
+                                        validateDecimalInput(maxDigits: maxDigits, maxDecimalPlaces: 2)
+                                    }
                                 }
                         }
                         .padding(6)
@@ -1188,6 +1355,7 @@ struct FieldView: View
         text = value
     }
 }
+
 
 //MARK: - Field suggestions view
 struct FieldSuggestionView<Item: Identifiable>: View {
