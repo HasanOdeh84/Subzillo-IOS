@@ -69,12 +69,13 @@ struct subscriptionListCard: View {
             }
         }
         .padding(12)
+        .frame(height: 74)
+        .background(.whiteBlackBG)
+        .cornerRadius(8)
         .overlay(
             RoundedRectangle(cornerRadius: 8)
                 .stroke(Color.neutral300Border, lineWidth: 1)
         )
-        .background(.whiteBlackBG)
-        .cornerRadius(8)
         //        .onAppear{
         //            print("load data")
         //            updateData()

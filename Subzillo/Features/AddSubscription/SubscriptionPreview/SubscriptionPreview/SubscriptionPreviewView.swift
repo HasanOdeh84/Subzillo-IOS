@@ -44,6 +44,7 @@ struct SubscriptionPreviewView: View {
     
     @State var fillRatio                        : CGFloat = 0.0
     @State var isInitial                        = true
+    @State private var previousBillingCycle     : String?
     
     //MARK: - body
     var body: some View {
@@ -126,10 +127,14 @@ struct SubscriptionPreviewView: View {
                             //                                    .padding(.horizontal, 16)
                             //                            }
                             //                            .padding(.bottom, 16)
-                            
-                            VoicePlayerUI(audioManager: playerManager)
-                                .padding(.horizontal, 16)
-                                .padding(.bottom,16)
+                            if let url = audioURL{
+                                //                                VoicePlayerUI(audioURL: url, audioManager: playerManager)
+                                //                                    .padding(.horizontal, 16)
+                                //                                    .padding(.bottom,16)
+                                VoicePlayerUI(audioManager: playerManager, audioURL: url)
+                                    .padding(.horizontal, 16)
+                                    .padding(.bottom,16)
+                            }
                         }
                         .frame(maxWidth: .infinity)
                         .overlay(
@@ -146,7 +151,7 @@ struct SubscriptionPreviewView: View {
                         HStack(spacing: 8) {
                             Text("Extracted Details")
                                 .font(.appRegular(18))
-//                                .foregroundColor(.underlineGray)
+                            //                                .foregroundColor(.underlineGray)
                                 .foregroundColor(Color.buttonsText)
                             Spacer()
                             Button(action: onEditAction) {
@@ -300,21 +305,6 @@ struct SubscriptionPreviewView: View {
                                     .presentationDragIndicator(.hidden)
                                     .presentationDetents([.height(400)])
                                 }
-                                .onChange(of: subscriptionData?.billingCycle) { newValue in
-                                    guard
-                                        let billingCycle = newValue,
-                                        !billingCycle.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
-                                    else {
-                                        return
-                                    }
-                                    if subscriptionData?.nextPaymentDate == "" && isInitial{
-                                        isInitial = false
-                                        let chargeDate = Constants.shared.getNextDateByFrequency(
-                                            frequency: subscriptionData?.billingCycle ?? ""
-                                        ).formattedDate(from: "dd/MM/yyyy", to: "yyyy-MM-dd")
-                                        subscriptionData?.nextPaymentDate = chargeDate
-                                    }
-                                }
                         }
                     }
                     
@@ -327,7 +317,7 @@ struct SubscriptionPreviewView: View {
                             Button(action: onViewAction) {
                                 Text("View")
                                     .font(.appBold(18))
-//                                    .foregroundColor(.underlineGray)
+                                //                                    .foregroundColor(.underlineGray)
                                     .foregroundColor(Color.buttonsText)
                             }
                             .frame(width: 40, alignment: .trailing)
@@ -366,14 +356,14 @@ struct SubscriptionPreviewView: View {
                                 }
                                 Spacer()
                                 /*Text(confidenceStr)
-                                //                                    .frame(maxWidth: .infinity)
-                                    .frame(height: 24)
-                                    .font(.appRegular(14))
-                                    .foregroundColor(.neutralMain700Gray)
-                                    .multilineTextAlignment(.center)
-                                    .padding(.horizontal, 16)
-                                    .background(colorValue)
-                                    .cornerRadius(8)
+                                 //                                    .frame(maxWidth: .infinity)
+                                 .frame(height: 24)
+                                 .font(.appRegular(14))
+                                 .foregroundColor(.neutralMain700Gray)
+                                 .multilineTextAlignment(.center)
+                                 .padding(.horizontal, 16)
+                                 .background(colorValue)
+                                 .cornerRadius(8)
                                  */
                                 ConfidenceBarView(
                                     text        : confidenceStr,
@@ -427,7 +417,6 @@ struct SubscriptionPreviewView: View {
                         .background(Color.whiteNeutralCardBG)
                         .cornerRadius(12)
                     }
-                    
                 }
                 .padding(.top, 24)
                 .padding(.horizontal, 20)
@@ -496,20 +485,18 @@ struct SubscriptionPreviewView: View {
                 .padding(.horizontal, 6)
                 .padding(.vertical, 24)
             }
-            
         }
         .padding(.top, 10)
         .background(.neutralBg100)
         .navigationBarBackButtonHidden(true)
         .onAppear{
-            //            commonApiVM.getCurrencies()
-            //            getSubDetails()
             numberOfSubscriptions = subscriptionsData?.count ?? 0
             getSubDetails()
             if !isFromImage{
                 guard let url = audioURL else {
                     return
                 }
+                playerManager.setDuration(url: url)
                 //                playerManager.load(url: url)
             }
             updateSubDetails()
@@ -631,10 +618,13 @@ struct SubscriptionPreviewView: View {
         if numberOfSubscriptions > 0
         {
             subscriptionData = subscriptionsData?[currentSubscriptions-1]
-            
-//            let (confidenceStr1, colorValue1) = Constants.confidenceInfo(isAssumed: false, confidence: subscriptionData?.confidenceOverall ?? 0.0)
+            let chargeDate = Constants.shared.getNextDateByFrequency(frequency: subscriptionData?.billingCycle ?? "").formattedDate(from: "dd/MM/yyyy", to: "yyyy-MM-dd")
+            if subscriptionData?.nextPaymentDate == nil || subscriptionData?.nextPaymentDate == ""{
+                subscriptionData?.nextPaymentDate = chargeDate
+            }else{
+            }
             let (confidenceStr1, colorValue1, fillRatio1) =
-                Constants.confidenceInfo(isAssumed: false, confidence: subscriptionData?.confidenceOverall ?? 0.0)
+            Constants.confidenceInfo(isAssumed: false, confidence: subscriptionData?.confidenceOverall ?? 0.0)
             confidenceStr = confidenceStr1
             colorValue = colorValue1
             fillRatio = fillRatio1
@@ -650,7 +640,6 @@ struct SubscriptionPreviewView: View {
             //                    .map { String($0.prefix(1)).uppercased() }
             //                    .joined()
             //            }
-            
             updateCountryAndCurrency()
         }
     }
@@ -659,13 +648,6 @@ struct SubscriptionPreviewView: View {
     func updateCountryAndCurrency() {
         if let currencies = commonApiVM.currencyResponse {
             let selectedCurrency = currencies.first(where: { $0.code == subscriptionData?.currency ?? Constants.shared.currencyCode })
-            /*if selectedCurrency == nil{
-             selectedCurrency = Currency(id      : nil,
-             name    : Constants.shared.currencyCode,
-             symbol  : Constants.shared.currencySymbol,
-             code    : Constants.shared.currencyCode,
-             flag    : Constants.shared.flag(from: Constants.shared.regionCode))
-             }*/
             subscriptionData?.currencySymbol = selectedCurrency?.symbol
             subscriptionsData?[currentSubscriptions-1] = subscriptionData!
         }else{
@@ -727,11 +709,9 @@ struct SubscriptionPreviewView: View {
             }
             getSubDetails()
         }
-        
     }
     
     private func onPreviousAction() {
-        
         /*if let errorMessage = ManualEntryValidations.shared.updateManualEntry(input: subscriptionData!) {
          ToastManager.shared.showToast(message: errorMessage,style:ToastStyle.error)
          }
@@ -819,24 +799,24 @@ struct SubscriptionPreviewView: View {
 
 //MARK: - ConfidenceBarView
 struct ConfidenceBarView: View {
-
+    
     let text: String
     let color: Color
     let fillRatio: CGFloat
-
+    
     var body: some View {
         ZStack(alignment: .leading) {
-          
-          let borderColor: Color =
-              text == "------------"
-              ? Color.lineGray
-              : Color.confidenceBlue
-
-
+            
+            let borderColor: Color =
+            text == "------------"
+            ? Color.lineGray
+            : Color.confidenceBlue
+            
+            
             RoundedRectangle(cornerRadius: 6)
                 .stroke(borderColor, lineWidth: 1)
                 .frame(height: 28)
-
+            
             GeometryReader { geo in
                 RoundedRectangle(cornerRadius: 6)
                     .fill(color)
@@ -846,7 +826,7 @@ struct ConfidenceBarView: View {
                     )
             }
             .clipShape(RoundedRectangle(cornerRadius: 6))
-
+            
             Text(text)
                 .font(.appRegular(14))
                 .foregroundColor(.black)
@@ -862,11 +842,8 @@ struct SubscriptionDetailsItem: View {
     var value                   : String?
     var confidence              : Double = 0.0
     var isAssumed               : Bool = false
-    //    @State var confidenceStr    : String = ""
-    //    @State var colorValue       : Color?
     
     var body: some View {
-//        let (confidenceStr, colorValue) = Constants.confidenceInfo(isAssumed: isAssumed, confidence: confidence)
         let (confidenceStr, colorValue, fillRatio) = Constants.confidenceInfo(isAssumed: isAssumed, confidence: confidence)
         HStack(spacing: 0) {
             VStack(alignment: .leading, spacing: 9) {
@@ -878,15 +855,15 @@ struct SubscriptionDetailsItem: View {
                     .font(.appBold(16))
                     .foregroundColor(.neutralMain700)
                 
-//                Text(confidenceStr)
-//                    .frame(maxWidth: .infinity)
-//                    .frame(height: 28)
-//                    .font(.appRegular(14))
-//                    .foregroundColor(.neutralMain700Gray)
-//                    .multilineTextAlignment(.center)
-//                    .padding(.horizontal, 16)
-//                    .background(colorValue)
-//                    .cornerRadius(4)
+                //                Text(confidenceStr)
+                //                    .frame(maxWidth: .infinity)
+                //                    .frame(height: 28)
+                //                    .font(.appRegular(14))
+                //                    .foregroundColor(.neutralMain700Gray)
+                //                    .multilineTextAlignment(.center)
+                //                    .padding(.horizontal, 16)
+                //                    .background(colorValue)
+                //                    .cornerRadius(4)
                 ConfidenceBarView(
                     text        : confidenceStr,
                     color       : colorValue,
@@ -910,6 +887,7 @@ struct SubscriptionDetailsItem: View {
 struct VoicePlayerUI: View {
     
     @ObservedObject var audioManager: AudioRecorderManager
+    @State var audioURL : URL
     
     var body: some View {
         HStack(alignment: .center,spacing: 5) {
@@ -918,7 +896,7 @@ struct VoicePlayerUI: View {
                 if audioManager.isPlaying {
                     audioManager.pausePlayback()
                 } else {
-                    audioManager.playRecording()
+                    audioManager.playFirstRecording(url: audioURL)
                 }
             }) {
                 Image(audioManager.isPlaying ? "pause_review" : "play_review")

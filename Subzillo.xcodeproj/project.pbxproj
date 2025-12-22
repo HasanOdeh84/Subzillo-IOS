@@ -7,6 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		C5AE44162EF90836007677EB /* libPhoneNumber in Frameworks */ = {isa = PBXBuildFile; productRef = C5AE44152EF90836007677EB /* libPhoneNumber */; };
+		C5AE44182EF90836007677EB /* libPhoneNumberGeocoding in Frameworks */ = {isa = PBXBuildFile; productRef = C5AE44172EF90836007677EB /* libPhoneNumberGeocoding */; };
+		C5AE441A2EF90836007677EB /* libPhoneNumberShortNumber in Frameworks */ = {isa = PBXBuildFile; productRef = C5AE44192EF90836007677EB /* libPhoneNumberShortNumber */; };
 		C5C4AFDF2EE17A67008E7432 /* FirebaseCrashlytics in Frameworks */ = {isa = PBXBuildFile; productRef = C5C4AFDE2EE17A67008E7432 /* FirebaseCrashlytics */; };
 		C5C4B2C12EE1943C008E7432 /* MSAL in Frameworks */ = {isa = PBXBuildFile; productRef = C5C4B2C02EE1943C008E7432 /* MSAL */; };
 		C5CDA2422EE9382A0022A7BD /* PhoneNumberKit in Frameworks */ = {isa = PBXBuildFile; productRef = C5CDA2412EE9382A0022A7BD /* PhoneNumberKit */; };
@@ -69,12 +72,15 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C5AE44162EF90836007677EB /* libPhoneNumber in Frameworks */,
 				C5CDA2422EE9382A0022A7BD /* PhoneNumberKit in Frameworks */,
 				C5E4178C2E9A73BF00E739A3 /* GoogleSignInSwift in Frameworks */,
 				C5C4B2C12EE1943C008E7432 /* MSAL in Frameworks */,
 				C5E417872E9A71C900E739A3 /* SDWebImageSwiftUI in Frameworks */,
+				C5AE44182EF90836007677EB /* libPhoneNumberGeocoding in Frameworks */,
 				C5C4AFDF2EE17A67008E7432 /* FirebaseCrashlytics in Frameworks */,
 				C5E4178A2E9A73BF00E739A3 /* GoogleSignIn in Frameworks */,
+				C5AE441A2EF90836007677EB /* libPhoneNumberShortNumber in Frameworks */,
 				C5E416102E9A4DE600E739A3 /* Lottie in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -156,6 +162,7 @@
 				C5C4AFDD2EE17A67008E7432 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
 				C5C4B2BF2EE1943C008E7432 /* XCRemoteSwiftPackageReference "microsoft-authentication-library-for-objc" */,
 				C5CDA2402EE9382A0022A7BD /* XCRemoteSwiftPackageReference "PhoneNumberKit" */,
+				C5AE44142EF90836007677EB /* XCRemoteSwiftPackageReference "libPhoneNumber-iOS" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = C5DA9EEE2E7A7B38008901A6 /* Products */;
@@ -337,7 +344,7 @@
 				CODE_SIGN_ENTITLEMENTS = Subzillo/SubzilloDebug.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1.10.0;
+				CURRENT_PROJECT_VERSION = 1.11.0;
 				DEVELOPMENT_ASSET_PATHS = "\"Subzillo/Resources/Preview Content\"";
 				DEVELOPMENT_TEAM = B48NJV8578;
 				ENABLE_PREVIEWS = YES;
@@ -381,7 +388,7 @@
 				CODE_SIGN_ENTITLEMENTS = Subzillo/Subzillo.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1.10.0;
+				CURRENT_PROJECT_VERSION = 1.11.0;
 				DEVELOPMENT_ASSET_PATHS = "\"Subzillo/Resources/Preview Content\"";
 				DEVELOPMENT_TEAM = B48NJV8578;
 				ENABLE_PREVIEWS = YES;
@@ -441,6 +448,14 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
+		C5AE44142EF90836007677EB /* XCRemoteSwiftPackageReference "libPhoneNumber-iOS" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/iziz/libPhoneNumber-iOS";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.3.1;
+			};
+		};
 		C5C4AFDD2EE17A67008E7432 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/firebase/firebase-ios-sdk.git";
@@ -492,6 +507,21 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		C5AE44152EF90836007677EB /* libPhoneNumber */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = C5AE44142EF90836007677EB /* XCRemoteSwiftPackageReference "libPhoneNumber-iOS" */;
+			productName = libPhoneNumber;
+		};
+		C5AE44172EF90836007677EB /* libPhoneNumberGeocoding */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = C5AE44142EF90836007677EB /* XCRemoteSwiftPackageReference "libPhoneNumber-iOS" */;
+			productName = libPhoneNumberGeocoding;
+		};
+		C5AE44192EF90836007677EB /* libPhoneNumberShortNumber */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = C5AE44142EF90836007677EB /* XCRemoteSwiftPackageReference "libPhoneNumber-iOS" */;
+			productName = libPhoneNumberShortNumber;
+		};
 		C5C4AFDE2EE17A67008E7432 /* FirebaseCrashlytics */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = C5C4AFDD2EE17A67008E7432 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;

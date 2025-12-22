@@ -20,51 +20,35 @@ struct AddSubscriptionsView: View {
                        titleFont    : 24) {
                 goToNotifications()
             }
-            .padding(.top, 50)
-            .frame(alignment: .leading)
+                       .padding(.top, 50)
+                       .frame(alignment: .leading)
             
             ScrollView(showsIndicators: false) {
-                /*GradientBorderView(title: "Smart Assistant", subTitle: "Let AI detect and add your subscriptions automatically", buttonImage: "SmartAssistntIcon", action: clickOnSmartAssistant, titleColor: Color.blueMain700)
-                    .padding(.bottom, 16)
-                
-                GradientBorderView(title: "Add by Voice", subTitle: "Speak your subscription details to add them easily", buttonImage: "AddVoiceIcon", action: clickOnAddByVoice, titleColor: Color.primeryBlue900)
-                    .padding(.bottom, 16)
-                
-                GradientBorderView(title: "Connect Email", subTitle: "Link your inbox to fetch subscriptions from receipts", buttonImage: "connectEmailIcon", action: clickOnConnectEmail, titleColor: Color.linearGradient3)
-                    .padding(.bottom, 16)
-                
-                GradientBorderView(title: "Upload Screenshot", subTitle: "Upload a bill or receipt screenshot to detect details", buttonImage: "uploadScreenshotIcon", action: clickOnUploadScreenshot, titleColor: Color.secondaryPurple700)
-                    .padding(.bottom, 16)
-                
-                GradientBorderView(title: "Manual Entry", subTitle: "Fill in your subscription details manually", buttonImage: "ManuvalEntryIcon", action: clickOnManuvalEntry, titleColor: Color.secondaryNavyBlue400)
-                    .padding(.bottom,90)
-                */
-                
                 NormalOptionView(title: "Smart Assistant", subTitle: "Let AI detect and add your subscriptions automatically", buttonImage: "SmartAssistntIcon", titleColor: Color.blueMain700, action: clickOnSmartAssistant)
-                      .innerBorder(cornerRadius: 8)
-                      .padding(.bottom, 16)
-                  
-                NormalOptionView(title: "Add by Voice", subTitle: "Speak your subscription details to add them easily", buttonImage: "AddVoiceIcon", titleColor: Color.primeryBlue900, action: clickOnAddByVoice)
-                      .innerBorder(cornerRadius: 8)
-                      .padding(.bottom, 16)
-                  
-                NormalOptionView(title: "Connect Email", subTitle: "Link your inbox to fetch subscriptions from receipts", buttonImage: "connectEmailIcon", titleColor: Color.linearGradient3, action: clickOnConnectEmail)
-                      .innerBorder(cornerRadius: 8)
-                      .padding(.bottom, 16)
-                  
-                NormalOptionView(title: "Upload Screenshot", subTitle: "Upload a bill or receipt screenshot to detect details", buttonImage: "uploadScreenshotIcon", titleColor: Color.secondaryPurple700, action: clickOnUploadScreenshot)
-                      .innerBorder(cornerRadius: 8)
-                      .padding(.bottom, 16)
-                  
-                NormalOptionView(title: "Manual Entry", subTitle: "Fill in your subscription details manually", buttonImage: "ManuvalEntryIcon", titleColor: Color.secondaryNavyBlue400, action: clickOnManuvalEntry)
-                      .innerBorder(cornerRadius: 8)
-                      .padding(.bottom,90)
+                    .innerBorder(cornerRadius: 8)
+                    .padding(.bottom, 16)
                 
-//                GradientBorderView(title: "Upload Bank Notification", subTitle: "Add subscriptions from your bank messages or alerts", buttonImage: "uploadBankIcon", action: clickOnUploasBankNotification, titleColor: Color.purple500)
-//                    .padding(.bottom, 16)
-//                
-//                GradienCustomeView(title: "Upload Bank Notification", subTitle: "Try voice recording for the fastest way to add multiple subscriptions at once.")
-//                    .padding(.bottom,90)
+                NormalOptionView(title: "Add by Voice", subTitle: "Speak your subscription details to add them easily", buttonImage: "AddVoiceIcon", titleColor: Color.primeryBlue900, action: clickOnAddByVoice)
+                    .innerBorder(cornerRadius: 8)
+                    .padding(.bottom, 16)
+                
+                NormalOptionView(title: "Connect Email", subTitle: "Link your inbox to fetch subscriptions from receipts", buttonImage: "connectEmailIcon", titleColor: Color.linearGradient3, action: clickOnConnectEmail)
+                    .innerBorder(cornerRadius: 8)
+                    .padding(.bottom, 16)
+                
+                NormalOptionView(title: "Upload Screenshot", subTitle: "Upload a bill or receipt screenshot to detect details", buttonImage: "uploadScreenshotIcon", titleColor: Color.secondaryPurple700, action: clickOnUploadScreenshot)
+                    .innerBorder(cornerRadius: 8)
+                    .padding(.bottom, 16)
+                
+                NormalOptionView(title: "Manual Entry", subTitle: "Fill in your subscription details manually", buttonImage: "ManuvalEntryIcon", titleColor: Color.secondaryNavyBlue400, action: clickOnManuvalEntry)
+                    .innerBorder(cornerRadius: 8)
+                    .padding(.bottom,90)
+                
+                //                GradientBorderView(title: "Upload Bank Notification", subTitle: "Add subscriptions from your bank messages or alerts", buttonImage: "uploadBankIcon", action: clickOnUploasBankNotification, titleColor: Color.purple500)
+                //                    .padding(.bottom, 16)
+                //
+                //                GradienCustomeView(title: "Upload Bank Notification", subTitle: "Try voice recording for the fastest way to add multiple subscriptions at once.")
+                //                    .padding(.bottom,90)
             }
             .frame(maxWidth: .infinity)
             .padding(.top, 24)
@@ -73,8 +57,8 @@ struct AddSubscriptionsView: View {
         .padding(20)
         .sheet(isPresented: $showUploadPopup) {
             UploadImageSheet()
-            .presentationDragIndicator(.hidden)
-            .presentationDetents([.height(630)])
+                .presentationDragIndicator(.hidden)
+                .presentationDetents([.height(630)])
         }
         .onReceive(NotificationCenter.default.publisher(for: .closeAllBottomSheets)) { _ in
             showUploadPopup = false

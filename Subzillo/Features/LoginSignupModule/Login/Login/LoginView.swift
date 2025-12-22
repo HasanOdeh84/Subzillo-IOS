@@ -38,25 +38,25 @@ struct LoginView: View {
                     .scaledToFit()
                     .frame(width: 128,height: 88)
                 
-//                VStack(spacing: 4) {
-//                    Text("You're not logged in")
-//                        .font(.appRegular(24))
-//                        .foregroundColor(.neutralMain700)
-//                        .multilineTextAlignment(.center)
-//                    Text("Sign in to your Subzillo account")
-//                        .font(.appRegular(16))
-//                        .foregroundColor(Color.neutralMain700)
-//                        .multilineTextAlignment(.center)
-//                }
+                //                VStack(spacing: 4) {
+                //                    Text("You're not logged in")
+                //                        .font(.appRegular(24))
+                //                        .foregroundColor(.neutralMain700)
+                //                        .multilineTextAlignment(.center)
+                //                    Text("Sign in to your Subzillo account")
+                //                        .font(.appRegular(16))
+                //                        .foregroundColor(Color.neutralMain700)
+                //                        .multilineTextAlignment(.center)
+                //                }
                 
-//                HStack(){
-//                    Text("Login your account using your preferred method")
-//                        .font(.appRegular(16))
-//                        .foregroundColor(Color.neutralMain700)
-//                        .padding(.bottom, -17)
-//                        .multilineTextAlignment(.leading)
-//                    Spacer()
-//                }
+                //                HStack(){
+                //                    Text("Login your account using your preferred method")
+                //                        .font(.appRegular(16))
+                //                        .foregroundColor(Color.neutralMain700)
+                //                        .padding(.bottom, -17)
+                //                        .multilineTextAlignment(.leading)
+                //                    Spacer()
+                //                }
                 
                 SegmentView(selectedSegment : $segmentSelected,
                             leftImage       : "call",
@@ -110,19 +110,19 @@ struct LoginView: View {
                 // Social logins
                 VStack(spacing: 8) {
                     /*
-                    AppleSignInButtonView {
-                        loginVM.socialLogin(loginType: .apple,deviceId: appDelegate.deviceToken ?? "")
-                    }
-                    
-                    GradientBorderButton(title: "Continue with Google",isBtn:true, buttonImage: "google") {
-                        loginVM.socialLogin(loginType: .google,deviceId: appDelegate.deviceToken ?? "")
-                    }
-                    .background(.whiteBlackBG)
-                    
-                    GradientBorderButton(title: "Continue with Microsoft",isBtn:true, buttonImage: "microsoft") {
-                        loginVM.socialLogin(loginType: .microsoft,deviceId: appDelegate.deviceToken ?? "")
-                    }
-                    .background(.whiteBlackBG)
+                     AppleSignInButtonView {
+                     loginVM.socialLogin(loginType: .apple,deviceId: appDelegate.deviceToken ?? "")
+                     }
+                     
+                     GradientBorderButton(title: "Continue with Google",isBtn:true, buttonImage: "google") {
+                     loginVM.socialLogin(loginType: .google,deviceId: appDelegate.deviceToken ?? "")
+                     }
+                     .background(.whiteBlackBG)
+                     
+                     GradientBorderButton(title: "Continue with Microsoft",isBtn:true, buttonImage: "microsoft") {
+                     loginVM.socialLogin(loginType: .microsoft,deviceId: appDelegate.deviceToken ?? "")
+                     }
+                     .background(.whiteBlackBG)
                      */
                     
                     SignInBorderButton(title: "Continue with Apple", buttonImage: "apple_withoutPadding"){
@@ -145,11 +145,11 @@ struct LoginView: View {
                 TermsAndPrivacyText(
                     onTapTerms: {
                         ToastManager.shared.showToast(message: "Coming soon in S4",style:ToastStyle.info)
-//                        loginVM.navigate(to: NavigationRoute.termsAndPrivacy(isTerm: true))
+                        //                        loginVM.navigate(to: NavigationRoute.termsAndPrivacy(isTerm: true))
                     },
                     onTapPrivacy: {
                         ToastManager.shared.showToast(message: "Coming soon in S4",style:ToastStyle.info)
-//                        loginVM.navigate(to: NavigationRoute.termsAndPrivacy(isTerm: false))
+                        //                        loginVM.navigate(to: NavigationRoute.termsAndPrivacy(isTerm: false))
                     }
                 )
                 .padding(.top,6)
@@ -176,8 +176,6 @@ struct LoginView: View {
     //MARK: - User defined methods
     func loginApi(){
         let phone = phoneNumber.normalizedPhoneNumber()
-//            .components(separatedBy: .whitespacesAndNewlines)
-//            .joined()
         print("phone no is \(phone)")
         let input = checkLoginRequest(
             loginType       : (segmentSelected == .first ? loginCheckType.mobile : loginCheckType.email).rawValue,

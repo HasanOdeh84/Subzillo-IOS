@@ -200,7 +200,7 @@ struct SubscriptionRow: View {
             .padding(.trailing, 12)
         }
         .frame(maxWidth: .infinity)
-//        .frame(height: calculatedHeight(for: subscriptionData))
+        //        .frame(height: calculatedHeight(for: subscriptionData))
         .frame(height: (calculatedHeight(for: subscriptionData) + 10))
         .background(.whiteNeutralCardBG)
         .overlay(
@@ -279,8 +279,8 @@ struct CalendarCardView: View {
                 .clipShape(RoundedCorner(radius: 7, corners: [.bottomLeft, .bottomRight]))
         }
         .frame(width: 46, height: 43)
-//        .background(Color.white)
-//        .cornerRadius(7)
+        //        .background(Color.white)
+        //        .cornerRadius(7)
         .background(
             RoundedRectangle(cornerRadius: 7)
                 .fill(Color.white)
@@ -317,6 +317,7 @@ struct DashedHorizontalDivider: View {
     }
 }
 
+//MARK: - PlanView
 struct PlanView: View {
     var isMore          : Bool = false
     var image           : String?
@@ -342,6 +343,7 @@ struct PlanView: View {
     }
 }
 
+//MARK: - RelationView
 struct RelationView: View {
     var isMore          : Bool = false
     var name            : String?
@@ -369,6 +371,7 @@ struct RelationView: View {
     }
 }
 
+//MARK: - PlanDetailsView
 struct PlanDetailsView: View {
     var image           : String?
     var serviceName     : String?
@@ -450,6 +453,7 @@ struct PlanDetailsView: View {
     }
 }
 
+//MARK: - CancelDeleteView
 struct CancelDeleteView: View {
     
     //MARK: - Properties

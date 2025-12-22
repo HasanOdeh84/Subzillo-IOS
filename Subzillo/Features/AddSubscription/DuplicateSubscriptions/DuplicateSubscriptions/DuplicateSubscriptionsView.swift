@@ -314,16 +314,16 @@ struct DuplicateListItem: View {
                     .font(.appBold(16))
                     .foregroundColor(.neutralMain700)
                 Spacer()
-//                if (item.existingSubscriptions?.count ?? 0) > 0 {
-//                    Button(action: keepAllBtnAction) {
-                        Text("Keep All")
-                            .font(.appBold(16))
-                            .foregroundColor(.navyBlueCTA700)
-                            .onTapGesture {
-                                keepAllBtnAction()
-                            }
-//                    }
-//                }
+                //                if (item.existingSubscriptions?.count ?? 0) > 0 {
+                //                    Button(action: keepAllBtnAction) {
+                Text("Keep All")
+                    .font(.appBold(16))
+                    .foregroundColor(.navyBlueCTA700)
+                    .onTapGesture {
+                        keepAllBtnAction()
+                    }
+                //                    }
+                //                }
             }
             .padding(.top, 10)
             .padding(.bottom, 6)
@@ -392,7 +392,7 @@ struct DuplicateListItem: View {
         if isNoColor {
             let isSelected = selectedIndex.contains(index) ? true : false
             SubItem(item: objc, isNoColor:isNoColor, isNew:true, isSelected:isSelected) { data, type in
-                 
+                
                 if let index = item.newSubscriptions?.firstIndex(where: { $0.id == data.id }) {
                     print("Found at index: \(index)")
                     if type == "click" {
@@ -404,12 +404,12 @@ struct DuplicateListItem: View {
                 }
                 
             }
-                /*.onTapGesture {
-                    selectedAction(at: index)
-                }*/
+            /*.onTapGesture {
+             selectedAction(at: index)
+             }*/
         } else {
             SubItem(item: objc, isNoColor:isNoColor, isNew:true) { data, type in
-                 
+                
                 if let index = item.newSubscriptions?.firstIndex(where: { $0.id == data.id }) {
                     print("Found at index: \(index)")
                     if type == "click" {
@@ -425,11 +425,11 @@ struct DuplicateListItem: View {
     
     private func oldRowView(for objc: SubscriptionInfo, at index: Int) -> some View {
         let isNoColor = (item.existingSubscriptions?.isEmpty ?? true)
-//        return SubItem(item: objc, isNoColor:isNoColor, isNew: false)
-//            .contentShape(Rectangle())
-//            .onTapGesture {
-//                onDelegate?(item, [index], "gotoDetails")
-//            }
+        //        return SubItem(item: objc, isNoColor:isNoColor, isNew: false)
+        //            .contentShape(Rectangle())
+        //            .onTapGesture {
+        //                onDelegate?(item, [index], "gotoDetails")
+        //            }
         return ZStack {
             SubItem(item: objc, isNoColor: isNoColor, isNew: false)
                 .allowsHitTesting(false)
@@ -474,68 +474,68 @@ struct SubItem: View {
     var body: some View {
         VStack(spacing: 0) {
             //Button(action: clickBtnAction) {
-                HStack(alignment: .top, spacing: 6) {
-                    if isNoColor == true
-                    {
-                       // Button(action: checkBtnAction) {
-                            VStack(alignment: .leading, spacing: 9) {
-                                Image(isSelected == true ? "Checkmark" : "UnCheckmark")
-                                    .frame(width: 24, height: 24)
-                                    .offset(x: 0, y: -5)
-                            }
-                            .onTapGesture {
-                                checkBtnAction()
-                            }
-                       // }
-                    }
+            HStack(alignment: .top, spacing: 6) {
+                if isNoColor == true
+                {
+                    // Button(action: checkBtnAction) {
                     VStack(alignment: .leading, spacing: 9) {
-                        HStack(spacing: 10) {
-                            Text("\(item.serviceName ?? "") \(item.subscriptionType ?? "")")
+                        Image(isSelected == true ? "Checkmark" : "UnCheckmark")
+                            .frame(width: 24, height: 24)
+                            .offset(x: 0, y: -5)
+                    }
+                    .onTapGesture {
+                        checkBtnAction()
+                    }
+                    // }
+                }
+                VStack(alignment: .leading, spacing: 9) {
+                    HStack(spacing: 10) {
+                        Text("\(item.serviceName ?? "") \(item.subscriptionType ?? "")")
+                            .font(.appRegular(16))
+                            .foregroundColor(.neutralMain700)
+                        Spacer()
+                        Text(isNew == true ? "New" : "Existing")
+                            .font(.appRegular(12))
+                            .foregroundColor(.white)
+                            .padding(8)
+                            .background(isNew == true ? .linearGradient3 : .blueMain700)
+                            .frame(height: 24)
+                            .cornerRadius(4)
+                    }
+                    HStack(spacing: 10) {
+                        VStack(alignment: .leading, spacing: 9) {
+                            Text("Next charge: \(item.nextPaymentDate ?? "")")
+                                .font(.appRegular(12))
+                                .foregroundColor(.neutral500)
+                            Text(String(format: "%@%.2f • %@", item?.currencySymbol ?? "",item?.amount ?? 0.00,item?.billingCycle ?? ""))
                                 .font(.appRegular(16))
                                 .foregroundColor(.neutralMain700)
-                            Spacer()
-                            Text(isNew == true ? "New" : "Existing")
-                                .font(.appRegular(12))
-                                .foregroundColor(.white)
-                                .padding(8)
-                                .background(isNew == true ? .linearGradient3 : .blueMain700)
-                                .frame(height: 24)
-                                .cornerRadius(4)
                         }
-                        HStack(spacing: 10) {
-                            VStack(alignment: .leading, spacing: 9) {
-                                Text("Next charge: \(item.nextPaymentDate ?? "")")
-                                    .font(.appRegular(12))
-                                    .foregroundColor(.neutral500)
-                                Text(String(format: "%@%.2f • %@", item?.currencySymbol ?? "",item?.amount ?? 0.00,item?.billingCycle ?? ""))
-                                    .font(.appRegular(16))
-                                    .foregroundColor(.neutralMain700)
-                            }
-                            Spacer()
-                            if isNew == true && isNoColor == false
-                            {
-                                //Button(action: updateBtnAction) {
-                                    Text("Update")
-                                        .font(.appSemiBold(16))
-                                        .foregroundColor(.white)
-                                        .padding(.vertical, 10)
-                                        .padding(.horizontal,16)
-                                        .background(.navyBlueCTA700)
-                                        .frame(height: 34)
-                                        .cornerRadius(7)
-                                        .onTapGesture {
-                                            updateBtnAction()
-                                        }
-                               // }
-                            }
+                        Spacer()
+                        if isNew == true && isNoColor == false
+                        {
+                            //Button(action: updateBtnAction) {
+                            Text("Update")
+                                .font(.appSemiBold(16))
+                                .foregroundColor(.white)
+                                .padding(.vertical, 10)
+                                .padding(.horizontal,16)
+                                .background(.navyBlueCTA700)
+                                .frame(height: 34)
+                                .cornerRadius(7)
+                                .onTapGesture {
+                                    updateBtnAction()
+                                }
+                            // }
                         }
                     }
-                    .frame(height: 24)
-                    .padding(.vertical, 16)
                 }
-                .onTapGesture {
-                    clickBtnAction()
-                }
+                .frame(height: 24)
+                .padding(.vertical, 16)
+            }
+            .onTapGesture {
+                clickBtnAction()
+            }
             //}
         }
         .frame(height: 108)

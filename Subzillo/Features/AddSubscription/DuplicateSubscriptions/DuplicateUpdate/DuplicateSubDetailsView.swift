@@ -84,13 +84,13 @@ struct DuplicateSubDetailsView: View {
                         }
                         //subscriptionFor Need to change with nickName
                         if subscriptionData?.subscriptionFor ?? "" == "" || subscriptionData?.subscriptionFor ?? "" == Constants.getUserId(){
-//                            SubscriptionDetailsPlainItem(title: "Benefit From", value: subscriptionData?.subscriptionFor ?? "" == "" ? "Me" : subscriptionData?.subscriptionFor ?? "")
+                            //                            SubscriptionDetailsPlainItem(title: "Benefit From", value: subscriptionData?.subscriptionFor ?? "" == "" ? "Me" : subscriptionData?.subscriptionFor ?? "")
                             SubscriptionDetailsPlainItem(title: "Benefit From", value: "Me")
                         }else{
                             SubscriptionDetailsPlainItem(title: "Benefit From", value: "")
                         }
                         SubscriptionDetailsPlainItem(title: "Renewal Reminders", value: renewalReminderValue)
-//                        SubscriptionDetailsPlainItem(title: "Status", value: subscriptionData?.status ?? "Active")
+                        //                        SubscriptionDetailsPlainItem(title: "Status", value: subscriptionData?.status ?? "Active")
                         SubscriptionDetailsPlainItem(title: "Status", value: subscriptionData?.status ?? "")
                         SubscriptionDetailsPlainItem(title: "Note", value: subscriptionData?.notes ?? "")
                     }

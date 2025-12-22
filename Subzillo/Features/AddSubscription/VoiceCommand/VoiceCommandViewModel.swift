@@ -21,7 +21,7 @@ class VoiceCommandViewModel: NSObject, ObservableObject, AVAudioPlayerDelegate, 
     //Missing details
     @Published var storedSubscriptions              : [SubscriptionData] = []
     @Published var missingDetailsList               : [MissingDetails] = []
-    @Published var attemptCount                     : Int = 0
+    @Published var attemptCount                     : Int = 1
     var maxAttempts                                 : Int = 0
     @Published var showMissingDetailsBottomSheet    : Bool = false
     @Published var recordedAudioURLs                : [URL] = []
@@ -60,18 +60,35 @@ class VoiceCommandViewModel: NSObject, ObservableObject, AVAudioPlayerDelegate, 
                 if storedSubscriptions.isEmpty{
                     self.showErrorPopup = true
                 }else{
-                    showMissingDetailsBottomSheet = true
+                    if attemptCount > response.data?.userFinalRecordingCount ?? 0 {
+                        showMissingDetailsBottomSheet = false
+                        router.navigate(
+                            to: .subscriptionPreviewView(
+                                subscriptionsData   : storedSubscriptions,
+                                content             : "",
+                                isFromImage         : false,
+                                audioUrl            : mergedAudioURL
+                            )
+                        )
+                        return
+                    }else{
+                        attemptCount += 1
+                        print("attemptCount \(attemptCount)")
+                        print("Stored subscriptions \(storedSubscriptions)")
+                        showMissingDetailsBottomSheet = true
+                    }
                 }
                 return
             }
             Constants.saveDefaults(value: response.providerLogoBaseUrl, key: Constants.providerBaseUrl)
             if let audioUrl {
-                if attemptCount == 0{
+                if attemptCount == 1{
                     print("added url \(attemptCount)")
                     mergedAudioURL = audioUrl
-//                    recordedAudioURLs.append(audioUrl)
+                    //                    recordedAudioURLs.append(audioUrl)
                 }
             }
+            globalSubscriptionData = nil // i have added because previous data is displaying instead of new one
             self.handleResponse(
                 subscriptions: subs,
                 userFinalRecordingCount: data.userFinalRecordingCount ?? 0,
@@ -91,18 +108,18 @@ class VoiceCommandViewModel: NSObject, ObservableObject, AVAudioPlayerDelegate, 
                 $0.serviceName == newSub.serviceName
             }) {
                 var existing = updated[index]
-//                if existing.amount == nil {
-//                    existing.amount = newSub.amount
-//                }
-//                if existing.categoryName == nil {
-//                    existing.categoryName = newSub.categoryName
-//                }
-//                if existing.subscriptionType == nil {
-//                    existing.subscriptionType = newSub.subscriptionType
-//                }
-//                if existing.billingCycle == nil {
-//                    existing.billingCycle = newSub.billingCycle
-//                }
+                //                if existing.amount == nil {
+                //                    existing.amount = newSub.amount
+                //                }
+                //                if existing.categoryName == nil {
+                //                    existing.categoryName = newSub.categoryName
+                //                }
+                //                if existing.subscriptionType == nil {
+                //                    existing.subscriptionType = newSub.subscriptionType
+                //                }
+                //                if existing.billingCycle == nil {
+                //                    existing.billingCycle = newSub.billingCycle
+                //                }
                 if newSub.amount != nil {
                     existing.amount = newSub.amount
                 }
@@ -144,9 +161,9 @@ class VoiceCommandViewModel: NSObject, ObservableObject, AVAudioPlayerDelegate, 
             )
         }
         
-//        let hasMissing = storedSubscriptions.contains {
-//            !$0.hasAllRequiredFields()
-//        }
+        //        let hasMissing = storedSubscriptions.contains {
+        //            !$0.hasAllRequiredFields()
+        //        }
         
         missingDetailsList.removeAll()
         
@@ -194,13 +211,15 @@ class VoiceCommandViewModel: NSObject, ObservableObject, AVAudioPlayerDelegate, 
         }
         
         // Still missing + attempts left → show bottom sheet
+        print("attemptCount \(attemptCount)")
+        print("Stored subscriptions \(storedSubscriptions)")
         showMissingDetailsBottomSheet = true
     }
     
     func resetVoiceFlow() {
         storedSubscriptions.removeAll()
         missingDetailsList.removeAll()
-        attemptCount = 0
+        attemptCount = 1
         maxAttempts = 0
         showMissingDetailsBottomSheet = false
         recordedAudioURLs.removeAll()
@@ -222,7 +241,7 @@ class VoiceCommandViewModel: NSObject, ObservableObject, AVAudioPlayerDelegate, 
                 PrintLogger.modelLog(response, type: .response, isInput: false)
                 if response.data?.subscriptions?.count == 0
                 {
-//                    self.showErrorPopup = true
+                    //                    self.showErrorPopup = true
                     continuation.resume(returning: false)
                 }
                 else{

@@ -21,9 +21,9 @@ struct VoiceMissingDetailsSheet: View {
     @State var showDiscardPopup             : Bool = false
     @State private var showPermissionAlert  = false
     @State var missingDetailsList           : [MissingDetails] = []
-    var onDelegate: (() -> Void)?
-    var onSubmit: (() -> Void)?
-    var onSkipToContinue: (() -> Void)?
+    var onDelegate          : (() -> Void)?
+    var onSubmit            : ((URL) -> Void)?
+    var onSkipToContinue    : (() -> Void)?
     
     //MARK: - body
     var body: some View {
@@ -102,15 +102,15 @@ struct VoiceMissingDetailsSheet: View {
                 .cornerRadius(16)
                 
                 //MARK: Note
-//                HStack{
-//                    Text("Note: ")
-//                        .font(.appSemiBold(15))
-//                        .foregroundColor(Color.black)
-//                    + Text("Please record missing details along with service name")
-//                        .font(.appRegular(15))
-//                        .foregroundColor(Color.black)
-//                    Spacer()
-//                }
+                //                HStack{
+                //                    Text("Note: ")
+                //                        .font(.appSemiBold(15))
+                //                        .foregroundColor(Color.black)
+                //                    + Text("Please record missing details along with service name")
+                //                        .font(.appRegular(15))
+                //                        .foregroundColor(Color.black)
+                //                    Spacer()
+                //                }
                 Text("**Note:** Please record missing details along with service name")
                     .font(.appRegular(15))
                     .foregroundColor(Color.black)
@@ -141,8 +141,12 @@ struct VoiceMissingDetailsSheet: View {
                 .shadow(color: Color.dropShadow, radius: 2, x: 0, y: 2)
                 .frame(maxWidth: .infinity, alignment: .center)
                 .onTapGesture {
-                    if !audioManager.isRecording{
-                        audioManager.startRecording()
+                    if audioManager.hasRecording && !audioManager.isRecording{
+                        
+                    }else{
+                        if !audioManager.isRecording{
+                            audioManager.startRecording()
+                        }
                     }
                 }
                 
@@ -240,11 +244,14 @@ struct VoiceMissingDetailsSheet: View {
     //MARK: stop action
     func stopBtnActn(){
         audioManager.stopRecording()
+//        audioManager.playLatestRecording()
     }
     
     //MARK: Submit action
     private func submitAction() {
-        onSubmit?()
+        if let url = audioManager.audioURL{
+            onSubmit?(url)
+        }
         dismiss()
     }
     

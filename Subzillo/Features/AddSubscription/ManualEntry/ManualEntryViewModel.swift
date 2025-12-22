@@ -24,7 +24,7 @@ class ManualEntryViewModel: ObservableObject {
     private let sessionManager                      : SessionManager
     @Published var isManualEntrySuccess             : Bool?
     @Published var isEditEntrySuccess               : Bool?
-
+    
     init(router: AppIntentRouter = .shared,sessionManager: SessionManager = .shared){
         self.router = router
         self.sessionManager = sessionManager
@@ -45,9 +45,9 @@ class ManualEntryViewModel: ObservableObject {
             if response.data != nil {
                 self.addSubscriptionResponse = response.data
             }
-//            else{
-//                ToastManager.shared.showToast(message: response.message ?? "")
-//            }
+            //            else{
+            //                ToastManager.shared.showToast(message: response.message ?? "")
+            //            }
             self.isManualEntrySuccess = true
         }
         .store(in: &self.subscriptions)
@@ -60,12 +60,12 @@ class ManualEntryViewModel: ObservableObject {
                     if case let .failure(error) = completion {
                         self?.handleError(error, endPoint: APIEndpoint.addSubscription)
                         
-                        continuation.resume(returning: false)   // ❌ failed
+                        continuation.resume(returning: false)   // failed
                     }
                 } receiveValue: { [weak self] response in
                     PrintLogger.modelLog(response, type: .response, isInput: false)
                     
-                    continuation.resume(returning: true)  // ✅ success
+                    continuation.resume(returning: true)  // success
                 }
                 .store(in: &self.subscriptions)
         }
@@ -85,8 +85,8 @@ class ManualEntryViewModel: ObservableObject {
         .store(in: &self.subscriptions)
     }
     
-    func listFamilyMembers(input:ListFamilyMembersRequest) {
-        apiReference.postApi(endPoint: APIEndpoint.listFamilyMembers, method: .POST,token: authKey,body: input,showLoader: true, responseType: ListFamilyMembersResponse.self)
+    func listFamilyMembers(input:ListFamilyMembersRequest, showLoader:Bool = false) {
+        apiReference.postApi(endPoint: APIEndpoint.listFamilyMembers, method: .POST,token: authKey,body: input,showLoader: showLoader, responseType: ListFamilyMembersResponse.self)
             .sink { [unowned self] completion in
                 if case let .failure(error) = completion {
                     self.handleError(error,endPoint: APIEndpoint.listFamilyMembers)
@@ -156,9 +156,9 @@ class ManualEntryViewModel: ObservableObject {
             if response.data != nil {
                 self.addSubscriptionResponse = response.data
             }
-//            else{
-//                ToastManager.shared.showToast(message: response.message ?? "")
-//            }
+            //            else{
+            //                ToastManager.shared.showToast(message: response.message ?? "")
+            //            }
             self.isEditEntrySuccess = true
         }
         .store(in: &self.subscriptions)
@@ -178,7 +178,7 @@ struct ImagePicker: UIViewControllerRepresentable {
     @Environment(\.presentationMode) var presentationMode
     var sourceType: UIImagePickerController.SourceType = .photoLibrary
     @Binding var selectedImage: UIImage?
-
+    
     func makeUIViewController(context: Context) -> UIImagePickerController {
         let picker = UIImagePickerController()
         picker.sourceType = sourceType
@@ -186,19 +186,19 @@ struct ImagePicker: UIViewControllerRepresentable {
         picker.allowsEditing = false    
         return picker
     }
-
+    
     func updateUIViewController(_ uiViewController: UIImagePickerController, context: Context) {}
-
+    
     func makeCoordinator() -> Coordinator {
         Coordinator(self)
     }
-
+    
     class Coordinator: NSObject, UINavigationControllerDelegate, UIImagePickerControllerDelegate {
         let parent: ImagePicker
         init(_ parent: ImagePicker) {
             self.parent = parent
         }
-
+        
         func imagePickerController(_ picker: UIImagePickerController,
                                    didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
             if let image = info[.originalImage] as? UIImage {
@@ -206,7 +206,7 @@ struct ImagePicker: UIViewControllerRepresentable {
             }
             parent.presentationMode.wrappedValue.dismiss()
         }
-
+        
         func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
             parent.presentationMode.wrappedValue.dismiss()
         }
@@ -217,32 +217,32 @@ struct DatePickerPopup: UIViewControllerRepresentable {
     @Binding var isPresented: Bool
     @Binding var selectedDate: Date
     var onDone: (Date) -> Void
-
+    
     func makeUIViewController(context: Context) -> UIViewController {
         UIViewController()
     }
-
+    
     func updateUIViewController(_ uiViewController: UIViewController, context: Context) {
         guard isPresented, uiViewController.presentedViewController == nil else { return }
-
+        
         // Create alert controller
         let alert = UIAlertController(title: "Select Date", message: "\n\n\n\n\n\n\n\n\n\n\n", preferredStyle: .alert)
-
+        
         // Create picker
         let datePicker = UIDatePicker()
         datePicker.datePickerMode = .date
         datePicker.preferredDatePickerStyle = .wheels
         datePicker.date = selectedDate
         datePicker.translatesAutoresizingMaskIntoConstraints = false
-
+        
         // Add picker to alert's view
         alert.view.addSubview(datePicker)
-
+        
         // Constrain picker to alert.view with Auto Layout
         // You can tweak constants (width & height) to taste.
         let pickerHeight: CGFloat = 200
         let alertWidth: CGFloat = 320 // target alert width — tweak if needed
-
+        
         // Activate constraints
         NSLayoutConstraint.activate([
             // center picker horizontally in alert
@@ -254,22 +254,22 @@ struct DatePickerPopup: UIViewControllerRepresentable {
             // ensure the picker doesn't exceed alert width (leading/trailing padding)
             datePicker.leadingAnchor.constraint(greaterThanOrEqualTo: alert.view.leadingAnchor, constant: 8),
             datePicker.trailingAnchor.constraint(lessThanOrEqualTo: alert.view.trailingAnchor, constant: -8),
-
+            
             // Force alert width so the picker fits
             alert.view.widthAnchor.constraint(equalToConstant: alertWidth)
         ])
-
+        
         // Add Cancel and Done actions
         alert.addAction(UIAlertAction(title: "Cancel", style: .cancel) { _ in
             isPresented = false
         })
-
+        
         alert.addAction(UIAlertAction(title: "Done", style: .default) { _ in
             selectedDate = datePicker.date
             onDone(datePicker.date)
             isPresented = false
         })
-
+        
         // Present alert
         DispatchQueue.main.async {
             uiViewController.present(alert, animated: true)
@@ -281,16 +281,16 @@ struct ExpiryDatePopup: UIViewControllerRepresentable {
     @Binding var isPresented: Bool
     @Binding var selectedDate: String
     var onDone: (String) -> Void
-
+    
     func makeUIViewController(context: Context) -> UIViewController {
         UIViewController()
     }
-
+    
     func updateUIViewController(_ uiViewController: UIViewController, context: Context) {
         guard isPresented, uiViewController.presentedViewController == nil else { return }
-
+        
         let alert = UIAlertController(title: "Select Expiry Date", message: "\n\n\n\n\n\n\n\n\n", preferredStyle: .alert)
-
+        
         // Setup UIDatePicker
         let datePicker = UIDatePicker()
         datePicker.datePickerMode = .date
@@ -298,10 +298,10 @@ struct ExpiryDatePopup: UIViewControllerRepresentable {
         datePicker.minimumDate = Date()
         datePicker.maximumDate = Calendar.current.date(byAdding: .year, value: 10, to: Date())
         datePicker.translatesAutoresizingMaskIntoConstraints = false
-
+        
         // Add picker to alert
         alert.view.addSubview(datePicker)
-
+        
         // Layout constraints
         NSLayoutConstraint.activate([
             datePicker.centerXAnchor.constraint(equalTo: alert.view.centerXAnchor),
@@ -309,12 +309,12 @@ struct ExpiryDatePopup: UIViewControllerRepresentable {
             datePicker.heightAnchor.constraint(equalToConstant: 150),
             alert.view.widthAnchor.constraint(equalToConstant: 300)
         ])
-
+        
         // Cancel & Done buttons
         alert.addAction(UIAlertAction(title: "Cancel", style: .cancel) { _ in
             isPresented = false
         })
-
+        
         alert.addAction(UIAlertAction(title: "Done", style: .default) { _ in
             let formatter = DateFormatter()
             formatter.dateFormat = "MM/yy"
@@ -323,7 +323,7 @@ struct ExpiryDatePopup: UIViewControllerRepresentable {
             onDone(formatted)
             isPresented = false
         })
-
+        
         // Present the alert
         DispatchQueue.main.async {
             uiViewController.present(alert, animated: true)

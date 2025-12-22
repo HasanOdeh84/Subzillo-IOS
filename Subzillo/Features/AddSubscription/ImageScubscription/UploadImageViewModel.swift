@@ -44,7 +44,7 @@ class UploadImageViewModel: ObservableObject {
                 globalSubscriptionData = nil // i have added because previous data is displaying instead of new one
                 self.router.navigate(to: .subscriptionPreviewView(subscriptionsData: response.data?.subscriptions, content: "", isFromImage:true, audioUrl: nil))
             }
-           // self.router.navigate(to: .subscriptionPreviewView(subscriptionsData: response.data?.subscriptions, content: "", isFromImage:true))
+            // self.router.navigate(to: .subscriptionPreviewView(subscriptionsData: response.data?.subscriptions, content: "", isFromImage:true))
         }
         .store(in: &self.subscriptions)
     }

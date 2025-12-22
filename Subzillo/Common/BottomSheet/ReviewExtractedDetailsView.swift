@@ -56,10 +56,9 @@ struct ReviewExtractedDetailsView: View {
     
     //MARK: - body
     var body: some View {
-//        let (confidenceStr, colorValue) = Constants.confidenceInfo(isAssumed: isAssumed, confidence: confidence)
         let (confidenceStr, colorValue, fillRatio) =
-            Constants.confidenceInfo(isAssumed: isAssumed, confidence: confidence)
-
+        Constants.confidenceInfo(isAssumed: isAssumed, confidence: confidence)
+        
         VStack(alignment: .center) {
             Capsule()
                 .fill(Color.grayCapsule)
@@ -74,22 +73,22 @@ struct ReviewExtractedDetailsView: View {
                 .padding(.top,24)
                 .padding(.horizontal, -5)
             
-//            Text(confidenceStr)
-//                .frame(maxWidth: .infinity)
-//                .frame(height: 28)
-//                .font(.appRegular(14))
-//                .foregroundColor(.neutralMain700)
-//                .multilineTextAlignment(.center)
-//                .padding(.horizontal, 16)
-//                .background(colorValue)
-//                .cornerRadius(4)
+            //            Text(confidenceStr)
+            //                .frame(maxWidth: .infinity)
+            //                .frame(height: 28)
+            //                .font(.appRegular(14))
+            //                .foregroundColor(.neutralMain700)
+            //                .multilineTextAlignment(.center)
+            //                .padding(.horizontal, 16)
+            //                .background(colorValue)
+            //                .cornerRadius(4)
             ConfidenceBarView(
                 text        : confidenceStr,
                 color       : colorValue,
                 fillRatio   : fillRatio
             )
-                .padding(.bottom,36)
-                .padding(.horizontal, -5)
+            .padding(.bottom,36)
+            .padding(.horizontal, -5)
             
             switch detailType {
             case .service:
@@ -126,7 +125,7 @@ struct ReviewExtractedDetailsView: View {
                         isAmountUpdate = true
                     }
                 )
-//                .focused($isInputActive)
+                //                .focused($isInputActive)
                 
                 if isAmountError{
                     HStack(spacing: 6){
@@ -264,6 +263,10 @@ struct ReviewExtractedDetailsView: View {
                         return
                     }
                     globalSubscriptionData?.billingCycle = selectedBilling?.title ?? ""//.lowercased()
+                    chargeDate = Constants.shared.getNextDateByFrequency(
+                        frequency: selectedBilling?.title ?? ""
+                    )
+                    globalSubscriptionData?.nextPaymentDate = chargeDate.formattedDate(from: "dd/MM/yyyy", to: "yyyy-MM-dd")
                 }
                 onDelegate?()
                 dismiss()

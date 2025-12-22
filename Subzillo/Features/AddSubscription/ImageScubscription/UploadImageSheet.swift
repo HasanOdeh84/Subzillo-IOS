@@ -262,15 +262,14 @@ struct UploadErrorImageSheet: View {
                         .foregroundColor(Color.neutralMain700)
                         .frame(maxWidth: .infinity, alignment: .leading)
                 }
-//                HStack(spacing: 16) {
-//                    Image("book-03")
-//                        .frame(width: 24, height: 24)
-//                    Text(LocalizedStringKey("Make sure text is in English"))
-//                        .font(.appRegular(16))
-//                        .foregroundColor(Color.neutralMain700)
-//                        .frame(maxWidth: .infinity, alignment: .leading)
-//                }
-                
+                //                HStack(spacing: 16) {
+                //                    Image("book-03")
+                //                        .frame(width: 24, height: 24)
+                //                    Text(LocalizedStringKey("Make sure text is in English"))
+                //                        .font(.appRegular(16))
+                //                        .foregroundColor(Color.neutralMain700)
+                //                        .frame(maxWidth: .infinity, alignment: .leading)
+                //                }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(24)
@@ -309,7 +308,7 @@ struct UploadItem: View {
                     .frame(width: 48, height: 48)
                     .background(imageColor)
                     .clipShape(RoundedRectangle(cornerRadius: 8))
-             
+                
                 VStack(alignment: .leading, spacing: 0) {
                     Text(title)
                         .font(.appSemiBold(16))

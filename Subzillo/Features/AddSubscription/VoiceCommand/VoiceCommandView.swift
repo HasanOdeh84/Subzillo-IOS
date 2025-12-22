@@ -18,11 +18,8 @@ struct VoiceCommandView: View {
     @State var showDiscardPopup             : Bool = false
     @StateObject private var audioManager   = AudioRecorderManager()
     @State private var isPlaying            = false
-    
-    //Missing details
-//    @State var missingDetailsList           : [MissingDetails] = []
     @State var showMissingDetailsPopup      : Bool = false
-
+    
     //MARK: - body
     var body: some View {
         VStack(alignment: .leading,spacing: 0) {
@@ -113,7 +110,7 @@ struct VoiceCommandView: View {
                             if audioManager.isPlaying {
                                 audioManager.pausePlayback()
                             } else {
-                                audioManager.playRecording()
+                                audioManager.playLatestRecording()
                             }
                         }) {
                             Image(audioManager.isPlaying ? "Pause" : "Play")
@@ -170,7 +167,11 @@ struct VoiceCommandView: View {
                         title       : "Submit",
                         background  : .navyBlueCTA700,
                         textColor   : .neutralDisabled200White,
-                        action      : submitAction
+                        action: {
+                            if let url = audioManager.audioURL{
+                                submitAction(url: url)
+                            }
+                        }
                     )
                     .padding(.horizontal, 20)
                     .padding(.vertical, 24)
@@ -199,6 +200,7 @@ struct VoiceCommandView: View {
                 // MARK: - Reset Button
                 GradientBorderButton(title: "Discard",isBtn:true, buttonImage: "discardIcon", action:{
                     audioManager.pausePlayback()
+                    voiceCommandVM.resetVoiceFlow()
                     DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
                         showDiscardPopup = true
                     }
@@ -258,8 +260,8 @@ struct VoiceCommandView: View {
         .sheet(isPresented: $voiceCommandVM.showMissingDetailsBottomSheet, onDismiss: {
         }) {
             VoiceMissingDetailsSheet(missingDetailsList : voiceCommandVM.missingDetailsList,
-                                     onSubmit           : {
-                submitAction()
+                                     onSubmit           : {url in
+                submitAction(url: url)
             },
                                      onSkipToContinue   : {
                 reviewScreen()
@@ -300,15 +302,16 @@ struct VoiceCommandView: View {
     }
     
     //MARK: - Submit action
-    private func submitAction() {
+    private func submitAction(url:URL) {
         audioManager.pausePlayback()
-        let voiceData:Data = try! Data(contentsOf: audioManager.audioURL)
+        let voiceData = try! Data(contentsOf: url)
+//        let voiceData:Data = try! Data(contentsOf: audioManager.audioURL)
         voiceCommandVM.voiceSubscription(input: VoiceSubscriptionRequest(userId: Constants.getUserId()), fileData: [MultiPartFileInput(
             fieldName   : "audio",
             fileName    : "recording.m4a",
             mimeType    : "audio/x-m4a",
             fileData    : voiceData
-        )], audioUrl: audioManager.audioURL)
+        )], audioUrl: url)
     }
     
     func stopBtn(){

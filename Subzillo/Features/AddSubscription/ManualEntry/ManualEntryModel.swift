@@ -120,6 +120,7 @@ public struct GetServiceProvidersListResponse: Codable {
 public struct GetServiceProvidersListData: Codable, Hashable, Identifiable {
     public var id           : String? = nil
     var name                : String? = nil
+    var logo                : String? = nil
 }
 
 public struct FetchProviderDataRequest: Codable {

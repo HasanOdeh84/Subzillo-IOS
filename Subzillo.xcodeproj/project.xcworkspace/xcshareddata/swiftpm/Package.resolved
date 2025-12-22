@@ -1,5 +1,5 @@
 {
-  "originHash" : "ad505c224634129fe5f61ced31df6f171c5e5728364d0aeb564e00543fde115b",
+  "originHash" : "d1f050d28e263263a2a14d8dd4fc6d5590a28cd276b1417caedbc5c1c6b007e0",
   "pins" : [
     {
       "identity" : "abseil-cpp-binary",
@@ -125,6 +125,15 @@
       "state" : {
         "revision" : "a0bc79961d7be727d258d33d5a6b2f1023270ba1",
         "version" : "1.22.5"
+      }
+    },
+    {
+      "identity" : "libphonenumber-ios",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/iziz/libPhoneNumber-iOS",
+      "state" : {
+        "revision" : "cc78d1f2913464cf33e024051479c4c829be5c9c",
+        "version" : "1.3.1"
       }
     },
     {

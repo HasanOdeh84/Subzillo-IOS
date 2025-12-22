@@ -39,8 +39,8 @@ struct DuplicateUpdateView: View {
                 .padding(.vertical, 16)
             }
             .background(Color.clear)
-//            .background(Color.white.ignoresSafeArea(edges: .top))
-//            .shadow(color: Color.dropShadowColor1, radius: 2, x: 0, y: 2)
+            //            .background(Color.white.ignoresSafeArea(edges: .top))
+            //            .shadow(color: Color.dropShadowColor1, radius: 2, x: 0, y: 2)
             
             ScrollView(showsIndicators: false) {
                 Button(action: goToDetials) {
@@ -103,12 +103,12 @@ struct DuplicateUpdateView: View {
         {
             if modifiedDuplicateDataInfo!.originalData?.newSubscriptions!.count == 1
             {
-//                if isFromAdd == true {
-//                    AppIntentRouter.shared.navigate(to: .addSubscriptionsView)
-//                }
-//                else{
-//                    AppIntentRouter.shared.navigate(to: .subscriptionsListView)
-//                }
+                //                if isFromAdd == true {
+                //                    AppIntentRouter.shared.navigate(to: .addSubscriptionsView)
+                //                }
+                //                else{
+                //                    AppIntentRouter.shared.navigate(to: .subscriptionsListView)
+                //                }
                 modifiedDuplicateDataInfo = nil
                 AppIntentRouter.shared.navigate(to: .subscriptionsListView)
             }

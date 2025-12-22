@@ -181,7 +181,7 @@ struct ManualEntryView: View {
                                                      countryResponse    : commonApiVM.countriesResponse,
                                                      header             : "Currency",
                                                      placeholder        : "Search currency")
-                                .presentationDetents([.medium, .large])
+                                .presentationDetents([.large])
                                 .presentationDragIndicator(.hidden)
                             }
                             Spacer()
@@ -306,11 +306,6 @@ struct ManualEntryView: View {
                         }
                         .onChange(of: selectedPayment) { newValue in
                             guard let newValue = newValue else { return }
-                            //                            if newValue.name!.lowercased().contains("card") {
-                            //                                isCards = true
-                            //                            } else {
-                            //                                isCards = false
-                            //                            }
                             isCards = newValue.status ?? false
                             paymentMethod = newValue.name!
                         }
@@ -443,7 +438,6 @@ struct ManualEntryView: View {
         .onAppear{
             addSubscriptionVM.getServiceProvidersList()
             updateSubDetailsTOView()
-            //            commonApiVM.getCurrencies()
             commonApiVM.getUserInfo(input: getUserInfoRequest(userId: Constants.getUserId()))
             commonApiVM.getCategories()
             commonApiVM.getPaymentMethods()
@@ -525,9 +519,6 @@ struct ManualEntryView: View {
                 }
                 if billingCycle == ""{
                     selectedBilling = billingData.first(where: { $0.title == matchedPlan.billingCycle ?? ""})
-                    //                    chargeDate = Constants.shared.getNextDateByFrequency(
-                    //                        frequency: selectedBilling?.title ?? ""
-                    //                    )
                 }
                 isAmountError = false
             } else {
@@ -558,9 +549,6 @@ struct ManualEntryView: View {
                     selectedBilling = billingData.first {
                         $0.title == (matchedPlan.billingCycle ?? "")
                     }
-                    //                    chargeDate = Constants.shared.getNextDateByFrequency(
-                    //                        frequency: selectedBilling?.title ?? ""
-                    //                    )
                 }
                 
                 isPlanTypeError = false
@@ -641,11 +629,6 @@ struct ManualEntryView: View {
             if globalSubscriptionData?.paymentMethodId ?? "" != "" {
                 if let paymentMethod1 = commonApiVM.paymentMethodResponse {
                     selectedPayment = paymentMethod1.first(where: { $0.id == globalSubscriptionData?.paymentMethodId ?? ""})
-                    //                    if (selectedPayment?.name ?? "").lowercased().contains("card") {
-                    //                        isCards = true
-                    //                    } else {
-                    //                        isCards = false
-                    //                    }
                     isCards = selectedPayment?.status ?? false
                     paymentMethod = selectedPayment?.name ?? ""
                 }
@@ -678,7 +661,6 @@ struct ManualEntryView: View {
     
     func updateUserInfo()
     {
-        //print(commonApiVM.userInfoResponse)
         if commonApiVM.userInfoResponse?.tierName?.lowercased() == "family plan"
         {
             let familyMembersLimit = commonApiVM.userInfoResponse?.familyMembersLimit ?? 0
@@ -733,16 +715,6 @@ struct ManualEntryView: View {
     
     func updateCountryAndCurrency() {
         if !fromSiri{
-            //            selectedCurrency = Currency(id      : nil,
-            //                                        name    : Constants.shared.currencyCode,
-            //                                        symbol  : Constants.shared.currencySymbol,
-            //                                        code    : Constants.shared.currencyCode,
-            //                                        flag    : Constants.shared.flag(from: Constants.shared.regionCode))
-            //            if let currencies = commonApiVM.currencyResponse {
-            //                selectedCurrency = currencies.first(where: { $0.code == Constants.shared.currencyCode })
-            //            }else{
-            //                commonApiVM.getCurrencies()
-            //            }
             selectedCurrency = Currency(id      : nil,
                                         name    : Constants.shared.currencyCode,
                                         symbol  : Constants.shared.currencySymbol,
@@ -930,8 +902,19 @@ struct ManualEntryView: View {
             }
             else if isFromEdit == true
             {
-                
+                let logo = addSubscriptionVM.servicesList?.first {
+                    $0.name?
+                        .trimmingCharacters(in: .whitespacesAndNewlines)
+                        .lowercased()
+                    ==
+                    serviceName
+                        .trimmingCharacters(in: .whitespacesAndNewlines)
+                        .lowercased()
+                }?.logo
                 globalSubscriptionData?.serviceName = serviceName.trimmed
+                if logo != ""{
+                    globalSubscriptionData?.serviceLogo = logo
+                }
                 globalSubscriptionData?.amount = Double(amount.trimmed) ?? 0.0
                 globalSubscriptionData?.currency = selectedCurrency?.code ?? ""
                 globalSubscriptionData?.currencySymbol = selectedCurrency?.symbol ?? ""
@@ -1025,169 +1008,6 @@ struct SecureCCVField: View
         }
     }
 }
-
-////MARK: - FieldView
-//struct FieldView: View
-//{
-//    @Binding var text   : String
-//    var textValue       : String?
-//    var title           : String?
-//    var image           : String?
-//    var placeHolder     : String?
-//    var isButton        : Bool    = false
-//    var isText          : Bool    = false
-//    var maxDigits       : Int = 0
-//    var isNumberPad     : Bool = false
-//    var maxCharacters   : Int = 0
-//    var isDate          = false
-//    
-//    var body: some View {
-//        VStack(alignment: .leading, spacing: 4) {
-//            Text(LocalizedStringKey(title ?? ""))
-//                .font(.appRegular(14))
-//                .foregroundColor(.neutralMain700)
-//            HStack{
-//                Image(image ?? "")
-//                if isText == true {
-//                    if isDate{
-//                        if text != ""
-//                        {
-//                            Text(text)
-//                                .padding(6)
-//                                .multilineTextAlignment(.leading)
-//                                .font(.appRegular(14))
-//                                .foregroundColor(Color.neutralMain700)
-//                                .frame(maxWidth:.infinity, alignment: .leading)
-//                        }
-//                        else{
-//                            Text(placeHolder ?? "")
-//                                .padding(6)
-//                                .multilineTextAlignment(.leading)
-//                                .font(.appRegular(14))
-//                                .foregroundColor(Color.neutral2500)
-//                                .frame(maxWidth:.infinity, alignment: .leading)
-//                        }
-//                    }else{
-//                        if textValue != ""
-//                        {
-//                            Text(textValue ?? "")
-//                                .padding(6)
-//                                .multilineTextAlignment(.leading)
-//                                .font(.appRegular(14))
-//                                .foregroundColor(Color.neutralMain700)
-//                                .frame(maxWidth:.infinity, alignment: .leading)
-//                        }
-//                        else{
-//                            Text(placeHolder ?? "")
-//                                .padding(6)
-//                                .multilineTextAlignment(.leading)
-//                                .font(.appRegular(14))
-//                                .foregroundColor(Color.neutral2500)
-//                                .frame(maxWidth:.infinity, alignment: .leading)
-//                        }
-//                    }
-//                }
-//                else{
-//                    if isNumberPad{
-//                        HStack{
-//                            if maxDigits == 4{
-//                                Text("**** **** ****")
-//                                    .foregroundColor(.whiteBlackBGnoPic)
-//                            }
-//                            TextField(maxDigits == 4 ? "" : placeHolder ?? "", text: $text)
-//                                .keyboardType(isNumberPad == true ? .decimalPad : .default)
-//                                .keyboardType(.default)
-//                                .autocapitalization(.none)
-//                                .multilineTextAlignment(.leading)
-//                                .font(.appRegular(14))
-//                                .foregroundColor(.whiteBlackBGnoPic)
-//                                .onChange(of: text) { newValue in
-//                                    //                                    filterDigitsAndLimit(maxDigits: maxDigits)
-//                                    validateDecimalInput(maxDigits: maxDigits, maxDecimalPlaces: 2)
-//                                }
-//                        }
-//                        .padding(6)
-//                    }else{
-//                        HStack{
-//                            if maxDigits == 4{
-//                                Text("**** **** ****")
-//                                    .foregroundColor(.whiteBlackBGnoPic)
-//                            }
-//                            TextField(maxDigits == 4 ? "" : placeHolder ?? "", text: $text)
-//                                .keyboardType(isNumberPad == true ? .numberPad : .default)
-//                                .keyboardType(.default)
-//                                .autocapitalization(.none)
-//                                .multilineTextAlignment(.leading)
-//                                .font(.appRegular(14))
-//                                .foregroundColor(.whiteBlackBGnoPic)
-//                                .onChange(of: text) { newValue in
-//                                    filterDigitsAndLimit(maxDigits: maxDigits)
-//                                }
-//                        }
-//                        .padding(6)
-//                    }
-//                }
-//                if isButton == true
-//                {
-//                    Image("downArrow")
-//                }
-//            }
-//            .padding(16)
-//            .frame(height: 52)
-//            //            .overlay(
-//            //                RoundedRectangle(cornerRadius: 12)
-//            //                    .stroke(Color.neutral2200, lineWidth: 1)
-//            //            )
-//            .overlay(
-//                RoundedRectangle(cornerRadius: 12)
-//                    .stroke(.neutral300Border, lineWidth: 1)
-//            )
-//            .background(Color.whiteNeutralCardBG)
-//            .cornerRadius(12)
-//        }
-//        .padding(5)
-//    }
-//    
-//    private func filterDigitsAndLimit(maxDigits: Int) {
-//        // keep digits only and limit length
-//        if maxDigits > 0
-//        {
-//            let digitsOnly = text.filter { $0.isNumber }
-//            if digitsOnly.count > maxDigits {
-//                text = String(digitsOnly.prefix(maxDigits))
-//            } else {
-//                text = digitsOnly
-//            }
-//        }
-//    }
-//    
-//    private func validateDecimalInput(maxDigits: Int, maxDecimalPlaces: Int = 2) {
-//        var value = text
-//        value = value.filter { $0.isNumber || $0 == "." }
-//        if value.filter({ $0 == "." }).count > 1 {
-//            var result = ""
-//            var dotFound = false
-//            for char in value {
-//                if char == "." {
-//                    if !dotFound {
-//                        dotFound = true
-//                        result.append(char)
-//                    }
-//                } else {
-//                    result.append(char)
-//                }
-//            }
-//            value = result
-//        }
-//        if let dotIndex = value.firstIndex(of: ".") {
-//            let before = value[..<dotIndex]
-//            let after  = value[value.index(after: dotIndex)...]
-//            let limitedAfter = after.prefix(maxDecimalPlaces)
-//            value = String(before) + "." + String(limitedAfter)
-//        }
-//        text = value
-//    }
-//}
 
 //MARK: - FieldView
 struct FieldView: View
@@ -1658,7 +1478,7 @@ struct ListView: View {
                 .padding(.bottom, 4)
                 .frame(maxWidth:.infinity, alignment: .leading)
             VStack(alignment: .leading, spacing: 0) {
-                                
+                
                 if type == .reminders {
                     remindersStack
                 } else {
@@ -1717,7 +1537,7 @@ struct ListView: View {
     }
     
     private var defaultList: some View {
-        List {
+        LazyVStack(spacing: 0) {
             ForEach(Array(data.enumerated()), id: \.offset) { index, objc in
                 VStack(spacing: 0) {
                     rowView(for: objc, at: index)
@@ -1733,7 +1553,7 @@ struct ListView: View {
                 .listRowBackground(Color.clear)
             }
         }
-        .scrollDisabled(true)
+        //        .scrollDisabled(true)
         .listStyle(.plain)
         .frame(maxWidth: .infinity)
         .scrollContentBackground(.hidden)
@@ -1763,17 +1583,28 @@ struct ListView: View {
     // MARK: - Extracted subview
     @ViewBuilder
     private func rowView(for objc: ManualDataInfo, at index: Int) -> some View {
-        if type == .billing {
+        if type == .billing { //not using, if using need add this type in selectedAction function
             BillingCycleItem(title: objc.title ?? "", subtitle: objc.subtitle ?? "", isSelected: index == selectedIndex ? true : false)
                 .onTapGesture {
                     selectedAction(at: index)
                 }
         }
         if type == .cards {
-            SubscriptionItem(title: objc.title ?? "", subtitle: objc.subtitle ?? "", isSelected: index == selectedIndex ? true : false, isSubTitlePresent: true)
-                .onTapGesture {
-                    selectedAction(at: index)
-                }
+            //            SubscriptionItem(title: objc.title ?? "", subtitle: objc.subtitle ?? "", isSelected: index == selectedIndex ? true : false, isSubTitlePresent: true)
+            //                .onTapGesture {
+            //                    selectedAction(at: index)
+            //                }
+            Button {
+                selectedAction(at: index)
+            } label: {
+                SubscriptionItem(
+                    title: objc.title ?? "",
+                    subtitle: objc.subtitle ?? "",
+                    isSelected: index == selectedIndex,
+                    isSubTitlePresent: true
+                )
+            }
+            .buttonStyle(.plain)
         }
         if type == .relations {
             SubscriptionItem(title: objc.title ?? "", subtitle: objc.subtitle ?? "", isSelected: index == selectedIndex ? true : false)
@@ -1782,17 +1613,19 @@ struct ListView: View {
                 }
         }
         if type == .reminders {
-            ReminderItem(title: objc.title ?? "", isSelected: objc.isSelected ?? false)
-                .onTapGesture {
-                    selectedAction(at: index)
-                }
+            Button {
+                selectedAction(at: index)
+            } label: {
+                ReminderItem(title: objc.title ?? "", isSelected: objc.isSelected ?? false)
+            }
+            .buttonStyle(.plain)
         }
     }
     
     // MARK: - Button actions
     private func selectedAction(at index: Int) {
         selectedIndex = index
-        if type == .reminders {
+        if type == .reminders || type == .cards{
             var obj = data[index]
             if (obj.isSelected ?? false ) == true
             {

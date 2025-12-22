@@ -131,8 +131,8 @@ struct PasteTextView: View {
         if textValue != ""
         {
             hideKeyboard()
-//            let input = VoiceSubscriptionRequest(userId: Constants.getUserId(), text: textValue)
-//            voiceCommandVM.voiceSubscription(input: input)
+            //            let input = VoiceSubscriptionRequest(userId: Constants.getUserId(), text: textValue)
+            //            voiceCommandVM.voiceSubscription(input: input)
         }
         else
         {

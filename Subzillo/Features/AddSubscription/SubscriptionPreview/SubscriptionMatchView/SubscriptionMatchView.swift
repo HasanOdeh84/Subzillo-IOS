@@ -24,6 +24,19 @@ struct SubscriptionMatchView: View {
     @State var renewalReminderValue             = ""
     @State var paymentMethodDataName            = ""
     
+    private var serviceLogoURL: URL? {
+        guard let logo = subscriptionData?.serviceLogo,
+              !logo.isEmpty else { return nil }
+        
+        if let url = URL(string: logo), url.scheme != nil {
+            // Already absolute URL
+            return url
+        }
+        
+        let baseURL = Constants.getUserDefaultsValue(for: Constants.providerBaseUrl)
+        return URL(string: baseURL + logo)
+    }
+    
     //MARK: - body
     var body: some View {
         VStack(alignment: .leading,spacing: 0) {
@@ -71,19 +84,23 @@ struct SubscriptionMatchView: View {
                                     .cornerRadius(64)
                                     .clipped()
                             }else{
-                                WebImage(url: URL(string: "\(Constants.getUserDefaultsValue(for: Constants.providerBaseUrl))\(subscriptionData?.serviceLogo ?? "")"))
-                                    .resizable()
-                                    .scaledToFill()
-                                    .frame(width: 128, height: 128)
-                                    .cornerRadius(64)
-                                    .clipped()
+//                                WebImage(url: URL(string: "\(Constants.getUserDefaultsValue(for: Constants.providerBaseUrl))\(subscriptionData?.serviceLogo ?? "")"))
+//                                    .resizable()
+//                                    .scaledToFill()
+//                                    .frame(width: 128, height: 128)
+//                                    .cornerRadius(64)
+//                                    .clipped()
+                                
+                                if let url = serviceLogoURL {
+                                    WebImage(url: url)
+                                        .resizable()
+                                        .scaledToFill()
+                                        .frame(width: 128, height: 128)
+                                        .cornerRadius(64)
+                                        .clipped()
+                                }
                             }
                         }
-                        /*Image("netflix")
-                         .resizable()
-                         .frame(width: 128, height: 128)
-                         .cornerRadius(64)
-                         .clipped()*/
                         
                         if !fromList{
                             Image("matchIcon")
@@ -110,7 +127,7 @@ struct SubscriptionMatchView: View {
                         SubscriptionDetailsPlainItem(title: "Price", value: "\(subscriptionData?.currencySymbol ?? "")\(subscriptionData?.amount ?? 0.0)")
                         SubscriptionDetailsPlainItem(title: "Currency", value: subscriptionData?.currency ?? Constants.shared.currencyCode)
                         SubscriptionDetailsPlainItem(title: "Billing Cycle", value: subscriptionData?.billingCycle ?? "")
-//                        SubscriptionDetailsPlainItem(title: "Subscription Start  Date", value: (subscriptionData?.lastPaymentDate ?? "").formattedDate())
+                        //                        SubscriptionDetailsPlainItem(title: "Subscription Start  Date", value: (subscriptionData?.lastPaymentDate ?? "").formattedDate())
                         SubscriptionDetailsPlainItem(title: "Next Charge Date", value: (subscriptionData?.nextPaymentDate ?? "").formattedDate(to: "d MMM yyyy"))
                         SubscriptionDetailsPlainItem(title: "Payment Method", value: subscriptionData?.paymentMethodName ?? "")
                         if fromList{
@@ -123,7 +140,7 @@ struct SubscriptionMatchView: View {
                             }else{
                                 SubscriptionDetailsPlainItem(title: "Benefit From", value: "")
                             }
-//                            SubscriptionDetailsPlainItem(title: "Benefit From", value: subscriptionData?.subscriptionFor ?? "" == "" ? "Me" : subscriptionData?.subscriptionFor ?? "")
+                            //                            SubscriptionDetailsPlainItem(title: "Benefit From", value: subscriptionData?.subscriptionFor ?? "" == "" ? "Me" : subscriptionData?.subscriptionFor ?? "")
                             SubscriptionDetailsPlainItem(title: "Renewal Reminders", value: renewalReminderValue)
                         }else{
                             if subscriptionData?.paymentMethodName ?? "" != ""{
@@ -223,6 +240,7 @@ struct SubscriptionMatchView: View {
         }
         .background(.neutralBg100)
     }
+    
     func showOfflineDetails()
     {
         if fromList{
@@ -231,7 +249,6 @@ struct SubscriptionMatchView: View {
             guard let subData = subDetails else { return }
             
             subscriptionData =  SubscriptionData(id: subData.id, serviceName: subData.serviceName, serviceLogo: subData.serviceLogo, subscriptionType: subData.subscriptionType, amount: subData.amount, currency: subData.currency, currencySymbol: subData.currencySymbol, billingCycle: subData.billingCycle, nextPaymentDate: subData.nextPaymentDate, paymentMethodId: subData.paymentMethod, paymentMethod: subData.paymentMethodName, paymentMethodName: subData.paymentMethodName, category: subData.category, categoryName: subData.categoryName, isSubscription: true, subscriptionForName: subData.subscriptionFor, paymentMethodDataId: subData.paymentMethodDataId, paymentMethodDataName: subData.paymentMethodDataName, renewalReminder: subData.renewalReminder, renewalReminders: subData.renewalReminder, notes: subData.notes, status: subData.status, cardName: subData.cardName, cardNumber: subData.cardNumber, nickName: subData.nickName, color: subData.color)
-            
             
             var remindersData = [
                 ManualDataInfo(id: "1", title: "3 days before renewal", value: "-3d"),
@@ -261,6 +278,7 @@ struct SubscriptionMatchView: View {
             getSubDetails()
         }
     }
+    
     func updateSubDetails()
     {
         if fromList{
@@ -304,9 +322,8 @@ struct SubscriptionMatchView: View {
     
     func getSubDetails()
     {
-//        let (confidenceStr1, colorValue1) = Constants.confidenceInfo(isAssumed: false, confidence: subscriptionData?.confidenceOverall ?? 0.0)
         let (confidenceStr1, colorValue1, fillRatio) =
-            Constants.confidenceInfo(isAssumed: false, confidence: subscriptionData?.confidenceOverall ?? 0.0)
+        Constants.confidenceInfo(isAssumed: false, confidence: subscriptionData?.confidenceOverall ?? 0.0)
         confidenceStr = confidenceStr1
         colorValue = colorValue1
         
@@ -341,27 +358,12 @@ struct SubscriptionMatchView: View {
     }
 }
 
+//MARK: - SubscriptionDetailsPlainItem
 struct SubscriptionDetailsPlainItem: View {
     var title                   : String
     var value                   : String?
     
     var body: some View {
-        
-        //        HStack(spacing: 8) {
-        //            Text(title)
-        //                .font(.appRegular(14))
-        //                .foregroundColor(.neutral500)
-        //                .lineLimit(1)
-        //                .layoutPriority(1)
-        //            DashedHorizontalDivider()
-        //            Text(value ?? "")
-        //                .font(.appBold(14))
-        //                .foregroundColor(.blueMain700)
-        //                .fixedSize(horizontal: false, vertical: true)
-        //                .layoutPriority(2)
-        //        }
-        //        .frame(maxWidth: .infinity, alignment: .leading)
-        
         HStack(spacing: 8) {
             Text(title)
                 .font(.appRegular(14))

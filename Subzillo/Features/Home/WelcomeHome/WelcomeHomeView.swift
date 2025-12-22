@@ -55,165 +55,6 @@ struct WelcomeHomeView: View {
                         .foregroundColor(Color.neutral500)
                         .multilineTextAlignment(.center)
                     
-                    //                    Text("You are in the free plan")
-                    //                        .font(.appRegular(18))
-                    //                        .foregroundColor(Color.neutralMain700)
-                    //                        .multilineTextAlignment(.center)
-                    //                        .padding(.top, 32)
-                    //
-                    //                    Button(action: upgradePlan) {
-                    //                        Text("Upgrade Today")
-                    //                            .font(.appSemiBold(18))
-                    //                            .foregroundColor(Color.secondaryPurple700)
-                    //                            .multilineTextAlignment(.center)
-                    //                    }
-                    //                    .frame(height: 56)
-                    //                    .frame(maxWidth: .infinity)
-                    //                    .overlay(
-                    //                        RoundedRectangle(cornerRadius: 8)
-                    //                            .stroke(Color.secondaryPurple400, lineWidth: 1)
-                    //                    )
-                    //                    .cornerRadius(8)
-                    //                    .padding(.top, 8)
-                    //
-                    //                    VStack(spacing: 0) {
-                    //                        Image("box")
-                    //                            .resizable()
-                    //                            .scaledToFit()
-                    //                            .frame(width: 91,height: 80)
-                    //                            .padding(.top, 32)
-                    //
-                    //                        Text("No subscriptions yet")
-                    //                            .font(.appRegular(18))
-                    //                            .foregroundColor(Color.neutralMain700)
-                    //                            .multilineTextAlignment(.center)
-                    //                            .padding(.top, 24)
-                    //
-                    //                        Text("Add your first subscription to start tracking your recurring payments")
-                    //                            .font(.appRegular(16))
-                    //                            .foregroundColor(Color.neutral500)
-                    //                            .multilineTextAlignment(.center)
-                    //                            .padding(.horizontal, 30)
-                    //                            .padding(.top, 8)
-                    //
-                    //                        Button(action: goToSmartAssistant) {
-                    //                            HStack(spacing: 5) {
-                    //                                Image("robotic")
-                    //                                    .frame(width: 20, height: 20)
-                    //                                Text("Add Subscription by AI Agent")
-                    //                                    .font(.appSemiBold(14))
-                    //                                    .foregroundColor(.white)
-                    //                            }
-                    //                            .padding()
-                    //                            .frame(maxWidth: .infinity, alignment: .center)
-                    //                            .background(
-                    //                                LinearGradient(
-                    //                                    colors: [Color.linearGradient3, Color.linearGradient4, Color.navyBlueCTA700],
-                    //                                    startPoint: .leading,
-                    //                                    endPoint: .trailing
-                    //                                )
-                    //                            )
-                    //                            .cornerRadius(8)
-                    //                        }
-                    //                        .padding(.horizontal, 16)
-                    //                        .padding(.top, 24)
-                    //
-                    //                        VStack(spacing: 8) {
-                    //
-                    //                            HStack(spacing: 8) {
-                    //                                Button(action: goToUploadImage) {
-                    //                                    HStack(spacing: 5) {
-                    //                                        Image("image-upload")
-                    //                                            .resizable()
-                    //                                            .frame(width: 20, height: 20)
-                    //                                        Text("Upload Image")
-                    //                                            .font(.appSemiBold(14))
-                    //                                            .foregroundColor(.neutralMain700)
-                    //                                    }
-                    //                                    .frame(maxWidth: .infinity, minHeight: 48)
-                    //                                    .overlay(
-                    //                                        RoundedRectangle(cornerRadius: 8)
-                    //                                            .stroke(Color.gradientPurple, lineWidth: 2)
-                    //                                    )
-                    //                                    .background(Color.whiteNeutralCardBG)
-                    //                                    .cornerRadius(8)
-                    //                                }
-                    //
-                    //                                Button(action: goToConnectEmail) {
-                    //                                    HStack(spacing: 5) {
-                    //                                        Image("mail-at-sign-01")
-                    //                                            .resizable()
-                    //                                            .frame(width: 20, height: 20)
-                    //                                        Text("Connect Email")
-                    //                                            .font(.appSemiBold(14))
-                    //                                            .foregroundColor(.neutralMain700)
-                    //                                    }
-                    //                                    .frame(maxWidth: .infinity, minHeight: 48)
-                    //                                    .overlay(
-                    //                                        RoundedRectangle(cornerRadius: 8)
-                    //                                            .stroke(Color.gradientBlue, lineWidth: 2)
-                    //                                    )
-                    //                                    .background(Color.whiteNeutralCardBG)
-                    //                                    .cornerRadius(8)
-                    //                                }
-                    //                            }
-                    //                            .frame(maxWidth: .infinity)
-                    //
-                    //
-                    //                            HStack(spacing: 8) {
-                    //                                Button(action: goToAddByVoice) {
-                    //                                    HStack(spacing: 5) {
-                    //                                        Image("mic-01-2")
-                    //                                            .resizable()
-                    //                                            .frame(width: 20, height: 20)
-                    //                                        Text("Add by Voice")
-                    //                                            .font(.appSemiBold(14))
-                    //                                            .foregroundColor(.neutralMain700)
-                    //                                    }
-                    //                                    .frame(maxWidth: .infinity, minHeight: 48)
-                    //                                    .overlay(
-                    //                                        RoundedRectangle(cornerRadius: 8)
-                    //                                            .stroke(Color.secondaryPurple300, lineWidth: 2)
-                    //                                    )
-                    //                                    .background(Color.whiteNeutralCardBG)
-                    //                                    .cornerRadius(8)
-                    //                                }
-                    //
-                    //                                Button(action: goToManualEntry) {
-                    //                                    HStack(spacing: 5) {
-                    //                                        Image("keyboard")
-                    //                                            .resizable()
-                    //                                            .frame(width: 20, height: 20)
-                    //                                        Text("Manual Entry")
-                    //                                            .font(.appSemiBold(14))
-                    //                                            .foregroundColor(.neutralMain700)
-                    //                                    }
-                    //                                    .frame(maxWidth: .infinity, minHeight: 48)
-                    //                                    .overlay(
-                    //                                        RoundedRectangle(cornerRadius: 8)
-                    //                                            .stroke(Color.secondaryPurple600, lineWidth: 2)
-                    //                                    )
-                    //                                    .background(Color.whiteNeutralCardBG)
-                    //                                    .cornerRadius(8)
-                    //                                }
-                    //                            }
-                    //                            .frame(maxWidth: .infinity)
-                    //                        }
-                    //                        .frame(maxWidth: .infinity, alignment: .center)
-                    //                        .padding(.horizontal, 16)
-                    //                        .padding(.top, 8)
-                    //                        .padding(.bottom, 16)
-                    //                    }
-                    //                    .frame(height: 411)
-                    //                    .frame(maxWidth: .infinity)
-                    //                    .overlay(
-                    //                        RoundedRectangle(cornerRadius: 16)
-                    //                            .stroke(Color.neutral300Border, lineWidth: 1)
-                    //                    )
-                    //                    .background(Color.whiteNeutralCardBG)
-                    //                    .cornerRadius(16)
-                    //                    .padding(.top, 24)
-                    
                     VStack(spacing: 0) {
                         VStack(spacing: 12) {
                             Spacer()
@@ -259,7 +100,7 @@ struct WelcomeHomeView: View {
                                         .background(Color.whiteNeutralCardBG)
                                         .innerBorder(
                                             cornerRadius: 8,
-                                            color: Color.gradientPurple.opacity(0.6)
+                                            color: Color.innerShadow.opacity(0.6)
                                         )
                                     }
                                     
@@ -280,7 +121,7 @@ struct WelcomeHomeView: View {
                                         .background(Color.whiteNeutralCardBG)
                                         .innerBorder(
                                             cornerRadius: 8,
-                                            color: Color.gradientBlue.opacity(0.6)
+                                            color: Color.innerShadow.opacity(0.6)
                                         )
                                     }
                                 }
@@ -305,7 +146,7 @@ struct WelcomeHomeView: View {
                                         .background(Color.whiteNeutralCardBG)
                                         .innerBorder(
                                             cornerRadius: 8,
-                                            color: Color.gradientBlue.opacity(0.6)
+                                            color: Color.innerShadow.opacity(0.6)
                                         )
                                     }
                                     
@@ -326,7 +167,7 @@ struct WelcomeHomeView: View {
                                         .background(Color.whiteNeutralCardBG)
                                         .innerBorder(
                                             cornerRadius: 8,
-                                            color: Color.gradientBlue.opacity(0.6)
+                                            color: Color.innerShadow.opacity(0.6)
                                         )
                                     }
                                 }
