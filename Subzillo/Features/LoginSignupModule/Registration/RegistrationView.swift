@@ -112,7 +112,7 @@ struct RegistrationView: View {
                     if let data = SessionManager.shared.loginData{
                         verifyData = data
                         if verifyData?.verifyType == 1{
-                            phoneNumber = verifyData?.phoneNumber ?? ""
+                            phoneNumber = verifyData?.formattedPhNo ?? ""//verifyData?.phoneNumber ?? ""
                         }else{
                             email       = verifyData?.email ?? ""
                         }

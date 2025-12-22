@@ -23,7 +23,7 @@ class LoginViewModel: ObservableObject {
         self.sessionManager = sessionManager
     }
     
-    func login(input:checkLoginRequest) {
+    func login(input:checkLoginRequest, formattedPhNo: String) {
         apiReference.postApi(endPoint: APIEndpoint.checkLogin, method: .POST,token: defaultAuthKey,body: input,showLoader: true, responseType: LoginResponse.self)
             .sink { [unowned self] completion in
                 if case let .failure(error) = completion {
@@ -51,6 +51,7 @@ class LoginViewModel: ObservableObject {
             let data = LoginSignupVerifyData(verifyType         : input.loginType,
                                              email              : input.email,
                                              phoneNumber        : input.phoneNumber,
+                                             formattedPhNo      : formattedPhNo,
                                              countryCode        : input.countryCode,
                                              userId             : response.data?.userId ?? "",
                                              isNewUser          : response.data?.isNewUser ?? false,

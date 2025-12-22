@@ -61,3 +61,23 @@ extension Array {
         return indices.contains(index) ? self[index] : nil
     }
 }
+
+func getFileName(from value: String) -> String {
+    // Case 1: Already only filename
+    if !value.contains("/") {
+        return value
+    }
+
+    // Case 2: Full URL or path
+    if let url = URL(string: value) {
+        return url.lastPathComponent
+    }
+
+    return value
+}
+
+extension String {
+    var fileNameOnly: String {
+        return URL(string: self)?.lastPathComponent ?? self
+    }
+}

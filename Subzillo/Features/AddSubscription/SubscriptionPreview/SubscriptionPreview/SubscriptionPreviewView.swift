@@ -211,7 +211,7 @@ struct SubscriptionPreviewView: View {
                                         ReviewExtractedDetailsView(onDelegate: {
                                         },
                                                                    detailType   : ReviewExtractedType.amount,
-                                                                   confidence   : subscriptionData?.serviceNameConfidence ?? 0.0,
+                                                                   confidence   : subscriptionData?.amountConfidence ?? 0.0,
                                                                    extractedData: subscriptionData,
                                                                    providerPlansList : manualEntryVM.providerData?.providerSubscriptionPlansList)
                                         .id(ReviewExtractedType.amount)
@@ -233,7 +233,7 @@ struct SubscriptionPreviewView: View {
                                         ReviewExtractedDetailsView(onDelegate: {
                                         },
                                                                    detailType   : ReviewExtractedType.nextChargeDate,
-                                                                   confidence   : subscriptionData?.serviceNameConfidence ?? 0.0,
+                                                                   confidence   : subscriptionData?.nextPaymentDateConfidence ?? 0.0,
                                                                    extractedData: subscriptionData)
                                         .id(ReviewExtractedType.nextChargeDate)
                                         .presentationDragIndicator(.hidden)
@@ -272,7 +272,7 @@ struct SubscriptionPreviewView: View {
                                         ReviewExtractedDetailsView(onDelegate: {
                                         },
                                                                    detailType   : ReviewExtractedType.category,
-                                                                   confidence   : subscriptionData?.serviceNameConfidence ?? 0.0,
+                                                                   confidence   : subscriptionData?.categoryConfidence ?? 0.0,
                                                                    extractedData: subscriptionData)
                                         .id(ReviewExtractedType.category)
                                         .presentationDragIndicator(.hidden)
@@ -299,7 +299,7 @@ struct SubscriptionPreviewView: View {
                                     ReviewExtractedDetailsView(onDelegate: {
                                     },
                                                                detailType   : ReviewExtractedType.billingCycle,
-                                                               confidence   : subscriptionData?.serviceNameConfidence ?? 0.0,
+                                                               confidence   : subscriptionData?.billingCycleConfidence ?? 0.0,
                                                                extractedData: subscriptionData)
                                     .id(ReviewExtractedType.billingCycle)
                                     .presentationDragIndicator(.hidden)
@@ -515,7 +515,7 @@ struct SubscriptionPreviewView: View {
             ReviewExtractedDetailsView(onDelegate: {
             },
                                        detailType   : ReviewExtractedType.currency,
-                                       confidence   : subscriptionData?.serviceNameConfidence ?? 0.0,
+                                       confidence   : subscriptionData?.currencyConfidence ?? 0.0,
                                        extractedData: subscriptionData)
             .id(ReviewExtractedType.currency)
             .presentationDragIndicator(.hidden)
@@ -525,7 +525,7 @@ struct SubscriptionPreviewView: View {
             ReviewExtractedDetailsView(onDelegate: {
             },
                                        detailType           : ReviewExtractedType.planType,
-                                       confidence           : subscriptionData?.serviceNameConfidence ?? 0.0,
+                                       confidence           : subscriptionData?.subscriptionTypeConfidence ?? 0.0,
                                        extractedData        : subscriptionData,
                                        providerPlansList    : manualEntryVM.providerData?.providerSubscriptionPlansList)
             .id(ReviewExtractedType.planType)
@@ -744,8 +744,9 @@ struct SubscriptionPreviewView: View {
                 {
                     let objc = subscriptionsData![i]
                     var currency = (objc.currency ?? "" == "") ? Constants.shared.currencyCode : (objc.currency ?? "")
+                    var logoUrl = getFileName(from: objc.serviceLogo ?? "")
                     let subObjc = ConfirmedSubscription(serviceName         : objc.serviceName ?? "",
-                                                        serviceLogo         : objc.serviceLogo ?? "",
+                                                        serviceLogo         : logoUrl,
                                                         amount              : objc.amount ?? 0.0,
                                                         currency            : currency,//objc.currency ?? "",
                                                         billingCycle        : objc.billingCycle ?? "",

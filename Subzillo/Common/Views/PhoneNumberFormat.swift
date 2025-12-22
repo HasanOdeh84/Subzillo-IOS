@@ -60,6 +60,10 @@ final class PhoneNumberFormatterService: ObservableObject {
         phoneUtil.getCountryCode(forRegion: region).stringValue
     }
     
+    func formattedNumber(digits: String) -> String {
+        format(digits: digits)
+    }
+    
     //    func placeholder() -> String {
     //        do {
     //            let example = try phoneUtil.getExampleNumber(

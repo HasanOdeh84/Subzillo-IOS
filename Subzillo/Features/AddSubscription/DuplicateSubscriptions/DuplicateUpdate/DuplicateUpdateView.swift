@@ -149,10 +149,16 @@ struct DuplicateUpdateView: View {
     //MARK: makeApiCall
     func makeApiCall(action:Int, existingSubscription:String, newSubscriptions:[SubscriptionInfo])
     {
+        let updatedSubscriptions = newSubscriptions.map { sub in
+            var updatedSub = sub
+            updatedSub.serviceLogo = sub.serviceLogo?.fileNameOnly
+            return updatedSub
+        }
         let inoput = ResolveDuplicateSubscriptionRequest(userId: Constants.getUserId(),
                                                          action: action,
                                                          existingSubscription: existingSubscription,
-                                                         newSubscriptions: newSubscriptions)
+                                                         //                                                         newSubscriptions: newSubscriptions)
+                                                         newSubscriptions: updatedSubscriptions)
         dupSubscriptionVM.resolveDuplicateSubscription(input: inoput)
     }
     

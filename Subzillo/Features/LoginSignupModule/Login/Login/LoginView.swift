@@ -176,7 +176,8 @@ struct LoginView: View {
     //MARK: - User defined methods
     func loginApi(){
         let phone = phoneNumber.normalizedPhoneNumber()
-        print("phone no is \(phone)")
+        let ph = PhoneNumberFormatterService(regionCode: selectedCountry?.countryCode ?? "").formattedNumber(digits: phoneNumber)
+        print("phone no is \(phone) \(ph)")
         let input = checkLoginRequest(
             loginType       : (segmentSelected == .first ? loginCheckType.mobile : loginCheckType.email).rawValue,
             email           : email.trimmed,
@@ -187,7 +188,7 @@ struct LoginView: View {
         if let errorMessage = LoginSignupValidations().validateLogin(input: input) {
             ToastManager.shared.showToast(message: errorMessage,style: ToastStyle.error)
         } else {
-            loginVM.login(input: input)
+            loginVM.login(input: input, formattedPhNo: ph)
         }
     }
 }
