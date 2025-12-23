@@ -50,12 +50,12 @@ This document lists all **dependencies** used in the project.
 - **Resources**: [MSAL github project](https://github.com/AzureAD/microsoft-authentication-library-for-objc)
 
 
-## 6. PhoneNumberKit
-- **Dependency**: PhoneNumberKit
-- **Purpose**: PhoneNumberKit is used to parse, validate, and format phone numbers accurately. It ensures consistent and reliable phone number handling across different regions.
+## 6. libPhoneNumber
+- **Dependency**: libPhoneNumber
+- **Purpose**: libPhoneNumber is used to parse, validate, and format phone numbers accurately. It ensures consistent and reliable phone number handling across different regions.
 - **Use Cases in Subzillo**:
   - Automatically formatting phone numbers based on the selected country code.
-- **Resources**: [PhoneNumberKit github project](https://github.com/marmelroy/PhoneNumberKit)
+- **Resources**: [PhoneNumberKit github project](https://github.com/iziz/libPhoneNumber-iOS)
 
 
 
