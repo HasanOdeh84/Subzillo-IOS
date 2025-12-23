@@ -2,6 +2,36 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.1.0] (Beta) - 2025-12-23
+
+### Fixed
+- Sprint3 minor changes.
+
+### Delivered
+- Sprint3 client feedback points.
+
+## [1.12.0] (Alpha) - 2025-12-22
+
+### Fixed
+- Sprint3 bug fixes.
+
+### Updated
+- Phone number formatting in signup screen.
+
+## [1.11.0] (Alpha) - 2025-12-22
+
+### Fixed
+- Sprint3 bug fixes.
+
+### Updated
+- Voice flow.
+- Phone number formatting library has been changed.
+
+## [1.10.0] (Alpha) - 2025-12-18
+
+### Added
+- Voice missing details flow.
+
 ## [1.9.0] (Alpha) - 2025-12-17
 
 ### Updated
