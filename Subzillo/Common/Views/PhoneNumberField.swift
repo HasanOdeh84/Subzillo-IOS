@@ -7,8 +7,8 @@
 
 import SwiftUI
 import SDWebImageSwiftUI
-import PhoneNumberKit
 import Combine
+import libPhoneNumber
 
 struct PhoneNumberField: View {
     
@@ -40,16 +40,16 @@ struct PhoneNumberField: View {
             HStack(spacing: 0) {
                 Button {
                     if isCountry{
-                        if commonApiVM.countryError != nil {
-                            commonApiVM.getCountries()
-                        } else if commonApiVM.countriesResponse != nil {
+                        if commonApiVM.countriesResponse != nil {
                             showCurrencySheet = true
+                        }else{
+                            commonApiVM.getCountries()
                         }
                     }else{
-                        if commonApiVM.currencyError != nil {
-                            commonApiVM.getCurrencies()
-                        } else if commonApiVM.currencyResponse != nil {
+                        if commonApiVM.currencyResponse != nil {
                             showCurrencySheet = true
+                        }else{
+                            commonApiVM.getCurrencies()
                         }
                     }
                 } label: {
@@ -74,12 +74,11 @@ struct PhoneNumberField: View {
                                 Text(Constants.shared.flag(from: Constants.shared.regionCode))
                                     .frame(width: 24, height: 24)
                             }else{
-                                WebImage(url: URL(string: isCountry ? flag : selectedCurrency?.flag ?? ""))
+                                WebImage(url: URL(string: selectedCurrency?.flag ?? ""))
                                     .resizable()
                                     .indicator(.activity)
                                     .transition(.fade(duration: 0.5))
                                     .scaledToFit()
-                                //                            .frame(width: 24, height: 18)
                                     .frame(width: 24, height: 24)
                                     .cornerRadius(5)
                             }
@@ -87,9 +86,27 @@ struct PhoneNumberField: View {
                         Image("dropDown_blackWhite")
                             .frame(width: 20, height: 20)
                             .foregroundColor(.black)
-                        Text(isCountry ? countryCode : selectedCurrency?.code ?? "")
-                            .font(.appRegular(14))
-                            .foregroundColor(.neutral2500)
+                        if isCountry{
+                            if countryCode == ""{
+                                Text("+\(NBPhoneNumberUtil.sharedInstance().getCountryCode(forRegion: Constants.shared.regionCode))")
+                                    .font(.appRegular(14))
+                                    .foregroundColor(.neutral2500)
+                            }else{
+                                Text(isCountry ? countryCode : selectedCurrency?.code ?? "")
+                                    .font(.appRegular(14))
+                                    .foregroundColor(.neutral2500)
+                            }
+                        }else{
+                            if countryCode == ""{
+                                Text(Constants.shared.currencyCode)
+                                    .font(.appRegular(14))
+                                    .foregroundColor(.neutral2500)
+                            }else{
+                                Text(selectedCurrency?.code ?? "")
+                                    .font(.appRegular(14))
+                                    .foregroundColor(.neutral2500)
+                            }
+                        }
                     }
                     .padding(.horizontal, 20)
                 }
@@ -126,14 +143,6 @@ struct PhoneNumberField: View {
                     //                                phoneNumber = filtered
                     //                            }
                     //                        }
-                    //                    PhoneNumberTextFieldView(phoneNumber: $phoneNumber,
-                    //                                             region     : selectedCountry?.countryCode ?? "")
-                    //                    .padding(.horizontal, 16)
-                    //                    .frame(height: 52)
-                    //                    .background(.whiteBlackBG)
-                    //                    .foregroundStyle(Color.whiteBlackBGnoPic)
-                    //                    .font(.appRegular(14))
-                    //                    .disabled(false)
                     PhoneNumberTextField(
                         digits          : $phoneNumber,
                         formatterService: formatterService
@@ -144,18 +153,6 @@ struct PhoneNumberField: View {
                     .foregroundStyle(Color.whiteBlackBGnoPic)
                     .font(.appRegular(14))
                     .disabled(false)
-                    
-                    
-                    //                    VStack(alignment: .leading) {
-                    //                        Text("Enter Phone Number:")
-                    //                        PhoneNumberField1(text: $phoneNumber)
-                    //                            .padding()
-                    //                            .background(Color.secondary.opacity(0.1))
-                    //                            .cornerRadius(8)
-                    //                            .keyboardType(.phonePad) // Ensure the phone keyboard appears
-                    //                        Text("Raw input: \(phoneNumber)")
-                    //                    }
-                    //                    .padding()
                 }
             }
             .frame(height: 52)
@@ -199,25 +196,18 @@ struct PhoneNumberField: View {
             verifyData = data
         }
         if !fromPreview{
-            if selectedCountry == nil{
-                selectedCurrency = Currency(id      : nil,
-                                            name    : Constants.shared.currencyCode,
-                                            symbol  : Constants.shared.currencySymbol,
-                                            code    : Constants.shared.currencyCode,
-                                            flag    : Constants.shared.flag(from: Constants.shared.regionCode))
+            if selectedCurrency == nil{
                 if let currencies = commonApiVM.currencyResponse {
                     selectedCurrency = currencies.first(where: { $0.code == Constants.shared.currencyCode })
                 }
             }
         }
         if fromSingup && !fromSocailLogin{
-            selectedCountry = Country(id: 0, countryName: "", countryCode: verifyData?.countryCode, dialCode: "", countryFlag: Constants.shared.flag(from: verifyData?.countryCode ?? ""))
             if let countries = commonApiVM.countriesResponse {
                 selectedCountry = countries.first(where: { $0.dialCode == verifyData?.countryCode })
             }
         }else{
             if selectedCountry == nil{
-                selectedCountry = Country(id: 0, countryName: "", countryCode: Constants.shared.regionCode, dialCode: "", countryFlag: Constants.shared.flag(from: Constants.shared.regionCode))
                 if let countries = commonApiVM.countriesResponse {
                     selectedCountry = countries.first(where: { $0.countryCode == Constants.shared.regionCode })
                 }
@@ -232,7 +222,7 @@ struct PhoneNumberField: View {
         flag                = selectedCountry?.countryFlag ?? ""
         if isCountry{
             if selectedCountry?.countryFlag ?? "" == "" && selectedCountry?.dialCode ?? "" == ""{
-                countryCode = Constants.shared.regionCode
+                countryCode = "+\(NBPhoneNumberUtil.sharedInstance().getCountryCode(forRegion: Constants.shared.regionCode))"
                 flag        = Constants.shared.flag(from: Constants.shared.regionCode)
             }
         }
@@ -243,7 +233,7 @@ struct PhoneNumberField: View {
         flag                = selectedCountry?.countryFlag ?? ""
         if isCountry{
             if selectedCountry?.countryFlag ?? "" == "" && selectedCountry?.dialCode ?? "" == ""{
-                countryCode = Constants.shared.regionCode
+                countryCode = "+\(NBPhoneNumberUtil.sharedInstance().getCountryCode(forRegion: Constants.shared.regionCode))"
                 flag        = Constants.shared.flag(from: Constants.shared.regionCode)
             }
         }

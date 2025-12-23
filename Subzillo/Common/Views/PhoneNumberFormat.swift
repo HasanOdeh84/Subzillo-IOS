@@ -60,6 +60,12 @@ final class PhoneNumberFormatterService: ObservableObject {
         phoneUtil.getCountryCode(forRegion: region).stringValue
     }
     
+    func dialCode(for regionCode: String) -> String {
+        let util = NBPhoneNumberUtil.sharedInstance()
+        let code = util.getCountryCode(forRegion: regionCode)
+        return "+\(code)"
+    }
+    
     func formattedNumber(digits: String) -> String {
         format(digits: digits)
     }

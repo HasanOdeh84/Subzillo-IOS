@@ -194,23 +194,11 @@ struct OnboardingView: View {
             .padding(.horizontal, 20)
             .navigationBarBackButtonHidden(true)
             .onAppear{
-//                AppState.shared.login()
-                selectedCurrency = Currency(id      : nil,
-                                            name    : Constants.shared.currencyCode,
-                                            symbol  : Constants.shared.currencySymbol,
-                                            code    : Constants.shared.currencyCode,
-                                            flag    : Constants.shared.flag(from: Constants.shared.regionCode))
-                if let error = commonApiVM.currencyError {
+                //                AppState.shared.login()
+                if commonApiVM.currencyResponse != nil {
+                    selectedCurrency = commonApiVM.currencyResponse?.first(where: { $0.code == Constants.shared.currencyCode })
+                }else{
                     commonApiVM.getCurrencies()
-                } else if let data = commonApiVM.currencyResponse {
-                    selectedCurrency = data.first(where: { $0.code == Constants.shared.currencyCode })
-                }
-                else{
-                    selectedCurrency = Currency(id      : nil,
-                                                name    : Constants.shared.currencyCode,
-                                                symbol  : Constants.shared.currencySymbol,
-                                                code    : Constants.shared.currencyCode,
-                                                flag    : Constants.shared.flag(from: Constants.shared.regionCode))
                 }
             }
         }
@@ -221,7 +209,7 @@ struct OnboardingView: View {
     func tellUsAbtYourselfView() -> some View {
         ScrollView{
             VStack(spacing: 32){
-//                Text("Tell us about yourself")
+                //                Text("Tell us about yourself")
                 Text("Almost Done")
                     .font(.appRegular(28))
                     .foregroundColor(.neutralMain700)
@@ -333,13 +321,13 @@ struct WrapButtonsView: View {
                                         .offset(.init(width: 0, height: 2))
                                         .mask(Capsule())
                                 )
-//                                .if(selectedIndexVal != index) { view in
-//                                                view.capsuleInnerShadow(
-//                                                    color: Color.black.opacity(0.12),
-//                                                    radius: 6,
-//                                                    offset: -4
-//                                                )
-//                                            }
+                            //                                .if(selectedIndexVal != index) { view in
+                            //                                                view.capsuleInnerShadow(
+                            //                                                    color: Color.black.opacity(0.12),
+                            //                                                    radius: 6,
+                            //                                                    offset: -4
+                            //                                                )
+                            //                                            }
                         )
                         .overlay(
                             Capsule()
@@ -415,7 +403,7 @@ struct ContentView: View {
     let cornerRadius: CGFloat = 20
     let shadowColor = Color.gray.opacity(0.45)
     let shadowRadius: CGFloat = 10
-
+    
     var body: some View {
         RoundedRectangle(cornerRadius: cornerRadius)
             .fill(Color.white)

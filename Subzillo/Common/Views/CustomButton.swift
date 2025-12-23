@@ -43,6 +43,36 @@ struct CustomButton: View {
     }
 }
 
+struct CustomBorderButton: View {
+    let title       : String
+    var background  : Color = .neutralBg100
+    var textColor   : Color = .disCardRed
+    var height      : CGFloat = 56
+    var cornerRadius: CGFloat = 8
+    var action      : () -> Void = {}
+    
+    var body: some View {
+        VStack(spacing: 0) {
+            Button(action: {
+                action()
+            }) {
+                Text(LocalizedStringKey(title))
+                    .multilineTextAlignment(.center)
+                    .foregroundColor(textColor)
+                    .font(.appSemiBold(18))
+                    .frame(maxWidth: .infinity, minHeight: height)
+            }
+        }
+        .overlay(
+            RoundedRectangle(cornerRadius: cornerRadius)
+                .stroke(Color.neutral300Border, lineWidth: 2)
+        )
+        .frame(maxWidth: .infinity, minHeight: height)
+        .background(background)
+        .cornerRadius(cornerRadius)
+    }
+}
+
 struct underlineText: View{
     var text        : String
     var image       : String

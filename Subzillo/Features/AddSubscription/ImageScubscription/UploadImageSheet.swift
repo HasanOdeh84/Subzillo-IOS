@@ -53,6 +53,7 @@ struct UploadImageSheet: View {
                     //                        .overlay(Color.neutral300Border)
                     //                    UploadItem(title: "Paste Text", subTitle: "Copy and paste notification text", image: "text-creation", imageColor: Color.purple100, action: pastTextAction)
                     Divider()
+                        .overlay(Color.neutral300Border)
                     UploadItem(title: "Take Screenshot", subTitle: "Take Screenshot for subscriptions", image: "text-creation", imageColor: Color.purple100, action: openSubscriptionsAction)
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)

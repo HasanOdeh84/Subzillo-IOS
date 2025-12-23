@@ -131,11 +131,11 @@ struct SubzilloApp: App {
                 .environmentObject(sharedViewModel)
                 .environmentObject(sessionManager)
                 .environment(\.managedObjectContext, persistenceController.container.viewContext)
-                .preferredColorScheme(
-                    themeManager.userChangedTheme
-                    ? (themeManager.isDarkMode ? .dark : .light)
-                    : nil // nil = follow system theme
-                )
+//                .preferredColorScheme(
+//                    themeManager.userChangedTheme
+//                    ? (themeManager.isDarkMode ? .dark : .light)
+//                    : nil // nil = follow system theme
+//                )
                 .withLoader()
                 .withAlert()
                 .withToast()
@@ -166,6 +166,8 @@ struct RootView: View {
     @State private var path         = NavigationPath()
     @EnvironmentObject var router   : AppIntentRouter
     @StateObject var sheetManager   = SheetManager.shared
+    @EnvironmentObject var themeManager: ThemeManager
+    @Environment(\.colorScheme) private var systemScheme
     
     var body: some View {
         NavigationStack(path: $path) {
@@ -238,6 +240,14 @@ struct RootView: View {
             OfflineSheet()
                 .presentationDragIndicator(.hidden)
                 .presentationDetents([.height(540)])
+        }
+        .preferredColorScheme(
+            themeManager.userChangedTheme
+            ? (themeManager.isDarkMode ? .dark : .light)
+            : nil
+        )
+        .onChange(of: systemScheme) { newScheme in
+            themeManager.applySystemTheme(newScheme == .dark)
         }
     }
 }

@@ -37,6 +37,19 @@ final class ThemeManager: ObservableObject {
         storedUserChanged = false
         userChangedTheme = false
     }
+    
+    func applyUserTheme(_ isDark: Bool) {
+        withAnimation {
+            isDarkMode = isDark
+        }
+        userChangedTheme = true
+        storedIsDarkMode = isDark
+        storedUserChanged = true
+    }
+    
+    // Used internally when following system
+    func applySystemTheme(_ isDark: Bool) {
+        guard !userChangedTheme else { return }
+        isDarkMode = isDark
+    }
 }
-
-

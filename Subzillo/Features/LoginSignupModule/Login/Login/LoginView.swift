@@ -159,7 +159,6 @@ struct LoginView: View {
             .padding(.horizontal, 20)
             .navigationBarBackButtonHidden(true)
             .onAppear{
-                selectedCountry = Country(id: 0, countryName: "", countryCode: Constants.shared.regionCode, dialCode: "", countryFlag: Constants.shared.flag(from: Constants.shared.regionCode))
                 if commonApiVM.countryError != nil {
                     commonApiVM.getCountries()
                 } else if let data = commonApiVM.countriesResponse {

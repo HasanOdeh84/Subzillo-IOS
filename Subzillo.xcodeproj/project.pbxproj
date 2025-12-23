@@ -12,7 +12,6 @@
 		C5AE441A2EF90836007677EB /* libPhoneNumberShortNumber in Frameworks */ = {isa = PBXBuildFile; productRef = C5AE44192EF90836007677EB /* libPhoneNumberShortNumber */; };
 		C5C4AFDF2EE17A67008E7432 /* FirebaseCrashlytics in Frameworks */ = {isa = PBXBuildFile; productRef = C5C4AFDE2EE17A67008E7432 /* FirebaseCrashlytics */; };
 		C5C4B2C12EE1943C008E7432 /* MSAL in Frameworks */ = {isa = PBXBuildFile; productRef = C5C4B2C02EE1943C008E7432 /* MSAL */; };
-		C5CDA2422EE9382A0022A7BD /* PhoneNumberKit in Frameworks */ = {isa = PBXBuildFile; productRef = C5CDA2412EE9382A0022A7BD /* PhoneNumberKit */; };
 		C5E416102E9A4DE600E739A3 /* Lottie in Frameworks */ = {isa = PBXBuildFile; productRef = C5E4160F2E9A4DE600E739A3 /* Lottie */; };
 		C5E417872E9A71C900E739A3 /* SDWebImageSwiftUI in Frameworks */ = {isa = PBXBuildFile; productRef = C5E417862E9A71C900E739A3 /* SDWebImageSwiftUI */; };
 		C5E4178A2E9A73BF00E739A3 /* GoogleSignIn in Frameworks */ = {isa = PBXBuildFile; productRef = C5E417892E9A73BF00E739A3 /* GoogleSignIn */; };
@@ -73,7 +72,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				C5AE44162EF90836007677EB /* libPhoneNumber in Frameworks */,
-				C5CDA2422EE9382A0022A7BD /* PhoneNumberKit in Frameworks */,
 				C5E4178C2E9A73BF00E739A3 /* GoogleSignInSwift in Frameworks */,
 				C5C4B2C12EE1943C008E7432 /* MSAL in Frameworks */,
 				C5E417872E9A71C900E739A3 /* SDWebImageSwiftUI in Frameworks */,
@@ -161,7 +159,6 @@
 				C5E417882E9A73BF00E739A3 /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */,
 				C5C4AFDD2EE17A67008E7432 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
 				C5C4B2BF2EE1943C008E7432 /* XCRemoteSwiftPackageReference "microsoft-authentication-library-for-objc" */,
-				C5CDA2402EE9382A0022A7BD /* XCRemoteSwiftPackageReference "PhoneNumberKit" */,
 				C5AE44142EF90836007677EB /* XCRemoteSwiftPackageReference "libPhoneNumber-iOS" */,
 			);
 			preferredProjectObjectVersion = 77;
@@ -344,9 +341,9 @@
 				CODE_SIGN_ENTITLEMENTS = Subzillo/SubzilloDebug.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1.1.0;
+				CURRENT_PROJECT_VERSION = 1.12.0;
 				DEVELOPMENT_ASSET_PATHS = "\"Subzillo/Resources/Preview Content\"";
-				DEVELOPMENT_TEAM = S7KJCQYHM8;
+				DEVELOPMENT_TEAM = B48NJV8578;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Subzillo/Resources/Info.plist;
@@ -361,13 +358,14 @@
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = "Launch Screen";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
+				INFOPLIST_KEY_UIUserInterfaceStyle = Light;
 				IPHONEOS_DEPLOYMENT_TARGET = 16;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.subzillo.app;
+				PRODUCT_BUNDLE_IDENTIFIER = com.krify.Subzillo;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
@@ -388,9 +386,9 @@
 				CODE_SIGN_ENTITLEMENTS = Subzillo/Subzillo.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1.1.0;
+				CURRENT_PROJECT_VERSION = 1.12.0;
 				DEVELOPMENT_ASSET_PATHS = "\"Subzillo/Resources/Preview Content\"";
-				DEVELOPMENT_TEAM = S7KJCQYHM8;
+				DEVELOPMENT_TEAM = B48NJV8578;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Subzillo/Resources/Info.plist;
@@ -405,13 +403,14 @@
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = "Launch Screen";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
+				INFOPLIST_KEY_UIUserInterfaceStyle = Light;
 				IPHONEOS_DEPLOYMENT_TARGET = 16;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.subzillo.app;
+				PRODUCT_BUNDLE_IDENTIFIER = com.krify.Subzillo;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
@@ -472,14 +471,6 @@
 				minimumVersion = 2.6.0;
 			};
 		};
-		C5CDA2402EE9382A0022A7BD /* XCRemoteSwiftPackageReference "PhoneNumberKit" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/marmelroy/PhoneNumberKit";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 4.2.1;
-			};
-		};
 		C5E4160E2E9A4DE600E739A3 /* XCRemoteSwiftPackageReference "lottie-spm" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/airbnb/lottie-spm.git";
@@ -531,11 +522,6 @@
 			isa = XCSwiftPackageProductDependency;
 			package = C5C4B2BF2EE1943C008E7432 /* XCRemoteSwiftPackageReference "microsoft-authentication-library-for-objc" */;
 			productName = MSAL;
-		};
-		C5CDA2412EE9382A0022A7BD /* PhoneNumberKit */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = C5CDA2402EE9382A0022A7BD /* XCRemoteSwiftPackageReference "PhoneNumberKit" */;
-			productName = PhoneNumberKit;
 		};
 		C5E4160F2E9A4DE600E739A3 /* Lottie */ = {
 			isa = XCSwiftPackageProductDependency;

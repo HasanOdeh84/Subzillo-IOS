@@ -132,13 +132,31 @@ struct ManualEntryView: View {
                         }
                     )
                     
-                    Button(action: selectCategory) {
-                        FieldView(text: $category, textValue: selectedCategory?.name ?? "", title: "Category", image: "gridIcon", placeHolder: "Please select", isButton: true, isText: true)
-                    }
-                    .sheet(isPresented: $showCategorySheet) {
-                        CategoriesBottomSheet(selectedCategory: $selectedCategory, categoryResponse:commonApiVM.categoriesResponse, header: "Select Category", placeholder: "Search Category")
-                            .presentationDetents([.medium, .large])
-                            .presentationDragIndicator(.hidden)
+                    //MARK: - PlanType field
+                    FieldSuggestionView1(
+                        text        : $planType,
+                        title       : "Plan Type",
+                        image       : "gridicon2",
+                        placeHolder : "e.g. Free, Pro, Premium",
+                        suggestions : addSubscriptionVM.providerData?.providerSubscriptionPlansList ?? [],
+                        displayKey  : { $0.planName ?? "" },
+                        fieldType   : FieldType.planType,
+                        activeField : $activeField,
+                        action      : {
+                            autoFillDetails(isAmount: false)
+                        }
+                    )
+                    if isPlanTypeError{
+                        HStack(spacing: 6){
+                            Image("info")
+                                .frame(width: 24, height: 24)
+                            Text("This plan is not available for this service")
+                                .font(.appRegular(14))
+                                .foregroundColor(Color.systemInfoBlue)
+                            Spacer()
+                        }
+                        .padding(.leading, 5)
+                        .padding(.top, -22)
                     }
                     
                     HStack(spacing: 24) {
@@ -211,35 +229,20 @@ struct ManualEntryView: View {
                         .padding(.top, -29)
                     }
                     
-                    //MARK: - PlanType field
-                    FieldSuggestionView1(
-                        text        : $planType,
-                        title       : "Plan Type",
-                        image       : "gridicon2",
-                        placeHolder : "e.g. Free, Pro, Premium",
-                        suggestions : addSubscriptionVM.providerData?.providerSubscriptionPlansList ?? [],
-                        displayKey  : { $0.planName ?? "" },
-                        fieldType   : FieldType.planType,
-                        activeField : $activeField,
-                        action      : {
-                            autoFillDetails(isAmount: false)
-                        }
-                    )
-                    if isPlanTypeError{
-                        HStack(spacing: 6){
-                            Image("info")
-                                .frame(width: 24, height: 24)
-                            Text("This plan is not available for this service")
-                                .font(.appRegular(14))
-                                .foregroundColor(Color.systemInfoBlue)
-                            Spacer()
-                        }
-                        .padding(.leading, 5)
-                        .padding(.top, -22)
+                    //MARK: - Category field
+                    Button(action: selectCategory) {
+                        FieldView(text: $category, textValue: selectedCategory?.name ?? "", title: "Category", image: "gridIcon", placeHolder: "Please select", isButton: true, isText: true)
+                    }
+                    .sheet(isPresented: $showCategorySheet) {
+                        CategoriesBottomSheet(selectedCategory: $selectedCategory, categoryResponse:commonApiVM.categoriesResponse, header: "Select Category", placeholder: "Search Category")
+                            .presentationDetents([.medium, .large])
+                            .presentationDragIndicator(.hidden)
                     }
                     
                     //                    ListView(type: .billing, title: "Billing Cycle", addMore: false, data: $billingData, selectedIndex: $billingIndex)
                     //                        .frame(height: Double(30 + (52 * billingData.count)))
+                    
+                    //MARK: - Billing cycle field
                     Button(action: selectBilling) {
                         FieldView(text: $billingCycle, textValue: selectedBilling?.title ?? "", title: "Billing Cycle", image: "billing", placeHolder: "Select billing cycle", isButton: true, isText: true)
                     }
@@ -263,6 +266,7 @@ struct ManualEntryView: View {
                         }
                     }
                     
+                    //MARK: - Next Charge Date field
                     Button(action: dateSelection) {
                         FieldView(text: $chargeDate, textValue: "", title: "Next Charge Date", image: "Calendar1", placeHolder: "dd/mm/yyyy", isButton: false, isText: true, isDate:true)
                     }
@@ -275,6 +279,7 @@ struct ManualEntryView: View {
                         }
                     )
                     
+                    //MARK: - Optional Details
                     Button(action: optionalDetailsAction) {
                         HStack(spacing: 8) {
                             Text("Optional Details")
@@ -795,10 +800,10 @@ struct ManualEntryView: View {
     }
     
     private func currencySelection() {
-        if commonApiVM.currencyError != nil {
-            commonApiVM.getCurrencies()
-        } else if commonApiVM.currencyResponse != nil {
+        if commonApiVM.currencyResponse != nil {
             showCurrencySheet = true
+        }else{
+            commonApiVM.getCurrencies()
         }
     }
     
@@ -1249,6 +1254,15 @@ struct FieldSuggestionView<Item: Identifiable>: View {
                         closeSuggestions()
                     }
                     .padding(6)
+                
+                if text != ""{
+                    Button(action: {
+                        text = ""
+                    }) {
+                        Image("cross")
+                            .frame(width: 20, height: 20)
+                    }
+                }
             }
             .padding(16)
             .frame(height: 52)
