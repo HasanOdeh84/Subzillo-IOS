@@ -743,8 +743,8 @@ struct SubscriptionPreviewView: View {
                 for i in 0..<subscriptionsData!.count
                 {
                     let objc = subscriptionsData![i]
-                    var currency = (objc.currency ?? "" == "") ? Constants.shared.currencyCode : (objc.currency ?? "")
-                    var logoUrl = getFileName(from: objc.serviceLogo ?? "")
+                    let currency = (objc.currency ?? "" == "") ? Constants.shared.currencyCode : (objc.currency ?? "")
+                    let logoUrl = getFileName(from: objc.serviceLogo ?? "")
                     let subObjc = ConfirmedSubscription(serviceName         : objc.serviceName ?? "",
                                                         serviceLogo         : logoUrl,
                                                         amount              : objc.amount ?? 0.0,

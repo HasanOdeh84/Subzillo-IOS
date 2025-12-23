@@ -220,7 +220,8 @@ struct ReviewExtractedDetailsView: View {
                     globalSubscriptionData?.serviceName     = serviceName.trimmed
                 case .amount:
                     let amountDouble = Double(amount.trimmed) ?? 0.0
-                    if amountDouble == 0.0 || amount.trimmed == ""{
+//                    if amountDouble == 0.0 || amount.trimmed == ""{
+                    if amount.trimmed == ""{
                         toastManager.showToast(message: "Amount is required",style:ToastStyle.error)
                         return
                     }

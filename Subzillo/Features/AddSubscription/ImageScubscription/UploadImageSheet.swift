@@ -40,9 +40,9 @@ struct UploadImageSheet: View {
                     Spacer()
                 }
                 
-                Text(LocalizedStringKey("Upload a screenshot from your bank email to automatically detect subscription payments."))
-                    .font(.appRegular(16))
-                    .foregroundColor(Color.gray)
+//                Text(LocalizedStringKey("Upload a screenshot from your bank email to automatically detect subscription payments."))
+//                    .font(.appRegular(16))
+//                    .foregroundColor(Color.gray)
                 
                 VStack(spacing: 0) {
                     UploadItem(title: "Take Photo", subTitle: "Capture bank notification on screen", image: "camera-02", imageColor: Color.high, action: cameraAction)
@@ -53,7 +53,7 @@ struct UploadImageSheet: View {
                     //                        .overlay(Color.neutral300Border)
                     //                    UploadItem(title: "Paste Text", subTitle: "Copy and paste notification text", image: "text-creation", imageColor: Color.purple100, action: pastTextAction)
                     Divider()
-                    UploadItem(title: "Text Screenshot", subTitle: "Take Screenshot for subscriptions", image: "text-creation", imageColor: Color.purple100, action: openSubscriptionsAction)
+                    UploadItem(title: "Take Screenshot", subTitle: "Take Screenshot for subscriptions", image: "text-creation", imageColor: Color.purple100, action: openSubscriptionsAction)
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .frame(height: 240)
