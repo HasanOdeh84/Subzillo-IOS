@@ -19,6 +19,7 @@ struct UploadImageSheet: View {
     @StateObject var uploadImageVM              = UploadImageViewModel()
     @State private var showPermissionAlert      = false
     @State private var isCamera                 = false
+    @State private var showRedirectionAlert     = false
     
     //MARK: - body
     var body: some View {
@@ -45,16 +46,16 @@ struct UploadImageSheet: View {
 //                    .foregroundColor(Color.gray)
                 
                 VStack(spacing: 0) {
-                    UploadItem(title: "Take Photo", subTitle: "Capture bank notification on screen", image: "camera-02", imageColor: Color.high, action: cameraAction)
+                    UploadItem(title: "Take Photo", subTitle: "Capture bank notification on screen", image: "camera", imageColor: Color.high, action: cameraAction)
                     Divider()
                         .overlay(Color.neutral300Border)
-                    UploadItem(title: "Choose from Gallery", subTitle: "Select existing screenshot", image: "image-02", imageColor: Color.warning, action: galleryAction)
+                    UploadItem(title: "Choose from Gallery", subTitle: "Select existing screenshot", image: "gallery", imageColor: Color.warning, action: galleryAction)
                     //                    Divider()
                     //                        .overlay(Color.neutral300Border)
                     //                    UploadItem(title: "Paste Text", subTitle: "Copy and paste notification text", image: "text-creation", imageColor: Color.purple100, action: pastTextAction)
                     Divider()
                         .overlay(Color.neutral300Border)
-                    UploadItem(title: "Take Screenshot", subTitle: "Take Screenshot for subscriptions", image: "text-creation", imageColor: Color.purple100, action: openSubscriptionsAction)
+                    UploadItem(title: "Take Screenshot", subTitle: "Take Screenshot for subscriptions", image: "screenshot", imageColor: Color.purple100, action: openSubscriptionsAction)
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .frame(height: 240)
@@ -82,6 +83,11 @@ struct UploadImageSheet: View {
             } else {
                 ImagePicker(sourceType: .photoLibrary, selectedImage: $selectedImage)
             }
+        }
+        .sheet(isPresented: $showRedirectionAlert) {
+            AppstoreRedirectionSheet()
+                .presentationDragIndicator(.hidden)
+                .presentationDetents([.height(450)])
         }
         .onChange(of: selectedImage) { _ in uploadImage() }
         .onChange(of: uploadImageVM.hideLoader) { _ in onApi() }
@@ -205,8 +211,8 @@ struct UploadImageSheet: View {
     }
     
     private func openSubscriptionsAction() {
-        dismiss()
-        Constants.shared.OpenSubscriptionsInAppStore()
+//        dismiss()
+        showRedirectionAlert = true
     }
     
     private func pastTextAction() {
@@ -307,7 +313,7 @@ struct UploadItem: View {
             HStack(spacing: 16) {
                 Image(image)
                     .frame(width: 48, height: 48)
-                    .background(imageColor)
+//                    .background(imageColor)
                     .clipShape(RoundedRectangle(cornerRadius: 8))
                 
                 VStack(alignment: .leading, spacing: 0) {
@@ -331,5 +337,60 @@ struct UploadItem: View {
             .padding(16)
             .frame(height: 80)
         }
+    }
+}
+
+struct AppstoreRedirectionSheet: View {
+    
+    //MARK: - Properties
+    @Environment(\.dismiss) private var dismiss
+    
+    //MARK: - body
+    var body: some View {
+        VStack {
+            Capsule()
+                .fill(Color.grayCapsule)
+                .frame(width: 150, height: 5)
+                .padding(.vertical, 24)
+            
+            VStack(alignment: .leading, spacing: 15) {
+                
+                Text(LocalizedStringKey("You will be redirected to the subscription list in Appstore."))
+                    .font(.appSemiBold(24))
+                    .foregroundColor(Color.neutralMain700)
+                    .multilineTextAlignment(.center)
+                
+                Text(LocalizedStringKey("Please follow these steps carefully:"))
+                    .font(.appRegular(18))
+                    .foregroundColor(Color.neutralMain700)
+                    .multilineTextAlignment(.leading)
+                
+                VStack(alignment: .leading, spacing: 5){
+                    Text(LocalizedStringKey("1. Take a screenshot of the required subscription."))
+                        .font(.appRegular(18))
+                        .foregroundColor(Color.neutralMain700)
+                    Text(LocalizedStringKey("2. Come back to the “Upload Screenshot” screen."))
+                        .font(.appRegular(18))
+                        .foregroundColor(Color.neutralMain700)
+                    Text(LocalizedStringKey("3. Click on Choose from Gallery."))
+                        .font(.appRegular(18))
+                        .foregroundColor(Color.neutralMain700)
+                    Text(LocalizedStringKey("4. Select the screenshot you just captured."))
+                        .font(.appRegular(18))
+                        .foregroundColor(Color.neutralMain700)
+                }
+            }
+            
+            CustomButton(title: "Continue", buttonImage: "", action: onContinueAction)
+                .padding(.vertical, 24)
+        }
+        .padding(.horizontal, 24)
+    }
+    
+    //MARK: - Button actions
+    
+    private func onContinueAction() {
+//        dismiss()
+        Constants.shared.OpenSubscriptionsInAppStore()
     }
 }

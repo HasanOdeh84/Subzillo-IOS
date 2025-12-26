@@ -39,12 +39,15 @@ struct ProfileView: View {
                 VStack(spacing: 24){
                     VStack(spacing: 8){
                         ZStack(alignment: .topTrailing) {
-                            WebImage(url: URL(string: "https://stagingsubzillo.krify.com/api/providers/amazon-music.png"))
+                            //                            WebImage(url: URL(string: "https://stagingsubzillo.krify.com/api/providers/amazon-music.png"))
+                            Image(systemName: "person.crop.circle.fill")
                                 .resizable()
-                                .indicator(.activity)
-                                .transition(.fade(duration: 0.5))
+                            //                                .indicator(.activity)
+                            //                                .transition(.fade(duration: 0.5))
                                 .scaledToFit()
                                 .frame(width: 96, height: 96)
+                                .foregroundColor(.gray)//need to remove
+                                .background(Color.white)//need to remove
                                 .overlay(
                                     RoundedRectangle(cornerRadius: 96/2)
                                         .stroke(Color.white, lineWidth: 2)
@@ -71,6 +74,33 @@ struct ProfileView: View {
                             .shadow(color: Color.dropShadow, radius: 4, x: 0, y: 2)
                             .offset(x: 0, y: 64)
                         }
+                        //                        ZStack(alignment: .bottomTrailing) {
+                        //                            Image(systemName: "person.crop.circle.fill")
+                        //                                .resizable()
+                        //                                .scaledToFill()
+                        //                                .frame(width: 150, height: 150)
+                        //                                .foregroundColor(.gray)
+                        //                                .background(Color.white)
+                        //                                .clipShape(Circle())
+                        //                                .overlay(
+                        //                                    Circle()
+                        //                                        .stroke(Color.white, lineWidth: 2)
+                        //                                )
+                        //                                .shadow(color: Color.dropShadow, radius: 10, x: 0, y: 5)
+                        //
+                        //                            Image(systemName: "camera.fill")
+                        //                                .font(.system(size: 20))
+                        //                                .foregroundColor(.white)
+                        //                                .padding(12)
+                        //                                .background(Color.blue)
+                        //                                .clipShape(Circle())
+                        //                                .overlay(
+                        //                                    Circle()
+                        //                                        .stroke(Color.white, lineWidth: 1)
+                        //                                )
+                        //                                .shadow(color: Color.dropShadow, radius: 4, x: 0, y: 2)
+                        //                                .offset(x: -5, y: -5)
+                        //                        }
                         
                         Text("Alaa Hassan")
                             .font(.appRegular(24))

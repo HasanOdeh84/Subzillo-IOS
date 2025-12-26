@@ -271,7 +271,7 @@ struct WelcomeHomeView: View {
         .sheet(isPresented: $showUploadPopup) {
             UploadImageSheet()
                 .presentationDragIndicator(.hidden)
-                .presentationDetents([.height(580)])
+                .presentationDetents([.height(550)])
         }
         .onReceive(NotificationCenter.default.publisher(for: .closeAllBottomSheets)) { _ in
             showUploadPopup = false
