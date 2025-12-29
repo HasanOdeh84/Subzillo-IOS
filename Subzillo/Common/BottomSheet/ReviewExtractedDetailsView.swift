@@ -247,7 +247,7 @@ struct ReviewExtractedDetailsView: View {
                         toastManager.showToast(message: "Please select category",style:ToastStyle.error)
                         return
                     }
-                    globalSubscriptionData?.categoryId = category
+                    globalSubscriptionData?.categoryId = selectedCategory?.id ?? ""
                     globalSubscriptionData?.categoryName = selectedCategory?.name ?? ""
                 case .planType:
                     if planType.trimmed == ""{

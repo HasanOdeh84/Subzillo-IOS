@@ -12,13 +12,15 @@ struct AddFamilyMemberBottomSheet: View {
     
     //MARK: - Properties
     @Environment(\.dismiss) private var dismiss
-    var header                              : String?
-    @Binding var selectedCurrency           : Currency?
-    @Binding var selectedCountry            : Country?
-    @Binding var phoneNumber                : String
-    @Binding var nickName                   : String
-    @Binding var familyColor                : Color
-    let action                              : () -> Void
+    var header                            : String?
+    var description                       : String?
+    var buttonName                        : String?
+    @State var selectedCurrency           : Currency?
+    @State var selectedCountry            : Country?
+    @State var phoneNumber                : String = ""
+    @State var nickName                   : String = ""
+    @State var selectedColor              : Color = Color.clear
+    let action                            : (String, String, String, String) -> Void
     
     //MARK: - body
     var body: some View {
@@ -31,15 +33,17 @@ struct AddFamilyMemberBottomSheet: View {
                 .font(.appRegular(24))
                 .foregroundStyle(.neutralMain700)
                 .padding(.top,24)
+                .multilineTextAlignment(.center)
             
-            Text("Sed ex elit scelerisque Nullam turpis viverra")
+            Text(LocalizedStringKey(description ?? ""))
                 .font(.appRegular(16))
-                .foregroundStyle(.gray)
+                .foregroundStyle(.grayClr)
                 .padding(.top,10)
+                .multilineTextAlignment(.center)
             
             VStack(alignment: .leading, spacing: 24) {
                 
-                ReusableTextField(placeholder   : "Nickname",
+                ReusableTextField2(placeholder   : "Nickname",
                                   text          : $nickName,
                                   header        : "Family Nickname")
                 .padding(.top,20)
@@ -53,16 +57,25 @@ struct AddFamilyMemberBottomSheet: View {
                 .addDoneButton{
                 }
                 
-                Text("Color (To distinguish color family subscriptions)")
+                (
+                Text("Color ")
                     .font(.caption)
-                    .foregroundColor(.gray)
-                    .padding(.bottom, -20)
+                    .foregroundColor(Color.neutralMain700)
+                +
+                Text("(To distinguish color family subscriptions)")
+                    .foregroundColor(Color.neutral500)
+                )
+                .font(.caption)
+                .padding(.bottom, -20)
                 
-                ColorPickerGrid(selectedColor: $familyColor)
+                ColorPickerGrid(selectedColor: $selectedColor)
                 
-                GradientBorderButton(title: "Save",isBtn:true, buttonImage: "profile_add") {
-                    ToastManager.shared.showToast(message: "Coming soon in S4",style:ToastStyle.info)
-                    action()
+                GradientBorderButton(title          : buttonName ?? "Save",
+                                     isBtn          : true,
+                                     buttonImage    : "profile_add") {
+                    let countryCode = selectedCountry?.dialCode ?? ""
+                    let colorHex    = selectedColor.toHex() ?? "#0000FF"
+                    action(nickName, phoneNumber, countryCode, colorHex)
                     dismiss()
                 }
             }

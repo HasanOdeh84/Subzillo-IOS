@@ -58,3 +58,37 @@ struct ReusableTextField: View {
         }
     }
 }
+
+struct ReusableTextField2: View {
+    
+    //MARK: - Properties
+    var placeholder     : String
+    @Binding var text   : String
+    var isEmail         : Bool = false
+    var header          : String?
+    var isDisabled      : Bool = false
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text(LocalizedStringKey(header ?? ""))
+                .font(.appRegular(14))
+                .foregroundColor(Color.neutralMain700)
+            HStack{
+                Image("profile")
+                TextField(placeholder, text: $text)
+                    .keyboardType(isEmail ? .emailAddress : .default)
+                    .padding(6)
+                    .autocapitalization(.none)
+                    .disabled(isDisabled)
+            }
+            .padding(16)
+            .frame(height: 52)
+            .background(.whiteNeutralCardBG)
+            .cornerRadius(12)
+            .overlay(
+                RoundedRectangle(cornerRadius: 12)
+                    .stroke(Color.neutral2200, lineWidth: 1)
+            )
+        }
+    }
+}

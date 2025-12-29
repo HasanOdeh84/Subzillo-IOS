@@ -159,6 +159,7 @@ struct ProfileView: View {
                         Divider()
                             .overlay(Color.border)
                         ProfileItem(title: "My Cards", image: "card", action:{
+//                            profileVM.navigate(to: NavigationRoute.myCards)
                             ToastManager.shared.showToast(message: "Coming soon in S4",style:ToastStyle.info)
                         })
                         Divider()
@@ -174,6 +175,7 @@ struct ProfileView: View {
                         Divider()
                             .overlay(Color.border)
                         ProfileItem(title: "Family Members", image: "familyMembers", action:{
+//                            profileVM.navigate(to: NavigationRoute.familyMembersView)
                             ToastManager.shared.showToast(message: "Coming soon in S4",style:ToastStyle.info)
                         })
                         Divider()

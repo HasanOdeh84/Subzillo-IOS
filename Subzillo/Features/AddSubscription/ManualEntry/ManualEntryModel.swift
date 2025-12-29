@@ -95,6 +95,7 @@ public struct ListFamilyMembersResponseData: Codable, Hashable {
     var phoneNumber         : String? = nil
     var countryCode         : String? = nil
     var color               : String? = nil
+    var subscriptions       : [SubscriptionListData]? = nil
 }
 
 public struct AddCardRequest: Codable {

@@ -11,10 +11,10 @@ import SwiftUI
 extension Color {
     
     static let transparentColor         = Color(hex: "#00000000")
-    static let graphText                = Color(hex: "#353F54")
-    static let graphGradient1           = Color(hex: "#6D28D9")
-    static let graphGradient2           = Color(hex: "#06B6D4")
-    static let graphBorder              = Color(hex: "#DBDBDB")
+//    static let graphText                = Color(hex: "#353F54")
+//    static let graphGradient1           = Color(hex: "#6D28D9")
+//    static let graphGradient2           = Color(hex: "#06B6D4")
+//    static let graphBorder              = Color(hex: "#DBDBDB")
 
 //    static let black                    = Color(hex: "#000000")
 //    static let white                    = Color(hex: "#FFFFFF")
@@ -72,6 +72,15 @@ extension Color {
     
 //    static let confidenceBlue           = Color(hex: "#58A0D9")
 //    static let buttonsText              = Color(hex: "#033A65")
+//    static let blackLG              = Color(hex: "#0F0F0F")
+//    static let grayLG               = Color(hex: "#383838")
+//    static let blueLG               = Color(hex: "#46FFF4")
+//    static let darkBlueLG               = Color(hex: "#2A38B9")
+//    static let orangeLG            = Color(hex: "#FFCEB4")
+//    static let brownLG               = Color(hex: "#B43F27")
+//    static let lightGreenLG               = Color(hex: "#00DB28")
+//    static let greenLG               = Color(hex: "#00A01D")
+//    static let grayText               = Color(hex: "#6C6C6C")
     
 //    static let neutral_2_500            = Color("appNeutral2_500")
 //    static let neutral_2_200            = Color("appNeutral2_200")
@@ -129,4 +138,25 @@ extension Color {
 //            opacity: Double(alpha) / 255
 //        )
 //    }
+    
+    func toHex() -> String? {
+        let uic = UIColor(self)
+        guard let components = uic.cgColor.components, components.count >= 3 else {
+            return nil
+        }
+        let r = Float(components[0])
+        let g = Float(components[1])
+        let b = Float(components[2])
+        var a = Float(1.0)
+
+        if components.count >= 4 {
+            a = Float(components[3])
+        }
+
+        if a != Float(1.0) {
+            return String(format: "%02lX%02lX%02lX%02lX", lroundf(r * 255), lroundf(g * 255), lroundf(b * 255), lroundf(a * 255))
+        } else {
+            return String(format: "%02lX%02lX%02lX", lroundf(r * 255), lroundf(g * 255), lroundf(b * 255))
+        }
+    }
 }

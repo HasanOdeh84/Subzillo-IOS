@@ -72,7 +72,7 @@ struct ColorPickerGrid: View {
             HStack {
                 ForEach(colors, id: \.self) { color in
                     Rectangle()
-                        .frame(width: 45, height: 48)
+                        .frame(width: 48, height: 48)
                         .foregroundStyle(color)
                         .clipShape(.rect(cornerRadius: 4)) // shorthand for RoundedRectangle(cornerRadius: 6)
                         .overlay(

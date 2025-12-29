@@ -24,6 +24,8 @@ class ManualEntryViewModel: ObservableObject {
     private let sessionManager                      : SessionManager
     @Published var isManualEntrySuccess             : Bool?
     @Published var isEditEntrySuccess               : Bool?
+    @Published var isAdd                            : Bool = false
+    @Published var isAddFamilyMember                : Bool = false
     
     init(router: AppIntentRouter = .shared,sessionManager: SessionManager = .shared){
         self.router = router
@@ -45,9 +47,6 @@ class ManualEntryViewModel: ObservableObject {
             if response.data != nil {
                 self.addSubscriptionResponse = response.data
             }
-            //            else{
-            //                ToastManager.shared.showToast(message: response.message ?? "")
-            //            }
             self.isManualEntrySuccess = true
         }
         .store(in: &self.subscriptions)
@@ -100,6 +99,7 @@ class ManualEntryViewModel: ObservableObject {
     }
     
     func addCard(input:AddCardRequest) {
+        isAdd = false
         apiReference.postApi(endPoint: APIEndpoint.addCard, method: .POST,token: authKey,body: input,showLoader: true, responseType: GeneralResponse.self)
             .sink { [unowned self] completion in
                 if case let .failure(error) = completion {
@@ -109,6 +109,7 @@ class ManualEntryViewModel: ObservableObject {
         receiveValue: { response in
             PrintLogger.modelLog(response, type: .response, isInput: false)
             ToastManager.shared.showToast(message: response.message ?? "")
+            self.isAdd = true
         }
         .store(in: &self.subscriptions)
     }
@@ -156,10 +157,23 @@ class ManualEntryViewModel: ObservableObject {
             if response.data != nil {
                 self.addSubscriptionResponse = response.data
             }
-            //            else{
-            //                ToastManager.shared.showToast(message: response.message ?? "")
-            //            }
             self.isEditEntrySuccess = true
+        }
+        .store(in: &self.subscriptions)
+    }
+    
+    func addfamilyMember(input:AddFamilyMemberRequest) {
+        isAddFamilyMember = false
+        apiReference.postApi(endPoint: APIEndpoint.addFamilyMember, method: .POST,token: authKey,body: input,showLoader: true, responseType: GeneralResponse.self)
+            .sink { [unowned self] completion in
+                if case let .failure(error) = completion {
+                    self.handleError(error,endPoint: APIEndpoint.addCard)
+                }
+            }
+        receiveValue: { response in
+            PrintLogger.modelLog(response, type: .response, isInput: false)
+            ToastManager.shared.showToast(message: response.message ?? "")
+            self.isAddFamilyMember = true
         }
         .store(in: &self.subscriptions)
     }

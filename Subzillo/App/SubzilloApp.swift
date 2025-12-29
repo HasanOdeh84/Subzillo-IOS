@@ -227,6 +227,10 @@ struct RootView: View {
                     DuplicateSubDetailsView(subscriptionData: subscriptionData)
                 case .subscriptionsListView:
                     RootTabBar(selectedTab: .subscriptions)
+                case .myCards:
+                    MyCardsView()
+                case .familyMembersView:
+                    FamilyMembersView()
                 }
             }
         }

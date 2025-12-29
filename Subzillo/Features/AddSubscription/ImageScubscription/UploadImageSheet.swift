@@ -41,9 +41,9 @@ struct UploadImageSheet: View {
                     Spacer()
                 }
                 
-//                Text(LocalizedStringKey("Upload a screenshot from your bank email to automatically detect subscription payments."))
-//                    .font(.appRegular(16))
-//                    .foregroundColor(Color.gray)
+                //                Text(LocalizedStringKey("Upload a screenshot from your bank email to automatically detect subscription payments."))
+                //                    .font(.appRegular(16))
+                //                    .foregroundColor(Color.gray)
                 
                 VStack(spacing: 0) {
                     UploadItem(title: "Take Photo", subTitle: "Capture bank notification on screen", image: "camera", imageColor: Color.high, action: cameraAction)
@@ -211,7 +211,7 @@ struct UploadImageSheet: View {
     }
     
     private func openSubscriptionsAction() {
-//        dismiss()
+        //        dismiss()
         showRedirectionAlert = true
     }
     
@@ -313,7 +313,7 @@ struct UploadItem: View {
             HStack(spacing: 16) {
                 Image(image)
                     .frame(width: 48, height: 48)
-//                    .background(imageColor)
+                //                    .background(imageColor)
                     .clipShape(RoundedRectangle(cornerRadius: 8))
                 
                 VStack(alignment: .leading, spacing: 0) {
@@ -364,20 +364,11 @@ struct AppstoreRedirectionSheet: View {
                     .font(.appRegular(18))
                     .foregroundColor(Color.neutralMain700)
                     .multilineTextAlignment(.leading)
-                
-                VStack(alignment: .leading, spacing: 5){
-                    Text(LocalizedStringKey("1. Take a screenshot of the required subscription."))
-                        .font(.appRegular(18))
-                        .foregroundColor(Color.neutralMain700)
-                    Text(LocalizedStringKey("2. Come back to the “Upload Screenshot” screen."))
-                        .font(.appRegular(18))
-                        .foregroundColor(Color.neutralMain700)
-                    Text(LocalizedStringKey("3. Click on Choose from Gallery."))
-                        .font(.appRegular(18))
-                        .foregroundColor(Color.neutralMain700)
-                    Text(LocalizedStringKey("4. Select the screenshot you just captured."))
-                        .font(.appRegular(18))
-                        .foregroundColor(Color.neutralMain700)
+                VStack(alignment: .leading, spacing: 5) {
+                    instructionRow(number: "1.", text: "Take a screenshot of the required subscription.")
+                    instructionRow(number: "2.", text: "Come back to the “Upload Screenshot” screen.")
+                    instructionRow(number: "3.", text: "Click on Choose from Gallery.")
+                    instructionRow(number: "4.", text: "Select the screenshot you just captured.")
                 }
             }
             
@@ -387,10 +378,25 @@ struct AppstoreRedirectionSheet: View {
         .padding(.horizontal, 24)
     }
     
+    //MARK: - User defined methods
+    func instructionRow(number: String, text: String) -> some View {
+        HStack(alignment: .top, spacing: 3) {
+            Text(number)
+                .font(.appRegular(18))
+                .foregroundColor(Color.neutralMain700)
+                .frame(width: 22, alignment: .leading)
+            
+            Text(LocalizedStringKey(text))
+                .font(.appRegular(18))
+                .foregroundColor(Color.neutralMain700)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+    }
+    
     //MARK: - Button actions
     
     private func onContinueAction() {
-//        dismiss()
+        //        dismiss()
         Constants.shared.OpenSubscriptionsInAppStore()
     }
 }

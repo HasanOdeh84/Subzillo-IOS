@@ -663,6 +663,7 @@ struct SubscriptionPreviewView: View {
     
     private func updateProviderData() {
         subscriptionData?.categoryName    = manualEntryVM.providerData?.categoryName ?? ""
+        subscriptionData?.categoryId      = manualEntryVM.providerData?.categoryId ?? ""
     }
     
     //MARK: - Button actions

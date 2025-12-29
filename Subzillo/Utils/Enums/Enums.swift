@@ -35,6 +35,8 @@ enum NavigationRoute: Hashable{
     case addSubscriptionsView
     case duplicateSubDetailsView(subscriptionData: SubscriptionInfo?)
     case subscriptionsListView
+    case myCards
+    case familyMembersView
 }
 
 enum FocusPin {

@@ -36,7 +36,7 @@ struct AddSubscriptionsView: View {
                     .innerBorder(cornerRadius: 8)
                     .padding(.bottom, 16)
                 
-                NormalOptionView(title: "Upload Screenshot", subTitle: "Upload a bill or receipt screenshot to detect details", buttonImage: "uploadScreenshotIcon", titleColor: Color.secondaryPurple700, action: clickOnUploadScreenshot)
+                NormalOptionView(title: "Upload a Screenshot", subTitle: "Upload a bill or receipt screenshot to detect details", buttonImage: "uploadScreenshotIcon", titleColor: Color.secondaryPurple700, action: clickOnUploadScreenshot)
                     .innerBorder(cornerRadius: 8)
                     .padding(.bottom, 16)
                 
