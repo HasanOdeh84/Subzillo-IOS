@@ -15,6 +15,7 @@ struct AddFamilyMemberBottomSheet: View {
     var header                            : String?
     var description                       : String?
     var buttonName                        : String?
+    var buttonImg                         : String? = "profile_add"
     @State var selectedCurrency           : Currency?
     @State var selectedCountry            : Country?
     @State var phoneNumber                : String = ""
@@ -53,7 +54,8 @@ struct AddFamilyMemberBottomSheet: View {
                                  placeholder        : "000 000 000",
                                  selectedCurrency   : $selectedCurrency,
                                  selectedCountry    : $selectedCountry,
-                                 isCountry          : true)
+                                 isCountry          : true,
+                                 fromFamily         : true)
                 .addDoneButton{
                 }
                 
@@ -72,7 +74,7 @@ struct AddFamilyMemberBottomSheet: View {
                 
                 GradientBorderButton(title          : buttonName ?? "Save",
                                      isBtn          : true,
-                                     buttonImage    : "profile_add") {
+                                     buttonImage    : buttonImg) {
                     let countryCode = selectedCountry?.dialCode ?? ""
                     let colorHex    = selectedColor.toHex() ?? "#0000FF"
                     action(nickName, phoneNumber, countryCode, colorHex)

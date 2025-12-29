@@ -15,6 +15,18 @@ struct FamilyMembersView: View {
     @StateObject var manualVM               = ManualEntryViewModel()
     @State private var expandedMemberId     : String? = nil
     @State private var openSwipeCardIndex   : Int? = nil
+    @State private var editingFamily        : EditableFamilyWrapper?
+    @State private var isScrollDisabled     : Bool = false
+    @EnvironmentObject var commonApiVM      : CommonAPIViewModel
+    @StateObject var familyMembersVM        = FamilyMembersViewModel()
+    @State var selectedCountry              : Country?
+    @State var showDeletePopup              : Bool = false
+    @State var deleteFamilyMemberId         : String = ""
+    
+    struct EditableFamilyWrapper: Identifiable {
+        let id = UUID()
+        let data: ListFamilyMembersResponseData
+    }
     
     //MARK: - Body
     var body: some View {
@@ -36,11 +48,13 @@ struct FamilyMembersView: View {
             }
             .frame(height: 32)
             .padding(.top, 16)
-
+            .padding(.bottom, 19)
+            .padding(.horizontal, 5)
+            
             //MARK: Family members list
             if let members = manualVM.listFamilyMembersResponse, !members.isEmpty {
                 ScrollView(showsIndicators: false) {
-                    VStack(spacing: 16) {
+                    VStack(spacing:0) {
                         ForEach(members, id: \.id) { member in
                             FamilyMemberCard(
                                 member              : member,
@@ -55,13 +69,30 @@ struct FamilyMembersView: View {
                                             openSwipeCardIndex = nil // Reset swipes
                                         }
                                     }
+                                },
+                                editBtn: {
+                                    if let countries = commonApiVM.countriesResponse {
+                                        selectedCountry = countries.first(where: { $0.countryCode == member.countryCode })
+                                    }
+                                    editingFamily = EditableFamilyWrapper(data: member)
+                                },
+                                delBtn : {
+                                    deleteFamilyMemberId = member.id ?? ""
+                                    showDeletePopup = true
                                 }
                             )
+                            Divider()
+                                .overlay(Color.border)
                         }
                     }
-                    .padding(.horizontal, 24)
-                    .padding(.bottom, 100)
+                    .cornerRadius(16)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 16)
+                            .stroke(Color.neutral300Border, lineWidth: 1)
+                    )
+                    .padding(5)
                 }
+                .cornerRadius(16)
             } else {
                 //MARK: Empty view
                 VStack(spacing: 24) {
@@ -100,7 +131,7 @@ struct FamilyMembersView: View {
             )
             .padding(.bottom, 20)
         }
-        .padding(.horizontal, 20)
+        .padding(.horizontal, 15)
         .background(Color.neutralBg100)
         .navigationBarBackButtonHidden(true)
         .sheet(isPresented: $openFamilyMemberSheet) {
@@ -122,18 +153,70 @@ struct FamilyMembersView: View {
             .presentationDragIndicator(.hidden)
             .presentationDetents([.height(600)])
         }
+        .sheet(item: $editingFamily) { wrapper in
+            AddFamilyMemberBottomSheet(header           : "Edit Family Member",
+                                       description      : "Edit a family member to manage and share plans together.",
+                                       buttonName       : "Update",
+                                       buttonImg        : "update",
+                                       selectedCountry  : selectedCountry ?? nil,
+                                       phoneNumber      : wrapper.data.phoneNumber ?? "",
+                                       nickName         : wrapper.data.nickName ?? "",
+                                       action: {nickName, phone, countryCode, colorHex in
+                let input = EditFamilyMemberRequest(familyMemberId       : wrapper.data.id ?? "",
+                                                   nickName              : nickName,
+                                                   phoneNumber           : phone,
+                                                   countryCode           : countryCode,
+                                                   color                 : colorHex)
+                if let errorMessage = ProfileValidations.shared.editfamilyMember(input: input) {
+                    ToastManager.shared.showToast(message: errorMessage,style:ToastStyle.error)
+                } else {
+                    familyMembersVM.editFamilyMember(input: input)
+                }
+            })
+            .presentationDetents([.height(600)])
+            .presentationDragIndicator(.hidden)
+        }
         .onAppear {
-            listFamilyMembers()
+            listFamilyMembersApi()
         }
         .onChange(of: manualVM.isAddFamilyMember) { value in
             if value{
-                listFamilyMembers()
+                listFamilyMembersApi()
+            }
+        }
+        .sheet(isPresented: $showDeletePopup) {
+            InfoAlertSheet(
+                onDelegate: {
+                    deleteFamilyMemberApi()
+                }, title    : "Are you sure you want to delete the subscriptions?\nData will be permanently deleted",
+                subTitle    :"",
+                imageName   : "del_red_big",
+                buttonIcon  : "deleteIcon",
+                buttonTitle : "Delete",
+                imageSize   : 70
+            )
+            .presentationDragIndicator(.hidden)
+            .presentationDetents([.height(340)])
+        }
+        .onChange(of: familyMembersVM.isDelete) { value in
+            if value == true{
+                listFamilyMembersApi()
+            }
+        }
+        .onChange(of: familyMembersVM.isEdit) { value in
+            if value == true{
+                listFamilyMembersApi()
             }
         }
     }
     
-    func listFamilyMembers(){
+    //MARK: - User defined methods
+    func listFamilyMembersApi(){
         manualVM.listFamilyMembers(input: ListFamilyMembersRequest(userId: Constants.getUserId()))
+    }
+    
+    func deleteFamilyMemberApi(){
+        familyMembersVM.deleteFamilyMember(input: DeleteFamilyMemberRequest(familyMemberId: deleteFamilyMemberId))
     }
 }
 
@@ -141,70 +224,64 @@ struct FamilyMembersView: View {
     FamilyMembersView()
 }
 
-// Sub-view for the Card
+//MARK: - FamilyMemberCard
 struct FamilyMemberCard: View {
     let member                      : ListFamilyMembersResponseData
     let isExpanded                  : Bool
     @Binding var openSwipeCardIndex : Int?
     let onTap                       : () -> Void
+    let editBtn                     : () -> Void
+    let delBtn                      : () -> Void
     
     var body: some View {
         VStack(spacing: 0) {
             // MARK: - Collapsed Header
-            HStack(spacing: 16) {
-                // Avatar
+            HStack(spacing: 24) {
                 ZStack {
-                    RoundedRectangle(cornerRadius: 8)
+                    RoundedRectangle(cornerRadius: 4)
                         .fill(Color(hex: member.color ?? "#619BEE"))
                         .frame(width: 48, height: 48)
                     
-                    Image(systemName: "person") // Replace with asset/Initials
-                        .foregroundColor(.white)
+                    Image("person")
+                        .frame(width: 20, height: 20)
                 }
                 
-                VStack(alignment: .leading, spacing: 4) {
+                VStack(alignment: .leading, spacing: 8) {
                     Text(member.nickName ?? "Member")
-                        .font(.appBold(16))
+                        .font(.appRegular(16))
                         .foregroundColor(.neutralMain700)
                     
                     Text(member.phoneNumber ?? "")
-                        .font(.appRegular(12))
-                        .foregroundColor(.grayText)
+                        .font(.appRegular(14))
+                        .foregroundColor(.neutral500)
                 }
                 
                 Spacer()
                 
-                // Collapsed Actions (Edit/Delete icons visible when closed)
-                if !isExpanded {
-                    HStack(spacing: 12) {
-                        Button {
-                            // Edit Action
-                        } label: {
-                            Image("edit_gray") // Replace with your asset
-                        }
-                        
-                        Button {
-                            // Delete Action
-                        } label: {
-                            Image("delete_gray") // Replace with your asset
-                        }
+                HStack(spacing: 24) {
+                    Button {
+                        editBtn()
+                    } label: {
+                        Image("edit_gray")
+                    }
+                    
+                    Button {
+                        delBtn()
+                    } label: {
+                        Image("del_gray")
                     }
                 }
             }
             .padding(16)
             .background(Color.white)
-            .contentShape(Rectangle()) // Make full row tappable
+            .contentShape(Rectangle())
             .onTapGesture {
                 onTap()
             }
             
             // MARK: - Expanded Content
             if isExpanded {
-                Divider()
-                    .padding(.horizontal, 16)
-                
                 VStack(spacing: 0) {
-                    
                     // Subscription List
                     if let subs = member.subscriptions, !subs.isEmpty {
                         // Max height ~3 items (~74pt each) -> ~240pt
@@ -229,51 +306,31 @@ struct FamilyMemberCard: View {
                                             isActive: false
                                         )
                                     }
-                                    
-                                    // Separator logic
-                                    if index < subs.count - 1 {
-                                        Divider()
-                                            .padding(.leading, 16)
-                                    }
                                 }
                             }
                         }
                         .frame(maxHeight: 240) // Limit height to ~3 items
                         .scrollDisabled(subs.count <= 3) // Disable scroll if few items
-                    } else {
-                        // No Subscriptions Empty State
-                        Text("No subscriptions assigned")
-                            .font(.appRegular(14))
-                            .foregroundColor(.gray)
-                            .padding(24)
                     }
                     
-                    Divider()
-                    
-                    // Add New Subscription Button
+                    //MARK: Add New Subscription Button
                     Button(action: {
                         print("Add New Subscription tapped for \(member.nickName ?? "")")
                     }) {
                         HStack {
                             Image(systemName: "plus")
                             Text("Add New")
-                                .font(.appRegular(14))
+                                .font(.appRegular(16))
                                 .underline()
                         }
                         .foregroundColor(Color.navyBlueCTA700)
-                        .padding(.vertical, 16)
+                        .padding(.bottom, 16)
                     }
+                    
                 }
                 .background(Color.white)
             }
         }
         .background(Color.white)
-        .cornerRadius(12)
-        .shadow(color: Color.black.opacity(0.05), radius: 4, x: 0, y: 2)
-        // Border
-        .overlay(
-            RoundedRectangle(cornerRadius: 12)
-                .stroke(Color.neutral300Border, lineWidth: 1)
-        )
     }
 }

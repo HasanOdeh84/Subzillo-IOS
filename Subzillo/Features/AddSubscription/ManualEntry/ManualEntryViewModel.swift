@@ -167,7 +167,7 @@ class ManualEntryViewModel: ObservableObject {
         apiReference.postApi(endPoint: APIEndpoint.addFamilyMember, method: .POST,token: authKey,body: input,showLoader: true, responseType: GeneralResponse.self)
             .sink { [unowned self] completion in
                 if case let .failure(error) = completion {
-                    self.handleError(error,endPoint: APIEndpoint.addCard)
+                    self.handleError(error,endPoint: APIEndpoint.addFamilyMember)
                 }
             }
         receiveValue: { response in

@@ -246,13 +246,6 @@ struct SubscriptionsView: View {
                                 onEdit: {
                                     editSubscription(sub: sub)
                                 },
-                                //                                onDelete: {
-                                //                                    var obj = subscriptionsList[index]
-                                //                                    obj.isSelected = true
-                                //                                    subscriptionsList[index] = obj
-                                //                                    showDeletePopup = true
-                                //                                }
-                                
                                 onDelete: {
                                     // Clear any previous selections
                                     for i in subscriptionsList.indices {
@@ -272,50 +265,13 @@ struct SubscriptionsView: View {
                                         toggleSelection(at: index)
                                     },
                                     onLongPress        : {
-                                        //                                        isLongPress = true
                                         handleLongPress(at: index) }
                                 )
                                 .contentShape(Rectangle())
-                                //                                .onTapGesture {
-                                //                                    if openCardIndex == nil && !selectionMode {
-                                //                                        AppIntentRouter.shared.navigate(
-                                //                                            to: .subscriptionMatchView(
-                                //                                                fromList: true,
-                                //                                                subscriptionId: sub.id ?? ""
-                                //                                            )
-                                //                                        )
-                                //                                    }
-                                //                                }
-                                //                                .simultaneousGesture(
-                                //                                    TapGesture().onEnded {
-                                //                                        if !selectionMode{
-                                //                                            AppIntentRouter.shared.navigate(
-                                //                                                to: .subscriptionMatchView(fromList: true, subscriptionId: sub.id ?? "")
-                                //                                            )
-                                //                                        }else{
-                                //                                            if isLongPress{
-                                //                                                toggleSelection(at: index)
-                                //                                            }
-                                //                                        }
-                                //                                    }
-                                //                                )
-                                
-                                
                             }
                             .onTapGesture {
                                 // 🔒 block tap when swipe is open
                                 guard openCardIndex == nil else { return }
-                                
-                                //                                if !selectionMode {
-                                //                                    AppIntentRouter.shared.navigate(
-                                //                                        to: .subscriptionMatchView(
-                                //                                            fromList: true,
-                                //                                            subscriptionId: sub.id ?? ""
-                                //                                        )
-                                //                                    )
-                                //                                } else if !isLongPress {
-                                //                                    toggleSelection(at: index)
-                                //                                }
                                 if selectionMode {
                                     toggleSelection(at: index)
                                 } else {
@@ -564,25 +520,20 @@ struct SubscriptionsView: View {
     }
     
     func editSubscription(sub: SubscriptionListData){
-        let subData = SubscriptionData(id               : sub.id ?? "",
-                                       serviceName      : sub.serviceName ?? "",
-                                       subscriptionType : sub.subscriptionType ?? "",
-                                       amount           : sub.amount ?? 0.0,
-                                       currency         : sub.currency ?? "",
-                                       currencySymbol   : sub.currencySymbol ?? "",
-                                       billingCycle     : sub.billingCycle ?? "",
-                                       nextPaymentDate  : sub.nextPaymentDate ?? "",
-                                       //                                       paymentMethodId  : sub.paymentMethodDataId ?? "",
-                                       //                                       paymentMethod    : sub.paymentMethod ?? "",
-                                       //                                       paymentMethodName: sub.paymentMethodName ?? "",
-                                       paymentMethodId  : sub.paymentMethod ?? "",
-                                       paymentMethod    : sub.paymentMethod ?? "",
-                                       paymentMethodName: sub.paymentMethodName ?? "",
-                                       categoryId       : sub.category ?? "",
-                                       //                                                                   category         : sub.category ?? "",
-                                       categoryName     : sub.categoryName ?? "",
-                                       reason           : sub.notes ?? "",
-                                       //                                                                   subscriptionForName: <#T##String?#>,
+        let subData = SubscriptionData(id                   : sub.id ?? "",
+                                       serviceName          : sub.serviceName ?? "",
+                                       subscriptionType     : sub.subscriptionType ?? "",
+                                       amount               : sub.amount ?? 0.0,
+                                       currency             : sub.currency ?? "",
+                                       currencySymbol       : sub.currencySymbol ?? "",
+                                       billingCycle         : sub.billingCycle ?? "",
+                                       nextPaymentDate      : sub.nextPaymentDate ?? "",
+                                       paymentMethodId      : sub.paymentMethod ?? "",
+                                       paymentMethod        : sub.paymentMethod ?? "",
+                                       paymentMethodName    : sub.paymentMethodName ?? "",
+                                       categoryId           : sub.category ?? "",
+                                       categoryName         : sub.categoryName ?? "",
+                                       reason               : sub.notes ?? "",
                                        subscriptionFor      : sub.subscriptionFor ?? "",
                                        paymentMethodDataId  : sub.paymentMethodDataId ?? "",
                                        paymentMethodDataName: sub.paymentMethodDataName ?? "",
@@ -705,308 +656,6 @@ struct SubscriptionsView: View {
     SubscriptionsView()
 }
 
-//MARK: - Swipe Action card
-//struct SwipeActionCard<Content: View>: View {
-//
-//    let id: Int
-//    @Binding var openCardIndex: Int?
-//    let onEdit: () -> Void
-//    let onDelete: () -> Void
-//    let content: Content
-//    @State private var offsetX: CGFloat = 0
-//    private let maxOffset: CGFloat = -135
-//    @State private var cardHeight: CGFloat = 0
-//
-//    init(
-//        id: Int,
-//        openCardIndex: Binding<Int?>,
-//        onEdit: @escaping () -> Void,
-//        onDelete: @escaping () -> Void,
-//        @ViewBuilder content: () -> Content
-//    ) {
-//        self.id = id
-//        self._openCardIndex = openCardIndex
-//        self.onEdit = onEdit
-//        self.onDelete = onDelete
-//        self.content = content()
-//    }
-//
-//    var body: some View {
-//        ZStack(alignment: .trailing) {
-//            ZStack(alignment: .trailing) {
-//                VStack{
-//                    Button {
-//                        onDelete()
-//                        closeCard()
-//                    } label: {
-//                        VStack(spacing: 8) {
-//                            Image("del_white")
-//                                .frame(width: 24, height: 24)
-//                            Text("Delete")
-//                                .font(.appSemiBold(14))
-//                                .foregroundColor(.white)
-//                        }
-//                        .frame(width: 70, height: 72)
-//                        .background(Color("redColor"))
-//                    }
-//                    .contentShape(Rectangle())
-//
-//                }
-//                .background(Color("redColor"))
-//                .clipShape(
-//                    RoundedCorner(
-//                        radius: 8,
-//                        corners: [.topRight, .bottomRight]
-//                    )
-//                )
-//                .overlay(
-//                    RoundedCorner(
-//                        radius: 8,
-//                        corners: [.topRight, .bottomRight]
-//                    )
-//                    .stroke(Color.neutral300Border, lineWidth: 1)
-//                )
-//                .frame(width: 80)
-//
-//                VStack{
-//                    Button {
-//                        onEdit()
-//                        closeCard()
-//                    } label: {
-//                        VStack(spacing: 8) {
-//                            Image("edit_white")
-//                                .frame(width: 24, height: 24)
-//                            Text("Edit")
-//                                .font(.appSemiBold(14))
-//                                .foregroundColor(.white)
-//                        }
-//                        .frame(width: 70, height: 72)
-//                        .background(Color("green"))
-//                    }
-//                    .contentShape(Rectangle())
-//
-//                }
-//                .background(Color("green"))
-//                .clipShape(
-//                    RoundedCorner(
-//                        radius: 8,
-//                        corners: [.topRight, .bottomRight]
-//                    )
-//                )
-//                .overlay(
-//                    RoundedCorner(
-//                        radius: 8,
-//                        corners: [.topRight, .bottomRight]
-//                    )
-//                    .stroke(Color.neutral300Border, lineWidth: 1)
-//                )
-//                .frame(width: 70)
-//                .offset(x: -70)
-//            }
-//            .contentShape(Rectangle())
-//
-//            content
-//                .offset(x: offsetX)
-////                .contentShape(Rectangle())
-//                .gesture(
-//                    DragGesture()
-//                        .onChanged { value in
-//                            if openCardIndex != id {
-//                                openCardIndex = id
-//                            }
-//
-//                            let translation = value.translation.width
-//                            if translation < 0 {
-//                                offsetX = max(translation, maxOffset)
-//                            } else {
-//                                offsetX = min(translation, 0)
-//                            }
-//                        }
-//                        .onEnded { value in
-//                            if value.translation.width < -60 {
-//                                openCard()
-//                            } else {
-//                                closeCard()
-//                            }
-//                        }
-//                )
-//                .onChange(of: openCardIndex) { newValue in
-//                    if newValue != id {
-//                        closeCard(animated: true)
-//                    }
-//                }
-//        }
-//        .animation(.easeInOut(duration: 0.25), value: offsetX)
-//    }
-//
-//    private func openCard() {
-//        offsetX = maxOffset
-//        openCardIndex = id
-//    }
-//
-//    private func closeCard(animated: Bool = false) {
-//        if animated {
-//            withAnimation {
-//                offsetX = 0
-//            }
-//        } else {
-//            offsetX = 0
-//        }
-//        if openCardIndex == id {
-//            openCardIndex = nil
-//        }
-//    }
-//}
-
-//struct SwipeActionCard<Content: View>: View {
-//
-//    let id: Int
-//    @Binding var openCardIndex: Int?
-//    let onEdit: () -> Void
-//    let onDelete: () -> Void
-//    let content: Content
-//
-//    @State private var offsetX: CGFloat = 0
-//    private let maxOffset: CGFloat = -135
-//
-//    init(
-//        id: Int,
-//        openCardIndex: Binding<Int?>,
-//        onEdit: @escaping () -> Void,
-//        onDelete: @escaping () -> Void,
-//        @ViewBuilder content: () -> Content
-//    ) {
-//        self.id = id
-//        self._openCardIndex = openCardIndex
-//        self.onEdit = onEdit
-//        self.onDelete = onDelete
-//        self.content = content()
-//    }
-//
-//    var body: some View {
-//        ZStack(alignment: .trailing) {
-//
-//            // Trailing buttons (no gestures here, just Buttons)
-//            ZStack(alignment: .trailing) {
-//                // Delete
-//                Button {
-//                    onDelete()
-//                    closeCard()
-//                } label: {
-//                    VStack(spacing: 8) {
-//                        Image("del_white")
-//                            .frame(width: 24, height: 24)
-//                        Text("Delete")
-//                            .font(.appSemiBold(14))
-//                            .foregroundColor(.white)
-//                    }
-//                    .frame(width: 70, height: 72)
-//                    .background(Color("redColor"))
-//                }
-//                .background(Color("redColor"))
-//                .clipShape(
-//                    RoundedCorner(
-//                        radius: 8,
-//                        corners: [.topRight, .bottomRight]
-//                    )
-//                )
-//                .overlay(
-//                    RoundedCorner(
-//                        radius: 8,
-//                        corners: [.topRight, .bottomRight]
-//                    )
-//                    .stroke(Color.neutral300Border, lineWidth: 1)
-//                )
-//                .frame(width: 80)
-//
-//                // Edit
-//                Button {
-//                    onEdit()
-//                    closeCard()
-//                } label: {
-//                    VStack(spacing: 8) {
-//                        Image("edit_white")
-//                            .frame(width: 24, height: 24)
-//                        Text("Edit")
-//                            .font(.appSemiBold(14))
-//                            .foregroundColor(.white)
-//                    }
-//                    .frame(width: 70, height: 72)
-//                    .background(Color("green"))
-//                }
-//                .background(Color("green"))
-//                .clipShape(
-//                    RoundedCorner(
-//                        radius: 8,
-//                        corners: [.topRight, .bottomRight]
-//                    )
-//                )
-//                .overlay(
-//                    RoundedCorner(
-//                        radius: 8,
-//                        corners: [.topRight, .bottomRight]
-//                    )
-//                    .stroke(Color.neutral300Border, lineWidth: 1)
-//                )
-//                .frame(width: 70)
-//                .offset(x: -70)
-//            }
-//            //            .contentShape(Rectangle())
-//
-//            // Foreground card with drag
-//            content
-//                .offset(x: offsetX)
-//            //                .contentShape(Rectangle())
-//                .gesture(
-//                    DragGesture()
-//                        .onChanged { value in
-//                            if openCardIndex != id {
-//                                openCardIndex = id
-//                            }
-//
-//                            let translation = value.translation.width
-//                            if translation < 0 {
-//                                offsetX = max(translation, maxOffset)
-//                            } else {
-//                                offsetX = min(translation, 0)
-//                            }
-//                        }
-//                        .onEnded { value in
-//                            if value.translation.width < -60 {
-//                                openCard()
-//                            } else {
-//                                closeCard()
-//                            }
-//                        }
-//                )
-//                .onChange(of: openCardIndex) { newValue in
-//                    if newValue != id {
-//                        closeCard(animated: true)
-//                    }
-//                }
-//        }
-//        .animation(.easeInOut(duration: 0.25), value: offsetX)
-//    }
-//
-//    private func openCard() {
-//        offsetX = maxOffset
-//        openCardIndex = id
-//    }
-//
-//    private func closeCard(animated: Bool = false) {
-//        if animated {
-//            withAnimation {
-//                offsetX = 0
-//            }
-//        } else {
-//            offsetX = 0
-//        }
-//        if openCardIndex == id {
-//            openCardIndex = nil
-//        }
-//    }
-//}
-
 //MARK: - SwipeActionCard
 struct SwipeActionCard<Content: View>: View {
     
@@ -1038,70 +687,6 @@ struct SwipeActionCard<Content: View>: View {
     
     var body: some View {
         ZStack(alignment: .trailing) {
-            
-            // ✅ Swipe buttons — SIDE BY SIDE
-            //            HStack(spacing: 0) {
-            //
-            //                // Edit
-            //                Button {
-            //                    onEdit()
-            //                    closeCard()
-            //                } label: {
-            //                    VStack(spacing: 8) {
-            //                        Image("edit_white")
-            //                        Text("Edit")
-            //                            .font(.appSemiBold(14))
-            //                            .foregroundColor(.white)
-            //                    }
-            //                    .frame(width: 70, height: 72)
-            //                    .background(Color("green"))
-            //                    .clipShape(
-            //                        RoundedCorner(
-            //                            radius: 8,
-            //                            corners: [.topRight, .bottomRight]
-            //                        )
-            //                    )
-            //                    .overlay(
-            //                        RoundedCorner(
-            //                            radius: 8,
-            //                            corners: [.topRight, .bottomRight]
-            //                        )
-            //                        .stroke(Color.neutral300Border, lineWidth: 1)
-            //                    )
-            //                }
-            //                .buttonStyle(.plain)
-            //
-            //                // Delete
-            //                Button {
-            //                    onDelete()
-            //                    closeCard()
-            //                } label: {
-            //                    VStack(spacing: 8) {
-            //                        Image("del_white")
-            //                        Text("Delete")
-            //                            .font(.appSemiBold(14))
-            //                            .foregroundColor(.white)
-            //                    }
-            //                    .frame(width: 70, height: 72)
-            //                    .background(Color("redColor"))
-            //                    .clipShape(
-            //                        RoundedCorner(
-            //                            radius: 8,
-            //                            corners: [.topRight, .bottomRight]
-            //                        )
-            //                    )
-            //                    .overlay(
-            //                        RoundedCorner(
-            //                            radius: 8,
-            //                            corners: [.topRight, .bottomRight]
-            //                        )
-            //                        .stroke(Color.neutral300Border, lineWidth: 1)
-            //                    )
-            //                }
-            //                .offset(x: -10)          // ✅ overlays Edit
-            //                .buttonStyle(.plain)
-            //
-            //            }
             
             // DELETE (foreground, overlays Edit)
             Button {
@@ -1160,8 +745,8 @@ struct SwipeActionCard<Content: View>: View {
                 )
             }
             .buttonStyle(.plain)
-            .offset(x: -65)          // ✅ overlays Edit
-            .zIndex(0)               // ✅ ensures on top
+            .offset(x: -65)          // overlays Edit
+            .zIndex(0)               // ensures on top
             
             // Foreground content
             content
@@ -1208,16 +793,11 @@ struct SwipeActionCard<Content: View>: View {
                 }
         }
         .clipShape(
-            RoundedRectangle(cornerRadius: 8)   // ✅ ONE rounded container
+            RoundedRectangle(cornerRadius: 8)   // ONE rounded container
         )
         .mask(
             RoundedRectangle(cornerRadius: 8, style: .continuous)
         )
-        //        .overlay(
-        //            RoundedRectangle(cornerRadius: 8, style: .continuous)
-        //                .stroke(Color.black, lineWidth: 1)//neutral300Border
-        //        )
-        //        .animation(.interactiveSpring(), value: offsetX)
     }
     
     private func openCard() {

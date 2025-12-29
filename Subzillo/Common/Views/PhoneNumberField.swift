@@ -25,6 +25,7 @@ struct PhoneNumberField: View {
     @State var fromSingup                   = false
     @State var fromPreview                  = false
     @State var fromSocailLogin              = false
+    @State var fromFamily                   = false
     @State var countryCode                  = ""
     @State var flag                         = ""
     
@@ -238,7 +239,9 @@ struct PhoneNumberField: View {
             }
         }
         if !fromSingup{
-            phoneNumber = ""
+            if !fromFamily{
+                phoneNumber = ""
+            }
         }
         formatterService.updateRegion(selectedCountry?.countryCode ?? "")
     }

@@ -57,16 +57,16 @@ enum APIEndpoint: String {
     case textSubscription               = "/textSubscription"
     case getServiceProvidersList        = "/getServiceProvidersList"
     case fetchProviderData              = "/fetchProviderData"
-
+    case editFamilyMember               = "/editFamilyMember"
+    case deleteCard                     = "/deleteCard"
+    case editCard                       = "/editCard"
+    case deleteFamilyMember             = "/deleteFamilyMember"
+    
     //common api's
     case getCategories                  = "/getCategories"
     case getPaymentMethods              = "/getPaymentMethods"
     case getCurrencies                  = "/getCurrencies"
     case getCountryCodes                = "/getCountryCodes"
-
-    //need to implement
-    case deleteCard                     = "/deleteCard"
-    case editCard                       = "/editCard"
     
     //old api's
     case updateUserInfo                 = "/updateUserInfo"

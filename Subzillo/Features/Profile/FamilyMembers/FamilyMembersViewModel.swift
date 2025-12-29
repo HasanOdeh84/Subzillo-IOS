@@ -1,8 +1,8 @@
 //
-//  MyCardsViewModel.swift
+//  FamilyMembersViewModel.swift
 //  Subzillo
 //
-//  Created by KSMACMINI-019 on 26/12/25.
+//  Created by KSMACMINI-019 on 29/12/25.
 //
 
 import Foundation
@@ -11,7 +11,7 @@ import SwiftUI
 import SwiftUICore
 import UIKit
 
-class MyCardsViewModel: ObservableObject {
+class FamilyMembersViewModel: ObservableObject {
     
     private var subscriptions                       = Set<AnyCancellable>()
     var apiReference                                = NetworkRequest.shared
@@ -26,12 +26,12 @@ class MyCardsViewModel: ObservableObject {
         self.sessionManager = sessionManager
     }
     
-    func editCard(input:EditCardRequest) {
+    func editFamilyMember(input:EditFamilyMemberRequest) {
         isEdit = false
-        apiReference.postApi(endPoint: APIEndpoint.editCard, method: .POST,token: authKey,body: input,showLoader: true, responseType: GeneralResponse.self)
+        apiReference.postApi(endPoint: APIEndpoint.editFamilyMember, method: .POST,token: authKey,body: input,showLoader: true, responseType: GeneralResponse.self)
             .sink { [unowned self] completion in
                 if case let .failure(error) = completion {
-                    self.handleError(error,endPoint: APIEndpoint.editCard)
+                    self.handleError(error,endPoint: APIEndpoint.editFamilyMember)
                 }
             }
         receiveValue: { response in
@@ -42,12 +42,12 @@ class MyCardsViewModel: ObservableObject {
         .store(in: &self.subscriptions)
     }
     
-    func deleteCard(input:DeleteCardRequest) {
+    func deleteFamilyMember(input:DeleteFamilyMemberRequest) {
         isDelete = false
-        apiReference.postApi(endPoint: APIEndpoint.deleteCard, method: .POST,token: authKey,body: input,showLoader: true, responseType: GeneralResponse.self)
+        apiReference.postApi(endPoint: APIEndpoint.deleteFamilyMember, method: .POST,token: authKey,body: input,showLoader: true, responseType: GeneralResponse.self)
             .sink { [unowned self] completion in
                 if case let .failure(error) = completion {
-                    self.handleError(error,endPoint: APIEndpoint.deleteCard)
+                    self.handleError(error,endPoint: APIEndpoint.deleteFamilyMember)
                 }
             }
         receiveValue: { response in
@@ -67,3 +67,4 @@ class MyCardsViewModel: ObservableObject {
         print("API Error : \(endPoint) - \(apiError.localizedDescription)")
     }
 }
+
