@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.2.0] (Beta) - 2025-12-29
+
+### Delivered
+- Sprint3 new client feedback points.
+
 ## [1.14.0] (Alpha) - 2025-12-29
 
 ### Fixed
