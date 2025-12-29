@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.14.0] (Alpha) - 2025-12-29
+
+### Fixed
+- Sprint3 client feedback Bug fixes.
+
 ## [1.13.0] (Alpha) - 2025-12-26
 
 ### Updated
