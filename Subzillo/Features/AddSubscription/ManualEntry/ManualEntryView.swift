@@ -228,11 +228,7 @@ struct ManualEntryView: View {
                         .onChange(of: selectedCurrency) { newCurrency in
                             guard let currency = newCurrency else { return }
                             if serviceName != ""{
-                                if isFromEdit && isInitialCategory{
-                                    isInitialCategory = false
-                                }else{
-                                    fetchProviderDataApi()
-                                }
+                                fetchProviderDataApi()
                             }
                         }
                     }
@@ -583,9 +579,13 @@ struct ManualEntryView: View {
     }
     
     private func updateProviderData() {
-        if addSubscriptionVM.providerData?.categoryName ?? "" != "" && addSubscriptionVM.providerData?.categoryId ?? "" != ""{
-            if let categories = commonApiVM.categoriesResponse {
-                selectedCategory = categories.first(where: { $0.id?.lowercased() == addSubscriptionVM.providerData?.categoryId ?? ""})
+        if isFromEdit && isInitialCategory{
+            isInitialCategory = false
+        }else{
+            if addSubscriptionVM.providerData?.categoryName ?? "" != "" && addSubscriptionVM.providerData?.categoryId ?? "" != ""{
+                if let categories = commonApiVM.categoriesResponse {
+                    selectedCategory = categories.first(where: { $0.id?.lowercased() == addSubscriptionVM.providerData?.categoryId ?? ""})
+                }
             }
         }
     }

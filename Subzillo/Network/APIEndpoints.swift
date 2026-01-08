@@ -8,7 +8,7 @@ enum urlType:Int{
     case prod  = 2
 }
 
-let Environment = urlType.stage
+let Environment = urlType.dev
 var baseurl: String {
     switch Environment {
     case .dev:

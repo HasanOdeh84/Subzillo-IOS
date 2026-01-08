@@ -352,14 +352,22 @@ struct UploadItem: View {
     var image                   : String
     var imageColor              : Color
     var action                  : () -> Void
+    var isEmail                 = false
     
     var body: some View {
         Button(action: action) {
             HStack(spacing: 16) {
-                Image(image)
-                    .frame(width: 48, height: 48)
-                //                    .background(imageColor)
-                    .clipShape(RoundedRectangle(cornerRadius: 8))
+                if isEmail{
+                    Image(image)
+                        .frame(width: 48, height: 48)
+                        .background(imageColor)
+                        .clipShape(RoundedRectangle(cornerRadius: 8))
+                }else{
+                    Image(image)
+                        .frame(width: 48, height: 48)
+                    //                    .background(imageColor)
+                        .clipShape(RoundedRectangle(cornerRadius: 8))
+                }
                 
                 VStack(alignment: .leading, spacing: 0) {
                     Text(title)

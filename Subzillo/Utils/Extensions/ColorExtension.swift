@@ -81,6 +81,7 @@ extension Color {
     //    static let lightGreenLG               = Color(hex: "#00DB28")
     //    static let greenLG               = Color(hex: "#00A01D")
     //    static let grayText               = Color(hex: "#6C6C6C")
+    //    static let systemInfo               = Color(hex: "#DFEEFA")
     
     //    static let neutral_2_500            = Color("appNeutral2_500")
     //    static let neutral_2_200            = Color("appNeutral2_200")

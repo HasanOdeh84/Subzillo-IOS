@@ -37,6 +37,7 @@ enum NavigationRoute: Hashable{
     case subscriptionsListView
     case myCards
     case familyMembersView
+    case connectEmail
 }
 
 enum FocusPin {

@@ -44,6 +44,7 @@ struct SubscriptionPreviewView: View {
     
     @State var fillRatio                        : CGFloat = 0.0
     @State var isInitial                        = true
+    @State var isServiceChanged                 = false
     @State private var previousBillingCycle     : String?
     
     //MARK: - body
@@ -178,6 +179,7 @@ struct SubscriptionPreviewView: View {
                                     }) {
                                         ReviewExtractedDetailsView(onDelegate: {
                                             print("clicked done")
+                                            isServiceChanged = true
                                         },
                                                                    detailType   : ReviewExtractedType.service,
                                                                    confidence   : subscriptionData?.serviceNameConfidence ?? 0.0,
@@ -297,9 +299,10 @@ struct SubscriptionPreviewView: View {
                                 .sheet(isPresented: $showBillingCycleBottom) {
                                     ReviewExtractedDetailsView(onDelegate: {
                                     },
-                                                               detailType   : ReviewExtractedType.billingCycle,
-                                                               confidence   : subscriptionData?.billingCycleConfidence ?? 0.0,
-                                                               extractedData: subscriptionData)
+                                                               detailType           : ReviewExtractedType.billingCycle,
+                                                               confidence           : subscriptionData?.billingCycleConfidence ?? 0.0,
+                                                               extractedData        : subscriptionData,
+                                                               providerPlansList    : manualEntryVM.providerData?.providerSubscriptionPlansList)
                                     .id(ReviewExtractedType.billingCycle)
                                     .presentationDragIndicator(.hidden)
                                     .presentationDetents([.height(400)])
@@ -488,6 +491,7 @@ struct SubscriptionPreviewView: View {
         .padding(.top, 10)
         .background(.neutralBg100)
         .navigationBarBackButtonHidden(true)
+        //MARK: - OnAppear
         .onAppear{
             numberOfSubscriptions = subscriptionsData?.count ?? 0
             getSubDetails()
@@ -500,6 +504,9 @@ struct SubscriptionPreviewView: View {
             }
             updateSubDetails()
             manualEntryVM.getServiceProvidersList()
+            if subscriptionData?.serviceName ?? "" != ""{
+                fetchProviderDataApi()
+            }
         }
         .onChange(of: globalSubscriptionData) { _ in updateSubDetails() }
         .onChange(of: commonApiVM.currencyResponse) { _ in getSubDetails() }
@@ -582,13 +589,11 @@ struct SubscriptionPreviewView: View {
                     AppIntentRouter.shared.navigate(to: .duplicateSubscriptionsView(duplicateSubsList: updatedDuplicates))
                 }
                 else{
-                    //                AppIntentRouter.shared.navigate(to: .addSubscriptionsView)
                     playerManager.pausePlayback()
                     AppIntentRouter.shared.navigate(to: .subscriptionsListView)
                 }
             }
             else{
-                //            AppIntentRouter.shared.navigate(to: .addSubscriptionsView)
                 playerManager.pausePlayback()
                 AppIntentRouter.shared.navigate(to: .subscriptionsListView)
             }
@@ -665,8 +670,11 @@ struct SubscriptionPreviewView: View {
     }
     
     private func updateProviderData() {
-        subscriptionData?.categoryName    = manualEntryVM.providerData?.categoryName ?? ""
-        subscriptionData?.categoryId      = manualEntryVM.providerData?.categoryId ?? ""
+        if isServiceChanged{
+            isServiceChanged = false
+            subscriptionData?.categoryName    = manualEntryVM.providerData?.categoryName ?? ""
+            subscriptionData?.categoryId      = manualEntryVM.providerData?.categoryId ?? ""
+        }
     }
     
     //MARK: - Button actions
@@ -716,17 +724,12 @@ struct SubscriptionPreviewView: View {
     }
     
     private func onPreviousAction() {
-        /*if let errorMessage = ManualEntryValidations.shared.updateManualEntry(input: subscriptionData!) {
-         ToastManager.shared.showToast(message: errorMessage,style:ToastStyle.error)
-         }
-         else{*/
         currentSubscriptions = currentSubscriptions - 1
         if currentSubscriptions <= 1
         {
             currentSubscriptions = 1
         }
         getSubDetails()
-        // }
     }
     
     private func onSaveAction() {
