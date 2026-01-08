@@ -65,6 +65,7 @@ public struct SubscriptionData: Codable, Hashable {
     var cardNumber                  : String?
     var nickName                    : String?
     var color                       : String?
+    var title                       : String?
 }
 
 extension SubscriptionData {

@@ -34,6 +34,7 @@ class CommonAPIViewModel: ObservableObject {
     
     //MARK: - API calls
     func getUserInfo(input:getUserInfoRequest) {
+        self.userInfoResponse = nil
         apiReference.postApi(endPoint: APIEndpoint.getUserInfo, method: .POST,token: authKey,body: input,showLoader: true, responseType: getUserInfoResponse.self)
             .sink { [unowned self] completion in
                 if case let .failure(error) = completion {

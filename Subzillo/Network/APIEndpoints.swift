@@ -61,6 +61,8 @@ enum APIEndpoint: String {
     case deleteCard                     = "/deleteCard"
     case editCard                       = "/editCard"
     case deleteFamilyMember             = "/deleteFamilyMember"
+    case updateProfile                  = "/updateProfile"
+    case homeYearlyGraph                = "/homeYearlyGraph"
     
     //common api's
     case getCategories                  = "/getCategories"

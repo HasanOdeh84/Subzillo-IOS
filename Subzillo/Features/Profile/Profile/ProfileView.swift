@@ -16,14 +16,24 @@ struct ProfileView: View {
     @EnvironmentObject var picker           : MediaPickerManager
     @State private var selectedImage        : UIImage?
     @State private var selectedDocumentName : String?
-    @StateObject private var commonApiVM    = CommonAPIViewModel()
     @EnvironmentObject var router           : AppIntentRouter
-    @State var appVersion   = ""
-    @State var buildNumber  = ""
-    @State var fullName     = "Alaa Hassan"
-    @State var email        = "allhassn@gmail.com"
-    @State var mobile       = "+971 123-4567"
-    @State var currency     = "USD"
+    @State var appVersion                   = ""
+    @State var buildNumber                  = ""
+    @State var fullName                     = "Alaa Hassan"
+    @State var email                        = "allhassn@gmail.com"
+    @State var mobile                       = "+971 123-4567"
+    @State var currency                     = "USD"
+    @EnvironmentObject var commonApiVM      : CommonAPIViewModel
+    @State var selectedAccountType          : AccountType?
+    @State private var showVerifyOtpSheet   = false
+    
+    @State var emailVerify                  = ""
+    @State var mobileVerify                 = ""
+    @State var countryCodeVerify            = ""
+    @State var accountTypeVerify            = 2
+    
+    @State var showUploadPopup              : Bool = false
+    @State private var isUploading          = false
     
     //MARK: - Body
     var body: some View {
@@ -39,15 +49,15 @@ struct ProfileView: View {
                 VStack(spacing: 24){
                     VStack(spacing: 8){
                         ZStack(alignment: .topTrailing) {
-                            //                            WebImage(url: URL(string: "https://stagingsubzillo.krify.com/api/providers/amazon-music.png"))
+//                            WebImage(url: URL(string: commonApiVM.userInfoResponse?.profileImage ?? ""))
                             Image(systemName: "person.crop.circle.fill")
                                 .resizable()
                             //                                .indicator(.activity)
                             //                                .transition(.fade(duration: 0.5))
                                 .scaledToFit()
                                 .frame(width: 96, height: 96)
-                                .foregroundColor(.gray)//need to remove
-                                .background(Color.white)//need to remove
+                                .foregroundColor(.gray)
+                                .background(Color.white)
                                 .overlay(
                                     RoundedRectangle(cornerRadius: 96/2)
                                         .stroke(Color.white, lineWidth: 2)
@@ -57,6 +67,8 @@ struct ProfileView: View {
                             
                             VStack(spacing: 0) {
                                 Button(action: {
+                                    ToastManager.shared.showToast(message: "Coming soon in S4",style:ToastStyle.info)
+//                                    showUploadPopup = true
                                 }) {
                                     Image("camera_white")
                                         .frame(width: 16, height: 16)
@@ -102,13 +114,15 @@ struct ProfileView: View {
                         //                                .offset(x: -5, y: -5)
                         //                        }
                         
-                        Text("Alaa Hassan")
+                        Text(fullName)
                             .font(.appRegular(24))
                             .foregroundStyle(Color.neutralMain700)
+                            .multilineTextAlignment(.center)
                         
-                        Text("+971 258741369")
+                        Text(mobile)
                             .font(.appRegular(18))
                             .foregroundStyle(Color.blueMain700)
+                            .multilineTextAlignment(.center)
                     }
                     
                     GradientBgBtn(title: "Upgrade today and save 30%", image: "percentage", action: {
@@ -127,21 +141,25 @@ struct ProfileView: View {
                         Divider()
                             .overlay(Color.border)
                         AccountInfo(title: "Full Name", subTitle: fullName) {
+//                            selectedAccountType = .name
                             ToastManager.shared.showToast(message: "Coming soon in S4",style:ToastStyle.info)
                         }
                         Divider()
                             .overlay(Color.border)
                         AccountInfo(title: "Email", subTitle: email) {
+//                            selectedAccountType = .email
                             ToastManager.shared.showToast(message: "Coming soon in S4",style:ToastStyle.info)
                         }
                         Divider()
                             .overlay(Color.border)
                         AccountInfo(title: "Mobile Number", subTitle: mobile) {
+//                            selectedAccountType = .mobile
                             ToastManager.shared.showToast(message: "Coming soon in S4",style:ToastStyle.info)
                         }
                         Divider()
                             .overlay(Color.border)
                         AccountInfo(title: "Currency", subTitle: currency) {
+//                            selectedAccountType = .currency
                             ToastManager.shared.showToast(message: "Coming soon in S4",style:ToastStyle.info)
                         }
                     }
@@ -219,14 +237,88 @@ struct ProfileView: View {
                 .onAppear{
                     appVersion = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? ""
                     buildNumber = Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? ""
+                    getUserDetailsApi()
                 }
+                .onChange(of: commonApiVM.userInfoResponse) { _ in updateUserInfo() }
             }
         }
         .background(.neutralBg100)
         .ignoresSafeArea()
+        .sheet(item: $selectedAccountType) { type in
+            EditAccountBottomSheet(onDelegate       : {
+            },
+                                   accountType      : type,
+                                   name             : fullName,
+                                   email            : email,
+                                   mobile           : commonApiVM.userInfoResponse?.phoneNumber ?? "",
+                                   currency         : currency,
+                                   currencySymbol   : commonApiVM.userInfoResponse?.preferredCurrencySymbol ?? "",
+                                   action           : { name, email, mobile, currency, type, countryCode, currencySymbol in
+                let input = UpdateProfileRequest(userId         : Constants.getUserId(),
+                                                 type           : type,
+                                                 fullName       : name,
+                                                 email          : email,
+                                                 phoneNumber    : mobile,
+                                                 countryCode    : countryCode,
+                                                 currency       : currency,
+                                                 currencySymbol : currencySymbol)
+                emailVerify         = email
+                mobileVerify        = mobile
+                countryCodeVerify   = countryCode
+                accountTypeVerify   = type
+                profileVM.updateProfile(input: input)
+            })
+            .presentationDetents([.height(320)])
+            .presentationDragIndicator(.hidden)
+        }
+        .sheet(isPresented: $showVerifyOtpSheet) {
+            VerifyOtpBottomSheet(verifyData: LoginSignupVerifyData(verifyType   : accountTypeVerify == 2 ? 2 : 1,
+                                                                   email        : emailVerify,
+                                                                   phoneNumber  : mobileVerify,
+                                                                   countryCode  : countryCodeVerify),
+                                 onDelegate:{
+                getUserDetailsApi()
+            })
+            .presentationDetents([.height(550)])
+            .presentationDragIndicator(.hidden)
+        }
+        .onChange(of: profileVM.isUpdate) { value in
+            if value{
+                if self.accountTypeVerify == 2 || self.accountTypeVerify == 3{
+                    showVerifyOtpSheet = true
+                }
+                getUserDetailsApi()
+            }
+        }
+        .sheet(isPresented: $showUploadPopup, onDismiss: {
+        }) {
+            UploadImageSheet(isUploading: $isUploading, fromProfile: true, onDelegate: {
+                getUserDetailsApi()
+            })
+                .presentationDragIndicator(.hidden)
+                .presentationDetents([.height(315)])
+                .interactiveDismissDisabled(isUploading)
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .closeAllBottomSheets)) { _ in
+            showUploadPopup = false
+        }
+    }
+    
+    //MARK: - User defined methods
+    func updateUserInfo()
+    {
+        fullName   = "Alekya"//commonApiVM.userInfoResponse?.fullName ?? ""
+        email      = "alekhya@krify.com"//commonApiVM.userInfoResponse?.email ?? ""
+        mobile     = "+91 9676442388"//"\(commonApiVM.userInfoResponse?.countryCode ?? "") \(commonApiVM.userInfoResponse?.phoneNumber ?? "")"
+        currency   = "INR"//commonApiVM.userInfoResponse?.preferredCurrency ?? Constants.shared.regionCode
+    }
+    
+    func getUserDetailsApi(){
+        commonApiVM.getUserInfo(input: getUserInfoRequest(userId: Constants.getUserId()))
     }
 }
 
 #Preview {
     ProfileView()
 }
+

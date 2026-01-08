@@ -241,8 +241,7 @@ struct SubscriptionPreviewView: View {
                                     }
                                 
                                 //MARK: - Currency
-                                if subscriptionData?.currency ?? "" == ""
-                                {
+                                if subscriptionData?.currency ?? "" == "" || subscriptionData?.currencyConfidence ?? 0.0 == 0.0{
                                     SubscriptionDetailsItem(title: "Currency", value: Constants.shared.currencyCode, confidence: 0.0, isAssumed: true)
                                         .onTapGesture {
                                             DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
@@ -648,7 +647,11 @@ struct SubscriptionPreviewView: View {
     func updateCountryAndCurrency() {
         if let currencies = commonApiVM.currencyResponse {
             let selectedCurrency = currencies.first(where: { $0.code == subscriptionData?.currency ?? Constants.shared.currencyCode })
-            subscriptionData?.currencySymbol = selectedCurrency?.symbol
+            if selectedCurrency?.symbol == nil || selectedCurrency?.symbol == ""{
+                subscriptionData?.currencySymbol = subscriptionData?.currencySymbol
+            }else{
+                subscriptionData?.currencySymbol = selectedCurrency?.symbol
+            }
             subscriptionsData?[currentSubscriptions-1] = subscriptionData!
         }else{
             commonApiVM.getCurrencies()

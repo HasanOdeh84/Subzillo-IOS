@@ -39,7 +39,7 @@ struct ManualEntryView: View {
     @State private var isDatePickerPresented    = false
     @State private var tempDate                 = Date()
     @State private var cardIndex                : Int = -1
-    @State private var relationIndex            : Int = 0
+    @State var relationIndex                    : Int = 0
     @State private var reminderInedex           : Int = -1
     @State private var isMoreEnable             : Bool = false
     @State var subscriptionId                   = ""
@@ -48,7 +48,7 @@ struct ManualEntryView: View {
     @State var isInitialCategory                = true
     @State var isInitialPayment                 = true
     @State private var billingCycle             : String = ""
-    @State var selectedBilling                  : ManualDataInfo?
+    @State var selectedBilling                  : String?
     @State private var showBillingCycleSheet    = false
     @State private var billingData              = [
         ManualDataInfo(id: "1", title: "Daily", subtitle: "Every 24 hours"),
@@ -71,6 +71,9 @@ struct ManualEntryView: View {
     @State var isPlanTypeError                  : Bool = false
     @State var isAmountError                    : Bool = false
     @State private var activeField              : FieldType?
+    @State private var showPlanTypeSheet        = false
+    @State var selectedPlanType                 : String?
+    @State var familyMemberId                   = ""
     
     //MARK: - body
     var body: some View {
@@ -132,31 +135,47 @@ struct ManualEntryView: View {
                         }
                     )
                     
+                    //                                        FieldSuggestionView1(
+                    //                                            text        : $planType,
+                    //                                            title       : "Plan Type",
+                    //                                            image       : "gridicon2",
+                    //                                            placeHolder : "e.g. Free, Pro, Premium",
+                    //                                            suggestions : addSubscriptionVM.providerData?.providerSubscriptionPlansList ?? [],
+                    //                                            displayKey  : { $0.planName ?? "" },
+                    //                                            fieldType   : FieldType.planType,
+                    //                                            activeField : $activeField,
+                    //                                            action      : {
+                    //                                                autoFillDetails(isAmount: false)
+                    //                                            }
+                    //                                        )
+                    //                                        if isPlanTypeError{
+                    //                                            HStack(spacing: 6){
+                    //                                                Image("info")
+                    //                                                    .frame(width: 24, height: 24)
+                    //                                                Text("This plan is not available for this service")
+                    //                                                    .font(.appRegular(14))
+                    //                                                    .foregroundColor(Color.systemInfoBlue)
+                    //                                                Spacer()
+                    //                                            }
+                    //                                            .padding(.leading, 5)
+                    //                                            .padding(.top, -22)
+                    //                                        }
+                    
                     //MARK: - PlanType field
-                    FieldSuggestionView1(
-                        text        : $planType,
-                        title       : "Plan Type",
-                        image       : "gridicon2",
-                        placeHolder : "e.g. Free, Pro, Premium",
-                        suggestions : addSubscriptionVM.providerData?.providerSubscriptionPlansList ?? [],
-                        displayKey  : { $0.planName ?? "" },
-                        fieldType   : FieldType.planType,
-                        activeField : $activeField,
-                        action      : {
+                    Button(action: selectPlanType) {
+                        FieldView(text: $planType, textValue: selectedPlanType ?? "", title: "Plan Type", image: "gridicon2", placeHolder: "Please select", isButton: true, isText: true)
+                    }
+                    .sheet(isPresented: $showPlanTypeSheet) {
+                        PlanTypeBottomSheet(selectedPlanType    : $selectedPlanType,
+                                            planTypeResponse    : filteredPlanTypes(),
+                                            header              : "Select Plan Type",
+                                            placeholder         : "Search Plan Type",
+                                            action              : {
+                            planType = selectedPlanType ?? ""
                             autoFillDetails(isAmount: false)
-                        }
-                    )
-                    if isPlanTypeError{
-                        HStack(spacing: 6){
-                            Image("info")
-                                .frame(width: 24, height: 24)
-                            Text("This plan is not available for this service")
-                                .font(.appRegular(14))
-                                .foregroundColor(Color.systemInfoBlue)
-                            Spacer()
-                        }
-                        .padding(.leading, 5)
-                        .padding(.top, -22)
+                        })
+                        .presentationDetents([.medium, .large])
+                        .presentationDragIndicator(.hidden)
                     }
                     
                     HStack(spacing: 24) {
@@ -186,6 +205,8 @@ struct ManualEntryView: View {
                             Spacer()
                         }
                         
+                        
+                        //MARK: - currency field
                         VStack{
                             Button(action: currencySelection) {
                                 FieldView(text: $currency, textValue: selectedCurrency?.code ?? "", title: "Currency", image: "globeIcon", placeHolder: Constants.shared.currencyCode, isButton: true, isText: true)
@@ -243,25 +264,51 @@ struct ManualEntryView: View {
                     //                        .frame(height: Double(30 + (52 * billingData.count)))
                     
                     //MARK: - Billing cycle field
+//                    Button(action: selectBilling) {
+//                        FieldView(text: $billingCycle, textValue: selectedBilling?.title ?? "", title: "Billing Cycle", image: "billing", placeHolder: "Select billing cycle", isButton: true, isText: true)
+//                    }
+//                    .sheet(isPresented: $showBillingCycleSheet) {
+//                        BillingCycleBottomSheet(selectedBilling: $selectedBilling, header: "Select Billing Cycle", placeholder: "Search billing cycle")
+//                            .presentationDetents([.height(500)])
+//                            .presentationDragIndicator(.hidden)
+//                    }
+//                    .onChange(of: selectedBilling) { billing in
+//                        guard
+//                            let billing,
+//                            let title = billing.title
+//                        else { return }
+//                        
+//                        if isFromEdit && isInitialPayment{
+//                            isInitialPayment = false
+//                        }else{
+//                            chargeDate = Constants.shared.getNextDateByFrequency(
+//                                frequency: title
+//                            )
+//                        }
+//                    }
+                    
+                    
+                    //MARK: - Billing cycle field
                     Button(action: selectBilling) {
-                        FieldView(text: $billingCycle, textValue: selectedBilling?.title ?? "", title: "Billing Cycle", image: "billing", placeHolder: "Select billing cycle", isButton: true, isText: true)
+//                        FieldView(text: $billingCycle, textValue: selectedBilling?.title ?? "", title: "Billing Cycle", image: "billing", placeHolder: "Select billing cycle", isButton: true, isText: true)
+                        FieldView(text: $billingCycle, textValue: selectedBilling ?? "", title: "Billing Cycle", image: "billing", placeHolder: "Select billing cycle", isButton: true, isText: true)
                     }
                     .sheet(isPresented: $showBillingCycleSheet) {
-                        BillingCycleBottomSheet(selectedBilling: $selectedBilling, header: "Select Billing Cycle", placeholder: "Search billing cycle")
+                        BillingCycleBottomSheet(selectedBilling         : $selectedBilling,
+                                                billingCyclesResponse   : filteredBillingCycles(),
+                                                header                  : "Select Billing Cycle",
+                                                placeholder             : "Search billing cycle")
                             .presentationDetents([.height(500)])
                             .presentationDragIndicator(.hidden)
                     }
                     .onChange(of: selectedBilling) { billing in
-                        guard
-                            let billing,
-                            let title = billing.title
-                        else { return }
-                        
-                        if isFromEdit && isInitialPayment{
+                        guard let billing else { return }
+
+                        if isFromEdit && isInitialPayment {
                             isInitialPayment = false
-                        }else{
+                        } else {
                             chargeDate = Constants.shared.getNextDateByFrequency(
-                                frequency: title
+                                frequency: billing
                             )
                         }
                     }
@@ -497,6 +544,44 @@ struct ManualEntryView: View {
         )
     }
     
+    func filteredPlanTypes() -> [String] {
+        guard
+            let plans = addSubscriptionVM.providerData?.providerSubscriptionPlansList,
+            !plans.isEmpty
+        else {
+            // Fallback when API returns no plans
+            return ["Free", "Basic"]
+        }
+        
+        let planNames = plans.compactMap { $0.planName }
+        
+        // If plan names are missing or empty, still return fallback
+        guard !planNames.isEmpty else {
+            return ["Free", "Basic"]
+        }
+        
+        return Array(Set(planNames))
+    }
+    
+    func filteredBillingCycles() -> [String] {
+        guard
+            let billingCycles = addSubscriptionVM.providerData?.providerSubscriptionPlansList,
+            !billingCycles.isEmpty
+        else {
+            // Fallback when API returns no plans
+            return ["Monthly", "Yearly"]
+        }
+        
+        let billingCycleNames = billingCycles.compactMap { $0.billingCycle }
+        
+        // If plan names are missing or empty, still return fallback
+        guard !billingCycleNames.isEmpty else {
+            return ["Monthly", "Yearly"]
+        }
+        
+        return Array(Set(billingCycleNames))
+    }
+    
     private func updateProviderData() {
         if addSubscriptionVM.providerData?.categoryName ?? "" != "" && addSubscriptionVM.providerData?.categoryId ?? "" != ""{
             if let categories = commonApiVM.categoriesResponse {
@@ -523,7 +608,7 @@ struct ManualEntryView: View {
                     planType = matchedPlan.planName ?? ""
                 }
                 if billingCycle == ""{
-                    selectedBilling = billingData.first(where: { $0.title == matchedPlan.billingCycle ?? ""})
+                    selectedBilling = matchedPlan.billingCycle ?? ""//billingData.first(where: { $0.title == matchedPlan.billingCycle ?? ""})
                 }
                 isAmountError = false
             } else {
@@ -551,9 +636,10 @@ struct ManualEntryView: View {
                 }
                 
                 if billingCycle.isEmpty {
-                    selectedBilling = billingData.first {
-                        $0.title == (matchedPlan.billingCycle ?? "")
-                    }
+                    selectedBilling = matchedPlan.billingCycle ?? ""
+//                    billingData.first {
+//                        $0.title == (matchedPlan.billingCycle ?? "")
+//                    }
                 }
                 
                 isPlanTypeError = false
@@ -596,7 +682,7 @@ struct ManualEntryView: View {
                         updatedDuplicates.append(info)
                     }
                     isFromAdd = isAdd
-                    AppIntentRouter.shared.navigate(to: .duplicateSubscriptionsView(duplicateSubsList: updatedDuplicates))
+                    AppIntentRouter.shared.navigate(to: .duplicateSubscriptionsView(duplicateSubsList: updatedDuplicates, fromFamily: familyMemberId == "" ? false : true))
                 }
                 else{
                     //                if isAdd == true {
@@ -608,7 +694,11 @@ struct ManualEntryView: View {
                     if isFromListEdit{
                         dismiss()
                     }else{
-                        AppIntentRouter.shared.navigate(to: .subscriptionsListView)
+                        if familyMemberId == ""{
+                            AppIntentRouter.shared.navigate(to: .subscriptionsListView)
+                        }else{
+                            dismiss()
+                        }
                     }
                 }
             }
@@ -622,7 +712,11 @@ struct ManualEntryView: View {
                 if isFromListEdit{
                     dismiss()
                 }else{
-                    AppIntentRouter.shared.navigate(to: .subscriptionsListView)
+                    if familyMemberId == ""{
+                        AppIntentRouter.shared.navigate(to: .subscriptionsListView)
+                    }else{
+                        dismiss()
+                    }
                 }
             }
         }
@@ -680,6 +774,7 @@ struct ManualEntryView: View {
     func updateRelationInfo()
     {
         relationsData.removeAll()
+        relationsData.append(ManualDataInfo(id: Constants.getUserId(), title: "Me"))
         if let familyCards = addSubscriptionVM.listFamilyMembersResponse {
             for family in familyCards {
                 relationsData.append(
@@ -690,6 +785,9 @@ struct ManualEntryView: View {
                 )
             }
             updateUserInfo()
+            if let index = relationsData.firstIndex(where: { $0.id == familyMemberId }) {
+                relationIndex = index
+            }
         }
     }
     
@@ -727,6 +825,13 @@ struct ManualEntryView: View {
                                         flag    : Constants.shared.flag(from: Constants.shared.regionCode))
             if let currencies = commonApiVM.currencyResponse {
                 selectedCurrency = currencies.first(where: { $0.code == commonApiVM.userInfoResponse?.preferredCurrency })
+                if selectedCurrency == nil{
+                    selectedCurrency = Currency(id      : nil,
+                                                name    : "",
+                                                symbol  : commonApiVM.userInfoResponse?.preferredCurrencySymbol,
+                                                code    : commonApiVM.userInfoResponse?.preferredCurrency,
+                                                flag    : "")//Constants.shared.flag(from: Constants.shared.regionCode))
+                }
             }else{
                 commonApiVM.getCurrencies()
             }
@@ -735,9 +840,14 @@ struct ManualEntryView: View {
         }
         if isFromEdit == true
         {
-            if globalSubscriptionData?.currency ?? "" != "" {
-                if let currencies = commonApiVM.currencyResponse {
-                    selectedCurrency = currencies.first(where: { $0.code == globalSubscriptionData?.currency ?? ""})
+            if let currencies = commonApiVM.currencyResponse {
+                selectedCurrency = currencies.first(where: { $0.code == globalSubscriptionData?.currency ?? ""})
+                if selectedCurrency == nil{
+                    selectedCurrency = Currency(id      : nil,
+                                                name    : "",
+                                                symbol  : globalSubscriptionData?.currencySymbol ?? "",
+                                                code    : globalSubscriptionData?.currency ?? "",
+                                                flag    : "")
                 }
             }
         }
@@ -760,7 +870,7 @@ struct ManualEntryView: View {
             if billing.lowercased() == "annual" {
                 billing = "yearly"
             }
-            selectedBilling = billingData.first(where: { $0.title == billing})
+            selectedBilling = billing//billingData.first(where: { $0.title == billing})
             //            if let index = billingData.firstIndex(where: {
             //                $0.title!.lowercased() == billing.lowercased()
             //            }) {
@@ -780,6 +890,7 @@ struct ManualEntryView: View {
             amount = "\(globalSubscriptionData?.amount ?? 0.00)"
             currency = globalSubscriptionData?.currency ?? ""
             planType = globalSubscriptionData?.subscriptionType ?? ""
+            selectedPlanType = globalSubscriptionData?.subscriptionType ?? ""
             chargeDate = (globalSubscriptionData?.nextPaymentDate ?? "").formattedDate(to: "dd/MM/yyyy")
             let billing = globalSubscriptionData?.billingCycle ?? ""
             //            if let index = billingData.firstIndex(where: {
@@ -787,7 +898,7 @@ struct ManualEntryView: View {
             //            }) {
             //                billingIndex = index
             //            }
-            selectedBilling = billingData.first(where: { $0.title == billing})
+            selectedBilling = billing//billingData.first(where: { $0.title == billing})
         }
     }
     
@@ -810,6 +921,11 @@ struct ManualEntryView: View {
     private func selectCategory()
     {
         showCategorySheet = true
+    }
+    
+    private func selectPlanType()
+    {
+        showPlanTypeSheet = true
     }
     
     private func selectBilling()
@@ -841,7 +957,7 @@ struct ManualEntryView: View {
         //        if billingIndex != -1{
         //            billingCycle            = billingData[billingIndex].title ?? ""
         //        }
-        billingCycle = selectedBilling?.title ?? ""//.lowercased()
+        billingCycle = selectedBilling ?? ""//?.title ?? ""//.lowercased()
         let paymentMethod           = selectedPayment?.id ?? ""
         var paymentMethodDataId     = ""
         var paymentMethodDataName   = ""
@@ -850,8 +966,13 @@ struct ManualEntryView: View {
             paymentMethodDataName   = "\(cardsData[cardIndex].title ?? "")****\(cardsData[cardIndex].subtitle ?? "")"
         }
         let category                = selectedCategory?.id ?? ""
-        let subscriptionFor         = Constants.getUserId()
-        let subscriptionForName     = "Me"
+        var subscriptionFor         = Constants.getUserId()
+        var subscriptionForName     = "Me"
+        if relationsData.indices.contains(relationIndex) {
+            let selectedRelation = relationsData[relationIndex]
+            subscriptionFor     = selectedRelation.id
+            subscriptionForName = selectedRelation.title ?? ""
+        }
         var renewalReminder         :[String] = []
         var renewalReminderValue = ""
         for item in remindersData

@@ -15,24 +15,28 @@ class ProfileViewModel: ObservableObject {
     private var subscriptions           = Set<AnyCancellable>()
     var apiReference                    = NetworkRequest.shared
     private let router                  : AppIntentRouter
+    @Published var isUpdate             = false
+    @Published var isProfileUpdate      = false
     
     init(router: AppIntentRouter = .shared) {
         self.router = router
     }
     
-//    func updateUserInfo(input:UpdateUserInfoRequest) {
-//        apiReference.postApi(endPoint: APIEndpoint.updateUserInfo, method: .POST,token: authKey,body: input,showLoader: true, responseType: GeneralResponse.self)
-//            .sink { [unowned self] completion in
-//                if case let .failure(error) = completion {
-//                    self.handleError(error,endPoint: APIEndpoint.updateUserInfo)
-//                }
-//            }
-//        receiveValue: { response in
-//            PrintLogger.modelLog(response, type: .response, isInput: false)
-//            ToastManager.shared.showToast(message: response.message ?? "")
-//        }
-//        .store(in: &self.subscriptions)
-//    }
+    func updateProfile(input:UpdateProfileRequest) {
+        isUpdate = false
+        apiReference.postApi(endPoint: APIEndpoint.updateProfile, method: .POST,token: authKey,body: input,showLoader: true, responseType: GeneralResponse.self)
+            .sink { [unowned self] completion in
+                if case let .failure(error) = completion {
+                    self.handleError(error,endPoint: APIEndpoint.updateProfile)
+                }
+            }
+        receiveValue: { response in
+            PrintLogger.modelLog(response, type: .response, isInput: false)
+            ToastManager.shared.showToast(message: response.message ?? "")
+            self.isUpdate = true
+        }
+        .store(in: &self.subscriptions)
+    }
     
 //    func updatePassword(input:UpdatePasswordRequest) {
 //        apiReference.postApi(endPoint: APIEndpoint.updatePassword, method: .POST,token: authKey,body: input,showLoader: true, responseType: GeneralResponse.self)
@@ -48,18 +52,21 @@ class ProfileViewModel: ObservableObject {
 //        .store(in: &self.subscriptions)
 //    }
     
-//    func updateProfileImage(input:UpdateProfileImageRequest,fileData:[MultiPartFileInput]){
-//        apiReference.postMultipartApi(endPoint: APIEndpoint.updateProfileImage, method: .POST,token: authKey,body: MultipartInput(parameters: input, fileInput: fileData),showLoader: true, responseType: GeneralResponse.self)
-//            .sink { [unowned self] completion in
-//                if case let .failure(error) = completion {
-//                    self.handleError(error,endPoint: APIEndpoint.updateProfileImage)
-//                }
-//            }
-//        receiveValue: { response in
-//            PrintLogger.modelLog(response, type: .response, isInput: false)
-//        }
-//        .store(in: &self.subscriptions)
-//    }   
+    func updateProfileImage(input:UpdateProfileImageRequest,fileData:[MultiPartFileInput]){
+        isProfileUpdate = false
+        apiReference.postMultipartApi(endPoint: APIEndpoint.updateProfileImage, method: .POST,token: authKey,body: MultipartInput(parameters: input, fileInput: fileData),showLoader: false, responseType: GeneralResponse.self)
+            .sink { [unowned self] completion in
+                if case let .failure(error) = completion {
+                    self.handleError(error,endPoint: APIEndpoint.updateProfileImage)
+                }
+            }
+        receiveValue: { response in
+            PrintLogger.modelLog(response, type: .response, isInput: false)
+            ToastManager.shared.showToast(message: response.message ?? "")
+            self.isProfileUpdate = true
+        }
+        .store(in: &self.subscriptions)
+    }
     
 //    func imageSubscription(input:ImageSubscriptionRequest,fileData:[MultiPartFileInput]){
 //        apiReference.postMultipartApi(endPoint: APIEndpoint.imageSubscription, method: .POST,token: authKey,body: MultipartInput(parameters: input, fileInput: fileData),showLoader: true, responseType: ImageSubscriptionResponse.self)

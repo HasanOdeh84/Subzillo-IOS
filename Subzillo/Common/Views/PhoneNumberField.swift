@@ -28,6 +28,7 @@ struct PhoneNumberField: View {
     @State var fromFamily                   = false
     @State var countryCode                  = ""
     @State var flag                         = ""
+    @State private var previousCountry: Country?
     
     @StateObject private var formatterService = PhoneNumberFormatterService(regionCode: Constants.shared.regionCode)
     
@@ -60,53 +61,89 @@ struct PhoneNumberField: View {
                                 Text(flag)
                                     .frame(width: 24, height: 24)
                             }else{
-                                WebImage(url: URL(string: isCountry ? flag : selectedCurrency?.flag ?? ""))
-                                    .resizable()
-                                    .indicator(.activity)
-                                    .transition(.fade(duration: 0.5))
-                                    .scaledToFit()
-                                //                            .frame(width: 24, height: 18)
-                                    .frame(width: 24, height: 24)
-                                    .cornerRadius(5)
+                                //                                WebImage(url: URL(string: isCountry ? flag : selectedCurrency?.flag ?? ""))
+                                //                                    .resizable()
+                                //                                    .indicator(.activity)
+                                //                                    .transition(.fade(duration: 0.5))
+                                //                                    .scaledToFit()
+                                //                                //                            .frame(width: 24, height: 18)
+                                //                                    .frame(width: 24, height: 24)
+                                //                                    .cornerRadius(5)
+                                AsyncImage(url: URL(string: flag)) { phase in
+                                    switch phase {
+                                    case .empty:
+                                        Rectangle()
+                                            .fill(Color.gray.opacity(0.5))
+                                            .frame(width: 24, height: 24)
+                                            .shimmer(true)
+                                    case .success(let image):
+                                        image
+                                            .resizable()
+                                            .scaledToFill()
+                                            .frame(width: 24, height: 24)
+                                        //                                            .clipShape(RoundedRectangle(cornerRadius: 10))
+                                    case .failure:
+                                        Rectangle()
+                                            .fill(Color.gray.opacity(0.5))
+                                            .frame(width: 24, height: 24)
+                                            .shimmer(true)
+                                    @unknown default:
+                                        EmptyView()
+                                    }
+                                }
                             }
                         }else
                         {
-                            if selectedCurrency?.flag ?? "" == ""{
-                                Text(Constants.shared.flag(from: Constants.shared.regionCode))
-                                    .frame(width: 24, height: 24)
-                            }else{
-                                WebImage(url: URL(string: selectedCurrency?.flag ?? ""))
-                                    .resizable()
-                                    .indicator(.activity)
-                                    .transition(.fade(duration: 0.5))
-                                    .scaledToFit()
-                                    .frame(width: 24, height: 24)
-                                    .cornerRadius(5)
+                            AsyncImage(url: URL(string: selectedCurrency?.flag ?? "")) { phase in
+                                switch phase {
+                                case .empty:
+                                    Rectangle()
+                                        .fill(Color.gray.opacity(0.5))
+                                        .frame(width: 24, height: 24)
+                                        .shimmer(true)
+                                case .success(let image):
+                                    image
+                                        .resizable()
+                                        .scaledToFit()
+                                        .frame(width: 24, height: 24)
+                                    //                                        .clipShape(RoundedRectangle(cornerRadius: 10))
+                                case .failure:
+                                    Rectangle()
+                                        .fill(Color.gray.opacity(0.5))
+                                        .frame(width: 24, height: 24)
+                                        .shimmer(true)
+                                @unknown default:
+                                    EmptyView()
+                                }
                             }
+                            //                            WebImage(url: URL(string: selectedCurrency?.flag ?? ""))
+                            //                                .resizable()
+                            //                                .indicator(.activity)
+                            //                                .transition(.fade(duration: 0.5))
+                            //                                .scaledToFit()
+                            //                                .frame(width: 24, height: 24)
+                            //                                .cornerRadius(5)
                         }
                         Image("dropDown_blackWhite")
                             .frame(width: 20, height: 20)
                             .foregroundColor(.black)
                         if isCountry{
-                            if countryCode == ""{
-                                Text("+\(NBPhoneNumberUtil.sharedInstance().getCountryCode(forRegion: Constants.shared.regionCode))")
-                                    .font(.appRegular(14))
-                                    .foregroundColor(.neutral2500)
-                            }else{
-                                Text(isCountry ? countryCode : selectedCurrency?.code ?? "")
-                                    .font(.appRegular(14))
-                                    .foregroundColor(.neutral2500)
-                            }
+                            //                            if countryCode == ""{
+                            //                                Text("+\(NBPhoneNumberUtil.sharedInstance().getCountryCode(forRegion: Constants.shared.regionCode))")
+                            //                                    .font(.appRegular(14))
+                            //                                    .foregroundColor(.neutral2500)
+                            //                            }else{
+                            //                                Text(isCountry ? countryCode : selectedCurrency?.code ?? "")
+                            //                                    .font(.appRegular(14))
+                            //                                    .foregroundColor(.neutral2500)
+                            //                            }
+                            Text(countryCode)
+                                .font(.appRegular(14))
+                                .foregroundColor(.neutral2500)
                         }else{
-                            if countryCode == ""{
-                                Text(Constants.shared.currencyCode)
-                                    .font(.appRegular(14))
-                                    .foregroundColor(.neutral2500)
-                            }else{
-                                Text(selectedCurrency?.code ?? "")
-                                    .font(.appRegular(14))
-                                    .foregroundColor(.neutral2500)
-                            }
+                            Text(selectedCurrency?.code ?? "")
+                                .font(.appRegular(14))
+                                .foregroundColor(.neutral2500)
                         }
                     }
                     .padding(.horizontal, 20)
@@ -196,11 +233,9 @@ struct PhoneNumberField: View {
         if let data = SessionManager.shared.loginData {
             verifyData = data
         }
-        if !fromPreview{
-            if selectedCurrency == nil{
-                if let currencies = commonApiVM.currencyResponse {
-                    selectedCurrency = currencies.first(where: { $0.code == Constants.shared.currencyCode })
-                }
+        if selectedCurrency == nil{
+            if let currencies = commonApiVM.currencyResponse {
+                selectedCurrency = currencies.first(where: { $0.code == Constants.shared.currencyCode })
             }
         }
         if fromSingup && !fromSocailLogin{
@@ -208,6 +243,17 @@ struct PhoneNumberField: View {
                 selectedCountry = countries.first(where: { $0.dialCode == verifyData?.countryCode })
             }
         }else{
+            if fromFamily{
+                if selectedCountry == nil{
+                    if let countries = commonApiVM.countriesResponse {
+                        selectedCountry = countries.first(where: { $0.countryCode == Constants.shared.regionCode })
+                    }
+                }else{
+                    if let countries = commonApiVM.countriesResponse {
+                        selectedCountry = countries.first(where: { $0.dialCode == countryCode })
+                    }
+                }
+            }
             if selectedCountry == nil{
                 if let countries = commonApiVM.countriesResponse {
                     selectedCountry = countries.first(where: { $0.countryCode == Constants.shared.regionCode })
@@ -227,6 +273,8 @@ struct PhoneNumberField: View {
                 flag        = Constants.shared.flag(from: Constants.shared.regionCode)
             }
         }
+        previousCountry = selectedCountry
+        formatterService.updateRegion(selectedCountry?.countryCode ?? "")
     }
     
     func countryChange(){
@@ -242,6 +290,12 @@ struct PhoneNumberField: View {
             if !fromFamily{
                 phoneNumber = ""
             }
+        }
+        if fromFamily{
+            if let prev = previousCountry, prev.dialCode != selectedCountry?.dialCode {
+                phoneNumber = ""
+            }
+            previousCountry = selectedCountry
         }
         formatterService.updateRegion(selectedCountry?.countryCode ?? "")
     }

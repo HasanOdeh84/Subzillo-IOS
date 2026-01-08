@@ -32,7 +32,7 @@ struct ReviewExtractedDetailsView: View {
     @State private var chargeDate               : String = ""
     @StateObject private var toastManager       = ToastManager()
     @State private var billingCycle             : String = ""
-    @State var selectedBilling                  : ManualDataInfo?
+    @State var selectedBilling                  : String?
     @State private var showBillingCycleSheet    = false
     @State private var billingData              = [
         ManualDataInfo(id: "1", title: "Daily", subtitle: "Every 24 hours"),
@@ -51,8 +51,10 @@ struct ReviewExtractedDetailsView: View {
     @State var isPlanTypeError                  : Bool = false
     @State var isAmountError                    : Bool = false
     
-    @State var servicesList      : [GetServiceProvidersListData]?
-    @State var providerPlansList : [ProviderSubscriptionPlan]?
+    @State var servicesList                     : [GetServiceProvidersListData]?
+    @State var providerPlansList                : [ProviderSubscriptionPlan]?
+    @State private var showPlanTypeSheet        = false
+    @State var selectedPlanType                 : String?
     
     //MARK: - body
     var body: some View {
@@ -111,7 +113,7 @@ struct ReviewExtractedDetailsView: View {
                     title       : "Amount",
                     image       : "currencyIcon",
                     placeHolder : "0.00",
-                    currency    : selectedCurrency?.symbol ?? Constants.shared.currencySymbol,
+                    currency    : selectedCurrency?.symbol ?? extractedData?.currencySymbol ?? "",//(extractedData?.currency ?? "" == "") ? (selectedCurrency?.symbol ?? Constants.shared.currencySymbol) : (selectedCurrency?.symbol ?? extractedData?.currencySymbol ?? ""),//Constants.shared.currencySymbol,
                     isNumberPad : true,
                     suggestions : filteredPricePlans(),
                     displayKey  : { plan in
@@ -169,39 +171,58 @@ struct ReviewExtractedDetailsView: View {
                         .presentationDragIndicator(.hidden)
                 }
             case .planType:
-                FieldSuggestionView(
-                    text        : $planType,
-                    title       : "Plan Type",
-                    image       : "gridicon2",
-                    placeHolder : "e.g. Free, Pro, Premium",
-                    suggestions : providerPlansList ?? [],
-                    displayKey  : { $0.planName ?? "" },
-                    isFocused   : $dummyFocus,
-                    fieldType   : FieldType.planType,
-                    activeField : $activeField,
-                    action      : {
-                        errorHint(isAmount: false)
-                        isPlanTypeUpdate = true
-                    }
-                )
-                if isPlanTypeError{
-                    HStack(spacing: 6){
-                        Image("info")
-                            .frame(width: 24, height: 24)
-                        Text("This plan is not available for this service")
-                            .font(.appRegular(14))
-                            .foregroundColor(Color.systemInfoBlue)
-                        Spacer()
-                    }
-                    .padding(.leading, 5)
-                    .padding(.top, -5)
+//                FieldSuggestionView(
+//                    text        : $planType,
+//                    title       : "Plan Type",
+//                    image       : "gridicon2",
+//                    placeHolder : "e.g. Free, Pro, Premium",
+//                    suggestions : providerPlansList ?? [],
+//                    displayKey  : { $0.planName ?? "" },
+//                    isFocused   : $dummyFocus,
+//                    fieldType   : FieldType.planType,
+//                    activeField : $activeField,
+//                    action      : {
+//                        errorHint(isAmount: false)
+//                        isPlanTypeUpdate = true
+//                    }
+//                )
+//                if isPlanTypeError{
+//                    HStack(spacing: 6){
+//                        Image("info")
+//                            .frame(width: 24, height: 24)
+//                        Text("This plan is not available for this service")
+//                            .font(.appRegular(14))
+//                            .foregroundColor(Color.systemInfoBlue)
+//                        Spacer()
+//                    }
+//                    .padding(.leading, 5)
+//                    .padding(.top, -5)
+//                }
+                
+                Button(action: selectPlanType) {
+                    FieldView(text: $planType, textValue: selectedPlanType ?? "", title: "Plan Type", image: "gridicon2", placeHolder: "Please select", isButton: true, isText: true)
+                }
+                .sheet(isPresented: $showPlanTypeSheet) {
+                    PlanTypeBottomSheet(selectedPlanType    : $selectedPlanType,
+                                        planTypeResponse    : filteredPlanTypes(),
+                                        header              : "Select Plan Type",
+                                        placeholder         : "Search Plan Type",
+                                        action              : {
+                        planType = selectedPlanType ?? ""
+                        autoFillDetails(isAmount: false)
+                    })
+                    .presentationDetents([.medium, .large])
+                    .presentationDragIndicator(.hidden)
                 }
             case .billingCycle:
                 Button(action: selectBilling) {
-                    FieldView(text: $billingCycle, textValue: selectedBilling?.title ?? "", title: "Billing Cycle", image: "billing", placeHolder: "Select billing cycle", isButton: true, isText: true)
+                    FieldView(text: $billingCycle, textValue: selectedBilling ?? "", title: "Billing Cycle", image: "billing", placeHolder: "Select billing cycle", isButton: true, isText: true)
                 }
                 .sheet(isPresented: $showBillingCycleSheet) {
-                    BillingCycleBottomSheet(selectedBilling: $selectedBilling, header: "Select Billing Cycle", placeholder: "Search billing cycle")
+                    BillingCycleBottomSheet(selectedBilling         : $selectedBilling,
+                                            billingCyclesResponse   : filteredBillingCycles(),
+                                            header                  : "Select Billing Cycle",
+                                            placeholder             : "Search billing cycle")
                         .presentationDetents([.height(500)])
                         .presentationDragIndicator(.hidden)
                 }
@@ -259,13 +280,13 @@ struct ReviewExtractedDetailsView: View {
                         autoFillDetails(isAmount: false)
                     }
                 case .billingCycle:
-                    if selectedBilling?.title ?? "" == ""{
+                    if selectedBilling ?? "" == ""{
                         toastManager.showToast(message: "Please select a billing cycle",style:ToastStyle.error)
                         return
                     }
-                    globalSubscriptionData?.billingCycle = selectedBilling?.title ?? ""//.lowercased()
+                    globalSubscriptionData?.billingCycle = selectedBilling ?? ""//.lowercased()
                     chargeDate = Constants.shared.getNextDateByFrequency(
-                        frequency: selectedBilling?.title ?? ""
+                        frequency: selectedBilling ?? ""
                     )
                     globalSubscriptionData?.nextPaymentDate = chargeDate.formattedDate(from: "dd/MM/yyyy", to: "yyyy-MM-dd")
                 }
@@ -320,6 +341,49 @@ struct ReviewExtractedDetailsView: View {
         )
     }
     
+    func filteredPlanTypes() -> [String] {
+        guard
+            let plans = providerPlansList,
+            !plans.isEmpty
+        else {
+            // Fallback when API returns no plans
+            return ["Free", "Basic"]
+        }
+        
+        let planNames = plans.compactMap { $0.planName }
+        
+        // If plan names are missing or empty, still return fallback
+        guard !planNames.isEmpty else {
+            return ["Free", "Basic"]
+        }
+        
+        return Array(Set(planNames))
+    }
+    
+    func filteredBillingCycles() -> [String] {
+        guard
+            let billingCycles = providerPlansList,
+            !billingCycles.isEmpty
+        else {
+            // Fallback when API returns no plans
+            return ["Monthly", "Yearly"]
+        }
+        
+        let billingCycleNames = billingCycles.compactMap { $0.billingCycle }
+        
+        // If plan names are missing or empty, still return fallback
+        guard !billingCycleNames.isEmpty else {
+            return ["Monthly", "Yearly"]
+        }
+        
+        return Array(Set(billingCycleNames))
+    }
+    
+    private func selectPlanType()
+    {
+        showPlanTypeSheet = true
+    }
+    
     private func selectCategory()
     {
         showCategorySheet = true
@@ -358,6 +422,13 @@ struct ReviewExtractedDetailsView: View {
             if let currencies = commonApiVM.currencyResponse {
                 selectedCurrency = currencies.first(where: { $0.code == extractedData?.currency ?? ""})
             }
+            if selectedCurrency == nil{
+                selectedCurrency = Currency(id      : nil,
+                                            name    : "",
+                                            symbol  : extractedData?.currencySymbol ?? "",
+                                            code    : extractedData?.currency ?? "",
+                                            flag    : "")
+            }
         }else{
             selectedCurrency = Currency(id      : nil,
                                         name    : Constants.shared.currencyCode,
@@ -371,9 +442,10 @@ struct ReviewExtractedDetailsView: View {
             }
         }
         category    = extractedData?.categoryName ?? ""
-        planType    = extractedData?.subscriptionType ?? ""
+        planType            = extractedData?.subscriptionType ?? ""
+        selectedPlanType    = extractedData?.subscriptionType ?? ""
         if extractedData?.billingCycle ?? "" != "" {
-            selectedBilling = billingData.first(where: { $0.title == globalSubscriptionData?.billingCycle ?? ""})
+            selectedBilling = globalSubscriptionData?.billingCycle ?? ""//billingData.first(where: { $0.title == globalSubscriptionData?.billingCycle ?? ""})
         }
     }
     

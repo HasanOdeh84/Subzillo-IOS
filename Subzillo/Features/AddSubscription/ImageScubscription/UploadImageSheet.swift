@@ -20,110 +20,144 @@ struct UploadImageSheet: View {
     @State private var showPermissionAlert      = false
     @State private var isCamera                 = false
     @State private var showRedirectionAlert     = false
+    @Binding var isUploading                    : Bool
+    @State var fromProfile                      : Bool = false
+    @StateObject var profileVM                  = ProfileViewModel()
+    @State private var showLocalLoader          = false
+    var onDelegate                              : (() -> Void)?
     
     //MARK: - body
     var body: some View {
-        VStack {
-            Capsule()
-                .fill(Color.grayCapsule)
-                .frame(width: 150, height: 5)
-                .padding(.bottom, 24)
-                .padding(.top, 0)
+        ZStack {
             
-            VStack(alignment: .leading, spacing: 24) {
+            VStack {
+                Capsule()
+                    .fill(Color.grayCapsule)
+                    .frame(width: 150, height: 5)
+                    .padding(.bottom, 24)
+                    .padding(.top, 0)
                 
-                HStack {
-                    Spacer()
-                    Text(LocalizedStringKey("Upload a Screenshot"))
-                        .font(.appSemiBold(24))
-                        .foregroundColor(Color.neutralMain700)
-                        .multilineTextAlignment(.center)
-                    Spacer()
-                }
-                
-                //                Text(LocalizedStringKey("Upload a screenshot from your bank email to automatically detect subscription payments."))
-                //                    .font(.appRegular(16))
-                //                    .foregroundColor(Color.gray)
-                
-                VStack(spacing: 0) {
-                    UploadItem(title: "Take Photo", subTitle: "Capture bank notification on screen", image: "camera", imageColor: Color.high, action: cameraAction)
-                    Divider()
-                        .overlay(Color.neutral300Border)
-                    UploadItem(title: "Choose from Gallery", subTitle: "Select existing screenshot", image: "gallery", imageColor: Color.warning, action: galleryAction)
-                    //                    Divider()
-                    //                        .overlay(Color.neutral300Border)
-                    //                    UploadItem(title: "Paste Text", subTitle: "Copy and paste notification text", image: "text-creation", imageColor: Color.purple100, action: pastTextAction)
-                    Divider()
-                        .overlay(Color.neutral300Border)
-                    UploadItem(title: "Take Screenshot", subTitle: "Take Screenshot for subscriptions", image: "screenshot", imageColor: Color.purple100, action: openSubscriptionsAction)
-                }
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .frame(height: 240)
-                .cornerRadius(12)
-                .overlay(
-                    RoundedRectangle(cornerRadius: 12)
-                        .stroke(Color.neutral300Border, lineWidth: 1)
-                )
-                
-                GradienCustomeView(title: "Privacy Notice", subTitle: "We only parse the content you provide to detect subscription payments. No data is stored permanently.", imageName: "privacyIcon")
-                    .padding(.bottom, 0)
+                VStack(alignment: .leading, spacing: 24) {
+                    
+                    HStack {
+                        Spacer()
+                        Text(LocalizedStringKey(fromProfile ? "Profile Picture" : "Upload a Screenshot"))
+                            .font(.appSemiBold(24))
+                            .foregroundColor(Color.neutralMain700)
+                            .multilineTextAlignment(.center)
+                        Spacer()
+                    }
+                    
+                    //                Text(LocalizedStringKey("Upload a screenshot from your bank email to automatically detect subscription payments."))
+                    //                    .font(.appRegular(16))
+                    //                    .foregroundColor(Color.gray)
+                    
+                    VStack(spacing: 0) {
+                        UploadItem(title: "Take Photo", subTitle: "Capture bank notification on screen", image: "camera", imageColor: Color.high, action: cameraAction)
+                        Divider()
+                            .overlay(Color.neutral300Border)
+                        UploadItem(title: "Choose from Gallery", subTitle: "Select existing screenshot", image: "gallery", imageColor: Color.warning, action: galleryAction)
+                        //                    Divider()
+                        //                        .overlay(Color.neutral300Border)
+                        //                    UploadItem(title: "Paste Text", subTitle: "Copy and paste notification text", image: "text-creation", imageColor: Color.purple100, action: pastTextAction)
+                        if !fromProfile{
+                            Divider()
+                                .overlay(Color.neutral300Border)
+                            UploadItem(title: "Take Screenshot", subTitle: "Take Screenshot for subscriptions", image: "screenshot", imageColor: Color.purple100, action: openSubscriptionsAction)
+                        }
+                    }
                     .frame(maxWidth: .infinity, alignment: .leading)
-                    .fixedSize(horizontal: false, vertical: true)
-                
-            }
-            .padding(.horizontal, 20)
-            .padding(.vertical, 0)
-        }
-        .padding(0)
-        .sheet(isPresented: $showImagePicker) {
-            if pickerSource == .camera {
-                ImagePicker(sourceType: .camera, selectedImage: $selectedImage)
-                    .edgesIgnoringSafeArea(.all)
-                    .ignoresSafeArea()
-            } else {
-                ImagePicker(sourceType: .photoLibrary, selectedImage: $selectedImage)
-            }
-        }
-        .sheet(isPresented: $showRedirectionAlert) {
-            AppstoreRedirectionSheet()
-                .presentationDragIndicator(.hidden)
-                .presentationDetents([.height(450)])
-        }
-        .onChange(of: selectedImage) { _ in uploadImage() }
-        .onChange(of: uploadImageVM.hideLoader) { _ in onApi() }
-        .sheet(isPresented: $uploadImageVM.showErrorPopup) {
-            UploadErrorImageSheet(
-                onDelegate: {
-                    dismiss()
+                    .frame(height: fromProfile ? 160 : 240)
+                    .cornerRadius(12)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 12)
+                            .stroke(Color.neutral300Border, lineWidth: 1)
+                    )
+                    if !fromProfile{
+                        GradienCustomeView(title: "Privacy Notice", subTitle: "We only parse the content you provide to detect subscription payments. No data is stored permanently.", imageName: "privacyIcon")
+                            .padding(.bottom, 0)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+                    
                 }
-            )
-            .presentationDragIndicator(.hidden)
-            .presentationDetents([.height(560)])
+                .padding(.horizontal, 20)
+                .padding(.vertical, 0)
+            }
+            .padding(0)
+            .sheet(isPresented: $showImagePicker) {
+                if pickerSource == .camera {
+                    ImagePicker(sourceType: .camera, selectedImage: $selectedImage)
+                        .edgesIgnoringSafeArea(.all)
+                        .ignoresSafeArea()
+                } else {
+                    ImagePicker(sourceType: .photoLibrary, selectedImage: $selectedImage)
+                }
+            }
+            .sheet(isPresented: $showRedirectionAlert) {
+                AppstoreRedirectionSheet()
+                    .presentationDragIndicator(.hidden)
+                    .presentationDetents([.height(450)])
+            }
+            .onChange(of: selectedImage) { _ in uploadImage() }
+            .onChange(of: uploadImageVM.hideLoader) { _ in onApi() }
+            .onChange(of: profileVM.isProfileUpdate) { _ in onUpdateProfile() }
+            .sheet(isPresented: $uploadImageVM.showErrorPopup) {
+                UploadErrorImageSheet(
+                    onDelegate: {
+                        dismiss()
+                    }
+                )
+                .presentationDragIndicator(.hidden)
+                .presentationDetents([.height(560)])
+            }
+            .sheet(isPresented: $showPermissionAlert) {
+                PermissionSheet(onDelegate: {
+                    dismiss()
+                }, title: isCamera == true ? "We need camera access to add subscriptions by uploading screenshots" : "We need gallery access to add subscriptions by uploading screenshots", type: isCamera == true ? "camera" : "gallery", value: isCamera == true ? "Tap Camera" : "Tap Photos")
+                .presentationDragIndicator(.hidden)
+                .presentationDetents([.height(580)])
+            }
+            .onReceive(NotificationCenter.default.publisher(for: .closeAllBottomSheets)) { _ in
+                showImagePicker = false
+                uploadImageVM.showErrorPopup = false
+                showPermissionAlert = false
+            }
+            .onAppear{
+                originalImage = nil
+            }
+            if showLocalLoader {
+                ZStack {
+                    Color.black.opacity(0.5)
+                        .ignoresSafeArea()
+                    VStack {
+                        LottieView(name: LoaderManager.shared.animationName, loopMode: .loop)
+                            .frame(width: 100, height: 100)
+                    }
+                }
+            }
         }
-        .sheet(isPresented: $showPermissionAlert) {
-            PermissionSheet(onDelegate: {
-                dismiss()
-            }, title: isCamera == true ? "We need camera access to add subscriptions by uploading screenshots" : "We need gallery access to add subscriptions by uploading screenshots", type: isCamera == true ? "camera" : "gallery", value: isCamera == true ? "Tap Camera" : "Tap Photos")
-            .presentationDragIndicator(.hidden)
-            .presentationDetents([.height(580)])
-        }
-        .onReceive(NotificationCenter.default.publisher(for: .closeAllBottomSheets)) { _ in
-            showImagePicker = false
-            uploadImageVM.showErrorPopup = false
-            showPermissionAlert = false
-        }
-        .onAppear{
-            originalImage = nil
-        }
-        .modifier(LoaderModifier())
     }
     
     private func onApi()
     {
+        isUploading = false
         if uploadImageVM.showErrorPopup != true {
             dismiss()
         }
-        LoaderManager.shared.hideLoader()
+        // LoaderManager.shared.hideLoader()
+        showLocalLoader = false
+    }
+    
+    private func onUpdateProfile()
+    {
+        isUploading = false
+        if profileVM.isProfileUpdate {
+            dismiss()
+            onDelegate?()
+        }
+        // LoaderManager.shared.hideLoader()
+        showLocalLoader = false
     }
     
     private func uploadImage()
@@ -132,15 +166,26 @@ struct UploadImageSheet: View {
            let imageData = image.jpegData(compressionQuality: 0.8) {
             
             originalImage = image
-            LoaderManager.shared.showLoader()
+            isUploading = true
+            // LoaderManager.shared.showLoader()
+            showLocalLoader = true
             let timestamp = Int(Date().timeIntervalSince1970)
             let filename = "image_\(timestamp).jpg"
-            uploadImageVM.imageSubscription(input: UpdateProfileImageRequest(userId: Constants.getUserId()), fileData: [MultiPartFileInput(
-                fieldName   : "screenshot",
-                fileName    : filename,
-                mimeType    : "image/jpeg",
-                fileData    : imageData
-            )])
+            if fromProfile{
+                profileVM.updateProfileImage(input: UpdateProfileImageRequest(userId: Constants.getUserId()), fileData: [MultiPartFileInput(
+                    fieldName   : "profile",
+                    fileName    : filename,
+                    mimeType    : "image/jpeg",
+                    fileData    : imageData
+                )])
+            }else{
+                uploadImageVM.imageSubscription(input: UpdateProfileImageRequest(userId: Constants.getUserId()), fileData: [MultiPartFileInput(
+                    fieldName   : "screenshot",
+                    fileName    : filename,
+                    mimeType    : "image/jpeg",
+                    fileData    : imageData
+                )])
+            }
         }
     }
     

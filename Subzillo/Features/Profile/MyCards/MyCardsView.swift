@@ -298,7 +298,7 @@ struct SwipeableCardRow: View {
                 }
                 .frame(width: 80, height: 148)
             }
-            .frame(width: 90, height: 148)
+            .frame(width: 80, height: 148)
             .background(Color("redColor"))
             .clipShape(
                 RoundedCorner(
@@ -363,21 +363,20 @@ struct SwipeableCardRow: View {
                                 return
                             }
                             isScrollDisabled = true
-                            // Only allow left swipe
-                            let translation = value.translation.width
-                            if value.translation.width < 0 {
-                                self.offset = max(translation, -menuWidth)
-                                print("1")
-                            } else if isSwiped {
-                                let newOffset = -menuWidth + value.translation.width
-                                self.offset = min(0, newOffset)
-                                print("2")
-                            } else if activeCardId == card.id {
-                                // If already swiped (we are active), allow dragging back to right
-                                let newOffset = -menuWidth + value.translation.width
-                                // prevent dragging too far right
-                                self.offset = min(0, newOffset)
+                            
+                            let containerWidth = -menuWidth
+                            var proposedOffset: CGFloat = 0
+                            
+                            if isSwiped {
+                                // Starting from open state (-menuWidth)
+                                proposedOffset = containerWidth + value.translation.width
+                            } else {
+                                // Starting from closed state (0)
+                                proposedOffset = value.translation.width
                             }
+                            
+                            // Strictly clamp the offset
+                            self.offset = min(0, max(containerWidth, proposedOffset))
                         }
                         .onEnded { value in
                             isScrollDisabled = false
@@ -404,9 +403,10 @@ struct SwipeableCardRow: View {
         .listRowSeparator(.hidden)
         .listRowBackground(Color.clear)
         .onChange(of: activeCardId) { newValue in
-            if newValue != card.id && offset != 0 {
+            if newValue != card.id && (offset != 0 || isSwiped) {
                 withAnimation {
                     offset = 0
+                    isSwiped = false
                 }
             }
         }

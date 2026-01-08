@@ -24,14 +24,16 @@ class UploadImageViewModel: ObservableObject {
     
     func imageSubscription(input:UpdateProfileImageRequest,fileData:[MultiPartFileInput]) {
         apiReference.postMultipartApi(endPoint: APIEndpoint.imageSubscription, method: .POST,token: authKey,body: MultipartInput(parameters: input, fileInput: fileData),showLoader: false, responseType: VoiceSubscriptionResponse.self)
-            .sink { [unowned self] completion in
+            .sink { [weak self] completion in
+                guard let self = self else { return }
                 if case let .failure(error) = completion {
                     self.handleError(error,endPoint: APIEndpoint.imageSubscription)
                     self.showErrorPopup = true
                 }
                 self.hideLoader = true
             }
-        receiveValue: { response in
+        receiveValue: { [weak self] response in
+            guard let self = self else { return }
             self.hideLoader = true
             PrintLogger.modelLog(response, type: .response, isInput: false)
             if response.data?.subscriptions?.count == 0

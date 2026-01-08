@@ -14,13 +14,6 @@ struct ListSubscriptionsRequest: Codable{
     let sortBy : Int
 }
 
-//public struct SubscriptionFilter: Codable {
-//    var includeFamilyMembers        : Bool = false
-//    var includeExpiredSubscriptions : Bool = false
-//    var amountOrder                 : String = "asc"
-//    var nextPaymentDateOrder        : String = "asc"
-//}
-
 public struct SubscriptionFilter: Codable {
     var includeFamilyMembers        : Bool = false
     var includeExpiredSubscriptions : Bool = false

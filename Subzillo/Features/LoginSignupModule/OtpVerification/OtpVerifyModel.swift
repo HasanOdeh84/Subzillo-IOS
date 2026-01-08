@@ -8,27 +8,27 @@
 import Foundation
 
 public struct LoginSignupVerifyData: Codable, Hashable {
-    let verifyType          : Int
+    let verifyType          : Int?
     let email               : String?
     let phoneNumber         : String?
     let formattedPhNo       : String?
     let countryCode         : String?
-    let userId              : String
-    let isNewUser           : Bool
-    let isSignupCompleted   : Bool
+    let userId              : String?
+    let isNewUser           : Bool?
+    let isSignupCompleted   : Bool?
     let fullName            : String?
     let socialLogin         : Bool?
     let socialLoginType     : loginType?
     let onboardingStatus    : Bool?
     init(
-        verifyType          : Int,
+        verifyType          : Int? = nil,
         email               : String? = nil,
         phoneNumber         : String? = nil,
         formattedPhNo       : String? = nil,
         countryCode         : String? = nil,
-        userId              : String,
-        isNewUser           : Bool,
-        isSignupCompleted   : Bool,
+        userId              : String? = nil,
+        isNewUser           : Bool? = nil,
+        isSignupCompleted   : Bool? = nil,
         fullName            : String? = nil,
         socialLogin         : Bool? = false,
         socialLoginType     : loginType? = loginType.none,

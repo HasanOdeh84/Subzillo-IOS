@@ -11,7 +11,8 @@ struct BillingCycleBottomSheet: View {
     
     //MARK: - Properties
     @Environment(\.dismiss) private var dismiss
-    @Binding var selectedBilling            : ManualDataInfo?
+    @Binding var selectedBilling            : String?
+    var billingCyclesResponse               : [String]?
     var header                              : String?
     var placeholder                         : String?
     @State private var searchText           = ""
@@ -25,13 +26,13 @@ struct BillingCycleBottomSheet: View {
         ManualDataInfo(id: "6", title: "Yearly", subtitle: "Every 360 Days")
     ]
     
-    var filteredCategories: [ManualDataInfo] {
+    var filteredCategories: [String] {
         if searchText.isEmpty {
-            return billingData
+            return billingCyclesResponse ?? []
         }
-        return billingData.filter {
-            $0.title?.localizedCaseInsensitiveContains(searchText) ?? false
-        }
+        return billingCyclesResponse?.filter {
+            $0.localizedCaseInsensitiveContains(searchText) ?? false
+        } ?? []
     }
     
     //MARK: - body
@@ -75,7 +76,7 @@ struct BillingCycleBottomSheet: View {
                                 dismiss()
                             } label: {
                                 HStack {
-                                    Text(billing.title ?? "")
+                                    Text(billing ?? "")
                                         .font(.appRegular(16))
                                         .foregroundColor(.neutralMain700)
                                         .padding(.horizontal, 14)

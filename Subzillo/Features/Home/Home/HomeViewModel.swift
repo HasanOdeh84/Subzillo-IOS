@@ -12,10 +12,11 @@ import SwiftUI
 
 class HomeViewModel: ObservableObject {
     
-    private var subscriptions           = Set<AnyCancellable>()
-    var apiReference                    = NetworkRequest.shared
-    private let router                  : AppIntentRouter
-    @Published var homeResponse         : HomeResponseData?
+    private var subscriptions               = Set<AnyCancellable>()
+    var apiReference                        = NetworkRequest.shared
+    private let router                      : AppIntentRouter
+    @Published var homeResponse             : HomeResponseData?
+    @Published var homeYearGraphResponse    : HomeYearlyGraphData?
     
     init(router: AppIntentRouter = .shared) {
         self.router = router
@@ -31,6 +32,21 @@ class HomeViewModel: ObservableObject {
         receiveValue: { response in
             PrintLogger.modelLog(response, type: .response, isInput: false)
             self.homeResponse = response.data
+        }
+        .store(in: &self.subscriptions)
+    }
+    
+    func homeYearlyGraph(input: HomeYearlyGraphRequest) {
+        self.homeYearGraphResponse = nil
+        apiReference.postApi(endPoint: APIEndpoint.homeYearlyGraph, method: .POST,token: authKey,body: input,showLoader: true, responseType: HomeYearlyGraphResponse.self)
+            .sink { [unowned self] completion in
+                if case let .failure(error) = completion {
+                    self.handleError(error,endPoint: APIEndpoint.homeYearlyGraph)
+                }
+            }
+        receiveValue: { response in
+            PrintLogger.modelLog(response, type: .response, isInput: false)
+            self.homeYearGraphResponse = response.data
         }
         .store(in: &self.subscriptions)
     }

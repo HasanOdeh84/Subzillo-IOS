@@ -78,13 +78,13 @@ struct ProfileHeader: View {
                         .frame(width: 32, height: 32)
                 }
                 
-                Text("3")
-                    .font(.appBold(11))
-                    .foregroundColor(Color.white)
-                    .frame(width: 16, height: 16)
-                    .background(Color.redBadge)
-                    .cornerRadius(4)
-                    .offset(x: 0, y: -5)
+//                Text("3")
+//                    .font(.appBold(11))
+//                    .foregroundColor(Color.white)
+//                    .frame(width: 16, height: 16)
+//                    .background(Color.redBadge)
+//                    .cornerRadius(4)
+//                    .offset(x: 0, y: -5)
             }
         }
         .frame(height: 32)

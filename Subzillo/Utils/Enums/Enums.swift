@@ -25,13 +25,13 @@ enum NavigationRoute: Hashable{
     case chat
     case appearance
     case notifications
-    case manualEntry(isFromEdit:Bool = false, isFromListEdit: Bool = false, subscriptionId:String = "")
+    case manualEntry(isFromEdit:Bool = false, isFromListEdit: Bool = false, subscriptionId:String = "", familyMemberId:String = "")
     case voiceCommandView
     case subscriptionPreviewView(subscriptionsData:[SubscriptionData]?, content: String, isFromImage:Bool, audioUrl:URL?)
     case subscriptionMatchView(subscriptionData:SubscriptionData = SubscriptionData(), fromList:Bool = false, subscriptionId:String = "")
     case pasteTextView
-    case duplicateSubscriptionsView(duplicateSubsList: [DuplicateDataInfo])
-    case duplicateUpdateView(duplicateSubsList: DuplicateDataInfo?, selectedIndex: Int)
+    case duplicateSubscriptionsView(duplicateSubsList: [DuplicateDataInfo], fromFamily:Bool = false)
+    case duplicateUpdateView(duplicateSubsList: DuplicateDataInfo?, selectedIndex: Int, fromFamily:Bool = false)
     case addSubscriptionsView
     case duplicateSubDetailsView(subscriptionData: SubscriptionInfo?)
     case subscriptionsListView
@@ -84,4 +84,19 @@ enum FieldType {
     case serviceName
     case planType
     case amount
+}
+
+enum SubscriptionsMode {
+    case list
+    case calendar
+    case analytics
+}
+
+enum AccountType : Int, Identifiable {
+    case name       = 1
+    case email      = 2
+    case mobile     = 3
+    case currency   = 4
+    
+    var id: Int { rawValue }
 }

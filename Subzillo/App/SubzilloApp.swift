@@ -207,8 +207,8 @@ struct RootView: View {
                     SuccessView(isOtp:isOtp ?? false,isMobile:isMobile)
                 case .welcome:
                     WelcomeHomeView()
-                case .manualEntry(let isFromEdit, let isFromListEdit, let subscriptionId):
-                    ManualEntryView(isFromEdit: isFromEdit, isFromListEdit: isFromListEdit, subscriptionId: subscriptionId)
+                case .manualEntry(let isFromEdit, let isFromListEdit, let subscriptionId, let familyMemberId):
+                    ManualEntryView(isFromEdit: isFromEdit, isFromListEdit: isFromListEdit, subscriptionId: subscriptionId, familyMemberId: familyMemberId)
                 case .voiceCommandView:
                     VoiceCommandView()
                 case .subscriptionPreviewView(let subscriptionsData, let content, let isFromImage, let audioUrl):
@@ -217,10 +217,10 @@ struct RootView: View {
                     SubscriptionMatchView(subscriptionData: subscriptionData, subscriptionId: subscriptionId, fromList: fromList)
                 case .pasteTextView:
                     PasteTextView()
-                case .duplicateSubscriptionsView(let duplicateSubsList):
-                    DuplicateSubscriptionsView(duplicateSubsList: duplicateSubsList)
-                case .duplicateUpdateView(let duplicateSubsList, let selectedIndex):
-                    DuplicateUpdateView(duplicateSubsList: duplicateSubsList, selectedIndex: selectedIndex)
+                case .duplicateSubscriptionsView(let duplicateSubsList, let fromFamily):
+                    DuplicateSubscriptionsView(duplicateSubsList: duplicateSubsList, fromFamily: fromFamily)
+                case .duplicateUpdateView(let duplicateSubsList, let selectedIndex, let fromFamily):
+                    DuplicateUpdateView(duplicateSubsList: duplicateSubsList, selectedIndex: selectedIndex, fromFamily: fromFamily)
                 case .addSubscriptionsView:
                     RootTabBar(selectedTab: .addSubscription)
                 case .duplicateSubDetailsView(let subscriptionData):
@@ -239,6 +239,16 @@ struct RootView: View {
             guard let new = new else { return }
             path.append(new)
             router.navigatingRoute = nil
+        }
+        .onChange(of: router.popCount) { count in
+            if count > 0 {
+                if path.count >= count {
+                    path.removeLast(count)
+                } else {
+                    path.removeLast(path.count)
+                }
+                router.popCount = 0
+            }
         }
         .sheet(isPresented: $sheetManager.isOfflineSheetVisible) {
             OfflineSheet()
@@ -261,10 +271,15 @@ final class AppIntentRouter: ObservableObject {
     private init() {}
 
     @Published var navigatingRoute: NavigationRoute? = nil
+    @Published var popCount: Int = 0
 }
 
 extension AppIntentRouter {
     func navigate(to route: NavigationRoute) {
         navigatingRoute = route
+    }
+    
+    func pop(count: Int = 1) {
+        popCount = count
     }
 }

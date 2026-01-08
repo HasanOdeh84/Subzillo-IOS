@@ -10,6 +10,7 @@ import SwiftUI
 struct AddSubscriptionsView: View {
     
     @State var showUploadPopup                 : Bool = false
+    @State private var isUploading             = false
     
     var body: some View {
         VStack(alignment: .leading,spacing: 0) {
@@ -56,9 +57,10 @@ struct AddSubscriptionsView: View {
         .background(Color.neutralBg100)
         .padding(20)
         .sheet(isPresented: $showUploadPopup) {
-            UploadImageSheet()
+            UploadImageSheet(isUploading: $isUploading)
                 .presentationDragIndicator(.hidden)
                 .presentationDetents([.height(550)])
+                .interactiveDismissDisabled(isUploading)
         }
         .onReceive(NotificationCenter.default.publisher(for: .closeAllBottomSheets)) { _ in
             showUploadPopup = false

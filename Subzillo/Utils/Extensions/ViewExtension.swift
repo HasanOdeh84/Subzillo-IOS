@@ -80,6 +80,16 @@ extension View {
                 )
         )
     }
+    
+    func shimmer(_ active: Bool) -> some View {
+        Group {
+            if active {
+                self.modifier(ShimmerModifier())
+            } else {
+                self
+            }
+        }
+    }
 }
 
 struct DoneButtonToolbar: ViewModifier {

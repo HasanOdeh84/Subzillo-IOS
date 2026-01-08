@@ -120,7 +120,7 @@ struct Constants{
     ) -> (String, Color, CGFloat) {
         let base = Color.confidenceBlue
         if isAssumed {
-            return ("Assumed", base.opacity(0.4), 0.4)
+            return ("Assumed", base.opacity(0.4), 0.0)
         } else if confidence <= 0 {
             return ("------------", base.opacity(0.0), 0.0)
         } else if confidence < 0.4 {

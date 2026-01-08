@@ -11,18 +11,18 @@ struct LoginSignupValidations {
     
     //MARK: - SignUp
     func validateSignup(input: RegisterRequest,isSocialLogin:Bool = false) -> String? {
-        if !input.phoneNumber.trimmed.isEmpty && !Validations().isValidMobile(input.phoneNumber.trimmed){
-            return "Enter a valid phone number"
-        }
+        //        if !input.phoneNumber.trimmed.isEmpty && !Validations().isValidMobile(input.phoneNumber.trimmed){
+        //            return "Enter a valid phone number"
+        //        }
         if input.fullName.trimmed.isEmpty{
             return "Please enter your full name"
         }
-//        if input.fullName.trimmed.count < 3 {
-//            return "Full name must be at least 3 characters"
-//        }
-//        if !Validations().isValidName(input.fullName.trimmed){
-//            return "Enter a valid name"
-//        }
+        //        if input.fullName.trimmed.count < 3 {
+        //            return "Full name must be at least 3 characters"
+        //        }
+        //        if !Validations().isValidName(input.fullName.trimmed){
+        //            return "Enter a valid name"
+        //        }
         if isSocialLogin{
             if input.email.trimmed.isEmpty{
                 return "Please enter email address"
@@ -32,44 +32,6 @@ struct LoginSignupValidations {
             return "Enter a valid email address"
         }
         return nil
-        //        if isSocialLogin{
-        //            if !input.phoneNumber.trimmed.isEmpty && !Validations().isValidMobile(input.phoneNumber.trimmed){
-        //                return "Enter a valid phone number"
-        //            }
-        //            if input.fullName.trimmed.isEmpty{
-        //                return "Please enter your full name"
-        //            }
-        //            if input.fullName.trimmed.count < 3 {
-        //                return "Full name must be at least 3 characters"
-        //            }
-        //            if !Validations().isValidName(input.fullName.trimmed){
-        //                return "Enter a valid name"
-        //            }
-        //            if input.email.trimmed.isEmpty{
-        //                return "Please enter email address"
-        //            }
-        //            if !input.email.trimmed.isEmpty && !Validations().isValidEmail(input.email.trimmed) {
-        //                return "Enter a valid email address"
-        //            }
-        //            return nil
-        //        }else{
-        //            if !input.phoneNumber.trimmed.isEmpty && !Validations().isValidMobile(input.phoneNumber.trimmed){
-        //                return "Enter a valid phone number"
-        //            }
-        //            if input.fullName.trimmed.isEmpty{
-        //                return "Please enter your full name"
-        //            }
-        //            if input.fullName.trimmed.count < 3 {
-        //                return "Full name must be at least 3 characters"
-        //            }
-        //            if !Validations().isValidName(input.fullName.trimmed){
-        //                return "Enter a valid name"
-        //            }
-        //            if !input.email.trimmed.isEmpty && !Validations().isValidEmail(input.email.trimmed) {
-        //                return "Enter a valid email address"
-        //            }
-        //        }
-        //        return nil // All validations passed
     }
     
     //MARK: - Verify OTP
@@ -88,10 +50,11 @@ struct LoginSignupValidations {
             if input.phoneNumber.isEmpty{
                 print("number is here\(input.phoneNumber)")
                 return "Phone number is required"
-            }else if !Validations().isValidMobile(input.phoneNumber){
-                print("number is \(input.phoneNumber)")
-                return "Mobile number must be between 6 to 15 digits"
             }
+            //            else if !Validations().isValidMobile(input.phoneNumber){
+            //                print("number is \(input.phoneNumber)")
+            //                return "Mobile number must be between 6 to 15 digits"
+            //            }
         }else{
             if input.email.trimmed.isEmpty {
                 return "Email is required"

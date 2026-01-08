@@ -67,14 +67,17 @@ struct ReusableTextField2: View {
     var isEmail         : Bool = false
     var header          : String?
     var isDisabled      : Bool = false
-
+    var isImage         = true
+    
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             Text(LocalizedStringKey(header ?? ""))
                 .font(.appRegular(14))
                 .foregroundColor(Color.neutralMain700)
             HStack{
-                Image("profile")
+                if isImage{
+                    Image("profile")
+                }
                 TextField(placeholder, text: $text)
                     .keyboardType(isEmail ? .emailAddress : .default)
                     .padding(6)

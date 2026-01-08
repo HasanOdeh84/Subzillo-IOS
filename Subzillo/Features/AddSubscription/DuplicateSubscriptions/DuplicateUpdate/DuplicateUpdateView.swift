@@ -16,6 +16,7 @@ struct DuplicateUpdateView: View {
     @State var selectedIndex                : Int = 0
     @State private var existingSubIndex     : Int = 0//-1
     @StateObject var dupSubscriptionVM      = DuplicateSubscriptionsViewModel()
+    @State var fromFamily                   = false
     
     //MARK: - body
     var body: some View {
@@ -110,7 +111,13 @@ struct DuplicateUpdateView: View {
                 //                    AppIntentRouter.shared.navigate(to: .subscriptionsListView)
                 //                }
                 modifiedDuplicateDataInfo = nil
-                AppIntentRouter.shared.navigate(to: .subscriptionsListView)
+                if fromFamily{
+                   // AppIntentRouter.shared.navigate(to: .familyMembersView)
+                    // Pop back to FamilyMembersView (Update -> Duplicates -> Manual -> Family)
+                    AppIntentRouter.shared.pop(count: 3)
+                }else{
+                    AppIntentRouter.shared.navigate(to: .subscriptionsListView)
+                }
             }
             else{
                 dismiss()

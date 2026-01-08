@@ -16,7 +16,6 @@ struct RegistrationView: View {
     @State private var agreeTerms                       = false
     @StateObject private var registerVM                 = RegistrationViewModel()
     @EnvironmentObject var appDelegate                  : AppDelegate
-    @State private var familyMembers                    : [FamilyMember]?
     @State private var selectedCountry                  : Country?
     @State private var selectedCurrency                 : Currency?
     @State var verifyData                               : LoginSignupVerifyData?

@@ -59,6 +59,34 @@ public struct HomeResponseData: Codable, Hashable{
     let expiringSoon          : [SubscriptionListData]?
 }
 
+struct HomeYearlyGraphRequest: Codable{
+    var userId : String
+    var year   : Int
+}
+
+public struct HomeYearlyGraphResponse: Codable {
+    let message : String?
+    let data    : HomeYearlyGraphData?
+}
+
+public struct HomeYearlyGraphData: Codable, Hashable, Identifiable{
+    public var id               : String?
+    let monthlySpend            : [MonthlySpendData]?
+    let userCurrencySymbol      : String?
+    let userCurrency            : String?
+}
+
+struct MonthlySpendData: Codable, Hashable, Identifiable{
+    var id       = UUID()
+    var month    : String
+    var amount   : Double
+    
+    enum CodingKeys: String, CodingKey {
+        case month
+        case amount
+    }
+}
+
 public struct SubscriptionListData: Codable, Hashable, Identifiable{
     public let id         : String?
     let serviceName       : String?
@@ -87,9 +115,12 @@ public struct SubscriptionListData: Codable, Hashable, Identifiable{
 }
 
 public struct TopCategoriesData: Codable, Hashable, Identifiable {
-    public var id           : String {categoryId ?? "\(UUID())"}
-    let categoryId          : String?
-    let categoryName        : String?
-    let subscriptionCount   : Int?
-    let percentage          : Double?
+    public var id               : String {categoryId ?? "\(UUID())"}
+    let categoryId              : String?
+    let categoryName            : String?
+    let color                   : String?
+    let currencySymbol          : String?
+    let subscriptionCount       : Int?
+    let percentage              : Double?
+    let totalAmount             : Double?
 }

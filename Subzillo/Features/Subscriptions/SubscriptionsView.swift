@@ -10,7 +10,7 @@ import SwiftUI
 struct SubscriptionsView: View {
     
     //MARK: - Properties
-    @State private var selectedSegment          : Segment = .first
+    @State private var selectedSegment          : Segment? = .first
     @State private var currentDate              = Date()
     @StateObject var subscriptionsVM            = SubscriptionsViewModel()
     @State private var page                     = 0
@@ -32,6 +32,8 @@ struct SubscriptionsView: View {
     @State private var selectedDate             = Date()
     @State private var filterSelect             : Bool = false
     @State private var pendingFilterSelect      : Bool? = nil
+    @State private var viewMode                 : SubscriptionsMode = .list
+    
     var hasSelection: Bool {
         subscriptionsList.contains(where: { $0.isSelected ?? false })
     }
@@ -90,6 +92,9 @@ struct SubscriptionsView: View {
                                     .frame(width: 20, height: 20)
                             }
                             .frame(width: 40, height: 40)
+                            .background(
+                                viewMode == .analytics ? Color.blue.opacity(0.15) : Color.clear
+                            )
                             .overlay(
                                 RoundedRectangle(cornerRadius: 8)
                                     .stroke(
@@ -103,7 +108,7 @@ struct SubscriptionsView: View {
                             )
                             .cornerRadius(8)
                             
-                            if selectedSegment == .first{
+                            if selectedSegment == .first && viewMode != .analytics {
                                 Button(action: clickOnFilter) {
                                     Image("filter")
                                         .frame(width: 20, height: 20)
@@ -150,43 +155,45 @@ struct SubscriptionsView: View {
                 }
                 
                 // MARK: - year and Month
-                if selectedSegment == .second{
-                    Button(action: dateSelection) {
-                        FieldView(text: $chargeDate, textValue: "", title: "", image: "Calendar1", placeHolder: "mm/yyyy", isButton: false, isText: true, isDate:true)
+                if viewMode != .analytics {
+                    if selectedSegment == .second{
+                        Button(action: dateSelection) {
+                            FieldView(text: $chargeDate, textValue: "", title: "", image: "Calendar1", placeHolder: "mm/yyyy", isButton: false, isText: true, isDate:true)
+                        }
+                        /*Button(action: {
+                         showExpiryPopup = true
+                         }) {
+                         FieldView(text: $expDate, textValue: expDate, title: "Amount", image: "expDateIcon", placeHolder: "MM / YY", isText:  true)
+                         }*/
+                        .sheet(isPresented: $isDatePickerPresented) {
+                            CustomCalenderSheet(
+                                isPresented         : $isDatePickerPresented,
+                                selectedMonth       : $month,
+                                selectedYear        : $year,
+                                onDone: {
+                                    let monthString = String(format: "%02d", month)
+                                    self.chargeDate = "\(monthString)/\(year)"
+                                    getSubsByMonthApi()
+                                }
+                            )
+                            .presentationDetents([.height(300)])
+                            .presentationDragIndicator(.hidden)
+                        }
+                        /*.background(
+                         DatePickerPopup(isPresented: $isDatePickerPresented, selectedDate: $tempDate) { date in
+                         let formatter = DateFormatter()
+                         formatter.dateFormat = "MM/yyyy"
+                         self.chargeDate = formatter.string(from: date)
+                         let calendar = Calendar.current
+                         year = calendar.component(.year, from: date)
+                         month = calendar.component(.month, from: date)
+                         print("year:", year)   // 2025
+                         print("month:", month) // 11
+                         print(chargeDate)
+                         getSubsByMonthApi()
+                         }
+                         )*/
                     }
-                    /*Button(action: {
-                     showExpiryPopup = true
-                     }) {
-                     FieldView(text: $expDate, textValue: expDate, title: "Amount", image: "expDateIcon", placeHolder: "MM / YY", isText:  true)
-                     }*/
-                    .sheet(isPresented: $isDatePickerPresented) {
-                        CustomCalenderSheet(
-                            isPresented         : $isDatePickerPresented,
-                            selectedMonth       : $month,
-                            selectedYear        : $year,
-                            onDone: {
-                                let monthString = String(format: "%02d", month)
-                                self.chargeDate = "\(monthString)/\(year)"
-                                getSubsByMonthApi()
-                            }
-                        )
-                        .presentationDetents([.height(300)])
-                        .presentationDragIndicator(.hidden)
-                    }
-                    /*.background(
-                     DatePickerPopup(isPresented: $isDatePickerPresented, selectedDate: $tempDate) { date in
-                     let formatter = DateFormatter()
-                     formatter.dateFormat = "MM/yyyy"
-                     self.chargeDate = formatter.string(from: date)
-                     let calendar = Calendar.current
-                     year = calendar.component(.year, from: date)
-                     month = calendar.component(.month, from: date)
-                     print("year:", year)   // 2025
-                     print("month:", month) // 11
-                     print(chargeDate)
-                     getSubsByMonthApi()
-                     }
-                     )*/
                 }
             }
             .padding(.bottom, 24)
@@ -201,117 +208,120 @@ struct SubscriptionsView: View {
             //
             //                        Text("Selected Date: \(selectedDate, formatter: dateFormatter)")
             //                    }
-            
-            //MARK: - calender view
-            if selectedSegment == .second{
-                if monthlySubscriptions.count != 0{
-                    List {
-                        ForEach(Array(subscriptions.enumerated()), id: \.offset) { index, subscription in
-                            SubscriptionRow(subscriptionData: subscription)
-                                .onTapGesture {
-                                    toggleSubscription(at: index)
-                                }
-                                .listRowSeparator(.hidden)
-                                .listRowInsets(EdgeInsets())
-                                .listRowBackground(Color.clear)
+            if viewMode == .analytics {
+//                ToastManager.shared.showToast(message: "Coming soon in S4",style:ToastStyle.info)
+//                AnalyticalView()
+            } else if let segment = selectedSegment {
+                if segment == .second{
+                    if monthlySubscriptions.count != 0{
+                        List {
+                            ForEach(Array(subscriptions.enumerated()), id: \.offset) { index, subscription in
+                                SubscriptionRow(subscriptionData: subscription)
+                                    .onTapGesture {
+                                        toggleSubscription(at: index)
+                                    }
+                                    .listRowSeparator(.hidden)
+                                    .listRowInsets(EdgeInsets())
+                                    .listRowBackground(Color.clear)
+                            }
                         }
+                        .listStyle(.plain)
+                        .frame(maxWidth: .infinity)
+                        .scrollContentBackground(.hidden)
+                        .background(.neutralBg100)
+                        .padding(.bottom,86)
+                    }else{
+                        Spacer()
+                        VStack(){
+                            Image("noSubs")
+                                .frame(width: 59, height: 80, alignment: .center)
+                            Text("You haven’t added any\nsubscriptions")
+                                .padding(10)
+                                .multilineTextAlignment(.center)
+                                .foregroundStyle(Color.neutral800)
+                                .font(.appBold(16))
+                        }
+                        Spacer()
                     }
-                    .listStyle(.plain)
-                    .frame(maxWidth: .infinity)
-                    .scrollContentBackground(.hidden)
-                    .background(.neutralBg100)
-                    .padding(.bottom,86)
-                }else{
-                    Spacer()
-                    VStack(){
-                        Image("noSubs")
-                            .frame(width: 59, height: 80, alignment: .center)
-                        Text("You haven’t added any\nsubscriptions")
-                            .padding(10)
-                            .multilineTextAlignment(.center)
-                            .foregroundStyle(Color.neutral800)
-                            .font(.appBold(16))
-                    }
-                    Spacer()
-                }
-            }else if selectedSegment == .first{
-                if subscriptionsList.count != 0{
-                    //MARK: - subscriptions list view
-                    List {
-                        ForEach(Array(subscriptionsList.enumerated()), id: \.offset) { index, sub in
-                            SwipeActionCard(
-                                id: index,
-                                openCardIndex: $openCardIndex,
-                                selectionMode: selectionMode,
-                                onEdit: {
-                                    editSubscription(sub: sub)
-                                },
-                                onDelete: {
-                                    // Clear any previous selections
-                                    for i in subscriptionsList.indices {
-                                        subscriptionsList[i].isSelected = false
+                }  else if segment == .first{
+                    if subscriptionsList.count != 0{
+                        //MARK: - subscriptions list view
+                        List {
+                            ForEach(Array(subscriptionsList.enumerated()), id: \.offset) { index, sub in
+                                SwipeActionCard(
+                                    id: index,
+                                    openCardIndex: $openCardIndex,
+                                    selectionMode: selectionMode,
+                                    onEdit: {
+                                        editSubscription(sub: sub)
+                                    },
+                                    
+                                    onDelete: {
+                                        // Clear any previous selections
+                                        for i in subscriptionsList.indices {
+                                            subscriptionsList[i].isSelected = false
+                                        }
+                                        
+                                        // Mark ONLY this item
+                                        subscriptionsList[index].isSelected = true
+                                        showDeletePopup = true
                                     }
                                     
-                                    // Mark ONLY this item
-                                    subscriptionsList[index].isSelected = true
-                                    showDeletePopup = true
-                                }
-                                
-                            ) {
-                                subscriptionListCard(
-                                    subscriptionData   : sub,
-                                    selectionMode      : selectionMode,
-                                    onSelect           : {
-                                        toggleSelection(at: index)
-                                    },
-                                    onLongPress        : {
-                                        handleLongPress(at: index) }
-                                )
-                                .contentShape(Rectangle())
-                            }
-                            .onTapGesture {
-                                // 🔒 block tap when swipe is open
-                                guard openCardIndex == nil else { return }
-                                if selectionMode {
-                                    toggleSelection(at: index)
-                                } else {
-                                    AppIntentRouter.shared.navigate(
-                                        to: .subscriptionMatchView(
-                                            fromList: true,
-                                            subscriptionId: sub.id ?? ""
-                                        )
+                                ) {
+                                    subscriptionListCard(
+                                        subscriptionData   : sub,
+                                        selectionMode      : selectionMode,
+                                        onSelect           : {
+                                            toggleSelection(at: index)
+                                        },
+                                        onLongPress        : {
+                                            handleLongPress(at: index) }
                                     )
+                                    .contentShape(Rectangle())
                                 }
-                            }
-                            .listRowSeparator(.hidden)
-                            .listRowInsets(.init(top: 0, leading: 0, bottom: 8, trailing: 0))
-                            .listRowBackground(Color.clear)
-                            .onAppear {
-                                if index == subscriptionsList.count - 1 {
-                                    loadNextPageIfNeeded()
+                                .onTapGesture {
+                                    guard openCardIndex == nil else { return }
+                                    if selectionMode {
+                                        toggleSelection(at: index)
+                                    } else {
+                                        AppIntentRouter.shared.navigate(
+                                            to: .subscriptionMatchView(
+                                                fromList: true,
+                                                subscriptionId: sub.id ?? ""
+                                            )
+                                        )
+                                    }
                                 }
+                                .listRowSeparator(.hidden)
+                                .listRowInsets(.init(top: 0, leading: 0, bottom: 8, trailing: 0))
+                                .listRowBackground(Color.clear)
+                                .onAppear {
+                                    if index == subscriptionsList.count - 1 {
+                                        loadNextPageIfNeeded()
+                                    }
+                                }
+                                .padding(.bottom, index == subscriptionsList.count - 1 ? 90 : 0)
                             }
-                            .padding(.bottom, index == subscriptionsList.count - 1 ? 90 : 0)
+                            .background(Color.clear)
+                            .padding(.top, 5)
                         }
+                        
+                        .listStyle(.plain)
                         .background(Color.clear)
-                        .padding(.top, 5)
+                        .scrollContentBackground(.hidden)
+                    }else{
+                        Spacer()
+                        VStack(){
+                            Image("noSubs")
+                                .frame(width: 59, height: 80, alignment: .center)
+                            Text("You haven’t added any\nsubscriptions")
+                                .padding(10)
+                                .multilineTextAlignment(.center)
+                                .foregroundStyle(Color.neutral800)
+                                .font(.appBold(16))
+                        }
+                        Spacer()
                     }
-                    //                    .padding(.bottom, 90)
-                    .listStyle(.plain)
-                    .background(Color.clear)
-                    .scrollContentBackground(.hidden)
-                }else{
-                    Spacer()
-                    VStack(){
-                        Image("noSubs")
-                            .frame(width: 59, height: 80, alignment: .center)
-                        Text("You haven’t added any\nsubscriptions")
-                            .padding(10)
-                            .multilineTextAlignment(.center)
-                            .foregroundStyle(Color.neutral800)
-                            .font(.appBold(16))
-                    }
-                    Spacer()
                 }
             }
             Spacer()
@@ -393,7 +403,18 @@ struct SubscriptionsView: View {
         .onChange(of: subscriptionsVM.listSubsResponse) { _ in updateSubsList() }
         .onChange(of: subscriptionsVM.getSubsByMonthResponse) { _ in updateMonthSubsList() }
         .onChange(of: subscriptionsVM.isDeletedSubscription) { _ in updateDeleteSubscription() }
-        .onChange(of: selectedSegment) { _ in callApis() }
+        //        .onChange(of: selectedSegment) { _ in callApis() }
+        .onChange(of: selectedSegment) { newValue in
+            if newValue == .first {
+                viewMode = .list
+            } else if newValue == .second {
+                viewMode = .calendar
+            } else {
+                ToastManager.shared.showToast(message: "Coming soon in S4",style:ToastStyle.info)
+//                viewMode = .analytics
+            }
+            callApis()
+        }
         .onReceive(NotificationCenter.default.publisher(for: .closeAllBottomSheets)) { _ in
             isDatePickerPresented = false
             showDeletePopup = false
@@ -520,20 +541,20 @@ struct SubscriptionsView: View {
     }
     
     func editSubscription(sub: SubscriptionListData){
-        let subData = SubscriptionData(id                   : sub.id ?? "",
-                                       serviceName          : sub.serviceName ?? "",
-                                       subscriptionType     : sub.subscriptionType ?? "",
-                                       amount               : sub.amount ?? 0.0,
-                                       currency             : sub.currency ?? "",
-                                       currencySymbol       : sub.currencySymbol ?? "",
-                                       billingCycle         : sub.billingCycle ?? "",
-                                       nextPaymentDate      : sub.nextPaymentDate ?? "",
-                                       paymentMethodId      : sub.paymentMethod ?? "",
-                                       paymentMethod        : sub.paymentMethod ?? "",
-                                       paymentMethodName    : sub.paymentMethodName ?? "",
-                                       categoryId           : sub.category ?? "",
-                                       categoryName         : sub.categoryName ?? "",
-                                       reason               : sub.notes ?? "",
+        let subData = SubscriptionData(id               : sub.id ?? "",
+                                       serviceName      : sub.serviceName ?? "",
+                                       subscriptionType : sub.subscriptionType ?? "",
+                                       amount           : sub.amount ?? 0.0,
+                                       currency         : sub.currency ?? "",
+                                       currencySymbol   : sub.currencySymbol ?? "",
+                                       billingCycle     : sub.billingCycle ?? "",
+                                       nextPaymentDate  : sub.nextPaymentDate ?? "",
+                                       paymentMethodId  : sub.paymentMethod ?? "",
+                                       paymentMethod    : sub.paymentMethod ?? "",
+                                       paymentMethodName: sub.paymentMethodName ?? "",
+                                       categoryId       : sub.category ?? "",
+                                       categoryName     : sub.categoryName ?? "",
+                                       reason           : sub.notes ?? "",
                                        subscriptionFor      : sub.subscriptionFor ?? "",
                                        paymentMethodDataId  : sub.paymentMethodDataId ?? "",
                                        paymentMethodDataName: sub.paymentMethodDataName ?? "",
@@ -606,7 +627,11 @@ struct SubscriptionsView: View {
     }
     
     private func clickOnChat() {
+        selectedSegment = nil
         ToastManager.shared.showToast(message: "Coming soon in S4",style:ToastStyle.info)
+        /*
+        viewMode = .analytics
+         */
     }
     
     //    private func clickOnFilter() {
@@ -652,10 +677,6 @@ struct SubscriptionsView: View {
     }
 }
 
-#Preview {
-    SubscriptionsView()
-}
-
 //MARK: - SwipeActionCard
 struct SwipeActionCard<Content: View>: View {
     
@@ -687,7 +708,6 @@ struct SwipeActionCard<Content: View>: View {
     
     var body: some View {
         ZStack(alignment: .trailing) {
-            
             // DELETE (foreground, overlays Edit)
             Button {
                 onDelete()
@@ -745,8 +765,8 @@ struct SwipeActionCard<Content: View>: View {
                 )
             }
             .buttonStyle(.plain)
-            .offset(x: -65)          // overlays Edit
-            .zIndex(0)               // ensures on top
+            .offset(x: -65)
+            .zIndex(0)
             
             // Foreground content
             content
@@ -793,7 +813,7 @@ struct SwipeActionCard<Content: View>: View {
                 }
         }
         .clipShape(
-            RoundedRectangle(cornerRadius: 8)   // ONE rounded container
+            RoundedRectangle(cornerRadius: 8)
         )
         .mask(
             RoundedRectangle(cornerRadius: 8, style: .continuous)
@@ -811,7 +831,6 @@ struct SwipeActionCard<Content: View>: View {
             offsetX = maxOffset
         }
         
-        // logical state — no animation needed
         openCardIndex = id
     }
     
@@ -830,7 +849,6 @@ struct SwipeActionCard<Content: View>: View {
             offsetX = 0
         }
         
-        // logical cleanup (outside animation)
         if openCardIndex == id {
             openCardIndex = nil
         }

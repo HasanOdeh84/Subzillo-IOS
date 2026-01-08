@@ -91,6 +91,24 @@ class OtpVerifyViewModel: ObservableObject {
         .store(in: &self.subscriptions)
     }
     
+    func verifyOtpEdit(input:OtpVerifyRequest, toastManager: ToastManager) {
+        otpVerified = false
+        apiReference.postApi(endPoint: APIEndpoint.verifyOtp, method: .POST, token: authKey, body: input, showLoader: true, responseType: GeneralResponse.self, fromVerifyOtpBottom: true)
+            .sink { [unowned self] completion in
+                if case let .failure(error) = completion {
+                    toastManager.showToast(message: error.localizedDescription, style: .error)
+                    self.handleError(error,endPoint: APIEndpoint.verifyOtp)
+                }
+            }
+        receiveValue: { [unowned self] response in
+            PrintLogger.modelLog(response, type: .response, isInput: false)
+            ToastManager.shared.showToast(message: response.message ?? "")
+            self.otpVerifyResponse = response
+            otpVerified = true
+        }
+        .store(in: &self.subscriptions)
+    }
+    
     func navigate(to route: NavigationRoute){
         self.router.navigate(to: route)
     }

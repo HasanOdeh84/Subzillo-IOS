@@ -9,7 +9,8 @@ import SwiftUI
 
 struct WelcomeHomeView: View {
     
-    @State var showUploadPopup                 : Bool = false
+    @State var showUploadPopup     : Bool = false
+    @State private var isUploading = false
     
     var body: some View {
         VStack(alignment: .leading,spacing: 0) {
@@ -269,9 +270,10 @@ struct WelcomeHomeView: View {
         .background(Color.neutralBg100)
         .navigationBarBackButtonHidden(true)
         .sheet(isPresented: $showUploadPopup) {
-            UploadImageSheet()
+            UploadImageSheet(isUploading: $isUploading)
                 .presentationDragIndicator(.hidden)
                 .presentationDetents([.height(550)])
+                .interactiveDismissDisabled(isUploading)
         }
         .onReceive(NotificationCenter.default.publisher(for: .closeAllBottomSheets)) { _ in
             showUploadPopup = false

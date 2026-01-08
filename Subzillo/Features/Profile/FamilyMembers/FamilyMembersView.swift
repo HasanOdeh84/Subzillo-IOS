@@ -72,13 +72,22 @@ struct FamilyMembersView: View {
                                 },
                                 editBtn: {
                                     if let countries = commonApiVM.countriesResponse {
-                                        selectedCountry = countries.first(where: { $0.countryCode == member.countryCode })
+                                        selectedCountry = countries.first(where: { $0.dialCode == member.countryCode })
                                     }
                                     editingFamily = EditableFamilyWrapper(data: member)
                                 },
                                 delBtn : {
                                     deleteFamilyMemberId = member.id ?? ""
                                     showDeletePopup = true
+                                },
+                                delSubscriptionBtn:{
+                                    listFamilyMembersApi()
+                                }
+                                , addSubscriptionBtn: { id in
+                                    familyMembersVM.navigate(to: .manualEntry(isFromEdit        : false,
+                                                                              isFromListEdit    : false,
+                                                                              subscriptionId    : "",
+                                                                              familyMemberId    : id))
                                 }
                             )
                             Divider()
@@ -125,7 +134,9 @@ struct FamilyMembersView: View {
                 isBtn: true,
                 buttonImage: "profile_add",
                 action: {
-                    openFamilyMemberSheet = true
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                        openFamilyMemberSheet = true
+                    }
                     print("Add Family Member tapped")
                 }
             )
@@ -140,39 +151,35 @@ struct FamilyMembersView: View {
                                        buttonName   : "Save",
                                        action       : {nickName, phone, countryCode, colorHex in
                 let input = AddFamilyMemberRequest(userId       : Constants.getUserId(),
-                                                   nickName     : nickName,
+                                                   nickName     : nickName.trimmed,
                                                    phoneNumber  : phone,
                                                    countryCode  : countryCode,
                                                    color        : colorHex)
-                if let errorMessage = ProfileValidations.shared.addfamilyMember(input: input) {
-                    ToastManager.shared.showToast(message: errorMessage,style:ToastStyle.error)
-                } else {
-                    manualVM.addfamilyMember(input: input)
-                }
+                manualVM.addfamilyMember(input: input)
             })
+            .id(UUID())
             .presentationDragIndicator(.hidden)
             .presentationDetents([.height(600)])
         }
         .sheet(item: $editingFamily) { wrapper in
             AddFamilyMemberBottomSheet(header           : "Edit Family Member",
-                                       description      : "Edit a family member to manage and share plans together.",
+                                       description      : "",
                                        buttonName       : "Update",
                                        buttonImg        : "update",
                                        selectedCountry  : selectedCountry ?? nil,
                                        phoneNumber      : wrapper.data.phoneNumber ?? "",
                                        nickName         : wrapper.data.nickName ?? "",
-                                       action: {nickName, phone, countryCode, colorHex in
-                let input = EditFamilyMemberRequest(familyMemberId       : wrapper.data.id ?? "",
-                                                   nickName              : nickName,
-                                                   phoneNumber           : phone,
-                                                   countryCode           : countryCode,
-                                                   color                 : colorHex)
-                if let errorMessage = ProfileValidations.shared.editfamilyMember(input: input) {
-                    ToastManager.shared.showToast(message: errorMessage,style:ToastStyle.error)
-                } else {
-                    familyMembersVM.editFamilyMember(input: input)
-                }
+                                       selectedColor    : wrapper.data.color ?? "",
+                                       isEdit           : true,
+                                       action           : {nickName, phone, countryCode, colorHex in
+                let input = EditFamilyMemberRequest(familyMemberId        : wrapper.data.id ?? "",
+                                                    nickName              : nickName.trimmed,
+                                                    phoneNumber           : phone,
+                                                    countryCode           : countryCode,
+                                                    color                 : colorHex)
+                familyMembersVM.editFamilyMember(input: input)
             })
+            .id(UUID())
             .presentationDetents([.height(600)])
             .presentationDragIndicator(.hidden)
         }
@@ -188,7 +195,7 @@ struct FamilyMembersView: View {
             InfoAlertSheet(
                 onDelegate: {
                     deleteFamilyMemberApi()
-                }, title    : "Are you sure you want to delete the subscriptions?\nData will be permanently deleted",
+                }, title    : "Are you sure you want to delete this family member?\nAll related subscriptions will be permanently deleted",
                 subTitle    :"",
                 imageName   : "del_red_big",
                 buttonIcon  : "deleteIcon",
@@ -196,7 +203,7 @@ struct FamilyMembersView: View {
                 imageSize   : 70
             )
             .presentationDragIndicator(.hidden)
-            .presentationDetents([.height(340)])
+            .presentationDetents([.height(370)])
         }
         .onChange(of: familyMembersVM.isDelete) { value in
             if value == true{
@@ -232,6 +239,13 @@ struct FamilyMemberCard: View {
     let onTap                       : () -> Void
     let editBtn                     : () -> Void
     let delBtn                      : () -> Void
+    let delSubscriptionBtn          : () -> Void
+    let addSubscriptionBtn          : (String) -> Void
+    @State private var activeCardId         : String? = nil
+    @State private var isScrollDisabled     : Bool = false
+    @State var showDeletePopup              : Bool = false
+    @StateObject var subscriptionsVM        = SubscriptionsViewModel()
+    @State var delSubscriptionId            = ""
     
     var body: some View {
         VStack(spacing: 0) {
@@ -282,40 +296,51 @@ struct FamilyMemberCard: View {
             // MARK: - Expanded Content
             if isExpanded {
                 VStack(spacing: 0) {
-                    // Subscription List
                     if let subs = member.subscriptions, !subs.isEmpty {
-                        // Max height ~3 items (~74pt each) -> ~240pt
-                        ScrollView {
-                            VStack(spacing: 0) {
-                                ForEach(Array(subs.enumerated()), id: \.element.id) { index, sub in
-                                    // Using existing SwipeActionCard
-                                    SwipeActionCard(
-                                        id: index,
-                                        openCardIndex: $openSwipeCardIndex,
-                                        selectionMode: false,
-                                        onEdit: {
-                                            print("Edit sub: \(sub.serviceName ?? "")")
-                                        },
-                                        onDelete: {
-                                            print("Delete sub: \(sub.serviceName ?? "")")
-                                        }
-                                    ) {
-                                        // Using existing subscriptionListCard
-                                        subscriptionListCard(
-                                            subscriptionData: sub,
-                                            isActive: false
+                        VStack{
+                            ScrollView {
+                                VStack(spacing: 0) {
+                                    ForEach(Array(subs.enumerated()), id: \.element.id) { index, sub in
+                                        SwipeableSubscriptionRow(
+                                            sub             : sub,
+                                            activeCardId    : $activeCardId,
+                                            isScrollDisabled: $isScrollDisabled,
+                                            onEdit: {
+                                                print("Edit sub: \(sub.serviceName ?? "")")
+                                                editSubscription(sub: sub, familyMemberId: member.id ?? "")
+                                            },
+                                            onDelete: {
+                                                print("Delete sub: \(sub.serviceName ?? "")")
+                                                delSubscriptionId = sub.id ?? ""
+                                                showDeletePopup = true
+                                            }
                                         )
+                                        if index < subs.count - 1 {
+                                            Divider()
+                                                .overlay(Color.neutral300Border)
+                                        }
                                     }
                                 }
                             }
+                            .scrollDisabled(isScrollDisabled)
+                            //                            .scrollDisabled(subs.count <= 3) // Disable scroll if few items
                         }
-                        .frame(maxHeight: 240) // Limit height to ~3 items
-                        .scrollDisabled(subs.count <= 3) // Disable scroll if few items
+                        .frame(maxHeight: 200)
+                        .background(.neutralBg100)
+                        .clipShape(RoundedRectangle(cornerRadius: 8))
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 8)
+                                .stroke(Color.neutral300Border, lineWidth: 1)
+                        )
+                        .padding(.horizontal, 16)
+                        .padding(.bottom, 16)
                     }
                     
                     //MARK: Add New Subscription Button
                     Button(action: {
+                        guard let id = member.id, !id.isEmpty else { return }
                         print("Add New Subscription tapped for \(member.nickName ?? "")")
+                        addSubscriptionBtn(id)
                     }) {
                         HStack {
                             Image(systemName: "plus")
@@ -332,5 +357,308 @@ struct FamilyMemberCard: View {
             }
         }
         .background(Color.white)
+        .sheet(isPresented: $showDeletePopup , onDismiss: {
+        }) {
+            InfoAlertSheet(
+                onDelegate: {
+                    deleteSubscription()
+                }, title    : "Are you sure you want to delete the subscriptions?\nData will be permanently deleted",
+                subTitle    :"",
+                imageName   : "del_red_big",
+                buttonIcon  : "deleteIcon",
+                buttonTitle : "Delete",
+                imageSize   : 70
+            )
+            .presentationDragIndicator(.hidden)
+            .presentationDetents([.height(340)])
+        }
+        .onChange(of: subscriptionsVM.isDeletedSubscription) { _ in updateDeleteSubscription() }
+    }
+    
+    //MARK: - User defined methods
+    func editSubscription(sub: SubscriptionListData, familyMemberId: String){
+        let subData = SubscriptionData(id               : sub.id ?? "",
+                                       serviceName      : sub.serviceName ?? "",
+                                       subscriptionType : sub.subscriptionType ?? "",
+                                       amount           : sub.amount ?? 0.0,
+                                       currency         : sub.currency ?? "",
+                                       currencySymbol   : sub.currencySymbol ?? "",
+                                       billingCycle     : sub.billingCycle ?? "",
+                                       nextPaymentDate  : sub.nextPaymentDate ?? "",
+                                       paymentMethodId  : sub.paymentMethod ?? "",
+                                       paymentMethod    : sub.paymentMethod ?? "",
+                                       paymentMethodName: sub.paymentMethodName ?? "",
+                                       categoryId       : sub.category ?? "",
+                                       categoryName     : sub.categoryName ?? "",
+                                       reason           : sub.notes ?? "",
+                                       subscriptionFor      : sub.subscriptionFor ?? "",
+                                       paymentMethodDataId  : sub.paymentMethodDataId ?? "",
+                                       paymentMethodDataName: sub.paymentMethodDataName ?? "",
+                                       renewalReminder      : sub.renewalReminder,
+                                       renewalReminders     : sub.renewalReminder,
+                                       notes                : sub.notes ?? "")
+        globalSubscriptionData = subData
+        AppIntentRouter.shared.navigate(to: .manualEntry(isFromEdit     : true,
+                                                         isFromListEdit : true,
+                                                         subscriptionId : sub.id ?? "",
+                                                         familyMemberId : familyMemberId))
+    }
+    
+    func deleteSubscription() {
+        //        var selectedIDs: [String] {
+        //            (member.subscriptions ?? [])
+        //                .filter { $0.isSelected == true }
+        //                .compactMap { $0.id }
+        //        }
+        subscriptionsVM.deleteSubscription(input: DeleteSubscriptionRequest(userId: Constants.getUserId(), subscriptionIds: [delSubscriptionId]))
+    }
+    
+    func updateDeleteSubscription(){
+        if subscriptionsVM.isDeletedSubscription ?? false{
+            delSubscriptionBtn()
+        }
     }
 }
+
+//MARK: - ColorPickerGrid
+struct ColorPickerGrid: View {
+    let colors: [String] = [ "#76869E",
+                             "#8766CE",
+                             "#619BEE",
+                             "#9AC473",
+                             "#E9D2A1",
+                             "#FF5959"]
+    @Binding var selectedColor: String
+    
+    var body: some View {
+        ScrollView(.horizontal, showsIndicators: false){
+            HStack {
+                ForEach(colors, id: \.self) { color in
+                    Rectangle()
+                        .frame(width: 48, height: 48)
+                        .foregroundStyle(Color.safeHex(color))
+                        .clipShape(.rect(cornerRadius: 4)) // shorthand for RoundedRectangle(cornerRadius: 6)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 4)
+                                .stroke(selectedColor == color ? Color.navyBlueCTA700 : Color.clear, lineWidth: 2)
+                        )
+                        .onTapGesture {
+                            selectedColor = color
+                        }
+                }
+            }
+            .padding(.vertical,10)
+            .padding(.leading,3)
+        }
+    }
+}
+
+//MARK: - SwipeableSubscriptionRow
+struct SwipeableSubscriptionRow: View {
+    let sub                     : SubscriptionListData
+    @Binding var activeCardId   : String?
+    @Binding var isScrollDisabled : Bool
+    let onEdit                  : () -> Void
+    let onDelete                : () -> Void
+    @State private var offset   : CGFloat = 0
+    @State private var isSwiped : Bool = false
+    let swipeThreshold: CGFloat = -80
+    let menuWidth: CGFloat      = 145
+    
+    var body: some View {
+        ZStack(alignment: .trailing) {
+            VStack {
+                HStack{
+                    VStack(spacing: 8){
+                        Image("del_white")
+                        Text("Delete")
+                            .font(.appSemiBold(14))
+                            .foregroundColor(.white)
+                    }
+                }
+                .frame(width: 80, height: 74)
+            }
+            .frame(width: 80, height: 74)
+            .background(Color("redColor"))
+            .clipShape(
+                RoundedCorner(
+                    radius: 8,
+                    corners: [.topRight, .bottomRight]
+                )
+            )
+            .overlay(
+                RoundedCorner(
+                    radius: 8,
+                    corners: [.topRight, .bottomRight]
+                )
+                .stroke(Color.neutral300Border, lineWidth: 1)
+            )
+            .opacity(offset != 0 || isSwiped ? 1 : 0) // Hide when not swiping
+            .onTapGesture {
+                withAnimation {
+                    offset = 0
+                    isSwiped = false
+                }
+                onDelete()
+            }
+            
+            VStack(spacing: 8) {
+                Image("edit_white")
+                Text("Edit")
+                    .font(.appSemiBold(14))
+                    .foregroundColor(.white)
+            }
+            .frame(width: 80, height: 74)
+            .background(Color("green"))
+            .clipShape(
+                RoundedCorner(
+                    radius: 8,
+                    corners: [.topRight, .bottomRight]
+                )
+            )
+            .overlay(
+                RoundedCorner(
+                    radius: 8,
+                    corners: [.topRight, .bottomRight]
+                )
+                .stroke(Color.neutral300Border, lineWidth: 1)
+            )
+            .offset(x: -75)
+            .zIndex(0)
+            .opacity(offset != 0 || isSwiped ? 1 : 0) // Hide when not swiping
+            .onTapGesture {
+                withAnimation {
+                    offset = 0
+                    isSwiped = false
+                }
+                onEdit()
+            }
+            
+            // Top Card Layer
+            subscriptionListCardInFamilyMember(
+                subscriptionData    : sub,
+                isActive            : false
+            )
+            .background(Color.white)
+            .offset(x: offset)
+            .simultaneousGesture(
+                DragGesture(minimumDistance: 10, coordinateSpace: .local)
+                    .onChanged { value in
+                        guard abs(value.translation.width) > abs(value.translation.height) else {
+                            isScrollDisabled = false
+                            return
+                        }
+                        isScrollDisabled = true
+                        let containerWidth = -menuWidth
+                        var proposedOffset: CGFloat = 0
+                        if isSwiped {
+                            // Starting from open state (-menuWidth)
+                            proposedOffset = containerWidth + value.translation.width
+                        } else {
+                            // Starting from closed state (0)
+                            proposedOffset = value.translation.width
+                        }
+                        // Strictly clamp the offset
+                        self.offset = min(0, max(containerWidth, proposedOffset))
+                    }
+                    .onEnded { value in
+                        isScrollDisabled = false
+                        guard abs(value.translation.width) > abs(value.translation.height) else { return }
+                        withAnimation(.spring()) {
+                            if value.translation.width < swipeThreshold {
+                                self.offset = -menuWidth
+                                self.isSwiped = true
+                                self.activeCardId = sub.id
+                            } else {
+                                self.offset = 0
+                                self.isSwiped = false
+                                if self.activeCardId == sub.id {
+                                    self.activeCardId = nil
+                                }
+                            }
+                        }
+                    }
+            )
+            .zIndex(1)
+        }
+        .listRowSeparator(.hidden)
+        .listRowBackground(Color.clear)
+        .onChange(of: activeCardId) { newValue in
+            if newValue != sub.id && (offset != 0 || isSwiped) {
+                withAnimation {
+                    offset = 0
+                    isSwiped = false
+                }
+            }
+        }
+    }
+}
+
+
+//struct FamilyMember: Identifiable {
+//    var id = UUID()
+//    var nickname: String = ""
+//    var phoneNumber: String = ""
+//    var color: Color
+//    var selectedCurrency : Currency?
+//}
+
+//struct FamilyMemberView: View {
+//    @Binding var member: FamilyMember
+//    let action      : () -> Void
+//
+//    var body: some View {
+//        VStack(alignment: .leading, spacing: 24) {
+//            HStack{
+//                Text("Family Member 1")
+//                    .font(.appRegular(16))
+//                    .foregroundColor(Color.neutralMain700)
+//                Spacer()
+//                Button(action: action) {
+//                    Image("cancel")
+//                }
+//            }
+//            Rectangle()
+//                .fill(Color.border)
+//                .frame(height: 2)
+//                .padding(.horizontal,-18)
+//                .padding(.top,-8)
+//
+//            ReusableTextField(placeholder   : "Nickname",
+//                              text          : $member.nickname,
+//                              header        : "Family Nickname")
+//            .padding(.top,-8)
+//
+////            PhoneNumberField(phoneNumber        : $member.phoneNumber,
+////                             header             : "Family Member phone number",
+////                             placeholder        : "000 000 000",
+////                             selectedCurrency   : $member.selectedCurrency)
+//
+//            Text("Color (To distinguish color family subscriptions)")
+//                .font(.caption)
+//                .foregroundColor(.gray)
+//                .padding(.bottom, -20)
+//
+//            ColorPickerGrid(selectedColor: $member.color)
+//        }
+//        .padding(18)
+//        .background(.white)
+//        .cornerRadius(16)
+//        .overlay(
+//            RoundedRectangle(cornerRadius: 12)
+//                .stroke(Color.border, lineWidth: 1)
+//        )
+//    }
+//}
+
+//#Preview {
+//    FamilyMemberView(
+//        member: .constant(
+//            FamilyMember(
+//                nickname: "John Doe",
+//                phoneNumber: "9876543210",
+//                color: .blue
+//            )
+//        ), action: { print("Button tapped!") }
+//    )
+//}

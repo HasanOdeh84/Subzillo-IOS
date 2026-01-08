@@ -7,13 +7,15 @@
 
 import Foundation
 
-public struct UpdateUserInfoRequest: Codable {
-    let userId      : String
-    let fullName    : String
-    let email       : String
-    let type        : Int
-    let phoneNumber : String
-    let countryCode : String
+public struct UpdateProfileRequest: Codable {
+    let userId          : String
+    let type            : Int //type -> 1- fullName, 2- email, 3- phone number with countrycode, 4-currency
+    let fullName        : String
+    let email           : String
+    let phoneNumber     : String
+    let countryCode     : String
+    let currency        : String
+    let currencySymbol  : String
 }
 
 public struct UpdatePasswordRequest: Codable {

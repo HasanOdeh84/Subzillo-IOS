@@ -112,3 +112,84 @@ struct subscriptionListCard: View {
         }
     }
 }
+
+
+struct subscriptionListCardInFamilyMember: View {
+    
+    //MARK: - Properties
+    var subscriptionData    : SubscriptionListData
+    var isActive            : Bool = false
+    @State var title        = ""
+    @State var subTitle     = ""
+    @State var nextPayment  = ""
+    @State var relation     = ""
+    @State var colour       = ""
+    var selectionMode       : Bool = false
+    var onSelect            : () -> Void = {}
+    var onLongPress         : () -> Void = {}
+    @State var isExpired    = false
+    
+    //MARK: - body
+    var body: some View {
+        HStack{
+            if selectionMode {
+                Button(action: onSelect) {
+                    Image(subscriptionData.isSelected == true ? "Checkmark" : "UnCheckmark")
+                        .font(.system(size: 24))
+                }
+                .padding(.horizontal,12)
+            }
+            
+            AvatarView(serviceName: subscriptionData.serviceName ?? "", serviceLogo: subscriptionData.serviceLogo ?? "", size: 48)
+            
+            VStack(alignment: .leading,spacing: 4){
+                Text(isActive ? "Next renewal" : "\(subscriptionData.serviceName ?? "") | \(subscriptionData.subscriptionType ?? "")")
+                    .font(.appRegular(12))
+                    .foregroundColor(isActive ? Color.neutral600 : Color.neutral600White)
+                    .multilineTextAlignment(.leading)
+                HStack(spacing: 3){
+                    Text("\(isActive ? subscriptionData.serviceName ?? "" : subscriptionData.billingCycle ?? "") •")
+                        .font(.appRegular(14))
+                        .foregroundColor(isActive ? .navyBlueCTA700White : .navyBlueCTA700)
+                        .multilineTextAlignment(.leading)
+                    Text(subscriptionData.status == "expired" ? "Expired" : Constants.shared.dateConversion(subscriptionData.nextPaymentDate ?? ""))
+                        .font(subscriptionData.status == "expired" ? .appBold(14) : .appRegular(14))
+                        .foregroundColor(subscriptionData.status == "expired" ? .disCardRed : (isActive ? .navyBlueCTA700White : .navyBlueCTA700))
+                        .multilineTextAlignment(.leading)
+                }
+            }
+            
+            Spacer()
+            
+            VStack(alignment: .trailing,spacing: 8){
+                Text("\(subscriptionData.currencySymbol ?? "")\(String(describing: subscriptionData.amount ?? 0.0))")
+                    .font(.appSemiBold(16))
+                    .foregroundColor(isActive ? .navyBlueCTA700White : .navyBlueCTA700)
+            }
+        }
+        .padding(16)
+        .frame(height: 74)
+        .background(.neutralBg100)
+        .onLongPressGesture {
+            onLongPress()
+        }
+    }
+    
+    //MARK: - User defined methods
+    func updateData(){
+        if subscriptionData.nickName == "" && subscriptionData.color == ""{
+            relation    = "Me"
+            colour      = "#619BEE"
+        }else{
+            relation = subscriptionData.nickName ?? "Me"
+            colour   = subscriptionData.color ?? "#619BEE"
+        }
+        nextPayment = Constants.shared.dateConversion(subscriptionData.nextPaymentDate ?? "")
+        if subscriptionData.status == "expired"{
+            nextPayment = "Expired"
+            isExpired   = true
+        }
+        title       = "\(subscriptionData.serviceName ?? "") | \(subscriptionData.subscriptionType ?? "")"
+        subTitle    = "\(subscriptionData.billingCycle ?? "") •"
+    }
+}

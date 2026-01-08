@@ -20,7 +20,7 @@ struct LoginView: View {
     @EnvironmentObject var appDelegate          : AppDelegate
     @State private var selectedCurrency         : Currency?
     @State private var selectedCountry          : Country?
-    @State var segmentSelected                  : Segment = .first
+    @State var segmentSelected                  : Segment? = .first
     @EnvironmentObject var commonApiVM          : CommonAPIViewModel
     
     //MARK: - Body

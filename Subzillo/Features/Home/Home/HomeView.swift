@@ -8,20 +8,6 @@ import SwiftUI
 import SDWebImageSwiftUI
 import Charts
 
-struct MonthlySpend: Identifiable {
-    let id = UUID()
-    let index: Int
-    let month: String
-    let value: Double
-}
-
-struct SubscriptionSpending: Identifiable {
-    let id = UUID()
-    let title: String
-    let amount: Double
-    let color: Color
-}
-
 struct HomeView: View {
     
     //MARK: - Properties
@@ -40,6 +26,7 @@ struct HomeView: View {
     @State var homeResponse                 : HomeResponseData?
     @State var fullName                     = ""
     @State private var isHome               : Bool? = nil
+    @State var selectedYear                 = 2025
     
     private var currentSubscriptions: [SubscriptionListData] {
         showAll ? activeSubsList : Array(activeSubsList.prefix(1))
@@ -117,11 +104,27 @@ struct HomeView: View {
                         .background(.whiteBlackBG)
                         .cornerRadius(12)
                         
+                        /*
+                        //MARK: Top spending subscriptions
+                        TopSpendingSubscriptionsView(data: topCategoriesList)
+                            .padding(.top, 16)
+                        
+                        //MARK: Year Overview
+                        YearOverviewChartView(data              : homeVM.homeYearGraphResponse?.monthlySpend ?? [],
+                                              currencySymbol    : homeVM.homeYearGraphResponse?.userCurrencySymbol ?? "",
+                                              onDone            : { year in
+                            selectedYear = year
+                            homeYearlyGraphApi()
+                        })
+                            .padding(.top, 16)
+                         */
+                        
                         TopSpendingSubscriptionsView()
                             .padding(.top, 16)
                         
                         YearOverviewChartView()
                             .padding(.top, 16)
+
                         
                         //MARK: Save cards
                         GradientBorderView(title: savePercent, subTitle: saveExpiry, buttonImage: "percent-square",nextBtnImage: "arrow_blue", action: clickOnSave, titleColor: Color.blue800,minHeight: 75,titleFont: 18,subTitleFont: 14)
@@ -287,6 +290,7 @@ struct HomeView: View {
                 self.fullName = fullName
             }
             homeVM.home(input: HomeRequest(userId: Constants.getUserId()))
+            homeYearlyGraphApi()
         }
         .onChange(of: homeVM.homeResponse){ _ in updateHomeResponse() }
     }
@@ -321,6 +325,10 @@ struct HomeView: View {
         subscriptionsList   = homeResponse?.subscriptionList ?? []
         topCategoriesList   = homeResponse?.topCategories ?? []
         isHome              = homeVM.homeResponse?.totalSubscriptions == 0 ? false : true
+    }
+    
+    func homeYearlyGraphApi(){
+//        homeVM.homeYearlyGraph(input: HomeYearlyGraphRequest(userId: Constants.getUserId(), year: selectedYear))
     }
 }
 
@@ -511,6 +519,348 @@ struct AvatarView: View {
     }
 }
 
+////MARK: - TopSpendingSubscriptionsView
+//struct TopSpendingSubscriptionsView: View {
+//    
+//    let data : [TopCategoriesData]
+//    var maxAmount: Double {
+//        data.map { $0.totalAmount ?? 0.0 }.max() ?? 1
+//    }
+//    
+//    var body: some View {
+//        VStack(alignment: .leading) {
+//            Text("Top spending subscriptions")
+//                .font(.appRegular(16))
+//                .foregroundColor(Color.neutralMain700)
+//                .padding(.bottom, 15)
+//                .padding(.horizontal, 15)
+//            Divider()
+//                .overlay(Color.neutral300Border)
+//            VStack(spacing: 16) {
+//                ForEach(data) { item in
+//                    SpendingRowView(
+//                        title       : item.categoryName ?? "",
+//                        amount      : item.totalAmount ?? 0.0,
+//                        maxAmount   : maxAmount,
+//                        percentage  : item.percentage ?? 0.0,
+//                        color       : item.color ?? ""
+//                    )
+//                }
+//            }
+//            .padding(15)
+//            
+//            HStack{
+//                Spacer()
+//                Text("View More")
+//                    .font(.appRegular(16))
+//                    .foregroundColor(.blueMain700)
+//                Spacer()
+//            }
+//        }
+//        .padding(.vertical, 16)
+//        .background(.whiteBlackBG)
+//        .overlay(
+//            RoundedRectangle(cornerRadius: 12)
+//                .stroke(.neutral300Border, lineWidth: 1)
+//        )
+//        .cornerRadius(12)
+//        //        .shadow(color: Color.black.opacity(0.05), radius: 8, x: 0, y: 4)
+//    }
+//}
+//
+////MARK: - SpendingRowView
+//struct SpendingRowView: View {
+//    
+//    let title       : String
+//    let amount      : Double
+//    let maxAmount   : Double
+//    let percentage  : Double
+//    let color       : String
+//    var progress    : CGFloat {
+//        CGFloat(percentage / 100)
+//    }
+//    
+//    var body: some View {
+//        HStack(spacing: 5) {
+//            Text(title)
+//                .font(.appRegular(14))
+//                .foregroundColor(.neutralMain700)
+//                .frame(width: 90, alignment: .leading)
+//                .padding(.trailing, 24)
+//            GeometryReader { geo in
+//                ZStack(alignment: .leading) {
+//                    Capsule()
+//                        .fill(Color.clear)
+//                    Capsule()
+//                        .fill(Color.safeHex(color))
+//                        .frame(width: geo.size.width * progress)
+//                }
+//            }
+//            .frame(height: 10)
+//            .padding(.trailing, 7)
+//            Text(String(format: "$%.2f", amount))
+//                .font(.appBold(14))
+//                .foregroundColor(.neutralMain700)
+//                .frame(width: 50, alignment: .trailing)
+//        }
+//    }
+//}
+//
+////MARK: - YearOverviewChartView
+//struct YearOverviewChartView: View {
+//    
+//    @State private var selected             : MonthlySpendData?
+//    @State private var clearSelectionTask   : Task<Void, Never>?
+//    let visibleMonths                       : [String] = ["Jan", "Apr", "Jun", "Aug", "Oct", "Dec"]
+//    let fakeMonths                          = ["Jan", "Apr", "Jun", "Aug", "Oct", "Dec"]
+//    let data                                : [MonthlySpendData]
+//    var currencySymbol                      : String
+//    @State var openYearSheet                = false
+//    @State var year                         : Int = 2025
+//    let onDone                              : (Int) -> Void
+//    
+//    //MARK: - Computed Properties
+//    private var yAxisValues: [Double] {
+//        let maxAmount = data.map { $0.amount }.max() ?? 0
+//        let effectiveMax = maxAmount == 0 ? 5 : maxAmount
+//        let step = effectiveMax / 5
+//        return (0...5).map { Double($0) * step }
+//    }
+//    
+//    //MARK: - body
+//    var body: some View {
+//        VStack(alignment: .leading, spacing: 2) {
+//            // Header
+//            HStack {
+//                Text("Year Overview")
+//                    .font(.appRegular(16))
+//                    .foregroundStyle(Color.neutralMain700)
+//                Spacer()
+//                HStack(spacing: 4) {
+//                    Text(String(year))
+//                        .font(.appRegular(16))
+//                        .foregroundStyle(Color.grayLG)
+//                    Image(systemName: "chevron.down")
+//                        .font(.system(size: 12))
+//                }
+//                .padding(.horizontal, 10)
+//                .padding(.vertical, 6)
+//                .overlay(
+//                    RoundedRectangle(cornerRadius: 4)
+//                        .stroke(.neutral300Border)
+//                )
+//                .onTapGesture {
+//                    openYearSheet = true
+//                }
+//            }
+//            .padding(.horizontal, 20)
+//            Spacer()
+//            
+//            Divider()
+//                .overlay(Color.neutral300Border)
+//                .padding(.bottom, 25)
+//            
+//            ZStack(alignment: .leading) {
+//                Rectangle()
+//                    .fill(Color.neutral300Border)
+//                    .frame(width: 1)
+//                    .padding(.top, 0)
+//                    .padding(.bottom, 0)
+////                    .padding(.leading, -10)
+//                    .offset(x: 32)
+//                
+//                // Chart
+//                Chart {
+//                    ForEach(data) { item in
+//                        AreaMark(
+//                            x: .value("Month", item.month),
+//                            y: .value("Value", item.amount)
+//                        )
+//                        .interpolationMethod(.catmullRom)
+//                        .foregroundStyle(
+//                            LinearGradient(
+//                                colors: [
+//                                    Color.graphGradient1.opacity(0.25), // near line
+//                                    Color.graphGradient1.opacity(0.05), // fade
+//                                    Color.clear                          // bottom
+//                                ],
+//                                startPoint: .top,
+//                                endPoint: .bottom
+//                            )
+//                        )
+//                        
+//                        LineMark(
+//                            x: .value("Month", item.month),
+//                            y: .value("Value", item.amount)
+//                        )
+//                        .interpolationMethod(.catmullRom)
+//                        .foregroundStyle(
+//                            LinearGradient(
+//                                colors: [Color.graphGradient1, Color.graphGradient2],
+//                                startPoint: .leading,
+//                                endPoint: .trailing
+//                            )
+//                        )
+//                        .lineStyle(.init(lineWidth: 1))
+////                        
+//                        // OUTERMOST border (grey)
+//                        PointMark(
+//                            x: .value("Month", item.month),
+//                            y: .value("Value", item.amount)
+//                        )
+//                        .symbolSize(300)
+//                        .opacity(selected?.id == item.id ? 1 : 0)
+//                        .foregroundStyle(Color.graphBorder)
+//                        
+//                        PointMark(
+//                            x: .value("Month", item.month),
+//                            y: .value("Value", item.amount)
+//                        )
+//                        .symbolSize(200) // outer size
+//                        .opacity(selected?.id == item.id ? 1 : 0)
+//                        .foregroundStyle(Color.white)
+//                        // INNER purple dot
+//                        PointMark(
+//                            x: .value("Month", item.month),
+//                            y: .value("Value", item.amount)
+//                        )
+//                        .symbolSize(80) // inner size
+//                        .opacity(selected?.id == item.id ? 1 : 0)
+//                        .foregroundStyle(Color.graphGradient1)
+//                    }
+//                }
+//                .chartYScale(domain: 0...(yAxisValues.last ?? 5))
+//                .chartXScale(range: .plotDimension(padding: 0))
+//                .chartYAxis {
+//                    AxisMarks(position: .leading, values: yAxisValues) { value in
+//                        AxisValueLabel {
+//                            if let y = value.as(Double.self) {
+//                                Text("\(Int(y))")
+//                                    .font(.appRegular(16))
+//                                    .foregroundStyle(Color.neutralMain700)
+//                                    .padding(.trailing, 20)
+//                            }
+//                        }
+//                    }
+//                }
+//                
+//                .chartXAxis {
+//                    
+//                }
+//                .frame(height: 220)
+//                .chartOverlay { proxy in
+//                    GeometryReader { geo in
+//                        ZStack(alignment: .topLeading) {
+//                            ForEach(yAxisValues, id: \.self) { value in
+//                                if value != 0, let yPos = proxy.position(forY: value) {
+//                                    DashedHorizontalDivider(dash: [2,2])
+//                                        .frame(height: 1)
+//                                        .position(
+//                                            x: geo.size.width / 2,
+//                                            y: yPos
+//                                        )
+//                                        .padding(.leading, 18)
+//                                        .padding(.trailing, 10)
+//                                }
+//                            }
+//                            
+//                            Rectangle()
+//                                .fill(Color.clear)
+//                                .contentShape(Rectangle())
+//                                .gesture(
+//                                    DragGesture(minimumDistance: 0)
+//                                        .onChanged { value in
+//                                            let x = value.location.x
+//                                            if let month: String = proxy.value(atX: x) {
+//                                                selected = data.first { $0.month == month }
+//                                            }
+//                                        }
+//                                )
+//                            
+//                            if let selected,
+//                               let xPos = proxy.position(forX: selected.month),
+//                               let yPos = proxy.position(forY: selected.amount) {
+//                                
+//                                VStack {
+//                                    Text("\(selected.month) : \(currencySymbol)\(Int(selected.amount))")
+//                                        .font(.appMedium(10))
+//                                        .padding(6)
+//                                        .background(Color.white)
+//                                        .cornerRadius(8)
+//                                        .shadow(color: Color.dropShadow, radius: 4, x: 0, y: 2)
+//                                        .overlay(
+//                                            RoundedRectangle(cornerRadius: 8)
+//                                                .stroke(.neutral300Border, lineWidth: 1)
+//                                        )
+//                                }
+//                                .position(
+//                                    x: xPos,
+//                                    y: yPos - 30
+//                                )
+//                            }
+//                        }
+//                    }
+//                }
+//            }
+//            .padding(.horizontal, 20)
+//            
+//            Divider()
+//                .background(Color.neutral300Border)
+//                .padding(.top, -2)
+//                .padding(.leading, 22)
+//                .padding(.horizontal, 30)
+//                .padding(.trailing, 10)
+//            
+//            HStack(spacing: 0) {
+//                ForEach(fakeMonths, id: \.self) { month in
+//                    Text(month)
+//                        .font(.appRegular(16))
+//                        .foregroundColor(Color.neutralMain700)
+//                        .frame(maxWidth: .infinity)
+//                }
+//            }
+//            .padding(.top, 10)
+//            .padding(.horizontal, 30)
+//            .padding(.trailing, 10)
+//            
+//            HStack{
+//                Spacer()
+//                Text("View More")
+//                    .font(.appRegular(16))
+//                    .foregroundColor(.blueMain700)
+//                Spacer()
+//            }
+//            .padding(.top, 16)
+//        }
+//        .padding(.vertical, 20)
+//        .overlay(
+//            RoundedRectangle(cornerRadius: 12)
+//                .stroke(.neutral300Border, lineWidth: 1)
+//        )
+//        .background(.whiteBlackBG)
+//        .cornerRadius(12)
+//        .onChange(of: selected?.id) { _ in
+//            clearSelectionTask?.cancel()
+//            guard selected != nil else { return }
+//            clearSelectionTask = Task {
+//                try? await Task.sleep(nanoseconds: 3_000_000_000)
+//                await MainActor.run {
+//                    selected = nil
+//                }
+//            }
+//        }
+//        .sheet(isPresented: $openYearSheet) {
+//            CustomYearBottomSheet(isPresented   : $openYearSheet,
+//                                  onDone        : { year in
+//                self.year = year
+//                onDone(year)
+//            })
+//            .presentationDetents([.height(300)])
+//            .presentationDragIndicator(.hidden)
+//        }
+//    }
+//}
+
 //MARK: - SpendingRowView
 struct SpendingRowView: View {
     let title: String
@@ -546,6 +896,20 @@ struct SpendingRowView: View {
                 .frame(width: 50, alignment: .trailing)
         }
     }
+}
+
+struct MonthlySpend: Identifiable {
+    let id = UUID()
+    let index: Int
+    let month: String
+    let value: Double
+}
+
+struct SubscriptionSpending: Identifiable {
+    let id = UUID()
+    let title: String
+    let amount: Double
+    let color: Color
 }
 
 //MARK: - TopSpendingSubscriptionsView
