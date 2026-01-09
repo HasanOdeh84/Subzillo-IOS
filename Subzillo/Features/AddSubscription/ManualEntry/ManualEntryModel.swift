@@ -143,7 +143,7 @@ struct FetchProviderData: Codable, Hashable, Identifiable {
 }
 
 struct ProviderSubscriptionPlan: Codable, Identifiable, Hashable {
-    var id          : String? = nil
+    let id          = UUID()
     var planName    : String? = nil
     var price       : Double? = nil
     var billingCycle: String? = nil

@@ -171,33 +171,33 @@ struct ReviewExtractedDetailsView: View {
                         .presentationDragIndicator(.hidden)
                 }
             case .planType:
-//                FieldSuggestionView(
-//                    text        : $planType,
-//                    title       : "Plan Type",
-//                    image       : "gridicon2",
-//                    placeHolder : "e.g. Free, Pro, Premium",
-//                    suggestions : providerPlansList ?? [],
-//                    displayKey  : { $0.planName ?? "" },
-//                    isFocused   : $dummyFocus,
-//                    fieldType   : FieldType.planType,
-//                    activeField : $activeField,
-//                    action      : {
-//                        errorHint(isAmount: false)
-//                        isPlanTypeUpdate = true
-//                    }
-//                )
-//                if isPlanTypeError{
-//                    HStack(spacing: 6){
-//                        Image("info")
-//                            .frame(width: 24, height: 24)
-//                        Text("This plan is not available for this service")
-//                            .font(.appRegular(14))
-//                            .foregroundColor(Color.systemInfoBlue)
-//                        Spacer()
-//                    }
-//                    .padding(.leading, 5)
-//                    .padding(.top, -5)
-//                }
+                //                FieldSuggestionView(
+                //                    text        : $planType,
+                //                    title       : "Plan Type",
+                //                    image       : "gridicon2",
+                //                    placeHolder : "e.g. Free, Pro, Premium",
+                //                    suggestions : providerPlansList ?? [],
+                //                    displayKey  : { $0.planName ?? "" },
+                //                    isFocused   : $dummyFocus,
+                //                    fieldType   : FieldType.planType,
+                //                    activeField : $activeField,
+                //                    action      : {
+                //                        errorHint(isAmount: false)
+                //                        isPlanTypeUpdate = true
+                //                    }
+                //                )
+                //                if isPlanTypeError{
+                //                    HStack(spacing: 6){
+                //                        Image("info")
+                //                            .frame(width: 24, height: 24)
+                //                        Text("This plan is not available for this service")
+                //                            .font(.appRegular(14))
+                //                            .foregroundColor(Color.systemInfoBlue)
+                //                        Spacer()
+                //                    }
+                //                    .padding(.leading, 5)
+                //                    .padding(.top, -5)
+                //                }
                 
                 Button(action: selectPlanType) {
                     FieldView(text: $planType, textValue: selectedPlanType ?? "", title: "Plan Type", image: "gridicon2", placeHolder: "Please select", isButton: true, isText: true)
@@ -222,9 +222,11 @@ struct ReviewExtractedDetailsView: View {
                     BillingCycleBottomSheet(selectedBilling         : $selectedBilling,
                                             billingCyclesResponse   : filteredBillingCycles(),
                                             header                  : "Select Billing Cycle",
-                                            placeholder             : "Search billing cycle")
-                        .presentationDetents([.height(500)])
-                        .presentationDragIndicator(.hidden)
+                                            placeholder             : "Search billing cycle",
+                                            onSelect: { billing in
+                    })
+                    .presentationDetents([.height(500)])
+                    .presentationDragIndicator(.hidden)
                 }
             }
             
@@ -241,7 +243,7 @@ struct ReviewExtractedDetailsView: View {
                     globalSubscriptionData?.serviceName     = serviceName.trimmed
                 case .amount:
                     let amountDouble = Double(amount.trimmed) ?? 0.0
-//                    if amountDouble == 0.0 || amount.trimmed == ""{
+                    //                    if amountDouble == 0.0 || amount.trimmed == ""{
                     if amount.trimmed == ""{
                         toastManager.showToast(message: "Amount is required",style:ToastStyle.error)
                         return
@@ -289,6 +291,9 @@ struct ReviewExtractedDetailsView: View {
                         frequency: selectedBilling ?? ""
                     )
                     globalSubscriptionData?.nextPaymentDate = chargeDate.formattedDate(from: "dd/MM/yyyy", to: "yyyy-MM-dd")
+                    
+                    //amount should be changed based on the billing cycle
+                    amountUpdate()
                 }
                 onDelegate?()
                 dismiss()
@@ -379,6 +384,25 @@ struct ReviewExtractedDetailsView: View {
         return Array(Set(billingCycleNames))
     }
     
+    func amountUpdate(){
+        guard
+            let selectedBilling = selectedBilling?
+                .trimmingCharacters(in: .whitespacesAndNewlines),
+            !selectedBilling.isEmpty,
+            let plans = providerPlansList
+        else {
+            return
+        }
+
+        if let matchedPlan = plans.first(where: {
+            ($0.billingCycle ?? "")
+                .trimmingCharacters(in: .whitespacesAndNewlines)
+                .caseInsensitiveCompare(selectedBilling) == .orderedSame
+        }) {
+            globalSubscriptionData?.amount = matchedPlan.price ?? 0.0
+        }
+    }
+    
     private func selectPlanType()
     {
         showPlanTypeSheet = true
@@ -464,14 +488,15 @@ struct ReviewExtractedDetailsView: View {
             }) {
                 if globalSubscriptionData?.subscriptionType == ""{
                     globalSubscriptionData?.subscriptionType = matchedPlan.planName ?? ""
-                }
-                if globalSubscriptionData?.billingCycle == ""{
                     globalSubscriptionData?.billingCycle = matchedPlan.billingCycle ?? ""//.lowercased()
                     chargeDate = Constants.shared.getNextDateByFrequency(
                         frequency: matchedPlan.billingCycle ?? ""
                     )
                     globalSubscriptionData?.nextPaymentDate = chargeDate.formattedDate(from: "dd/MM/yyyy", to: "yyyy-MM-dd")
                 }
+//                if globalSubscriptionData?.billingCycle == ""{
+//                    
+//                }
                 isAmountError = false
             } else {
                 if providerPlansList?.count != 0{
@@ -484,6 +509,10 @@ struct ReviewExtractedDetailsView: View {
                 let plans = providerPlansList
             else {
                 isPlanTypeError = false
+                
+                //For first-time users, the available plan types are Free Plan and Basic Plan. When the user selects either one, the billing cycle should be displayed as Monthly by default.
+                selectedBilling = "Monthly"
+                
                 return
             }
             if let matchedPlan = plans.first(where: {
@@ -493,16 +522,16 @@ struct ReviewExtractedDetailsView: View {
                         planType.trimmingCharacters(in: .whitespacesAndNewlines)
                     ) == .orderedSame
             }) {
-                if globalSubscriptionData?.amount == 0.0 || globalSubscriptionData?.amount == nil{
+//                if globalSubscriptionData?.amount == 0.0 || globalSubscriptionData?.amount == nil{
                     globalSubscriptionData?.amount = matchedPlan.price
-                }
-                if globalSubscriptionData?.billingCycle == "" || globalSubscriptionData?.billingCycle == nil {
+//                }
+//                if globalSubscriptionData?.billingCycle == "" || globalSubscriptionData?.billingCycle == nil {
                     globalSubscriptionData?.billingCycle = matchedPlan.billingCycle ?? ""//.lowercased()
                     chargeDate = Constants.shared.getNextDateByFrequency(
                         frequency: matchedPlan.billingCycle ?? ""
                     )
                     globalSubscriptionData?.nextPaymentDate = chargeDate.formattedDate(from: "dd/MM/yyyy", to: "yyyy-MM-dd")
-                }
+//                }
                 isPlanTypeError = false
             } else {
                 if !(providerPlansList?.isEmpty ?? true) {

@@ -60,11 +60,44 @@ struct ConnectEmailView: View {
                     RoundedRectangle(cornerRadius: 12)
                         .stroke(Color.neutral300Border, lineWidth: 1)
                 )
+                .padding(5)
+                
+                // MARK: - Connected mails
+                VStack(spacing: 0) {
+                    HStack{
+                        Text("Connected mails")
+                            .font(.appSemiBold(16))
+                            .foregroundColor(.neutralMain700)
+                        
+                        Spacer()
+                        Image("arrow-right-01-round")
+                            .renderingMode(.template)
+                            .foregroundColor(.secondaryNavyBlue400)
+                            .frame(width: 24, height: 24)
+                    }
+                    .padding(.vertical, 20)
+                    .padding(.leading, 16)
+                    .padding(.trailing, 8)
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .frame(height: 56)
+                .cornerRadius(12)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 12)
+                        .stroke(Color.neutral300Border, lineWidth: 1)
+                )
+                
+                // MARK: - How It Works
+                GradienCustomeView(title    : "How it work?",
+                                   subTitle : ". We never store full email content\n. We cannot send emails or access personal messages")
+                .padding(.horizontal, 20)
+                .padding(.top, 24)
+                .padding(.bottom, 24)
                 
                 Spacer()
             }
             .frame(maxWidth: .infinity)
-            .padding(20)
+            .padding(15)
         }
         .navigationBarBackButtonHidden()
         .background(Color.neutralBg100)

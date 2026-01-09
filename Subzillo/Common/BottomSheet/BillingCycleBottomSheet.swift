@@ -16,6 +16,7 @@ struct BillingCycleBottomSheet: View {
     var header                              : String?
     var placeholder                         : String?
     @State private var searchText           = ""
+    var onSelect: (String) -> Void
     
     @State private var billingData = [
         ManualDataInfo(id: "1", title: "Daily", subtitle: "Every 24 hours"),
@@ -74,6 +75,7 @@ struct BillingCycleBottomSheet: View {
                             Button {
                                 selectedBilling = billing
                                 dismiss()
+                                onSelect(billing)
                             } label: {
                                 HStack {
                                     Text(billing ?? "")

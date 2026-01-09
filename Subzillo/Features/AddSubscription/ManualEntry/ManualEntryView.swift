@@ -259,54 +259,83 @@ struct ManualEntryView: View {
                     //                    ListView(type: .billing, title: "Billing Cycle", addMore: false, data: $billingData, selectedIndex: $billingIndex)
                     //                        .frame(height: Double(30 + (52 * billingData.count)))
                     
-                    //MARK: - Billing cycle field
-//                    Button(action: selectBilling) {
-//                        FieldView(text: $billingCycle, textValue: selectedBilling?.title ?? "", title: "Billing Cycle", image: "billing", placeHolder: "Select billing cycle", isButton: true, isText: true)
-//                    }
-//                    .sheet(isPresented: $showBillingCycleSheet) {
-//                        BillingCycleBottomSheet(selectedBilling: $selectedBilling, header: "Select Billing Cycle", placeholder: "Search billing cycle")
-//                            .presentationDetents([.height(500)])
-//                            .presentationDragIndicator(.hidden)
-//                    }
-//                    .onChange(of: selectedBilling) { billing in
-//                        guard
-//                            let billing,
-//                            let title = billing.title
-//                        else { return }
-//                        
-//                        if isFromEdit && isInitialPayment{
-//                            isInitialPayment = false
-//                        }else{
-//                            chargeDate = Constants.shared.getNextDateByFrequency(
-//                                frequency: title
-//                            )
-//                        }
-//                    }
+                    //                    Button(action: selectBilling) {
+                    //                        FieldView(text: $billingCycle, textValue: selectedBilling?.title ?? "", title: "Billing Cycle", image: "billing", placeHolder: "Select billing cycle", isButton: true, isText: true)
+                    //                    }
+                    //                    .sheet(isPresented: $showBillingCycleSheet) {
+                    //                        BillingCycleBottomSheet(selectedBilling: $selectedBilling, header: "Select Billing Cycle", placeholder: "Search billing cycle")
+                    //                            .presentationDetents([.height(500)])
+                    //                            .presentationDragIndicator(.hidden)
+                    //                    }
+                    //                    .onChange(of: selectedBilling) { billing in
+                    //                        guard
+                    //                            let billing,
+                    //                            let title = billing.title
+                    //                        else { return }
+                    //
+                    //                        if isFromEdit && isInitialPayment{
+                    //                            isInitialPayment = false
+                    //                        }else{
+                    //                            chargeDate = Constants.shared.getNextDateByFrequency(
+                    //                                frequency: title
+                    //                            )
+                    //                        }
+                    //                    }
                     
                     
                     //MARK: - Billing cycle field
                     Button(action: selectBilling) {
-//                        FieldView(text: $billingCycle, textValue: selectedBilling?.title ?? "", title: "Billing Cycle", image: "billing", placeHolder: "Select billing cycle", isButton: true, isText: true)
+                        //                        FieldView(text: $billingCycle, textValue: selectedBilling?.title ?? "", title: "Billing Cycle", image: "billing", placeHolder: "Select billing cycle", isButton: true, isText: true)
                         FieldView(text: $billingCycle, textValue: selectedBilling ?? "", title: "Billing Cycle", image: "billing", placeHolder: "Select billing cycle", isButton: true, isText: true)
                     }
                     .sheet(isPresented: $showBillingCycleSheet) {
                         BillingCycleBottomSheet(selectedBilling         : $selectedBilling,
                                                 billingCyclesResponse   : filteredBillingCycles(),
                                                 header                  : "Select Billing Cycle",
-                                                placeholder             : "Search billing cycle")
-                            .presentationDetents([.height(500)])
-                            .presentationDragIndicator(.hidden)
+                                                placeholder             : "Search billing cycle",
+                                                onSelect: { billing in
+                            //amount should be changed based on the billing cycle
+                            self.updateAmount(billing: billing)
+                        })
+                        .presentationDetents([.height(500)])
+                        .presentationDragIndicator(.hidden)
                     }
+                    //                    .onChange(of: selectedBilling) { billing in
+                    //                        guard let billing else { return }
+                    //                        if isFromEdit && isInitialPayment {
+                    //                            isInitialPayment = false
+                    //                        } else {
+                    //                            chargeDate = Constants.shared.getNextDateByFrequency(
+                    //                                frequency: billing
+                    //                            )
+                    //                            guard
+                    //                                !selectedBilling.isEmpty,
+                    //                                let plans = addSubscriptionVM.providerData?.providerSubscriptionPlansList
+                    //                            else {
+                    //                                return
+                    //                            }
+                    //                            if let matchedPlan = plans.first(where: {
+                    //                                ($0.billingCycle ?? "")
+                    //                                    .trimmingCharacters(in: .whitespacesAndNewlines)
+                    //                                    .caseInsensitiveCompare(
+                    //                                        selectedBilling.trimmingCharacters(in: .whitespacesAndNewlines)
+                    //                                    ) == .orderedSame
+                    //                            }) {
+                    //                                amount = String(format: "%.2f", matchedPlan.price ?? 0)
+                    //                            }
+                    //                        }
+                    //                    }
                     .onChange(of: selectedBilling) { billing in
                         guard let billing else { return }
-
+                        
                         if isFromEdit && isInitialPayment {
                             isInitialPayment = false
-                        } else {
-                            chargeDate = Constants.shared.getNextDateByFrequency(
-                                frequency: billing
-                            )
+                            return
                         }
+                        
+                        chargeDate = Constants.shared.getNextDateByFrequency(
+                            frequency: billing
+                        )
                     }
                     
                     //MARK: - Next Charge Date field
@@ -590,6 +619,25 @@ struct ManualEntryView: View {
         }
     }
     
+    func updateAmount(billing:String){
+        guard
+            !billing.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty,
+            let plans = addSubscriptionVM.providerData?.providerSubscriptionPlansList
+        else {
+            return
+        }
+        
+        if let matchedPlan = plans.first(where: {
+            ($0.billingCycle ?? "")
+                .trimmingCharacters(in: .whitespacesAndNewlines)
+                .caseInsensitiveCompare(
+                    billing.trimmingCharacters(in: .whitespacesAndNewlines)
+                ) == .orderedSame
+        }) {
+            amount = String(format: "%.2f", matchedPlan.price ?? 0)
+        }
+    }
+    
     private func autoFillDetails(isAmount:Bool = false){
         if isAmount{
             guard
@@ -606,10 +654,12 @@ struct ManualEntryView: View {
             }) {
                 if planType == ""{
                     planType = matchedPlan.planName ?? ""
+                    selectedPlanType = matchedPlan.planName ?? ""
+                    selectedBilling = matchedPlan.billingCycle ?? ""
                 }
-                if billingCycle == ""{
-                    selectedBilling = matchedPlan.billingCycle ?? ""//billingData.first(where: { $0.title == matchedPlan.billingCycle ?? ""})
-                }
+                //                if billingCycle == ""{
+                //                    selectedBilling = matchedPlan.billingCycle ?? ""//billingData.first(where: { $0.title == matchedPlan.billingCycle ?? ""})
+                //                }
                 isAmountError = false
             } else {
                 if addSubscriptionVM.providerData?.providerSubscriptionPlansList?.count != 0{
@@ -622,6 +672,10 @@ struct ManualEntryView: View {
                 let plans = addSubscriptionVM.providerData?.providerSubscriptionPlansList
             else {
                 isPlanTypeError = false
+                
+                //For first-time users, the available plan types are Free Plan and Basic Plan. When the user selects either one, the billing cycle should be displayed as Monthly by default.
+                selectedBilling = "Monthly"
+                
                 return
             }
             if let matchedPlan = plans.first(where: {
@@ -631,16 +685,16 @@ struct ManualEntryView: View {
                         planType.trimmingCharacters(in: .whitespacesAndNewlines)
                     ) == .orderedSame
             }) {
-                if amount.isEmpty {
-                    amount = String(format: "%.2f", matchedPlan.price ?? 0)
-                }
+                //                if amount.isEmpty {
+                amount = String(format: "%.2f", matchedPlan.price ?? 0)
+                //                }
                 
-                if billingCycle.isEmpty {
-                    selectedBilling = matchedPlan.billingCycle ?? ""
-//                    billingData.first {
-//                        $0.title == (matchedPlan.billingCycle ?? "")
-//                    }
-                }
+                //                if billingCycle.isEmpty {
+                selectedBilling = matchedPlan.billingCycle ?? ""
+                //                    billingData.first {
+                //                        $0.title == (matchedPlan.billingCycle ?? "")
+                //                    }
+                //                }
                 
                 isPlanTypeError = false
             } else {
@@ -861,6 +915,7 @@ struct ManualEntryView: View {
             serviceName = siriData["serviceName"] as? String ?? ""
             amount = "\(siriData["price"] as? Double ?? 0.00)"
             planType = siriData["planName"] as? String ?? ""
+            selectedPlanType = siriData["planName"] as? String ?? ""
             currency = siriData["currencyCode"] as? String ?? ""
             category = siriData["category"] as? String ?? ""
             let formatter = DateFormatter()
