@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 ## [1.17.0] (Alpha) - 2026-01-09
 
 ### Fixed
-- Sprint3 new client feedback points and build shared with dev url.
+- Auto fill details changes in manual and preview screens and build shared with dev url.
 
 ## [1.16.0] (Alpha) - 2026-01-08
 
