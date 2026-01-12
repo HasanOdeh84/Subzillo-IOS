@@ -14,7 +14,7 @@ struct ConnectEmailView: View {
     
     //MARK: - body
     var body: some View {
-        VStack(alignment: .leading,spacing: 24) {
+        VStack(alignment: .leading) {
             
             // MARK: - Header
             HStack(spacing: 8) {
@@ -77,22 +77,27 @@ struct ConnectEmailView: View {
                     }
                     .padding(.vertical, 20)
                     .padding(.leading, 16)
-                    .padding(.trailing, 8)
+                    .padding(.trailing, 16)
                 }
-                .frame(maxWidth: .infinity, alignment: .leading)
+                .onTapGesture {
+                    AppIntentRouter.shared.navigate(to: NavigationRoute.connectedEmailsList)
+                }
+                .frame(alignment: .leading)
                 .frame(height: 56)
                 .cornerRadius(12)
                 .overlay(
                     RoundedRectangle(cornerRadius: 12)
                         .stroke(Color.neutral300Border, lineWidth: 1)
                 )
+                .padding(.vertical, 24)
+                .padding(.horizontal, 5)
                 
                 // MARK: - How It Works
                 GradienCustomeView(title    : "How it work?",
-                                   subTitle : ". We never store full email content\n. We cannot send emails or access personal messages")
-                .padding(.horizontal, 20)
-                .padding(.top, 24)
+                                   subTitle : "•  We never store full email content\n•  We cannot send emails or access personal messages",
+                                   isImage  : false)
                 .padding(.bottom, 24)
+                .padding(.horizontal, 5)
                 
                 Spacer()
             }

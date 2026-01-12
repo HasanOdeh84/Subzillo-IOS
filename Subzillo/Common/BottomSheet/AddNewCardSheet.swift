@@ -89,6 +89,7 @@ struct AddNewCardSheet: View {
             
             Spacer()
         }
+        .fixedSize(horizontal: false, vertical: true)
         .modifier(ToastModifier(toast: toastManager))
         .onChange(of: myCardsVM.isEdit) { value in
             if value == true{

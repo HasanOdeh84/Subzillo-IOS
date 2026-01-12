@@ -142,7 +142,7 @@ struct FilterSheet: View {
                                     //                          members: addSubscriptionVM.listFamilyMembersResponse ?? []
                                     members: familyMembersWithMe
                                 )
-                                .presentationDetents([.height(400)])
+                                .presentationDetents([.height(400)]) //need to change to dynamic height
                                 .presentationDragIndicator(.hidden)
                             }
                             .padding(.horizontal, -5)

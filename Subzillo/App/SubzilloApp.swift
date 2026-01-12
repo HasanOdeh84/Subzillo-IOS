@@ -233,6 +233,8 @@ struct RootView: View {
                     FamilyMembersView()
                 case .connectEmail:
                     ConnectEmailView()
+                case .connectedEmailsList:
+                    ConnectedEmailsListView()
                 }
             }
         }

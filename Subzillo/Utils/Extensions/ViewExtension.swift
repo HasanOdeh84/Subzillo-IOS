@@ -130,3 +130,19 @@ struct DoneButtonToolbar1: ViewModifier {
             }
     }
 }
+
+func instructionRow(number: String, text: String) -> some View {
+    HStack(alignment: .top) {
+        Text(number)
+            .font(.appRegular(14))
+            .foregroundColor(.white)
+            .multilineTextAlignment(.leading)
+            .frame(width: 5, alignment: .leading)
+        
+        Text(LocalizedStringKey(text))
+            .font(.appRegular(14))
+            .foregroundColor(.white)
+            .multilineTextAlignment(.leading)
+            .fixedSize(horizontal: false, vertical: true)
+    }
+}

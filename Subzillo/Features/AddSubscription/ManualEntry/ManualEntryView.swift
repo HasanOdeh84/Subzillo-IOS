@@ -46,6 +46,7 @@ struct ManualEntryView: View {
     @State var fromSiri                         = false
     @Environment(\.dismiss) private var dismiss
     @State var isInitialCategory                = true
+    @State var isInitial                        = true
     @State var isInitialPayment                 = true
     @State private var billingCycle             : String = ""
     @State var selectedBilling                  : String?
@@ -74,6 +75,21 @@ struct ManualEntryView: View {
     @State private var showPlanTypeSheet        = false
     @State var selectedPlanType                 : String?
     @State var familyMemberId                   = ""
+    @State private var sheetHeight              : CGFloat = .zero
+    @State private var sheetID                  = UUID()
+    @State private var serviceLastActionText    : String = ""
+    @State private var planLastActionText       : String = ""
+    @State private var amountLastActionText     : String = ""
+    @State private var pendingUIAction          : PendingUIAction? = nil
+    @State var isCurrency                       = false
+    
+    enum PendingUIAction {
+        case selectPlanType
+        case selectBilling
+        case selectCategory
+        case selectpaymentMethod
+        case dateSelection
+    }
     
     //MARK: - body
     var body: some View {
@@ -128,9 +144,15 @@ struct ManualEntryView: View {
                         displayKey  : { $0.name ?? "" },
                         fieldType   : FieldType.serviceName,
                         activeField : $activeField,
+//                        lastActionText : $serviceLastActionText,
                         action      : {
                             if serviceName != ""{
-                                fetchProviderDataApi()
+                                if serviceName.trimmed != serviceLastActionText{
+                                    serviceLastActionText = serviceName.trimmed
+                                    fetchProviderDataApi()
+                                }
+                            }else{
+                                clearData()
                             }
                         }
                     )
@@ -171,11 +193,33 @@ struct ManualEntryView: View {
                                             header              : "Select Plan Type",
                                             placeholder         : "Search Plan Type",
                                             action              : {
+                            planLastActionText = selectedPlanType ?? ""
                             planType = selectedPlanType ?? ""
                             autoFillDetails(isAmount: false)
                         })
-                        .presentationDetents([.medium, .large])
+                        .onAppear {
+                            DispatchQueue.main.async {
+                                sheetHeight = sheetHeight
+                            }
+                        }
+                        .id(sheetID)
+                        .overlay {
+                            GeometryReader { geo in
+                                Color.clear
+                                    .preference(
+                                        key: InnerHeightPreferenceKey.self,
+                                        value: geo.size.height
+                                    )
+                            }
+                        }
+                        .onPreferenceChange(InnerHeightPreferenceKey.self) { height in
+                            if height > 150 {
+                                sheetHeight = height
+                            }
+                        }
+                        .presentationDetents([.height(sheetHeight)])
                         .presentationDragIndicator(.hidden)
+                        .interactiveDismissDisabled(false)
                     }
                     
                     HStack(spacing: 24) {
@@ -194,12 +238,12 @@ struct ManualEntryView: View {
                                 },
                                 fieldType   : FieldType.amount,
                                 activeField : $activeField,
+//                                lastActionText : $amountLastActionText,
                                 action      : {
                                     autoFillDetails(isAmount: true)
                                 }
                             )
                             .addDoneButton{
-                                handleDone()
                             }
                             
                             Spacer()
@@ -228,6 +272,11 @@ struct ManualEntryView: View {
                         .onChange(of: selectedCurrency) { newCurrency in
                             guard let currency = newCurrency else { return }
                             if serviceName != ""{
+                                if isFromEdit && isInitial{
+                                    isInitial = false
+                                }else{
+                                    isCurrency = true
+                                }
                                 fetchProviderDataApi()
                             }
                         }
@@ -252,7 +301,7 @@ struct ManualEntryView: View {
                     }
                     .sheet(isPresented: $showCategorySheet) {
                         CategoriesBottomSheet(selectedCategory: $selectedCategory, categoryResponse:commonApiVM.categoriesResponse, header: "Select Category", placeholder: "Search Category")
-                            .presentationDetents([.medium, .large])
+                            .presentationDetents([.large])
                             .presentationDragIndicator(.hidden)
                     }
                     
@@ -297,34 +346,29 @@ struct ManualEntryView: View {
                             //amount should be changed based on the billing cycle
                             self.updateAmount(billing: billing)
                         })
-                        .presentationDetents([.height(500)])
+                        .onAppear {
+                            DispatchQueue.main.async {
+                                sheetHeight = sheetHeight
+                            }
+                        }
+                        .id(sheetID)
+                        .overlay {
+                            GeometryReader { geo in
+                                Color.clear
+                                    .preference(
+                                        key: InnerHeightPreferenceKey.self,
+                                        value: geo.size.height
+                                    )
+                            }
+                        }
+                        .onPreferenceChange(InnerHeightPreferenceKey.self) { height in
+                            if height > 150 {
+                                sheetHeight = height
+                            }
+                        }
+                        .presentationDetents([.height(sheetHeight)])
                         .presentationDragIndicator(.hidden)
                     }
-                    //                    .onChange(of: selectedBilling) { billing in
-                    //                        guard let billing else { return }
-                    //                        if isFromEdit && isInitialPayment {
-                    //                            isInitialPayment = false
-                    //                        } else {
-                    //                            chargeDate = Constants.shared.getNextDateByFrequency(
-                    //                                frequency: billing
-                    //                            )
-                    //                            guard
-                    //                                !selectedBilling.isEmpty,
-                    //                                let plans = addSubscriptionVM.providerData?.providerSubscriptionPlansList
-                    //                            else {
-                    //                                return
-                    //                            }
-                    //                            if let matchedPlan = plans.first(where: {
-                    //                                ($0.billingCycle ?? "")
-                    //                                    .trimmingCharacters(in: .whitespacesAndNewlines)
-                    //                                    .caseInsensitiveCompare(
-                    //                                        selectedBilling.trimmingCharacters(in: .whitespacesAndNewlines)
-                    //                                    ) == .orderedSame
-                    //                            }) {
-                    //                                amount = String(format: "%.2f", matchedPlan.price ?? 0)
-                    //                            }
-                    //                        }
-                    //                    }
                     .onChange(of: selectedBilling) { billing in
                         guard let billing else { return }
                         
@@ -332,10 +376,11 @@ struct ManualEntryView: View {
                             isInitialPayment = false
                             return
                         }
-                        
-                        chargeDate = Constants.shared.getNextDateByFrequency(
-                            frequency: billing
-                        )
+                        if billing != ""{
+                            chargeDate = Constants.shared.getNextDateByFrequency(
+                                frequency: billing
+                            )
+                        }
                     }
                     
                     //MARK: - Next Charge Date field
@@ -378,7 +423,7 @@ struct ManualEntryView: View {
                         }
                         .sheet(isPresented: $showPaymentMethodSheet) {
                             PaymentMethodsSheet(selectedPaymentMethod: $selectedPayment, paymentMethodResponse:commonApiVM.paymentMethodResponse, header: "Select Payment Method", placeholder: "Search Payment Method")
-                                .presentationDetents([.medium, .large])
+                                .presentationDetents([.large])
                                 .presentationDragIndicator(.hidden)
                         }
                         .onChange(of: selectedPayment) { newValue in
@@ -540,16 +585,21 @@ struct ManualEntryView: View {
             showCurrencySheet = false
             showPaymentMethodSheet = false
         }
+        .contentShape(Rectangle())
         .onTapGesture {
+            hideKeyboard()
         }
     }
     
     //MARK: - User defined methods
     
     func fetchProviderDataApi(){
-        addSubscriptionVM.fetchProviderData(input: FetchProviderDataRequest(userId          : Constants.getUserId(),
-                                                                            serviceName     : serviceName,
-                                                                            currencyCode    : selectedCurrency?.code ?? "" == "" ? Constants.shared.currencyCode : selectedCurrency?.code ?? ""))
+//        if serviceName.trimmed != serviceLastActionText{
+//            serviceLastActionText = serviceName.trimmed
+            addSubscriptionVM.fetchProviderData(input: FetchProviderDataRequest(userId          : Constants.getUserId(),
+                                                                                serviceName     : serviceName.trimmed,
+                                                                                currencyCode    : selectedCurrency?.code ?? "" == "" ? Constants.shared.currencyCode : selectedCurrency?.code ?? ""))
+//        }
     }
     
     func filteredPricePlans() -> [ProviderSubscriptionPlan] {
@@ -608,6 +658,10 @@ struct ManualEntryView: View {
     }
     
     private func updateProviderData() {
+        activeField = nil
+        let pending = pendingUIAction
+        pendingUIAction = nil
+        
         if isFromEdit && isInitialCategory{
             isInitialCategory = false
         }else{
@@ -616,7 +670,52 @@ struct ManualEntryView: View {
                     selectedCategory = categories.first(where: { $0.id?.lowercased() == addSubscriptionVM.providerData?.categoryId ?? ""})
                 }
             }
+            if !isCurrency{
+                planType = ""
+                selectedPlanType = ""
+                amount = ""
+                selectedBilling = ""
+                chargeDate = ""
+            }else{
+                isCurrency = false
+            }
         }
+        
+        if let pendingAction = pending {
+            executePendingUIAction(pendingAction)
+        }
+    }
+    
+    private func executePendingUIAction(_ action: PendingUIAction) {
+        switch action {
+        case .selectPlanType:
+            sheetID = UUID()
+            showPlanTypeSheet = true
+        case .selectBilling:
+            sheetID = UUID()
+            showBillingCycleSheet = true
+        case .selectCategory:
+            showCategorySheet = true
+        case .selectpaymentMethod:
+            showPaymentMethodSheet = true
+        case .dateSelection:
+            withAnimation(.easeInOut) {
+                isDatePickerPresented = true
+            }
+        }
+    }
+    
+    func clearData(){
+        planType = ""
+        selectedPlanType = ""
+        amount = ""
+        selectedBilling = ""
+        chargeDate = ""
+        selectedCategory = nil
+        category = ""
+//        addSubscriptionVM.providerData?.providerSubscriptionPlansList = nil
+        addSubscriptionVM.providerData = nil
+        serviceLastActionText = ""
     }
     
     func updateAmount(billing:String){
@@ -635,10 +734,12 @@ struct ManualEntryView: View {
                 ) == .orderedSame
         }) {
             amount = String(format: "%.2f", matchedPlan.price ?? 0)
+            amountLastActionText = amount
         }
     }
     
     private func autoFillDetails(isAmount:Bool = false){
+        activeField = nil
         if isAmount{
             guard
                 let enteredAmount = Double(amount),
@@ -654,12 +755,10 @@ struct ManualEntryView: View {
             }) {
                 if planType == ""{
                     planType = matchedPlan.planName ?? ""
+                    planLastActionText = planType
                     selectedPlanType = matchedPlan.planName ?? ""
                     selectedBilling = matchedPlan.billingCycle ?? ""
                 }
-                //                if billingCycle == ""{
-                //                    selectedBilling = matchedPlan.billingCycle ?? ""//billingData.first(where: { $0.title == matchedPlan.billingCycle ?? ""})
-                //                }
                 isAmountError = false
             } else {
                 if addSubscriptionVM.providerData?.providerSubscriptionPlansList?.count != 0{
@@ -674,7 +773,12 @@ struct ManualEntryView: View {
                 isPlanTypeError = false
                 
                 //For first-time users, the available plan types are Free Plan and Basic Plan. When the user selects either one, the billing cycle should be displayed as Monthly by default.
-                selectedBilling = "Monthly"
+                if planType == "Free" || planType == "Basic"{
+                    selectedBilling = "Monthly"
+                }
+                if planType == "Free"{
+                    amount = "0.0"
+                }
                 
                 return
             }
@@ -685,19 +789,19 @@ struct ManualEntryView: View {
                         planType.trimmingCharacters(in: .whitespacesAndNewlines)
                     ) == .orderedSame
             }) {
-                //                if amount.isEmpty {
-                amount = String(format: "%.2f", matchedPlan.price ?? 0)
-                //                }
-                
-                //                if billingCycle.isEmpty {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                    amount = String(format: "%.2f", matchedPlan.price ?? 0)
+                    amountLastActionText = amount
+                }
                 selectedBilling = matchedPlan.billingCycle ?? ""
-                //                    billingData.first {
-                //                        $0.title == (matchedPlan.billingCycle ?? "")
-                //                    }
-                //                }
-                
                 isPlanTypeError = false
             } else {
+                if planType == "Free" || planType == "Basic"{
+                    selectedBilling = "Monthly"
+                }
+                if planType == "Free"{
+                    amount = "0.0"
+                }
                 if !(addSubscriptionVM.providerData?.providerSubscriptionPlansList?.isEmpty ?? true) {
                     isPlanTypeError = true
                 }
@@ -954,6 +1058,9 @@ struct ManualEntryView: View {
             //                billingIndex = index
             //            }
             selectedBilling = billing//billingData.first(where: { $0.title == billing})
+            serviceLastActionText = serviceName
+            planLastActionText = planType
+            amountLastActionText = amount
         }
     }
     
@@ -966,6 +1073,8 @@ struct ManualEntryView: View {
     }
     
     private func currencySelection() {
+        hideKeyboard()
+        handleDone()
         if commonApiVM.currencyResponse != nil {
             showCurrencySheet = true
         }else{
@@ -975,27 +1084,73 @@ struct ManualEntryView: View {
     
     private func selectCategory()
     {
-        showCategorySheet = true
+        hideKeyboard()
+        if serviceName.trimmed != serviceLastActionText {
+            pendingUIAction = .selectCategory
+            fetchProviderDataApi()
+            handleDone()
+        } else {
+            handleDone()
+            showCategorySheet = true
+        }
     }
     
     private func selectPlanType()
     {
-        showPlanTypeSheet = true
+        hideKeyboard()
+        if serviceName.trimmed != serviceLastActionText {
+            pendingUIAction = .selectPlanType
+            fetchProviderDataApi()
+            handleDone()
+        } else {
+            handleDone()
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                sheetID = UUID()
+                showPlanTypeSheet = true
+            }
+        }
     }
     
     private func selectBilling()
     {
-        showBillingCycleSheet = true
+        hideKeyboard()
+        if serviceName.trimmed != serviceLastActionText {
+            pendingUIAction = .selectBilling
+            fetchProviderDataApi()
+            handleDone()
+        } else {
+            handleDone()
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                sheetID = UUID()
+                showBillingCycleSheet = true
+            }
+        }
     }
     
     private func selectpaymentMethod()
     {
-        showPaymentMethodSheet = true
+        hideKeyboard()
+        if serviceName.trimmed != serviceLastActionText {
+            pendingUIAction = .selectpaymentMethod
+            fetchProviderDataApi()
+            handleDone()
+        } else {
+            handleDone()
+            showPaymentMethodSheet = true
+        }
     }
     
     private func dateSelection() {
-        withAnimation(.easeInOut) {
-            isDatePickerPresented = true
+        hideKeyboard()
+        if serviceName.trimmed != serviceLastActionText {
+            pendingUIAction = .dateSelection
+            fetchProviderDataApi()
+            handleDone()
+        } else {
+            handleDone()
+            withAnimation(.easeInOut) {
+                isDatePickerPresented = true
+            }
         }
     }
     
@@ -1124,13 +1279,30 @@ struct ManualEntryView: View {
     private func handleDone() {
         switch activeField {
         case .serviceName:
+//            if serviceName != "" && serviceName.trimmed != serviceLastActionText {
+//                serviceLastActionText = serviceName.trimmed
+//                fetchProviderDataApi()
+//            } else if serviceName == "" {
+//                clearData()
+//            }
             if serviceName != ""{
-                fetchProviderDataApi()
+                if serviceName.trimmed != serviceLastActionText{
+                    serviceLastActionText = serviceName.trimmed
+                    fetchProviderDataApi()
+                }
+            }else{
+                clearData()
             }
         case .planType:
-            autoFillDetails()
+            if planType != planLastActionText {
+                planLastActionText = planType
+                autoFillDetails()
+            }
         case .amount:
-            autoFillDetails(isAmount: true)
+            if amount != amountLastActionText {
+                amountLastActionText = amount
+                autoFillDetails(isAmount: true)
+            }
         case .none:
             break
         }
@@ -1375,8 +1547,10 @@ struct FieldSuggestionView<Item: Identifiable>: View {
     
     var fieldType                       : FieldType
     @Binding var activeField            : FieldType?
+//    @Binding var lastActionText         : String
+//    @State private var focusTask        : Task<Void, Never>? = nil
     
-    @State private var showSuggestions  : Bool = false
+    private var showSuggestions: Bool { isFocused && !filtered.isEmpty }
     
     private var filtered: [Item] {
         let query = text.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
@@ -1414,17 +1588,21 @@ struct FieldSuggestionView<Item: Identifiable>: View {
                     .font(.appRegular(14))
                     .foregroundColor(.whiteBlackBGnoPic)
                     .focused($isFocused)
-                    .onChange(of: text) { _ in
-                        showSuggestions = isFocused && !filtered.isEmpty
-                    }
-                //                    .onChange(of: isFocused) { focused in
-                //                        showSuggestions = focused && !filtered.isEmpty
-                //                    }
                     .onChange(of: isFocused) { focused in
                         if focused {
+//                            focusTask?.cancel()
                             activeField = fieldType
+//                            lastActionText = text.trimmed
+                        } else {
+//                            focusTask = Task {
+//                                try? await Task.sleep(nanoseconds: 200_000_000)
+//                                if !Task.isCancelled && text.trimmed != lastActionText {
+//                                    lastActionText = text.trimmed
+//                                    action()
+//                                }
+//                            }
+                            action()
                         }
-                        showSuggestions = focused && !filtered.isEmpty
                     }
                     .onSubmit {
                         closeSuggestions()
@@ -1504,9 +1682,7 @@ struct FieldSuggestionView<Item: Identifiable>: View {
     private func closeSuggestions() {
         DispatchQueue.main.async {
             isFocused = false
-            showSuggestions = false
             activeField = nil
-            action()
         }
     }
 }
@@ -1526,8 +1702,10 @@ struct FieldSuggestionView1<Item: Identifiable>: View {
     @FocusState private var isFocused   : Bool
     var fieldType                       : FieldType
     @Binding var activeField            : FieldType?
+//    @Binding var lastActionText         : String
+    @State private var focusTask        : Task<Void, Never>? = nil
     
-    @State private var showSuggestions  : Bool = false
+    private var showSuggestions: Bool { isFocused && !filtered.isEmpty }
     
     private var filtered: [Item] {
         let query = text.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
@@ -1565,14 +1743,21 @@ struct FieldSuggestionView1<Item: Identifiable>: View {
                     .font(.appRegular(14))
                     .foregroundColor(.whiteBlackBGnoPic)
                     .focused($isFocused)
-                    .onChange(of: text) { _ in
-                        showSuggestions = isFocused && !filtered.isEmpty
-                    }
                     .onChange(of: isFocused) { focused in
                         if focused {
+//                            focusTask?.cancel()
                             activeField = fieldType
+//                            lastActionText = text.trimmed
+                        } else {
+//                            focusTask = Task {
+//                                try? await Task.sleep(nanoseconds: 200_000_000)
+//                                if !Task.isCancelled && text.trimmed != lastActionText {
+//                                    lastActionText = text.trimmed
+//                                    action()
+//                                }
+//                            }
+                            action()
                         }
-                        showSuggestions = focused && !filtered.isEmpty
                     }
                     .onSubmit {
                         closeSuggestions()
@@ -1642,9 +1827,7 @@ struct FieldSuggestionView1<Item: Identifiable>: View {
     private func closeSuggestions() {
         DispatchQueue.main.async {
             isFocused = false
-            showSuggestions = false
             activeField = nil
-            action()
         }
     }
 }
@@ -1659,6 +1842,8 @@ struct ListView: View {
     @State private var showNewCardSheet    = false
     var onDismiss: (() -> Void)?
     @State private var shouldCallAPI = false
+    @State private var sheetHeight              : CGFloat = .zero
+    @State private var sheetID                  = UUID()
     
     var body: some View {
         VStack(spacing: 0) {
@@ -1698,8 +1883,29 @@ struct ListView: View {
                             }
                         }) {
                             AddNewCardSheet(shouldCallAPI:$shouldCallAPI)
-                                .presentationDetents([.height(500), .large])
+                                .onAppear {
+                                    DispatchQueue.main.async {
+                                        sheetHeight = sheetHeight
+                                    }
+                                }
+                                .id(sheetID)
+                                .overlay {
+                                    GeometryReader { geo in
+                                        Color.clear
+                                            .preference(
+                                                key: InnerHeightPreferenceKey.self,
+                                                value: geo.size.height
+                                            )
+                                    }
+                                }
+                                .onPreferenceChange(InnerHeightPreferenceKey.self) { height in
+                                    if height > 150 {
+                                        sheetHeight = height
+                                    }
+                                }
+                                .presentationDetents([.height(sheetHeight)])
                                 .presentationDragIndicator(.hidden)
+                                .interactiveDismissDisabled(false)
                         }
                         //                        .onChange(of: showNewCardSheet) { newValue in
                         //                            if newValue == false {
@@ -1831,7 +2037,10 @@ struct ListView: View {
     private func addMoreAction() {
         if type == .cards
         {
-            showNewCardSheet = true
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                sheetID = UUID()
+                showNewCardSheet = true
+            }
         }
     }
 }

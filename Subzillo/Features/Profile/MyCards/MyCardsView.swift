@@ -22,6 +22,8 @@ struct MyCardsView: View {
     @State private var activeCardId     : String? = nil
     @State private var editingCard      : EditableCardWrapper?
     @State private var isScrollDisabled : Bool = false
+    @State private var sheetHeight              : CGFloat = .zero
+    @State private var sheetID                  = UUID()
     
     struct EditableCardWrapper: Identifiable {
         let id = UUID()
@@ -111,8 +113,29 @@ struct MyCardsView: View {
                             action: {
                 self.userCardsApi()
             })
-            .presentationDetents([.height(500), .large])
+            .onAppear {
+                DispatchQueue.main.async {
+                    sheetHeight = sheetHeight
+                }
+            }
+            .id(sheetID)
+            .overlay {
+                GeometryReader { geo in
+                    Color.clear
+                        .preference(
+                            key: InnerHeightPreferenceKey.self,
+                            value: geo.size.height
+                        )
+                }
+            }
+            .onPreferenceChange(InnerHeightPreferenceKey.self) { height in
+                if height > 150 {
+                    sheetHeight = height
+                }
+            }
+            .presentationDetents([.height(sheetHeight)])
             .presentationDragIndicator(.hidden)
+            .interactiveDismissDisabled(false)
         }
         .sheet(item: $editingCard) { wrapper in
             AddNewCardSheet(nickName        : wrapper.data.nickName ?? "",
@@ -154,8 +177,11 @@ struct MyCardsView: View {
     }
     
     func addCard(){
-        activeCardId = nil
-        addCardSheet = true
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+            sheetID = UUID()
+            activeCardId = nil
+            addCardSheet = true
+        }
     }
     
     func editCard(){

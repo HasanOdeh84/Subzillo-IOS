@@ -69,37 +69,63 @@ struct BillingCycleBottomSheet: View {
 //            .padding(.horizontal,24)
             
             if filteredCategories.count != 0{
-                VStack(spacing: 0){
-                    List(filteredCategories, id: \.self) { billing in
-                        VStack(spacing: 0) { // no unwanted spacing
-                            Button {
-                                selectedBilling = billing
-                                dismiss()
-                                onSelect(billing)
-                            } label: {
-                                HStack {
-                                    Text(billing ?? "")
-                                        .font(.appRegular(16))
-                                        .foregroundColor(.neutralMain700)
-                                        .padding(.horizontal, 14)
-                                        .frame(maxWidth: .infinity, alignment: .leading)
-                                }
-                                .frame(maxWidth: .infinity, minHeight: 56)
-                                .contentShape(Rectangle())
+//                VStack(spacing: 0){
+//                    List(filteredCategories, id: \.self) { billing in
+//                        VStack(spacing: 0) { // no unwanted spacing
+//                            Button {
+//                                selectedBilling = billing
+//                                dismiss()
+//                                onSelect(billing)
+//                            } label: {
+//                                HStack {
+//                                    Text(billing ?? "")
+//                                        .font(.appRegular(16))
+//                                        .foregroundColor(.neutralMain700)
+//                                        .padding(.horizontal, 14)
+//                                        .frame(maxWidth: .infinity, alignment: .leading)
+//                                }
+//                                .frame(maxWidth: .infinity, minHeight: 56)
+//                                .contentShape(Rectangle())
+//                            }
+//                            .buttonStyle(.plain) // remove SwiftUI’s default button padding
+//                            
+//                            if billing != filteredCategories.last {
+//                                Rectangle()
+//                                    .fill(Color.neutralDisabled200)
+//                                    .frame(height: 1)
+//                                    .padding(.horizontal, -20)
+//                            }
+//                        }
+//                        .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0)) // remove default list padding
+//                        .listRowSeparator(.hidden)
+//                    }
+//                    .listStyle(.plain)
+//                }
+                VStack(spacing: 0) {
+                    ForEach(filteredCategories, id: \.self) { billing in
+                        Button {
+                            selectedBilling = billing
+                            dismiss()
+                            onSelect(billing)
+                        } label: {
+                            HStack {
+                                Text(billing)
+                                    .font(.appRegular(16))
+                                    .foregroundColor(.neutralMain700)
+                                    .padding(.horizontal, 14)
+                                    .frame(maxWidth: .infinity, alignment: .leading)
                             }
-                            .buttonStyle(.plain) // remove SwiftUI’s default button padding
-                            
-                            if billing != filteredCategories.last {
-                                Rectangle()
-                                    .fill(Color.neutralDisabled200)
-                                    .frame(height: 1)
-                                    .padding(.horizontal, -20)
-                            }
+                            .frame(maxWidth: .infinity, minHeight: 56)
+                            .contentShape(Rectangle())
                         }
-                        .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0)) // remove default list padding
-                        .listRowSeparator(.hidden)
+                        .buttonStyle(.plain)
+
+                        if billing != filteredCategories.last {
+                            Rectangle()
+                                .fill(Color.neutralDisabled200)
+                                .frame(height: 1)
+                        }
                     }
-                    .listStyle(.plain)
                 }
                 .background(.clear)
                 .cornerRadius(12)
@@ -115,6 +141,8 @@ struct BillingCycleBottomSheet: View {
                     .font(.appRegular(16))
                 Spacer()
             }
+//            Spacer()
         }
+        .fixedSize(horizontal: false, vertical: true)
     }
 }

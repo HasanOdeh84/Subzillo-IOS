@@ -71,32 +71,42 @@ struct GradienCustomeView: View {
     var title           : String
     var subTitle        : String
     var imageName       : String = "howItWorks"
+    var isImage         = true
     
     var body: some View {
         //Button(action: action) {
             HStack(alignment: .top, spacing: 0) {
-                VStack(alignment: .leading, spacing: 0) {
-                    HStack {
-                        Image(imageName)
+                if isImage{
+                    VStack(alignment: .leading, spacing: 0) {
+                        HStack {
+                            Image(imageName)
+                        }
                     }
+                    .frame(width: 48, height: 48)
+                    .background(Color.lightPurple)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 12)
+                            .stroke(Color.border, lineWidth: 0)
+                    )
+                    .cornerRadius(12)
+                    .padding(.trailing, 16)
                 }
-                .frame(width: 48, height: 48)
-                .background(Color.lightPurple)
-                .overlay(
-                    RoundedRectangle(cornerRadius: 12)
-                        .stroke(Color.border, lineWidth: 0)
-                )
-                .cornerRadius(12)
-                .padding(.trailing, 16)
                 
                 VStack(alignment: .leading, spacing: 6) {
                     Text(LocalizedStringKey(title))
                         .font(.appSemiBold(16))
                         .foregroundColor(.white)
-                    Text(LocalizedStringKey(subTitle))
-                        .font(.appRegular(14))
-                        .foregroundColor(.white)
-                        .multilineTextAlignment(.leading)
+                    if !isImage{
+                        VStack(alignment: .leading, spacing: 5) {
+                            instructionRow(number: "•", text: "We never store full email content")
+                            instructionRow(number: "•", text: "We cannot send emails or access personal messages")
+                        }
+                    }else{
+                        Text(LocalizedStringKey(subTitle))
+                            .font(.appRegular(14))
+                            .foregroundColor(.white)
+                            .multilineTextAlignment(.leading)
+                    }
                 }
                 Spacer()
             }

@@ -33,6 +33,8 @@ struct SubscriptionsView: View {
     @State private var filterSelect             : Bool = false
     @State private var pendingFilterSelect      : Bool? = nil
     @State private var viewMode                 : SubscriptionsMode = .list
+    @State private var isScrollDisabled         : Bool = false
+    @State private var activeCardId             : String? = nil
     
     var hasSelection: Bool {
         subscriptionsList.contains(where: { $0.isSelected ?? false })
@@ -209,8 +211,8 @@ struct SubscriptionsView: View {
             //                        Text("Selected Date: \(selectedDate, formatter: dateFormatter)")
             //                    }
             if viewMode == .analytics {
-//                ToastManager.shared.showToast(message: "Coming soon in S4",style:ToastStyle.info)
-//                AnalyticalView()
+                //                ToastManager.shared.showToast(message: "Coming soon in S4",style:ToastStyle.info)
+                //                AnalyticalView()
             } else if let segment = selectedSegment {
                 if segment == .second{
                     if monthlySubscriptions.count != 0{
@@ -309,6 +311,58 @@ struct SubscriptionsView: View {
                         .listStyle(.plain)
                         .background(Color.clear)
                         .scrollContentBackground(.hidden)
+                        /*VStack{
+                            ScrollView {
+                                VStack(spacing: 0) {
+                                    ForEach(Array(subscriptionsList.enumerated()), id: \.element.id) { index, sub in
+                                        SwipeableSubscriptionRow(
+                                            sub             : sub,
+                                            activeCardId    : $activeCardId,
+                                            isScrollDisabled: $isScrollDisabled,
+                                            onEdit: {
+                                                editSubscription(sub: sub)
+                                            },
+                                            onDelete: {
+                                                // Clear any previous selections
+                                                for i in subscriptionsList.indices {
+                                                    subscriptionsList[i].isSelected = false
+                                                }
+                                                
+                                                // Mark ONLY this item
+                                                subscriptionsList[index].isSelected = true
+                                                showDeletePopup = true
+                                            },
+                                            isFamily        : false
+                                        )
+                                        .onTapGesture {
+                                            guard openCardIndex == nil else { return }
+                                            if selectionMode {
+                                                toggleSelection(at: index)
+                                            } else {
+                                                AppIntentRouter.shared.navigate(
+                                                    to: .subscriptionMatchView(
+                                                        fromList: true,
+                                                        subscriptionId: sub.id ?? ""
+                                                    )
+                                                )
+                                            }
+                                        }
+                                        .listRowSeparator(.hidden)
+                                        .listRowInsets(.init(top: 0, leading: 0, bottom: 8, trailing: 0))
+                                        .listRowBackground(Color.clear)
+                                        .onAppear {
+                                            if index == subscriptionsList.count - 1 {
+                                                loadNextPageIfNeeded()
+                                            }
+                                        }
+                                        .padding(.bottom, index == subscriptionsList.count - 1 ? 90 : 0)
+                                    }
+                                    .background(Color.clear)
+                                    .padding(.top, 5)
+                                }
+                            }
+                            .scrollDisabled(isScrollDisabled)
+                        }*/
                     }else{
                         Spacer()
                         VStack(){
@@ -411,7 +465,7 @@ struct SubscriptionsView: View {
                 viewMode = .calendar
             } else {
                 ToastManager.shared.showToast(message: "Coming soon in S4",style:ToastStyle.info)
-//                viewMode = .analytics
+                //                viewMode = .analytics
             }
             callApis()
         }
@@ -630,7 +684,7 @@ struct SubscriptionsView: View {
         selectedSegment = nil
         ToastManager.shared.showToast(message: "Coming soon in S4",style:ToastStyle.info)
         /*
-        viewMode = .analytics
+         viewMode = .analytics
          */
     }
     

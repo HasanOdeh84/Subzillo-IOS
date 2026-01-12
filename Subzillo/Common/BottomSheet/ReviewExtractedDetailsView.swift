@@ -55,6 +55,7 @@ struct ReviewExtractedDetailsView: View {
     @State var providerPlansList                : [ProviderSubscriptionPlan]?
     @State private var showPlanTypeSheet        = false
     @State var selectedPlanType                 : String?
+    @State private var sheetHeight              : CGFloat = 300
     
     //MARK: - body
     var body: some View {
@@ -167,7 +168,7 @@ struct ReviewExtractedDetailsView: View {
                 }
                 .sheet(isPresented: $showCategorySheet) {
                     CategoriesBottomSheet(selectedCategory: $selectedCategory, categoryResponse:commonApiVM.categoriesResponse, header: "Select Category", placeholder: "Search Category")
-                        .presentationDetents([.medium, .large])
+                        .presentationDetents([.large])
                         .presentationDragIndicator(.hidden)
                 }
             case .planType:
@@ -211,7 +212,21 @@ struct ReviewExtractedDetailsView: View {
                         planType = selectedPlanType ?? ""
                         autoFillDetails(isAmount: false)
                     })
-                    .presentationDetents([.medium, .large])
+                    .overlay {
+                        GeometryReader { geo in
+                            Color.clear
+                                .preference(
+                                    key: InnerHeightPreferenceKey.self,
+                                    value: geo.size.height
+                                )
+                        }
+                    }
+                    .onPreferenceChange(InnerHeightPreferenceKey.self) { height in
+                        if height > 150 {
+                            sheetHeight = height
+                        }
+                    }
+                    .presentationDetents([.height(sheetHeight)])
                     .presentationDragIndicator(.hidden)
                 }
             case .billingCycle:
@@ -225,7 +240,21 @@ struct ReviewExtractedDetailsView: View {
                                             placeholder             : "Search billing cycle",
                                             onSelect: { billing in
                     })
-                    .presentationDetents([.height(500)])
+                    .overlay {
+                        GeometryReader { geo in
+                            Color.clear
+                                .preference(
+                                    key: InnerHeightPreferenceKey.self,
+                                    value: geo.size.height
+                                )
+                        }
+                    }
+                    .onPreferenceChange(InnerHeightPreferenceKey.self) { height in
+                        if height > 150 {
+                            sheetHeight = height
+                        }
+                    }
+                    .presentationDetents([.height(sheetHeight)])
                     .presentationDragIndicator(.hidden)
                 }
             }
@@ -405,7 +434,9 @@ struct ReviewExtractedDetailsView: View {
     
     private func selectPlanType()
     {
-        showPlanTypeSheet = true
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+            showPlanTypeSheet = true
+        }
     }
     
     private func selectCategory()
@@ -415,7 +446,9 @@ struct ReviewExtractedDetailsView: View {
     
     private func selectBilling()
     {
-        showBillingCycleSheet = true
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+            showBillingCycleSheet = true
+        }
     }
     
     private func dateSelection() {
@@ -494,9 +527,6 @@ struct ReviewExtractedDetailsView: View {
                     )
                     globalSubscriptionData?.nextPaymentDate = chargeDate.formattedDate(from: "dd/MM/yyyy", to: "yyyy-MM-dd")
                 }
-//                if globalSubscriptionData?.billingCycle == ""{
-//                    
-//                }
                 isAmountError = false
             } else {
                 if providerPlansList?.count != 0{
@@ -511,7 +541,12 @@ struct ReviewExtractedDetailsView: View {
                 isPlanTypeError = false
                 
                 //For first-time users, the available plan types are Free Plan and Basic Plan. When the user selects either one, the billing cycle should be displayed as Monthly by default.
-                selectedBilling = "Monthly"
+                if planType == "Free" || planType == "Basic"{
+                    selectedBilling = "Monthly"
+                }
+                if planType == "Free"{
+                    globalSubscriptionData?.amount = 0.0
+                }
                 
                 return
             }
@@ -522,18 +557,22 @@ struct ReviewExtractedDetailsView: View {
                         planType.trimmingCharacters(in: .whitespacesAndNewlines)
                     ) == .orderedSame
             }) {
-//                if globalSubscriptionData?.amount == 0.0 || globalSubscriptionData?.amount == nil{
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
                     globalSubscriptionData?.amount = matchedPlan.price
-//                }
-//                if globalSubscriptionData?.billingCycle == "" || globalSubscriptionData?.billingCycle == nil {
+                }
                     globalSubscriptionData?.billingCycle = matchedPlan.billingCycle ?? ""//.lowercased()
                     chargeDate = Constants.shared.getNextDateByFrequency(
                         frequency: matchedPlan.billingCycle ?? ""
                     )
                     globalSubscriptionData?.nextPaymentDate = chargeDate.formattedDate(from: "dd/MM/yyyy", to: "yyyy-MM-dd")
-//                }
                 isPlanTypeError = false
             } else {
+                if planType == "Free" || planType == "Basic"{
+                    selectedBilling = "Monthly"
+                }
+                if planType == "Free"{
+                    globalSubscriptionData?.amount = 0.0
+                }
                 if !(providerPlansList?.isEmpty ?? true) {
                     isPlanTypeError = true
                 }

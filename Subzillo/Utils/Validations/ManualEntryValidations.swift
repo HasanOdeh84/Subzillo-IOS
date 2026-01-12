@@ -37,8 +37,8 @@ struct ManualEntryValidations {
         if input.serviceName.isEmpty{
             return "Please enter service name"
         }
-        if input.category.isEmpty{
-            return "Please select category"
+        if input.subscriptionType.isEmpty {
+            return "Please enter plan type"
         }
         if input.amount == nil {
             return "Amount is required"
@@ -46,8 +46,8 @@ struct ManualEntryValidations {
         if input.currency == "" {
             return "Currency selection required"
         }
-        if input.subscriptionType.isEmpty {
-            return "Please enter plan type"
+        if input.category.isEmpty{
+            return "Please select category"
         }
         if input.billingCycle.isEmpty{
             return "Please select a billing cycle"

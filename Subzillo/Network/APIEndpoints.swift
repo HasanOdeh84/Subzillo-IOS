@@ -8,7 +8,7 @@ enum urlType:Int{
     case prod  = 2
 }
 
-let Environment = urlType.dev
+let Environment = urlType.stage
 var baseurl: String {
     switch Environment {
     case .dev:
@@ -63,6 +63,7 @@ enum APIEndpoint: String {
     case deleteFamilyMember             = "/deleteFamilyMember"
     case updateProfile                  = "/updateProfile"
     case homeYearlyGraph                = "/homeYearlyGraph"
+    case OauthUrl                       = "/OauthUrl"
     
     //common api's
     case getCategories                  = "/getCategories"

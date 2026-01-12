@@ -78,8 +78,8 @@ struct AddSubscriptionsView: View {
         AppIntentRouter.shared.navigate(to: .voiceCommandView)
     }
     private func clickOnConnectEmail() {
-//        AppIntentRouter.shared.navigate(to: .connectEmail)
-        ToastManager.shared.showToast(message: "Coming soon in S4",style:ToastStyle.info)
+        AppIntentRouter.shared.navigate(to: .connectEmail)
+//        ToastManager.shared.showToast(message: "Coming soon in S4",style:ToastStyle.info)
     }
     private func clickOnUploadScreenshot() {
         showUploadPopup = true
