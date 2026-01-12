@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.18.0] (Alpha) - 2026-01-10
+
+### Fixed
+- New modifications and bug fixes.
+
 ## [1.17.0] (Alpha) - 2026-01-09
 
 ### Fixed
