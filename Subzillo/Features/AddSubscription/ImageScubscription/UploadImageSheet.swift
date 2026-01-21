@@ -102,10 +102,17 @@ struct UploadImageSheet: View {
             .onChange(of: selectedImage) { _ in uploadImage() }
             .onChange(of: uploadImageVM.hideLoader) { _ in onApi() }
             .onChange(of: profileVM.isProfileUpdate) { _ in onUpdateProfile() }
-            .sheet(isPresented: $uploadImageVM.showErrorPopup) {
+            .sheet(isPresented: $uploadImageVM.showErrorPopup, onDismiss: {
+                isUploading = false
+                showLocalLoader = false
+            }) {
                 UploadErrorImageSheet(
                     onDelegate: {
                         dismiss()
+                    },
+                    onDismiss: {
+                        isUploading = false
+                        showLocalLoader = false
                     }
                 )
                 .presentationDragIndicator(.hidden)
@@ -266,10 +273,12 @@ struct UploadImageSheet: View {
     }
 }
 
+//MARK: - UploadErrorImageSheet
 struct UploadErrorImageSheet: View {
     
     //MARK: - Properties
     var onDelegate: (() -> Void)?
+    var onDismiss: (() -> Void)?
     @Environment(\.dismiss) private var dismiss
     
     //MARK: - body
@@ -342,6 +351,7 @@ struct UploadErrorImageSheet: View {
     }
     
     private func onRetryAction() {
+        onDismiss?()
         dismiss()
     }
 }

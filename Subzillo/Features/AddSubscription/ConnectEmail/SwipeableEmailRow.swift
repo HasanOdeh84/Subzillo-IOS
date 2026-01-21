@@ -10,33 +10,61 @@ struct SwipeableEmailRow: View {
     
     @State private var offset   : CGFloat = 0
     @State private var isSwiped : Bool = false
-    let swipeThreshold: CGFloat = -40
+    @State private var rowHeight: CGFloat = 0
+    let swipeThreshold: CGFloat = -20
     let menuWidth: CGFloat      = 70
     
     var body: some View {
         ZStack(alignment: .trailing) {
             // Delete Background
-            HStack {
-                Spacer()
-                Button(action: {
-                    withAnimation {
-                        offset = 0
-                        isSwiped = false
+            VStack {
+                HStack{
+                    VStack(spacing: 8){
+                        Image("del_white")
+                        Text("Delete")
+                            .font(.appSemiBold(14))
+                            .foregroundColor(.white)
                     }
-                    onDelete()
-                }) {
-                    Image("del_white") // Assuming this exists based on MyCardsView
-                        .resizable()
-                        .frame(width: 24, height: 24)
-                        .padding()
-                        .frame(width: menuWidth, height: 80)
-                        .background(Color("redColor")) // Assuming this exists
-                        .clipShape(RoundedRectangle(cornerRadius: 12))
                 }
+                .frame(width: menuWidth, height: rowHeight)
+            }
+            .frame(width: menuWidth, height: rowHeight)
+            .background(Color("redColor"))
+            .clipShape(
+                RoundedCorner(
+                    radius: 12,
+                    corners: [.topRight, .bottomRight]
+                )
+            )
+            .overlay(
+                RoundedCorner(
+                    radius: 12,
+                    corners: [.topRight, .bottomRight]
+                )
+                .stroke(Color.neutral300Border, lineWidth: 1)
+            )
+            .zIndex(0)
+            .onTapGesture {
+                withAnimation {
+                    offset = 0
+                    isSwiped = false
+                }
+                onDelete()
             }
             
             // Top Layer (Email Item)
             ConnectedEmailItemView(email: email, onSync: onSync, onView: onView)
+                .background(
+                    GeometryReader { geo in
+                        Color.clear
+                            .onAppear {
+                                rowHeight = geo.size.height
+                            }
+                            .onChange(of: geo.size.height) { newValue in
+                                rowHeight = newValue
+                            }
+                    }
+                )
                 .offset(x: offset)
                 .simultaneousGesture(
                     DragGesture(minimumDistance: 10, coordinateSpace: .local)
@@ -76,6 +104,7 @@ struct SwipeableEmailRow: View {
                             }
                         }
                 )
+                .zIndex(1)
         }
         .onChange(of: activeEmailId) { newValue in
             if newValue != email.id && (offset != 0 || isSwiped) {

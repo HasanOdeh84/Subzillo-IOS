@@ -102,3 +102,11 @@ enum AccountType : Int, Identifiable {
     
     var id: Int { rawValue }
 }
+
+enum PendingUIAction {
+    case selectPlanType
+    case selectBilling
+    case selectCategory
+    case selectpaymentMethod
+    case dateSelection
+}

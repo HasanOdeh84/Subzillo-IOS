@@ -5,6 +5,18 @@
 //  Created by Ratna Kavya on 08/11/25.
 //
 
+/*//Manual entry cases
+ 1. The amount and Billing cycle should change based on the plan type either empty or not empty.
+ 2. When the amount is changed, both the plan type and the billing should be updated accordingly if plan type is empty.
+ 3. For first-time users, the available plan types are Free Plan and Basic Plan. When the user selects either one, the billing cycle should be displayed as Monthly by default.
+ 4.Based on the billing cycle, amount should be changed
+ 5. if Plan type is free then amount should be 0 in manual and review screens.
+ 6. Need to show the bottom sheet once we get the success from provider api response and if service name is empty also need to show bottom sheet in manual screen.
+ 7. If service name is empty or if service names changes then need to clear the data and need to clear the provider list.
+ 8. If currency is changed no need to clear the data
+ 9. If plans are not related to the selected currency, then we will get other country plans then currency will change accordingly.
+ */
+
 import SwiftUI
 import UIKit
 
@@ -82,14 +94,7 @@ struct ManualEntryView: View {
     @State private var amountLastActionText     : String = ""
     @State private var pendingUIAction          : PendingUIAction? = nil
     @State var isCurrency                       = false
-    
-    enum PendingUIAction {
-        case selectPlanType
-        case selectBilling
-        case selectCategory
-        case selectpaymentMethod
-        case dateSelection
-    }
+    @State var isCurrencyUpdate                 = false
     
     //MARK: - body
     var body: some View {
@@ -144,7 +149,7 @@ struct ManualEntryView: View {
                         displayKey  : { $0.name ?? "" },
                         fieldType   : FieldType.serviceName,
                         activeField : $activeField,
-//                        lastActionText : $serviceLastActionText,
+                        //                        lastActionText : $serviceLastActionText,
                         action      : {
                             if serviceName != ""{
                                 if serviceName.trimmed != serviceLastActionText{
@@ -156,32 +161,6 @@ struct ManualEntryView: View {
                             }
                         }
                     )
-                    
-                    //                                        FieldSuggestionView1(
-                    //                                            text        : $planType,
-                    //                                            title       : "Plan Type",
-                    //                                            image       : "gridicon2",
-                    //                                            placeHolder : "e.g. Free, Pro, Premium",
-                    //                                            suggestions : addSubscriptionVM.providerData?.providerSubscriptionPlansList ?? [],
-                    //                                            displayKey  : { $0.planName ?? "" },
-                    //                                            fieldType   : FieldType.planType,
-                    //                                            activeField : $activeField,
-                    //                                            action      : {
-                    //                                                autoFillDetails(isAmount: false)
-                    //                                            }
-                    //                                        )
-                    //                                        if isPlanTypeError{
-                    //                                            HStack(spacing: 6){
-                    //                                                Image("info")
-                    //                                                    .frame(width: 24, height: 24)
-                    //                                                Text("This plan is not available for this service")
-                    //                                                    .font(.appRegular(14))
-                    //                                                    .foregroundColor(Color.systemInfoBlue)
-                    //                                                Spacer()
-                    //                                            }
-                    //                                            .padding(.leading, 5)
-                    //                                            .padding(.top, -22)
-                    //                                        }
                     
                     //MARK: - PlanType field
                     Button(action: selectPlanType) {
@@ -238,17 +217,15 @@ struct ManualEntryView: View {
                                 },
                                 fieldType   : FieldType.amount,
                                 activeField : $activeField,
-//                                lastActionText : $amountLastActionText,
+                                //                                lastActionText : $amountLastActionText,
                                 action      : {
                                     autoFillDetails(isAmount: true)
                                 }
                             )
                             .addDoneButton{
                             }
-                            
                             Spacer()
                         }
-                        
                         
                         //MARK: - currency field
                         VStack{
@@ -271,13 +248,17 @@ struct ManualEntryView: View {
                         }
                         .onChange(of: selectedCurrency) { newCurrency in
                             guard let currency = newCurrency else { return }
-                            if serviceName != ""{
-                                if isFromEdit && isInitial{
-                                    isInitial = false
-                                }else{
-                                    isCurrency = true
+                            if isCurrencyUpdate{
+                                isCurrencyUpdate = false
+                            }else{
+                                if serviceName != ""{
+                                    if isFromEdit && isInitial{
+                                        isInitial = false
+                                    }else{
+                                        isCurrency = true
+                                    }
+                                    fetchProviderDataApi()
                                 }
-                                fetchProviderDataApi()
                             }
                         }
                     }
@@ -305,36 +286,8 @@ struct ManualEntryView: View {
                             .presentationDragIndicator(.hidden)
                     }
                     
-                    //                    ListView(type: .billing, title: "Billing Cycle", addMore: false, data: $billingData, selectedIndex: $billingIndex)
-                    //                        .frame(height: Double(30 + (52 * billingData.count)))
-                    
-                    //                    Button(action: selectBilling) {
-                    //                        FieldView(text: $billingCycle, textValue: selectedBilling?.title ?? "", title: "Billing Cycle", image: "billing", placeHolder: "Select billing cycle", isButton: true, isText: true)
-                    //                    }
-                    //                    .sheet(isPresented: $showBillingCycleSheet) {
-                    //                        BillingCycleBottomSheet(selectedBilling: $selectedBilling, header: "Select Billing Cycle", placeholder: "Search billing cycle")
-                    //                            .presentationDetents([.height(500)])
-                    //                            .presentationDragIndicator(.hidden)
-                    //                    }
-                    //                    .onChange(of: selectedBilling) { billing in
-                    //                        guard
-                    //                            let billing,
-                    //                            let title = billing.title
-                    //                        else { return }
-                    //
-                    //                        if isFromEdit && isInitialPayment{
-                    //                            isInitialPayment = false
-                    //                        }else{
-                    //                            chargeDate = Constants.shared.getNextDateByFrequency(
-                    //                                frequency: title
-                    //                            )
-                    //                        }
-                    //                    }
-                    
-                    
                     //MARK: - Billing cycle field
                     Button(action: selectBilling) {
-                        //                        FieldView(text: $billingCycle, textValue: selectedBilling?.title ?? "", title: "Billing Cycle", image: "billing", placeHolder: "Select billing cycle", isButton: true, isText: true)
                         FieldView(text: $billingCycle, textValue: selectedBilling ?? "", title: "Billing Cycle", image: "billing", placeHolder: "Select billing cycle", isButton: true, isText: true)
                     }
                     .sheet(isPresented: $showBillingCycleSheet) {
@@ -474,10 +427,6 @@ struct ManualEntryView: View {
                             }
                             .padding(16)
                             .frame(height: 110)
-                            //                            .overlay(
-                            //                                RoundedRectangle(cornerRadius: 12)
-                            //                                    .stroke(Color.neutral2200, lineWidth: 1)
-                            //                            )
                             .overlay(
                                 RoundedRectangle(cornerRadius: 12)
                                     .stroke(.neutral300Border, lineWidth: 1)
@@ -594,21 +543,26 @@ struct ManualEntryView: View {
     //MARK: - User defined methods
     
     func fetchProviderDataApi(){
-//        if serviceName.trimmed != serviceLastActionText{
-//            serviceLastActionText = serviceName.trimmed
-            addSubscriptionVM.fetchProviderData(input: FetchProviderDataRequest(userId          : Constants.getUserId(),
-                                                                                serviceName     : serviceName.trimmed,
-                                                                                currencyCode    : selectedCurrency?.code ?? "" == "" ? Constants.shared.currencyCode : selectedCurrency?.code ?? ""))
-//        }
+        addSubscriptionVM.fetchProviderData(input: FetchProviderDataRequest(userId          : Constants.getUserId(),
+                                                                            serviceName     : serviceName.trimmed,
+                                                                            currencyCode    : selectedCurrency?.code ?? "" == "" ? Constants.shared.currencyCode : selectedCurrency?.code ?? ""))
     }
     
     func filteredPricePlans() -> [ProviderSubscriptionPlan] {
         guard let plans = addSubscriptionVM.providerData?.providerSubscriptionPlansList else {
             return []
         }
+        
+        let filteredPlans: [ProviderSubscriptionPlan]
+        if let selected = selectedPlanType, !selected.isEmpty {
+            filteredPlans = plans.filter { ($0.planName ?? "").caseInsensitiveCompare(selected) == .orderedSame }
+        } else {
+            filteredPlans = plans
+        }
+        
         return Array(
             Dictionary(
-                grouping: plans.compactMap { plan in
+                grouping: filteredPlans.compactMap { plan in
                     guard plan.price != nil else { return nil }
                     return plan
                 },
@@ -640,14 +594,21 @@ struct ManualEntryView: View {
     
     func filteredBillingCycles() -> [String] {
         guard
-            let billingCycles = addSubscriptionVM.providerData?.providerSubscriptionPlansList,
-            !billingCycles.isEmpty
+            let plans = addSubscriptionVM.providerData?.providerSubscriptionPlansList,
+            !plans.isEmpty
         else {
             // Fallback when API returns no plans
             return ["Monthly", "Yearly"]
         }
         
-        let billingCycleNames = billingCycles.compactMap { $0.billingCycle }
+        let filteredPlans: [ProviderSubscriptionPlan]
+        if let selected = selectedPlanType, !selected.isEmpty {
+            filteredPlans = plans.filter { ($0.planName ?? "").caseInsensitiveCompare(selected) == .orderedSame }
+        } else {
+            filteredPlans = plans
+        }
+        
+        let billingCycleNames = filteredPlans.compactMap { $0.billingCycle }
         
         // If plan names are missing or empty, still return fallback
         guard !billingCycleNames.isEmpty else {
@@ -713,7 +674,6 @@ struct ManualEntryView: View {
         chargeDate = ""
         selectedCategory = nil
         category = ""
-//        addSubscriptionVM.providerData?.providerSubscriptionPlansList = nil
         addSubscriptionVM.providerData = nil
         serviceLastActionText = ""
     }
@@ -726,15 +686,22 @@ struct ManualEntryView: View {
             return
         }
         
-        if let matchedPlan = plans.first(where: {
-            ($0.billingCycle ?? "")
+        if let matchedPlan = plans.first(where: { plan in
+            let cycleMatch = (plan.billingCycle ?? "")
                 .trimmingCharacters(in: .whitespacesAndNewlines)
                 .caseInsensitiveCompare(
                     billing.trimmingCharacters(in: .whitespacesAndNewlines)
                 ) == .orderedSame
+            
+            if let selected = selectedPlanType, !selected.isEmpty {
+                return cycleMatch && (plan.planName ?? "").caseInsensitiveCompare(selected) == .orderedSame
+            }
+            return cycleMatch
         }) {
             amount = String(format: "%.2f", matchedPlan.price ?? 0)
             amountLastActionText = amount
+            updateCurrency(currencyCode     : matchedPlan.currencyCode ?? Constants.shared.regionCode,
+                           currencySymbol   : matchedPlan.currencySymbol ?? Constants.shared.currencySymbol)
         }
     }
     
@@ -760,6 +727,8 @@ struct ManualEntryView: View {
                     selectedBilling = matchedPlan.billingCycle ?? ""
                 }
                 isAmountError = false
+                updateCurrency(currencyCode     : matchedPlan.currencyCode ?? Constants.shared.regionCode,
+                               currencySymbol   : matchedPlan.currencySymbol ?? Constants.shared.currencySymbol)
             } else {
                 if addSubscriptionVM.providerData?.providerSubscriptionPlansList?.count != 0{
                     isAmountError = true
@@ -771,7 +740,6 @@ struct ManualEntryView: View {
                 let plans = addSubscriptionVM.providerData?.providerSubscriptionPlansList
             else {
                 isPlanTypeError = false
-                
                 //For first-time users, the available plan types are Free Plan and Basic Plan. When the user selects either one, the billing cycle should be displayed as Monthly by default.
                 if planType == "Free" || planType == "Basic"{
                     selectedBilling = "Monthly"
@@ -795,6 +763,8 @@ struct ManualEntryView: View {
                 }
                 selectedBilling = matchedPlan.billingCycle ?? ""
                 isPlanTypeError = false
+                updateCurrency(currencyCode     : matchedPlan.currencyCode ?? Constants.shared.regionCode,
+                               currencySymbol   : matchedPlan.currencySymbol ?? Constants.shared.currencySymbol)
             } else {
                 if planType == "Free" || planType == "Basic"{
                     selectedBilling = "Monthly"
@@ -861,12 +831,6 @@ struct ManualEntryView: View {
                 }
             }
             else{
-                //            if isAdd == true {
-                //                AppIntentRouter.shared.navigate(to: .addSubscriptionsView)
-                //            }
-                //            else{
-                //                AppIntentRouter.shared.navigate(to: .subscriptionsListView)
-                //            }
                 if isFromListEdit{
                     dismiss()
                 }else{
@@ -972,6 +936,27 @@ struct ManualEntryView: View {
                 cardIndex = index
             }
         }
+    }
+    
+    func updateCurrency(currencyCode:String, currencySymbol:String){
+        selectedCurrency = Currency(id      : nil,
+                                    name    : Constants.shared.currencyCode,
+                                    symbol  : Constants.shared.currencySymbol,
+                                    code    : Constants.shared.currencyCode,
+                                    flag    : Constants.shared.flag(from: Constants.shared.regionCode))
+        if let currencies = commonApiVM.currencyResponse {
+            selectedCurrency = currencies.first(where: { $0.code == currencyCode })
+            if selectedCurrency == nil{
+                selectedCurrency = Currency(id      : nil,
+                                            name    : "",
+                                            symbol  : currencySymbol,
+                                            code    : currencyCode,
+                                            flag    : "")
+            }
+        }else{
+            commonApiVM.getCurrencies()
+        }
+        isCurrencyUpdate = true
     }
     
     func updateCountryAndCurrency() {
@@ -1090,7 +1075,6 @@ struct ManualEntryView: View {
             fetchProviderDataApi()
             handleDone()
         } else {
-            handleDone()
             showCategorySheet = true
         }
     }
@@ -1103,7 +1087,6 @@ struct ManualEntryView: View {
             fetchProviderDataApi()
             handleDone()
         } else {
-            handleDone()
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
                 sheetID = UUID()
                 showPlanTypeSheet = true
@@ -1119,7 +1102,6 @@ struct ManualEntryView: View {
             fetchProviderDataApi()
             handleDone()
         } else {
-            handleDone()
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
                 sheetID = UUID()
                 showBillingCycleSheet = true
@@ -1135,7 +1117,6 @@ struct ManualEntryView: View {
             fetchProviderDataApi()
             handleDone()
         } else {
-            handleDone()
             showPaymentMethodSheet = true
         }
     }
@@ -1147,7 +1128,6 @@ struct ManualEntryView: View {
             fetchProviderDataApi()
             handleDone()
         } else {
-            handleDone()
             withAnimation(.easeInOut) {
                 isDatePickerPresented = true
             }
@@ -1279,12 +1259,6 @@ struct ManualEntryView: View {
     private func handleDone() {
         switch activeField {
         case .serviceName:
-//            if serviceName != "" && serviceName.trimmed != serviceLastActionText {
-//                serviceLastActionText = serviceName.trimmed
-//                fetchProviderDataApi()
-//            } else if serviceName == "" {
-//                clearData()
-//            }
             if serviceName != ""{
                 if serviceName.trimmed != serviceLastActionText{
                     serviceLastActionText = serviceName.trimmed
@@ -1474,10 +1448,6 @@ struct FieldView: View
             }
             .padding(16)
             .frame(height: 52)
-            //            .overlay(
-            //                RoundedRectangle(cornerRadius: 12)
-            //                    .stroke(Color.neutral2200, lineWidth: 1)
-            //            )
             .overlay(
                 RoundedRectangle(cornerRadius: 12)
                     .stroke(.neutral300Border, lineWidth: 1)
@@ -1529,29 +1499,23 @@ struct FieldView: View
     }
 }
 
-
 //MARK: - Field suggestions view
 struct FieldSuggestionView<Item: Identifiable>: View {
     
-    @Binding var text   : String
-    var title           : String?
-    var image           : String?
-    var placeHolder     : String?
-    var currency        : String?
-    var isNumberPad     : Bool = false
-    var suggestions     : [Item]
-    var displayKey      : (Item) -> String
-    
-    //    @FocusState private var isFocused   : Bool
-    @FocusState.Binding var isFocused: Bool
-    
+    //MARK: - Properties
+    @Binding var text                   : String
+    var title                           : String?
+    var image                           : String?
+    var placeHolder                     : String?
+    var currency                        : String?
+    var isNumberPad                     : Bool = false
+    var suggestions                     : [Item]
+    var displayKey                      : (Item) -> String
+    @FocusState.Binding var isFocused   : Bool
     var fieldType                       : FieldType
     @Binding var activeField            : FieldType?
-//    @Binding var lastActionText         : String
-//    @State private var focusTask        : Task<Void, Never>? = nil
-    
-    private var showSuggestions: Bool { isFocused && !filtered.isEmpty }
-    
+    private var showSuggestions         : Bool { isFocused && !filtered.isEmpty }
+    let action                          : () -> Void
     private var filtered: [Item] {
         let query = text.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
         if isFocused && query.isEmpty {
@@ -1562,9 +1526,9 @@ struct FieldSuggestionView<Item: Identifiable>: View {
             displayKey($0).lowercased().contains(query)
         }
     }
+    var onSelect: (Item) -> Void = {_ in }
     
-    let action          : () -> Void
-    
+    //MARK: - body
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
             
@@ -1590,17 +1554,8 @@ struct FieldSuggestionView<Item: Identifiable>: View {
                     .focused($isFocused)
                     .onChange(of: isFocused) { focused in
                         if focused {
-//                            focusTask?.cancel()
                             activeField = fieldType
-//                            lastActionText = text.trimmed
                         } else {
-//                            focusTask = Task {
-//                                try? await Task.sleep(nanoseconds: 200_000_000)
-//                                if !Task.isCancelled && text.trimmed != lastActionText {
-//                                    lastActionText = text.trimmed
-//                                    action()
-//                                }
-//                            }
                             action()
                         }
                     }
@@ -1631,7 +1586,6 @@ struct FieldSuggestionView<Item: Identifiable>: View {
             if showSuggestions {
                 suggestionList
                     .padding(.top, 10)
-                //                    .padding(.bottom, -10)
             }
         }
         .padding(5)
@@ -1656,6 +1610,7 @@ struct FieldSuggestionView<Item: Identifiable>: View {
                             .contentShape(Rectangle())
                             .onTapGesture {
                                 text = displayKey(item)
+                                onSelect(item) 
                                 closeSuggestions()
                             }
                             if index < filtered.count - 1 {
@@ -1702,7 +1657,7 @@ struct FieldSuggestionView1<Item: Identifiable>: View {
     @FocusState private var isFocused   : Bool
     var fieldType                       : FieldType
     @Binding var activeField            : FieldType?
-//    @Binding var lastActionText         : String
+    //    @Binding var lastActionText         : String
     @State private var focusTask        : Task<Void, Never>? = nil
     
     private var showSuggestions: Bool { isFocused && !filtered.isEmpty }
@@ -1745,17 +1700,17 @@ struct FieldSuggestionView1<Item: Identifiable>: View {
                     .focused($isFocused)
                     .onChange(of: isFocused) { focused in
                         if focused {
-//                            focusTask?.cancel()
+                            //                            focusTask?.cancel()
                             activeField = fieldType
-//                            lastActionText = text.trimmed
+                            //                            lastActionText = text.trimmed
                         } else {
-//                            focusTask = Task {
-//                                try? await Task.sleep(nanoseconds: 200_000_000)
-//                                if !Task.isCancelled && text.trimmed != lastActionText {
-//                                    lastActionText = text.trimmed
-//                                    action()
-//                                }
-//                            }
+                            //                            focusTask = Task {
+                            //                                try? await Task.sleep(nanoseconds: 200_000_000)
+                            //                                if !Task.isCancelled && text.trimmed != lastActionText {
+                            //                                    lastActionText = text.trimmed
+                            //                                    action()
+                            //                                }
+                            //                            }
                             action()
                         }
                     }
@@ -1915,10 +1870,6 @@ struct ListView: View {
                     }
                 }
             }
-            //            .overlay(
-            //                RoundedRectangle(cornerRadius: 12)
-            //                    .stroke(Color.neutral2200, lineWidth: 1)
-            //            )
             .overlay(
                 RoundedRectangle(cornerRadius: 16)
                     .stroke(.neutral300Border, lineWidth: 1)
@@ -1986,10 +1937,6 @@ struct ListView: View {
                 }
         }
         if type == .cards {
-            //            SubscriptionItem(title: objc.title ?? "", subtitle: objc.subtitle ?? "", isSelected: index == selectedIndex ? true : false, isSubTitlePresent: true)
-            //                .onTapGesture {
-            //                    selectedAction(at: index)
-            //                }
             Button {
                 selectedAction(at: index)
             } label: {

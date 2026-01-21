@@ -5,11 +5,16 @@
 //  Created by Ratna Kavya on 11/11/25.
 //
 
+/* Review screens cases
+ Confidence Assumed will come only for currency
+ */
+
 import SwiftUI
 import SDWebImageSwiftUI
 
 var globalSubscriptionData                      : SubscriptionData?
 var originalImage                               : UIImage? = nil
+var isCurrencyUpdateGlobal                      = false
 
 struct SubscriptionPreviewView: View {
     
@@ -43,7 +48,8 @@ struct SubscriptionPreviewView: View {
     @StateObject var manualEntryVM              = ManualEntryViewModel()
     
     @State var fillRatio                        : CGFloat = 0.0
-    @State var isInitial                        = true
+    @State var isInitialService                 = true
+    @State var isInitialCurrency                = true
     @State var isServiceChanged                 = false
     @State private var previousBillingCycle     : String?
     
@@ -196,7 +202,11 @@ struct SubscriptionPreviewView: View {
                                         else {
                                             return
                                         }
-                                        fetchProviderDataApi()
+                                        if isInitialService{
+                                            isInitialService = false
+                                        }else{
+                                            fetchProviderDataApi()
+                                        }
                                     }
                                 
                                 //MARK: - Amount
@@ -244,7 +254,7 @@ struct SubscriptionPreviewView: View {
                                 
                                 //MARK: - Currency
                                 if subscriptionData?.currency ?? "" == "" || subscriptionData?.currencyConfidence ?? 0.0 == 0.0{
-                                    SubscriptionDetailsItem(title: "Currency", value: Constants.shared.currencyCode, confidence: 0.0, isAssumed: true)
+                                    SubscriptionDetailsItem(title: "Currency", value: subscriptionData?.currency ?? "", confidence: subscriptionData?.currencyConfidence ?? 0.0, isAssumed: true)
                                         .onTapGesture {
                                             DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
                                                 showCurrencyBottom = true
@@ -522,12 +532,15 @@ struct SubscriptionPreviewView: View {
             },
                                        detailType   : ReviewExtractedType.currency,
                                        confidence   : subscriptionData?.currencyConfidence ?? 0.0,
+                                       isAssumed    : (subscriptionData?.currency ?? "" == "" || subscriptionData?.currencyConfidence ?? 0.0 == 0.0) ? true : false,
                                        extractedData: subscriptionData)
             .id(ReviewExtractedType.currency)
             .presentationDragIndicator(.hidden)
             .presentationDetents([.height(400)])
         }
-        .sheet(isPresented: $showPlanTypeBottom) {
+        .sheet(isPresented: $showPlanTypeBottom, onDismiss:{
+            print("sheet plan type dismissed")
+        }) {
             ReviewExtractedDetailsView(onDelegate: {
             },
                                        detailType           : ReviewExtractedType.planType,
@@ -545,8 +558,16 @@ struct SubscriptionPreviewView: View {
             else {
                 return
             }
-            if subscriptionData?.serviceName != ""{
-                fetchProviderDataApi()
+            if isCurrencyUpdateGlobal{
+                isCurrencyUpdateGlobal = false
+            }else{
+                if subscriptionData?.serviceName != ""{
+                    if isInitialCurrency{
+                        isInitialCurrency = false
+                    }else{
+                        fetchProviderDataApi()
+                    }
+                }
             }
         }
         .onChange(of: manualEntryVM.providerData) { _ in updateProviderData() }
@@ -674,6 +695,28 @@ struct SubscriptionPreviewView: View {
             isServiceChanged = false
             subscriptionData?.categoryName    = manualEntryVM.providerData?.categoryName ?? ""
             subscriptionData?.categoryId      = manualEntryVM.providerData?.categoryId ?? ""
+            let normalizedServiceName = subscriptionData?.serviceName?
+                .trimmingCharacters(in: .whitespacesAndNewlines)
+                .lowercased()
+            
+            let logo = manualEntryVM.servicesList?
+                .first {
+                    guard
+                        let name = $0.name?
+                            .trimmingCharacters(in: .whitespacesAndNewlines)
+                            .lowercased(),
+                        let targetName = normalizedServiceName
+                    else {
+                        return false
+                    }
+                    
+                    return name == targetName
+                }?
+                .logo
+            
+            if let logo = logo, !logo.isEmpty {
+                subscriptionData?.serviceLogo = logo
+            }
         }
     }
     

@@ -105,18 +105,18 @@ struct HomeView: View {
                         .cornerRadius(12)
                         
                         /*
-                        //MARK: Top spending subscriptions
-                        TopSpendingSubscriptionsView(data: topCategoriesList)
-                            .padding(.top, 16)
-                        
-                        //MARK: Year Overview
-                        YearOverviewChartView(data              : homeVM.homeYearGraphResponse?.monthlySpend ?? [],
-                                              currencySymbol    : homeVM.homeYearGraphResponse?.userCurrencySymbol ?? "",
-                                              onDone            : { year in
-                            selectedYear = year
-                            homeYearlyGraphApi()
-                        })
-                            .padding(.top, 16)
+                         //MARK: Top spending subscriptions
+                         TopSpendingSubscriptionsView(data: topCategoriesList)
+                         .padding(.top, 16)
+                         
+                         //MARK: Year Overview
+                         YearOverviewChartView(data              : homeVM.homeYearGraphResponse?.monthlySpend ?? [],
+                         currencySymbol    : homeVM.homeYearGraphResponse?.userCurrencySymbol ?? "",
+                         onDone            : { year in
+                         selectedYear = year
+                         homeYearlyGraphApi()
+                         })
+                         .padding(.top, 16)
                          */
                         
                         TopSpendingSubscriptionsView()
@@ -124,7 +124,7 @@ struct HomeView: View {
                         
                         YearOverviewChartView()
                             .padding(.top, 16)
-
+                        
                         
                         //MARK: Save cards
                         GradientBorderView(title: savePercent, subTitle: saveExpiry, buttonImage: "percent-square",nextBtnImage: "arrow_blue", action: clickOnSave, titleColor: Color.blue800,minHeight: 75,titleFont: 18,subTitleFont: 14)
@@ -328,7 +328,7 @@ struct HomeView: View {
     }
     
     func homeYearlyGraphApi(){
-//        homeVM.homeYearlyGraph(input: HomeYearlyGraphRequest(userId: Constants.getUserId(), year: selectedYear))
+        //        homeVM.homeYearlyGraph(input: HomeYearlyGraphRequest(userId: Constants.getUserId(), year: selectedYear))
     }
 }
 

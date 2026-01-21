@@ -94,6 +94,7 @@ struct ReviewExtractedDetailsView: View {
             .padding(.horizontal, -5)
             
             switch detailType {
+                //MARK: - service
             case .service:
                 FieldSuggestionView(
                     text        : $serviceName,
@@ -108,6 +109,7 @@ struct ReviewExtractedDetailsView: View {
                     action      : {
                     }
                 )
+                //MARK: - amount
             case .amount:
                 FieldSuggestionView(
                     text        : $amount,
@@ -126,6 +128,13 @@ struct ReviewExtractedDetailsView: View {
                     action      : {
                         errorHint(isAmount: true)
                         isAmountUpdate = true
+                    },
+                    onSelect    : { plan in
+                        selectedCurrency = Currency(id      : nil,
+                                                    name    : "",
+                                                    symbol  : plan.currencySymbol,
+                                                    code    : plan.currencyCode,
+                                                    flag    : "")
                     }
                 )
                 //                .focused($isInputActive)
@@ -142,6 +151,7 @@ struct ReviewExtractedDetailsView: View {
                     .padding(.leading, 5)
                     .padding(.top, -5)
                 }
+                //MARK: - nextChargeDate
             case .nextChargeDate:
                 Button(action: dateSelection) {
                     FieldView(text: $chargeDate, textValue: "", title: "Next Charge Date", image: "Calendar1", placeHolder: "dd/mm/yyyy", isButton: false, isText: true, isDate:true)
@@ -154,6 +164,7 @@ struct ReviewExtractedDetailsView: View {
                         print(chargeDate)
                     }
                 )
+                //MARK: - currency
             case .currency:
                 PhoneNumberField(phoneNumber        : .constant(""),
                                  header             : "Your payment currency",
@@ -162,6 +173,7 @@ struct ReviewExtractedDetailsView: View {
                                  selectedCountry    : .constant(nil),
                                  isCountry          : false,
                                  fromPreview        : true)
+                //MARK: - category
             case .category:
                 Button(action: selectCategory) {
                     FieldView(text: $category, textValue: selectedCategory?.name ?? "", title: "Category", image: "gridIcon", placeHolder: "Please select", isButton: true, isText: true)
@@ -171,6 +183,7 @@ struct ReviewExtractedDetailsView: View {
                         .presentationDetents([.large])
                         .presentationDragIndicator(.hidden)
                 }
+                //MARK: - planType
             case .planType:
                 //                FieldSuggestionView(
                 //                    text        : $planType,
@@ -210,7 +223,9 @@ struct ReviewExtractedDetailsView: View {
                                         placeholder         : "Search Plan Type",
                                         action              : {
                         planType = selectedPlanType ?? ""
-                        autoFillDetails(isAmount: false)
+                        //                        autoFillDetails(isAmount: false)
+                        errorHint(isAmount: false)
+                        isPlanTypeUpdate = true
                     })
                     .overlay {
                         GeometryReader { geo in
@@ -229,6 +244,7 @@ struct ReviewExtractedDetailsView: View {
                     .presentationDetents([.height(sheetHeight)])
                     .presentationDragIndicator(.hidden)
                 }
+                //MARK: - billingCycle
             case .billingCycle:
                 Button(action: selectBilling) {
                     FieldView(text: $billingCycle, textValue: selectedBilling ?? "", title: "Billing Cycle", image: "billing", placeHolder: "Select billing cycle", isButton: true, isText: true)
@@ -281,6 +297,10 @@ struct ReviewExtractedDetailsView: View {
                     if isAmountUpdate{
                         autoFillDetails(isAmount: true)
                     }
+                    
+                    //need to change the currency if that provider is from other country
+                    globalSubscriptionData?.currency = selectedCurrency?.code ?? ""
+                    globalSubscriptionData?.currencySymbol = selectedCurrency?.symbol ?? ""
                 case .nextChargeDate:
                     if chargeDate == ""{
                         toastManager.showToast(message: "Please select next charge date",style:ToastStyle.error)
@@ -302,14 +322,17 @@ struct ReviewExtractedDetailsView: View {
                     globalSubscriptionData?.categoryId = selectedCategory?.id ?? ""
                     globalSubscriptionData?.categoryName = selectedCategory?.name ?? ""
                 case .planType:
-                    if planType.trimmed == ""{
+                    if selectedPlanType?.trimmed == ""{
                         toastManager.showToast(message: "Please select plan type",style:ToastStyle.error)
                         return
                     }
-                    globalSubscriptionData?.subscriptionType = planType.trimmed
+                    globalSubscriptionData?.subscriptionType = selectedPlanType?.trimmed
                     if isPlanTypeUpdate{
                         autoFillDetails(isAmount: false)
                     }
+                    //need to change the currency if that provider is from other country
+                    globalSubscriptionData?.currency = selectedCurrency?.code ?? ""
+                    globalSubscriptionData?.currencySymbol = selectedCurrency?.symbol ?? ""
                 case .billingCycle:
                     if selectedBilling ?? "" == ""{
                         toastManager.showToast(message: "Please select a billing cycle",style:ToastStyle.error)
@@ -323,6 +346,9 @@ struct ReviewExtractedDetailsView: View {
                     
                     //amount should be changed based on the billing cycle
                     amountUpdate()
+                    //need to change the currency if that provider is from other country
+                    globalSubscriptionData?.currency = selectedCurrency?.code ?? ""
+                    globalSubscriptionData?.currencySymbol = selectedCurrency?.symbol ?? ""
                 }
                 onDelegate?()
                 dismiss()
@@ -358,13 +384,38 @@ struct ReviewExtractedDetailsView: View {
     }
     
     //MARK: - User defined methods
+    //    func filteredPricePlans() -> [ProviderSubscriptionPlan] {
+    //        guard let plans = providerPlansList else{//manualEntryVM.providerData?.providerSubscriptionPlansList else {
+    //            return []
+    //        }
+    //        return Array(
+    //            Dictionary(
+    //                grouping: plans.compactMap { plan in
+    //                    guard plan.price != nil else { return nil }
+    //                    return plan
+    //                },
+    //                by: { $0.price! }
+    //            )
+    //            .values
+    //                .compactMap { $0.first }
+    //        )
+    //    }
+    
     func filteredPricePlans() -> [ProviderSubscriptionPlan] {
         guard let plans = providerPlansList else{//manualEntryVM.providerData?.providerSubscriptionPlansList else {
             return []
         }
+        
+        let filteredPlans: [ProviderSubscriptionPlan]
+        if let selected = selectedPlanType, !selected.isEmpty {
+            filteredPlans = plans.filter { ($0.planName ?? "").caseInsensitiveCompare(selected) == .orderedSame }
+        } else {
+            filteredPlans = plans
+        }
+        
         return Array(
             Dictionary(
-                grouping: plans.compactMap { plan in
+                grouping: filteredPlans.compactMap { plan in
                     guard plan.price != nil else { return nil }
                     return plan
                 },
@@ -394,6 +445,25 @@ struct ReviewExtractedDetailsView: View {
         return Array(Set(planNames))
     }
     
+    //    func filteredBillingCycles() -> [String] {
+    //        guard
+    //            let billingCycles = providerPlansList,
+    //            !billingCycles.isEmpty
+    //        else {
+    //            // Fallback when API returns no plans
+    //            return ["Monthly", "Yearly"]
+    //        }
+    //        
+    //        let billingCycleNames = billingCycles.compactMap { $0.billingCycle }
+    //        
+    //        // If plan names are missing or empty, still return fallback
+    //        guard !billingCycleNames.isEmpty else {
+    //            return ["Monthly", "Yearly"]
+    //        }
+    //        
+    //        return Array(Set(billingCycleNames))
+    //    }
+    
     func filteredBillingCycles() -> [String] {
         guard
             let billingCycles = providerPlansList,
@@ -403,7 +473,14 @@ struct ReviewExtractedDetailsView: View {
             return ["Monthly", "Yearly"]
         }
         
-        let billingCycleNames = billingCycles.compactMap { $0.billingCycle }
+        let filteredPlans: [ProviderSubscriptionPlan]
+        if let selected = selectedPlanType, !selected.isEmpty {
+            filteredPlans = billingCycles.filter { ($0.planName ?? "").caseInsensitiveCompare(selected) == .orderedSame }
+        } else {
+            filteredPlans = billingCycles
+        }
+        
+        let billingCycleNames = filteredPlans.compactMap { $0.billingCycle }
         
         // If plan names are missing or empty, still return fallback
         guard !billingCycleNames.isEmpty else {
@@ -422,13 +499,15 @@ struct ReviewExtractedDetailsView: View {
         else {
             return
         }
-
+        
         if let matchedPlan = plans.first(where: {
             ($0.billingCycle ?? "")
                 .trimmingCharacters(in: .whitespacesAndNewlines)
                 .caseInsensitiveCompare(selectedBilling) == .orderedSame
         }) {
             globalSubscriptionData?.amount = matchedPlan.price ?? 0.0
+            updateCurrency(currencyCode     : matchedPlan.currencyCode ?? Constants.shared.regionCode,
+                           currencySymbol   : matchedPlan.currencySymbol ?? Constants.shared.currencySymbol)
         }
     }
     
@@ -506,6 +585,27 @@ struct ReviewExtractedDetailsView: View {
         }
     }
     
+    func updateCurrency(currencyCode:String, currencySymbol:String){
+        selectedCurrency = Currency(id      : nil,
+                                    name    : Constants.shared.currencyCode,
+                                    symbol  : Constants.shared.currencySymbol,
+                                    code    : Constants.shared.currencyCode,
+                                    flag    : Constants.shared.flag(from: Constants.shared.regionCode))
+        if let currencies = commonApiVM.currencyResponse {
+            selectedCurrency = currencies.first(where: { $0.code == currencyCode })
+            if selectedCurrency == nil{
+                selectedCurrency = Currency(id      : nil,
+                                            name    : "",
+                                            symbol  : currencySymbol,
+                                            code    : currencyCode,
+                                            flag    : "")
+            }
+        }else{
+            commonApiVM.getCurrencies()
+        }
+        isCurrencyUpdateGlobal = true
+    }
+    
     private func autoFillDetails(isAmount:Bool = false){
         if isAmount{
             guard
@@ -527,6 +627,8 @@ struct ReviewExtractedDetailsView: View {
                     )
                     globalSubscriptionData?.nextPaymentDate = chargeDate.formattedDate(from: "dd/MM/yyyy", to: "yyyy-MM-dd")
                 }
+                updateCurrency(currencyCode     : matchedPlan.currencyCode ?? Constants.shared.regionCode,
+                               currencySymbol   : matchedPlan.currencySymbol ?? Constants.shared.currencySymbol)
                 isAmountError = false
             } else {
                 if providerPlansList?.count != 0{
@@ -535,16 +637,17 @@ struct ReviewExtractedDetailsView: View {
             }
         }else{
             guard
-                !planType.isEmpty,
+                let selectedPlanType = selectedPlanType,
+                !selectedPlanType.isEmpty,
                 let plans = providerPlansList
             else {
                 isPlanTypeError = false
                 
                 //For first-time users, the available plan types are Free Plan and Basic Plan. When the user selects either one, the billing cycle should be displayed as Monthly by default.
-                if planType == "Free" || planType == "Basic"{
+                if selectedPlanType == "Free" || selectedPlanType == "Basic"{
                     selectedBilling = "Monthly"
                 }
-                if planType == "Free"{
+                if selectedPlanType == "Free"{
                     globalSubscriptionData?.amount = 0.0
                 }
                 
@@ -554,23 +657,26 @@ struct ReviewExtractedDetailsView: View {
                 ($0.planName ?? "")
                     .trimmingCharacters(in: .whitespacesAndNewlines)
                     .caseInsensitiveCompare(
-                        planType.trimmingCharacters(in: .whitespacesAndNewlines)
+                        selectedPlanType.trimmingCharacters(in: .whitespacesAndNewlines)
                     ) == .orderedSame
             }) {
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-                    globalSubscriptionData?.amount = matchedPlan.price
-                }
-                    globalSubscriptionData?.billingCycle = matchedPlan.billingCycle ?? ""//.lowercased()
-                    chargeDate = Constants.shared.getNextDateByFrequency(
-                        frequency: matchedPlan.billingCycle ?? ""
-                    )
-                    globalSubscriptionData?.nextPaymentDate = chargeDate.formattedDate(from: "dd/MM/yyyy", to: "yyyy-MM-dd")
+                //                DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                //
+                //                }
+                globalSubscriptionData?.amount = matchedPlan.price
+                globalSubscriptionData?.billingCycle = matchedPlan.billingCycle ?? ""//.lowercased()
+                chargeDate = Constants.shared.getNextDateByFrequency(
+                    frequency: matchedPlan.billingCycle ?? ""
+                )
+                globalSubscriptionData?.nextPaymentDate = chargeDate.formattedDate(from: "dd/MM/yyyy", to: "yyyy-MM-dd")
+                updateCurrency(currencyCode     : matchedPlan.currencyCode ?? Constants.shared.regionCode,
+                               currencySymbol   : matchedPlan.currencySymbol ?? Constants.shared.currencySymbol)
                 isPlanTypeError = false
             } else {
-                if planType == "Free" || planType == "Basic"{
+                if selectedPlanType == "Free" || selectedPlanType == "Basic"{
                     selectedBilling = "Monthly"
                 }
-                if planType == "Free"{
+                if selectedPlanType == "Free"{
                     globalSubscriptionData?.amount = 0.0
                 }
                 if !(providerPlansList?.isEmpty ?? true) {
@@ -599,7 +705,12 @@ struct ReviewExtractedDetailsView: View {
             isAmountError = !isMatched
         } else {
             guard
-                !planType.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty,
+                //                !selectedPlanType?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty,
+                //                let plans = providerPlansList,
+                //                !plans.isEmpty
+                let selectedPlanType = selectedPlanType?
+                    .trimmingCharacters(in: .whitespacesAndNewlines),
+                !selectedPlanType.isEmpty,
                 let plans = providerPlansList,
                 !plans.isEmpty
             else {
@@ -611,7 +722,7 @@ struct ReviewExtractedDetailsView: View {
                 (plan.planName ?? "")
                     .trimmingCharacters(in: .whitespacesAndNewlines)
                     .caseInsensitiveCompare(
-                        planType.trimmingCharacters(in: .whitespacesAndNewlines)
+                        selectedPlanType.trimmingCharacters(in: .whitespacesAndNewlines)
                     ) == .orderedSame
             }
             

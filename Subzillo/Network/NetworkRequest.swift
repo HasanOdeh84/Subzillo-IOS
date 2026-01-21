@@ -270,7 +270,9 @@ class NetworkRequest {
                     }
                 }
             receiveValue: {
-                LoaderManager.shared.hideLoader()
+                if showLoader {
+                    LoaderManager.shared.hideLoader()
+                }
                 promise(.success($0))
             }
             .store(in: &self.subscriptions)
@@ -414,7 +416,9 @@ class NetworkRequest {
                 .receive(on: DispatchQueue.main)
                 .sink { completion in
                     if case let .failure(error) = completion {
-                        LoaderManager.shared.hideLoader()
+                        if showLoader {
+                            LoaderManager.shared.hideLoader()
+                        }
                         switch error {
                         case let urlError as URLError:
                             promise(.failure(.urlError(urlError)))
@@ -435,7 +439,9 @@ class NetworkRequest {
                     }
                 }
             receiveValue: {
-                LoaderManager.shared.hideLoader()
+                if showLoader {
+                    LoaderManager.shared.hideLoader()
+                }
                 promise(.success($0))
             }
             .store(in: &self.subscriptions)
@@ -559,7 +565,9 @@ class NetworkRequest {
                 .receive(on: DispatchQueue.main)
                 .sink { completion in
                     if case let .failure(error) = completion {
-                        LoaderManager.shared.hideLoader()
+                        if showLoader {
+                            LoaderManager.shared.hideLoader()
+                        }
                         switch error {
                         case let urlError as URLError:
                             promise(.failure(.urlError(urlError)))
@@ -574,7 +582,9 @@ class NetworkRequest {
                     }
                 }
             receiveValue: {
-                LoaderManager.shared.hideLoader()
+                if showLoader {
+                    LoaderManager.shared.hideLoader()
+                }
                 promise(.success($0))
             }
             .store(in: &self.subscriptions)
