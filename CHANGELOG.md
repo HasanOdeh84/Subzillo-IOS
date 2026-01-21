@@ -2,10 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
-## [1.21.0] (Alpha) - 2026-01-21
+## [1.22.0] (Beta) - 2026-01-21
 
-### Fixed
-- Bug fixes and build sent with stage url.
+### Delivered
+- Manual subscription data has been updated in the database.
+- When a user enters an incorrect amount (for example, 609), a Hint will be displayed stating that the entered amount is not the original price. 
+- If a subscription does not support Quarterly or Biannual plans, those billing cycles will not be displayed. Only the available billing cycles will be shown.
+- In the Manual entry screen, the Monthly billing cycle will be selected by default.
+- The Plan Type will now be displayed as a dropdown instead of an input field. If no plan types are available for a specific subscription, Basic and Free will be shown as default options.
 
 ## [1.20.0] (Alpha) - 2026-01-20
 
