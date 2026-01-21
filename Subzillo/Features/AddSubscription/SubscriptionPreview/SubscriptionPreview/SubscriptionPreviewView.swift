@@ -57,7 +57,7 @@ struct SubscriptionPreviewView: View {
     var body: some View {
         
         VStack(alignment: .leading,spacing: 0) {
-            // MARK: - Header
+            // MARK: Header
             HStack(spacing: 8) {
                 // MARK: - back
                 Button(action: goBack) {
@@ -68,14 +68,14 @@ struct SubscriptionPreviewView: View {
                 }
                 
                 VStack(alignment: .leading, spacing: 2) {
-                    // MARK: - Title
+                    // MARK: Title
                     Text("Review entry \(currentSubscriptions) of \(numberOfSubscriptions)")
                         .font(.appRegular(24))
                         .foregroundColor(Color.neutralMain700)
                         .padding(.top, 20)
                     
                     HStack {
-                        // MARK: - SubTitle
+                        // MARK: SubTitle
                         Text("Validate extracted data")
                             .font(.appRegular(18))
                             .foregroundColor(Color.neutral500)
@@ -173,7 +173,7 @@ struct SubscriptionPreviewView: View {
                         VStack(alignment: .leading, spacing: 16) {
                             HStack(spacing: 16) {
                                 
-                                //MARK: - Service
+                                //MARK: Service
                                 SubscriptionDetailsItem(title: "Service", value: subscriptionData?.serviceName ?? "", confidence: subscriptionData?.serviceNameConfidence ?? 0.0)
                                     .onTapGesture {
                                         DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
@@ -209,7 +209,7 @@ struct SubscriptionPreviewView: View {
                                         }
                                     }
                                 
-                                //MARK: - Amount
+                                //MARK: Amount
                                 SubscriptionDetailsItem(title       : "Amount",
                                                         value       : "\(subscriptionData?.currencySymbol ?? "")\(subscriptionData?.amount ?? 0.0)",
                                                         confidence  : subscriptionData?.amountConfidence ?? 0.0)
@@ -234,7 +234,7 @@ struct SubscriptionPreviewView: View {
                             
                             HStack(spacing: 16) {
                                 
-                                //MARK: - Next Charge Date
+                                //MARK: Next Charge Date
                                 SubscriptionDetailsItem(title: "Next Charge Date", value: (subscriptionData?.nextPaymentDate ?? "").formattedDate(), confidence: subscriptionData?.nextPaymentDateConfidence ?? 0.0)
                                     .onTapGesture {
                                         DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
@@ -252,7 +252,7 @@ struct SubscriptionPreviewView: View {
                                         .presentationDetents([.height(400)])
                                     }
                                 
-                                //MARK: - Currency
+                                //MARK: Currency
                                 if subscriptionData?.currency ?? "" == "" || subscriptionData?.currencyConfidence ?? 0.0 == 0.0{
                                     SubscriptionDetailsItem(title: "Currency", value: subscriptionData?.currency ?? "", confidence: subscriptionData?.currencyConfidence ?? 0.0, isAssumed: true)
                                         .onTapGesture {
@@ -272,7 +272,7 @@ struct SubscriptionPreviewView: View {
                             }
                             
                             HStack(spacing: 16) {
-                                //MARK: - Category
+                                //MARK: Category
                                 SubscriptionDetailsItem(title: "Category", value: subscriptionData?.categoryName ?? "", confidence: subscriptionData?.categoryConfidence ?? 0.0)
                                     .onTapGesture {
                                         DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
@@ -290,7 +290,7 @@ struct SubscriptionPreviewView: View {
                                         .presentationDetents([.height(400)])
                                     }
                                 
-                                //MARK: - Plan Type
+                                //MARK: Plan Type
                                 SubscriptionDetailsItem(title: "Plan Type", value: subscriptionData?.subscriptionType ?? "", confidence: subscriptionData?.subscriptionTypeConfidence ?? 0.0)
                                     .onTapGesture {
                                         DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
@@ -299,7 +299,7 @@ struct SubscriptionPreviewView: View {
                                     }
                             }
                             
-                            //MARK: - Billing Cycle
+                            //MARK: Billing Cycle
                             SubscriptionDetailsItem(title: "Billing Cycle", value: subscriptionData?.billingCycle ?? "", confidence: subscriptionData?.billingCycleConfidence ?? 0.0)
                                 .onTapGesture {
                                     DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
@@ -501,7 +501,7 @@ struct SubscriptionPreviewView: View {
         .padding(.top, 10)
         .background(.neutralBg100)
         .navigationBarBackButtonHidden(true)
-        //MARK: - OnAppear
+        //MARK: OnAppear
         .onAppear{
             numberOfSubscriptions = subscriptionsData?.count ?? 0
             getSubDetails()
@@ -527,8 +527,10 @@ struct SubscriptionPreviewView: View {
             showImagePopup = false
             showDiscardPopup = false
         }
+        //MARK: Currency bottom sheet
         .sheet(isPresented: $showCurrencyBottom) {
             ReviewExtractedDetailsView(onDelegate: {
+                handleCurrencySelection()
             },
                                        detailType   : ReviewExtractedType.currency,
                                        confidence   : subscriptionData?.currencyConfidence ?? 0.0,
@@ -538,6 +540,7 @@ struct SubscriptionPreviewView: View {
             .presentationDragIndicator(.hidden)
             .presentationDetents([.height(400)])
         }
+        //MARK: plan type bottom sheet
         .sheet(isPresented: $showPlanTypeBottom, onDismiss:{
             print("sheet plan type dismissed")
         }) {
@@ -551,29 +554,31 @@ struct SubscriptionPreviewView: View {
             .presentationDragIndicator(.hidden)
             .presentationDetents([.height(400)])
         }
-        .onChange(of: subscriptionData?.currency) { newValue in
-            guard
-                let currency = newValue,
-                !currency.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
-            else {
-                return
-            }
-            if isCurrencyUpdateGlobal{
-                isCurrencyUpdateGlobal = false
-            }else{
-                if subscriptionData?.serviceName != ""{
-                    if isInitialCurrency{
-                        isInitialCurrency = false
-                    }else{
-                        fetchProviderDataApi()
-                    }
-                }
-            }
-        }
+        //MARK: currency onchange
+        //        .onChange(of: subscriptionData?.currency) { newValue in
+        //            guard
+        //                let currency = newValue,
+        //                !currency.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+        //            else {
+        //                return
+        //            }
+        //            if isCurrencyUpdateGlobal{
+        //                isCurrencyUpdateGlobal = false
+        //            }else{
+        //                if subscriptionData?.serviceName != ""{
+        //                    if isInitialCurrency{
+        //                        isInitialCurrency = false
+        //                    }else{
+        //                        fetchProviderDataApi()
+        //                    }
+        //                }
+        //            }
+        //        }
         .onChange(of: manualEntryVM.providerData) { _ in updateProviderData() }
     }
     
-    //MARK: - addSubApiRespons
+    //MARK: - User defined methods
+    //MARK: addSubApiRespons
     private func addSubApiResponseHandling() {
         if subscriptionPreviewVM.isEntrySuccess == true{
             if subscriptionPreviewVM.addSubscriptionResponse != nil{
@@ -669,7 +674,7 @@ struct SubscriptionPreviewView: View {
         }
     }
     
-    //MARK: - updateCountryAndCurrency
+    //MARK: updateCountryAndCurrency
     func updateCountryAndCurrency() {
         if let currencies = commonApiVM.currencyResponse {
             let selectedCurrency = currencies.first(where: { $0.code == subscriptionData?.currency ?? Constants.shared.currencyCode })
@@ -716,6 +721,16 @@ struct SubscriptionPreviewView: View {
             
             if let logo = logo, !logo.isEmpty {
                 subscriptionData?.serviceLogo = logo
+            }
+        }
+    }
+    
+    private func handleCurrencySelection() {
+        if isCurrencyUpdateGlobal{
+            isCurrencyUpdateGlobal = false
+        }else{
+            if subscriptionData?.serviceName != ""{
+                fetchProviderDataApi()
             }
         }
     }

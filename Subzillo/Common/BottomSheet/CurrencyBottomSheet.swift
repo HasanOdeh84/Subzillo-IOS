@@ -20,8 +20,9 @@ struct CountriesBottomSheet: View {
     var header                              : String?
     var placeholder                         : String?
     @State private var searchText           = ""
-    @FocusState private var isSearchFocused: Bool
-
+    @FocusState private var isSearchFocused : Bool
+    var action                              : () -> Void = {}
+    
     var filteredCurrencies: [Currency] {
         if searchText.isEmpty {
             return currencyResponse ?? []
@@ -139,7 +140,10 @@ struct CountriesBottomSheet: View {
                         List(filteredCurrencies, id: \.self) { currency in
                             VStack(spacing: 0) {
                                 Button {
+                                    isCurrencyUpdateGlobalManual = false
+                                    isCurrencyUpdateGlobal = false
                                     selectedCurrency = currency
+                                    action()
                                     dismiss()
                                 } label: {
                                     HStack {

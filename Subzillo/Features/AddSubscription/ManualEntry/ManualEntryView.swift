@@ -6,19 +6,20 @@
 //
 
 /*//Manual entry cases
- 1. The amount and Billing cycle should change based on the plan type either empty or not empty.
- 2. When the amount is changed, both the plan type and the billing should be updated accordingly if plan type is empty.
- 3. For first-time users, the available plan types are Free Plan and Basic Plan. When the user selects either one, the billing cycle should be displayed as Monthly by default.
- 4.Based on the billing cycle, amount should be changed
- 5. if Plan type is free then amount should be 0 in manual and review screens.
- 6. Need to show the bottom sheet once we get the success from provider api response and if service name is empty also need to show bottom sheet in manual screen.
- 7. If service name is empty or if service names changes then need to clear the data and need to clear the provider list.
- 8. If currency is changed no need to clear the data
- 9. If plans are not related to the selected currency, then we will get other country plans then currency will change accordingly.
+ 1. When the plan type is changed, both the amount and Billing cycle and currency and currency symbol (If plans are not related to the selected currency, then we will get other country plans then currency will change accordingly.) should be updated accordingly either empty or not empty.
+ 2. When billing cycle is updated, then next charge date and amount should be updated accordingly.
+ 3. When the amount is changed, both the plan type and the billing cycle and currency and currency symbol (If plans are not related to the selected currency, then we will get other country plans then currency will change accordingly.) should be updated accordingly if plan type is empty.
+ 4. If there are no plans for particular service, the available plan types are Free Plan and Basic Plan. When the user selects either one, the billing cycle should be displayed as Monthly by default.
+ 5. If Plan type is free then amount should be 0 in manual and review screens.
+ 6. If service name is empty or if service name changes then need to clear the data and need to clear the provider list.
+ 7. If currency is changed no need to clear the data.
+ 8. Amount suggestions and billing cycles list will be filtered based on plan type.
  */
 
 import SwiftUI
 import UIKit
+
+var isCurrencyUpdateGlobalManual                = false
 
 struct ManualEntryView: View {
     
@@ -100,7 +101,7 @@ struct ManualEntryView: View {
     var body: some View {
         VStack(alignment: .leading,spacing: 0) {
             
-            // MARK: - Header
+            // MARK: Header
             HStack(spacing: 8) {
                 // MARK: - back
                 Button(action: goBack) {
@@ -111,13 +112,13 @@ struct ManualEntryView: View {
                 }
                 
                 VStack(alignment: .leading, spacing: 2) {
-                    // MARK: - Title
+                    // MARK: Title
                     Text(isFromEdit == true ? "Edit Details" : "Manual Entry")
                         .font(.appRegular(24))
                         .foregroundColor(Color.neutralMain700)
                         .padding(.top, 20)
                     
-                    // MARK: - SubTitle
+                    // MARK: SubTitle
                     Text(isFromEdit == true ? "Update your details" : "Add your subscription details manually.")
                         .font(.appRegular(18))
                         .foregroundColor(Color.neutral500)
@@ -138,7 +139,7 @@ struct ManualEntryView: View {
                         .frame(height: 28)
                         .padding(.leading, 5)
                     
-                    //MARK: - Service field
+                    //MARK: Service field
                     
                     FieldSuggestionView1(
                         text        : $serviceName,
@@ -162,7 +163,7 @@ struct ManualEntryView: View {
                         }
                     )
                     
-                    //MARK: - PlanType field
+                    //MARK: PlanType field
                     Button(action: selectPlanType) {
                         FieldView(text: $planType, textValue: selectedPlanType ?? "", title: "Plan Type", image: "gridicon2", placeHolder: "Please select", isButton: true, isText: true)
                     }
@@ -202,7 +203,7 @@ struct ManualEntryView: View {
                     }
                     
                     HStack(spacing: 24) {
-                        //MARK: - Amount field
+                        //MARK: Amount field
                         VStack{
                             FieldSuggestionView1(
                                 text        : $amount,
@@ -227,7 +228,7 @@ struct ManualEntryView: View {
                             Spacer()
                         }
                         
-                        //MARK: - currency field
+                        //MARK: currency field
                         VStack{
                             Button(action: currencySelection) {
                                 FieldView(text: $currency, textValue: selectedCurrency?.code ?? "", title: "Currency", image: "globeIcon", placeHolder: Constants.shared.currencyCode, isButton: true, isText: true)
@@ -240,27 +241,31 @@ struct ManualEntryView: View {
                                                      currencyResponse   : commonApiVM.currencyResponse,
                                                      countryResponse    : commonApiVM.countriesResponse,
                                                      header             : "Currency",
-                                                     placeholder        : "Search currency")
+                                                     placeholder        : "Search currency",
+                                                     action             : {
+                                    self.handleCurrencySelection()
+                                })
                                 .presentationDetents([.large])
                                 .presentationDragIndicator(.hidden)
                             }
                             Spacer()
                         }
-                        .onChange(of: selectedCurrency) { newCurrency in
-                            guard let currency = newCurrency else { return }
-                            if isCurrencyUpdate{
-                                isCurrencyUpdate = false
-                            }else{
-                                if serviceName != ""{
-                                    if isFromEdit && isInitial{
-                                        isInitial = false
-                                    }else{
-                                        isCurrency = true
-                                    }
-                                    fetchProviderDataApi()
-                                }
-                            }
-                        }
+                        //                        .onChange(of: selectedCurrency) { newCurrency in
+                        //                            guard let currency = newCurrency else { return }
+                        //                            //                            if isCurrencyUpdateGlobalManual{
+                        //                            //                                isCurrencyUpdateGlobalManual = false
+                        //                            //                            }else{
+                        //                            //                                if serviceName != ""{
+                        //                            //                                    if isFromEdit && isInitial{
+                        //                            //                                        isInitial = false
+                        //                            //                                    }else{
+                        //                            //                                        isCurrency = true
+                        //                            //                                    }
+                        //                            //                                    fetchProviderDataApi()
+                        //                            //                                }
+                        //                            //                            }
+                        //                            handleCurrencySelection()
+                        //                        }
                     }
                     
                     if isAmountError{
@@ -276,7 +281,7 @@ struct ManualEntryView: View {
                         .padding(.top, -29)
                     }
                     
-                    //MARK: - Category field
+                    //MARK: Category field
                     Button(action: selectCategory) {
                         FieldView(text: $category, textValue: selectedCategory?.name ?? "", title: "Category", image: "gridIcon", placeHolder: "Please select", isButton: true, isText: true)
                     }
@@ -286,7 +291,7 @@ struct ManualEntryView: View {
                             .presentationDragIndicator(.hidden)
                     }
                     
-                    //MARK: - Billing cycle field
+                    //MARK: Billing cycle field
                     Button(action: selectBilling) {
                         FieldView(text: $billingCycle, textValue: selectedBilling ?? "", title: "Billing Cycle", image: "billing", placeHolder: "Select billing cycle", isButton: true, isText: true)
                     }
@@ -336,7 +341,7 @@ struct ManualEntryView: View {
                         }
                     }
                     
-                    //MARK: - Next Charge Date field
+                    //MARK: Next Charge Date field
                     Button(action: dateSelection) {
                         FieldView(text: $chargeDate, textValue: "", title: "Next Charge Date", image: "Calendar1", placeHolder: "dd/mm/yyyy", isButton: false, isText: true, isDate:true)
                     }
@@ -349,7 +354,7 @@ struct ManualEntryView: View {
                         }
                     )
                     
-                    //MARK: - Optional Details
+                    //MARK: Optional Details
                     Button(action: optionalDetailsAction) {
                         HStack(spacing: 8) {
                             Text("Optional Details")
@@ -506,6 +511,7 @@ struct ManualEntryView: View {
         .navigationBarBackButtonHidden()
         .padding(.top, 10)
         .background(.neutralBg100)
+        //MARK: OnAppear
         .onAppear{
             addSubscriptionVM.getServiceProvidersList()
             updateSubDetailsTOView()
@@ -515,6 +521,11 @@ struct ManualEntryView: View {
             addSubscriptionVM.listUserCards(input: ListUserCardsRequest(userId: Constants.getUserId()))
             addSubscriptionVM.listFamilyMembers(input: ListFamilyMembersRequest(userId: Constants.getUserId()))
             updateCountryAndCurrency()
+            if isFromEdit{
+                if !serviceName.isEmpty{
+                    fetchProviderDataApi()
+                }
+            }
         }
         .onChange(of: addSubscriptionVM.providerData) { _ in updateProviderData() }
         .onChange(of: commonApiVM.paymentMethodResponse) { _ in updatePaymentInfo() }
@@ -618,6 +629,21 @@ struct ManualEntryView: View {
         return Array(Set(billingCycleNames))
     }
     
+    private func handleCurrencySelection() {
+        if isCurrencyUpdateGlobalManual {
+            isCurrencyUpdateGlobalManual = false
+            return
+        }
+        guard !serviceName.isEmpty else { return }
+//        if isFromEdit && isInitial {
+//            isInitial = false
+//        } else {
+////            isCurrency = true
+//        }
+        isCurrency = true
+        fetchProviderDataApi()
+    }
+    
     private func updateProviderData() {
         activeField = nil
         let pending = pendingUIAction
@@ -631,14 +657,14 @@ struct ManualEntryView: View {
                     selectedCategory = categories.first(where: { $0.id?.lowercased() == addSubscriptionVM.providerData?.categoryId ?? ""})
                 }
             }
-            if !isCurrency{
+            if isCurrency{
+                isCurrency = false
+            }else{
                 planType = ""
                 selectedPlanType = ""
                 amount = ""
                 selectedBilling = ""
                 chargeDate = ""
-            }else{
-                isCurrency = false
             }
         }
         
@@ -956,7 +982,7 @@ struct ManualEntryView: View {
         }else{
             commonApiVM.getCurrencies()
         }
-        isCurrencyUpdate = true
+        isCurrencyUpdateGlobalManual = true
     }
     
     func updateCountryAndCurrency() {
@@ -1610,7 +1636,7 @@ struct FieldSuggestionView<Item: Identifiable>: View {
                             .contentShape(Rectangle())
                             .onTapGesture {
                                 text = displayKey(item)
-                                onSelect(item) 
+                                onSelect(item)
                                 closeSuggestions()
                             }
                             if index < filtered.count - 1 {
