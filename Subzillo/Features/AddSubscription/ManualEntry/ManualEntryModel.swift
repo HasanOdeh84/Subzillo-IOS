@@ -18,7 +18,7 @@ struct ManualDataInfo: Identifiable, Hashable {
 public struct AddSubscriptionRequest: Codable {
     let userId                  : String
     let serviceName             : String
-    let amount                  : Double
+    let amount                  : Double?
     let currency                : String
     let billingCycle            : String
     let nextPaymentDate         : String

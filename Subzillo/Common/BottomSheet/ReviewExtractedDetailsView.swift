@@ -128,14 +128,15 @@ struct ReviewExtractedDetailsView: View {
                     action      : {
                         errorHint(isAmount: true)
                         isAmountUpdate = true
-                    },
-                    onSelect    : { plan in
-                        selectedCurrency = Currency(id      : nil,
-                                                    name    : "",
-                                                    symbol  : plan.currencySymbol,
-                                                    code    : plan.currencyCode,
-                                                    flag    : "")
                     }
+//                    ,
+//                    onSelect    : { plan in
+//                        selectedCurrency = Currency(id      : nil,
+//                                                    name    : "",
+//                                                    symbol  : plan.currencySymbol,
+//                                                    code    : plan.currencyCode,
+//                                                    flag    : "")
+//                    }
                 )
                 //                .focused($isInputActive)
                 

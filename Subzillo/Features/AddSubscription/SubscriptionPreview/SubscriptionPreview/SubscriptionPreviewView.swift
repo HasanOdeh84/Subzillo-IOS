@@ -648,6 +648,7 @@ struct SubscriptionPreviewView: View {
         if numberOfSubscriptions > 0
         {
             subscriptionData = subscriptionsData?[currentSubscriptions-1]
+//            subscriptionData?.billingCycle = (subscriptionData?.billingCycle == "" || subscriptionData?.billingCycle == nil) ? "Monthly" : subscriptionData?.billingCycle //no need
             let chargeDate = Constants.shared.getNextDateByFrequency(frequency: subscriptionData?.billingCycle ?? "").formattedDate(from: "dd/MM/yyyy", to: "yyyy-MM-dd")
             if subscriptionData?.nextPaymentDate == nil || subscriptionData?.nextPaymentDate == ""{
                 subscriptionData?.nextPaymentDate = chargeDate

@@ -1207,7 +1207,7 @@ struct ManualEntryView: View {
         
         let input = AddSubscriptionRequest(userId               : Constants.getUserId(),
                                            serviceName          : serviceName.trimmed,
-                                           amount               : Double(amount.trimmed) ?? 0.0,
+                                           amount               : Double(amount.trimmed),// ?? 0.0,
                                            currency             : selectedCurrency?.code ?? "",
                                            billingCycle         : billingCycle,
                                            nextPaymentDate      : chargeDate.formattedDate(from: "dd/MM/yyyy", to: "yyyy-MM-dd"),
