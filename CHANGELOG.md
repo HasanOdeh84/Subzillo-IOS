@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.21.0] (Alpha) - 2026-01-21
+
+### Fixed
+- Bug fixes and build sent with stage url.
+
+## [1.20.0] (Alpha) - 2026-01-20
+
+### Fixed
+- Validation agent modifications and build sent with stage url.
+
+## [1.19.0] (Alpha) - 2026-01-20
+
+### Fixed
+- Validation agent modifications and build sent with dev url.
+
 ## [1.18.0] (Alpha) - 2026-01-10
 
 ### Fixed
