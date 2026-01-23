@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.23.0] (Alpha) - 2026-01-23
+
+### Fixed
+- Client feedback points and modifications and build sent with stage url.
+
 ## [1.22.0] (Beta) - 2026-01-21
 
 ### Delivered
