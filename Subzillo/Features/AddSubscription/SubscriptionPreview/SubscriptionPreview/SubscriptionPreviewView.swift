@@ -8,9 +8,9 @@
 /* Review screens cases
  Confidence Assumed will come only for currency
  
- 1. When the plan type is changed, both the amount and Billing cycle and should be updated accordingly only if there are empty.
+ 1. When the plan type is changed, both the amount and Billing cycle and currency and currency symbol (If plans are not related to the selected currency, then we will get other country plans then currency will change accordingly.) should be updated accordingly only if there are empty.
  2. When billing cycle is updated, then next charge date and amount should be updated only if there are empty.
- 3. When the amount is changed, both the plan type and the billing cycle should be updated accordingly if plan type is empty.
+ 3. When the amount is changed, both the plan type and the billing cycle and currency and currency symbol (If plans are not related to the selected currency, then we will get other country plans then currency will change accordingly.) should be updated accordingly if plan type is empty.
  4. If there are no plans for particular service, the available plan types are Free Plan and Basic Plan. When the user selects either one, the billing cycle should be displayed as Monthly by default.
  5. If Plan type is free then amount should be 0 in manual and review screens.
  6. If service name is empty or if service name changes then need to clear the data and need to clear the provider list.
@@ -262,8 +262,8 @@ struct SubscriptionPreviewView: View {
                                     }
                                 
                                 //MARK: Currency
-                                if subscriptionData?.currency ?? "" == "" || subscriptionData?.currencyConfidence ?? 0.0 == 0.0{
-                                    SubscriptionDetailsItem(title: "Currency", value: subscriptionData?.currency ?? "", confidence: subscriptionData?.currencyConfidence ?? 0.0, isAssumed: true)
+                                if subscriptionData?.currency == nil || subscriptionData?.currency ?? "" == "" || subscriptionData?.currencyConfidence ?? 0.0 == 0.0{
+                                    SubscriptionDetailsItem(title: "Currency", value: subscriptionData?.currency ?? Constants.shared.currencyCode, confidence: subscriptionData?.currencyConfidence ?? 0.0, isAssumed: true)
                                         .onTapGesture {
                                             DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
                                                 showCurrencyBottom = true
@@ -817,7 +817,11 @@ struct SubscriptionPreviewView: View {
                 for i in 0..<subscriptionsData!.count
                 {
                     let objc = subscriptionsData![i]
-                    let currency = (objc.currency ?? "" == "") ? Constants.shared.currencyCode : (objc.currency ?? "")
+                    var currency = objc.currency ?? ""
+                    if objc.currency == "" || objc.currency == nil || objc.currency == "null" {
+                        currency = Constants.shared.currencyCode
+                    }
+//                    let currency = (objc.currency ?? "" == "") ? Constants.shared.currencyCode : (objc.currency ?? "")
                     let logoUrl = getFileName(from: objc.serviceLogo ?? "")
                     let subObjc = ConfirmedSubscription(serviceName         : objc.serviceName ?? "",
                                                         serviceLogo         : logoUrl,

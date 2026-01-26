@@ -53,10 +53,10 @@ struct UploadImageSheet: View {
                     //                    .foregroundColor(Color.gray)
                     
                     VStack(spacing: 0) {
-                        UploadItem(title: "Take Photo", subTitle: "Capture bank notification on screen", image: "camera", imageColor: Color.high, action: cameraAction)
+                        UploadItem(title: "Take Photo", subTitle: "Capture a new picture using your camera", image: "camera", imageColor: Color.high, action: cameraAction)
                         Divider()
                             .overlay(Color.neutral300Border)
-                        UploadItem(title: "Choose from Gallery", subTitle: "Select existing screenshot", image: "gallery", imageColor: Color.warning, action: galleryAction)
+                        UploadItem(title: "Choose from Gallery", subTitle: "Select an existing photo from your device", image: "gallery", imageColor: Color.warning, action: galleryAction)
                         //                    Divider()
                         //                        .overlay(Color.neutral300Border)
                         //                    UploadItem(title: "Paste Text", subTitle: "Copy and paste notification text", image: "text-creation", imageColor: Color.purple100, action: pastTextAction)

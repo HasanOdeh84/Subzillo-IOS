@@ -2095,39 +2095,34 @@ struct OriginalImageView: View {
     @Environment(\.dismiss) private var dismiss
     var image: UIImage
     
-    // Calculate the aspect ratio height for available width
-    private func imageHeight(for width: CGFloat) -> CGFloat {
-        let aspectRatio = image.size.height / image.size.width
-        return width * aspectRatio
-    }
-    
     var body: some View {
-        GeometryReader { geometry in
-            VStack {
-                Capsule()
-                    .fill(Color.grayCapsule)
-                    .frame(width: 150, height: 5)
-                    .padding(.vertical, 24)
-                
-                VStack(alignment: .center, spacing: 8) {
-                    Text(LocalizedStringKey("Review Original Image"))
-                        .font(.appRegular(24))
-                        .foregroundColor(Color.neutralMain700)
-                }
-                .padding(.bottom, 24)
-                
-                Image(uiImage: image)
-                    .resizable()
-                    .scaledToFill()
-                    .frame(width: geometry.size.width - 40,
-                           height: min(imageHeight(for: geometry.size.width - 40),geometry.size.height - 200))
-                    .clipShape(RoundedRectangle(cornerRadius: 22))
-                    .padding(.bottom, 16)
-                
-                Spacer()
+        VStack(spacing: 0) {
+            Capsule()
+                .fill(Color.grayCapsule)
+                .frame(width: 150, height: 5)
+                .padding(.vertical, 24)
+            
+            VStack(alignment: .center, spacing: 8) {
+                Text(LocalizedStringKey("Review Original Image"))
+                    .font(.appRegular(24))
+                    .foregroundColor(Color.neutralMain700)
             }
-            .padding(.bottom,20)
-            .padding(.horizontal, 20)
+            .padding(.bottom, 24)
+            
+            ScrollView(showsIndicators: false) {
+                VStack(spacing: 0) {
+                    Image(uiImage: image)
+                        .resizable()
+                        .scaledToFit()
+                        .frame(maxWidth: .infinity)
+                        .clipShape(RoundedRectangle(cornerRadius: 22))
+                        .padding(.bottom, 16)
+                    
+                    Spacer()
+                }
+                .padding(.horizontal, 20)
+                .padding(.bottom, 20)
+            }
         }
     }
 }

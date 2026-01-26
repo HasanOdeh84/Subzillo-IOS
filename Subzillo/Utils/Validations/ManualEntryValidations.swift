@@ -75,7 +75,7 @@ struct ManualEntryValidations {
 //        guard let amount = input.amount else {
 //            return "Amount is required"
 //        }
-        if input.currency == nil || input.currency == "" {
+        if input.currency == "" {
             return "Currency selection required"
         }
         if (input.subscriptionType == nil || input.subscriptionType ?? "" == "") {

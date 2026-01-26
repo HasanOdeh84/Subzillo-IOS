@@ -55,24 +55,14 @@ struct DuplicateUpdateView: View {
                     .foregroundColor(Color.neutralMain700)
                     .frame(maxWidth: .infinity, alignment: .leading)
                 
-                VStack(spacing: 0) {
-                    List {
-                        ForEach(Array((duplicateSubsList?.existingSubscriptions!.enumerated())!), id: \.offset) { index, objc in
-                            VStack(spacing: 0) {
-                                rowView(for: objc, at: index)
-                            }
-                            .listRowSeparator(.hidden)
-                            .listRowInsets(EdgeInsets())
-                            .listRowBackground(Color.clear)
+                VStack(spacing: 8) {
+                    if let existing = duplicateSubsList?.existingSubscriptions {
+                        ForEach(Array(existing.enumerated()), id: \.offset) { index, objc in
+                            rowView(for: objc, at: index)
                         }
                     }
-                    .scrollDisabled(true)
-                    .listStyle(.plain)
-                    .frame(maxWidth: .infinity)
-                    .scrollContentBackground(.hidden)
-                    .frame(height: getCellHeight())
-                    .background(.clear)
                 }
+                .padding(.bottom, 10)
                 
                 CustomButton(title: "Update Existing Subscription", buttonImage: "settingsicon", action: onUpdateAction)
                     .padding(.top, 10)
@@ -125,12 +115,6 @@ struct DuplicateUpdateView: View {
         }
     }
     
-    //MARK: getCellHeight
-    private func getCellHeight() -> CGFloat {
-        let count = duplicateSubsList?.existingSubscriptions?.count ?? 0
-        let height = 118 * count
-        return CGFloat(height)
-    }
     
     //MARK: rowView
     @ViewBuilder
@@ -228,6 +212,13 @@ struct SubOldItem: View {
     var showSelection   : Bool = false
     var onDelegate: ((_ data:SubscriptionInfo, _ type:String) -> Void)?
     
+    var fullTitle: String {
+        [item?.serviceName, item?.subscriptionType]
+            .compactMap { $0 }
+            .filter { !$0.isEmpty }
+            .joined(separator: " ")
+    }
+    
     //MARK: - body
     var body: some View {
         VStack(spacing: 0) {
@@ -237,7 +228,8 @@ struct SubOldItem: View {
                     VStack(alignment: .leading) {
                         Image(isSelected == true ? "SelectedRadio" : "UnSelectedRadio")
                             .frame(width: 24, height: 24)
-                            .offset(x: 0, y: -5)
+//                            .offset(x: 0, y: -5)
+                            .padding(.top, 18)
                     }
                     .onTapGesture {
                         checkBtnAction()
@@ -245,9 +237,10 @@ struct SubOldItem: View {
                 }
                 VStack(alignment: .leading, spacing: 9) {
                     HStack(spacing: 10) {
-                        Text("\(item.serviceName ?? "") \(item.subscriptionType ?? "")")
+                        Text(fullTitle)
                             .font(.appRegular(16))
                             .foregroundColor(.neutralMain700)
+                            .multilineTextAlignment(.leading)
                         Spacer()
                         Text(isNew == true ? "New" : "Existing")
                             .font(.appRegular(12))
@@ -268,15 +261,19 @@ struct SubOldItem: View {
                         }
                         Spacer()
                     }
+                    
+                    if item.status == "expired"{
+                        Text("We found an old expired subscription. Do you want to replace it or add a new subscription?")
+                            .foregroundStyle(Color.redBadge)
+                            .font(.appRegular(12))
+                    }
                 }
-                .frame(height: 24)
                 .padding(.vertical, 16)
                 .onTapGesture {
                     clickBtnAction()
                 }
             }
         }
-        .frame(height: 108)
         .padding(.horizontal, 16)
         .overlay(
             RoundedRectangle(cornerRadius: 8)
@@ -284,7 +281,7 @@ struct SubOldItem: View {
         )
         .background(.whiteNeutralCardBG)
         .cornerRadius(8)
-        .padding(.bottom, 10)
+        .padding(.bottom, 5) // Slightly reduced bottom padding for better grouping in list
     }
     
     //MARK: - Button actions

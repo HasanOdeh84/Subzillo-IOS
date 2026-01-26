@@ -21,19 +21,6 @@ struct DuplicateSubscriptionsView: View {
     @State var duplicateSubsList         : [DuplicateDataInfo]
     @StateObject var dupSubscriptionVM   = DuplicateSubscriptionsViewModel()
     @State var fromFamily                = false
-    /*@State private var duplicateSubsList = [
-     DuplicateDataInfo(id: "1", serviceName:"Netflix", newSubscriptions: [SubscriptionInfo(id: "1", serviceName: "Netflix", serviceLogo: "", amount: 17.99, currency: "INR", currencySymbol: "₹", billingCycle: "Monthly", subscriptionType: "Premium", subscriptionFor: "Me", nextPaymentDate: "Fed 15, 2025", status: "active")], existingSubscriptions: [SubscriptionInfo(id: "2", serviceName: "Netflix", serviceLogo: "", amount: 17.99, currency: "INR", currencySymbol: "₹", billingCycle: "Monthly", subscriptionType: "Premium", subscriptionFor: "Me", nextPaymentDate: "Fed 15, 2025", status: "active")]),
-     
-     DuplicateDataInfo(id: "2", serviceName:"Spotiy", newSubscriptions: [SubscriptionInfo(id: "3", serviceName: "Spotiy", serviceLogo: "", amount: 17.99, currency: "INR", currencySymbol: "₹", billingCycle: "Monthly", subscriptionType: "Premium", subscriptionFor: "Me", nextPaymentDate: "Fed 15, 2025", status: "active")], existingSubscriptions: [SubscriptionInfo(id: "4", serviceName: "Spotiy", serviceLogo: "", amount: 17.99, currency: "INR", currencySymbol: "₹", billingCycle: "Monthly", subscriptionType: "Premium", subscriptionFor: "Me", nextPaymentDate: "Fed 15, 2025", status: "active"),SubscriptionInfo(id: "2", serviceName: "Spotiy", serviceLogo: "", amount: 17.99, currency: "INR", currencySymbol: "₹", billingCycle: "Monthly", subscriptionType: "Premium", subscriptionFor: "Me", nextPaymentDate: "Fed 15, 2025", status: "active")]),
-     
-     DuplicateDataInfo(id: "3", serviceName:"YouTube", newSubscriptions: [SubscriptionInfo(id: "5", serviceName: "YouTube", serviceLogo: "", amount: 17.99, currency: "INR", currencySymbol: "₹", billingCycle: "Monthly", subscriptionType: "Premium", subscriptionFor: "Me", nextPaymentDate: "Fed 15, 2025", status: "active"),SubscriptionInfo(id: "6", serviceName: "YouTube", serviceLogo: "", amount: 17.99, currency: "INR", currencySymbol: "₹", billingCycle: "Monthly", subscriptionType: "Premium", subscriptionFor: "Me", nextPaymentDate: "Fed 15, 2025", status: "active")], existingSubscriptions: [SubscriptionInfo(id: "7", serviceName: "YouTube", serviceLogo: "", amount: 17.99, currency: "INR", currencySymbol: "₹", billingCycle: "Monthly", subscriptionType: "Premium", subscriptionFor: "Me", nextPaymentDate: "Fed 15, 2025", status: "active"),SubscriptionInfo(id: "2", serviceName: "YouTube", serviceLogo: "", amount: 17.99, currency: "INR", currencySymbol: "₹", billingCycle: "Monthly", subscriptionType: "Premium", subscriptionFor: "Me", nextPaymentDate: "Fed 15, 2025", status: "active")]),
-     
-     DuplicateDataInfo(id: "4", serviceName:"Prime video", newSubscriptions: [SubscriptionInfo(id: "8", serviceName: "Prime video", serviceLogo: "", amount: 17.99, currency: "INR", currencySymbol: "₹", billingCycle: "Monthly", subscriptionType: "Premium", subscriptionFor: "Me", nextPaymentDate: "Fed 15, 2025", status: "active"),SubscriptionInfo(id: "9", serviceName: "Prime video", serviceLogo: "", amount: 17.99, currency: "INR", currencySymbol: "₹", billingCycle: "Monthly", subscriptionType: "Premium", subscriptionFor: "Me", nextPaymentDate: "Fed 15, 2025", status: "active")], existingSubscriptions: [SubscriptionInfo(id: "10", serviceName: "Prime video", serviceLogo: "", amount: 17.99, currency: "INR", currencySymbol: "₹", billingCycle: "Monthly", subscriptionType: "Premium", subscriptionFor: "Me", nextPaymentDate: "Fed 15, 2025", status: "active")]),
-     
-     DuplicateDataInfo(id: "5", serviceName:"Hotstar", newSubscriptions: [SubscriptionInfo(id: "11", serviceName: "Hotstar", serviceLogo: "", amount: 17.99, currency: "INR", currencySymbol: "₹", billingCycle: "Monthly", subscriptionType: "Premium", subscriptionFor: "Me", nextPaymentDate: "Fed 15, 2025", status: "active"),SubscriptionInfo(id: "12", serviceName: "Hotstar", serviceLogo: "", amount: 17.99, currency: "INR", currencySymbol: "₹", billingCycle: "Monthly", subscriptionType: "Premium", subscriptionFor: "Me", nextPaymentDate: "Fed 15, 2025", status: "active"),SubscriptionInfo(id: "13", serviceName: "Hotstar", serviceLogo: "", amount: 17.99, currency: "INR", currencySymbol: "₹", billingCycle: "Monthly", subscriptionType: "Premium", subscriptionFor: "Me", nextPaymentDate: "Fed 15, 2025", status: "active")])
-     
-     ]
-     */
     
     //MARK: - body
     var body: some View {
@@ -69,29 +56,15 @@ struct DuplicateSubscriptionsView: View {
             //            .shadow(color: Color.dropShadowColor1, radius: 2, x: 0, y: 2)
             
             ScrollView(showsIndicators: false) {
-                
-                VStack(spacing: 0) {
-                    List {
-                        ForEach(Array(duplicateSubsList.enumerated()), id: \.offset) { index, objc in
-                            VStack(spacing: 0) {
-                                rowView(for: objc, at: index)
-                            }
-                            .listRowSeparator(.hidden)
-                            .listRowInsets(EdgeInsets())
-                            .listRowBackground(Color.clear)
-                        }
+                VStack(spacing: 16) {
+                    ForEach(Array(duplicateSubsList.enumerated()), id: \.offset) { index, objc in
+                        rowView(for: objc, at: index)
+                            .frame(maxWidth: .infinity)
                     }
-                    .scrollDisabled(true)
-                    .listStyle(.plain)
-                    .frame(maxWidth: .infinity)
-                    .scrollContentBackground(.hidden)
-                    .frame(height: getCellHeight())
-                    .background(.clear)
                 }
                 .padding(.top, 16)
-                .padding(.horizontal, 16.5)
+                .padding(.horizontal, 16)
                 .background(.clear)
-                
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
@@ -205,20 +178,6 @@ struct DuplicateSubscriptionsView: View {
         }
     }
     
-    private func getCellHeight() -> CGFloat {
-        var height = 0.0
-        for item in duplicateSubsList {
-            var count = item.newSubscriptions?.count ?? 0
-            count = count + (item.existingSubscriptions?.count ?? 0)
-            if item.existingSubscriptions?.count ?? 0 == 0 {
-                height = height + Double((118 * count)) + 162
-            }
-            else {
-                height = height + Double((118 * count)) + 62
-            }
-        }
-        return CGFloat(height)
-    }
     
     // MARK: - Extracted subview
     @ViewBuilder
@@ -345,48 +304,32 @@ struct DuplicateListItem: View {
             }
             .padding(.top, 10)
             .padding(.bottom, 6)
-            .padding(.horizontal, 16.5)
+            .padding(.horizontal, 16)
             
-            VStack(spacing: 0) {
-                List {
-                    ForEach(Array(item.newSubscriptions!.enumerated()), id: \.offset) { index, objc in
-                        VStack(spacing: 0) {
-                            newRowView(for: objc, at: index)
-                        }
-                        .listRowSeparator(.hidden)
-                        .listRowInsets(EdgeInsets())
-                        .listRowBackground(Color.clear)
-                    }
-                    if (item.existingSubscriptions?.count ?? 0) > 0 {
-                        ForEach(Array(item.existingSubscriptions!.enumerated()), id: \.offset) { index, objc in
-                            VStack(spacing: 0) {
-                                oldRowView(for: objc, at: index)
-                            }
-                            .listRowSeparator(.hidden)
-                            .listRowInsets(EdgeInsets())
-                            .listRowBackground(Color.clear)
-                        }
+            VStack(spacing: 10) {
+                ForEach(Array(item.newSubscriptions!.enumerated()), id: \.offset) { index, objc in
+                    newRowView(for: objc, at: index)
+                }
+                if let existing = item.existingSubscriptions, !existing.isEmpty {
+                    ForEach(Array(existing.enumerated()), id: \.offset) { index, objc in
+                        oldRowView(for: objc, at: index)
                     }
                 }
-                .scrollDisabled(true)
-                .listStyle(.plain)
-                .frame(maxWidth: .infinity)
-                .scrollContentBackground(.hidden)
-                .frame(height: getCellHeight())
-                .background(.clear)
             }
-            .padding(.horizontal, 16.5)
+            .padding(.horizontal, 16)
             
             if item.existingSubscriptions?.count ?? 0 == 0 {
                 CustomButton(title: "Save", height: 49)//, action: saveAction)
                     .frame(width: 124)
-                    .padding(.bottom, 5)
+                    .padding(.bottom, 15) // Increased padding for better spacing
                     .onTapGesture {
                         saveAction()
                     }
+            } else {
+                Spacer()
+                    .frame(height: 16)
             }
         }
-        .frame(height: item.existingSubscriptions?.count ?? 0 == 0 ? getCellHeight()+100 : getCellHeight()+45)
         .overlay(
             RoundedRectangle(cornerRadius: 16)
                 .stroke(Color.neutral300Border, lineWidth: 1)
@@ -396,12 +339,6 @@ struct DuplicateListItem: View {
         .padding(.bottom, 16)
     }
     
-    private func getCellHeight() -> CGFloat {
-        var count = item?.newSubscriptions?.count ?? 0
-        count = count + (item?.existingSubscriptions?.count ?? 0)
-        let height = 118 * count
-        return CGFloat(height)
-    }
     
     // MARK: - Extracted subview
     @ViewBuilder
@@ -489,6 +426,13 @@ struct SubItem: View {
     var isSelected      : Bool = false
     var onDelegate: ((_ data:SubscriptionInfo, _ type:String) -> Void)?
     
+    var fullTitle: String {
+        [item?.serviceName, item?.subscriptionType]
+            .compactMap { $0 }
+            .filter { !$0.isEmpty }
+            .joined(separator: " ")
+    }
+    
     var body: some View {
         VStack(spacing: 0) {
             //Button(action: clickBtnAction) {
@@ -508,9 +452,10 @@ struct SubItem: View {
                 }
                 VStack(alignment: .leading, spacing: 9) {
                     HStack(spacing: 10) {
-                        Text("\(item.serviceName ?? "") \(item.subscriptionType ?? "")")
+                        Text(fullTitle)
                             .font(.appRegular(16))
                             .foregroundColor(.neutralMain700)
+                            .multilineTextAlignment(.leading)
                         Spacer()
                         Text(isNew == true ? "New" : "Existing")
                             .font(.appRegular(12))
@@ -520,6 +465,8 @@ struct SubItem: View {
                             .frame(height: 24)
                             .cornerRadius(4)
                     }
+                    .padding(.bottom, -5)
+
                     HStack(spacing: 10) {
                         VStack(alignment: .leading, spacing: 9) {
                             Text("Next charge: \(item.nextPaymentDate ?? "")")
@@ -547,8 +494,13 @@ struct SubItem: View {
                             // }
                         }
                     }
+                    
+                    if item.status == "expired"{
+                        Text("We found an old expired subscription. Do you want to replace it or add a new subscription?")
+                            .foregroundStyle(Color.redBadge)
+                            .font(.appRegular(12))
+                    }
                 }
-                .frame(height: 24)
                 .padding(.vertical, 16)
             }
             .onTapGesture {
@@ -556,7 +508,7 @@ struct SubItem: View {
             }
             //}
         }
-        .frame(height: 108)
+        .frame(minHeight: 108)
         .padding(.horizontal, 16)
         .background(.clear)
         .overlay(
@@ -570,7 +522,7 @@ struct SubItem: View {
     
     // MARK: - Button actions
     private func updateBtnAction() {
-        print(item.serviceName)
+        print(item.serviceName ?? "")
         onDelegate?(item, "update")
         //AppIntentRouter.shared.navigate(to: .duplicateUpdateView)
     }

@@ -343,7 +343,7 @@ struct ReviewExtractedDetailsView: View {
                     chargeDate = Constants.shared.getNextDateByFrequency(
                         frequency: selectedBilling ?? ""
                     )
-                    if globalSubscriptionData?.nextPaymentDate == ""{
+                    if globalSubscriptionData?.nextPaymentDate == "" || globalSubscriptionData?.nextPaymentDate == nil{
                         globalSubscriptionData?.nextPaymentDate = chargeDate.formattedDate(from: "dd/MM/yyyy", to: "yyyy-MM-dd")
                     }
                     
@@ -511,8 +511,10 @@ struct ReviewExtractedDetailsView: View {
                 .caseInsensitiveCompare(selectedBilling) == .orderedSame
         }) {
             globalSubscriptionData?.amount = matchedPlan.price ?? 0.0
-            updateCurrency(currencyCode     : matchedPlan.currencyCode ?? Constants.shared.regionCode,
-                           currencySymbol   : matchedPlan.currencySymbol ?? Constants.shared.currencySymbol)
+            if globalSubscriptionData?.currency == ""{
+                updateCurrency(currencyCode     : matchedPlan.currencyCode ?? Constants.shared.regionCode,
+                               currencySymbol   : matchedPlan.currencySymbol ?? Constants.shared.currencySymbol)
+            }
         }
     }
     
@@ -624,18 +626,20 @@ struct ReviewExtractedDetailsView: View {
                 guard let price = $0.price else { return false }
                 return abs(price - enteredAmount) < 0.01
             }) {
-                if globalSubscriptionData?.subscriptionType == ""{
+                if globalSubscriptionData?.subscriptionType == "" || globalSubscriptionData?.subscriptionType == nil{
                     globalSubscriptionData?.subscriptionType = matchedPlan.planName ?? ""
                     globalSubscriptionData?.billingCycle = matchedPlan.billingCycle ?? ""//.lowercased()
                     chargeDate = Constants.shared.getNextDateByFrequency(
                         frequency: matchedPlan.billingCycle ?? ""
                     )
-                    if globalSubscriptionData?.nextPaymentDate == ""{
+                    if globalSubscriptionData?.nextPaymentDate == "" || globalSubscriptionData?.nextPaymentDate == nil{
                         globalSubscriptionData?.nextPaymentDate = chargeDate.formattedDate(from: "dd/MM/yyyy", to: "yyyy-MM-dd")
                     }
                 }
-                updateCurrency(currencyCode     : matchedPlan.currencyCode ?? Constants.shared.regionCode,
-                               currencySymbol   : matchedPlan.currencySymbol ?? Constants.shared.currencySymbol)
+                if globalSubscriptionData?.currency == ""{
+                    updateCurrency(currencyCode     : matchedPlan.currencyCode ?? Constants.shared.regionCode,
+                                   currencySymbol   : matchedPlan.currencySymbol ?? Constants.shared.currencySymbol)
+                }
                 isAmountError = false
             } else {
                 if providerPlansList?.count != 0{
@@ -653,6 +657,7 @@ struct ReviewExtractedDetailsView: View {
                 //For first-time users, the available plan types are Free Plan and Basic Plan. When the user selects either one, the billing cycle should be displayed as Monthly by default.
                 if selectedPlanType == "Free" || selectedPlanType == "Basic"{
                     selectedBilling = "Monthly"
+                    globalSubscriptionData?.billingCycle = "Monthly"
                 }
                 if selectedPlanType == "Free"{
                     globalSubscriptionData?.amount = 0.0
@@ -673,21 +678,24 @@ struct ReviewExtractedDetailsView: View {
                 if globalSubscriptionData?.amount == nil{
                     globalSubscriptionData?.amount = matchedPlan.price
                 }
-                if globalSubscriptionData?.billingCycle == ""{
+                if globalSubscriptionData?.billingCycle == "" || globalSubscriptionData?.billingCycle == nil{
                     globalSubscriptionData?.billingCycle = matchedPlan.billingCycle ?? ""//.lowercased()
                 }
                 chargeDate = Constants.shared.getNextDateByFrequency(
                     frequency: matchedPlan.billingCycle ?? ""
                 )
-                if globalSubscriptionData?.nextPaymentDate == ""{
+                if globalSubscriptionData?.nextPaymentDate == "" || globalSubscriptionData?.nextPaymentDate == nil{
                     globalSubscriptionData?.nextPaymentDate = chargeDate.formattedDate(from: "dd/MM/yyyy", to: "yyyy-MM-dd")
                 }
-                updateCurrency(currencyCode     : matchedPlan.currencyCode ?? Constants.shared.regionCode,
-                               currencySymbol   : matchedPlan.currencySymbol ?? Constants.shared.currencySymbol)
+                if globalSubscriptionData?.currency == ""{
+                    updateCurrency(currencyCode     : matchedPlan.currencyCode ?? Constants.shared.regionCode,
+                                   currencySymbol   : matchedPlan.currencySymbol ?? Constants.shared.currencySymbol)
+                }
                 isPlanTypeError = false
             } else {
                 if selectedPlanType == "Free" || selectedPlanType == "Basic"{
                     selectedBilling = "Monthly"
+                    globalSubscriptionData?.billingCycle = "Monthly"
                 }
                 if selectedPlanType == "Free"{
                     globalSubscriptionData?.amount = 0.0
