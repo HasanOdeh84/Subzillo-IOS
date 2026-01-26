@@ -36,7 +36,7 @@ class UploadImageViewModel: ObservableObject {
             guard let self = self else { return }
             self.hideLoader = true
             PrintLogger.modelLog(response, type: .response, isInput: false)
-            if response.data?.subscriptions?.count == 0
+            if response.data == nil || response.data?.subscriptions?.count == 0
             {
                 self.showErrorPopup = true
             }

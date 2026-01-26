@@ -19,6 +19,7 @@ public enum APIError: Error {
     case decodingError(DecodingError)
     case anyError
     case apiError(String)
+    case insufficientQuota
     
     var localizedDescription: String {
         switch self {
@@ -56,6 +57,8 @@ public enum APIError: Error {
             return message
         case .someOneLoggedInElsewhere:
             return "someone logged in else where"
+        case .insufficientQuota:
+            return "insufficient quota or quota exceeded"
         }
     }
 }

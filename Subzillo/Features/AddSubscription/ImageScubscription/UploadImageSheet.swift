@@ -347,7 +347,9 @@ struct UploadErrorImageSheet: View {
     private func onManualAction() {
         onDelegate?()
         dismiss()
-        AppIntentRouter.shared.navigate(to: .manualEntry(isFromEdit: false))
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+            AppIntentRouter.shared.navigate(to: .manualEntry(isFromEdit: false))
+        }
     }
     
     private func onRetryAction() {

@@ -513,6 +513,12 @@ class NetworkRequest {
                         }else{
                             throw APIError.badRequest
                         }
+                    case 429 : //insufficient quota or quota exceeded cases
+                        if let apiError = try? JSONDecoder().decode(APIErrorResponse.self, from: result.data) {
+                            throw APIError.apiError(apiError.message)
+                        }else{
+                            throw APIError.insufficientQuota
+                        }
                     case 401:
                         throw APIError.unauthorized
                     case 500:
@@ -574,7 +580,10 @@ class NetworkRequest {
                         case let decodingError as DecodingError:
                             promise(.failure(.decodingError(decodingError)))
                         case let apiError as APIError:
-                            ToastManager.shared.showToast(message: apiError.localizedDescription,style: .error)
+                            if endPoint == .imageSubscription || endPoint == .voiceSubscription{
+                            }else{
+                                ToastManager.shared.showToast(message: apiError.localizedDescription,style: .error)
+                            }
                             promise(.failure(apiError))
                         default:
                             promise(.failure(.unknown))

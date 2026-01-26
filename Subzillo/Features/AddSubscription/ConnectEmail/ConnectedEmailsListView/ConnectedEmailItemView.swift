@@ -8,6 +8,19 @@ struct ConnectedEmailItemView: View {
     var body: some View {
         HStack(spacing: 12) {
             // Provider Icon
+//            Image(email.provider.iconName)
+//                .resizable()
+//                .scaledToFit()
+//                .frame(width: 24, height: 24)
+//                .padding(12)
+//                .background(Color.white)
+//                .clipShape(Circle())
+//                .overlay(
+//                    RoundedRectangle(cornerRadius: 12)
+//                        .stroke(Color.border, lineWidth: 0.5)
+//                )
+//                .shadow(color: Color.black.opacity(0.1), radius: 4, x: 0, y: 2)
+            
             Image(email.provider.iconName)
                 .resizable()
                 .scaledToFit()
@@ -15,7 +28,10 @@ struct ConnectedEmailItemView: View {
                 .padding(12)
                 .background(Color.white)
                 .clipShape(Circle())
-                .shadow(color: Color.black.opacity(0.1), radius: 4, x: 0, y: 2)
+                .overlay(
+                    Circle()
+                        .stroke(Color.border, lineWidth: 0.5)
+                )
             
             VStack(alignment: .leading, spacing: 4) {
                 Text(email.email)
@@ -40,7 +56,7 @@ struct ConnectedEmailItemView: View {
             RoundedRectangle(cornerRadius: 12)
                 .stroke(Color.neutral300Border, lineWidth: 1)
         )
-//        .shadow(color: Color.black.opacity(0.04), radius: 6, x: 0, y: 3)
+        //        .shadow(color: Color.black.opacity(0.04), radius: 6, x: 0, y: 3)
     }
     
     @ViewBuilder
@@ -50,22 +66,34 @@ struct ConnectedEmailItemView: View {
             Button(action: onSync) {
                 Text(email.status.buttonText)
                     .font(.appSemiBold(14))
-                    .foregroundColor(Color(hex: "#3260BB"))
-                    .frame(width: 100, height: 32)
+                    .foregroundColor(Color.blueMain700)
+                    .frame(width: 100, height: 30)
                     .overlay(
-                        RoundedRectangle(cornerRadius: 6)
-                            .stroke(Color(hex: "#3260BB"), lineWidth: 1)
+                        RoundedRectangle(cornerRadius: 5)
+                            .stroke(Color.blueMain700, lineWidth: 1)
                     )
             }
         case .view:
             Button(action: onView) {
                 Text(email.status.buttonText)
                     .font(.appSemiBold(14))
-                    .foregroundColor(Color(hex: "#8766CE"))
-                    .frame(width: 80, height: 32)
+                    .foregroundStyle(LinearGradient(
+                        gradient: Gradient(colors: [Color.linearGradient3, Color.linearGradient4, Color.blueMain700]),
+                        startPoint: .top,
+                        endPoint: .bottom
+                    ))
+                    .frame(width: 80, height: 30)
                     .overlay(
-                        RoundedRectangle(cornerRadius: 6)
-                            .stroke(Color(hex: "#8766CE"), lineWidth: 1)
+                        RoundedRectangle(cornerRadius: 5)
+                            .stroke(
+                                LinearGradient(
+                                    gradient: Gradient(colors: [Color.linearGradient3, Color.linearGradient4, Color.blueMain700]),
+                                    startPoint: .top,
+                                    endPoint: .bottom
+                                ),
+                                lineWidth: 1
+                            )
+//                            .stroke(Color(hex: "#8766CE"), lineWidth: 1)
                     )
             }
         case .sync:
@@ -73,9 +101,9 @@ struct ConnectedEmailItemView: View {
                 Text(email.status.buttonText)
                     .font(.appSemiBold(14))
                     .foregroundColor(.white)
-                    .frame(width: 80, height: 32)
-                    .background(Color(hex: "#4489EB"))
-                    .cornerRadius(6)
+                    .frame(width: 80, height: 30)
+                    .background(Color.blueMain700)
+                    .cornerRadius(5)
             }
         }
     }

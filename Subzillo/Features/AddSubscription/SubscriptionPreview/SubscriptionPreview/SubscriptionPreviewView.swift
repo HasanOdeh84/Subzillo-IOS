@@ -7,6 +7,15 @@
 
 /* Review screens cases
  Confidence Assumed will come only for currency
+ 
+ 1. When the plan type is changed, both the amount and Billing cycle and should be updated accordingly only if there are empty.
+ 2. When billing cycle is updated, then next charge date and amount should be updated only if there are empty.
+ 3. When the amount is changed, both the plan type and the billing cycle should be updated accordingly if plan type is empty.
+ 4. If there are no plans for particular service, the available plan types are Free Plan and Basic Plan. When the user selects either one, the billing cycle should be displayed as Monthly by default.
+ 5. If Plan type is free then amount should be 0 in manual and review screens.
+ 6. If service name is empty or if service name changes then need to clear the data and need to clear the provider list.
+ 7. If currency is changed no need to clear the data.
+ 8. Amount suggestions and billing cycles list will be filtered based on plan type.
  */
 
 import SwiftUI
@@ -652,7 +661,6 @@ struct SubscriptionPreviewView: View {
             let chargeDate = Constants.shared.getNextDateByFrequency(frequency: subscriptionData?.billingCycle ?? "").formattedDate(from: "dd/MM/yyyy", to: "yyyy-MM-dd")
             if subscriptionData?.nextPaymentDate == nil || subscriptionData?.nextPaymentDate == ""{
                 subscriptionData?.nextPaymentDate = chargeDate
-            }else{
             }
             let (confidenceStr1, colorValue1, fillRatio1) =
             Constants.confidenceInfo(isAssumed: false, confidence: subscriptionData?.confidenceOverall ?? 0.0)

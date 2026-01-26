@@ -7,6 +7,16 @@
 
 import SwiftUI
 
+/*
+ 1. Mails connection using oauth url
+ 2. Once the mails are connected, we can see those emails with sync status, we will get status for the sync, syncing and view from list api.
+ 3. Need to add the logos for the mails based on the status(gmail, microsoft, yahoo) from the connected emails list api.
+ 4. When we click on the view button, if we don't get any subscription data after syncing the mail then need to show the no subscription bottom sheet then backend will change the view status to sync status.
+ 5. If we discard all the subsriptions or save all or discard some and save some also, backend will change the view status to sync status. We will have discard api.
+ 6. Once the mail sync is successed then we will get the push notification, if we click on that we need to naviagate connected emails list screen.
+ 7. No original content.
+ */
+
 struct ConnectedEmailsListView: View {
     
     //MARK: - Properties
@@ -47,7 +57,7 @@ struct ConnectedEmailsListView: View {
             .padding(.horizontal)
             .padding(.top, 0)
             .padding(.bottom, 20)
-
+            
             // MARK: - Search Bar
             HStack {
                 Image("search")

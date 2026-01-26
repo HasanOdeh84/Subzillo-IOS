@@ -343,10 +343,14 @@ struct ReviewExtractedDetailsView: View {
                     chargeDate = Constants.shared.getNextDateByFrequency(
                         frequency: selectedBilling ?? ""
                     )
-                    globalSubscriptionData?.nextPaymentDate = chargeDate.formattedDate(from: "dd/MM/yyyy", to: "yyyy-MM-dd")
+                    if globalSubscriptionData?.nextPaymentDate == ""{
+                        globalSubscriptionData?.nextPaymentDate = chargeDate.formattedDate(from: "dd/MM/yyyy", to: "yyyy-MM-dd")
+                    }
                     
                     //amount should be changed based on the billing cycle
-                    amountUpdate()
+                    if globalSubscriptionData?.amount == nil{
+                        amountUpdate()
+                    }
                     //need to change the currency if that provider is from other country
                     globalSubscriptionData?.currency = selectedCurrency?.code ?? ""
                     globalSubscriptionData?.currencySymbol = selectedCurrency?.symbol ?? ""
@@ -626,7 +630,9 @@ struct ReviewExtractedDetailsView: View {
                     chargeDate = Constants.shared.getNextDateByFrequency(
                         frequency: matchedPlan.billingCycle ?? ""
                     )
-                    globalSubscriptionData?.nextPaymentDate = chargeDate.formattedDate(from: "dd/MM/yyyy", to: "yyyy-MM-dd")
+                    if globalSubscriptionData?.nextPaymentDate == ""{
+                        globalSubscriptionData?.nextPaymentDate = chargeDate.formattedDate(from: "dd/MM/yyyy", to: "yyyy-MM-dd")
+                    }
                 }
                 updateCurrency(currencyCode     : matchedPlan.currencyCode ?? Constants.shared.regionCode,
                                currencySymbol   : matchedPlan.currencySymbol ?? Constants.shared.currencySymbol)
@@ -664,12 +670,18 @@ struct ReviewExtractedDetailsView: View {
                 //                DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
                 //
                 //                }
-                globalSubscriptionData?.amount = matchedPlan.price
-                globalSubscriptionData?.billingCycle = matchedPlan.billingCycle ?? ""//.lowercased()
+                if globalSubscriptionData?.amount == nil{
+                    globalSubscriptionData?.amount = matchedPlan.price
+                }
+                if globalSubscriptionData?.billingCycle == ""{
+                    globalSubscriptionData?.billingCycle = matchedPlan.billingCycle ?? ""//.lowercased()
+                }
                 chargeDate = Constants.shared.getNextDateByFrequency(
                     frequency: matchedPlan.billingCycle ?? ""
                 )
-                globalSubscriptionData?.nextPaymentDate = chargeDate.formattedDate(from: "dd/MM/yyyy", to: "yyyy-MM-dd")
+                if globalSubscriptionData?.nextPaymentDate == ""{
+                    globalSubscriptionData?.nextPaymentDate = chargeDate.formattedDate(from: "dd/MM/yyyy", to: "yyyy-MM-dd")
+                }
                 updateCurrency(currencyCode     : matchedPlan.currencyCode ?? Constants.shared.regionCode,
                                currencySymbol   : matchedPlan.currencySymbol ?? Constants.shared.currencySymbol)
                 isPlanTypeError = false

@@ -11,6 +11,7 @@ struct ConnectEmailView: View {
     
     //MARK: - Properties
     @Environment(\.dismiss) private var dismiss
+    @StateObject var connectEmailVM     = ConnectEmailViewModel()
     
     //MARK: - body
     var body: some View {
@@ -79,11 +80,12 @@ struct ConnectEmailView: View {
                     .padding(.leading, 16)
                     .padding(.trailing, 16)
                 }
+                .frame(alignment: .leading)
+                .frame(height: 56)
+                .contentShape(Rectangle())
                 .onTapGesture {
                     AppIntentRouter.shared.navigate(to: NavigationRoute.connectedEmailsList)
                 }
-                .frame(alignment: .leading)
-                .frame(height: 56)
                 .cornerRadius(12)
                 .overlay(
                     RoundedRectangle(cornerRadius: 12)
@@ -106,6 +108,20 @@ struct ConnectEmailView: View {
         }
         .navigationBarBackButtonHidden()
         .background(Color.neutralBg100)
+        //MARK: Onchange
+        .onChange(of: connectEmailVM.isSuccess) { success in
+            if success, let oauthUrlString = connectEmailVM.oauthUrlResponse?.authUrl, let url = URL(string: oauthUrlString) {
+                let callbackScheme = "subzillo-auth"
+                OAuthManager.shared.startOAuth(url: url, callbackScheme: callbackScheme) { callbackURL, error in
+                    if let callbackURL = callbackURL {
+                        connectEmailVM.handleOAuthCallback(url: callbackURL)
+                    } else if let error = error {
+                        print("OAuth error: \(error.localizedDescription)")
+                    }
+                    connectEmailVM.isSuccess = false
+                }
+            }
+        }
     }
     
     //MARK: - Button actions
@@ -114,9 +130,11 @@ struct ConnectEmailView: View {
     }
     
     private func gmailAction() {
+        connectEmailVM.oauthUrl(input: OauthUrlRequest(userId: Constants.getUserId(), type: 1))
     }
     
     private func outlookAction() {
+        connectEmailVM.oauthUrl(input: OauthUrlRequest(userId: Constants.getUserId(), type: 2))
     }
     
     private func yahooAction() {

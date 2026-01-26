@@ -1,35 +1,33 @@
 import SwiftUI
 
 struct SwipeableEmailRow: View {
-    let email                   : ConnectedEmail
-    @Binding var activeEmailId  : UUID?
-    @Binding var isScrollDisabled: Bool
-    let onDelete                : () -> Void
-    let onSync                  : () -> Void
-    let onView                  : () -> Void
     
-    @State private var offset   : CGFloat = 0
-    @State private var isSwiped : Bool = false
-    @State private var rowHeight: CGFloat = 0
-    let swipeThreshold: CGFloat = -20
-    let menuWidth: CGFloat      = 70
+    //MARK: - Properties
+    let email                       : ConnectedEmail
+    @Binding var activeEmailId      : UUID?
+    @Binding var isScrollDisabled   : Bool
+    let onDelete                    : () -> Void
+    let onSync                      : () -> Void
+    let onView                      : () -> Void
+    @State private var offset       : CGFloat = 0
+    @State private var isSwiped     : Bool = false
+    @State private var rowHeight    : CGFloat = 0
+    let swipeThreshold: CGFloat     = -20
+    let menuWidth: CGFloat          = 50
     
     var body: some View {
         ZStack(alignment: .trailing) {
-            // Delete Background
+            //MARK: Delete Button
             VStack {
                 HStack{
                     VStack(spacing: 8){
                         Image("del_white")
-                        Text("Delete")
-                            .font(.appSemiBold(14))
-                            .foregroundColor(.white)
                     }
                 }
                 .frame(width: menuWidth, height: rowHeight)
             }
             .frame(width: menuWidth, height: rowHeight)
-            .background(Color("redColor"))
+            .background(Color("disCardRed"))
             .clipShape(
                 RoundedCorner(
                     radius: 12,
@@ -52,7 +50,7 @@ struct SwipeableEmailRow: View {
                 onDelete()
             }
             
-            // Top Layer (Email Item)
+            //MARK: Top Layer card view
             ConnectedEmailItemView(email: email, onSync: onSync, onView: onView)
                 .background(
                     GeometryReader { geo in

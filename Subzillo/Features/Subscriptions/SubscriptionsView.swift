@@ -214,6 +214,7 @@ struct SubscriptionsView: View {
                 //                ToastManager.shared.showToast(message: "Coming soon in S4",style:ToastStyle.info)
                 //                AnalyticalView()
             } else if let segment = selectedSegment {
+                //MARK: Calender view
                 if segment == .second{
                     if monthlySubscriptions.count != 0{
                         List {
@@ -228,6 +229,7 @@ struct SubscriptionsView: View {
                             }
                         }
                         .listStyle(.plain)
+                        .scrollIndicators(.hidden)
                         .frame(maxWidth: .infinity)
                         .scrollContentBackground(.hidden)
                         .background(.neutralBg100)
@@ -253,6 +255,7 @@ struct SubscriptionsView: View {
                                 SwipeActionCard(
                                     id: index,
                                     openCardIndex: $openCardIndex,
+                                    isScrollDisabled: $isScrollDisabled,
                                     selectionMode: selectionMode,
                                     onEdit: {
                                         editSubscription(sub: sub)
@@ -307,62 +310,63 @@ struct SubscriptionsView: View {
                             .background(Color.clear)
                             .padding(.top, 5)
                         }
-                        
                         .listStyle(.plain)
+                        .scrollIndicators(.hidden)
                         .background(Color.clear)
                         .scrollContentBackground(.hidden)
+                        .scrollDisabled(isScrollDisabled)
                         /*VStack{
-                            ScrollView {
-                                VStack(spacing: 0) {
-                                    ForEach(Array(subscriptionsList.enumerated()), id: \.element.id) { index, sub in
-                                        SwipeableSubscriptionRow(
-                                            sub             : sub,
-                                            activeCardId    : $activeCardId,
-                                            isScrollDisabled: $isScrollDisabled,
-                                            onEdit: {
-                                                editSubscription(sub: sub)
-                                            },
-                                            onDelete: {
-                                                // Clear any previous selections
-                                                for i in subscriptionsList.indices {
-                                                    subscriptionsList[i].isSelected = false
-                                                }
-                                                
-                                                // Mark ONLY this item
-                                                subscriptionsList[index].isSelected = true
-                                                showDeletePopup = true
-                                            },
-                                            isFamily        : false
-                                        )
-                                        .onTapGesture {
-                                            guard openCardIndex == nil else { return }
-                                            if selectionMode {
-                                                toggleSelection(at: index)
-                                            } else {
-                                                AppIntentRouter.shared.navigate(
-                                                    to: .subscriptionMatchView(
-                                                        fromList: true,
-                                                        subscriptionId: sub.id ?? ""
-                                                    )
-                                                )
-                                            }
-                                        }
-                                        .listRowSeparator(.hidden)
-                                        .listRowInsets(.init(top: 0, leading: 0, bottom: 8, trailing: 0))
-                                        .listRowBackground(Color.clear)
-                                        .onAppear {
-                                            if index == subscriptionsList.count - 1 {
-                                                loadNextPageIfNeeded()
-                                            }
-                                        }
-                                        .padding(.bottom, index == subscriptionsList.count - 1 ? 90 : 0)
-                                    }
-                                    .background(Color.clear)
-                                    .padding(.top, 5)
-                                }
-                            }
-                            .scrollDisabled(isScrollDisabled)
-                        }*/
+                         ScrollView {
+                         VStack(spacing: 0) {
+                         ForEach(Array(subscriptionsList.enumerated()), id: \.element.id) { index, sub in
+                         SwipeableSubscriptionRow(
+                         sub             : sub,
+                         activeCardId    : $activeCardId,
+                         isScrollDisabled: $isScrollDisabled,
+                         onEdit: {
+                         editSubscription(sub: sub)
+                         },
+                         onDelete: {
+                         // Clear any previous selections
+                         for i in subscriptionsList.indices {
+                         subscriptionsList[i].isSelected = false
+                         }
+                         
+                         // Mark ONLY this item
+                         subscriptionsList[index].isSelected = true
+                         showDeletePopup = true
+                         },
+                         isFamily        : false
+                         )
+                         .onTapGesture {
+                         guard openCardIndex == nil else { return }
+                         if selectionMode {
+                         toggleSelection(at: index)
+                         } else {
+                         AppIntentRouter.shared.navigate(
+                         to: .subscriptionMatchView(
+                         fromList: true,
+                         subscriptionId: sub.id ?? ""
+                         )
+                         )
+                         }
+                         }
+                         .listRowSeparator(.hidden)
+                         .listRowInsets(.init(top: 0, leading: 0, bottom: 8, trailing: 0))
+                         .listRowBackground(Color.clear)
+                         .onAppear {
+                         if index == subscriptionsList.count - 1 {
+                         loadNextPageIfNeeded()
+                         }
+                         }
+                         .padding(.bottom, index == subscriptionsList.count - 1 ? 90 : 0)
+                         }
+                         .background(Color.clear)
+                         .padding(.top, 5)
+                         }
+                         }
+                         .scrollDisabled(isScrollDisabled)
+                         }*/
                     }else{
                         Spacer()
                         VStack(){
@@ -736,6 +740,7 @@ struct SwipeActionCard<Content: View>: View {
     
     let id: Int
     @Binding var openCardIndex: Int?
+    @Binding var isScrollDisabled: Bool
     let selectionMode: Bool
     let onEdit: () -> Void
     let onDelete: () -> Void
@@ -747,6 +752,7 @@ struct SwipeActionCard<Content: View>: View {
     init(
         id: Int,
         openCardIndex: Binding<Int?>,
+        isScrollDisabled: Binding<Bool>,
         selectionMode: Bool,
         onEdit: @escaping () -> Void,
         onDelete: @escaping () -> Void,
@@ -754,6 +760,7 @@ struct SwipeActionCard<Content: View>: View {
     ) {
         self.id = id
         self._openCardIndex = openCardIndex
+        self._isScrollDisabled = isScrollDisabled
         self.selectionMode = selectionMode
         self.onEdit = onEdit
         self.onDelete = onDelete
@@ -826,16 +833,20 @@ struct SwipeActionCard<Content: View>: View {
             content
                 .offset(x: offsetX)
                 .simultaneousGesture(
-                    //                .highPriorityGesture(
-                    DragGesture(minimumDistance: 10)
+                    DragGesture(minimumDistance: 30) // Provide more headroom for vertical scroll
                         .onChanged { value in
-                            guard abs(value.translation.width) > abs(value.translation.height) else {
-                                return   // allow vertical scroll
-                            }
+                            // Prioritize vertical scroll if vertical translation is significant
+                            let isHorizontal = abs(value.translation.width) > abs(value.translation.height) * 1.5
+                            guard isHorizontal else { return }
+                            
                             guard !selectionMode else { return }
+                            
+                            isScrollDisabled = true
+                            
                             if openCardIndex != id {
                                 openCardIndex = id
                             }
+                            
                             let translation = value.translation.width
                             if translation < 0 {
                                 offsetX = max(translation, maxOffset)
@@ -844,6 +855,8 @@ struct SwipeActionCard<Content: View>: View {
                             }
                         }
                         .onEnded { value in
+                            isScrollDisabled = false
+                            
                             guard !selectionMode else {
                                 closeCard(animated: true)
                                 return
