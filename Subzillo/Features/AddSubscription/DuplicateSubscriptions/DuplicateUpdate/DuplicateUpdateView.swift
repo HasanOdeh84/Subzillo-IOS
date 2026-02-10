@@ -17,6 +17,7 @@ struct DuplicateUpdateView: View {
     @State private var existingSubIndex     : Int = 0//-1
     @StateObject var dupSubscriptionVM      = DuplicateSubscriptionsViewModel()
     @State var fromFamily                   = false
+    @State var isFromEmail                  : Bool = false
     
     //MARK: - body
     var body: some View {
@@ -102,11 +103,11 @@ struct DuplicateUpdateView: View {
                 //                }
                 modifiedDuplicateDataInfo = nil
                 if fromFamily{
-                   // AppIntentRouter.shared.navigate(to: .familyMembersView)
+                    // AppIntentRouter.shared.navigate(to: .familyMembersView)
                     // Pop back to FamilyMembersView (Update -> Duplicates -> Manual -> Family)
                     AppIntentRouter.shared.pop(count: 3)
                 }else{
-                    AppIntentRouter.shared.navigate(to: .subscriptionsListView)
+                    AppIntentRouter.shared.navigate(to: .subscriptionsListView())
                 }
             }
             else{
@@ -143,14 +144,17 @@ struct DuplicateUpdateView: View {
         let updatedSubscriptions = newSubscriptions.map { sub in
             var updatedSub = sub
             updatedSub.serviceLogo = sub.serviceLogo?.fileNameOnly
+            if isFromEmail{
+                updatedSub.sourceReference = sub.sourceReference
+            }
             return updatedSub
         }
-        let inoput = ResolveDuplicateSubscriptionRequest(userId: Constants.getUserId(),
+        let input = ResolveDuplicateSubscriptionRequest(userId: Constants.getUserId(),
                                                          action: action,
                                                          existingSubscription: existingSubscription,
                                                          //                                                         newSubscriptions: newSubscriptions)
                                                          newSubscriptions: updatedSubscriptions)
-        dupSubscriptionVM.resolveDuplicateSubscription(input: inoput)
+        dupSubscriptionVM.resolveDuplicateSubscription(input: input)
     }
     
     //MARK: - Button actions
@@ -228,7 +232,7 @@ struct SubOldItem: View {
                     VStack(alignment: .leading) {
                         Image(isSelected == true ? "SelectedRadio" : "UnSelectedRadio")
                             .frame(width: 24, height: 24)
-//                            .offset(x: 0, y: -5)
+                        //                            .offset(x: 0, y: -5)
                             .padding(.top, 18)
                     }
                     .onTapGesture {

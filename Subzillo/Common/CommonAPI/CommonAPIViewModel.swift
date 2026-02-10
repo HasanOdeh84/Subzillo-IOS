@@ -28,6 +28,8 @@ class CommonAPIViewModel: ObservableObject {
     @Published var userInfoResponse     : UserInfo?
     @Published var userInfError         : Error?
     
+    @Published var unreadCountResponse  : UnreadNotificationCountData?
+    
     init(router: AppIntentRouter = .shared) {
         self.router = router
     }
@@ -45,6 +47,38 @@ class CommonAPIViewModel: ObservableObject {
         receiveValue: { response in
             PrintLogger.modelLog(response, type: .response, isInput: false)
             self.userInfoResponse = response.data
+        }
+        .store(in: &self.subscriptions)
+    }
+    
+    func unreadNotificationCount(input:UnreadNotificationCountRequest) {
+        self.unreadCountResponse = nil
+        apiReference.postApi(endPoint: APIEndpoint.unreadNotificationCount, method: .POST,token: authKey,body: input,showLoader: true, responseType: UnreadNotificationCountResponse.self)
+            .sink { [unowned self] completion in
+                if case let .failure(error) = completion {
+                    self.userInfError = error
+                    self.handleError(error,endPoint: APIEndpoint.unreadNotificationCount)
+                }
+            }
+        receiveValue: { response in
+            PrintLogger.modelLog(response, type: .response, isInput: false)
+            self.unreadCountResponse = response.data
+        }
+        .store(in: &self.subscriptions)
+    }
+    
+    func updateDeviceId(input:UpdateDeviceIdRequest) {
+        apiReference.postApi(endPoint: APIEndpoint.updateDeviceId, method: .POST,token: authKey,body: input,showLoader: true, responseType: UpdateDeviceIdResponse.self)
+            .sink { [unowned self] completion in
+                if case let .failure(error) = completion {
+                    self.userInfError = error
+                    self.handleError(error,endPoint: APIEndpoint.updateDeviceId)
+                }
+            }
+        receiveValue: { response in
+            PrintLogger.modelLog(response, type: .response, isInput: false)
+            KeychainHelper.save(response.data?.accessToken, account: Constants.authKey)
+            KeychainHelper.save(response.data?.refreshToken, account: Constants.refreshKey)
         }
         .store(in: &self.subscriptions)
     }

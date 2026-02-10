@@ -34,41 +34,61 @@ struct ProfileView: View {
     
     @State var showUploadPopup              : Bool = false
     @State private var isUploading          = false
+    @State var showDeletePopup              : Bool = false
+    @State private var deleteSheetHeight    : CGFloat = .zero
     
     //MARK: - Body
     var body: some View {
         VStack{
             ProfileHeader(title: "My Profile", onSettings: {
-                ToastManager.shared.showToast(message: "Coming soon in S4",style:ToastStyle.info)
+                profileVM.navigate(to: .settings)
             }, onNotificationAction: {
-                ToastManager.shared.showToast(message: "Coming soon in S4",style:ToastStyle.info)
+                profileVM.navigate(to: .notifications)
+//                ToastManager.shared.showToast(message: "Coming soon in S4",style:ToastStyle.info)
+                profileVM.navigate(to: .notifications)
             })
-            .padding(.top, 70)
-            .padding(.horizontal, 20)
+            .padding(.top, 50)
+//            .padding(.horizontal, 20)
+            
             ScrollView(showsIndicators: false){
                 VStack(spacing: 24){
                     VStack(spacing: 8){
                         ZStack(alignment: .topTrailing) {
-//                            WebImage(url: URL(string: commonApiVM.userInfoResponse?.profileImage ?? ""))
-                            Image(systemName: "person.crop.circle.fill")
-                                .resizable()
-                            //                                .indicator(.activity)
-                            //                                .transition(.fade(duration: 0.5))
-                                .scaledToFit()
-                                .frame(width: 96, height: 96)
-                                .foregroundColor(.gray)
-                                .background(Color.white)
-                                .overlay(
-                                    RoundedRectangle(cornerRadius: 96/2)
-                                        .stroke(Color.white, lineWidth: 2)
-                                )
-                                .cornerRadius(96/2)
-                                .shadow(color: Color.dropShadow, radius: 2, x: 0, y: 2)
+                            if commonApiVM.userInfoResponse?.profileImage ?? "" != ""{
+                                WebImage(url: URL(string: commonApiVM.userInfoResponse?.profileImage ?? ""))
+                                //                            Image(systemName: "person.crop.circle.fill")
+                                    .resizable()
+                                //                                .indicator(.activity)
+                                //                                .transition(.fade(duration: 0.5))
+                                    .scaledToFit()
+                                    .frame(width: 96, height: 96)
+                                    .foregroundColor(.gray)
+                                    .background(Color.white)
+                                    .overlay(
+                                        RoundedRectangle(cornerRadius: 96/2)
+                                            .stroke(Color.white, lineWidth: 2)
+                                    )
+                                    .cornerRadius(96/2)
+                                    .shadow(color: Color.dropShadow, radius: 2, x: 0, y: 2)
+                            }else{
+                                Image(systemName: "person.crop.circle.fill")
+                                    .resizable()
+                                    .scaledToFit()
+                                    .frame(width: 96, height: 96)
+                                    .foregroundColor(.gray)
+                                    .background(Color.white)
+                                    .overlay(
+                                        RoundedRectangle(cornerRadius: 96/2)
+                                            .stroke(Color.white, lineWidth: 2)
+                                    )
+                                    .cornerRadius(96/2)
+                                    .shadow(color: Color.dropShadow, radius: 2, x: 0, y: 2)
+                            }
                             
                             VStack(spacing: 0) {
                                 Button(action: {
-                                    ToastManager.shared.showToast(message: "Coming soon in S4",style:ToastStyle.info)
-//                                    showUploadPopup = true
+//                                    ToastManager.shared.showToast(message: "Coming soon in S4",style:ToastStyle.info)
+                                    showUploadPopup = true
                                 }) {
                                     Image("camera_white")
                                         .frame(width: 16, height: 16)
@@ -126,7 +146,8 @@ struct ProfileView: View {
                     }
                     
                     GradientBgBtn(title: "Upgrade today and save 30%", image: "percentage", action: {
-                        ToastManager.shared.showToast(message: "Coming soon in S4",style:ToastStyle.info)
+//                        ToastManager.shared.showToast(message: "Coming soon in S4",style:ToastStyle.info)
+                        profileVM.navigate(to: .pricingPlans)
                     })
                     
                     VStack(spacing: 0) {
@@ -141,26 +162,26 @@ struct ProfileView: View {
                         Divider()
                             .overlay(Color.border)
                         AccountInfo(title: "Full Name", subTitle: fullName) {
-//                            selectedAccountType = .name
-                            ToastManager.shared.showToast(message: "Coming soon in S4",style:ToastStyle.info)
+                            selectedAccountType = .name
+                            //                            ToastManager.shared.showToast(message: "Coming soon in S4",style:ToastStyle.info)
                         }
                         Divider()
                             .overlay(Color.border)
                         AccountInfo(title: "Email", subTitle: email) {
-//                            selectedAccountType = .email
-                            ToastManager.shared.showToast(message: "Coming soon in S4",style:ToastStyle.info)
+                            selectedAccountType = .email
+                            //                            ToastManager.shared.showToast(message: "Coming soon in S4",style:ToastStyle.info)
                         }
                         Divider()
                             .overlay(Color.border)
                         AccountInfo(title: "Mobile Number", subTitle: mobile) {
-//                            selectedAccountType = .mobile
-                            ToastManager.shared.showToast(message: "Coming soon in S4",style:ToastStyle.info)
+                            selectedAccountType = .mobile
+                            //                            ToastManager.shared.showToast(message: "Coming soon in S4",style:ToastStyle.info)
                         }
                         Divider()
                             .overlay(Color.border)
                         AccountInfo(title: "Currency", subTitle: currency) {
-//                            selectedAccountType = .currency
-                            ToastManager.shared.showToast(message: "Coming soon in S4",style:ToastStyle.info)
+                            selectedAccountType = .currency
+                            //                            ToastManager.shared.showToast(message: "Coming soon in S4",style:ToastStyle.info)
                         }
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)
@@ -171,14 +192,15 @@ struct ProfileView: View {
                     )
                     
                     VStack(spacing: 0) {
-                        ProfileItem(title: "Subscription Plans", image: "award", action:{
-                            ToastManager.shared.showToast(message: "Coming soon in S4",style:ToastStyle.info)
+                        ProfileItem(title: "Plans & Pricing", image: "award", action:{
+//                            ToastManager.shared.showToast(message: "Coming soon in S4",style:ToastStyle.info)
+                            profileVM.navigate(to: .pricingPlans)
                         })
                         Divider()
                             .overlay(Color.border)
                         ProfileItem(title: "My Cards", image: "card", action:{
-//                            profileVM.navigate(to: NavigationRoute.myCards)
-                            ToastManager.shared.showToast(message: "Coming soon in S4",style:ToastStyle.info)
+                            profileVM.navigate(to: NavigationRoute.myCards)
+                            //                            ToastManager.shared.showToast(message: "Coming soon in S4",style:ToastStyle.info)
                         })
                         Divider()
                             .overlay(Color.border)
@@ -188,18 +210,19 @@ struct ProfileView: View {
                         Divider()
                             .overlay(Color.border)
                         ProfileItem(title: "Integrations", image: "link", action:{
-                            ToastManager.shared.showToast(message: "Coming soon in S4",style:ToastStyle.info)
+                            profileVM.navigate(to: NavigationRoute.connectedEmailsList(isIntegrations: true))
+                            //                            ToastManager.shared.showToast(message: "Coming soon in S4",style:ToastStyle.info)
                         })
                         Divider()
                             .overlay(Color.border)
                         ProfileItem(title: "Family Members", image: "familyMembers", action:{
-//                            profileVM.navigate(to: NavigationRoute.familyMembersView)
-                            ToastManager.shared.showToast(message: "Coming soon in S4",style:ToastStyle.info)
+                            profileVM.navigate(to: NavigationRoute.familyMembersView)
+                            //                            ToastManager.shared.showToast(message: "Coming soon in S4",style:ToastStyle.info)
                         })
                         Divider()
                             .overlay(Color.border)
                         ProfileItem(title: "Invite friends", image: "user-add-02", action:{
-                            ToastManager.shared.showToast(message: "Coming soon in S4",style:ToastStyle.info)
+                            profileVM.navigate(to: .inviteFriends)
                         })
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)
@@ -210,14 +233,15 @@ struct ProfileView: View {
                     )
                     
                     CustomBorderButton(title: "Logout") {
-                        AlertManager.shared.showAlert(
-                            title       : "Logout",
-                            message     : "Are you sure you want to logout?",
-                            cancelText  : "Cancel",
-                            okAction    : {
-                                loginVM.logout(input: LogoutRequest(userId: Constants.getUserId()))
-                            }
-                        )
+                        showDeletePopup = true
+//                        AlertManager.shared.showAlert(
+//                            title       : "Logout",
+//                            message     : "Are you sure you want to logout?",
+//                            cancelText  : "Cancel",
+//                            okAction    : {
+//                                loginVM.logout(input: LogoutRequest(userId: Constants.getUserId()))
+//                            }
+//                        )
                     }
                     
                     HStack(spacing: 4) {
@@ -231,7 +255,7 @@ struct ProfileView: View {
                     }
                     .padding(.bottom,90)
                 }
-                .padding(20)
+//                .padding(20)
                 .navigationBarBackButtonHidden(true)
                 .background(MediaPickerHost().allowsHitTesting(false)) // host
                 .onAppear{
@@ -242,8 +266,8 @@ struct ProfileView: View {
                 .onChange(of: commonApiVM.userInfoResponse) { _ in updateUserInfo() }
             }
         }
-        .background(.neutralBg100)
-        .ignoresSafeArea()
+        .padding(20)
+        .background(Color.neutralBg100.ignoresSafeArea())
         .sheet(item: $selectedAccountType) { type in
             EditAccountBottomSheet(onDelegate       : {
             },
@@ -268,7 +292,7 @@ struct ProfileView: View {
                 accountTypeVerify   = type
                 profileVM.updateProfile(input: input)
             })
-            .presentationDetents([.height(320)])
+            .presentationDetents([.height(350)]) // Increased height slightly to prevent layout cut-off
             .presentationDragIndicator(.hidden)
         }
         .sheet(isPresented: $showVerifyOtpSheet) {
@@ -285,9 +309,12 @@ struct ProfileView: View {
         .onChange(of: profileVM.isUpdate) { value in
             if value{
                 if self.accountTypeVerify == 2 || self.accountTypeVerify == 3{
-                    showVerifyOtpSheet = true
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {
+                        showVerifyOtpSheet = true
+                    }
                 }
                 getUserDetailsApi()
+                profileVM.isUpdate = false
             }
         }
         .sheet(isPresented: $showUploadPopup, onDismiss: {
@@ -295,22 +322,42 @@ struct ProfileView: View {
             UploadImageSheet(isUploading: $isUploading, fromProfile: true, onDelegate: {
                 getUserDetailsApi()
             })
-                .presentationDragIndicator(.hidden)
-                .presentationDetents([.height(315)])
-                .interactiveDismissDisabled(isUploading)
+            .presentationDragIndicator(.hidden)
+            .presentationDetents([.height(315)])
+            .interactiveDismissDisabled(isUploading)
         }
         .onReceive(NotificationCenter.default.publisher(for: .closeAllBottomSheets)) { _ in
             showUploadPopup = false
+        }
+        .sheet(isPresented: $showDeletePopup) {
+            InfoAlertSheet(
+                onDelegate: {
+                    loginVM.logout(input: LogoutRequest(userId: Constants.getUserId()))
+                }, title                : "Logout",
+                subTitle                : "Are you sure you want to logout?",
+                imageName               : "del_red_big",
+                buttonIcon              : "deleteIcon",
+                buttonTitle             : "Ok",
+                imageSize               : 70,
+                isCancelButtonVisible   : true
+            )
+            .onPreferenceChange(InnerHeightPreferenceKey.self) { height in
+                if height > 0 {
+                    deleteSheetHeight = height
+                }
+            }
+            .presentationDragIndicator(.hidden)
+            .presentationDetents([.height(deleteSheetHeight)])
         }
     }
     
     //MARK: - User defined methods
     func updateUserInfo()
     {
-        fullName   = "Alekya"//commonApiVM.userInfoResponse?.fullName ?? ""
-        email      = "alekhya@krify.com"//commonApiVM.userInfoResponse?.email ?? ""
-        mobile     = "+91 9676442388"//"\(commonApiVM.userInfoResponse?.countryCode ?? "") \(commonApiVM.userInfoResponse?.phoneNumber ?? "")"
-        currency   = "INR"//commonApiVM.userInfoResponse?.preferredCurrency ?? Constants.shared.regionCode
+        fullName   = commonApiVM.userInfoResponse?.fullName ?? ""//"Alekya"//
+        email      = commonApiVM.userInfoResponse?.email ?? ""//"alekhya@krify.com"//
+        mobile     = "\(commonApiVM.userInfoResponse?.countryCode ?? "") \(commonApiVM.userInfoResponse?.phoneNumber ?? "")"//"+91 9676442388"//
+        currency   = commonApiVM.userInfoResponse?.preferredCurrency ?? Constants.shared.regionCode//"INR"//
     }
     
     func getUserDetailsApi(){

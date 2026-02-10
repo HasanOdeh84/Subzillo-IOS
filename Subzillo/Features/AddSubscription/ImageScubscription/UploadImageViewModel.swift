@@ -22,8 +22,8 @@ class UploadImageViewModel: ObservableObject {
         self.router = router
     }
     
-    func imageSubscription(input:UpdateProfileImageRequest,fileData:[MultiPartFileInput]) {
-        apiReference.postMultipartApi(endPoint: APIEndpoint.imageSubscription, method: .POST,token: authKey,body: MultipartInput(parameters: input, fileInput: fileData),showLoader: false, responseType: VoiceSubscriptionResponse.self)
+    func imageSubscription(input:UpdateProfileImageRequest,fileData:[MultiPartFileInput], showLoader:Bool = false) {
+        apiReference.postMultipartApi(endPoint: APIEndpoint.imageSubscription, method: .POST,token: authKey,body: MultipartInput(parameters: input, fileInput: fileData),showLoader: showLoader, responseType: VoiceSubscriptionResponse.self)
             .sink { [weak self] completion in
                 guard let self = self else { return }
                 if case let .failure(error) = completion {

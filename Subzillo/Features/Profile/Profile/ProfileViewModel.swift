@@ -38,20 +38,6 @@ class ProfileViewModel: ObservableObject {
         .store(in: &self.subscriptions)
     }
     
-//    func updatePassword(input:UpdatePasswordRequest) {
-//        apiReference.postApi(endPoint: APIEndpoint.updatePassword, method: .POST,token: authKey,body: input,showLoader: true, responseType: GeneralResponse.self)
-//            .sink { [unowned self] completion in
-//                if case let .failure(error) = completion {
-//                    self.handleError(error,endPoint: APIEndpoint.updatePassword)
-//                }
-//            }
-//        receiveValue: { response in
-//            PrintLogger.modelLog(response, type: .response, isInput: false)
-//            ToastManager.shared.showToast(message: response.message ?? "")
-//        }
-//        .store(in: &self.subscriptions)
-//    }
-    
     func updateProfileImage(input:UpdateProfileImageRequest,fileData:[MultiPartFileInput]){
         isProfileUpdate = false
         apiReference.postMultipartApi(endPoint: APIEndpoint.updateProfileImage, method: .POST,token: authKey,body: MultipartInput(parameters: input, fileInput: fileData),showLoader: false, responseType: GeneralResponse.self)
@@ -67,19 +53,6 @@ class ProfileViewModel: ObservableObject {
         }
         .store(in: &self.subscriptions)
     }
-    
-//    func imageSubscription(input:ImageSubscriptionRequest,fileData:[MultiPartFileInput]){
-//        apiReference.postMultipartApi(endPoint: APIEndpoint.imageSubscription, method: .POST,token: authKey,body: MultipartInput(parameters: input, fileInput: fileData),showLoader: true, responseType: ImageSubscriptionResponse.self)
-//            .sink { [unowned self] completion in
-//                if case let .failure(error) = completion {
-//                    self.handleError(error,endPoint: APIEndpoint.imageSubscription)
-//                }
-//            }
-//        receiveValue: { response in
-//            PrintLogger.modelLog(response, type: .response, isInput: false)
-//        }
-//        .store(in: &self.subscriptions)
-//    }
     
     func navigate(to route: NavigationRoute){
         self.router.navigate(to: route)

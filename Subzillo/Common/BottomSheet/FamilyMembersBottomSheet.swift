@@ -7,6 +7,7 @@ struct FamilyMembersBottomSheet: View {
     @Binding var selectedMembers    : [ListFamilyMembersResponseData]
     var members                     : [ListFamilyMembersResponseData]
     @State private var searchText   = ""
+    @State private var contentHeight: CGFloat = .zero
     
     var filteredMembers: [ListFamilyMembersResponseData] {
         if searchText.isEmpty {
@@ -54,9 +55,10 @@ struct FamilyMembersBottomSheet: View {
             
             // List
             if !filteredMembers.isEmpty {
-                List {
-                    ForEach(filteredMembers, id: \.id) { member in
-                        VStack(spacing: 0) {
+                
+                ScrollView {
+                    VStack(spacing: 0) {
+                        ForEach(filteredMembers, id: \.self) { member in
                             Button {
                                 toggleSelection(member)
                             } label: {
@@ -79,7 +81,7 @@ struct FamilyMembersBottomSheet: View {
                                 .contentShape(Rectangle())
                             }
                             .buttonStyle(.plain)
-                            // Divider
+
                             if member.id != filteredMembers.last?.id {
                                 Rectangle()
                                     .fill(Color.neutralDisabled200)
@@ -87,17 +89,28 @@ struct FamilyMembersBottomSheet: View {
                                     .padding(.horizontal, -20)
                             }
                         }
-                        .listRowInsets(.init())
-                        .listRowSeparator(.hidden)
                     }
+                    .background(
+                        GeometryReader { geo in
+                            Color.clear
+                                .onAppear {
+                                    contentHeight = geo.size.height
+                                }
+                                .onChange(of: geo.size.height) { newHeight in
+                                    contentHeight = newHeight
+                                }
+                        }
+                    )
+                    .background(.clear)
+                    .cornerRadius(12)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 12)
+                            .stroke(Color.neutral300Border, lineWidth: 1)
+                    )
+                    .padding(24)
                 }
-                .listStyle(.plain)
-                .cornerRadius(12)
-                .overlay(
-                    RoundedRectangle(cornerRadius: 12)
-                        .stroke(Color.neutral300Border, lineWidth: 1)
-                )
-                .padding(24)
+//                .frame(height: min(contentHeight + 100, 400)) // Dynamic height with max limit
+                
             } else {
                 Text("No data found")
                     .font(.appRegular(16))
@@ -111,15 +124,17 @@ struct FamilyMembersBottomSheet: View {
                 dismiss()
             } label: {
                 Text("Ok")
-                    .font(.appSemiBold(16))
-                    .foregroundColor(.white)
-                    .frame(maxWidth: .infinity, minHeight: 56)
-                    .background(Color.blueMain700)
-                    .cornerRadius(8)
+                .font(.appSemiBold(16))
+                .foregroundColor(.white)
+                .frame(maxWidth: .infinity, minHeight: 56)
+                .background(Color.blueMain700)
+                .cornerRadius(8)
             }
             .padding(.horizontal, 24)
             .padding(.bottom, 24)
         }
+        .frame(height: min(contentHeight + 300, UIScreen.main.bounds.height - 60)) // Dynamic height with max limit
+//        .fixedSize(horizontal: false, vertical: true)
     }
     
     // MARK: - Selection Logic

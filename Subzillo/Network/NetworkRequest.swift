@@ -304,7 +304,20 @@ class NetworkRequest {
                         //                        SheetManager.shared.isOfflineSheetVisible = true
                         // AlertManager.shared.showAlert(title: "No Internet Connection", message: "Please check your internet connection.")
                         if AppState.shared.isLoggedIn{
-                            SheetManager.shared.isOfflineSheetVisible = true
+                            let allowedEndpoints: [APIEndpoint] = [
+                                .listSubscriptions,
+                                .getSubscriptionDetails,
+                                .getServiceProvidersList,
+                                .getUserInfo,
+                                .getCategories,
+                                .getPaymentMethods,
+                                .listUserCards,
+                                .listFamilyMembers,
+                                .fetchProviderData
+                            ]
+                            if !allowedEndpoints.contains(endPoint) {
+                                SheetManager.shared.isOfflineSheetVisible = true
+                            }
                         }else{
                             AlertManager.shared.showAlert(title: "No Internet Connection", message: "Please check your internet connection.")
                         }

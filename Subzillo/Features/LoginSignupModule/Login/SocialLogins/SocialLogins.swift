@@ -18,7 +18,7 @@ class SocialLogins:NSObject, ObservableObject{
     
     private var appleController : ASAuthorizationController?
     
-    let googleConfig            = GIDConfiguration.init(clientID: Constants.googleSigninId)
+    let googleConfig            = GIDConfiguration.init(clientID: Constants.googleClientId)
     
     private var application     : MSALPublicClientApplication?
     @Published var account      : MSALAccount?
@@ -116,6 +116,80 @@ class SocialLogins:NSObject, ObservableObject{
             completion(model)
         }
     }
+    
+    func gmailSignInOAuth(
+        presentingVC: UIViewController,
+        completion: @escaping (String?) -> Void
+    ) {
+        
+        GIDSignIn.sharedInstance.signOut()
+        
+        let config = GIDConfiguration(
+            clientID: Constants.googleClientId,
+            serverClientID: Constants.webClientId
+        )
+        GIDSignIn.sharedInstance.configuration = config
+        let scopes = [
+            "https://www.googleapis.com/auth/gmail.readonly"
+        ]
+        GIDSignIn.sharedInstance.signIn(
+            withPresenting: presentingVC,
+            hint: nil,
+            additionalScopes: scopes
+        ) { result, error in
+            if let error = error {
+                print("Google Sign-In error:", error.localizedDescription)
+                completion(nil)
+                return
+            }
+            guard let result = result else {
+                completion(nil)
+                return
+            }
+            let serverAuthCode = result.serverAuthCode
+            completion(serverAuthCode)
+        }
+    }
+    
+    func microsoftSignInOAuth(
+        presentingVC: UIViewController,
+        completion: @escaping (String?) -> Void
+    ) {
+        guard let application = application else {
+            print("MSAL Application not initialized")
+            completion(nil)
+            return
+        }
+        let emailScopes = [
+            "Mail.Read",
+            "User.Read",
+        ]
+        let webParams = MSALWebviewParameters(authPresentationViewController: presentingVC)
+        let parameters = MSALInteractiveTokenParameters(scopes: emailScopes, webviewParameters: webParams)
+        parameters.promptType = .consent
+        application.acquireToken(with: parameters) { (result, error) in
+            if let error = error as NSError? {
+                print("Microsoft OAuth error: \(error.localizedDescription)")
+                print("Error Domain: \(error.domain), Code: \(error.code)")
+                if let msalError = error.userInfo[MSALErrorDescriptionKey] {
+                    print("MSAL Error Description: \(msalError)")
+                }
+                completion(nil)
+                return
+            }
+            guard let result = result else {
+                print("No MSAL result received")
+                completion(nil)
+                return
+            }
+            DispatchQueue.main.async {
+                self.account = result.account
+            }
+            let authCode = result.accessToken
+            print("Microsoft OAuth Success. Token obtained.")
+            completion(authCode)
+        }
+    }
 }
 
 // MARK: - Apple Sign In Delegate methods
@@ -139,5 +213,15 @@ extension SocialLogins:ASAuthorizationControllerDelegate, ASAuthorizationControl
                                                      emailAddress     : appleIDCredential.email)
             self.appleSignInCompletion?(self.socialLoginData)
         }
+    }
+}
+
+extension UIApplication {
+    var rootViewController: UIViewController? {
+        connectedScenes
+            .compactMap { $0 as? UIWindowScene }
+            .flatMap { $0.windows }
+            .first { $0.isKeyWindow }?
+            .rootViewController
     }
 }

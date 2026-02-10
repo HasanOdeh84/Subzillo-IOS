@@ -19,6 +19,7 @@ struct VoiceCommandView: View {
     @StateObject private var audioManager   = AudioRecorderManager()
     @State private var isPlaying            = false
     @State var showMissingDetailsPopup      : Bool = false
+    @State private var deleteSheetHeight    : CGFloat = .zero
     
     //MARK: - body
     var body: some View {
@@ -254,8 +255,13 @@ struct VoiceCommandView: View {
                 buttonTitle : "Discard"
             )
             .id(UUID())
+            .onPreferenceChange(InnerHeightPreferenceKey.self) { height in
+                if height > 0 {
+                    deleteSheetHeight = height
+                }
+            }
             .presentationDragIndicator(.hidden)
-            .presentationDetents([.height(350)])
+            .presentationDetents([.height(deleteSheetHeight)])
         }
         .sheet(isPresented: $voiceCommandVM.showMissingDetailsBottomSheet, onDismiss: {
         }) {

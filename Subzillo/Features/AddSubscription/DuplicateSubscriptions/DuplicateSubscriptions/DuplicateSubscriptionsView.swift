@@ -21,6 +21,7 @@ struct DuplicateSubscriptionsView: View {
     @State var duplicateSubsList         : [DuplicateDataInfo]
     @StateObject var dupSubscriptionVM   = DuplicateSubscriptionsViewModel()
     @State var fromFamily                = false
+    @State var isFromEmail               : Bool = false
     
     //MARK: - body
     var body: some View {
@@ -86,10 +87,10 @@ struct DuplicateSubscriptionsView: View {
                 //                    AppIntentRouter.shared.navigate(to: .subscriptionsListView)
                 //                }
                 if fromFamily{
-//                    AppIntentRouter.shared.navigate(to: .familyMembersView)
+                    //                    AppIntentRouter.shared.navigate(to: .familyMembersView)
                     AppIntentRouter.shared.pop(count: 2)
                 }else{
-                    AppIntentRouter.shared.navigate(to: .subscriptionsListView)
+                    AppIntentRouter.shared.navigate(to: .subscriptionsListView())
                 }
             }
             // print(dupSubscriptionVM.subscriptioIds)
@@ -225,7 +226,7 @@ struct DuplicateSubscriptionsView: View {
             {
                 //print(data.serviceName)
                 duplicateDataCount = duplicateSubsList.count
-                AppIntentRouter.shared.navigate(to: .duplicateUpdateView(duplicateSubsList: data, selectedIndex: selected[0], fromFamily: fromFamily))
+                AppIntentRouter.shared.navigate(to: .duplicateUpdateView(duplicateSubsList: data, selectedIndex: selected[0], fromFamily: fromFamily, isFromEmail: isFromEmail))
             }
             else if type == "gotoDetails"
             {
@@ -254,10 +255,10 @@ struct DuplicateSubscriptionsView: View {
         //        }
         if fromFamily{
             AppIntentRouter.shared.pop(count: 2)
-//            AppIntentRouter.shared.navigate(to: .familyMembersView)
+            //            AppIntentRouter.shared.navigate(to: .familyMembersView)
         }
         else{
-            AppIntentRouter.shared.navigate(to: .subscriptionsListView)
+            AppIntentRouter.shared.navigate(to: .subscriptionsListView())
         }
     }
     
@@ -267,12 +268,15 @@ struct DuplicateSubscriptionsView: View {
         let updatedSubscriptions = newSubscriptions.map { sub in
             var updatedSub = sub
             updatedSub.serviceLogo = sub.serviceLogo?.fileNameOnly
+            if isFromEmail{
+                updatedSub.sourceReference = sub.sourceReference
+            }
             return updatedSub
         }
         let input = ResolveDuplicateSubscriptionRequest(userId: Constants.getUserId(),
                                                         action: action,
                                                         existingSubscription: existingSubscription,
-//                                                        newSubscriptions: newSubscriptions)
+                                                        //                                                        newSubscriptions: newSubscriptions)
                                                         newSubscriptions: updatedSubscriptions)
         dupSubscriptionVM.resolveDuplicateSubscription(input: input)
     }
@@ -466,7 +470,7 @@ struct SubItem: View {
                             .cornerRadius(4)
                     }
                     .padding(.bottom, -5)
-
+                    
                     HStack(spacing: 10) {
                         VStack(alignment: .leading, spacing: 9) {
                             Text("Next charge: \(item.nextPaymentDate ?? "")")

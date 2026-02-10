@@ -17,13 +17,14 @@ struct VoiceMissingDetailsSheet: View {
     
     //MARK: - Properties
     @Environment(\.dismiss) private var dismiss
-    @StateObject private var audioManager   = AudioRecorderManager()
-    @State var showDiscardPopup             : Bool = false
-    @State private var showPermissionAlert  = false
-    @State var missingDetailsList           : [MissingDetails] = []
-    var onDelegate          : (() -> Void)?
-    var onSubmit            : ((URL) -> Void)?
-    var onSkipToContinue    : (() -> Void)?
+    @StateObject private var audioManager       = AudioRecorderManager()
+    @State var showDiscardPopup                 : Bool = false
+    @State private var showPermissionAlert      = false
+    @State var missingDetailsList               : [MissingDetails] = []
+    var onDelegate                              : (() -> Void)?
+    var onSubmit                                : ((URL) -> Void)?
+    var onSkipToContinue                        : (() -> Void)?
+    @State private var deleteSheetHeight        : CGFloat = .zero
     
     //MARK: - body
     var body: some View {
@@ -113,7 +114,7 @@ struct VoiceMissingDetailsSheet: View {
                 //                }
                 Text("**Note:** Please record missing details along with service name")
                     .font(.appRegular(15))
-                    .foregroundColor(Color.black)
+                    .foregroundStyle(Color.redBadge)
                     .frame(maxWidth: .infinity, alignment: .leading)
                 
                 //MARK: Recording Button
@@ -228,8 +229,13 @@ struct VoiceMissingDetailsSheet: View {
                 buttonTitle : "Discard"
             )
             .id(UUID())
+            .onPreferenceChange(InnerHeightPreferenceKey.self) { height in
+                if height > 0 {
+                    deleteSheetHeight = height
+                }
+            }
             .presentationDragIndicator(.hidden)
-            .presentationDetents([.height(350)])
+            .presentationDetents([.height(deleteSheetHeight)])
         }
         .onChange(of: audioManager.requiredPermission) { _ in
             if audioManager.requiredPermission{

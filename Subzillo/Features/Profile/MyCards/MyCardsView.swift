@@ -30,6 +30,8 @@ struct MyCardsView: View {
         let data: ListUserCardsResponseData
     }
     
+    @State private var deleteSheetHeight        : CGFloat = .zero
+
     //MARK: - Body
     var body: some View {
         VStack{
@@ -154,15 +156,20 @@ struct MyCardsView: View {
             InfoAlertSheet(
                 onDelegate: {
                     deleteCard()
-                }, title    : "Are you sure you want to delete the subscriptions?\nData will be permanently deleted",
+                }, title    : "Are you sure you want to delete this card?\n This card will be permanently removed.",
                 subTitle    :"",
                 imageName   : "del_red_big",
                 buttonIcon  : "deleteIcon",
                 buttonTitle : "Delete",
                 imageSize   : 70
             )
+            .onPreferenceChange(InnerHeightPreferenceKey.self) { height in
+                if height > 0 {
+                    deleteSheetHeight = height
+                }
+            }
             .presentationDragIndicator(.hidden)
-            .presentationDetents([.height(340)])
+            .presentationDetents([.height(deleteSheetHeight)])
         }
         .onChange(of: myCardsVM.isDelete) { value in
             if value == true{
@@ -258,10 +265,16 @@ struct CardView: View {
                 
                 HStack {
                     Text("****   ****   ****   \(card.cardNumber ?? "")")
+//                        .font(.system(size: 20, weight: .bold, design: .monospaced))
+//                        .font(.appBold(20))
+//                        .lineSpacing(4)
+//                        .minimumScaleFactor(0.7)
+//                        .foregroundColor(.white)
                         .font(.system(size: 20, weight: .bold, design: .monospaced))
-                        .font(.appBold(20))
-                        .lineSpacing(4)
-                        .foregroundColor(.white)
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.65)
+                            .allowsTightening(true)
+                            .foregroundColor(.white)
                     
                     Spacer()
                 }
@@ -308,8 +321,8 @@ struct SwipeableCardRow: View {
     let onDelete                : () -> Void
     @State private var offset   : CGFloat = 0
     @State private var isSwiped : Bool = false
-    let swipeThreshold: CGFloat = -80
-    let menuWidth: CGFloat      = 145
+    let swipeThreshold: CGFloat = -70
+    let menuWidth: CGFloat      = 135
     
     var body: some View {
         ZStack(alignment: .trailing) {
@@ -321,6 +334,9 @@ struct SwipeableCardRow: View {
                             .font(.appSemiBold(14))
                             .foregroundColor(.white)
                     }
+                    .padding(.leading, 5)
+                    .frame(alignment: .trailing)
+                    .frame(width: 80, height: 148)
                 }
                 .frame(width: 80, height: 148)
             }
@@ -348,12 +364,17 @@ struct SwipeableCardRow: View {
             }
             
             VStack(spacing: 8) {
-                Image("edit_white")
-                Text("Edit")
-                    .font(.appSemiBold(14))
-                    .foregroundColor(.white)
+                VStack(spacing: 8){
+                    Image("edit_white")
+                    Text("Edit")
+                        .font(.appSemiBold(14))
+                        .foregroundColor(.white)
+                }
+                .padding(.leading, 15)
+                .frame(alignment: .trailing)
+                .frame(width: 70, height: 148)
             }
-            .frame(width: 80, height: 148)
+            .frame(width: 90, height: 148)
             .background(Color("green"))
             .clipShape(
                 RoundedCorner(
@@ -368,7 +389,7 @@ struct SwipeableCardRow: View {
                 )
                 .stroke(Color.neutral300Border, lineWidth: 1)
             )
-            .offset(x: -75)
+            .offset(x: -70)
             .zIndex(0)
             .onTapGesture {
                 withAnimation {

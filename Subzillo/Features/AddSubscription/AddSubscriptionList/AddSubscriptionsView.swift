@@ -9,13 +9,17 @@ import SwiftUI
 
 struct AddSubscriptionsView: View {
     
+    //MARK: Properties
     @State var showUploadPopup                 : Bool = false
     @State private var isUploading             = false
+    @StateObject private var sharedImageManager = SharedImageManager.shared
+    @StateObject private var uploadImageVM      = UploadImageViewModel()
     
+    //MARK: Body
     var body: some View {
         VStack(alignment: .leading,spacing: 0) {
             
-            //MARK: - Header
+            //MARK: Header
             HeaderView(title        : "Add subscription",
                        subTitle     : "Choose how you'd like to add your subscription",
                        titleFont    : 24) {
@@ -48,8 +52,8 @@ struct AddSubscriptionsView: View {
                 //                GradientBorderView(title: "Upload Bank Notification", subTitle: "Add subscriptions from your bank messages or alerts", buttonImage: "uploadBankIcon", action: clickOnUploasBankNotification, titleColor: Color.purple500)
                 //                    .padding(.bottom, 16)
                 //
-                //                GradienCustomeView(title: "Upload Bank Notification", subTitle: "Try voice recording for the fastest way to add multiple subscriptions at once.")
-                //                    .padding(.bottom,90)
+//                                GradienCustomeView(title: "Upload Bank Notification", subTitle: "Try voice recording for the fastest way to add multiple subscriptions at once.")
+//                                    .padding(.bottom,90)
             }
             .frame(maxWidth: .infinity)
             .padding(.top, 24)
@@ -65,11 +69,51 @@ struct AddSubscriptionsView: View {
         .onReceive(NotificationCenter.default.publisher(for: .closeAllBottomSheets)) { _ in
             showUploadPopup = false
         }
+        .onAppear {
+            if let image = sharedImageManager.sharedImage {
+                handleSharedImageUpload(image)
+                sharedImageManager.sharedImage = nil
+            }
+        }
+        .sheet(isPresented: $uploadImageVM.showErrorPopup, onDismiss: {
+            isUploading = false
+        }) {
+            UploadErrorImageSheet(
+                onDelegate: {
+                },
+                onDismiss: {
+                    isUploading = false
+                }
+            )
+            .presentationDragIndicator(.hidden)
+            .presentationDetents([.height(560)])
+        }
+    }
+    
+    //MARK: User defined methods
+    private func handleSharedImageUpload(_ image: UIImage) {
+        if let imageData = image.jpegData(compressionQuality: 0.8) {
+            isUploading = true
+            let timestamp = Int(Date().timeIntervalSince1970)
+            let filename = "shared_image_\(timestamp).jpg"
+            
+            uploadImageVM.imageSubscription(
+                input       : UpdateProfileImageRequest(userId: Constants.getUserId()),
+                fileData    : [MultiPartFileInput(
+                    fieldName   : "screenshot",
+                    fileName    : filename,
+                    mimeType    : "image/jpeg",
+                    fileData    : imageData
+                )],
+                showLoader  : true
+            )
+        }
     }
     
     //MARK: - Button actions
     private func goToNotifications() {
-        ToastManager.shared.showToast(message: "Coming soon in S4",style:ToastStyle.info)
+        uploadImageVM.navigate(to: .notifications)
+//        ToastManager.shared.showToast(message: "Coming soon in S4",style:ToastStyle.info)
     }
     private func clickOnSmartAssistant() {
         ToastManager.shared.showToast(message: "Coming soon in S5",style:ToastStyle.info)
@@ -78,8 +122,8 @@ struct AddSubscriptionsView: View {
         AppIntentRouter.shared.navigate(to: .voiceCommandView)
     }
     private func clickOnConnectEmail() {
-//                AppIntentRouter.shared.navigate(to: .connectEmail)
-        ToastManager.shared.showToast(message: "Coming soon in S4",style:ToastStyle.info)
+        AppIntentRouter.shared.navigate(to: .connectEmail)
+//        ToastManager.shared.showToast(message: "Coming soon in S4",style:ToastStyle.info)
     }
     private func clickOnUploadScreenshot() {
         showUploadPopup = true

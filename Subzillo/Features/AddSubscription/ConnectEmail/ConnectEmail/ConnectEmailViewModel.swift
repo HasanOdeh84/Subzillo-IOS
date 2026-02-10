@@ -41,6 +41,34 @@ class ConnectEmailViewModel: ObservableObject {
         .store(in: &self.subscriptions)
     }
     
+    func gmailOauthCallBack(input:GmailOauthCallBackRequest) {
+        apiReference.postApi(endPoint: APIEndpoint.gmailOuthCallback, method: .POST,token: authKey,body: input,showLoader: true, responseType: GeneralResponse.self)
+            .sink { [unowned self] completion in
+                if case let .failure(error) = completion {
+                    self.handleError(error,endPoint: APIEndpoint.gmailOuthCallback)
+                }
+            }
+        receiveValue: { response in
+            PrintLogger.modelLog(response, type: .response, isInput: false)
+//            ToastManager.shared.showToast(message: response.message ?? "")
+        }
+        .store(in: &self.subscriptions)
+    }
+    
+    func microsoftOauthCallBack(input:GmailOauthCallBackRequest) {
+        apiReference.postApi(endPoint: APIEndpoint.gmailOuthCallback, method: .POST,token: authKey,body: input,showLoader: true, responseType: GeneralResponse.self)
+            .sink { [unowned self] completion in
+                if case let .failure(error) = completion {
+                    self.handleError(error,endPoint: APIEndpoint.gmailOuthCallback)
+                }
+            }
+        receiveValue: { response in
+            PrintLogger.modelLog(response, type: .response, isInput: false)
+//            ToastManager.shared.showToast(message: response.message ?? "Microsoft email connected successfully")
+        }
+        .store(in: &self.subscriptions)
+    }
+    
     func handleOAuthCallback(url: URL) {
         // Here you can handle the redirect URL if there's any logic needed
         // For example, extracting tokens or verifying the state

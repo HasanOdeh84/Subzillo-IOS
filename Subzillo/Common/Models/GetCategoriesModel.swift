@@ -13,6 +13,6 @@ public struct getCategoriesResponse: Codable {
 }
 
 public struct Category: Codable, Hashable {
-    let id          : String?
-    let name        : String?
+    var id          : String?
+    var name        : String?
 }

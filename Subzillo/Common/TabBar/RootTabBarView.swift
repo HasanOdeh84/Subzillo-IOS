@@ -11,6 +11,7 @@ struct RootTabBar: View {
     
     //MARK: - Properties
     @State var selectedTab                      : Tab = .home
+    @State var selectedSegment                  : Segment? = .first
     
     //MARK: - Body
     var body: some View {
@@ -21,7 +22,7 @@ struct RootTabBar: View {
                 case .home:
                     HomeView(tabSelected:$selectedTab)
                 case .subscriptions:
-                    SubscriptionsView()
+                    SubscriptionsView(selectedTab: selectedSegment)
                 case .addSubscription:
                     AddSubscriptionsView()
                 case .smartAI:
@@ -33,9 +34,10 @@ struct RootTabBar: View {
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .ignoresSafeArea()
             
-            CurvedTabBar(selectedTab: $selectedTab)
+            CurvedTabBar(selectedTab        : $selectedTab,
+                         selectedSegment    : $selectedSegment)
                 .padding(.bottom,UIDevice.isFullScreeniPhone ? 20 : 0)
-//                .padding(.bottom, 20)
+            //                .padding(.bottom, 20)
         }
         .ignoresSafeArea(edges: .bottom)
         .navigationBarBackButtonHidden(true)
@@ -67,6 +69,7 @@ struct RootTabBar: View {
 //MARK: - Curved tab bar
 struct CurvedTabBar: View {
     @Binding var selectedTab : Tab
+    @Binding var selectedSegment: Segment?
     var body: some View {
         GeometryReader { proxy in
             HStack(alignment: .bottom) {
@@ -74,6 +77,7 @@ struct CurvedTabBar: View {
                     selectedTab = .home
                 }, selectedTab: $selectedTab, tab: .home)
                 TabBarItem(label: "My Subs", iconName: selectedTab == .subscriptions ? "mySubs-tabSelected" : "mySubs-tab", action: {
+                    selectedSegment = .first
                     selectedTab = .subscriptions
                 }, selectedTab: $selectedTab, tab: .subscriptions)
                 

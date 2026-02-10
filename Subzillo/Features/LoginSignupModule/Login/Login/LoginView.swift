@@ -8,6 +8,7 @@
 import SwiftUI
 import GoogleSignInSwift
 import _AuthenticationServices_SwiftUI
+import libPhoneNumber
 
 struct LoginView: View {
     
@@ -144,12 +145,12 @@ struct LoginView: View {
                 
                 TermsAndPrivacyText(
                     onTapTerms: {
-                        ToastManager.shared.showToast(message: "Coming soon in S4",style:ToastStyle.info)
-                        //                        loginVM.navigate(to: NavigationRoute.termsAndPrivacy(isTerm: true))
+//                        ToastManager.shared.showToast(message: "Coming soon in S4",style:ToastStyle.info)
+                        loginVM.navigate(to: NavigationRoute.termsAndPrivacy(isTerm: true))
                     },
                     onTapPrivacy: {
-                        ToastManager.shared.showToast(message: "Coming soon in S4",style:ToastStyle.info)
-                        //                        loginVM.navigate(to: NavigationRoute.termsAndPrivacy(isTerm: false))
+//                        ToastManager.shared.showToast(message: "Coming soon in S4",style:ToastStyle.info)
+                        loginVM.navigate(to: NavigationRoute.termsAndPrivacy(isTerm: false))
                     }
                 )
                 .padding(.top,6)
@@ -181,7 +182,7 @@ struct LoginView: View {
             loginType       : (segmentSelected == .first ? loginCheckType.mobile : loginCheckType.email).rawValue,
             email           : email.trimmed,
             phoneNumber     : phone,
-            countryCode     : selectedCountry?.dialCode ?? "",
+            countryCode     : selectedCountry?.dialCode ?? "+\(NBPhoneNumberUtil.sharedInstance().getCountryCode(forRegion: Constants.shared.regionCode))",
             deviceId        : appDelegate.deviceToken ?? ""
         )
         if let errorMessage = LoginSignupValidations().validateLogin(input: input) {

@@ -28,13 +28,14 @@ struct SubscriptionsView: View {
     @State var filterData                       : FilterModel = FilterModel()
     @State private var subscriptions            = [SubscriptionInfoo]()
     @State private var openCardIndex            : Int?
-    //    @State var isLongPress                      = false
     @State private var selectedDate             = Date()
     @State private var filterSelect             : Bool = false
     @State private var pendingFilterSelect      : Bool? = nil
     @State private var viewMode                 : SubscriptionsMode = .list
     @State private var isScrollDisabled         : Bool = false
     @State private var activeCardId             : String? = nil
+    var selectedTab                             : Segment? = .first
+    @State private var deleteSheetHeight        : CGFloat = .zero
     
     var hasSelection: Bool {
         subscriptionsList.contains(where: { $0.isSelected ?? false })
@@ -89,13 +90,14 @@ struct SubscriptionsView: View {
                         
                         HStack(spacing: 8) {
                             Button(action: clickOnChat) {
-                                
                                 Image("chart-line-data-02")
+                                    .renderingMode(.template)
                                     .frame(width: 20, height: 20)
+                                    .foregroundColor(viewMode == .analytics ? .white : .navyBlueCTA700)
                             }
                             .frame(width: 40, height: 40)
                             .background(
-                                viewMode == .analytics ? Color.blue.opacity(0.15) : Color.clear
+                                viewMode == .analytics ? Color.navyBlueCTA700 : Color.clear
                             )
                             .overlay(
                                 RoundedRectangle(cornerRadius: 8)
@@ -107,6 +109,7 @@ struct SubscriptionsView: View {
                                         ),
                                         lineWidth: 2
                                     )
+                                    .opacity(viewMode == .analytics ? 0 : 1)
                             )
                             .cornerRadius(8)
                             
@@ -210,9 +213,10 @@ struct SubscriptionsView: View {
             //
             //                        Text("Selected Date: \(selectedDate, formatter: dateFormatter)")
             //                    }
+            //MARK: Analytics view
             if viewMode == .analytics {
-                //                ToastManager.shared.showToast(message: "Coming soon in S4",style:ToastStyle.info)
-                //                AnalyticalView()
+                //                                ToastManager.shared.showToast(message: "Coming soon in S4",style:ToastStyle.info)
+                AnalyticalView()
             } else if let segment = selectedSegment {
                 //MARK: Calender view
                 if segment == .second{
@@ -387,7 +391,7 @@ struct SubscriptionsView: View {
         .background(Color.neutralBg100)
         .padding(20)
         .onAppear {
-            selectedSegment = .first
+            selectedSegment = selectedTab// .first
             page = 0
             self.subscriptionsList.removeAll()
             listSubsApi()
@@ -415,8 +419,13 @@ struct SubscriptionsView: View {
                 buttonTitle : "Delete",
                 imageSize   : 70
             )
+            .onPreferenceChange(InnerHeightPreferenceKey.self) { height in
+                if height > 0 {
+                    deleteSheetHeight = height
+                }
+            }
             .presentationDragIndicator(.hidden)
-            .presentationDetents([.height(340)])
+            .presentationDetents([.height(deleteSheetHeight)])
         }
         .sheet(isPresented: $showFilterSheet) {
             FilterSheet(
@@ -468,8 +477,8 @@ struct SubscriptionsView: View {
             } else if newValue == .second {
                 viewMode = .calendar
             } else {
-                ToastManager.shared.showToast(message: "Coming soon in S4",style:ToastStyle.info)
-                //                viewMode = .analytics
+//                ToastManager.shared.showToast(message: "Coming soon in S4",style:ToastStyle.info)
+                viewMode = .analytics
             }
             callApis()
         }
@@ -529,12 +538,13 @@ struct SubscriptionsView: View {
     }
     
     func updateSubsList(){
+        guard let listResponse = self.subscriptionsVM.listSubsResponse else { return }
         DispatchQueue.main.async {
             if page == 0 {
                 self.subscriptionsList.removeAll()
-                SubscriptionDBManager.shared.deleteAllSubscription()
+//                SubscriptionDBManager.shared.deleteAllSubscription()
             }
-            let listArray = self.subscriptionsVM.listSubsResponse?.subscriptions ?? []
+            let listArray = listResponse.subscriptions ?? []
             for item in listArray
             {
                 SubscriptionDBManager.shared.updateSubscription(params: item)
@@ -681,20 +691,15 @@ struct SubscriptionsView: View {
     }
     
     private func goToNotifications() {
-        ToastManager.shared.showToast(message: "Coming soon in S4",style:ToastStyle.info)
+        subscriptionsVM.navigate(to: .notifications)
+//        ToastManager.shared.showToast(message: "Coming soon in S4",style:ToastStyle.info)
     }
     
     private func clickOnChat() {
         selectedSegment = nil
-        ToastManager.shared.showToast(message: "Coming soon in S4",style:ToastStyle.info)
-        /*
-         viewMode = .analytics
-         */
+//        ToastManager.shared.showToast(message: "Coming soon in S4",style:ToastStyle.info)
+        viewMode = .analytics
     }
-    
-    //    private func clickOnFilter() {
-    //        showFilterSheet = true
-    //    }
     
     private func clickOnFilter() {
         pendingFilterSelect = true

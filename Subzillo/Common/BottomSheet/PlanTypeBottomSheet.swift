@@ -26,7 +26,8 @@ struct PlanTypeBottomSheet: View {
         } ?? []
     }
     
-    let action          : () -> Void
+    let action                          : () -> Void
+    @State private var contentHeight    : CGFloat = .zero
     
     //MARK: - body
     var body: some View {
@@ -61,71 +62,84 @@ struct PlanTypeBottomSheet: View {
             .padding(.horizontal,24)
             
             if filteredPlanTypes.count != 0{
-//                VStack(spacing: 0){
-//                    List(filteredPlanTypes, id: \.self) { planType in
-//                        VStack(spacing: 0) { // no unwanted spacing
-//                            Button {
-//                                selectedPlanType = planType
-//                                action()
-//                                dismiss()
-//                            } label: {
-//                                HStack {
-//                                    Text(planType)
-//                                        .font(.appRegular(16))
-//                                        .foregroundColor(.neutralMain700)
-//                                        .padding(.horizontal, 14)
-//                                        .frame(maxWidth: .infinity, alignment: .leading)
-//                                }
-//                                .frame(maxWidth: .infinity, minHeight: 56)
-//                                .contentShape(Rectangle())
-//                            }
-//                            .buttonStyle(.plain) // remove SwiftUI’s default button padding
-//                            
-//                            if planType != filteredPlanTypes.last {
-//                                Rectangle()
-//                                    .fill(Color.neutralDisabled200)
-//                                    .frame(height: 1)
-//                                    .padding(.horizontal, -20)
-//                            }
-//                        }
-//                        .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0)) // remove default list padding
-//                        .listRowSeparator(.hidden)
-//                    }
-//                    .listStyle(.plain)
-//                }
-                VStack(spacing: 0) {
-                    ForEach(filteredPlanTypes, id: \.self) { planType in
-                        Button {
-                            selectedPlanType = planType
-                            action()
-                            dismiss()
-                        } label: {
-                            HStack {
-                                Text(planType)
-                                    .font(.appRegular(16))
-                                    .foregroundColor(.neutralMain700)
-                                    .padding(.horizontal, 14)
-                                    .frame(maxWidth: .infinity, alignment: .leading)
+                //                VStack(spacing: 0){
+                //                    List(filteredPlanTypes, id: \.self) { planType in
+                //                        VStack(spacing: 0) { // no unwanted spacing
+                //                            Button {
+                //                                selectedPlanType = planType
+                //                                action()
+                //                                dismiss()
+                //                            } label: {
+                //                                HStack {
+                //                                    Text(planType)
+                //                                        .font(.appRegular(16))
+                //                                        .foregroundColor(.neutralMain700)
+                //                                        .padding(.horizontal, 14)
+                //                                        .frame(maxWidth: .infinity, alignment: .leading)
+                //                                }
+                //                                .frame(maxWidth: .infinity, minHeight: 56)
+                //                                .contentShape(Rectangle())
+                //                            }
+                //                            .buttonStyle(.plain) // remove SwiftUI’s default button padding
+                //
+                //                            if planType != filteredPlanTypes.last {
+                //                                Rectangle()
+                //                                    .fill(Color.neutralDisabled200)
+                //                                    .frame(height: 1)
+                //                                    .padding(.horizontal, -20)
+                //                            }
+                //                        }
+                //                        .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0)) // remove default list padding
+                //                        .listRowSeparator(.hidden)
+                //                    }
+                //                    .listStyle(.plain)
+                //                }
+                ScrollView{
+                    VStack(spacing: 0) {
+                        ForEach(filteredPlanTypes, id: \.self) { planType in
+                            Button {
+                                selectedPlanType = planType
+                                action()
+                                dismiss()
+                            } label: {
+                                HStack {
+                                    Text(planType)
+                                        .font(.appRegular(16))
+                                        .foregroundColor(.neutralMain700)
+                                        .padding(.horizontal, 14)
+                                        .frame(maxWidth: .infinity, alignment: .leading)
+                                }
+                                .frame(maxWidth: .infinity, minHeight: 56)
+                                .contentShape(Rectangle())
                             }
-                            .frame(maxWidth: .infinity, minHeight: 56)
-                            .contentShape(Rectangle())
-                        }
-                        .buttonStyle(.plain)
-
-                        if planType != filteredPlanTypes.last {
-                            Rectangle()
-                                .fill(Color.neutralDisabled200)
-                                .frame(height: 1)
+                            .buttonStyle(.plain)
+                            
+                            if planType != filteredPlanTypes.last {
+                                Rectangle()
+                                    .fill(Color.neutralDisabled200)
+                                    .frame(height: 1)
+                            }
                         }
                     }
+                    .background(
+                        GeometryReader { geo in
+                            Color.clear
+                                .onAppear {
+                                    contentHeight = geo.size.height
+                                }
+                                .onChange(of: geo.size.height) { newHeight in
+                                    contentHeight = newHeight
+                                }
+                        }
+                    )
+                    .background(.clear)
+                    .cornerRadius(12)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 12)
+                            .stroke(Color.neutral300Border, lineWidth: 1)
+                    )
+                    .padding(24)
                 }
-                .background(.clear)
-                .cornerRadius(12)
-                .overlay(
-                    RoundedRectangle(cornerRadius: 12)
-                        .stroke(Color.neutral300Border, lineWidth: 1)
-                )
-                .padding(24)
             }else{
                 Text("No data found")
                     .padding(30)
@@ -133,8 +147,9 @@ struct PlanTypeBottomSheet: View {
                     .font(.appRegular(16))
                 Spacer()
             }
-//            Spacer()
+            //            Spacer()
         }
-        .fixedSize(horizontal: false, vertical: true)
+        //        .fixedSize(horizontal: false, vertical: true)
+        .frame(height: min(contentHeight + 200, UIScreen.main.bounds.height - 60)) // Dynamic height with max limit
     }
 }

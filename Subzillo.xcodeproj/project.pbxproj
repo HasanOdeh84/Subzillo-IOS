@@ -12,11 +12,23 @@
 		C5AE441A2EF90836007677EB /* libPhoneNumberShortNumber in Frameworks */ = {isa = PBXBuildFile; productRef = C5AE44192EF90836007677EB /* libPhoneNumberShortNumber */; };
 		C5C4AFDF2EE17A67008E7432 /* FirebaseCrashlytics in Frameworks */ = {isa = PBXBuildFile; productRef = C5C4AFDE2EE17A67008E7432 /* FirebaseCrashlytics */; };
 		C5C4B2C12EE1943C008E7432 /* MSAL in Frameworks */ = {isa = PBXBuildFile; productRef = C5C4B2C02EE1943C008E7432 /* MSAL */; };
+		C5E012812F3B27260084A642 /* BranchSDK in Frameworks */ = {isa = PBXBuildFile; productRef = C5E012802F3B27260084A642 /* BranchSDK */; };
 		C5E416102E9A4DE600E739A3 /* Lottie in Frameworks */ = {isa = PBXBuildFile; productRef = C5E4160F2E9A4DE600E739A3 /* Lottie */; };
 		C5E417872E9A71C900E739A3 /* SDWebImageSwiftUI in Frameworks */ = {isa = PBXBuildFile; productRef = C5E417862E9A71C900E739A3 /* SDWebImageSwiftUI */; };
 		C5E4178A2E9A73BF00E739A3 /* GoogleSignIn in Frameworks */ = {isa = PBXBuildFile; productRef = C5E417892E9A73BF00E739A3 /* GoogleSignIn */; };
 		C5E4178C2E9A73BF00E739A3 /* GoogleSignInSwift in Frameworks */ = {isa = PBXBuildFile; productRef = C5E4178B2E9A73BF00E739A3 /* GoogleSignInSwift */; };
+		C5F41A2A2F28B85A00ADE3CF /* SubzilloShare.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = C5F41A202F28B85A00ADE3CF /* SubzilloShare.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 /* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		C5F41A282F28B85A00ADE3CF /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = C5DA9EE52E7A7B38008901A6 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = C5F41A1F2F28B85A00ADE3CF;
+			remoteInfo = SubzilloShare;
+		};
+/* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
 		0BF6060C2F0289FF002606CC /* Embed Foundation Extensions */ = {
@@ -25,6 +37,7 @@
 			dstPath = "";
 			dstSubfolderSpec = 13;
 			files = (
+				C5F41A2A2F28B85A00ADE3CF /* SubzilloShare.appex in Embed Foundation Extensions */,
 			);
 			name = "Embed Foundation Extensions";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -53,6 +66,7 @@
 
 /* Begin PBXFileReference section */
 		C5DA9EED2E7A7B38008901A6 /* Subzillo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Subzillo.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		C5F41A202F28B85A00ADE3CF /* SubzilloShare.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = SubzilloShare.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -63,6 +77,13 @@
 			);
 			target = C5DA9EEC2E7A7B38008901A6 /* Subzillo */;
 		};
+		C5F41A2E2F28B85A00ADE3CF /* Exceptions for "SubzilloShare" folder in "SubzilloShare" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = C5F41A1F2F28B85A00ADE3CF /* SubzilloShare */;
+		};
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -72,6 +93,14 @@
 				C5DAA0532E7A8140008901A6 /* Exceptions for "Subzillo" folder in "Subzillo" target */,
 			);
 			path = Subzillo;
+			sourceTree = "<group>";
+		};
+		C5F41A212F28B85A00ADE3CF /* SubzilloShare */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				C5F41A2E2F28B85A00ADE3CF /* Exceptions for "SubzilloShare" folder in "SubzilloShare" target */,
+			);
+			path = SubzilloShare;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -86,10 +115,18 @@
 				C5C4B2C12EE1943C008E7432 /* MSAL in Frameworks */,
 				C5E417872E9A71C900E739A3 /* SDWebImageSwiftUI in Frameworks */,
 				C5AE44182EF90836007677EB /* libPhoneNumberGeocoding in Frameworks */,
+				C5E012812F3B27260084A642 /* BranchSDK in Frameworks */,
 				C5C4AFDF2EE17A67008E7432 /* FirebaseCrashlytics in Frameworks */,
 				C5E4178A2E9A73BF00E739A3 /* GoogleSignIn in Frameworks */,
 				C5AE441A2EF90836007677EB /* libPhoneNumberShortNumber in Frameworks */,
 				C5E416102E9A4DE600E739A3 /* Lottie in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		C5F41A1D2F28B85A00ADE3CF /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -100,6 +137,7 @@
 			isa = PBXGroup;
 			children = (
 				C5DA9EEF2E7A7B38008901A6 /* Subzillo */,
+				C5F41A212F28B85A00ADE3CF /* SubzilloShare */,
 				C5DA9EEE2E7A7B38008901A6 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -108,6 +146,7 @@
 			isa = PBXGroup;
 			children = (
 				C5DA9EED2E7A7B38008901A6 /* Subzillo.app */,
+				C5F41A202F28B85A00ADE3CF /* SubzilloShare.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -130,6 +169,7 @@
 			buildRules = (
 			);
 			dependencies = (
+				C5F41A292F28B85A00ADE3CF /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
 				C5DA9EEF2E7A7B38008901A6 /* Subzillo */,
@@ -139,6 +179,28 @@
 			productReference = C5DA9EED2E7A7B38008901A6 /* Subzillo.app */;
 			productType = "com.apple.product-type.application";
 		};
+		C5F41A1F2F28B85A00ADE3CF /* SubzilloShare */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = C5F41A2D2F28B85A00ADE3CF /* Build configuration list for PBXNativeTarget "SubzilloShare" */;
+			buildPhases = (
+				C5F41A1C2F28B85A00ADE3CF /* Sources */,
+				C5F41A1D2F28B85A00ADE3CF /* Frameworks */,
+				C5F41A1E2F28B85A00ADE3CF /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				C5F41A212F28B85A00ADE3CF /* SubzilloShare */,
+			);
+			name = SubzilloShare;
+			packageProductDependencies = (
+			);
+			productName = SubzilloShare;
+			productReference = C5F41A202F28B85A00ADE3CF /* SubzilloShare.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -146,10 +208,13 @@
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
-				LastSwiftUpdateCheck = 1640;
+				LastSwiftUpdateCheck = 1620;
 				LastUpgradeCheck = 1620;
 				TargetAttributes = {
 					C5DA9EEC2E7A7B38008901A6 = {
+						CreatedOnToolsVersion = 16.2;
+					};
+					C5F41A1F2F28B85A00ADE3CF = {
 						CreatedOnToolsVersion = 16.2;
 					};
 				};
@@ -171,6 +236,7 @@
 				C5C4AFDD2EE17A67008E7432 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
 				C5C4B2BF2EE1943C008E7432 /* XCRemoteSwiftPackageReference "microsoft-authentication-library-for-objc" */,
 				C5AE44142EF90836007677EB /* XCRemoteSwiftPackageReference "libPhoneNumber-iOS" */,
+				C5E0127F2F3B27260084A642 /* XCRemoteSwiftPackageReference "ios-branch-sdk-spm" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = C5DA9EEE2E7A7B38008901A6 /* Products */;
@@ -178,12 +244,20 @@
 			projectRoot = "";
 			targets = (
 				C5DA9EEC2E7A7B38008901A6 /* Subzillo */,
+				C5F41A1F2F28B85A00ADE3CF /* SubzilloShare */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
 		C5DA9EEB2E7A7B38008901A6 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		C5F41A1E2F28B85A00ADE3CF /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -220,7 +294,22 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		C5F41A1C2F28B85A00ADE3CF /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		C5F41A292F28B85A00ADE3CF /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = C5F41A1F2F28B85A00ADE3CF /* SubzilloShare */;
+			targetProxy = C5F41A282F28B85A00ADE3CF /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		C5DA9EF92E7A7B39008901A6 /* Debug */ = {
@@ -434,6 +523,62 @@
 			};
 			name = Release;
 		};
+		C5F41A2B2F28B85A00ADE3CF /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = SubzilloShare/SubzilloShare.entitlements;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = B48NJV8578;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = SubzilloShare/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = SubzilloShare;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.krify.Subzillo.SubzilloShare;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		C5F41A2C2F28B85A00ADE3CF /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = SubzilloShare/SubzilloShare.entitlements;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = B48NJV8578;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = SubzilloShare/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = SubzilloShare;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.krify.Subzillo.SubzilloShare;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -451,6 +596,15 @@
 			buildConfigurations = (
 				C5DA9EFC2E7A7B39008901A6 /* Debug */,
 				C5DA9EFD2E7A7B39008901A6 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		C5F41A2D2F28B85A00ADE3CF /* Build configuration list for PBXNativeTarget "SubzilloShare" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				C5F41A2B2F28B85A00ADE3CF /* Debug */,
+				C5F41A2C2F28B85A00ADE3CF /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
@@ -480,6 +634,14 @@
 			requirement = {
 				kind = upToNextMajorVersion;
 				minimumVersion = 2.6.0;
+			};
+		};
+		C5E0127F2F3B27260084A642 /* XCRemoteSwiftPackageReference "ios-branch-sdk-spm" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/BranchMetrics/ios-branch-sdk-spm";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 3.13.3;
 			};
 		};
 		C5E4160E2E9A4DE600E739A3 /* XCRemoteSwiftPackageReference "lottie-spm" */ = {
@@ -533,6 +695,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = C5C4B2BF2EE1943C008E7432 /* XCRemoteSwiftPackageReference "microsoft-authentication-library-for-objc" */;
 			productName = MSAL;
+		};
+		C5E012802F3B27260084A642 /* BranchSDK */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = C5E0127F2F3B27260084A642 /* XCRemoteSwiftPackageReference "ios-branch-sdk-spm" */;
+			productName = BranchSDK;
 		};
 		C5E4160F2E9A4DE600E739A3 /* Lottie */ = {
 			isa = XCSwiftPackageProductDependency;

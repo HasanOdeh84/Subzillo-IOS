@@ -29,6 +29,7 @@ struct SubscriptionPreviewView: View {
     
     //MARK: - Properties
     @State var isFromImage                      : Bool = false
+    @State var isFromEmail                      : Bool = false
     @State var subscriptionsData                : [SubscriptionData]?
     @State var numberOfSubscriptions            : Int = 0
     @State var currentSubscriptions             : Int = 1
@@ -61,6 +62,7 @@ struct SubscriptionPreviewView: View {
     @State var isInitialCurrency                = true
     @State var isServiceChanged                 = false
     @State private var previousBillingCycle     : String?
+    @State private var deleteSheetHeight        : CGFloat = .zero
     
     //MARK: - body
     var body: some View {
@@ -106,8 +108,6 @@ struct SubscriptionPreviewView: View {
                                     VStack(spacing: 0) {
                                         OriginalImageView(image: image)
                                             .frame(maxWidth: .infinity)
-                                        //                                            .background(Color.white)
-                                        //                                            .cornerRadius(50, corners: [.topLeft, .topRight]) // 👈 your custom radius
                                     }
                                     .background(Color.clear)
                                     .presentationDetents([.height(imageHeightForSheet(image))])
@@ -125,28 +125,15 @@ struct SubscriptionPreviewView: View {
             
             ScrollView {
                 VStack(spacing: 24) {
-                    if isFromImage == false && audioURL != nil{
+                    if isFromImage == false && isFromEmail == false && audioURL != nil {
                         VStack(alignment: .leading, spacing: 8) {
-                            
                             Text("Original Content")
                                 .foregroundColor(Color.underlineGray)
                                 .font(.appRegular(18))
                                 .frame(maxWidth: .infinity, alignment: .leading)
                                 .padding(.top, 16)
                                 .padding(.horizontal, 16)
-                            
-                            //                            ScrollView(showsIndicators: true) {
-                            //                                Text(content)
-                            //                                    .foregroundColor(Color.neutralMain700)
-                            //                                    .font(.appRegular(16))
-                            //                                    .frame(maxWidth: .infinity, alignment: .leading)
-                            //                                    .padding(.horizontal, 16)
-                            //                            }
-                            //                            .padding(.bottom, 16)
                             if let url = audioURL{
-                                //                                VoicePlayerUI(audioURL: url, audioManager: playerManager)
-                                //                                    .padding(.horizontal, 16)
-                                //                                    .padding(.bottom,16)
                                 VoicePlayerUI(audioManager: playerManager, audioURL: url)
                                     .padding(.horizontal, 16)
                                     .padding(.bottom,16)
@@ -167,7 +154,6 @@ struct SubscriptionPreviewView: View {
                         HStack(spacing: 8) {
                             Text("Extracted Details")
                                 .font(.appRegular(18))
-                            //                                .foregroundColor(.underlineGray)
                                 .foregroundColor(Color.buttonsText)
                             Spacer()
                             Button(action: onEditAction) {
@@ -338,7 +324,6 @@ struct SubscriptionPreviewView: View {
                             Button(action: onViewAction) {
                                 Text("View")
                                     .font(.appBold(18))
-                                //                                    .foregroundColor(.underlineGray)
                                     .foregroundColor(Color.buttonsText)
                             }
                             .frame(width: 40, alignment: .trailing)
@@ -346,26 +331,7 @@ struct SubscriptionPreviewView: View {
                         .frame(height: 28)
                         
                         VStack(alignment: .leading, spacing: 16) {
-                            
                             HStack(spacing: 12) {
-                                
-                                //                                if (subscriptionData?.serviceLogo ?? "").isEmpty {
-                                //                                    ZStack {
-                                //                                        Color.black
-                                //                                        Text(initials)
-                                //                                            .font(.appBold(16))
-                                //                                            .foregroundColor(.blueMain700)
-                                //                                    }
-                                //                                    .frame(width: 34, height: 34)
-                                //                                    .cornerRadius(8)
-                                //                                } else {
-                                //                                    WebImage(url: URL(string: subscriptionData?.serviceLogo ?? ""))
-                                //                                        .resizable()
-                                //                                        .scaledToFill()
-                                //                                        .frame(width: 34, height: 34)
-                                //                                        .cornerRadius(8)
-                                //                                        .clipped()
-                                //                                }
                                 AvatarView(serviceName: subscriptionData?.serviceName ?? "", serviceLogo: subscriptionData?.serviceLogo ?? "", size: 34, fontSize: 16, fromPreview: true)
                                 VStack(alignment: .leading, spacing: 4) {
                                     Text("\(subscriptionData?.serviceName ?? "") \(subscriptionData?.subscriptionType ?? "")")
@@ -376,16 +342,7 @@ struct SubscriptionPreviewView: View {
                                         .foregroundColor(.neutral500)
                                 }
                                 Spacer()
-                                /*Text(confidenceStr)
-                                 //                                    .frame(maxWidth: .infinity)
-                                 .frame(height: 24)
-                                 .font(.appRegular(14))
-                                 .foregroundColor(.neutralMain700Gray)
-                                 .multilineTextAlignment(.center)
-                                 .padding(.horizontal, 16)
-                                 .background(colorValue)
-                                 .cornerRadius(8)
-                                 */
+                              
                                 ConfidenceBarView(
                                     text        : confidenceStr,
                                     color       : colorValue ?? .confidenceBlue.opacity(0.2),
@@ -405,17 +362,6 @@ struct SubscriptionPreviewView: View {
                                 }
                                 .frame(height: 20)
                                 
-                                //                                HStack(spacing: 8) {
-                                //                                    Text("Subscription start:")
-                                //                                        .font(.appRegular(14))
-                                //                                        .foregroundColor(.neutral500)
-                                //                                    Spacer()
-                                //                                    Text("\(subscriptionData?.lastPaymentDate ?? "")".formattedDate())
-                                //                                        .font(.appBold(14))
-                                //                                        .foregroundColor(.blueMain700)
-                                //                                }
-                                //                                .frame(height: 20)
-                                //
                                 HStack(spacing: 8) {
                                     Text("Next Charge Date:")
                                         .font(.appRegular(14))
@@ -488,6 +434,12 @@ struct SubscriptionPreviewView: View {
                                 .foregroundColor(Color.disCardRed)
                         }
                     }
+                    .onChange(of: subscriptionPreviewVM.isDiscardSuccess) { newValue in
+                        if newValue == true {
+                            handleLocalDiscard()
+                            subscriptionPreviewVM.isDiscardSuccess = false
+                        }
+                    }
                     .sheet(isPresented: $showDiscardPopup) {
                         InfoAlertSheet(
                             onDelegate: {
@@ -498,8 +450,13 @@ struct SubscriptionPreviewView: View {
                             buttonIcon  : "deleteIcon",
                             buttonTitle : "Delete Entry"
                         )
+                        .onPreferenceChange(InnerHeightPreferenceKey.self) { height in
+                            if height > 0 {
+                                deleteSheetHeight = height
+                            }
+                        }
                         .presentationDragIndicator(.hidden)
-                        .presentationDetents([.height(380)])
+                        .presentationDetents([.height(deleteSheetHeight)])
                     }
                 }
                 .frame(maxWidth: .infinity)
@@ -519,7 +476,6 @@ struct SubscriptionPreviewView: View {
                     return
                 }
                 playerManager.setDuration(url: url)
-                //                playerManager.load(url: url)
             }
             updateSubDetails()
             manualEntryVM.getServiceProvidersList()
@@ -563,27 +519,13 @@ struct SubscriptionPreviewView: View {
             .presentationDragIndicator(.hidden)
             .presentationDetents([.height(400)])
         }
-        //MARK: currency onchange
-        //        .onChange(of: subscriptionData?.currency) { newValue in
-        //            guard
-        //                let currency = newValue,
-        //                !currency.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
-        //            else {
-        //                return
-        //            }
-        //            if isCurrencyUpdateGlobal{
-        //                isCurrencyUpdateGlobal = false
-        //            }else{
-        //                if subscriptionData?.serviceName != ""{
-        //                    if isInitialCurrency{
-        //                        isInitialCurrency = false
-        //                    }else{
-        //                        fetchProviderDataApi()
-        //                    }
-        //                }
-        //            }
-        //        }
         .onChange(of: manualEntryVM.providerData) { _ in updateProviderData() }
+        .onChange(of: subscriptionPreviewVM.isDiscardSuccess) { newValue in
+            if newValue == true {
+                handleLocalDiscard()
+                subscriptionPreviewVM.isDiscardSuccess = false
+            }
+        }
     }
     
     //MARK: - User defined methods
@@ -621,16 +563,16 @@ struct SubscriptionPreviewView: View {
                     }
                     isFromAdd = true
                     playerManager.pausePlayback()
-                    AppIntentRouter.shared.navigate(to: .duplicateSubscriptionsView(duplicateSubsList: updatedDuplicates))
+                    AppIntentRouter.shared.navigate(to: .duplicateSubscriptionsView(duplicateSubsList: updatedDuplicates, isFromEmail: isFromEmail))
                 }
                 else{
                     playerManager.pausePlayback()
-                    AppIntentRouter.shared.navigate(to: .subscriptionsListView)
+                    AppIntentRouter.shared.navigate(to: .subscriptionsListView())
                 }
             }
             else{
                 playerManager.pausePlayback()
-                AppIntentRouter.shared.navigate(to: .subscriptionsListView)
+                AppIntentRouter.shared.navigate(to: .subscriptionsListView())
             }
         }
     }
@@ -639,7 +581,6 @@ struct SubscriptionPreviewView: View {
         let screenWidth = UIScreen.main.bounds.width - 40
         let aspectRatio = image.size.height / image.size.width
         let imageHeight = screenWidth * aspectRatio
-        // Add some padding + capsule area
         return imageHeight + 150
     }
     
@@ -657,7 +598,7 @@ struct SubscriptionPreviewView: View {
         if numberOfSubscriptions > 0
         {
             subscriptionData = subscriptionsData?[currentSubscriptions-1]
-//            subscriptionData?.billingCycle = (subscriptionData?.billingCycle == "" || subscriptionData?.billingCycle == nil) ? "Monthly" : subscriptionData?.billingCycle //no need
+            //            subscriptionData?.billingCycle = (subscriptionData?.billingCycle == "" || subscriptionData?.billingCycle == nil) ? "Monthly" : subscriptionData?.billingCycle //no need
             let chargeDate = Constants.shared.getNextDateByFrequency(frequency: subscriptionData?.billingCycle ?? "").formattedDate(from: "dd/MM/yyyy", to: "yyyy-MM-dd")
             if subscriptionData?.nextPaymentDate == nil || subscriptionData?.nextPaymentDate == ""{
                 subscriptionData?.nextPaymentDate = chargeDate
@@ -667,18 +608,6 @@ struct SubscriptionPreviewView: View {
             confidenceStr = confidenceStr1
             colorValue = colorValue1
             fillRatio = fillRatio1
-            //            let serviceName = subscriptionData?.serviceName ?? ""
-            //            let words = serviceName
-            //                .split(separator: " ")
-            //                .filter { !$0.isEmpty }
-            //
-            //            if words.count == 1 {
-            //                initials = String(words[0].prefix(1)).uppercased()
-            //            } else {
-            //                initials = words.prefix(2)
-            //                    .map { String($0.prefix(1)).uppercased() }
-            //                    .joined()
-            //            }
             updateCountryAndCurrency()
         }
     }
@@ -759,7 +688,7 @@ struct SubscriptionPreviewView: View {
         {
             globalSubscriptionData = subscriptionData!
             playerManager.pausePlayback()
-            AppIntentRouter.shared.navigate(to: .manualEntry(isFromEdit: true))
+            AppIntentRouter.shared.navigate(to: .manualEntry(isFromEdit: true, isFromEmail: isFromEmail))
         }
     }
     
@@ -809,8 +738,9 @@ struct SubscriptionPreviewView: View {
             else {
                 //source -> 1- manual, 2 - voice, 3 - image, 4 - email
                 var source = 2
-                if isFromImage == true
-                {
+                if isFromEmail {
+                    source = 4
+                } else if isFromImage == true {
                     source = 3
                 }
                 var subsctionsArray: [ConfirmedSubscription] = []
@@ -821,7 +751,7 @@ struct SubscriptionPreviewView: View {
                     if objc.currency == "" || objc.currency == nil || objc.currency == "null" {
                         currency = Constants.shared.currencyCode
                     }
-//                    let currency = (objc.currency ?? "" == "") ? Constants.shared.currencyCode : (objc.currency ?? "")
+                    //                    let currency = (objc.currency ?? "" == "") ? Constants.shared.currencyCode : (objc.currency ?? "")
                     let logoUrl = getFileName(from: objc.serviceLogo ?? "")
                     let subObjc = ConfirmedSubscription(serviceName         : objc.serviceName ?? "",
                                                         serviceLogo         : logoUrl,
@@ -837,7 +767,8 @@ struct SubscriptionPreviewView: View {
                                                         renewalReminder     : objc.renewalReminder ?? [],
                                                         notes               : objc.reason ?? "",
                                                         currencySymbol      : objc.currencySymbol ?? "",
-                                                        source              : source)
+                                                        source              : source,
+                                                        sourceReference     : isFromEmail ? objc.sourceReference : nil)
                     subsctionsArray.append(subObjc)
                 }
                 let input = PendingSubscriptionConfirmRequest(userId: Constants.getUserId(), confirmedSubscription: subsctionsArray)
@@ -855,6 +786,20 @@ struct SubscriptionPreviewView: View {
     }
     
     private func performDeleteAction() {
+        if isFromEmail {
+            if let subId = subscriptionData?.id {
+                let input = DiscardEmailSubscriptionRequest(userId          : Constants.getUserId(),
+                                                            subscriptionId  : subId)
+                subscriptionPreviewVM.discardEmailSubscriptionApi(input: input)
+            } else {
+                handleLocalDiscard()
+            }
+        } else {
+            handleLocalDiscard()
+        }
+    }
+    
+    private func handleLocalDiscard() {
         if numberOfSubscriptions < 2
         {
             dismiss()
@@ -870,7 +815,6 @@ struct SubscriptionPreviewView: View {
             {
                 currentSubscriptions = numberOfSubscriptions
             }
-            //currentSubscriptions = 1
             getSubDetails()
         }
     }
@@ -934,15 +878,6 @@ struct SubscriptionDetailsItem: View {
                     .font(.appBold(16))
                     .foregroundColor(.neutralMain700)
                 
-                //                Text(confidenceStr)
-                //                    .frame(maxWidth: .infinity)
-                //                    .frame(height: 28)
-                //                    .font(.appRegular(14))
-                //                    .foregroundColor(.neutralMain700Gray)
-                //                    .multilineTextAlignment(.center)
-                //                    .padding(.horizontal, 16)
-                //                    .background(colorValue)
-                //                    .cornerRadius(4)
                 ConfidenceBarView(
                     text        : confidenceStr,
                     color       : colorValue,
@@ -982,15 +917,6 @@ struct VoicePlayerUI: View {
                     .frame(width: 40, height: 40)
             }
             
-            //            Slider(value: Binding(
-            //                get: { audioManager.currentTime },
-            //                set: { newValue in
-            //                    audioManager.currentTime = newValue
-            //                    audioManager.audioPlayer?.currentTime = newValue
-            //                }
-            //            ), in: 0...audioManager.duration)
-            //            .tint(.navyBlueCTA700)
-            
             VStack{
                 Spacer()
                 GradientThumbSlider(
@@ -1006,7 +932,6 @@ struct VoicePlayerUI: View {
                 )
                 Spacer()
             }
-            //            .frame(height: 40)
             
             Text("\(formatTime(TimeInterval(Int(audioManager.currentTime)))) / \(formatTime(TimeInterval(Int(audioManager.duration))))")
                 .font(.appRegular(14))

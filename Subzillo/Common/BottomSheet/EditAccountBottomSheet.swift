@@ -39,7 +39,6 @@ struct EditAccountBottomSheet: View {
                 .fill(Color.grayCapsule)
                 .frame(width: 150, height: 5)
                 .padding(.top,24)
-                .padding(.horizontal, -5)
             
             Text(LocalizedStringKey(title ?? ""))
                 .font(.appRegular(24))
@@ -47,7 +46,6 @@ struct EditAccountBottomSheet: View {
                 .multilineTextAlignment(.center)
                 .padding(.top,24)
                 .padding(.bottom,36)
-                .padding(.horizontal, -5)
             
             switch accountType {
             case .name:
@@ -56,7 +54,7 @@ struct EditAccountBottomSheet: View {
                 ReusableTextField2(placeholder: "name@example.com", text: $email, header: "Email", isImage: false)
             case .mobile:
                 PhoneNumberField(phoneNumber        : $mobile,
-                                 header             : "Enter your Mobile number",
+                                 header             : "Mobile number",
                                  placeholder        : "000 000 000",
                                  selectedCurrency   : $selectedCurrency,
                                  selectedCountry    : $selectedCountry,
@@ -72,7 +70,6 @@ struct EditAccountBottomSheet: View {
                                  isCountry          : false)
             }
             
-            //MARK: - Update button
             GradientBorderButton(title          : buttonTitle ?? "",
                                  isBtn          : true,
                                  buttonImage    : buttonIcon ?? "") {
@@ -98,7 +95,8 @@ struct EditAccountBottomSheet: View {
                 }
             }
                                  .padding(.vertical,36)
-                                 .padding(.horizontal, -5)
+            
+            Spacer()
         }
         .padding(.horizontal, 24)
         //MARK: OnAppear

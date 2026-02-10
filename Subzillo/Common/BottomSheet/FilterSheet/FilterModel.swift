@@ -8,8 +8,8 @@ import Foundation
 struct FilterModel: Codable {
     var categoryId                      : String? = nil
     var categoryName                    : String? = nil
-    var includeFamilySubscriptions      : Bool = false
-    var includeExpiredSubscriptions     : Bool = false
+    var includeFamilySubscriptions      : Bool = true
+    var includeExpiredSubscriptions     : Bool = true
     var costOrder                       : Int = 0
     var renewalDateOrder                : OrderType = .none
     var familyMemberIds                 : [String] = []

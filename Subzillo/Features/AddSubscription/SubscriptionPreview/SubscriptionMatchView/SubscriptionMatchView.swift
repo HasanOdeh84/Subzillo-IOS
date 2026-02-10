@@ -17,12 +17,14 @@ struct SubscriptionMatchView: View {
     @State var subscriptionData                 : SubscriptionData?
     @State var initials                         : String  = ""
     @StateObject var subscriptionMatchVM        = SubscriptionMatchViewModel()
-    @State var subscriptionId                   : String?
-    @State var fromList                         = false
+    var subscriptionId                          : String?
+    var fromList                                = false
+    @State private var justAppeared             : Bool = false
     @State var showDeletePopup                  : Bool = false
     @StateObject var subscriptionsVM            = SubscriptionsViewModel()
     @State var renewalReminderValue             = ""
     @State var paymentMethodDataName            = ""
+    @State private var deleteSheetHeight        : CGFloat = .zero
     
     private var serviceLogoURL: URL? {
         guard let logo = subscriptionData?.serviceLogo,
@@ -138,7 +140,7 @@ struct SubscriptionMatchView: View {
                             if subscriptionData?.subscriptionFor ?? "" == "" || subscriptionData?.subscriptionFor ?? "" == Constants.getUserId(){
                                 SubscriptionDetailsPlainItem(title: "Benefit From", value: "Me")
                             }else{
-                                SubscriptionDetailsPlainItem(title: "Benefit From", value: "")
+                                SubscriptionDetailsPlainItem(title: "Benefit From", value: subscriptionData?.nickName)
                             }
                             //                            SubscriptionDetailsPlainItem(title: "Benefit From", value: subscriptionData?.subscriptionFor ?? "" == "" ? "Me" : subscriptionData?.subscriptionFor ?? "")
                             SubscriptionDetailsPlainItem(title: "Renewal Reminders", value: renewalReminderValue)
@@ -204,16 +206,55 @@ struct SubscriptionMatchView: View {
             .padding(.top, 10)
             .background(.neutralBg100)
             .navigationBarBackButtonHidden(true)
-            .onAppear{
-                if fromList{
+            .onAppear {
+                justAppeared = true
+                if fromList {
                     self.showOfflineDetails()
                     subscriptionMatchVM.getSubscriptionDetails(input: GetSubscriptionDetailsRequest(userId: Constants.getUserId(), subscriptionId: subscriptionId ?? ""))
-                }else{
+                } else {
                     getSubDetails()
+                }
+                if let serviceName = subscriptionData?.serviceName {
+                    let words = serviceName
+                        .split(separator: " ")
+                        .filter { !$0.isEmpty }
+                    
+                    if words.count == 1 {
+                        initials = String(words[0].prefix(1)).uppercased()
+                    } else {
+                        initials = words.prefix(2)
+                            .map { String($0.prefix(1)).uppercased() }
+                            .joined()
+                    }
+                }
+                DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+                    justAppeared = false
+                }
+            }
+            .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("RefreshScreenData"))) { notification in
+                if !justAppeared {
+                    if fromList {
+                        self.showOfflineDetails()
+                        let idFromPush = notification.userInfo?["subscriptionId"] as? String
+                        let finalId = (idFromPush?.isEmpty == false) ? idFromPush : subscriptionId
+                        subscriptionMatchVM.getSubscriptionDetails(input: GetSubscriptionDetailsRequest(userId: Constants.getUserId(), subscriptionId: finalId ?? ""))
+                    }else{
+                        getSubDetails()
+                    }
+                }
+            }
+            .onChange(of: subscriptionId) { newId in
+                if !justAppeared {
+                    if fromList {
+                        self.showOfflineDetails()
+                        subscriptionMatchVM.getSubscriptionDetails(input: GetSubscriptionDetailsRequest(userId: Constants.getUserId(), subscriptionId: newId ?? ""))
+                    }
                 }
             }
             .onChange(of: globalSubscriptionData) { _ in updateSubDetails() }
-            .onChange(of: subscriptionMatchVM.getSubsDetailsResponse) { _ in updateSubDetails() }
+            .onChange(of: subscriptionMatchVM.getSubsDetailsResponse) { _ in
+                updateSubDetails()
+            }
             .onChange(of: subscriptionsVM.isDeletedSubscription) { _ in
                 if subscriptionsVM.isDeletedSubscription == true {
                     SubscriptionDBManager.shared.deleteSubscription(id: subscriptionData?.id ?? "")
@@ -231,8 +272,13 @@ struct SubscriptionMatchView: View {
                     buttonTitle : "Delete",
                     imageSize   : 70
                 )
+                .onPreferenceChange(InnerHeightPreferenceKey.self) { height in
+                    if height > 0 {
+                        deleteSheetHeight = height
+                    }
+                }
                 .presentationDragIndicator(.hidden)
-                .presentationDetents([.height(340)])
+                .presentationDetents([.height(deleteSheetHeight)])
             }
             .onReceive(NotificationCenter.default.publisher(for: .closeAllBottomSheets)) { _ in
                 showDeletePopup = false
@@ -248,7 +294,33 @@ struct SubscriptionMatchView: View {
             
             guard let subData = subDetails else { return }
             
-            subscriptionData =  SubscriptionData(id: subData.id, serviceName: subData.serviceName, serviceLogo: subData.serviceLogo, subscriptionType: subData.subscriptionType, amount: subData.amount, currency: subData.currency, currencySymbol: subData.currencySymbol, billingCycle: subData.billingCycle, nextPaymentDate: subData.nextPaymentDate, paymentMethodId: subData.paymentMethod, paymentMethod: subData.paymentMethodName, paymentMethodName: subData.paymentMethodName, category: subData.category, categoryName: subData.categoryName, isSubscription: true, subscriptionForName: subData.subscriptionFor, paymentMethodDataId: subData.paymentMethodDataId, paymentMethodDataName: subData.paymentMethodDataName, renewalReminder: subData.renewalReminder, renewalReminders: subData.renewalReminder, notes: subData.notes, status: subData.status, cardName: subData.cardName, cardNumber: subData.cardNumber, nickName: subData.nickName, color: subData.color)
+            subscriptionData =  SubscriptionData(id                     : subData.id,
+                                                 serviceName            : subData.serviceName,
+                                                 serviceLogo            : subData.serviceLogo,
+                                                 subscriptionType       : subData.subscriptionType,
+                                                 amount                 : subData.amount,
+                                                 currency               : subData.currency,
+                                                 currencySymbol         : subData.currencySymbol,
+                                                 billingCycle           : subData.billingCycle,
+                                                 nextPaymentDate        : subData.nextPaymentDate,
+                                                 paymentMethodId        : subData.paymentMethod,
+                                                 paymentMethod          : subData.paymentMethodName,
+                                                 paymentMethodName      : subData.paymentMethodName,
+                                                 category               : subData.category,
+                                                 categoryName           : subData.categoryName,
+                                                 isSubscription         : true,
+                                                 subscriptionForName    : subData.nickName,
+                                                 subscriptionFor        : subData.subscriptionFor,
+                                                 paymentMethodDataId    : subData.paymentMethodDataId,
+                                                 paymentMethodDataName  : subData.paymentMethodDataName,
+                                                 renewalReminder        : subData.renewalReminder,
+                                                 renewalReminders       : subData.renewalReminder,
+                                                 notes                  : subData.notes,
+                                                 status                 : subData.status,
+                                                 cardName               : subData.cardName,
+                                                 cardNumber             : subData.cardNumber,
+                                                 nickName               : subData.nickName,
+                                                 color                  : subData.color)
             
             var remindersData = [
                 ManualDataInfo(id: "1", title: "3 days before renewal", value: "-3d"),

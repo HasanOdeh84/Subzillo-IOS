@@ -53,8 +53,18 @@ struct SplashView: View {
     }
     
     private func navigateToNextScreen() {
+        // If a notification already triggered a navigation, 
+        // don't perform the default splash navigation.
+        if router.hasNavigatedFromSplash {
+            return
+        }
         if appState.isLoggedIn {
-            router.navigatingRoute = .home
+            if let target = router.pendingNotification {
+                router.resetStackTo = [.home, target]
+                router.pendingNotification = nil
+            } else {
+                router.navigatingRoute = .home
+            }
         } else {
             router.navigatingRoute = .login
         }

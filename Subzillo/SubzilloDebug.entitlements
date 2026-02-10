@@ -8,7 +8,13 @@
 	<array>
 		<string>Default</string>
 	</array>
+	<key>com.apple.developer.associated-domains</key>
+	<array/>
 	<key>com.apple.developer.siri</key>
 	<true/>
+	<key>com.apple.security.application-groups</key>
+	<array>
+		<string>group.com.krify.Subzillo</string>
+	</array>
 </dict>
 </plist>

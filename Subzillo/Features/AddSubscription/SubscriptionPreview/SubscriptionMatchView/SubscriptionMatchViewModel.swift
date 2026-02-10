@@ -20,6 +20,7 @@ class SubscriptionMatchViewModel: NSObject, ObservableObject {
     }
     
     func getSubscriptionDetails(input:GetSubscriptionDetailsRequest) {
+        self.getSubsDetailsResponse = nil
         apiReference.postApi(endPoint: APIEndpoint.getSubscriptionDetails, method: .POST,token: authKey,body: input,showLoader: true, responseType: GetSubscriptionDetailsResponse.self)
             .sink { [unowned self] completion in
                 if case let .failure(error) = completion {

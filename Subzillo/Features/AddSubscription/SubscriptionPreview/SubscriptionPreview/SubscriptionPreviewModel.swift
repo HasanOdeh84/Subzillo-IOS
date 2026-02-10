@@ -28,6 +28,7 @@ public struct ConfirmedSubscription: Codable {
     let notes                   : String
     let currencySymbol          : String
     let source                  : Int
+    let sourceReference         : Int?
 }
 
 public struct PendingSubscriptionConfirmResponse: Codable {
@@ -37,4 +38,9 @@ public struct PendingSubscriptionConfirmResponse: Codable {
 
 public struct PendingSubscriptionConfirmResponseData: Codable {
     var duplicates              : [DuplicatesData]?
+}
+
+public struct DiscardEmailSubscriptionRequest: Codable {
+    let userId                  : String
+    let subscriptionId          : String
 }

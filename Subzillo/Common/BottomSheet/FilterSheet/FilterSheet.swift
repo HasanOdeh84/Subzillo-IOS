@@ -39,6 +39,7 @@ struct FilterSheet: View {
     @State private var relationsData            = [
         ManualDataInfo(id: Constants.getUserId(), title: "Me")
     ]
+    @State private var sheetHeight              : CGFloat = 400
     
     //MARK: - body
     var body: some View {
@@ -79,7 +80,7 @@ struct FilterSheet: View {
                             .presentationDetents([.large])
                             .presentationDragIndicator(.hidden)
                         }
-                        .padding(.horizontal, -5)
+                        .padding(.horizontal, 0)
                     }
                     .padding(.bottom, 20)
                     
@@ -142,10 +143,24 @@ struct FilterSheet: View {
                                     //                          members: addSubscriptionVM.listFamilyMembersResponse ?? []
                                     members: familyMembersWithMe
                                 )
-                                .presentationDetents([.height(400)]) //need to change to dynamic height
+                                .overlay {
+                                    GeometryReader { geo in
+                                        Color.clear
+                                            .preference(
+                                                key: InnerHeightPreferenceKey.self,
+                                                value: geo.size.height
+                                            )
+                                    }
+                                }
+                                .onPreferenceChange(InnerHeightPreferenceKey.self) { height in
+                                    if height > 150 {
+                                        sheetHeight = height
+                                    }
+                                }
+                                .presentationDetents([.height(sheetHeight)])
                                 .presentationDragIndicator(.hidden)
                             }
-                            .padding(.horizontal, -5)
+                            .padding(.horizontal, 0)
                         }
                         .padding(.bottom, 20)
                     }
@@ -185,7 +200,7 @@ struct FilterSheet: View {
                             .presentationDetents([.height(300)])
                             .presentationDragIndicator(.hidden)
                         }
-                        .padding(.horizontal, -5)
+                        .padding(.horizontal, 0)
                     }
                 } else {
                     Text("Sort by cost or renewal date")
@@ -261,7 +276,7 @@ struct FilterSheet: View {
                 }
                 CustomButton(title: "Apply",action: onApplyAction)
             }
-            .padding(.horizontal,-15)
+            .padding(.horizontal, 0)
             Spacer()
         }
         .padding(.horizontal, 40)
@@ -275,12 +290,12 @@ struct FilterSheet: View {
                let categories = commonApiVM.categoriesResponse {
                 selectedCategory = categories.first { $0.id == categoryId }
             }
-            if !filterData.familyMemberIds.isEmpty {
-                selectedFamilyMembers =
-                familyMembersWithMe.filter {
-                    filterData.familyMemberIds.contains($0.id ?? "")
-                }
+            
+            if let categoryId = filterData.categoryId,
+               let categories = commonApiVM.categoriesResponse {
+                selectedCategory = categories.first { $0.id == categoryId }
             }
+            
             if let month = filterData.month,
                let year = filterData.year {
                 chargeDate = String(format: "%02d/%d", month, year)
@@ -329,12 +344,10 @@ struct FilterSheet: View {
             }
         }
         
-        if filterData != nil{
             if let categoryId = filterData.categoryId,
                let categories = commonApiVM.categoriesResponse {
                 selectedCategory = categories.first { $0.id == categoryId }
             }
-        }
     }
     
     func updateRelationInfo()
@@ -350,6 +363,17 @@ struct FilterSheet: View {
                 )
             }
             updateUserInfo()
+            
+            // Sync selectedFamilyMembers with filterData
+            if filterData.familyMemberIds.isEmpty {
+                // If it's a fresh/reset filter, select all by default
+                selectedFamilyMembers = familyMembersWithMe
+            } else {
+                // Restore previous selection against the loaded members
+                selectedFamilyMembers = familyMembersWithMe.filter { member in
+                    filterData.familyMemberIds.contains(member.id ?? "")
+                }
+            }
         }
     }
     
@@ -367,15 +391,15 @@ struct FilterSheet: View {
     
     func resetFilters() {
         filterData = FilterModel(
-            includeFamilySubscriptions: false,
-            includeExpiredSubscriptions: false,
+            includeFamilySubscriptions: true,
+            includeExpiredSubscriptions: true,
             costOrder: 0,
             renewalDateOrder: .none
         )
         filterData.familyMemberIds = []
         selectedCategory = nil
         category = ""
-        selectedFamilyMembers.removeAll()
+        selectedFamilyMembers = familyMembersWithMe
         isClear = true
     }
     
@@ -410,10 +434,11 @@ struct FilterSheet: View {
     //MARK: - Button actions
     private func onApplyAction() {
         if isClear{
-            filterData = FilterModel(includeFamilySubscriptions : false,
-                                     includeExpiredSubscriptions: false,
+            filterData = FilterModel(includeFamilySubscriptions : true,
+                                     includeExpiredSubscriptions: true,
                                      costOrder                  : 0,
                                      renewalDateOrder           : .none)
+            filterData.familyMemberIds = familyMembersWithMe.compactMap { $0.id }
         }
         onDelegate?(filterData)
         dismiss()

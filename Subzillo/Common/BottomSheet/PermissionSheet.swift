@@ -14,6 +14,7 @@ struct PermissionSheet: View {
     var title                         : String
     var type                          : String
     var value                         : String
+    var hideManualBtn                 : Bool = false
     
     //MARK: - body
     var body: some View {
@@ -67,8 +68,10 @@ struct PermissionSheet: View {
             CustomButton(title: "Open settings", buttonImage: "settingsicon", action: onSettingsAction)
                 .padding(.top, 24)
             
-            GradientBorderButton(title: "Add Manually Instead", isBtn: true, buttonImage: "text-creation1", action: onManualAction, backgroundColor: .whiteBlackBG)
-                .padding(.vertical, 16)
+            if !hideManualBtn{
+                GradientBorderButton(title: "Add Manually Instead", isBtn: true, buttonImage: "text-creation1", action: onManualAction, backgroundColor: .whiteBlackBG)
+                    .padding(.vertical, 16)
+            }
         }
         .padding(.horizontal, 20)
     }

@@ -34,6 +34,9 @@ class SubscriptionsViewModel: ObservableObject {
         receiveValue: { response in
             PrintLogger.modelLog(response, type: .response, isInput: false)
             self.listSubsResponse = response.data
+            if input.page == 0 {
+                SubscriptionDBManager.shared.deleteAllSubscription()
+            }
         }
         .store(in: &self.subscriptions)
     }

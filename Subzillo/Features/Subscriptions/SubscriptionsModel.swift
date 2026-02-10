@@ -15,8 +15,8 @@ struct ListSubscriptionsRequest: Codable{
 }
 
 public struct SubscriptionFilter: Codable {
-    var includeFamilyMembers        : Bool = false
-    var includeExpiredSubscriptions : Bool = false
+    var includeFamilyMembers        : Bool = true
+    var includeExpiredSubscriptions : Bool = true
     var amountOrder                 : String = "asc"
     var nextPaymentDateOrder        : String = "asc"
     var categoryId                  : String?

@@ -25,20 +25,58 @@ enum NavigationRoute: Hashable{
     case chat
     case appearance
     case notifications
-    case manualEntry(isFromEdit:Bool = false, isFromListEdit: Bool = false, subscriptionId:String = "", familyMemberId:String = "")
+    case manualEntry(isFromEdit:Bool = false, isFromListEdit: Bool = false, subscriptionId:String = "", familyMemberId:String = "", isFromEmail: Bool = false)
     case voiceCommandView
-    case subscriptionPreviewView(subscriptionsData:[SubscriptionData]?, content: String, isFromImage:Bool, audioUrl:URL?)
+    case subscriptionPreviewView(subscriptionsData:[SubscriptionData]?, content: String, isFromImage:Bool, isFromEmail: Bool = false, audioUrl:URL?)
     case subscriptionMatchView(subscriptionData:SubscriptionData = SubscriptionData(), fromList:Bool = false, subscriptionId:String = "")
     case pasteTextView
-    case duplicateSubscriptionsView(duplicateSubsList: [DuplicateDataInfo], fromFamily:Bool = false)
-    case duplicateUpdateView(duplicateSubsList: DuplicateDataInfo?, selectedIndex: Int, fromFamily:Bool = false)
+    case duplicateSubscriptionsView(duplicateSubsList: [DuplicateDataInfo], fromFamily:Bool = false, isFromEmail: Bool = false)
+    case duplicateUpdateView(duplicateSubsList: DuplicateDataInfo?, selectedIndex: Int, fromFamily:Bool = false, isFromEmail: Bool = false)
     case addSubscriptionsView
     case duplicateSubDetailsView(subscriptionData: SubscriptionInfo?)
-    case subscriptionsListView
+    case subscriptionsListView(selectedSegment: Segment = .first)
     case myCards
     case familyMembersView
     case connectEmail
-    case connectedEmailsList
+    case connectedEmailsList(isIntegrations:Bool = false)
+    case settings
+    case contactUs
+    case pricingPlans
+    case inviteFriends
+}
+
+extension NavigationRoute {
+    var subId: String? {
+        switch self {
+        case .manualEntry(_, _, let id, _, _):
+            return id
+        case .subscriptionMatchView(_, _, let id):
+            return id
+        default:
+            return nil
+        }
+    }
+    
+    func isSameRoute(as other: NavigationRoute) -> Bool {
+        switch (self, other) {
+        case (.home, .home): 
+            return true
+        case (.subscriptionMatchView(_, _, let id1), .subscriptionMatchView(_, _, let id2)):
+            return id1 == id2 && !id1.isEmpty
+        case (.connectedEmailsList(let i1), .connectedEmailsList(let i2)):
+            return i1 == i2
+        case (.pricingPlans, .pricingPlans): 
+            return true
+        case (.notifications, .notifications): 
+            return true
+        case (.settings, .settings):
+            return true
+        case (.subscriptionsListView(let s1), .subscriptionsListView(let s2)):
+            return s1 == s2
+        default:
+            return false
+        }
+    }
 }
 
 enum FocusPin {
@@ -67,7 +105,7 @@ enum loginCheckType: Int, Codable{
 }
 
 enum Segment {
-    case first, second
+    case first, second, third
 }
 
 enum ListType {

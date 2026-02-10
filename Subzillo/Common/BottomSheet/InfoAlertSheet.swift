@@ -19,6 +19,7 @@ struct InfoAlertSheet: View {
     var buttonTitle                         : String?
     var titleFont                           : Font? = .appRegular(18)
     var imageSize                           : CGFloat = 100
+    var isCancelButtonVisible               : Bool = false
     
     //MARK: - body
     var body: some View {
@@ -28,46 +29,75 @@ struct InfoAlertSheet: View {
                 .frame(width: 150, height: 5)
                 .padding(.top,24)
             
+            if !isCancelButtonVisible{
                 ZStack(alignment: .topTrailing) {
                     Image(imageName ?? "")
                         .frame(width: imageSize, height: imageSize)
                 }
                 .frame(width: imageSize, height: imageSize, alignment: .center)
                 .frame(maxWidth: .infinity, alignment: .center)
-                
-                if subTitle != ""
-                {
-                    VStack(alignment: .center, spacing: 8) {
-                        Text(LocalizedStringKey(title ?? ""))
-                            .font(.appSemiBold(24))
-                            .foregroundStyle(.neutralMain700)
-                            .multilineTextAlignment(.center)
-                        
-                        Text(LocalizedStringKey(subTitle ?? ""))
-                            .font(.appRegular(18))
-                            .foregroundStyle(.underlineGray)
-                            .multilineTextAlignment(.center)
-                            .lineSpacing(4)
-                    }
-                }
-                else{
+            }
+            
+            if subTitle != ""
+            {
+                VStack(alignment: .center, spacing: isCancelButtonVisible ? 12 : 8) {
                     Text(LocalizedStringKey(title ?? ""))
-                        .font(titleFont)
+                        .font(.appSemiBold(24))
+                        .foregroundStyle(.neutralMain700)
+                        .multilineTextAlignment(.center)
+                        .fixedSize(horizontal: false, vertical: true)
+                    
+                    Text(LocalizedStringKey(subTitle ?? ""))
+                        .font(.appRegular(18))
                         .foregroundStyle(.underlineGray)
                         .multilineTextAlignment(.center)
                         .lineSpacing(4)
-                        .padding(.horizontal, 40)
+                        .fixedSize(horizontal: false, vertical: true)
                 }
-                   
+            }
+            else{
+                Text(LocalizedStringKey(title ?? ""))
+                    .font(titleFont)
+                    .foregroundStyle(.underlineGray)
+                    .multilineTextAlignment(.center)
+                    .lineSpacing(4)
+                    .padding(.horizontal, 40)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            
+            if !isCancelButtonVisible{
                 GradientBorderButton(title          : buttonTitle ?? "",
                                      isBtn          : true,
                                      buttonImage    : buttonIcon ?? "") {
                     onDelegate?()
                     dismiss()
                 }
-            Spacer()
-         }
+                                     .padding(.bottom, 24)
+            }else{
+                HStack(spacing: 0)  {
+                    GradientBorderButton(title: "Cancel", action:{
+                        dismiss()
+                    }, backgroundColor:.whiteBlack)
+                    .padding(.horizontal)
+                    CustomButton(title: buttonTitle ?? "", height:50, action: {
+                        onDelegate?()
+                        dismiss()
+                    })
+                    .padding(.horizontal)
+                }
+            }
+        }
         .padding(.horizontal, 20)
+        .fixedSize(horizontal: false, vertical: true)
+        .overlay {
+            GeometryReader { geo in
+                Color.clear
+                    .preference(
+                        key: InnerHeightPreferenceKey.self,
+                        value: geo.size.height
+                    )
+            }
+        }
     }
 }
 
@@ -103,6 +133,7 @@ struct InfoVoiceAlertSheet: View {
                 .font(titleFont)
                 .foregroundStyle(.underlineGray)
                 .multilineTextAlignment(.center)
+                .fixedSize(horizontal: false, vertical: true)
             
             GradientBorderButton(title          : buttonTitle ?? "",
                                  isBtn          : true,
@@ -110,9 +141,18 @@ struct InfoVoiceAlertSheet: View {
                 onDelegate?()
                 dismiss()
             }
-            
-            Spacer()
+            .padding(.bottom, 24)
         }
         .padding(.horizontal, 24)
+        .fixedSize(horizontal: false, vertical: true)
+        .overlay {
+            GeometryReader { geo in
+                Color.clear
+                    .preference(
+                        key: InnerHeightPreferenceKey.self,
+                        value: geo.size.height
+                    )
+            }
+        }
     }
 }

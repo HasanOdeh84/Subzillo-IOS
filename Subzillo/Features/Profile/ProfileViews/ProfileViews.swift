@@ -49,9 +49,10 @@ struct ProfileHeaderView: View {
 struct ProfileHeader: View {
     
     //MARK: - Properties
-    var title           : String
-    var onSettings      : (() -> Void)? = nil
-    var onNotificationAction: (() -> Void)? = nil
+    var title                           : String
+    var onSettings                      : (() -> Void)? = nil
+    var onNotificationAction            : (() -> Void)? = nil
+    @EnvironmentObject var commonApiVM  : CommonAPIViewModel
     
     var body: some View {
         HStack {
@@ -78,16 +79,29 @@ struct ProfileHeader: View {
                         .frame(width: 32, height: 32)
                 }
                 
-//                Text("3")
-//                    .font(.appBold(11))
-//                    .foregroundColor(Color.white)
-//                    .frame(width: 16, height: 16)
-//                    .background(Color.redBadge)
-//                    .cornerRadius(4)
-//                    .offset(x: 0, y: -5)
+                if let count = commonApiVM.unreadCountResponse?.unreadCount{
+                    if count != 0{
+                        var filterCount = count >= 10 ? "9+" : "\(count)"
+                        Text(filterCount)
+                            .font(.appBold(11))
+                            .foregroundColor(Color.white)
+                            .frame(width: 16, height: 15)
+                            .multilineTextAlignment(.center)
+                        //                        .padding(4)
+                            .background(Color.redBadge)
+                            .cornerRadius(4)
+                            .offset(x: 0, y: -5)
+                    }
+                }
             }
         }
+        .offset(x: 0, y: -5)
         .frame(height: 32)
+        .onAppear{
+            if commonApiVM.unreadCountResponse == nil{
+                commonApiVM.unreadNotificationCount(input: UnreadNotificationCountRequest(userId: Constants.getUserId()))
+            }
+        }
     }
 }
 
@@ -132,22 +146,24 @@ struct GradientBgBtn: View {
     var body: some View {
         Button(action: action) {
             ZStack {
-                Text(title)
-                    .font(.appSemiBold(18))
-                    .foregroundColor(.white)
-                
                 HStack {
                     Image(image)
                         .frame(width: 20, height: 20)
                         .padding(.leading, 24)
-                    Spacer()
+                    HStack{
+                        Text(title)
+                            .font(.appSemiBold(18))
+                            .foregroundColor(.white)
+                            .padding(.horizontal, 18)
+                        Spacer()
+                    }
                 }
             }
-            .padding()
+            .padding(.vertical, 16)
             .frame(maxWidth: .infinity)
             .background(
                 LinearGradient(
-                    colors: [Color.linearGradient1, Color.linearGradient2],
+                    colors: [Color.linearGradient2, Color.linearGradient1],
                     startPoint: .leading,
                     endPoint: .trailing
                 )

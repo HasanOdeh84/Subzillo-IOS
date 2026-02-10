@@ -23,6 +23,8 @@ struct FamilyMembersView: View {
     @State var showDeletePopup              : Bool = false
     @State var deleteFamilyMemberId         : String = ""
     
+    @State private var deleteSheetHeight : CGFloat = .zero
+
     struct EditableFamilyWrapper: Identifiable {
         let id = UUID()
         let data: ListFamilyMembersResponseData
@@ -202,8 +204,13 @@ struct FamilyMembersView: View {
                 buttonTitle : "Delete",
                 imageSize   : 70
             )
+            .onPreferenceChange(InnerHeightPreferenceKey.self) { height in
+                if height > 0 {
+                    deleteSheetHeight = height
+                }
+            }
             .presentationDragIndicator(.hidden)
-            .presentationDetents([.height(370)])
+            .presentationDetents([.height(deleteSheetHeight)])
         }
         .onChange(of: familyMembersVM.isDelete) { value in
             if value == true{
@@ -233,19 +240,20 @@ struct FamilyMembersView: View {
 
 //MARK: - FamilyMemberCard
 struct FamilyMemberCard: View {
-    let member                      : ListFamilyMembersResponseData
-    let isExpanded                  : Bool
-    @Binding var openSwipeCardIndex : Int?
-    let onTap                       : () -> Void
-    let editBtn                     : () -> Void
-    let delBtn                      : () -> Void
-    let delSubscriptionBtn          : () -> Void
-    let addSubscriptionBtn          : (String) -> Void
+    let member                              : ListFamilyMembersResponseData
+    let isExpanded                          : Bool
+    @Binding var openSwipeCardIndex         : Int?
+    let onTap                               : () -> Void
+    let editBtn                             : () -> Void
+    let delBtn                              : () -> Void
+    let delSubscriptionBtn                  : () -> Void
+    let addSubscriptionBtn                  : (String) -> Void
     @State private var activeCardId         : String? = nil
     @State private var isScrollDisabled     : Bool = false
     @State var showDeletePopup              : Bool = false
     @StateObject var subscriptionsVM        = SubscriptionsViewModel()
     @State var delSubscriptionId            = ""
+    @State private var deleteSheetHeight    : CGFloat = .zero
     
     var body: some View {
         VStack(spacing: 0) {
@@ -369,8 +377,13 @@ struct FamilyMemberCard: View {
                 buttonTitle : "Delete",
                 imageSize   : 70
             )
+            .onPreferenceChange(InnerHeightPreferenceKey.self) { height in
+                if height > 0 {
+                    deleteSheetHeight = height
+                }
+            }
             .presentationDragIndicator(.hidden)
-            .presentationDetents([.height(340)])
+            .presentationDetents([.height(deleteSheetHeight)])
         }
         .onChange(of: subscriptionsVM.isDeletedSubscription) { _ in updateDeleteSubscription() }
     }

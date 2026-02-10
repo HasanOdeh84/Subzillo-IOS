@@ -33,7 +33,7 @@ struct ManualEntryValidations {
     }
     
     //MARK: - Manual entry
-    func manualEntry(input: AddSubscriptionRequest) -> String? {
+    func manualEntry(input: AddSubscriptionRequest, category: String = "") -> String? {
         if input.serviceName.isEmpty{
             return "Please enter service name"
         }
@@ -49,7 +49,7 @@ struct ManualEntryValidations {
         if input.currency == "" {
             return "Currency selection required"
         }
-        if input.category.isEmpty{
+        if category.isEmpty{
             return "Please select category"
         }
         if input.billingCycle.isEmpty{
@@ -66,9 +66,12 @@ struct ManualEntryValidations {
         if (input.serviceName == nil || input.serviceName ?? "" == "") {
             return "Please enter service name"
         }
-        if (input.categoryId == nil || input.categoryId ?? "" == ""){
+        if input.category ?? "" == ""{
             return "Please select category"
         }
+//        if (input.categoryId == nil || input.categoryId ?? "" == ""){
+//            return "Please select category"
+//        }
 //        if input.amount == nil{
 //            return "Amount is required"
 //        }

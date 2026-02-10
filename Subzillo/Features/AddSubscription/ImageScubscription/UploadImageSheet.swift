@@ -24,6 +24,7 @@ struct UploadImageSheet: View {
     @State var fromProfile                      : Bool = false
     @StateObject var profileVM                  = ProfileViewModel()
     @State private var showLocalLoader          = false
+    @State private var showPreview              = false
     var onDelegate                              : (() -> Void)?
     
     //MARK: - body
@@ -99,7 +100,25 @@ struct UploadImageSheet: View {
                     .presentationDragIndicator(.hidden)
                     .presentationDetents([.height(450)])
             }
-            .onChange(of: selectedImage) { _ in uploadImage() }
+            .onChange(of: selectedImage) { image in
+                if image != nil {
+                    showPreview = true
+                }
+            }
+            .sheet(isPresented: $showPreview) {
+                if let image = selectedImage {
+                    ImagePreviewView(image: image, onConfirm: {
+                        uploadImage()
+                    }, onCancel: {
+                        selectedImage = nil
+                    })
+                    //                    .presentationDetents([.fraction(0.8), .large])
+                    .background(Color.clear)
+                    .presentationDetents([.height(imageHeightForSheet(image))])
+                    .presentationDragIndicator(.hidden)
+                    .ignoresSafeArea(edges: .bottom)
+                }
+            }
             .onChange(of: uploadImageVM.hideLoader) { _ in onApi() }
             .onChange(of: profileVM.isProfileUpdate) { _ in onUpdateProfile() }
             .sheet(isPresented: $uploadImageVM.showErrorPopup, onDismiss: {
@@ -121,7 +140,7 @@ struct UploadImageSheet: View {
             .sheet(isPresented: $showPermissionAlert) {
                 PermissionSheet(onDelegate: {
                     dismiss()
-                }, title: isCamera == true ? "We need camera access to add subscriptions by uploading screenshots" : "We need gallery access to add subscriptions by uploading screenshots", type: isCamera == true ? "camera" : "gallery", value: isCamera == true ? "Tap Camera" : "Tap Photos")
+                }, title: isCamera == true ? "We need camera access to add subscriptions by take photo" : "We need gallery access to add subscriptions by image upload", type: isCamera == true ? "camera" : "gallery", value: isCamera == true ? "Tap Camera" : "Tap Photos")
                 .presentationDragIndicator(.hidden)
                 .presentationDetents([.height(580)])
             }
@@ -144,6 +163,14 @@ struct UploadImageSheet: View {
                 }
             }
         }
+    }
+    
+    private func imageHeightForSheet(_ image: UIImage) -> CGFloat {
+        let screenWidth = UIScreen.main.bounds.width - 40
+        let aspectRatio = image.size.height / image.size.width
+        let imageHeight = screenWidth * aspectRatio
+        // Add some padding + capsule area
+        return imageHeight + 150 + 50
     }
     
     private func onApi()
@@ -277,8 +304,9 @@ struct UploadImageSheet: View {
 struct UploadErrorImageSheet: View {
     
     //MARK: - Properties
-    var onDelegate: (() -> Void)?
-    var onDismiss: (() -> Void)?
+    var isImage     = true
+    var onDelegate  : (() -> Void)?
+    var onDismiss   : (() -> Void)?
     @Environment(\.dismiss) private var dismiss
     
     //MARK: - body
@@ -291,15 +319,15 @@ struct UploadErrorImageSheet: View {
             
             VStack(alignment: .center, spacing: 8) {
                 
-                Image("ErrorImageIcon")
+                Image(isImage ? "ErrorImageIcon" : "no_mail")
                     .frame(width: 84, height: 84)
                     .padding(.bottom, 16)
                 
-                Text(LocalizedStringKey("Couldn't Read Image"))
+                Text(LocalizedStringKey(isImage ? "Couldn't Read Image" : "No Subscriptions Found"))
                     .font(.appSemiBold(24))
                     .foregroundColor(Color.neutralMain700)
                 
-                Text(LocalizedStringKey("We couldn't extract subscription details from this image. Try these tips:"))
+                Text(LocalizedStringKey(isImage ? "We couldn't extract subscription details from this image. Try these tips:" : "We scanned your recent emails but didn't find any subscription receipts."))
                     .font(.appRegular(18))
                     .foregroundColor(Color.neutralMain700)
                     .multilineTextAlignment(.center)
@@ -310,7 +338,7 @@ struct UploadErrorImageSheet: View {
                 HStack(spacing: 16) {
                     Image("bulb-charging")
                         .frame(width: 24, height: 24)
-                    Text(LocalizedStringKey("Ensure text is clear and well-lit"))
+                    Text(LocalizedStringKey(isImage ? "Ensure text is clear and well-lit" : "Recurring payment receipts"))
                         .font(.appRegular(16))
                         .foregroundColor(Color.neutralMain700)
                         .frame(maxWidth: .infinity, alignment: .leading)
@@ -318,24 +346,38 @@ struct UploadErrorImageSheet: View {
                 HStack(spacing: 16) {
                     Image("image-crop")
                         .frame(width: 24, height: 24)
-                    Text(LocalizedStringKey("Crop to show only the relevant text"))
+                    Text(LocalizedStringKey(isImage ? "Crop to show only the relevant text" : "Subscription confirmations"))
                         .font(.appRegular(16))
                         .foregroundColor(Color.neutralMain700)
                         .frame(maxWidth: .infinity, alignment: .leading)
                 }
-                //                HStack(spacing: 16) {
-                //                    Image("book-03")
-                //                        .frame(width: 24, height: 24)
-                //                    Text(LocalizedStringKey("Make sure text is in English"))
-                //                        .font(.appRegular(16))
-                //                        .foregroundColor(Color.neutralMain700)
-                //                        .frame(maxWidth: .infinity, alignment: .leading)
-                //                }
+                
+                if !isImage{
+                    HStack(spacing: 16) {
+                        Image("book-03")
+                            .frame(width: 24, height: 24)
+                        Text(LocalizedStringKey(isImage ? "Make sure text is in English" : "Billing notifications"))
+                            .font(.appRegular(16))
+                            .foregroundColor(Color.neutralMain700)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                    }
+                }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(24)
+            //            .padding(isImage ? 24 : 0)
+            //            if isImage{
+            //                .padding(24)
+            //            }else{
+            //                .padding(.top, 24)
+            //                .padding(.horizontal, 24)
+            //            }
+            .padding(.top, 24)
+            .padding(.horizontal, 24)
+            .padding(.bottom, isImage ? 24 : 0)
             
-            CustomButton(title: "Retry", buttonImage: "refresh", action: onRetryAction)
+            if isImage{
+                CustomButton(title: "Retry", buttonImage: "refresh", action: onRetryAction)
+            }
             
             GradientBorderButton(title: "Add Manually Instead", isBtn: true, buttonImage: "text-creation1", action: onManualAction, backgroundColor: .whiteBlackBG)
                 .padding(.vertical, 24)
@@ -389,6 +431,7 @@ struct UploadItem: View {
                     Text(subTitle)
                         .font(.appRegular(12))
                         .foregroundColor(.neutral500)
+                        .multilineTextAlignment(.leading)
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
                 

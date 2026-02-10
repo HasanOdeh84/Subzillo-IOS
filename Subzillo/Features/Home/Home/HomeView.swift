@@ -27,6 +27,9 @@ struct HomeView: View {
     @State var fullName                     = ""
     @State private var isHome               : Bool? = nil
     @State var selectedYear                 = 2025
+    @State private var showYouSavedSheet    = false
+    @State private var showSaveSheet        = false
+    @EnvironmentObject var commonApiVM      : CommonAPIViewModel
     
     private var currentSubscriptions: [SubscriptionListData] {
         showAll ? activeSubsList : Array(activeSubsList.prefix(1))
@@ -104,26 +107,20 @@ struct HomeView: View {
                         .background(.whiteBlackBG)
                         .cornerRadius(12)
                         
-                        /*
-                         //MARK: Top spending subscriptions
-                         TopSpendingSubscriptionsView(data: topCategoriesList)
-                         .padding(.top, 16)
-                         
-                         //MARK: Year Overview
-                         YearOverviewChartView(data              : homeVM.homeYearGraphResponse?.monthlySpend ?? [],
-                         currencySymbol    : homeVM.homeYearGraphResponse?.userCurrencySymbol ?? "",
-                         onDone            : { year in
-                         selectedYear = year
-                         homeYearlyGraphApi()
-                         })
-                         .padding(.top, 16)
-                         */
+                        //MARK: Top spending subscriptions
+                        if topCategoriesList.count != 0{
+                            TopSpendingSubscriptionsView(data: topCategoriesList)
+                                .padding(.top, 16)
+                        }
                         
-                        TopSpendingSubscriptionsView()
-                            .padding(.top, 16)
-                        
-                        YearOverviewChartView()
-                            .padding(.top, 16)
+                        //MARK: Year Overview
+                        YearOverviewChartView(data              : homeVM.homeYearGraphResponse?.monthlySpend ?? [],
+                                              currencySymbol    : homeVM.homeYearGraphResponse?.userCurrencySymbol ?? "",
+                                              onDone            : { year in
+                            selectedYear = year
+                            homeYearlyGraphApi()
+                        })
+                        .padding(.top, 16)
                         
                         
                         //MARK: Save cards
@@ -291,22 +288,52 @@ struct HomeView: View {
             }
             homeVM.home(input: HomeRequest(userId: Constants.getUserId()))
             homeYearlyGraphApi()
+            commonApiVM.unreadNotificationCount(input: UnreadNotificationCountRequest(userId: Constants.getUserId()))
         }
         .onChange(of: homeVM.homeResponse){ _ in updateHomeResponse() }
+        .sheet(isPresented: $showYouSavedSheet) {
+            YouSavedBottomSheet(
+                title       : youSaved,
+                subTitle    : youSavedExpiry,
+                lastMonth   : "$\(homeVM.homeYearGraphResponse?.monthlySpend?.suffix(2).first?.amount ?? 0.0)",
+                thisMonth   : monthlySpend,
+                action      : {
+                    // Action for analytics
+                }
+            )
+            .presentationDetents([.height(520)])
+            .presentationDragIndicator(.hidden)
+        }
+        .sheet(isPresented: $showSaveSheet) {
+            YouSavedBottomSheet(
+                title       : "Save 58% on Netflix",
+                subTitle    : "Applies to your next renewal",
+                lastMonth   : "$\(homeVM.homeYearGraphResponse?.monthlySpend?.suffix(2).first?.amount ?? 0.0)",
+                thisMonth   : monthlySpend,
+                isSave      : true,
+                action      : {
+                    // Action for analytics
+                }
+            )
+            .presentationDetents([.height(400)])
+            .presentationDragIndicator(.hidden)
+        }
     }
     
     //MARK: - User defined methods
     //MARK: goToNotifications
     private func goToNotifications() {
-        ToastManager.shared.showToast(message: "Coming soon in S4",style:ToastStyle.info)
+        homeVM.navigate(to: .notifications)
+//        ToastManager.shared.showToast(message: "Coming soon in S4",style:ToastStyle.info)
     }
     
     private func clickOnSave() {
-        ToastManager.shared.showToast(message: "Coming soon in S4",style:ToastStyle.info)
+        showSaveSheet = true
+//        ToastManager.shared.showToast(message: "Coming soon in S4",style:ToastStyle.info)
     }
     
     private func clickOnYouSaved() {
-        ToastManager.shared.showToast(message: "Coming soon in S4",style:ToastStyle.info)
+        showYouSavedSheet = true
     }
     
     private func goToSubscriptions() {
@@ -324,11 +351,11 @@ struct HomeView: View {
         activeSubsList      = homeResponse?.expiringSoon ?? []
         subscriptionsList   = homeResponse?.subscriptionList ?? []
         topCategoriesList   = homeResponse?.topCategories ?? []
-        isHome              = homeVM.homeResponse?.totalSubscriptions == 0 ? false : true
+        isHome              = (homeVM.homeResponse?.topCategories?.count == 0 || homeVM.homeResponse?.topCategories == nil) ? false : true
     }
     
     func homeYearlyGraphApi(){
-        //        homeVM.homeYearlyGraph(input: HomeYearlyGraphRequest(userId: Constants.getUserId(), year: selectedYear))
+        homeVM.homeYearlyGraph(input: HomeYearlyGraphRequest(userId: Constants.getUserId(), year: selectedYear))
     }
 }
 
@@ -394,10 +421,11 @@ struct SubscriptionAnalyticsCard: View {
 struct HeaderView: View {
     
     //MARK: - Properties
-    var title           : String
-    var subTitle        : String = "Here's your subscription overview"
-    var titleFont       = 28
-    let action          : () -> Void
+    var title                           : String
+    var subTitle                        : String = "Here's your subscription overview"
+    var titleFont                       = 28
+    let action                          : () -> Void
+    @EnvironmentObject var commonApiVM  : CommonAPIViewModel
     
     var body: some View {
         //MARK: notification btn
@@ -406,14 +434,20 @@ struct HeaderView: View {
                 Image("notification-03")
                     .frame(width: 32, height: 32)
             }
-            
-            //                Text("3")
-            //                    .font(.appBold(11))
-            //                    .foregroundColor(Color.white)
-            //                    .frame(width: 16, height: 16)
-            //                    .background(Color.redBadge)
-            //                    .cornerRadius(4)
-            //                    .offset(x: 0, y: -5)
+            if let count = commonApiVM.unreadCountResponse?.unreadCount{
+                if count != 0{
+                    var filterCount = count >= 10 ? "9+" : "\(count)"
+                    Text(filterCount)
+                        .font(.appBold(11))
+                        .foregroundColor(Color.white)
+                        .frame(width: 16, height: 15)
+                        .multilineTextAlignment(.center)
+                    //                        .padding(4)
+                        .background(Color.redBadge)
+                        .cornerRadius(4)
+                        .offset(x: 0, y: -5)
+                }
+            }
             
             VStack(alignment: .leading,spacing: 2) {
                 // MARK: - Title
@@ -432,6 +466,11 @@ struct HeaderView: View {
             .padding(.trailing,16)
         }
         .offset(x: 0, y: -5)
+        .onAppear{
+            if commonApiVM.unreadCountResponse == nil{
+                commonApiVM.unreadNotificationCount(input: UnreadNotificationCountRequest(userId: Constants.getUserId()))
+            }
+        }
     }
 }
 
@@ -519,96 +558,98 @@ struct AvatarView: View {
     }
 }
 
-////MARK: - TopSpendingSubscriptionsView
-//struct TopSpendingSubscriptionsView: View {
-//    
-//    let data : [TopCategoriesData]
-//    var maxAmount: Double {
-//        data.map { $0.totalAmount ?? 0.0 }.max() ?? 1
-//    }
-//    
-//    var body: some View {
-//        VStack(alignment: .leading) {
-//            Text("Top spending subscriptions")
-//                .font(.appRegular(16))
-//                .foregroundColor(Color.neutralMain700)
-//                .padding(.bottom, 15)
-//                .padding(.horizontal, 15)
-//            Divider()
-//                .overlay(Color.neutral300Border)
-//            VStack(spacing: 16) {
-//                ForEach(data) { item in
-//                    SpendingRowView(
-//                        title       : item.categoryName ?? "",
-//                        amount      : item.totalAmount ?? 0.0,
-//                        maxAmount   : maxAmount,
-//                        percentage  : item.percentage ?? 0.0,
-//                        color       : item.color ?? ""
-//                    )
-//                }
-//            }
-//            .padding(15)
-//            
-//            HStack{
-//                Spacer()
-//                Text("View More")
-//                    .font(.appRegular(16))
-//                    .foregroundColor(.blueMain700)
-//                Spacer()
-//            }
-//        }
-//        .padding(.vertical, 16)
-//        .background(.whiteBlackBG)
-//        .overlay(
-//            RoundedRectangle(cornerRadius: 12)
-//                .stroke(.neutral300Border, lineWidth: 1)
-//        )
-//        .cornerRadius(12)
-//        //        .shadow(color: Color.black.opacity(0.05), radius: 8, x: 0, y: 4)
-//    }
-//}
-//
-////MARK: - SpendingRowView
-//struct SpendingRowView: View {
-//    
-//    let title       : String
-//    let amount      : Double
-//    let maxAmount   : Double
-//    let percentage  : Double
-//    let color       : String
-//    var progress    : CGFloat {
-//        CGFloat(percentage / 100)
-//    }
-//    
-//    var body: some View {
-//        HStack(spacing: 5) {
-//            Text(title)
-//                .font(.appRegular(14))
-//                .foregroundColor(.neutralMain700)
-//                .frame(width: 90, alignment: .leading)
-//                .padding(.trailing, 24)
-//            GeometryReader { geo in
-//                ZStack(alignment: .leading) {
-//                    Capsule()
-//                        .fill(Color.clear)
-//                    Capsule()
-//                        .fill(Color.safeHex(color))
-//                        .frame(width: geo.size.width * progress)
-//                }
-//            }
-//            .frame(height: 10)
-//            .padding(.trailing, 7)
-//            Text(String(format: "$%.2f", amount))
-//                .font(.appBold(14))
-//                .foregroundColor(.neutralMain700)
-//                .frame(width: 50, alignment: .trailing)
-//        }
-//    }
-//}
-//
-////MARK: - YearOverviewChartView
+//MARK: - TopSpendingSubscriptionsView
+struct TopSpendingSubscriptionsView: View {
+    
+    let data : [TopCategoriesData]
+    var maxAmount: Double {
+        data.map { $0.totalAmount ?? 0.0 }.max() ?? 1
+    }
+    
+    var body: some View {
+        VStack(alignment: .leading) {
+            Text("Top spending subscriptions")
+                .font(.appRegular(16))
+                .foregroundColor(Color.neutralMain700)
+                .padding(.bottom, 15)
+                .padding(.horizontal, 15)
+            Divider()
+                .overlay(Color.neutral300Border)
+            VStack(spacing: 16) {
+                ForEach(data.prefix(3)) { item in
+                    SpendingRowView(
+                        title       : item.categoryName ?? "",
+                        amount      : item.totalAmount ?? 0.0,
+                        percentage  : item.percentage ?? 0.0,
+                        color       : item.color ?? ""
+                    )
+                }
+            }
+            .padding(15)
+            
+            HStack{
+                Spacer()
+                Text("View More")
+                    .font(.appRegular(16))
+                    .foregroundColor(.blueMain700)
+                    .contentShape(Rectangle())
+                    .onTapGesture {
+                        AppIntentRouter.shared.navigate(to: .subscriptionsListView(selectedSegment: .third))
+                    }
+                Spacer()
+            }
+        }
+        .padding(.vertical, 16)
+        .background(.whiteBlackBG)
+        .overlay(
+            RoundedRectangle(cornerRadius: 12)
+                .stroke(.neutral300Border, lineWidth: 1)
+        )
+        .cornerRadius(12)
+        //        .shadow(color: Color.black.opacity(0.05), radius: 8, x: 0, y: 4)
+    }
+}
+
+//MARK: - SpendingRowView
+struct SpendingRowView: View {
+    
+    let title       : String
+    let amount      : Double
+    let percentage  : Double
+    let color       : String
+    var progress    : CGFloat {
+        CGFloat(percentage / 100)
+    }
+    
+    var body: some View {
+        HStack(spacing: 5) {
+            Text(title)
+                .font(.appRegular(14))
+                .foregroundColor(.neutralMain700)
+                .frame(width: 90, alignment: .leading)
+                .padding(.trailing, 20)
+            GeometryReader { geo in
+                ZStack(alignment: .leading) {
+                    Capsule()
+                        .fill(Color.clear)
+                    Capsule()
+                        .fill(Color.safeHex(color))
+                        .frame(width: geo.size.width * progress)
+                }
+            }
+            .frame(height: 10)
+            .padding(.trailing, 7)
+            Text(String(format: "$%.2f", amount))
+                .font(.appBold(14))
+                .foregroundColor(.neutralMain700)
+                .frame(alignment: .trailing)
+            //                .frame(width: 60, alignment: .trailing)
+        }
+    }
+}
+
 //struct YearOverviewChartView: View {
-//    
+//
 //    @State private var selected             : MonthlySpendData?
 //    @State private var clearSelectionTask   : Task<Void, Never>?
 //    let visibleMonths                       : [String] = ["Jan", "Apr", "Jun", "Aug", "Oct", "Dec"]
@@ -618,16 +659,14 @@ struct AvatarView: View {
 //    @State var openYearSheet                = false
 //    @State var year                         : Int = 2025
 //    let onDone                              : (Int) -> Void
-//    
-//    //MARK: - Computed Properties
+//
 //    private var yAxisValues: [Double] {
 //        let maxAmount = data.map { $0.amount }.max() ?? 0
 //        let effectiveMax = maxAmount == 0 ? 5 : maxAmount
 //        let step = effectiveMax / 5
 //        return (0...5).map { Double($0) * step }
 //    }
-//    
-//    //MARK: - body
+//
 //    var body: some View {
 //        VStack(alignment: .leading, spacing: 2) {
 //            // Header
@@ -655,11 +694,11 @@ struct AvatarView: View {
 //            }
 //            .padding(.horizontal, 20)
 //            Spacer()
-//            
+//
 //            Divider()
 //                .overlay(Color.neutral300Border)
 //                .padding(.bottom, 25)
-//            
+//
 //            ZStack(alignment: .leading) {
 //                Rectangle()
 //                    .fill(Color.neutral300Border)
@@ -668,7 +707,7 @@ struct AvatarView: View {
 //                    .padding(.bottom, 0)
 ////                    .padding(.leading, -10)
 //                    .offset(x: 32)
-//                
+//
 //                // Chart
 //                Chart {
 //                    ForEach(data) { item in
@@ -688,7 +727,7 @@ struct AvatarView: View {
 //                                endPoint: .bottom
 //                            )
 //                        )
-//                        
+//
 //                        LineMark(
 //                            x: .value("Month", item.month),
 //                            y: .value("Value", item.amount)
@@ -702,7 +741,7 @@ struct AvatarView: View {
 //                            )
 //                        )
 //                        .lineStyle(.init(lineWidth: 1))
-////                        
+////
 //                        // OUTERMOST border (grey)
 //                        PointMark(
 //                            x: .value("Month", item.month),
@@ -711,7 +750,7 @@ struct AvatarView: View {
 //                        .symbolSize(300)
 //                        .opacity(selected?.id == item.id ? 1 : 0)
 //                        .foregroundStyle(Color.graphBorder)
-//                        
+//
 //                        PointMark(
 //                            x: .value("Month", item.month),
 //                            y: .value("Value", item.amount)
@@ -743,9 +782,9 @@ struct AvatarView: View {
 //                        }
 //                    }
 //                }
-//                
+//
 //                .chartXAxis {
-//                    
+//
 //                }
 //                .frame(height: 220)
 //                .chartOverlay { proxy in
@@ -763,7 +802,7 @@ struct AvatarView: View {
 //                                        .padding(.trailing, 10)
 //                                }
 //                            }
-//                            
+//
 //                            Rectangle()
 //                                .fill(Color.clear)
 //                                .contentShape(Rectangle())
@@ -776,11 +815,11 @@ struct AvatarView: View {
 //                                            }
 //                                        }
 //                                )
-//                            
+//
 //                            if let selected,
 //                               let xPos = proxy.position(forX: selected.month),
 //                               let yPos = proxy.position(forY: selected.amount) {
-//                                
+//
 //                                VStack {
 //                                    Text("\(selected.month) : \(currencySymbol)\(Int(selected.amount))")
 //                                        .font(.appMedium(10))
@@ -803,14 +842,14 @@ struct AvatarView: View {
 //                }
 //            }
 //            .padding(.horizontal, 20)
-//            
+//
 //            Divider()
 //                .background(Color.neutral300Border)
 //                .padding(.top, -2)
 //                .padding(.leading, 22)
 //                .padding(.horizontal, 30)
 //                .padding(.trailing, 10)
-//            
+//
 //            HStack(spacing: 0) {
 //                ForEach(fakeMonths, id: \.self) { month in
 //                    Text(month)
@@ -822,7 +861,7 @@ struct AvatarView: View {
 //            .padding(.top, 10)
 //            .padding(.horizontal, 30)
 //            .padding(.trailing, 10)
-//            
+//
 //            HStack{
 //                Spacer()
 //                Text("View More")
@@ -861,182 +900,79 @@ struct AvatarView: View {
 //    }
 //}
 
-//MARK: - SpendingRowView
-struct SpendingRowView: View {
-    let title: String
-    let amount: Double
-    let maxAmount: Double
-    let color: Color
-    var progress: CGFloat {
-        CGFloat(amount / maxAmount)
-    }
-    var body: some View {
-        HStack(spacing: 5) {
-            Text(title)
-                .font(.appRegular(14))
-                .foregroundColor(.black)
-                .frame(width: 90, alignment: .leading)
-            GeometryReader { geo in
-                ZStack(alignment: .leading) {
-                    Capsule()
-                        .fill(Color.gray.opacity(0.2))
-                        .frame(height: 10)
-                    Capsule()
-                        .fill(color)
-                        .frame(
-                            width: geo.size.width * progress,
-                            height: 10
-                        )
-                }
-            }
-            .frame(height: 10)
-            Text(String(format: "$%.2f", amount))
-                .font(.appRegular(14))
-                .foregroundColor(.black)
-                .frame(width: 50, alignment: .trailing)
-        }
-    }
-}
-
-struct MonthlySpend: Identifiable {
-    let id = UUID()
-    let index: Int
-    let month: String
-    let value: Double
-}
-
-struct SubscriptionSpending: Identifiable {
-    let id = UUID()
-    let title: String
-    let amount: Double
-    let color: Color
-}
-
-//MARK: - TopSpendingSubscriptionsView
-struct TopSpendingSubscriptionsView: View {
-    let data: [SubscriptionSpending] = [
-        .init(title: "Entertainment", amount: 299.99, color: .purple),
-        .init(title: "Sports", amount: 99.99, color: .red),
-        .init(title: "Education", amount: 99.99, color: .blue)
-    ]
-    var maxAmount: Double {
-        data.map { $0.amount }.max() ?? 1
-    }
-    var body: some View {
-        VStack(alignment: .leading, spacing: 20) {
-            Text("Top spending subscriptions")
-                .font(.appRegular(16))
-                .foregroundColor(Color.graphText)
-            Divider()
-            VStack(spacing: 16) {
-                ForEach(data) { item in
-                    SpendingRowView(
-                        title: item.title,
-                        amount: item.amount,
-                        maxAmount: maxAmount,
-                        color: item.color
-                    )
-                }
-            }
-        }
-        .padding(20)
-        .background(Color.white)
-        .cornerRadius(16)
-        //        .shadow(color: Color.black.opacity(0.05), radius: 8, x: 0, y: 4)
-    }
-}
-
 //MARK: - YearOverviewChartView
 struct YearOverviewChartView: View {
     
-    @State private var selected             : MonthlySpend?
+    @State private var selected             : MonthlySpendData?
     @State private var clearSelectionTask   : Task<Void, Never>?
-    let visibleMonths           : [String] = ["Jan", "Apr", "Jun", "Aug", "Oct", "Dec"]
-    let fakeMonths              = ["Jan", "Apr", "Jun", "Aug", "Oct", "Dec"]
-    let data: [MonthlySpend]    = [
-        .init(index: 0,  month: "Jan", value: 1.8),
-        .init(index: 1,  month: "Feb", value: 2.2),
-        .init(index: 2,  month: "Mar", value: 2.6),
-        .init(index: 3,  month: "Apr", value: 2.5),
-        .init(index: 4,  month: "May", value: 2.3),
-        .init(index: 5,  month: "Jun", value: 2.2),
-        .init(index: 6,  month: "Jul", value: 2.4),
-        .init(index: 7,  month: "Aug", value: 2.8),
-        .init(index: 8,  month: "Sep", value: 3.1),
-        .init(index: 9,  month: "Oct", value: 3.5),
-        .init(index: 10, month: "Nov", value: 3.7),
-        .init(index: 11, month: "Dec", value: 3.8)
+    let visibleMonths                       : [String] = ["Jan", "Apr", "Jun", "Aug", "Oct", "Dec"]
+    let fakeMonths                          = ["Jan", "Apr", "Jun", "Aug", "Oct", "Dec"]
+    let data                                : [MonthlySpendData]
+    var currencySymbol                      : String
+    @State var openYearSheet                = false
+    @State var year                         : Int = 2025
+    let onDone                              : (Int) -> Void
+    
+    private let monthMap: [String: Int] = [
+        "Jan": 0, "Feb": 1, "Mar": 2, "Apr": 3, "May": 4, "Jun": 5,
+        "Jul": 6, "Aug": 7, "Sep": 8, "Oct": 9, "Nov": 10, "Dec": 11
     ]
     
-    //MARK: - body
+    private func getIndex(for month: String) -> Int {
+        return monthMap[month] ?? 0
+    }
+    
+    //MARK: Computed Properties
+    private var yAxisValues: [Double] {
+        let maxAmount = data.map { $0.amount }.max() ?? 0
+        let effectiveMax = maxAmount == 0 ? 5 : maxAmount
+        let step = effectiveMax / 5
+        return (0...5).map { Double($0) * step }
+    }
+    
+    //MARK: body
     var body: some View {
         VStack(alignment: .leading, spacing: 2) {
             // Header
             HStack {
                 Text("Year Overview")
                     .font(.appRegular(16))
-                    .foregroundColor(Color.graphText)
+                    .foregroundStyle(Color.neutralMain700)
                 Spacer()
                 HStack(spacing: 4) {
-                    Text("2025")
-                        .font(.appRegular(14))
-                    //                    Image(systemName: "chevron.down")
-                    //                        .font(.system(size: 12))
+                    Text(String(year))
+                        .font(.appRegular(16))
+                        .foregroundStyle(Color.grayLG)
+                    Image(systemName: "chevron.down")
+                        .font(.system(size: 12))
                 }
                 .padding(.horizontal, 10)
                 .padding(.vertical, 6)
                 .overlay(
-                    RoundedRectangle(cornerRadius: 6)
+                    RoundedRectangle(cornerRadius: 4)
                         .stroke(.neutral300Border)
                 )
+                .onTapGesture {
+                    openYearSheet = true
+                }
             }
-            Spacer()
+            .padding(.horizontal, 20)
             Spacer()
             
+            Divider()
+                .overlay(Color.neutral300Border)
+                .padding(.bottom, 25)
+            
             ZStack(alignment: .leading) {
-                Rectangle()
-                    .fill(Color.neutral300Border)
-                    .frame(width: 1)
-                    .padding(.top, 0)
-                    .padding(.bottom, 0)
-                    .padding(.leading, -10)
-                    .offset(x: 32)
+                // Vertical Line will be drawn in chartOverlay for perfect alignment
                 
-                // ✅ Manual horizontal dotted lines (start at leading + 5)
-                //            GeometryReader { geo in
-                //                let lineCount = 4          // 1,2,3,4 (no 0)
-                //                let totalSteps = lineCount + 1
-                //                let spacing = geo.size.height / CGFloat(totalSteps)
-                //
-                //                VStack(spacing: 0) {
-                //
-                //                    // ❌ Skip 0 level
-                //                    Spacer()
-                //                        .frame(height: spacing)
-                //
-                //                    // ✅ Draw lines for 1...lineCount
-                //                    ForEach(1...lineCount, id: \.self) { _ in
-                //                        Rectangle()
-                //                            .fill(Color.clear)
-                //                            .frame(height: 1)
-                //                            .overlay(
-                //                                DashedHorizontalDivider(dash: [2,2])
-                //                            )
-                //                            .padding(.leading, 22)
-                //                            .padding(.trailing, 20)
-                //
-                //                        Spacer()
-                //                            .frame(height: spacing)
-                //                    }
-                //                }
-                //            }
                 // Chart
                 Chart {
                     ForEach(data) { item in
-                        
+                        let index = getIndex(for: item.month)
                         AreaMark(
-                            x: .value("Month", item.month),
-                            y: .value("Value", item.value)
+                            x: .value("Month", index),
+                            y: .value("Value", item.amount)
                         )
                         .interpolationMethod(.catmullRom)
                         .foregroundStyle(
@@ -1051,10 +987,9 @@ struct YearOverviewChartView: View {
                             )
                         )
                         
-                        
                         LineMark(
-                            x: .value("Month", item.month),
-                            y: .value("Value", item.value)
+                            x: .value("Month", index),
+                            y: .value("Value", item.amount)
                         )
                         .interpolationMethod(.catmullRom)
                         .foregroundStyle(
@@ -1065,110 +1000,130 @@ struct YearOverviewChartView: View {
                             )
                         )
                         .lineStyle(.init(lineWidth: 1))
-                        
+                        //
                         // OUTERMOST border (grey)
                         PointMark(
-                            x: .value("Month", item.month),
-                            y: .value("Value", item.value)
+                            x: .value("Month", index),
+                            y: .value("Value", item.amount)
                         )
                         .symbolSize(300)
                         .opacity(selected?.id == item.id ? 1 : 0)
                         .foregroundStyle(Color.graphBorder)
                         
                         PointMark(
-                            x: .value("Month", item.month),
-                            y: .value("Value", item.value)
+                            x: .value("Month", index),
+                            y: .value("Value", item.amount)
                         )
                         .symbolSize(200) // outer size
                         .opacity(selected?.id == item.id ? 1 : 0)
                         .foregroundStyle(Color.white)
                         // INNER purple dot
                         PointMark(
-                            x: .value("Month", item.month),
-                            y: .value("Value", item.value)
+                            x: .value("Month", index),
+                            y: .value("Value", item.amount)
                         )
                         .symbolSize(80) // inner size
                         .opacity(selected?.id == item.id ? 1 : 0)
                         .foregroundStyle(Color.graphGradient1)
                     }
-                    
-                    //                if let selected {
-                    //                    RuleMark(x: .value("Selected", selected.month))
-                    //                        .foregroundStyle(.gray.opacity(0.3))
-                    //                        .annotation(position: .top) {
-                    //                            Text("\(selected.month) : $\(Int(selected.value * 20))")
-                    //                                .font(.appRegular(14))
-                    //                                .padding(8)
-                    //                                .background(Color.white)
-                    //                                .cornerRadius(8)
-                    //                                .shadow(radius: 3)
-                    //                        }
-                    //                }
                 }
-                //            .chartYAxis {
-                //                AxisMarks(
-                //                    position: .leading,
-                //                    values: .automatic(desiredCount: 6)
-                //                ) { value in
-                //
-                //                    if let yValue = value.as(Double.self), yValue != 0 {
-                //                        // ✅ Draw dashed grid lines for non-zero values
-                //                        AxisGridLine(stroke: StrokeStyle(dash: [4]))
-                //                            .foregroundStyle(.neutralDisabled200White)
-                //                            .padding(.leading,5)
-                //                    }
-                //
-                //                    // ✅ Still show labels (including 0)
-                //                    AxisValueLabel()
-                //                }
-                //            }
+                .chartYScale(domain: 0...(yAxisValues.last ?? 5))
+                //                .chartXScale(domain: -0.5...11.5)  //Widened domain to ensure Dec label is visible
                 .chartYAxis {
-                    AxisMarks(position: .leading, values: .automatic(desiredCount: 6)) { value in
-                        AxisValueLabel {
+                    AxisMarks(position: .leading, values: yAxisValues) { value in
+                        
+                        //                        if let y = value.as(Double.self), y == 0 {
+                        //                                    AxisGridLine(stroke: StrokeStyle(lineWidth: 1))
+                        //                                        .foregroundStyle(Color.neutral300Border)
+                        //                                }
+                        
+                        if let y = value.as(Double.self) {
+                            if y == 0 {
+                                // 1. Solid horizontal baseline for 0
+                                AxisGridLine(stroke: StrokeStyle(lineWidth: 1))
+                                    .foregroundStyle(Color.dashClr)
+                            } else {
+                                // 2. Dashed horizontal lines for all other values (1, 2, 3, 4, 5 etc.)
+                                AxisGridLine(stroke: StrokeStyle(lineWidth: 1, dash: [2, 2]))
+                                    .foregroundStyle(Color.neutralDisabled200)
+                            }
+                        }
+                        AxisValueLabel(anchor: .trailing) { // Anchor trailing to place labels left of the line
+                            //                            if let y = value.as(Double.self) {
+                            //                                let rounded = Int((y / 100).rounded() * 100)
+                            //
+                            //                                Text("\(rounded)")
+                            //                                    .font(.appRegular(16))
+                            //                                    .foregroundStyle(Color.neutralMain700)
+                            //                                    .padding(.trailing, 5)
+                            //                            }
                             if let y = value.as(Double.self) {
-                                Text("\(Int(y))")
-                                    .font(.appRegular(16))
-                                    .foregroundColor(Color.graphText)
+                                let maxAmount = data.map { $0.amount }.max() ?? 0
+                                
+                                if maxAmount <= 5 {
+                                    // If everything is 0 (or very small), show exact integers (0, 1, 2, 3, 4, 5)
+                                    Text("\(Int(y))")
+                                        .font(.appRegular(16))
+                                        .foregroundStyle(Color.neutralMain700)
+                                        .padding(.trailing, 5)
+                                } else {
+                                    // Otherwise, apply your rounding to the nearest hundred
+                                    let rounded = Int((y / 100).rounded() * 100)
+                                    Text("\(rounded)")
+                                        .font(.appRegular(16))
+                                        .foregroundStyle(Color.neutralMain700)
+                                        .padding(.trailing, 5)
+                                }
                             }
                         }
                     }
                 }
-                //            .chartPlotStyle { plot in
-                //              plot.padding(.leading, 5)
-                //            }
-                
+                //                .chartXAxis {
+                //                    // Native Vertical Axis Line at index 0
+                //                    //                    AxisMarks(values: [0]) { _ in
+                //                    //                        AxisGridLine()
+                //                    //                            .foregroundStyle(Color.neutral300Border)
+                //                    //                    }
+                //                    //
+                //                    //                    // Month Labels
+                //                    //                                        AxisMarks(values: [0, 3, 5, 7, 9, 11]) { mode in
+                //                    //                                            AxisValueLabel {
+                //                    //                                                if let index = mode.as(Int.self) {
+                //                    //                                                    let monthsNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+                //                    //                                                    if index >= 0 && index < monthsNames.count {
+                //                    //                                                        Text(monthsNames[index])
+                //                    //                                                            .font(.appRegular(16))
+                //                    //                                                            .foregroundColor(Color.neutralMain700)
+                //                    //                                                    }
+                //                    //                                                }
+                //                    //                                            }
+                //                    //                                        }
+                //                }
                 .chartXAxis {
-                    // Added Fake X - Axis
-                    //                AxisMarks(values: visibleMonths) { value in
-                    //                    AxisValueLabel {
-                    //                        if let month = value.as(String.self) {
-                    //                            Text(month)
-                    //                                .font(.appRegular(14))
-                    //                                .foregroundColor(.neutralMain700)
+                    // 1. Vertical straight line at the start (Jan)
+                    AxisMarks(values: [0]) { _ in
+                        AxisGridLine(stroke: StrokeStyle(lineWidth: 1))
+                            .foregroundStyle(Color.dashClr)
+                    }
+                    
+                    //                    // 2. Month Labels perfectly aligned with the graph points
+                    //                    AxisMarks(values: [0, 3, 5, 7, 9, 11]) { value in
+                    //                        AxisValueLabel {
+                    //                            if let index = value.as(Int.self) {
+                    //                                let months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+                    //                                Text(months[index])
+                    //                                    .font(.appRegular(16))
+                    //                                    .foregroundColor(Color.neutralMain700)
+                    //                            }
                     //                        }
                     //                    }
-                    //                }
-                    //              AxisValueLabel().hidden()
-                    //              AxisTick().hidden()
-                    //              AxisGridLine().hidden()
+                    
+                    
                 }
                 .frame(height: 220)
                 .chartOverlay { proxy in
                     GeometryReader { geo in
                         ZStack(alignment: .topLeading) {
-                            
-                            ForEach(1...4, id: \.self) { value in
-                                if let yPos = proxy.position(forY: Double(value)) {
-                                    DashedHorizontalDivider(dash: [2,2])
-                                        .frame(height: 1)
-                                        .position(
-                                            x: geo.size.width / 2,
-                                            y: yPos
-                                        )
-                                        .padding(.leading, 12)
-                                        .padding(.trailing, 10)
-                                }
-                            }
                             
                             Rectangle()
                                 .fill(Color.clear)
@@ -1177,51 +1132,103 @@ struct YearOverviewChartView: View {
                                     DragGesture(minimumDistance: 0)
                                         .onChanged { value in
                                             let x = value.location.x
-                                            if let month: String = proxy.value(atX: x) {
-                                                selected = data.first { $0.month == month }
+                                            if let index: Double = proxy.value(atX: x) {
+                                                let roundedIndex = Int(round(index))
+                                                if roundedIndex >= 0 && roundedIndex < 12 {
+                                                    // Find if we have data for this index
+                                                    selected = data.first { getIndex(for: $0.month) == roundedIndex }
+                                                }
                                             }
                                         }
                                 )
                             
+                            // Native line handled by AxisMarks now
+                            
                             if let selected,
-                               let xPos = proxy.position(forX: selected.month),
-                               let yPos = proxy.position(forY: selected.value) {
+                               let xPos = proxy.position(forX: getIndex(for: selected.month)),
+                               let yPos = proxy.position(forY: selected.amount) {
                                 
-                                VStack {
-                                    Text("\(selected.month) : $\(Int(selected.value * 20))")
-                                        .font(.appRegular(14))
-                                        .padding(8)
+                                //                                VStack {
+                                //                                    Text("\(selected.month) : \(currencySymbol)\(Int(selected.amount))")
+                                //                                        .font(.appMedium(10))
+                                //                                        .padding(6)
+                                //                                        .background(Color.white)
+                                //                                        .cornerRadius(8)
+                                //                                        .shadow(color: Color.dropShadow, radius: 4, x: 0, y: 2)
+                                //                                        .overlay(
+                                //                                            RoundedRectangle(cornerRadius: 8)
+                                //                                                .stroke(.neutral300Border, lineWidth: 1)
+                                //                                        )
+                                //                                }
+                                VStack(spacing: 0) {
+                                    Text("\(selected.month) : \(currencySymbol)\(Int(selected.amount))")
+                                        .font(.appMedium(10))
+                                        .foregroundColor(.black)
+                                        .padding(.horizontal, 8)
+                                        .padding(.vertical, 4)
+                                        .fixedSize(horizontal: true, vertical: false)
                                         .background(Color.white)
-                                        .cornerRadius(8)
-                                        .shadow(radius: 4)
+                                        .cornerRadius(6)
+                                        .shadow(color: .black.opacity(0.15), radius: 4, x: 0, y: 2)
+                                        .overlay(
+                                            RoundedRectangle(cornerRadius: 6)
+                                                .stroke(Color.neutral300Border, lineWidth: 0.5)
+                                        )
+                                    
+                                    // Pointer
+                                    Image(systemName: "arrowtriangle.down.fill")
+                                        .resizable()
+                                        .frame(width: 8, height: 4)
+                                        .foregroundColor(.white)
+                                        .offset(y: -2)
                                 }
                                 .position(
-                                    x: xPos,
+                                    x: xPos + 10,
                                     y: yPos - 30
                                 )
+                                .zIndex(1)
                             }
                         }
                     }
                 }
+                .padding(.leading, 35)
+                .padding(.trailing, 35)
             }
-            Divider()
-                .background(Color.neutral300Border)
-                .padding(.top, -2)
-                .padding(.leading, 22)
+            
             HStack(spacing: 0) {
                 ForEach(fakeMonths, id: \.self) { month in
                     Text(month)
                         .font(.appRegular(16))
-                        .foregroundColor(Color.graphText)
+                        .foregroundColor(Color.neutralMain700)
                         .frame(maxWidth: .infinity)
                 }
             }
-            .padding(.top, 10)
+            .padding(.top, 15)
+            .padding(.leading, 50)
+            .padding(.trailing, 20)
+            
+            HStack{
+                Spacer()
+                HStack(spacing: 4) {
+                    Text("View Details")
+                        .font(.appRegular(16))
+                        .foregroundColor(.blueMain700)
+                }
+                .contentShape(Rectangle())
+                .onTapGesture {
+                    AppIntentRouter.shared.navigate(to: .subscriptionsListView(selectedSegment: .third))
+                }
+                Spacer()
+            }
+            .padding(.top, 16)
         }
-        .padding(20)
-        .background(Color.white)
-        .cornerRadius(16)
-        //        .shadow(color: Color.black.opacity(0.05), radius: 8)
+        .padding(.vertical, 20)
+        .overlay(
+            RoundedRectangle(cornerRadius: 12)
+                .stroke(.neutral300Border, lineWidth: 1)
+        )
+        .background(.whiteBlackBG)
+        .cornerRadius(12)
         .onChange(of: selected?.id) { _ in
             clearSelectionTask?.cancel()
             guard selected != nil else { return }
@@ -1231,6 +1238,15 @@ struct YearOverviewChartView: View {
                     selected = nil
                 }
             }
+        }
+        .sheet(isPresented: $openYearSheet) {
+            CustomYearBottomSheet(isPresented   : $openYearSheet,
+                                  onDone        : { year in
+                self.year = year
+                onDone(year)
+            })
+            .presentationDetents([.height(300)])
+            .presentationDragIndicator(.hidden)
         }
     }
 }

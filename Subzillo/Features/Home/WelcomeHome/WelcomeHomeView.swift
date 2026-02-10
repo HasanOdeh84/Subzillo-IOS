@@ -9,8 +9,9 @@ import SwiftUI
 
 struct WelcomeHomeView: View {
     
-    @State var showUploadPopup     : Bool = false
-    @State private var isUploading = false
+    @State var showUploadPopup          : Bool = false
+    @State private var isUploading      = false
+    @EnvironmentObject var commonApiVM  : CommonAPIViewModel
     
     var body: some View {
         VStack(alignment: .leading,spacing: 0) {
@@ -26,23 +27,25 @@ struct WelcomeHomeView: View {
                             .padding(.top, 70)
                             .padding(.bottom, 34)
                         
-                        HStack {
-                            Spacer()
-                            ZStack(alignment: .topTrailing) {
-                                Button(action: goToNotifications) {
-                                    Image("notification-03")
-                                        .frame(width: 32, height: 32)
-                                }
-                                
-                                //                                Text("3")
-                                //                                    .font(.appBold(11))
-                                //                                    .foregroundColor(Color.white)
-                                //                                    .frame(width: 16, height: 16)
-                                //                                    .background(Color.redBadge)
-                                //                                    .cornerRadius(4)
-                                //                                    .offset(x: 0, y: -5)
-                            }
-                        }
+//                        HStack {
+//                            Spacer()
+//                            ZStack(alignment: .topTrailing) {
+//                                Button(action: goToNotifications) {
+//                                    Image("notification-03")
+//                                        .frame(width: 32, height: 32)
+//                                }
+//                                
+//                                if let count = commonApiVM.unreadCountResponse?.unreadCount{
+//                                    Text("\(count)")
+//                                        .font(.appBold(11))
+//                                        .foregroundColor(Color.white)
+//                                        .frame(width: 16, height: 16)
+//                                        .background(Color.redBadge)
+//                                        .cornerRadius(4)
+//                                        .offset(x: 0, y: -5)
+//                                }
+//                            }
+//                        }
                         .offset(x: 0, y: 10)
                     }
                     
@@ -282,10 +285,12 @@ struct WelcomeHomeView: View {
     
     //MARK: - Button actions
     private func goToNotifications() {
-        ToastManager.shared.showToast(message: "Coming soon in S4",style:ToastStyle.info)
+        AppIntentRouter.shared.navigate(to: .notifications)
+//        ToastManager.shared.showToast(message: "Coming soon in S4",style:ToastStyle.info)
     }
     private func upgradePlan() {
-        ToastManager.shared.showToast(message: "Coming soon in S4",style:ToastStyle.info)
+        AppIntentRouter.shared.navigate(to: .pricingPlans)
+//        ToastManager.shared.showToast(message: "Coming soon in S4",style:ToastStyle.info)
     }
     private func goToSmartAssistant() {
         ToastManager.shared.showToast(message: "Coming soon in S5",style:ToastStyle.info)
@@ -295,7 +300,8 @@ struct WelcomeHomeView: View {
         showUploadPopup = true
     }
     private func goToConnectEmail() {
-        ToastManager.shared.showToast(message: "Coming soon in S4",style:ToastStyle.info)
+        AppIntentRouter.shared.navigate(to: .connectEmail)
+//        ToastManager.shared.showToast(message: "Coming soon in S4",style:ToastStyle.info)
     }
     private func goToAddByVoice() {
         // ToastManager.shared.showToast(message: "Coming soon",style:ToastStyle.info)

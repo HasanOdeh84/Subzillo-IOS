@@ -46,16 +46,16 @@ struct ConnectEmailView: View {
             
             ScrollView(showsIndicators: false) {
                 VStack(spacing: 0) {
-                    UploadItem(title: "Connect Gmail", subTitle: "Capture Gmail notification on screen", image: "google", imageColor: Color.systemInfo, action: gmailAction, isEmail: true)
+                    UploadItem(title: "Connect Gmail", subTitle: "Link your Gmail account to sync and manage all email subscriptions.", image: "google", imageColor: Color.systemInfo, action: gmailAction, isEmail: true)
                     Divider()
                         .overlay(Color.neutral300Border)
-                    UploadItem(title: "Connect Outlook", subTitle: "Capture Outlook notification on screen", image: "microsoft", imageColor: Color.systemInfo, action: outlookAction, isEmail: true)
-                    Divider()
-                        .overlay(Color.neutral300Border)
-                    UploadItem(title: "Connect Yahoo", subTitle: "Capture Yahoo notification on screen", image: "yahoo", imageColor: Color.systemInfo, action: yahooAction, isEmail: true)
+                    UploadItem(title: "Connect Outlook", subTitle: "Connect your Outlook account to access and manage your subscriptions.", image: "microsoft", imageColor: Color.systemInfo, action: outlookAction, isEmail: true)
+//                    Divider()
+//                        .overlay(Color.neutral300Border)
+//                    UploadItem(title: "Connect Yahoo", subTitle: "Integrate your Yahoo Mail account to organize and manage subscriptions.", image: "yahoo", imageColor: Color.systemInfo, action: yahooAction, isEmail: true)
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
-                .frame(height: 240)
+                .frame(height: 160)//240)
                 .cornerRadius(12)
                 .overlay(
                     RoundedRectangle(cornerRadius: 12)
@@ -84,7 +84,7 @@ struct ConnectEmailView: View {
                 .frame(height: 56)
                 .contentShape(Rectangle())
                 .onTapGesture {
-                    AppIntentRouter.shared.navigate(to: NavigationRoute.connectedEmailsList)
+                    AppIntentRouter.shared.navigate(to: NavigationRoute.connectedEmailsList())
                 }
                 .cornerRadius(12)
                 .overlay(
@@ -100,7 +100,6 @@ struct ConnectEmailView: View {
                                    isImage  : false)
                 .padding(.bottom, 24)
                 .padding(.horizontal, 5)
-                
                 Spacer()
             }
             .frame(maxWidth: .infinity)
@@ -109,19 +108,19 @@ struct ConnectEmailView: View {
         .navigationBarBackButtonHidden()
         .background(Color.neutralBg100)
         //MARK: Onchange
-        .onChange(of: connectEmailVM.isSuccess) { success in
-            if success, let oauthUrlString = connectEmailVM.oauthUrlResponse?.authUrl, let url = URL(string: oauthUrlString) {
-                let callbackScheme = "subzillo-auth"
-                OAuthManager.shared.startOAuth(url: url, callbackScheme: callbackScheme) { callbackURL, error in
-                    if let callbackURL = callbackURL {
-                        connectEmailVM.handleOAuthCallback(url: callbackURL)
-                    } else if let error = error {
-                        print("OAuth error: \(error.localizedDescription)")
-                    }
-                    connectEmailVM.isSuccess = false
-                }
-            }
-        }
+        //        .onChange(of: connectEmailVM.isSuccess) { success in
+        //            if success, let oauthUrlString = connectEmailVM.oauthUrlResponse?.authUrl, let url = URL(string: oauthUrlString) {
+        //                let callbackScheme = "com.googleusercontent.apps.955282043815-5tm4dfjcs5uv5qkvne9uv6jkf64div4a"
+        //                OAuthManager.shared.startOAuth(url: url, callbackScheme: callbackScheme) { callbackURL, error in
+        //                    if let callbackURL = callbackURL {
+        //                        connectEmailVM.handleOAuthCallback(url: callbackURL)
+        //                    } else if let error = error {
+        //                        print("OAuth error: \(error.localizedDescription)")
+        //                    }
+        //                    connectEmailVM.isSuccess = false
+        //                }
+        //            }
+        //        }
     }
     
     //MARK: - Button actions
@@ -129,12 +128,35 @@ struct ConnectEmailView: View {
         dismiss()
     }
     
-    private func gmailAction() {
-        connectEmailVM.oauthUrl(input: OauthUrlRequest(userId: Constants.getUserId(), type: 1))
+    private func gmailAction(){
+        guard let presentingVC = UIApplication.shared.rootViewController else {
+            return
+        }
+        SocialLogins.shared.gmailSignInOAuth(presentingVC: presentingVC) { serverAuthCode in
+            guard let code = serverAuthCode else {
+                print("❌ serverAuthCode is nil")
+                return
+            }
+            print("✅ serverAuthCode:", code)
+            connectEmailVM.gmailOauthCallBack(input: GmailOauthCallBackRequest(userId: Constants.getUserId(), code: code, type: 1))
+        }
     }
     
     private func outlookAction() {
-        connectEmailVM.oauthUrl(input: OauthUrlRequest(userId: Constants.getUserId(), type: 2))
+        guard let presentingVC = UIApplication.shared.rootViewController else {
+            return
+        }
+        SocialLogins.shared.microsoftSignInOAuth(presentingVC: presentingVC) { authCode in
+            guard let code = authCode else {
+                print("❌ Microsoft authCode is nil")
+                return
+            }
+            print("✅ Microsoft authCode:", code)
+            connectEmailVM.gmailOauthCallBack(input: GmailOauthCallBackRequest(userId: Constants.getUserId(), code: code, type: 2))
+//            connectEmailVM.microsoftOauthCallBack(input: GmailOauthCallBackRequest(userId   : Constants.getUserId(),
+//                                                                                   code     : code,
+//                                                                                   type     : 2))
+        }
     }
     
     private func yahooAction() {

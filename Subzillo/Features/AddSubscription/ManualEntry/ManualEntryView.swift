@@ -24,8 +24,8 @@ var isCurrencyUpdateGlobalManual                = false
 struct ManualEntryView: View {
     
     //MARK: - Properties
-    @State var isFromEdit                       = false
-    @State var isFromListEdit                   = false
+    var isFromEdit                              = false
+    var isFromListEdit                          = false
     @State private var showActionSheet          = false
     @State private var showImagePicker          = false
     @State private var selectedImage            : UIImage? = nil
@@ -55,7 +55,7 @@ struct ManualEntryView: View {
     @State var relationIndex                    : Int = 0
     @State private var reminderInedex           : Int = -1
     @State private var isMoreEnable             : Bool = false
-    @State var subscriptionId                   = ""
+    var subscriptionId                          = ""
     @State var fromSiri                         = false
     @Environment(\.dismiss) private var dismiss
     @State var isInitialCategory                = true
@@ -87,7 +87,7 @@ struct ManualEntryView: View {
     @State private var activeField              : FieldType?
     @State private var showPlanTypeSheet        = false
     @State var selectedPlanType                 : String?
-    @State var familyMemberId                   = ""
+    var familyMemberId                          = ""
     @State private var sheetHeight              : CGFloat = .zero
     @State private var sheetID                  = UUID()
     @State private var serviceLastActionText    : String = ""
@@ -96,6 +96,7 @@ struct ManualEntryView: View {
     @State private var pendingUIAction          : PendingUIAction? = nil
     @State var isCurrency                       = false
     @State var isCurrencyUpdate                 = false
+    var isFromEmail                             : Bool = false
     
     //MARK: - body
     var body: some View {
@@ -283,7 +284,7 @@ struct ManualEntryView: View {
                     
                     //MARK: Category field
                     Button(action: selectCategory) {
-                        FieldView(text: $category, textValue: selectedCategory?.name ?? "", title: "Category", image: "gridIcon", placeHolder: "Please select", isButton: true, isText: true)
+                        FieldView(text: $category, textValue: selectedCategory?.name ?? category, title: "Category", image: "gridIcon", placeHolder: "Please select", isButton: true, isText: true)
                     }
                     .sheet(isPresented: $showCategorySheet) {
                         CategoriesBottomSheet(selectedCategory: $selectedCategory, categoryResponse:commonApiVM.categoriesResponse, header: "Select Category", placeholder: "Search Category")
@@ -500,7 +501,7 @@ struct ManualEntryView: View {
                          }
                          */
                     }
-                    CustomButton(title: isFromEdit == true ? "Save changes" : "Save Subscription", action: saveAction)
+                    CustomButton(title: isFromEdit == true ? "Save Changes" : "Save Subscription", action: saveAction)
                         .padding(.horizontal, 0)
                         .padding(.bottom, 20)
                 }
@@ -635,11 +636,11 @@ struct ManualEntryView: View {
             return
         }
         guard !serviceName.isEmpty else { return }
-//        if isFromEdit && isInitial {
-//            isInitial = false
-//        } else {
-////            isCurrency = true
-//        }
+        //        if isFromEdit && isInitial {
+        //            isInitial = false
+        //        } else {
+        ////            isCurrency = true
+        //        }
         isCurrency = true
         fetchProviderDataApi()
     }
@@ -836,7 +837,7 @@ struct ManualEntryView: View {
                         updatedDuplicates.append(info)
                     }
                     isFromAdd = isAdd
-                    AppIntentRouter.shared.navigate(to: .duplicateSubscriptionsView(duplicateSubsList: updatedDuplicates, fromFamily: familyMemberId == "" ? false : true))
+                    AppIntentRouter.shared.navigate(to: .duplicateSubscriptionsView(duplicateSubsList: updatedDuplicates, fromFamily: familyMemberId == "" ? false : true, isFromEmail: isFromEmail))
                 }
                 else{
                     //                if isAdd == true {
@@ -849,7 +850,7 @@ struct ManualEntryView: View {
                         dismiss()
                     }else{
                         if familyMemberId == ""{
-                            AppIntentRouter.shared.navigate(to: .subscriptionsListView)
+                            AppIntentRouter.shared.navigate(to: .subscriptionsListView())
                         }else{
                             dismiss()
                         }
@@ -861,7 +862,7 @@ struct ManualEntryView: View {
                     dismiss()
                 }else{
                     if familyMemberId == ""{
-                        AppIntentRouter.shared.navigate(to: .subscriptionsListView)
+                        AppIntentRouter.shared.navigate(to: .subscriptionsListView())
                     }else{
                         dismiss()
                     }
@@ -878,6 +879,8 @@ struct ManualEntryView: View {
                     selectedPayment = paymentMethod1.first(where: { $0.id == globalSubscriptionData?.paymentMethodId ?? ""})
                     isCards = selectedPayment?.status ?? false
                     paymentMethod = selectedPayment?.name ?? ""
+                }else{
+                    paymentMethod = globalSubscriptionData?.paymentMethodName ?? ""
                 }
             }
         }
@@ -896,6 +899,11 @@ struct ManualEntryView: View {
                 selectedCategory = categories.first {
                     $0.name == categoryName
                 }
+                if selectedCategory == nil {
+                    selectedCategory = Category(id: nil, name: categoryName)
+                }
+            }else{
+                selectedCategory = Category(id: nil, name: globalSubscriptionData?.categoryName)
             }
         }
         if category != ""
@@ -933,8 +941,16 @@ struct ManualEntryView: View {
                 )
             }
             updateUserInfo()
-            if let index = relationsData.firstIndex(where: { $0.id == familyMemberId }) {
-                relationIndex = index
+            if familyMemberId != ""{
+                if let index = relationsData.firstIndex(where: { $0.id == familyMemberId }) {
+                    relationIndex = index
+                }
+            }else{
+                if isFromEdit{
+                    if let index = relationsData.firstIndex(where: { $0.id == globalSubscriptionData?.subscriptionFor }) {
+                        relationIndex = index
+                    }
+                }
             }
         }
     }
@@ -1072,6 +1088,24 @@ struct ManualEntryView: View {
             serviceLastActionText = serviceName
             planLastActionText = planType
             amountLastActionText = amount
+            if let categories = commonApiVM.categoriesResponse,
+               let categoryName = globalSubscriptionData?.categoryName {
+                selectedCategory = categories.first {
+                    $0.name == categoryName
+                }
+            }else{
+                selectedCategory?.name = globalSubscriptionData?.categoryName
+                category = globalSubscriptionData?.categoryName ?? ""
+            }
+            if globalSubscriptionData?.paymentMethodId ?? "" != "" {
+                if let paymentMethod1 = commonApiVM.paymentMethodResponse {
+                    selectedPayment = paymentMethod1.first(where: { $0.id == globalSubscriptionData?.paymentMethodId ?? ""})
+                    isCards = selectedPayment?.status ?? false
+                    paymentMethod = selectedPayment?.name ?? ""
+                }else{
+                    paymentMethod = globalSubscriptionData?.paymentMethodName ?? ""
+                }
+            }
         }
     }
     
@@ -1236,7 +1270,7 @@ struct ManualEntryView: View {
                                                 notes                : notes.trimmed,
                                                 currencySymbol       : selectedCurrency?.symbol ?? "")
         
-        if let errorMessage = ManualEntryValidations.shared.manualEntry(input: input) {
+        if let errorMessage = ManualEntryValidations.shared.manualEntry(input: input, category: selectedCategory?.name ?? "") {
             ToastManager.shared.showToast(message: errorMessage,style:ToastStyle.error)
         } else {
             if isFromListEdit{

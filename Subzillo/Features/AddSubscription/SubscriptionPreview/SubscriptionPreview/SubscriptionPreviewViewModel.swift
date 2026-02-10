@@ -16,6 +16,7 @@ class SubscriptionPreviewViewModel: NSObject, ObservableObject {
     private let router                          : AppIntentRouter
     @Published var isEntrySuccess               : Bool?
     @Published var addSubscriptionResponse      : PendingSubscriptionConfirmResponseData?
+    @Published var isDiscardSuccess             : Bool?
     
     init(router: AppIntentRouter = .shared) {
         self.router = router
@@ -40,6 +41,22 @@ class SubscriptionPreviewViewModel: NSObject, ObservableObject {
 //                ToastManager.shared.showToast(message: response.message ?? "")
 //            }
             self.isEntrySuccess = true
+        }
+        .store(in: &self.subscriptions)
+    }
+    
+    func discardEmailSubscriptionApi(input: DiscardEmailSubscriptionRequest) {
+        self.isDiscardSuccess = false
+        apiReference.postApi(endPoint: APIEndpoint.discardEmailSubscription, method: .POST, token: authKey, body: input, showLoader: true, responseType: GeneralResponse.self)
+            .sink { [unowned self] completion in
+                if case let .failure(error) = completion {
+                    self.handleError(error, endPoint: APIEndpoint.discardEmailSubscription)
+                }
+            }
+        receiveValue: { response in
+            PrintLogger.modelLog(response, type: .response, isInput: false)
+            ToastManager.shared.showToast(message: response.message ?? "")
+            self.isDiscardSuccess = true
         }
         .store(in: &self.subscriptions)
     }
