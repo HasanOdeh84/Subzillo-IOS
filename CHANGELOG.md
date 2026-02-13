@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.24.0] (Beta) - 2026-01-24
+
+### Delivered
+- Next Renewal Date: The next renewal date is not being captured correctly for some subscriptions.
+- Billing Cycle Selection: For certain subscriptions, the selected billing cycle (monthly or yearly) is not applied as expected.
+- Currency Update Issue: When switching from a monthly plan to a yearly plan, the amount updates correctly; however, the currency changes to USD instead of remaining in AED, even though AED was initially detected correctly.
+- Expired Subscription Detection:An expired subscription was identified. The system shows the user whether they want to replace the existing subscription or add it as a new one.
+- Dark Theme Image Support:Data extraction from images in dark theme is now working correctly.
+
+## [1.24.0] (Alpha) - 2026-01-24
+
+### Fixed
+- Bug fixes and modifications.
+
 ## [1.23.0] (Alpha) - 2026-01-23
 
 ### Fixed
