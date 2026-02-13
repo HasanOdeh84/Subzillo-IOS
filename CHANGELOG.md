@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.25.0] (Alpha) - 2026-02-13
+
+### Added
+- Connect Email, connected emails list, no subscriptions bottom sheet UI's.
+- Gmail connect, gmail sync, delete mail and email subscriptions list. 
+
 ## [1.24.0] (Beta) - 2026-01-24
 
 ### Delivered
