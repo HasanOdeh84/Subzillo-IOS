@@ -32,6 +32,8 @@ struct Constants{
     static let googleMapApiKey                      = "AIzaSyAjueXZzKodaxXdG2mZYG21_Jaf_ikFicQ"
     static let googleToken                          = "AIzaSyC8QkcmKT-p9tpMnamwLZ3xY4RSTxcvaKk"
     static let googleClientId                       = "955282043815-5tm4dfjcs5uv5qkvne9uv6jkf64div4a.apps.googleusercontent.com"
+//    static let miscrosoftClientId                   = "b6d1a52b-8d3a-4c74-b75f-b8a63be5a684"//ajay's
+    static let miscrosoftClientId                   = "d81f4f2f-5591-4cae-bcfb-bd219a7d4016"
 //    static let webClientId                          = "955282043815-shgvrph5q1jiogm6es7lc143jad27vk0.apps.googleusercontent.com"
     static let webClientId                          = "955282043815-uither25lbuv22smj2tdhje513ilg5je.apps.googleusercontent.com"
     static let userDefaults                         = UserDefaults.standard

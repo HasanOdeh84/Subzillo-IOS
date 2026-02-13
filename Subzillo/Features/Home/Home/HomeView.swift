@@ -1241,6 +1241,7 @@ struct YearOverviewChartView: View {
         }
         .sheet(isPresented: $openYearSheet) {
             CustomYearBottomSheet(isPresented   : $openYearSheet,
+                                  selectedYear  : $year,
                                   onDone        : { year in
                 self.year = year
                 onDone(year)

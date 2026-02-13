@@ -257,7 +257,7 @@ struct SettingsView: View {
                     GradientBorderButton(title: "Reset to default") {
                         settingsVM.toggleReminders(input: ToggleRemindersRequest(userId         : Constants.getUserId(),
                                                                                  type           : 3,
-                                                                                 status         : false))
+                                                                                 status         : true))
                     }
                     .background(Color.clear)
                     .padding(.bottom,48)

@@ -67,7 +67,7 @@ struct CustomYearBottomSheet: View {
     
     //MARK: - Properties
     @Binding var isPresented    : Bool
-    @State var selectedYear     : Int = 2025
+    @Binding var selectedYear   : Int
     let onDone                  : (Int) -> Void
     let years                   = Array(2025...(Calendar.current.component(.year, from: Date()) + 100))
     

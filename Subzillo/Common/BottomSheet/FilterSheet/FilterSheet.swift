@@ -80,7 +80,7 @@ struct FilterSheet: View {
                             .presentationDetents([.large])
                             .presentationDragIndicator(.hidden)
                         }
-                        .padding(.horizontal, 0)
+                        .padding(.horizontal, -5)
                     }
                     .padding(.bottom, 20)
                     
@@ -160,7 +160,7 @@ struct FilterSheet: View {
                                 .presentationDetents([.height(sheetHeight)])
                                 .presentationDragIndicator(.hidden)
                             }
-                            .padding(.horizontal, 0)
+                            .padding(.horizontal, -5)
                         }
                         .padding(.bottom, 20)
                     }
@@ -200,7 +200,7 @@ struct FilterSheet: View {
                             .presentationDetents([.height(300)])
                             .presentationDragIndicator(.hidden)
                         }
-                        .padding(.horizontal, 0)
+                        .padding(.horizontal, -5)
                     }
                 } else {
                     Text("Sort by cost or renewal date")
@@ -276,7 +276,7 @@ struct FilterSheet: View {
                 }
                 CustomButton(title: "Apply",action: onApplyAction)
             }
-            .padding(.horizontal, 0)
+            .padding(.horizontal,-15)
             Spacer()
         }
         .padding(.horizontal, 40)
@@ -291,11 +291,12 @@ struct FilterSheet: View {
                 selectedCategory = categories.first { $0.id == categoryId }
             }
             
-            if let categoryId = filterData.categoryId,
-               let categories = commonApiVM.categoriesResponse {
-                selectedCategory = categories.first { $0.id == categoryId }
+            if !filterData.familyMemberIds.isEmpty {
+                selectedFamilyMembers =
+                familyMembersWithMe.filter {
+                    filterData.familyMemberIds.contains($0.id ?? "")
+                }
             }
-            
             if let month = filterData.month,
                let year = filterData.year {
                 chargeDate = String(format: "%02d/%d", month, year)
@@ -344,10 +345,12 @@ struct FilterSheet: View {
             }
         }
         
+        if filterData != nil{
             if let categoryId = filterData.categoryId,
                let categories = commonApiVM.categoriesResponse {
                 selectedCategory = categories.first { $0.id == categoryId }
             }
+        }
     }
     
     func updateRelationInfo()
@@ -363,17 +366,6 @@ struct FilterSheet: View {
                 )
             }
             updateUserInfo()
-            
-            // Sync selectedFamilyMembers with filterData
-            if filterData.familyMemberIds.isEmpty {
-                // If it's a fresh/reset filter, select all by default
-                selectedFamilyMembers = familyMembersWithMe
-            } else {
-                // Restore previous selection against the loaded members
-                selectedFamilyMembers = familyMembersWithMe.filter { member in
-                    filterData.familyMemberIds.contains(member.id ?? "")
-                }
-            }
         }
     }
     
@@ -391,15 +383,15 @@ struct FilterSheet: View {
     
     func resetFilters() {
         filterData = FilterModel(
-            includeFamilySubscriptions: true,
-            includeExpiredSubscriptions: true,
+            includeFamilySubscriptions: false,
+            includeExpiredSubscriptions: false,
             costOrder: 0,
             renewalDateOrder: .none
         )
         filterData.familyMemberIds = []
         selectedCategory = nil
         category = ""
-        selectedFamilyMembers = familyMembersWithMe
+        selectedFamilyMembers.removeAll()
         isClear = true
     }
     
@@ -434,11 +426,10 @@ struct FilterSheet: View {
     //MARK: - Button actions
     private func onApplyAction() {
         if isClear{
-            filterData = FilterModel(includeFamilySubscriptions : true,
-                                     includeExpiredSubscriptions: true,
+            filterData = FilterModel(includeFamilySubscriptions : false,
+                                     includeExpiredSubscriptions: false,
                                      costOrder                  : 0,
                                      renewalDateOrder           : .none)
-            filterData.familyMemberIds = familyMembersWithMe.compactMap { $0.id }
         }
         onDelegate?(filterData)
         dismiss()

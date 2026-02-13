@@ -22,7 +22,7 @@ var baseurl: String {
 
 //com.subzillo.app
 //com.krify.Subzillo
-let defaultAuthKey  = "CeZwFhHrhiK8bBG2sH9XuwGbsHfeRp0kdTr6ZAwZzxP5jOLbCRBtfaz3qHLPhg1v"
+let defaultAuthKey = "CeZwFhHrhiK8bBG2sH9XuwGbsHfeRp0kdTr6ZAwZzxP5jOLbCRBtfaz3qHLPhg1v"
 
 enum HTTPMethod: String {
     case GET, POST, PUT, DELETE, PATCH
@@ -78,6 +78,7 @@ enum APIEndpoint: String {
     case notificationsList              = "/notificationsList"
     case updateProfileImage             = "/updateProfileImage"
     case updateDeviceId                 = "/updateDeviceId"
+    case analytics                      = "/analytics"
 
     //new api's
     case deleteAccount                  = "/deleteAccount"

@@ -85,6 +85,7 @@ class ManualEntryViewModel: ObservableObject {
     }
     
     func listFamilyMembers(input:ListFamilyMembersRequest, showLoader:Bool = false) {
+        listFamilyMembersResponse = nil
         apiReference.postApi(endPoint: APIEndpoint.listFamilyMembers, method: .POST,token: authKey,body: input,showLoader: showLoader, responseType: ListFamilyMembersResponse.self)
             .sink { [unowned self] completion in
                 if case let .failure(error) = completion {

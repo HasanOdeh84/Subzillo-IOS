@@ -15,9 +15,17 @@ struct AnalyticalView: View {
     @State private var tempDate                 = Date()
     @State var year                             : Int = 0
     @State var month                            : Int = 0
-    @State private var monthlySubscriptions     = [SubscriptionDay]()
+    @State private var monthlySubscriptions     = [AnalyticsCategoryData]()
     @State private var isDatePickerPresented    = false
     @State private var chargeDate               : String = ""
+    @StateObject var viewModel                  = SubscriptionsViewModel()
+    @StateObject var manualVM                   = ManualEntryViewModel()
+    @State var monthYear                        : String =  ""
+    @State var selectedFamilyMembers            : [String] = ["all"]
+    @State private var relationsData            = [
+        ManualDataInfo(id: "all", title: "All"),
+        ManualDataInfo(id: "me", title: "Me")
+    ]
     
     private var currentYear: Int {
         Calendar.current.component(.year, from: currentDate)
@@ -54,47 +62,96 @@ struct AnalyticalView: View {
                 
                 /*
                  
- //                Button(action: dateSelection) {
- //                    FieldView(
- //                        text: $chargeDate,
- //                        textValue: "",
- //                        title: "",
- //                        image: "Calendar1",
- //                        placeHolder: "mm/yyyy",
- //                        isButton: false,
- //                        isText: true,
- //                        isDate: true
- //                    )
- //                    .padding(.top, -24)
- //                    .padding(.horizontal, -5)
- //                }
- //                .sheet(isPresented: $isDatePickerPresented) {
- //                    CustomCalenderSheet(
- //                        isPresented   : $isDatePickerPresented,
- //                        selectedMonth : $month,
- //                        selectedYear  : $year,
- //                        onDone: {
- //                            let monthString = String(format: "%02d", month)
- //                            self.chargeDate = "\(monthString)/\(year)"
- //                            //                    getSubsByMonthApi()
- //                        }
- //                    )
- //                    .presentationDetents([.height(300)])
- //                    .presentationDragIndicator(.hidden)
- //                }
+                 //                Button(action: dateSelection) {
+                 //                    FieldView(
+                 //                        text: $chargeDate,
+                 //                        textValue: "",
+                 //                        title: "",
+                 //                        image: "Calendar1",
+                 //                        placeHolder: "mm/yyyy",
+                 //                        isButton: false,
+                 //                        isText: true,
+                 //                        isDate: true
+                 //                    )
+                 //                    .padding(.top, -24)
+                 //                    .padding(.horizontal, -5)
+                 //                }
+                 //                .sheet(isPresented: $isDatePickerPresented) {
+                 //                    CustomCalenderSheet(
+                 //                        isPresented   : $isDatePickerPresented,
+                 //                        selectedMonth : $month,
+                 //                        selectedYear  : $year,
+                 //                        onDone: {
+                 //                            let monthString = String(format: "%02d", month)
+                 //                            self.chargeDate = "\(monthString)/\(year)"
+                 //                            //                    getSubsByMonthApi()
+                 //                        }
+                 //                    )
+                 //                    .presentationDetents([.height(300)])
+                 //                    .presentationDragIndicator(.hidden)
+                 //                }
                  */
                 
                 // Member Filter
-                AnalyticsMemberFilterView()
+                //                AnalyticsMemberFilterView(members: relationsData)
+                AnalyticsMemberFilterView(members: relationsData, selectedIds: $selectedFamilyMembers) {
+                    analyticsApi()
+                }
                 
                 // Donut Chart (Top Spending)
-                SubscriptionSummaryView()
+                SubscriptionSummaryView(pieData         : viewModel.analyticsResponse?.pie ?? PieData(month: 0, year: 0, monthYear: "", totals: nil, totalAmount: 0.0, categories: []),
+                                        subscriptions   : viewModel.analyticsResponse?.pie?.categories ?? [],
+                                        currencySymbol  : viewModel.analyticsResponse?.currencySymbol ?? Constants.shared.currencySymbol,
+                                        monthYear       : $monthYear,
+                                        done: {
+                    analyticsApi()
+                })
                 
                 // Year overview bar chart
-                AnalyticsYearOverviewChartView(onDone: { year in
-                    
+                AnalyticsYearOverviewChartView(barData: viewModel.analyticsResponse?.bar, onDone: { year in
+                    self.year = year
+                    analyticsApi()
                 })
                 .padding(.bottom, 75)
+            }
+            .onAppear{
+                let now = Date()
+                let formatter = DateFormatter()
+                year = Calendar.current.component(.year, from: now)
+                formatter.dateFormat = "yyyy-MM"
+                monthYear = formatter.string(from: now)
+                analyticsApi()
+                listFamilyMembersApi()
+            }
+            .onChange(of: manualVM.listFamilyMembersResponse) { _ in updateRelationInfo() }
+        }
+    }
+    
+    //MARK: - User defined methods
+    func analyticsApi(){
+        viewModel.analytics(input: AnalyticsRequest(userId          : Constants.getUserId(),
+                                                    monthYear       : monthYear,
+                                                    year            : year,
+                                                    familyMembers   : selectedFamilyMembers))
+    }
+    
+    func listFamilyMembersApi(){
+        manualVM.listFamilyMembers(input: ListFamilyMembersRequest(userId: Constants.getUserId()))
+    }
+    
+    func updateRelationInfo()
+    {
+        relationsData.removeAll()
+        relationsData.append(ManualDataInfo(id: "all", title: "All"))
+        relationsData.append(ManualDataInfo(id: "me", title: "Me"))
+        if let familyCards = manualVM.listFamilyMembersResponse {
+            for family in familyCards {
+                relationsData.append(
+                    ManualDataInfo(
+                        id      : family.id ?? "",
+                        title   : family.nickName
+                    )
+                )
             }
         }
     }
@@ -104,30 +161,29 @@ struct AnalyticalView: View {
 
 //MARK: AnalyticsMemberFilterView
 struct AnalyticsMemberFilterView: View {
-    let members = ["All", "Me", "Wife", "Fatemah", "Son", "Harry"]
-    @State private var selectedMember = "All"
+    let members                 : [ManualDataInfo]
+    @Binding var selectedIds    : [String]
+    var onSelectionChange       : () -> Void
     
     var body: some View {
         ScrollView(.horizontal, showsIndicators: false) {
             HStack(spacing: 8) {
-                ForEach(members, id: \.self) { member in
+                ForEach(members, id: \.id) { member in
                     Button {
-                        withAnimation {
-                            selectedMember = member
-                        }
+                        handleSelection(member.id)
                     } label: {
-                        Text(member)
+                        Text(member.title ?? "")
                             .font(.appRegular(14))
                             .padding(.horizontal, 16)
                             .padding(.vertical, 8)
-                            .foregroundColor(selectedMember == member ? .white : .navyBlueCTA700)
+                            .foregroundColor(isSelected(member.id) ? .white : .navyBlueCTA700)
                             .background(
-                                selectedMember == member ? Color.blueMain700 : Color.white
+                                isSelected(member.id) ? Color.blueMain700 : Color.white
                             )
                             .overlay(
                                 RoundedRectangle(cornerRadius: 8)
                                     .stroke(Color.neutral300Border,
-                                            lineWidth: selectedMember == member ? 0 : 1
+                                            lineWidth: isSelected(member.id) ? 0 : 1
                                            )
                             )
                             .cornerRadius(8)
@@ -137,19 +193,40 @@ struct AnalyticsMemberFilterView: View {
             .padding(.top, 5)
         }
     }
+    
+    private func isSelected(_ id: String) -> Bool {
+        selectedIds.contains(id)
+    }
+    
+    private func handleSelection(_ id: String) {
+        withAnimation {
+            if id == "all" {
+                selectedIds = ["all"]
+            } else {
+                if selectedIds.contains("all") {
+                    selectedIds.removeAll { $0 == "all" }
+                }
+                
+                if selectedIds.contains(id) {
+                    selectedIds.removeAll { $0 == id }
+                    if selectedIds.isEmpty {
+                        selectedIds = ["all"]
+                    }
+                } else {
+                    selectedIds.append(id)
+                }
+            }
+        }
+        onSelectionChange()
+    }
 }
 
 //MARK: SubscriptionSummaryView
 struct SubscriptionSummaryView: View {
     
-    let subscriptions = [
-        SubscriptionData(amount: 10.00, color: "red", title: "Netflix"),
-        SubscriptionData(amount: 20.00, color: "blue", title: "Prime"),
-        SubscriptionData(amount: 5.32, color: "purple", title: "iCloud"),
-        SubscriptionData(amount: 21.99, color: "indigo", title: "Spotify"),
-        SubscriptionData(amount: 66.68, color: "cyan", title: "YouTube")
-    ]
-    
+    var pieData         : PieData
+    let subscriptions   : [AnalyticsCategoryData]
+    var currencySymbol  : String
     @State private var showAll                  = false
     @State private var currentDate              = Date()
     @State private var tempDate                 = Date()
@@ -157,8 +234,10 @@ struct SubscriptionSummaryView: View {
     @State var month                            : Int = 0
     @State private var isDatePickerPresented    = false
     @State private var chargeDate               : String = "mm/yyyy"
+    @Binding var monthYear                      : String
+    var done                                    : () -> Void
     
-    private var visibleSubscriptions: [SubscriptionData] {
+    private var visibleSubscriptions: [AnalyticsCategoryData] {
         if showAll {
             return subscriptions
         } else {
@@ -174,7 +253,7 @@ struct SubscriptionSummaryView: View {
                     .foregroundColor(.neutralMain700)
                 
                 Spacer()
-
+                
                 HStack(spacing: 4) {
                     Text(chargeDate)
                         .font(.appRegular(16))
@@ -200,7 +279,8 @@ struct SubscriptionSummaryView: View {
                         onDone: {
                             let monthString = String(format: "%02d", month)
                             self.chargeDate = "\(monthString)/\(year)"
-                            //                    getSubsByMonthApi()
+                            monthYear = "\(year)-\(monthString)"
+                            done()
                         }
                     )
                     .presentationDetents([.height(300)])
@@ -221,32 +301,37 @@ struct SubscriptionSummaryView: View {
                 .overlay(Color.neutral300Border)
             
             // Chart
-            DonutChartView(data: subscriptions)
-                .padding(.vertical, 24)
-                .padding(.horizontal, 29)
+            DonutChartView(data             : subscriptions,
+                           currencySymbol   : currencySymbol)
+            .padding(.vertical, 24)
+            .padding(.horizontal, 29)
             
             VStack(spacing: 16) {
                 HStack(spacing: 4) {
-                    Text("Active - 10")
+                    Text("Active - \(pieData.totals?.activeSubscriptions ?? 0)")
                         .font(.appBold(14))
                         .foregroundColor(Color.green)
                     Text("|")
                         .font(.appBold(14))
                         .foregroundColor(.neutralMain700)
-                    Text("Inactive - 06")
+                    Text("Inactive - \(pieData.totals?.inactiveSubscriptions ?? 0)")
                         .font(.appBold(14))
                         .foregroundColor(Color.red)
                     Spacer()
                 }
                 .padding(.horizontal, 24)
                 .padding(.top, 24)
+                .padding(.bottom, visibleSubscriptions.count == 0 ? -16 : 0)
                 
                 VStack(spacing: 8) {
                     ForEach(visibleSubscriptions.indices, id: \.self) { index in
-                        LegendItemView(item: visibleSubscriptions[index])
+                        LegendItemView(item             : visibleSubscriptions[index],
+                                       currencySymbol   : currencySymbol)
                     }
                 }
                 .padding(.horizontal, 24)
+                //                .padding(.bottom, 21)
+                .padding(.bottom, subscriptions.count < 2 ? 22 : 0)
                 
                 if subscriptions.count > 2 {
                     Divider()
@@ -282,24 +367,29 @@ struct SubscriptionSummaryView: View {
             .padding(.bottom, 16)
             .padding(.horizontal, 16)
         }
-        .background(Color.white)
+        .overlay(
+            RoundedRectangle(cornerRadius: 8)
+                .stroke(.neutral300Border, lineWidth: 1)
+        )
+        .background(.whiteBlackBG)
         .cornerRadius(8)
-        // .shadow(color: Color.black.opacity(0.05), radius: 4, x: 0, y: 2)
     }
 }
 
 struct DonutChartView: View {
     
-    var data: [SubscriptionData]
+    var data                     : [AnalyticsCategoryData]
+    var currencySymbol           : String
     @State private var progresses: [CGFloat]
     
-    init(data: [SubscriptionData]) {
+    init(data: [AnalyticsCategoryData], currencySymbol: String) {
         self.data = data
+        self.currencySymbol = currencySymbol
         _progresses = State(initialValue: Array(repeating: 0, count: data.count))
     }
     
     private var totalAmount: Double {
-        data.compactMap { $0.amount }.reduce(0, +)
+        data.compactMap { $0.totalAmount }.reduce(0, +)
     }
     
     private var sliceAngles: [(start: Angle, end: Angle, sweep: Double)] {
@@ -307,8 +397,8 @@ struct DonutChartView: View {
         var current = Angle(degrees: -90)
         
         for item in data {
-            let value = item.amount ?? 0
-            let percent = totalAmount == 0 ? 0 : value / totalAmount
+            let value = item.totalAmount ?? 0
+            let percent = totalAmount == 0 ? (1.0 / Double(max(1, data.count))) : (value / totalAmount)
             let sweep = 360 * percent
             let end = current + .degrees(sweep)
             result.append((current, end, sweep))
@@ -322,17 +412,27 @@ struct DonutChartView: View {
             GeometryReader { _ in
                 let thickness: CGFloat = 37
                 
+                // Background circle for empty state
+                DonutSlice(
+                    startAngle: .degrees(0),
+                    endAngle: .degrees(360),
+                    thickness: thickness
+                )
+                .foregroundColor(.neutralDisabled200)
+                
                 ForEach(Array(data.enumerated()), id: \.offset) { index, item in
-                    let s = sliceAngles[index]
-                    let animatedEnd = s.start + .degrees(s.sweep * progresses[index])
-                    
-                    DonutSlice(
-                        startAngle: s.start,
-                        endAngle: animatedEnd,
-                        thickness: thickness
-                    )
-                    //                    .glossyFill(color: item.color)
-                    .glossyFill(color: item.uiColor)
+                    if index < progresses.count {
+                        let s = sliceAngles[index]
+                        let animatedEnd = s.start + .degrees(s.sweep * progresses[index])
+                        
+                        DonutSlice(
+                            startAngle: s.start,
+                            endAngle: animatedEnd,
+                            thickness: thickness
+                        )
+                        //                    .glossyFill(color: item.color)
+                        .glossyFill(color: Color(hex: item.categoryColor ?? "#619BEE"))
+                    }
                 }
             }
             
@@ -345,13 +445,17 @@ struct DonutChartView: View {
                     .foregroundColor(.neutral500)
                     .font(.appSemiBold(18))
                 
-                Text("$\(String(format: "%.2f", totalAmount))")
+                Text("\(currencySymbol)\(String(format: "%.2f", totalAmount))")
                     .font(.appSemiBold(28))
                     .foregroundColor(.navyBlueCTA700)
             }
         }
         .frame(height: 278)
         .onAppear { animateSequentially() }
+        .onChange(of: data) { newData in
+            progresses = Array(repeating: 0, count: newData.count)
+            animateSequentially()
+        }
     }
     
     private func animateSequentially() {
@@ -406,23 +510,25 @@ struct DonutSlice: Shape {
 }
 
 struct LegendItemView: View {
-    let item: SubscriptionData
+    let item            : AnalyticsCategoryData
+    let currencySymbol  : String
     
     var body: some View {
         HStack(alignment: .center, spacing: 8) {
             Circle()
-                .fill(item.uiColor)
+                .fill(Color(hex: item.categoryColor ?? "#619BEE"))
                 .frame(width: 15, height: 15)
             
-            Text(item.title ?? "")
+            Text(item.categoryName ?? "")
                 .font(.appRegular(14))
                 .foregroundColor(.neutralMain700)
                 .lineLimit(1)
-            
+                .fixedSize(horizontal: true, vertical: false)
+                .layoutPriority(1)
             
             DashedHorizontalDivider()
             
-            Text("$\(String(format: "%.2f", item.amount ?? 0.00))")
+            Text("\(currencySymbol)\(String(format: "%.2f", item.totalAmount ?? 0.00))")
                 .font(.appSemiBold(16))
                 .foregroundColor(.neutralMain700)
         }
@@ -441,37 +547,54 @@ extension Shape {
                 ]),
                 center: .center,
                 startRadius: 0,
-                endRadius: 200     // adjust based on frame
+                endRadius: 200
             )
         )
     }
 }
 
-extension SubscriptionData {
-    var uiColor: Color {
-        // Map colors to design system or standard colors
-        // Mockup uses a specific palette
-        switch color?.lowercased() {
-        case "red": return Color(hex: "FF5C5C") // Estimate
-        case "blue": return Color(hex: "2E5BFF")
-        case "purple": return .purple
-        case "indigo": return .indigo
-        case "cyan": return .cyan
-        default: return .gray
-        }
-    }
-}
+//extension SubscriptionData {
+//    var uiColor: Color {
+//        // Map colors to design system or standard colors
+//        // Mockup uses a specific palette
+//        switch color?.lowercased() {
+//        case "red": return Color(hex: "FF5C5C") // Estimate
+//        case "blue": return Color(hex: "2E5BFF")
+//        case "purple": return .purple
+//        case "indigo": return .indigo
+//        case "cyan": return .cyan
+//        default: return .gray
+//        }
+//    }
+//}
 
 //MARK: - AnalyticsYearOverviewChartView
 struct AnalyticsYearOverviewChartView: View {
     
+    let barData                     : BarData?
     @State var year                 : Int = 2025
-    let years                       = ["2023", "2024", "2025"]
-    @State private var selectedYear = "2024"
-    let monthlyData: [Double]       = [80, 60, 200, 80, 60, 40, 80, 120, 80, 80, 80, 90]
     let months                      = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
     @State var openYearSheet        = false
     let onDone                      : (Int) -> Void
+    
+    private var monthlyData: [Double] {
+        var data = Array(repeating: 0.0, count: 12)
+        if let apiMonths = barData?.months {
+            for item in apiMonths {
+                if let m = item.month, m >= 1 && m <= 12 {
+                    data[m-1] = item.totalAmount ?? 0.0
+                }
+            }
+        }
+        return data
+    }
+    
+    private var maxAmount: Double {
+        let maxVal = monthlyData.max() ?? 0
+        if maxVal == 0 { return 200 }
+        // Round up to the nearest 10
+        return ceil(maxVal / 10.0) * 10.0
+    }
     
     var body: some View {
         VStack(spacing: 16) {
@@ -501,6 +624,7 @@ struct AnalyticsYearOverviewChartView: View {
             .padding(.top, 16)
             .sheet(isPresented: $openYearSheet) {
                 CustomYearBottomSheet(isPresented   : $openYearSheet,
+                                      selectedYear  : $year,
                                       onDone        : { year in
                     self.year = year
                     onDone(year)
@@ -525,9 +649,9 @@ struct AnalyticsYearOverviewChartView: View {
                         HStack {
                             Text("0")
                             Spacer()
-                            Text("100")
+                            Text("\(Int(maxAmount / 2))")
                             Spacer()
-                            Text("200")
+                            Text("\(Int(maxAmount))")
                         }
                         .font(.appRegular(12))
                         .foregroundColor(.neutralMain700)
@@ -550,7 +674,7 @@ struct AnalyticsYearOverviewChartView: View {
                             GeometryReader { geo in
                                 let maxWidth = geo.size.width
                                 let value = monthlyData[index]
-                                let barWidth = (value / 200.0) * maxWidth
+                                let barWidth = maxAmount == 0 ? 0 : (value / maxAmount) * maxWidth
                                 
                                 RoundedCorner(radius: 4, corners: [.topRight, .bottomRight])
                                     .fill(
@@ -571,7 +695,15 @@ struct AnalyticsYearOverviewChartView: View {
                 .padding(.bottom, 16)
             }
         }
-        .background(Color.white)
+        .onAppear{
+            let now = Date()
+            year    = Calendar.current.component(.year, from: now)
+        }
+        .overlay(
+            RoundedRectangle(cornerRadius: 12)
+                .stroke(.neutral300Border, lineWidth: 1)
+        )
+        .background(.whiteBlackBG)
         .cornerRadius(12)
     }
 }

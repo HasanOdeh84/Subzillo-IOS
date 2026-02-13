@@ -50,12 +50,12 @@ struct ConnectEmailView: View {
                     Divider()
                         .overlay(Color.neutral300Border)
                     UploadItem(title: "Connect Outlook", subTitle: "Connect your Outlook account to access and manage your subscriptions.", image: "microsoft", imageColor: Color.systemInfo, action: outlookAction, isEmail: true)
-//                    Divider()
-//                        .overlay(Color.neutral300Border)
-//                    UploadItem(title: "Connect Yahoo", subTitle: "Integrate your Yahoo Mail account to organize and manage subscriptions.", image: "yahoo", imageColor: Color.systemInfo, action: yahooAction, isEmail: true)
+                    Divider()
+                        .overlay(Color.neutral300Border)
+                    UploadItem(title: "Connect Yahoo", subTitle: "Integrate your Yahoo Mail account to organize and manage subscriptions.", image: "yahoo", imageColor: Color.systemInfo, action: yahooAction, isEmail: true)
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
-                .frame(height: 160)//240)
+                .frame(height: 240)//160)
                 .cornerRadius(12)
                 .overlay(
                     RoundedRectangle(cornerRadius: 12)
@@ -143,23 +143,25 @@ struct ConnectEmailView: View {
     }
     
     private func outlookAction() {
-        guard let presentingVC = UIApplication.shared.rootViewController else {
-            return
-        }
-        SocialLogins.shared.microsoftSignInOAuth(presentingVC: presentingVC) { authCode in
-            guard let code = authCode else {
-                print("❌ Microsoft authCode is nil")
-                return
-            }
-            print("✅ Microsoft authCode:", code)
-            connectEmailVM.gmailOauthCallBack(input: GmailOauthCallBackRequest(userId: Constants.getUserId(), code: code, type: 2))
-//            connectEmailVM.microsoftOauthCallBack(input: GmailOauthCallBackRequest(userId   : Constants.getUserId(),
-//                                                                                   code     : code,
-//                                                                                   type     : 2))
-        }
+        ToastManager.shared.showToast(message: "Coming soon in S4",style:ToastStyle.info)
+//        guard let presentingVC = UIApplication.shared.rootViewController else {
+//            return
+//        }
+//        SocialLogins.shared.microsoftSignInOAuth(presentingVC: presentingVC) { authCode in
+//            guard let code = authCode else {
+//                print("❌ Microsoft authCode is nil")
+//                return
+//            }
+//            print("✅ Microsoft authCode:", code)
+//            connectEmailVM.gmailOauthCallBack(input: GmailOauthCallBackRequest(userId: Constants.getUserId(), code: code, type: 2))
+////            connectEmailVM.microsoftOauthCallBack(input: GmailOauthCallBackRequest(userId   : Constants.getUserId(),
+////                                                                                   code     : code,
+////                                                                                   type     : 2))
+//        }
     }
     
     private func yahooAction() {
+        ToastManager.shared.showToast(message: "Coming soon in S4",style:ToastStyle.info)
     }
 }
 

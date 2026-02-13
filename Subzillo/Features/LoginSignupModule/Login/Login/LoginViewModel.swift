@@ -147,6 +147,7 @@ class LoginViewModel: ObservableObject {
         receiveValue: { response in
             PrintLogger.modelLog(response, type: .response, isInput: false)
             ToastManager.shared.showToast(message: response.message ?? "")
+            SocialLogins.shared.googleSignOut()
             AppState.shared.logout()
             self.router.navigate(to: .login)
         }

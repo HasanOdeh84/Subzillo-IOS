@@ -182,6 +182,7 @@ struct ConnectedEmailsListView: View {
         }
         //MARK: No subscriptions found sheet
         .sheet(isPresented: $viewModel.showErrorPopup, onDismiss: {
+            viewModel.listConnectedEmails(input: ListConnectedEmailsRequest(userId: Constants.getUserId()))
         }) {
             UploadErrorImageSheet(
                 isImage     : false,

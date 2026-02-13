@@ -56,7 +56,7 @@ struct SwipeableMailRow: View {
                 if email.syncStatus != 1{
                     onDelete()
                 }else{
-                    ToastManager.shared.showToast(message: "Email is syncing, you can't delete")
+                    ToastManager.shared.showToast(message: "Can't delete the mail while syncing")
                 }
             }
             

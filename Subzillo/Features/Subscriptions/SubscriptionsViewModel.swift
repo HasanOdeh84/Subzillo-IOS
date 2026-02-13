@@ -17,6 +17,7 @@ class SubscriptionsViewModel: ObservableObject {
     private let router                        : AppIntentRouter
     @Published var listSubsResponse           : ListSubscriptionsResponseData?
     @Published var getSubsByMonthResponse     : MonthlySubscriptionsData?
+    @Published var analyticsResponse          : AnalyticsData?
     @Published var isDeletedSubscription      : Bool?
     
     init(router: AppIntentRouter = .shared) {
@@ -67,6 +68,21 @@ class SubscriptionsViewModel: ObservableObject {
         receiveValue: { response in
             PrintLogger.modelLog(response, type: .response, isInput: false)
             self.isDeletedSubscription = true
+        }
+        .store(in: &self.subscriptions)
+    }
+    
+    func analytics(input: AnalyticsRequest) {
+//        analyticsResponse = nil
+        apiReference.postApi(endPoint: APIEndpoint.analytics, method: .POST,token: authKey,body: input,showLoader: true, responseType: AnalyticsResponse.self)
+        .sink { [unowned self] completion in
+            if case let .failure(error) = completion {
+                self.handleError(error,endPoint: APIEndpoint.analytics)
+            }
+        }
+        receiveValue: { response in
+            PrintLogger.modelLog(response, type: .response, isInput: false)
+            self.analyticsResponse = response.data
         }
         .store(in: &self.subscriptions)
     }

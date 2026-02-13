@@ -21,16 +21,31 @@ class SocialLogins:NSObject, ObservableObject{
     let googleConfig            = GIDConfiguration.init(clientID: Constants.googleClientId)
     
     private var application     : MSALPublicClientApplication?
+    private var application1     : MSALPublicClientApplication?
     @Published var account      : MSALAccount?
-    private let clientId        = "b6d1a52b-8d3a-4c74-b75f-b8a63be5a684"
+    //    private let clientId        = "b6d1a52b-8d3a-4c74-b75f-b8a63be5a684" //ajay's
+    //    private let clientId        = "d81f4f2f-5591-4cae-bcfb-bd219a7d4016" //soniya's
     private let scopes          = ["User.Read"]
+    //    @StateObject var viewModel = ProfileViewModel()
     
     private override init(){
         do {
-            let config = MSALPublicClientApplicationConfig(clientId: clientId)
+            let config = MSALPublicClientApplicationConfig(clientId: Constants.miscrosoftClientId)
             // Optionally: set authority if you need a particular tenant/endpoint
             // config.authority = try MSALAADAuthority(url: URL(string: "https://login.microsoftonline.com/common")!)
             application = try MSALPublicClientApplication(configuration: config)
+            
+            //for miscrosoft oauth integration
+            let authorityURL = URL(string: "https://login.microsoftonline.com/common")!
+            let authority = try MSALAADAuthority(url: authorityURL)
+            
+            let config1 = MSALPublicClientApplicationConfig(
+                clientId    : Constants.miscrosoftClientId,
+                redirectUri : "msauth.com.krify.Subzillo://auth",
+                authority   : authority
+            )
+            
+            application1 = try MSALPublicClientApplication(configuration: config1)
         } catch {
             print("MSAL init error: \(error)")
         }
@@ -41,23 +56,79 @@ class SocialLogins:NSObject, ObservableObject{
         guard let rootVC = UIApplication.shared.connectedScenes
             .compactMap({ ($0 as? UIWindowScene)?.keyWindow?.rootViewController })
             .first else { return }
-        GIDSignIn.sharedInstance.signIn(withPresenting: rootVC) { signInResult, error in
-            if let error = error {
-                print("Google Sign-in failed:", error.localizedDescription)
-                completion(nil)
-                return
+        
+//        GIDSignIn.sharedInstance.signOut()
+//        DispatchQueue.moain.asyncAfter(deadline: .now() + 1) {
+            let config = GIDConfiguration(clientID: Constants.googleClientId)
+            GIDSignIn.sharedInstance.configuration = config
+            GIDSignIn.sharedInstance.signIn(withPresenting: rootVC, hint: nil, additionalScopes: nil) { [self] signInResult, error in
+                if let error = error {
+                    print("Google Sign-in failed:", error.localizedDescription)
+                    completion(nil)
+                    return
+                }
+                
+                guard let idToken = signInResult?.user.idToken?.tokenString else {
+                    print("Failed to get ID Token")
+                    completion(nil)
+                    return
+                }
+                
+                //            var image = URL?
+                //            if signInResult?.user.profile?.hasImage == true {
+                //                let imageURL = signInResult?.user.profile?.imageURL(withDimension: 200)
+                //                print("Profile Image URL: \(String(describing: imageURL))")
+                //                image = imageURL ?? URL
+                //            }
+                
+                if let user = GIDSignIn.sharedInstance.currentUser,
+                   let imageURL = user.profile?.imageURL(withDimension: 200) {
+                    
+                    downloadGoogleProfileImage(from: imageURL) { data in
+                        
+                        guard let imageData = data else {
+                            print("No image data received")
+                            return
+                        }
+                        
+                        DispatchQueue.main.async { [self] in
+                            // Now you have the image data
+                            print("Image downloaded successfully")
+                            let timestamp = Int(Date().timeIntervalSince1970)
+                            let filename = "image_\(timestamp).jpg"
+                            // 👉 Upload to API here
+                            //                        uploadProfileImage(imageData: imageData)
+                            //                        viewModel.updateProfileImage(input: UpdateProfileImageRequest(userId: Constants.getUserId()), fileData: [MultiPartFileInput(
+                            //                            fieldName   : "profile",
+                            //                            fileName    : filename,
+                            //                            mimeType    : "image/jpeg",
+                            //                            fileData    : imageData
+                            //                        )])
+                        }
+                    }
+                }
+                
+                self.socialLoginData = SocialLoginModel(id: idToken,
+                                                        loginType: .google,
+                                                        fullName: signInResult?.user.profile?.name,
+                                                        emailAddress: signInResult?.user.profile?.email ?? "")
+                completion(self.socialLoginData)
             }
-            guard let idToken = signInResult?.user.idToken?.tokenString else {
-                print("Failed to get ID Token")
+//        }
+    }
+    
+    func googleSignOut() {
+        GIDSignIn.sharedInstance.signOut()
+    }
+    
+    func downloadGoogleProfileImage(from url: URL, completion: @escaping (Data?) -> Void) {
+        URLSession.shared.dataTask(with: url) { data, response, error in
+            if let data = data {
+                completion(data)
+            } else {
                 completion(nil)
-                return
             }
-            self.socialLoginData =  SocialLoginModel(id               : idToken,
-                                                     loginType        : .google,
-                                                     fullName         : signInResult?.user.profile?.name,
-                                                     emailAddress     : signInResult?.user.profile?.email ?? "")
-            completion(self.socialLoginData)
-        }
+        }.resume()
     }
     
     // MARK: - Apple Sign In ------------
@@ -78,7 +149,7 @@ class SocialLogins:NSObject, ObservableObject{
     
     //MARK: - Microsoft Sign In -------------
     func signInWithMicrosoft(completion: @escaping (SocialLoginModel?) -> Void) {
-        guard let application = application else {
+        guard let application = application1 else {
             print("MSAL Application not initialized")
             completion(nil)
             return
@@ -92,6 +163,7 @@ class SocialLogins:NSObject, ObservableObject{
         }
         let webParams = MSALWebviewParameters(authPresentationViewController: rootVC)
         let parameters = MSALInteractiveTokenParameters(scopes: scopes, webviewParameters: webParams)
+        parameters.promptType = .selectAccount
         application.acquireToken(with: parameters) { (result, error) in
             if let error = error {
                 print("Microsoft login failed: \(error.localizedDescription)")
