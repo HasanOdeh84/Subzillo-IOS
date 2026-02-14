@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.26.0] (Alpha) - 2026-02-14
+
+### Modified
+- changed the gmailOauthCallback api name to oauthCallback. 
+
 ## [1.25.0] (Alpha) - 2026-02-13
 
 ### Added
