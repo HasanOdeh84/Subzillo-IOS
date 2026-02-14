@@ -2,7 +2,7 @@
 Smart subscription management at your fingertips.
 
 # Description
-Subzillo is a smart subscription management platform that helps users track, organize, and optimize their digital subscriptions in one place. It offers features like subscription reminders, expense insights, and centralized control over services such as Google Play, Apple Store, Netflix, Spotify, and more. With secure integration, users can easily manage renewals, cancellations, and payments while avoiding missed deadlines or unwanted charges. Designed with a simple and intuitive Android interface, Subzillo ensures transparency, convenience, and smarter control over recurring expenses.
+Subzillo is a smart subscription management platform that helps users track, organize, and optimize their digital subscriptions in one place. It offers features like subscription reminders, expense insights, and centralized control over services such as Google Play, Apple Store, Netflix, Spotify, and more. With secure integration, users can easily manage renewals, cancellations, and payments while avoiding missed deadlines or unwanted charges. Designed with a simple and intuitive iOS interface, Subzillo ensures transparency, convenience, and smarter control over recurring expenses.
 
 # Technologies used
 
