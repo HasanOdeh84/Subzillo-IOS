@@ -66,7 +66,7 @@ enum APIEndpoint: String {
     case OauthUrl                       = "/OauthUrl" //No need
     case listConnectedEmails            = "/listConnectedEmails"
     case deleteEmail                    = "/deleteEmail"
-    case gmailOuthCallback              = "/gmailOuthCallback"
+    case gmailOuthCallback              = "/oauthCallback"
     case syncEmail                      = "/syncEmail"
     case emailSubscriptionsList         = "/emailSubscriptionsList"
     case privacyData                    = "/privacyData"
