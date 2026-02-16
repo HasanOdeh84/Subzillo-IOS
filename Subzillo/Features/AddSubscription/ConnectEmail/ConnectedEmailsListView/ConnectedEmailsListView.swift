@@ -31,6 +31,7 @@ struct ConnectedEmailsListView: View {
     var placeholder                         : String?
     @State private var justAppeared         : Bool = false
     @State private var deleteSheetHeight    : CGFloat = .zero
+    @State private var isVisible            : Bool = false
     
     //MARK: - body
     var body: some View {
@@ -134,6 +135,8 @@ struct ConnectedEmailsListView: View {
                                 viewModel.syncEmail(email)
                             },              onView   : {
                                 viewModel.viewEmail(email)
+                            }, onDownloadLogs: {
+                                viewModel.downloadLogs(email)
                             }, isIntegrations: isIntegrations)
                         }
                     }
@@ -169,14 +172,23 @@ struct ConnectedEmailsListView: View {
         .background(Color.neutralBg100)
         //MARK: OnAppear
         .onAppear{
+            isVisible = true
             justAppeared = true
             listConnectedMailsApi()
             DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
                 justAppeared = false
             }
         }
+        .onDisappear {
+            isVisible = false
+        }
         .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("RefreshScreenData"))) { _ in
-            if !justAppeared {
+            if isVisible && !justAppeared {
+                listConnectedMailsApi()
+            }
+        }
+        .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("RefreshConnectedEmails"))) { _ in
+            if isVisible {
                 listConnectedMailsApi()
             }
         }

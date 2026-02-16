@@ -70,6 +70,14 @@ class AppDelegate: NSObject, ObservableObject, UIApplicationDelegate, UNUserNoti
                                 withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
         let userInfo = notification.request.content.userInfo
         print("Push payload: \(userInfo)")
+        
+        // Handle foreground refresh for Connected Emails
+        let typeValue = userInfo["type"]
+        let type = (typeValue as? Int) ?? Int(typeValue as? String ?? "")
+        if type == 1 {
+            NotificationCenter.default.post(name: NSNotification.Name("RefreshConnectedEmails"), object: nil)
+        }
+        
         completionHandler([.banner, .sound, .badge])
     }
     
@@ -220,12 +228,12 @@ struct SubzilloApp: App {
         let storedToken = Constants.getUserDefaultsValue(for: "device_token")
         let isLoggedIn = AppState.shared.isLoggedIn
         if storedToken != token && isLoggedIn {
-            sharedViewModel.updateDeviceId(input: UpdateDeviceIdRequest(
-                userId: Constants.getUserId(),
-                deviceId: token,
-                uniqueId: UUID().uuidString
-            ))
-            Constants.saveDefaults(value: token, key: "device_token")
+//            sharedViewModel.updateDeviceId(input: UpdateDeviceIdRequest(
+//                userId: Constants.getUserId(),
+//                deviceId: token,
+//                uniqueId: UUID().uuidString
+//            ))
+//            Constants.saveDefaults(value: token, key: "device_token")
             print("✅ Device token API called and saved to defaults")
         } else if storedToken != token {
             print("ℹ️ Device token changed but user not logged in. Waiting for login to sync.")

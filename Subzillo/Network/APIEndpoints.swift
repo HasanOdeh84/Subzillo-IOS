@@ -8,7 +8,7 @@ enum urlType:Int{
     case prod  = 2
 }
 
-let Environment = urlType.dev
+let Environment = urlType.stage
 var baseurl: String {
     switch Environment {
     case .dev:
@@ -66,7 +66,7 @@ enum APIEndpoint: String {
     case OauthUrl                       = "/OauthUrl" //No need
     case listConnectedEmails            = "/listConnectedEmails"
     case deleteEmail                    = "/deleteEmail"
-    case gmailOuthCallback              = "/oauthCallback"
+    case oauthCallback                  = "/OauthCallback"
     case syncEmail                      = "/syncEmail"
     case emailSubscriptionsList         = "/emailSubscriptionsList"
     case privacyData                    = "/privacyData"
@@ -79,6 +79,7 @@ enum APIEndpoint: String {
     case updateProfileImage             = "/updateProfileImage"
     case updateDeviceId                 = "/updateDeviceId"
     case analytics                      = "/analytics"
+    case exportGmailSyncLogs            = "/exportGmailSyncLogs"
 
     //new api's
     case deleteAccount                  = "/deleteAccount"

@@ -93,3 +93,12 @@ struct EmailSubscriptionsListRequest: Codable{
     let userId          : String
     let integrationId   : String
 }
+
+struct ExportGmailSyncLogsRequest: Codable{
+    let userId          : String
+    let integrationId   : String
+}
+
+struct ExportGmailSyncLogsResponse: Codable {
+    let message : String?
+}

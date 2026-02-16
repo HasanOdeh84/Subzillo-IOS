@@ -10,6 +10,7 @@ struct SwipeableMailRow: View {
     let onDelete                    : () -> Void
     let onSync                      : () -> Void
     let onView                      : () -> Void
+    let onDownloadLogs              : () -> Void
     @State private var offset       : CGFloat = 0
     @State private var isSwiped     : Bool = false
     let swipeThreshold: CGFloat     = -20
@@ -64,6 +65,7 @@ struct SwipeableMailRow: View {
             ConnectedEmailItemView(email            : email,
                                    onSync           : onSync,
                                    onView           : onView,
+                                   onDownloadLogs   : onDownloadLogs,
                                    isIntegrations   : isIntegrations)
             .background(Color.clear)
             .background(

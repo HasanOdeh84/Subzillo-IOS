@@ -285,23 +285,23 @@ struct WelcomeHomeView: View {
     
     //MARK: - Button actions
     private func goToNotifications() {
-        AppIntentRouter.shared.navigate(to: .notifications)
-//        ToastManager.shared.showToast(message: "Coming soon in S4",style:ToastStyle.info)
+//        AppIntentRouter.shared.navigate(to: .notifications)
+        ToastManager.shared.showToast(message: "Coming soon in S4",style:ToastStyle.info)
     }
     private func upgradePlan() {
-        AppIntentRouter.shared.navigate(to: .pricingPlans)
-//        ToastManager.shared.showToast(message: "Coming soon in S4",style:ToastStyle.info)
+//        AppIntentRouter.shared.navigate(to: .pricingPlans)
+        ToastManager.shared.showToast(message: "Coming soon in S4",style:ToastStyle.info)
     }
     private func goToSmartAssistant() {
         ToastManager.shared.showToast(message: "Coming soon in S5",style:ToastStyle.info)
     }
     private func goToUploadImage() {
-        //ToastManager.shared.showToast(message: "Coming soon",style:ToastStyle.info)
-        showUploadPopup = true
+        ToastManager.shared.showToast(message: "Coming soon",style:ToastStyle.info)
+//        showUploadPopup = true
     }
     private func goToConnectEmail() {
-        AppIntentRouter.shared.navigate(to: .connectEmail)
-//        ToastManager.shared.showToast(message: "Coming soon in S4",style:ToastStyle.info)
+//        AppIntentRouter.shared.navigate(to: .connectEmail)
+        ToastManager.shared.showToast(message: "Coming soon in S4",style:ToastStyle.info)
     }
     private func goToAddByVoice() {
         // ToastManager.shared.showToast(message: "Coming soon",style:ToastStyle.info)

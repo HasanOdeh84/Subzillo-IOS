@@ -75,6 +75,38 @@ class NetworkRequest {
             .eraseToAnyPublisher()
     }
     
+    func postApiData<U : Encodable>(
+        endPoint    : APIEndpoint,
+        method      : HTTPMethod,
+        token       : String,
+        body        : U?,
+        showLoader  : Bool = false
+    ) -> AnyPublisher<Data, APIError> {
+        return self.postRequestData(endPoint: endPoint, method: method,token: token,body: body,showLoader: showLoader)
+            .catch { error -> AnyPublisher<Data, APIError> in
+                if case .unauthorized = error {
+                    if endPoint == .regenerateAccessToken{
+                        DispatchQueue.main.async {
+                            AlertManager.shared.showAlert(title: "", message: "Session expired, Please login again.",okAction: {
+                                AppState.shared.logout()
+                                AppIntentRouter.shared.navigate(to: .login)
+                            })
+                        }
+                        return Fail(error: .unauthorized).eraseToAnyPublisher()
+                    }else{
+                        return self.regenerateAccessAPI()
+                            .flatMap {
+                                return self.postRequestData(endPoint: endPoint, method: method,token: authKey,body: body,showLoader: showLoader)
+                            }
+                            .eraseToAnyPublisher()
+                    }
+                } else {
+                    return Fail(error: error).eraseToAnyPublisher()
+                }
+            }
+            .eraseToAnyPublisher()
+    }
+    
     func postApi<T: Decodable, U : Encodable>(
         endPoint    : APIEndpoint,
         method      : HTTPMethod,
@@ -279,6 +311,157 @@ class NetworkRequest {
         }
     }
     
+    func postRequestData<U : Encodable>(
+        endPoint    : APIEndpoint,
+        method      : HTTPMethod,
+        token       : String,
+        body        : U?,
+        showLoader  : Bool = false
+    ) -> Future<Data, APIError> {
+        return Future<Data, APIError> { [self] promise in
+            
+            NetworkMonitor.shared.waitForNetworkStatus {
+                guard NetworkMonitor.shared.isConnected else {
+                    DispatchQueue.main.async {
+                        if AppState.shared.isLoggedIn{
+                            let allowedEndpoints: [APIEndpoint] = [
+                                .listSubscriptions,
+                                .getSubscriptionDetails,
+                                .getServiceProvidersList,
+                                .getUserInfo,
+                                .getCategories,
+                                .getPaymentMethods,
+                                .listUserCards,
+                                .listFamilyMembers,
+                                .fetchProviderData
+                            ]
+                            if !allowedEndpoints.contains(endPoint) {
+                                SheetManager.shared.isOfflineSheetVisible = true
+                            }
+                        }else{
+                            AlertManager.shared.showAlert(title: "No Internet Connection", message: "Please check your internet connection.")
+                        }
+                    }
+                    return promise(.failure(.noInternetConnection))
+                }
+            }
+            
+            if showLoader{
+                LoaderManager.shared.showLoader()
+            }
+            
+            guard let url = self.createURL(with: endPoint.rawValue)
+            else {
+                return promise(.failure(.badRequest))
+            }
+            
+            var request = URLRequest(url: url)
+            request.httpMethod = method.rawValue
+            request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+            request.addValue(token, forHTTPHeaderField: "Authorization")
+            if let body = body {
+                do {
+                    request.httpBody = try JSONEncoder().encode(body)
+                } catch {
+                    return promise(.failure(.badRequest))
+                }
+            }
+            PrintLogger.log(type: .authToken, message: token)
+            PrintLogger.log(type: .apiUrl, message: url.absoluteString)
+            PrintLogger.modelLog(body, type: .inputParamenters)
+            self.urlSession.dataTaskPublisher(for: request)
+                .tryMap { result -> Data in
+                    guard let httpResponse = result.response as? HTTPURLResponse else {
+                        if let apiError = try? JSONDecoder().decode(APIErrorResponse.self, from: result.data) {
+                            throw APIError.apiError(apiError.message)
+                        }else{
+                            throw APIError.responseError
+                        }
+                    }
+                    print("Status Code : \(httpResponse.statusCode)")
+                    
+                    switch httpResponse.statusCode {
+                    case 400 :
+                        if let apiError = try? JSONDecoder().decode(APIErrorResponse.self, from: result.data) {
+                            throw APIError.apiError(apiError.message)
+                        }else{
+                            throw APIError.badRequest
+                        }
+                    case 401:
+                        throw APIError.unauthorized
+                    case 500:
+                        if let apiError = try? JSONDecoder().decode(APIErrorResponse.self, from: result.data) {
+                            throw APIError.apiError(apiError.message)
+                        }else{
+                            throw APIError.internalServerError
+                        }
+                    case 409: //Someone logged
+                        DispatchQueue.main.async {
+                            AlertManager.shared.showAlert(title: "", message: "Someone logged in your account.",okAction: {
+                                AppState.shared.logout()
+                                AppIntentRouter.shared.navigate(to: .login)
+                            })
+                        }
+                        if let apiError = try? JSONDecoder().decode(APIErrorResponse.self, from: result.data) {
+                            throw APIError.apiError(apiError.message)
+                        }else{
+                            throw APIError.someOneLoggedInElsewhere
+                        }
+                    case 403: //Account blocked
+                        DispatchQueue.main.async {
+                            AlertManager.shared.showAlert(title: "", message: "Your account has been blocked by the admin",okAction: {
+                                AppState.shared.logout()
+                                AppIntentRouter.shared.navigate(to: .login)
+                            })
+                        }
+                        if let apiError = try? JSONDecoder().decode(APIErrorResponse.self, from: result.data) {
+                            throw APIError.apiError(apiError.message)
+                        }else{
+                            throw APIError.accountBlocked
+                        }
+                    case 404: //User not found
+                        DispatchQueue.main.async {
+                            AlertManager.shared.showAlert(title: "", message: "User not found.",okAction: {
+                                AppState.shared.logout()
+                                AppIntentRouter.shared.navigate(to: .login)
+                            })
+                        }
+                        if let apiError = try? JSONDecoder().decode(APIErrorResponse.self, from: result.data) {
+                            throw APIError.apiError(apiError.message)
+                        }else{
+                            throw APIError.notFound
+                        }
+                    default:
+                        return result.data
+                    }
+                }
+                .receive(on: DispatchQueue.main)
+                .sink { completion in
+                    if case let .failure(error) = completion {
+                        if showLoader {
+                            LoaderManager.shared.hideLoader()
+                        }
+                        switch error {
+                        case let urlError as URLError:
+                            promise(.failure(.urlError(urlError)))
+                        case let apiError as APIError:
+                            ToastManager.shared.showToast(message: apiError.localizedDescription,style: .error)
+                            promise(.failure(apiError))
+                        default:
+                            promise(.failure(.unknown))
+                        }
+                    }
+                }
+            receiveValue: {
+                if showLoader {
+                    LoaderManager.shared.hideLoader()
+                }
+                promise(.success($0))
+            }
+            .store(in: &self.subscriptions)
+        }
+    }
+
     //MARK: - Post Request
     func postRequest<T: Decodable, U : Encodable>(
         endPoint    : APIEndpoint,

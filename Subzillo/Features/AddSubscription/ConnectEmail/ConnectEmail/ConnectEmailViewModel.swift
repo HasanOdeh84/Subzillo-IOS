@@ -42,24 +42,25 @@ class ConnectEmailViewModel: ObservableObject {
     }
     
     func gmailOauthCallBack(input:GmailOauthCallBackRequest) {
-        apiReference.postApi(endPoint: APIEndpoint.gmailOuthCallback, method: .POST,token: authKey,body: input,showLoader: true, responseType: GeneralResponse.self)
+        apiReference.postApi(endPoint: APIEndpoint.oauthCallback, method: .POST,token: authKey,body: input,showLoader: true, responseType: GeneralResponse.self)
             .sink { [unowned self] completion in
                 if case let .failure(error) = completion {
-                    self.handleError(error,endPoint: APIEndpoint.gmailOuthCallback)
+                    self.handleError(error,endPoint: APIEndpoint.oauthCallback)
                 }
             }
         receiveValue: { response in
             PrintLogger.modelLog(response, type: .response, isInput: false)
-//            ToastManager.shared.showToast(message: response.message ?? "")
+            ToastManager.shared.showToast(message: response.message ?? "")
+            self.navigate(to: NavigationRoute.connectedEmailsList(isIntegrations: false))
         }
         .store(in: &self.subscriptions)
     }
     
     func microsoftOauthCallBack(input:GmailOauthCallBackRequest) {
-        apiReference.postApi(endPoint: APIEndpoint.gmailOuthCallback, method: .POST,token: authKey,body: input,showLoader: true, responseType: GeneralResponse.self)
+        apiReference.postApi(endPoint: APIEndpoint.oauthCallback, method: .POST,token: authKey,body: input,showLoader: true, responseType: GeneralResponse.self)
             .sink { [unowned self] completion in
                 if case let .failure(error) = completion {
-                    self.handleError(error,endPoint: APIEndpoint.gmailOuthCallback)
+                    self.handleError(error,endPoint: APIEndpoint.oauthCallback)
                 }
             }
         receiveValue: { response in

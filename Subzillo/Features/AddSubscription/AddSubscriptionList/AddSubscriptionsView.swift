@@ -112,8 +112,8 @@ struct AddSubscriptionsView: View {
     
     //MARK: - Button actions
     private func goToNotifications() {
-        uploadImageVM.navigate(to: .notifications)
-//        ToastManager.shared.showToast(message: "Coming soon in S4",style:ToastStyle.info)
+//        uploadImageVM.navigate(to: .notifications)
+        ToastManager.shared.showToast(message: "Coming soon in S4",style:ToastStyle.info)
     }
     private func clickOnSmartAssistant() {
         ToastManager.shared.showToast(message: "Coming soon in S5",style:ToastStyle.info)

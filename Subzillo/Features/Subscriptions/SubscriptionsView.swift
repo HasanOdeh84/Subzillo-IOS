@@ -215,8 +215,8 @@ struct SubscriptionsView: View {
             //                    }
             //MARK: Analytics view
             if viewMode == .analytics {
-                //                                ToastManager.shared.showToast(message: "Coming soon in S4",style:ToastStyle.info)
-                AnalyticalView()
+//                ToastManager.shared.showToast(message: "Coming soon in S4",style:ToastStyle.info)
+//                AnalyticalView()
             } else if let segment = selectedSegment {
                 //MARK: Calender view
                 if segment == .second{
@@ -477,8 +477,8 @@ struct SubscriptionsView: View {
             } else if newValue == .second {
                 viewMode = .calendar
             } else {
-//                ToastManager.shared.showToast(message: "Coming soon in S4",style:ToastStyle.info)
-                viewMode = .analytics
+                ToastManager.shared.showToast(message: "Coming soon in S4",style:ToastStyle.info)
+//                viewMode = .analytics
             }
             callApis()
         }
@@ -691,8 +691,8 @@ struct SubscriptionsView: View {
     }
     
     private func goToNotifications() {
-        subscriptionsVM.navigate(to: .notifications)
-//        ToastManager.shared.showToast(message: "Coming soon in S4",style:ToastStyle.info)
+//        subscriptionsVM.navigate(to: .notifications)
+        ToastManager.shared.showToast(message: "Coming soon in S4",style:ToastStyle.info)
     }
     
     private func clickOnChat() {

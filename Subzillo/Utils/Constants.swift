@@ -35,7 +35,8 @@ struct Constants{
 //    static let miscrosoftClientId                   = "b6d1a52b-8d3a-4c74-b75f-b8a63be5a684"//ajay's
     static let miscrosoftClientId                   = "d81f4f2f-5591-4cae-bcfb-bd219a7d4016"
 //    static let webClientId                          = "955282043815-shgvrph5q1jiogm6es7lc143jad27vk0.apps.googleusercontent.com"
-    static let webClientId                          = "955282043815-uither25lbuv22smj2tdhje513ilg5je.apps.googleusercontent.com"
+//    static let webClientId                          = "955282043815-uither25lbuv22smj2tdhje513ilg5je.apps.googleusercontent.com" //soniya
+    static let webClientId                          = "955282043815-4rckggvbc5m8dtsrtdhecrjl25e0lbg6.apps.googleusercontent.com" //new soniya
     static let userDefaults                         = UserDefaults.standard
     
     let regionCode      = Locale.current.region?.identifier ?? "US"

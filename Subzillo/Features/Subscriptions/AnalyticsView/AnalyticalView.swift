@@ -45,11 +45,11 @@ struct AnalyticalView: View {
                     Text("Subscription Spend Analytics")
                         .font(.appRegular(18))
                     Spacer()
-                    Button {
-                    } label: {
-                        Image("share_analytics")
-                    }
-                    .frame(width: 40, height: 40)
+//                    Button {
+//                    } label: {
+//                        Image("share_analytics")
+//                    }
+//                    .frame(width: 40, height: 40)
                     .background(Color.white)
                     .overlay(
                         RoundedRectangle(cornerRadius: 8)

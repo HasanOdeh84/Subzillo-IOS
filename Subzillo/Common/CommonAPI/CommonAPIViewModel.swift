@@ -53,7 +53,7 @@ class CommonAPIViewModel: ObservableObject {
     
     func unreadNotificationCount(input:UnreadNotificationCountRequest) {
         self.unreadCountResponse = nil
-        apiReference.postApi(endPoint: APIEndpoint.unreadNotificationCount, method: .POST,token: authKey,body: input,showLoader: true, responseType: UnreadNotificationCountResponse.self)
+        apiReference.postApi(endPoint: APIEndpoint.unreadNotificationCount, method: .POST,token: authKey,body: input,showLoader: false, responseType: UnreadNotificationCountResponse.self)
             .sink { [unowned self] completion in
                 if case let .failure(error) = completion {
                     self.userInfError = error
@@ -68,7 +68,7 @@ class CommonAPIViewModel: ObservableObject {
     }
     
     func updateDeviceId(input:UpdateDeviceIdRequest) {
-        apiReference.postApi(endPoint: APIEndpoint.updateDeviceId, method: .POST,token: authKey,body: input,showLoader: true, responseType: UpdateDeviceIdResponse.self)
+        apiReference.postApi(endPoint: APIEndpoint.updateDeviceId, method: .POST,token: authKey,body: input,showLoader: false, responseType: UpdateDeviceIdResponse.self)
             .sink { [unowned self] completion in
                 if case let .failure(error) = completion {
                     self.userInfError = error

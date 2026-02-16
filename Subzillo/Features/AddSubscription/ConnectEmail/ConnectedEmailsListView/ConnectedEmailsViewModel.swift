@@ -90,6 +90,42 @@ class ConnectedEmailsViewModel: ObservableObject {
         .store(in: &self.subscriptions)
     }
     
+    func downloadLogAPI(input: ExportGmailSyncLogsRequest,showLoader:Bool = true) {
+        apiReference.postApiData(endPoint: APIEndpoint.exportGmailSyncLogs, method: .POST,token: authKey,body: input,showLoader: showLoader)
+            .sink { [unowned self] completion in
+                if case let .failure(error) = completion {
+                    self.handleError(error,endPoint: APIEndpoint.exportGmailSyncLogs)
+                }
+            }
+        receiveValue: { [unowned self] data in
+            self.saveDataToFile(data: data)
+        }
+        .store(in: &self.subscriptions)
+    }
+    
+    private func saveDataToFile(data: Data) {
+        let fileName = "GmailSyncLogs_\(Int(Date().timeIntervalSince1970)).xlsx"
+        
+        guard let documentsURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first else {
+            print("Error: Could not find documents directory")
+            return
+        }
+        
+        let fileURL = documentsURL.appendingPathComponent(fileName)
+        
+        do {
+            try data.write(to: fileURL)
+            DispatchQueue.main.async {
+                ToastManager.shared.showToast(message: "File saved successfully to Files app", style: .success)
+            }
+        } catch {
+            print("Error saving file: \(error)")
+            DispatchQueue.main.async {
+                ToastManager.shared.showToast(message: "Failed to save file", style: .error)
+            }
+        }
+    }
+    
     func deleteEmail(_ email: ListConnectedEmailsData) {
         connectedEmails.removeAll { $0.id == email.id ?? "" }
         deleteEmailAPI(input: DeleteEmailRequest(userId         : Constants.getUserId(),
@@ -105,6 +141,11 @@ class ConnectedEmailsViewModel: ObservableObject {
     func viewEmail(_ email: ListConnectedEmailsData) {
         emailSubscriptionsList(input: EmailSubscriptionsListRequest(userId          : Constants.getUserId(),
                                                                     integrationId   : email.id ?? ""))
+    }
+    
+    func downloadLogs(_ email: ListConnectedEmailsData) {
+        downloadLogAPI(input: ExportGmailSyncLogsRequest(userId         : Constants.getUserId(),
+                                                         integrationId  : email.id ?? ""))
     }
     
     func navigate(to route: NavigationRoute){

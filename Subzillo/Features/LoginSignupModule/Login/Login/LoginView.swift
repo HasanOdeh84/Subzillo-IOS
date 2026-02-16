@@ -145,12 +145,12 @@ struct LoginView: View {
                 
                 TermsAndPrivacyText(
                     onTapTerms: {
-//                        ToastManager.shared.showToast(message: "Coming soon in S4",style:ToastStyle.info)
-                        loginVM.navigate(to: NavigationRoute.termsAndPrivacy(isTerm: true))
+                        ToastManager.shared.showToast(message: "Coming soon in S4",style:ToastStyle.info)
+//                        loginVM.navigate(to: NavigationRoute.termsAndPrivacy(isTerm: true))
                     },
                     onTapPrivacy: {
-//                        ToastManager.shared.showToast(message: "Coming soon in S4",style:ToastStyle.info)
-                        loginVM.navigate(to: NavigationRoute.termsAndPrivacy(isTerm: false))
+                        ToastManager.shared.showToast(message: "Coming soon in S4",style:ToastStyle.info)
+//                        loginVM.navigate(to: NavigationRoute.termsAndPrivacy(isTerm: false))
                     }
                 )
                 .padding(.top,6)

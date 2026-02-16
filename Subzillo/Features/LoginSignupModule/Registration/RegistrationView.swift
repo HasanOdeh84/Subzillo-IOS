@@ -93,12 +93,12 @@ struct RegistrationView: View {
                     
                     TermsAndPrivacyText(
                         onTapTerms: {
-//                            ToastManager.shared.showToast(message: "Coming soon in S4",style:ToastStyle.info)
-                            registerVM.navigate(to: .termsAndPrivacy(isTerm: true))
+                            ToastManager.shared.showToast(message: "Coming soon in S4",style:ToastStyle.info)
+//                            registerVM.navigate(to: .termsAndPrivacy(isTerm: true))
                         },
                         onTapPrivacy: {
-//                            ToastManager.shared.showToast(message: "Coming soon in S4",style:ToastStyle.info)
-                            registerVM.navigate(to: .termsAndPrivacy(isTerm: false))
+                            ToastManager.shared.showToast(message: "Coming soon in S4",style:ToastStyle.info)
+//                            registerVM.navigate(to: .termsAndPrivacy(isTerm: false))
                         },
                         bottomPadding: 28
                     )

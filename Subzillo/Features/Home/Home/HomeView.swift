@@ -121,15 +121,16 @@ struct HomeView: View {
                             homeYearlyGraphApi()
                         })
                         .padding(.top, 16)
+                        .padding(.bottom, activeSubsList.count == 0 ? 90 : 15)
                         
                         
                         //MARK: Save cards
-                        GradientBorderView(title: savePercent, subTitle: saveExpiry, buttonImage: "percent-square",nextBtnImage: "arrow_blue", action: clickOnSave, titleColor: Color.blue800,minHeight: 75,titleFont: 18,subTitleFont: 14)
-                            .padding(.bottom, 16)
-                            .padding(.top,15)
-                        
-                        GradientBorderView(title: youSaved, subTitle: youSavedExpiry, buttonImage: "checkmark-badge",nextBtnImage: "arrow_blue", action: clickOnYouSaved, titleColor: Color.blue800,minHeight: 75,titleFont: 18,subTitleFont: 14)
-                            .padding(.bottom, activeSubsList.count == 0 ? 90 : 12)
+//                        GradientBorderView(title: savePercent, subTitle: saveExpiry, buttonImage: "percent-square",nextBtnImage: "arrow_blue", action: clickOnSave, titleColor: Color.blue800,minHeight: 75,titleFont: 18,subTitleFont: 14)
+//                            .padding(.bottom, 16)
+//                            .padding(.top,15)
+//                        
+//                        GradientBorderView(title: youSaved, subTitle: youSavedExpiry, buttonImage: "checkmark-badge",nextBtnImage: "arrow_blue", action: clickOnYouSaved, titleColor: Color.blue800,minHeight: 75,titleFont: 18,subTitleFont: 14)
+//                            .padding(.bottom, activeSubsList.count == 0 ? 90 : 12)
                         
                         //                            //MARK: Add / view subscriptions
                         //                            HStack(spacing:16){
@@ -288,7 +289,7 @@ struct HomeView: View {
             }
             homeVM.home(input: HomeRequest(userId: Constants.getUserId()))
             homeYearlyGraphApi()
-            commonApiVM.unreadNotificationCount(input: UnreadNotificationCountRequest(userId: Constants.getUserId()))
+//            commonApiVM.unreadNotificationCount(input: UnreadNotificationCountRequest(userId: Constants.getUserId()))
         }
         .onChange(of: homeVM.homeResponse){ _ in updateHomeResponse() }
         .sheet(isPresented: $showYouSavedSheet) {
@@ -323,8 +324,8 @@ struct HomeView: View {
     //MARK: - User defined methods
     //MARK: goToNotifications
     private func goToNotifications() {
-        homeVM.navigate(to: .notifications)
-//        ToastManager.shared.showToast(message: "Coming soon in S4",style:ToastStyle.info)
+//        homeVM.navigate(to: .notifications)
+        ToastManager.shared.showToast(message: "Coming soon in S4",style:ToastStyle.info)
     }
     
     private func clickOnSave() {
@@ -467,9 +468,10 @@ struct HeaderView: View {
         }
         .offset(x: 0, y: -5)
         .onAppear{
-            if commonApiVM.unreadCountResponse == nil{
-                commonApiVM.unreadNotificationCount(input: UnreadNotificationCountRequest(userId: Constants.getUserId()))
-            }
+//            if commonApiVM.unreadCountResponse == nil{
+//                commonApiVM.unreadNotificationCount(input: UnreadNotificationCountRequest(userId: Constants.getUserId()))
+//            }
+//            commonApiVM.unreadNotificationCount(input: UnreadNotificationCountRequest(userId: Constants.getUserId()))
         }
     }
 }
@@ -594,7 +596,8 @@ struct TopSpendingSubscriptionsView: View {
                     .foregroundColor(.blueMain700)
                     .contentShape(Rectangle())
                     .onTapGesture {
-                        AppIntentRouter.shared.navigate(to: .subscriptionsListView(selectedSegment: .third))
+                        ToastManager.shared.showToast(message: "Coming soon in S4",style:ToastStyle.info)
+//                        AppIntentRouter.shared.navigate(to: .subscriptionsListView(selectedSegment: .third))
                     }
                 Spacer()
             }
@@ -1216,7 +1219,8 @@ struct YearOverviewChartView: View {
                 }
                 .contentShape(Rectangle())
                 .onTapGesture {
-                    AppIntentRouter.shared.navigate(to: .subscriptionsListView(selectedSegment: .third))
+                    ToastManager.shared.showToast(message: "Coming soon in S4",style:ToastStyle.info)
+//                    AppIntentRouter.shared.navigate(to: .subscriptionsListView(selectedSegment: .third))
                 }
                 Spacer()
             }

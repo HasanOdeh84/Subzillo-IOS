@@ -4,6 +4,7 @@ struct ConnectedEmailItemView: View {
     let email                   : ListConnectedEmailsData
     let onSync                  : () -> Void
     let onView                  : () -> Void
+    let onDownloadLogs          : () -> Void
     @State var provider         : EmailProvider = EmailProvider.gmail
     @State var isIntegrations   : Bool = false
     
@@ -30,7 +31,7 @@ struct ConnectedEmailItemView: View {
                 
                 if email.lastSyncDate != ""{
                     if email.lastSyncDate != nil{
-                        Text((email.lastSyncDate ?? "").formattedDate(from: "DD/MM/YYYY", to: "dd/MM/yyyy"))
+                        Text(email.lastSyncDate ?? "")//.formattedDate(from: "DD/MM/YYYY", to: "dd/MM/yyyy"))
                             .font(.appRegular(14))
                             .foregroundStyle(Color.underlineGray)
                     }
@@ -67,48 +68,72 @@ struct ConnectedEmailItemView: View {
     @ViewBuilder
     private var actionButton: some View {
         if email.syncStatus == 0 && email.viewStatus == false{
-            Text("Sync")
-                .font(.appSemiBold(14))
-                .foregroundColor(.white)
-                .frame(width: 80, height: 30)
-                .background(Color.blueMain700)
-                .cornerRadius(5)
-                .onTapGesture {
-                    onSync()
-                }
+            HStack(spacing: 12){
+                Text("Sync")
+                    .font(.appSemiBold(14))
+                    .foregroundColor(.white)
+                    .frame(width: 80, height: 30)
+                    .background(Color.blueMain700)
+                    .cornerRadius(5)
+                    .onTapGesture {
+                        onSync()
+                    }
+                
+                Image("download")
+                    .frame(width: 30, height: 30)
+                    .onTapGesture {
+                        onDownloadLogs()
+                    }
+            }
         } else if email.syncStatus == 1 && email.viewStatus == false{
-            Text("Syncing...")
-                .font(.appSemiBold(14))
-                .foregroundColor(Color.blueMain700)
-                .frame(width: 100, height: 30)
-                .overlay(
-                    RoundedRectangle(cornerRadius: 5)
-                        .stroke(Color.blueMain700, lineWidth: 1)
-                )
+            HStack(spacing: 12){
+                Text("Syncing...")
+                    .font(.appSemiBold(14))
+                    .foregroundColor(Color.blueMain700)
+                    .frame(width: 100, height: 30)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 5)
+                            .stroke(Color.blueMain700, lineWidth: 1)
+                    )
+                
+                Image("download")
+                    .frame(width: 30, height: 30)
+                    .onTapGesture {
+                        onDownloadLogs()
+                    }
+            }
         }
         if email.viewStatus ?? false{
-            Text("View")
-                .font(.appSemiBold(14))
-                .foregroundStyle(LinearGradient(
-                    gradient: Gradient(colors: [Color.linearGradient3, Color.linearGradient4, Color.blueMain700]),
-                    startPoint: .top,
-                    endPoint: .bottom
-                ))
-                .frame(width: 80, height: 30)
-                .overlay(
-                    RoundedRectangle(cornerRadius: 5)
-                        .stroke(
-                            LinearGradient(
-                                gradient: Gradient(colors: [Color.linearGradient3, Color.linearGradient4, Color.blueMain700]),
-                                startPoint: .top,
-                                endPoint: .bottom
-                            ),
-                            lineWidth: 1
-                        )
-                )
-                .onTapGesture {
-                    onView()
-                }
+            HStack(spacing: 12){
+                Text("View")
+                    .font(.appSemiBold(14))
+                    .foregroundStyle(LinearGradient(
+                        gradient: Gradient(colors: [Color.linearGradient3, Color.linearGradient4, Color.blueMain700]),
+                        startPoint: .top,
+                        endPoint: .bottom
+                    ))
+                    .frame(width: 80, height: 30)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 5)
+                            .stroke(
+                                LinearGradient(
+                                    gradient: Gradient(colors: [Color.linearGradient3, Color.linearGradient4, Color.blueMain700]),
+                                    startPoint: .top,
+                                    endPoint: .bottom
+                                ),
+                                lineWidth: 1
+                            )
+                    )
+                    .onTapGesture {
+                        onView()
+                    }
+                
+                Image("download")
+                    .frame(width: 30, height: 30)
+                    .onTapGesture {
+                        onDownloadLogs()
+                    }
+            }
         }
         //        switch email.syncStatus {
         //        case 1:
