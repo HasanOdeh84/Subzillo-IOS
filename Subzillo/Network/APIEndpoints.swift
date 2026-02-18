@@ -80,6 +80,8 @@ enum APIEndpoint: String {
     case updateDeviceId                 = "/updateDeviceId"
     case analytics                      = "/analytics"
     case exportGmailSyncLogs            = "/exportGmailSyncLogs"
+    case emailAutoSync                  = "/emailAutoSync"
+    case exportSubscriptionData        = "/exportSubscriptionData"
 
     //new api's
     case deleteAccount                  = "/deleteAccount"

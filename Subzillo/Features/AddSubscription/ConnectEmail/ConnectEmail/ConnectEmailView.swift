@@ -50,12 +50,12 @@ struct ConnectEmailView: View {
                     Divider()
                         .overlay(Color.neutral300Border)
                     UploadItem(title: "Connect Outlook", subTitle: "Connect your Outlook account to access and manage your subscriptions.", image: "microsoft", imageColor: Color.systemInfo, action: outlookAction, isEmail: true)
-                    Divider()
-                        .overlay(Color.neutral300Border)
-                    UploadItem(title: "Connect Yahoo", subTitle: "Integrate your Yahoo Mail account to organize and manage subscriptions.", image: "yahoo", imageColor: Color.systemInfo, action: yahooAction, isEmail: true)
+//                    Divider()
+//                        .overlay(Color.neutral300Border)
+//                    UploadItem(title: "Connect Yahoo", subTitle: "Integrate your Yahoo Mail account to organize and manage subscriptions.", image: "yahoo", imageColor: Color.systemInfo, action: yahooAction, isEmail: true)
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
-                .frame(height: 240)//160)
+                .frame(height: 160)//240)
                 .cornerRadius(12)
                 .overlay(
                     RoundedRectangle(cornerRadius: 12)
@@ -108,19 +108,19 @@ struct ConnectEmailView: View {
         .navigationBarBackButtonHidden()
         .background(Color.neutralBg100)
         //MARK: Onchange
-        //        .onChange(of: connectEmailVM.isSuccess) { success in
-        //            if success, let oauthUrlString = connectEmailVM.oauthUrlResponse?.authUrl, let url = URL(string: oauthUrlString) {
-        //                let callbackScheme = "com.googleusercontent.apps.955282043815-5tm4dfjcs5uv5qkvne9uv6jkf64div4a"
-        //                OAuthManager.shared.startOAuth(url: url, callbackScheme: callbackScheme) { callbackURL, error in
-        //                    if let callbackURL = callbackURL {
-        //                        connectEmailVM.handleOAuthCallback(url: callbackURL)
-        //                    } else if let error = error {
-        //                        print("OAuth error: \(error.localizedDescription)")
-        //                    }
-        //                    connectEmailVM.isSuccess = false
-        //                }
-        //            }
-        //        }
+        .onChange(of: connectEmailVM.isSuccess) { success in
+            if success, let oauthUrlString = connectEmailVM.oauthUrlResponse?.authUrl, let url = URL(string: oauthUrlString) {
+                let callbackScheme = "subzillo"//"com.googleusercontent.apps.955282043815-5tm4dfjcs5uv5qkvne9uv6jkf64div4a"
+                OAuthManager.shared.startOAuth(url: url, callbackScheme: callbackScheme) { callbackURL, error in
+                    if let callbackURL = callbackURL {
+                        connectEmailVM.handleOAuthCallback(url: callbackURL)
+                    } else if let error = error {
+                        print("OAuth error: \(error.localizedDescription)")
+                    }
+                    connectEmailVM.isSuccess = false
+                }
+            }
+        }
     }
     
     //MARK: - Button actions
@@ -143,7 +143,13 @@ struct ConnectEmailView: View {
     }
     
     private func outlookAction() {
+        //Using api auth url
+//        connectEmailVM.oauthUrl(input: OauthUrlRequest(userId   : Constants.getUserId(),
+//                                                       type     : 2))
         ToastManager.shared.showToast(message: "Coming soon in S4",style:ToastStyle.info)
+        
+        
+        //USing SDK
 //        guard let presentingVC = UIApplication.shared.rootViewController else {
 //            return
 //        }
@@ -153,7 +159,7 @@ struct ConnectEmailView: View {
 //                return
 //            }
 //            print("✅ Microsoft authCode:", code)
-//            connectEmailVM.gmailOauthCallBack(input: GmailOauthCallBackRequest(userId: Constants.getUserId(), code: code, type: 2))
+////            connectEmailVM.gmailOauthCallBack(input: GmailOauthCallBackRequest(userId: Constants.getUserId(), code: code, type: 2))
 ////            connectEmailVM.microsoftOauthCallBack(input: GmailOauthCallBackRequest(userId   : Constants.getUserId(),
 ////                                                                                   code     : code,
 ////                                                                                   type     : 2))

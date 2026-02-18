@@ -11,7 +11,7 @@ class SharedImageManager: ObservableObject {
     static let shared = SharedImageManager()
     @Published var sharedImage: UIImage? = nil
     
-    private let appGroupIdentifier = "group.com.krify.Subzillo"
+    private let appGroupIdentifier = Constants.appGroupID
 
     func checkSharedImage() {
         if let sharedDefaults = UserDefaults(suiteName: appGroupIdentifier) {

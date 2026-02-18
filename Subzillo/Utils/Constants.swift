@@ -25,6 +25,7 @@ struct Constants{
     static let longitude                            = "longitude"
     static let loginData                            = "loginData"
     static let uuid                                 = UUID()
+    static let userDefaults                         = UserDefaults.standard
     static let deviceName                           = UIDevice.current.name
     static let deviceModel                          = UIDevice.current.model
     static let systemName                           = UIDevice.current.systemName
@@ -32,12 +33,13 @@ struct Constants{
     static let googleMapApiKey                      = "AIzaSyAjueXZzKodaxXdG2mZYG21_Jaf_ikFicQ"
     static let googleToken                          = "AIzaSyC8QkcmKT-p9tpMnamwLZ3xY4RSTxcvaKk"
     static let googleClientId                       = "955282043815-5tm4dfjcs5uv5qkvne9uv6jkf64div4a.apps.googleusercontent.com"
-//    static let miscrosoftClientId                   = "b6d1a52b-8d3a-4c74-b75f-b8a63be5a684"//ajay's
-    static let miscrosoftClientId                   = "d81f4f2f-5591-4cae-bcfb-bd219a7d4016"
-//    static let webClientId                          = "955282043815-shgvrph5q1jiogm6es7lc143jad27vk0.apps.googleusercontent.com"
-//    static let webClientId                          = "955282043815-uither25lbuv22smj2tdhje513ilg5je.apps.googleusercontent.com" //soniya
-    static let webClientId                          = "955282043815-4rckggvbc5m8dtsrtdhecrjl25e0lbg6.apps.googleusercontent.com" //new soniya
-    static let userDefaults                         = UserDefaults.standard
+    //    static let miscrosoftClientId                   = "b6d1a52b-8d3a-4c74-b75f-b8a63be5a684"//ajay's
+    static let miscrosoftClientId                   = "d81f4f2f-5591-4cae-bcfb-bd219a7d4016"//soniya's
+    //    static let webClientId                          = "955282043815-shgvrph5q1jiogm6es7lc143jad27vk0.apps.googleusercontent.com"
+    //    static let webClientId                          = "955282043815-uither25lbuv22smj2tdhje513ilg5je.apps.googleusercontent.com" //soniya for dev
+    static let webClientId                          = "955282043815-4rckggvbc5m8dtsrtdhecrjl25e0lbg6.apps.googleusercontent.com" //new soniya for staging
+//    static let appGroupID                           = "group.com.krify.Subzillo" //krify
+    static let appGroupID                           = "group.com.subzillo.app" //client
     
     let regionCode      = Locale.current.region?.identifier ?? "US"
     let currencyCode    = Locale.current.currency?.identifier ?? "USD"
@@ -103,21 +105,21 @@ struct Constants{
         defaults.removeObject(forKey: key)
     }
     
-//    static func confidenceInfo(isAssumed:Bool,confidence:Double) -> (String, Color) {
-//        if isAssumed {
-//            return ("Assumed", Color.warning)
-//        } else if confidence <= 0.0 {
-//            return ("------------", Color.empty)
-//        } else if confidence < 0.4 {
-//            return ("Low confidence", Color.error)
-//        } else if confidence < 0.7 {
-//            return ("Medium confidence", Color.info)
-//        } else if confidence < 1 {
-//            return ("High confidence", Color.high)
-//        } else {
-//            return ("Perfect match", Color.success)
-//        }
-//    }
+    //    static func confidenceInfo(isAssumed:Bool,confidence:Double) -> (String, Color) {
+    //        if isAssumed {
+    //            return ("Assumed", Color.warning)
+    //        } else if confidence <= 0.0 {
+    //            return ("------------", Color.empty)
+    //        } else if confidence < 0.4 {
+    //            return ("Low confidence", Color.error)
+    //        } else if confidence < 0.7 {
+    //            return ("Medium confidence", Color.info)
+    //        } else if confidence < 1 {
+    //            return ("High confidence", Color.high)
+    //        } else {
+    //            return ("Perfect match", Color.success)
+    //        }
+    //    }
     
     static func confidenceInfo(
         isAssumed: Bool,
@@ -410,7 +412,7 @@ extension UIDevice {
             .compactMap { $0 as? UIWindowScene }
             .flatMap { $0.windows }
             .first
-
+        
         let topInset = window?.safeAreaInsets.top ?? 0
         return topInset > 20   // Full-screen iPhones have large notch inset
     }

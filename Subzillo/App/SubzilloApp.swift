@@ -25,7 +25,7 @@ class AppDelegate: NSObject, ObservableObject, UIApplicationDelegate, UNUserNoti
         UNUserNotificationCenter.current().delegate = self
         
         // Initialize Branch.io
-        BranchManager.shared.initSession(launchOptions: launchOptions)
+//        BranchManager.shared.initSession(launchOptions: launchOptions)
         
         return true
     }

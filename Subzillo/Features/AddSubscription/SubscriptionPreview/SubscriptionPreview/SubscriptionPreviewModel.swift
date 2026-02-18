@@ -28,7 +28,7 @@ public struct ConfirmedSubscription: Codable {
     let notes                   : String
     let currencySymbol          : String
     let source                  : Int
-    let sourceReference         : Int?
+    let sourceReference         : String?
 }
 
 public struct PendingSubscriptionConfirmResponse: Codable {

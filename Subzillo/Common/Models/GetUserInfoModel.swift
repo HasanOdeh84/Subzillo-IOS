@@ -37,7 +37,7 @@ public struct UserInfo: Codable, Hashable {
     var familyMembersLimit      : Int?
     var renewalReminders        : Bool?
     var priceChangeReminders    : Bool?
-    var isEmailConnection       : Bool?
+//    var isEmailConnection       : Bool?
 }
 
 public struct UnreadNotificationCountRequest: Codable {

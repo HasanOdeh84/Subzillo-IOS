@@ -66,7 +66,7 @@ struct ManualEntryValidations {
         if (input.serviceName == nil || input.serviceName ?? "" == "") {
             return "Please enter service name"
         }
-        if input.category ?? "" == ""{
+        if input.categoryName ?? "" == ""{
             return "Please select category"
         }
 //        if (input.categoryId == nil || input.categoryId ?? "" == ""){

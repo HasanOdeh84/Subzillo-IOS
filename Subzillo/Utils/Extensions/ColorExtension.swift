@@ -87,9 +87,9 @@ extension Color {
 //    static let lightPurple              = Color(hex: "#F1F5F9")
 //    static let border                   = Color(hex: "#E2E8F0")
 //    static let whiteBlack               = Color(hex: "#FFFFFF")
-//    static let blueG               = Color(hex: "#5CC1F1")
-//    static let purpleG               = Color(hex: "#8A38F5")
-//    static let grayP               = Color(hex: "#6A6A6A")
+//    static let blueG                    = Color(hex: "#5CC1F1")
+//    static let purpleG                  = Color(hex: "#8A38F5")
+//    static let grayP                    = Color(hex: "#6A6A6A")
     
     static let neutral_2_500            = Color("appNeutral2_500")
     static let neutral_2_200            = Color("appNeutral2_200")

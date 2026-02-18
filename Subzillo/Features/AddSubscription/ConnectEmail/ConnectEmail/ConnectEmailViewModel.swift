@@ -71,11 +71,13 @@ class ConnectEmailViewModel: ObservableObject {
     }
     
     func handleOAuthCallback(url: URL) {
-        // Here you can handle the redirect URL if there's any logic needed
-        // For example, extracting tokens or verifying the state
         print("OAuth Callback URL: \(url.absoluteString)")
-        // Typically you might refresh the connected emails list here
-        ToastManager.shared.showToast(message: "Email connection initiated")
+        if url.absoluteString.contains("oauth-error"){
+            ToastManager.shared.showToast(message: "Microsoft account connection failed")
+        }else if url.absoluteString.contains("oauth-success"){
+            ToastManager.shared.showToast(message: "Microsoft account connected successfully")
+            navigate(to: .connectedEmailsList(isIntegrations: false))
+        }
     }
     
     func navigate(to route: NavigationRoute){

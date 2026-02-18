@@ -16,6 +16,7 @@
  6. If service name is empty or if service name changes then need to clear the data and need to clear the provider list.
  7. If currency is changed no need to clear the data.
  8. Amount suggestions and billing cycles list will be filtered based on plan type.
+ 9. If plantype is empty and amount is 0/empty then plantype should be free. If plan type is empty and amount is not 0/empty then plantype should be basic.
  */
 
 import SwiftUI
@@ -598,6 +599,19 @@ struct SubscriptionPreviewView: View {
         if numberOfSubscriptions > 0
         {
             subscriptionData = subscriptionsData?[currentSubscriptions-1]
+            
+            // Logic for Plan Type based on Amount
+            let planType = (subscriptionData?.subscriptionType ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
+            let amount = subscriptionData?.amount ?? 0.0
+            
+            if planType.isEmpty{
+                if amount == 0.0{
+                    subscriptionData?.subscriptionType = "Free"
+                } else {
+                    subscriptionData?.subscriptionType = "Basic"
+                }
+            }
+            
             //            subscriptionData?.billingCycle = (subscriptionData?.billingCycle == "" || subscriptionData?.billingCycle == nil) ? "Monthly" : subscriptionData?.billingCycle //no need
             let chargeDate = Constants.shared.getNextDateByFrequency(frequency: subscriptionData?.billingCycle ?? "").formattedDate(from: "dd/MM/yyyy", to: "yyyy-MM-dd")
             if subscriptionData?.nextPaymentDate == nil || subscriptionData?.nextPaymentDate == ""{
@@ -608,6 +622,8 @@ struct SubscriptionPreviewView: View {
             confidenceStr = confidenceStr1
             colorValue = colorValue1
             fillRatio = fillRatio1
+            
+            subscriptionsData?[currentSubscriptions-1] = subscriptionData!
             updateCountryAndCurrency()
         }
     }

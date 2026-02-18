@@ -133,9 +133,11 @@ class ConnectedEmailsViewModel: ObservableObject {
     }
     
     func syncEmail(_ email: ListConnectedEmailsData) {
-        syncEmailAPI(input: SyncEmailRequest(userId         : Constants.getUserId(),
-                                             integrationId  : email.id ?? "",
-                                             type           : email.type ?? 1))
+//        if email.type == 1{
+            syncEmailAPI(input: SyncEmailRequest(userId         : Constants.getUserId(),
+                                                 integrationId  : email.id ?? "",
+                                                 type           : email.type ?? 1))
+//        }
     }
     
     func viewEmail(_ email: ListConnectedEmailsData) {

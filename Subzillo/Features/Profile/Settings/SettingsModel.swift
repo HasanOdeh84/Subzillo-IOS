@@ -27,3 +27,12 @@ public struct ToggleRemindersRequest: Codable {
     let type                : Int //type -> 1 - renewal reminders, 2- price change reminders, 3 - both (same status will be applied)
     let status              : Bool //status -> true - enable, false - disable
 }
+
+public struct EmailAutoSyncRequest: Codable {
+    let userId              : String
+    let type                : Int
+}
+
+struct ExportSubscriptionDataRequest: Codable{
+    let userId          : String
+}

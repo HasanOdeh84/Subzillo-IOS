@@ -7,65 +7,65 @@
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
-            uuid = "9F24E23B-F96A-4CA5-BEBD-754AB7005FEB"
+            uuid = "CD5500E1-3B77-453A-BC6E-8DEB881B4323"
             shouldBeEnabled = "Yes"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
-            filePath = "Subzillo/Features/AddSubscription/ManualEntry/ManualEntryView.swift"
+            filePath = "Subzillo/Common/BottomSheet/ReviewExtractedDetailsView.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "1274"
-            endingLineNumber = "1274"
-            landmarkName = "saveAction()"
+            startingLineNumber = "320"
+            endingLineNumber = "320"
+            landmarkName = "body"
+            landmarkType = "24">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "CD7A5298-5078-4312-9485-C38B05CA0CB1"
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "Subzillo/Utils/Validations/ManualEntryValidations.swift"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "53"
+            endingLineNumber = "53"
+            landmarkName = "manualEntry(input:category:)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
-            uuid = "4058FE58-1BE9-488B-A1FC-B7B79E6223EE"
+            uuid = "6BEFD31B-1C1E-4F8C-A5B8-5FF18DABDA17"
             shouldBeEnabled = "Yes"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
-            filePath = "Subzillo/Common/BottomSheet/FilterSheet/FilterSheet.swift"
+            filePath = "Subzillo/Utils/Validations/ManualEntryValidations.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "296"
-            endingLineNumber = "296"
-            landmarkName = "body"
-            landmarkType = "24">
+            startingLineNumber = "70"
+            endingLineNumber = "70"
+            landmarkName = "updateManualEntry(input:)"
+            landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
-            uuid = "0C6036D5-0E37-4A6D-B1D6-FEF29D5FBFB8"
+            uuid = "0860205D-018A-4032-A955-671E5833F18F"
             shouldBeEnabled = "Yes"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
-            filePath = "Subzillo/Common/BottomSheet/FilterSheet/FilterSheet.swift"
+            filePath = "Subzillo/Features/AddSubscription/SubscriptionPreview/SubscriptionPreview/SubscriptionPreviewView.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "308"
-            endingLineNumber = "308"
-            landmarkName = "body"
-            landmarkType = "24">
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
-            uuid = "2A40A933-18E0-4984-AE1A-2165F0BC2129"
-            shouldBeEnabled = "Yes"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "Subzillo/Features/Subscriptions/AnalyticsView/AnalyticalView.swift"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "358"
-            endingLineNumber = "358"
-            landmarkName = "body"
-            landmarkType = "24">
+            startingLineNumber = "725"
+            endingLineNumber = "725"
+            landmarkName = "onNextAction()"
+            landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
    </Breakpoints>

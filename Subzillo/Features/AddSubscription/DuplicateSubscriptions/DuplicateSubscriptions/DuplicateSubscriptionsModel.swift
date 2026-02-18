@@ -39,7 +39,7 @@ public struct SubscriptionInfo: Codable, Hashable {
     var renewalReminder         : [String]?
     var status                  : String?
     var source                  : Int?
-    var sourceReference         : Int?
+    var sourceReference         : String?
     var paymentMethodName       : String?
     var categoryName            : String?
     var cardNumber              : String?

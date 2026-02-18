@@ -39,228 +39,203 @@ struct PricingPlansView: View {
     @Environment(\.dismiss) private var dismiss
     @State private var selectedSegment          : Segment? = .first
     @EnvironmentObject var commonApiVM          : CommonAPIViewModel
+    @StateObject private var storeManager       = StoreManager.shared
     @State private var justAppeared             : Bool = false
-    
-    @State private var products: [SKProduct] = []
     
     //MARK: - Body
     var body: some View {
-        VStack(spacing: 0) {
-            // MARK: Header
-            HStack(spacing: 8) {
-                // MARK: back
-                Button(action: {
-                    dismiss()
-                }) {
-                    HStack {
-                        Image("back_gray")
+        ZStack {
+            VStack(spacing: 0) {
+                // MARK: Header
+                HStack(spacing: 8) {
+                    // MARK: back
+                    Button(action: {
+                        dismiss()
+                    }) {
+                        HStack {
+                            Image("back_gray")
+                        }
+                        .foregroundColor(.blue)
                     }
-                    .foregroundColor(.blue)
-                }
-                
-                VStack(alignment: .leading, spacing: 2) {
-                    // MARK: Title
-                    Text("Plans & Pricing")
-                        .font(.appRegular(24))
-                        .foregroundColor(Color.neutralMain700)
-                        .padding(.top, 20)
                     
-                    // MARK: SubTitle
-                    Text("Here's subscription Plans")
-                        .font(.appRegular(18))
-                        .foregroundColor(Color.neutral500)
-                }
-                Spacer()
-                
-//                ZStack(alignment: .topTrailing) {
-//                    Button(action: {
-//                        AppIntentRouter.shared.navigate(to: .notifications)
-//                    }) {
-//                        Image("notification-03")
-//                            .frame(width: 32, height: 32)
-//                    }
-//                    
-//                    if let count = commonApiVM.unreadCountResponse?.unreadCount{
-//                        Text("\(count)")
-//                            .font(.appBold(11))
-//                            .foregroundColor(Color.white)
-//                            .frame(width: 16, height: 16)
-//                            .background(Color.redBadge)
-//                            .cornerRadius(4)
-//                            .offset(x: 0, y: -5)
-//                    }
-//                }
-            }
-            .padding(.top, 50)
-            .padding(.horizontal, 24)
-            .padding(.bottom, 24)
-            
-            // MARK: Toggle
-            PlanToggleView(selectedSegment : $selectedSegment,
-                           leftText        : "Monthly",
-                           rightText       : "Annually")
-            .padding(.bottom, 24)
-            .padding(.horizontal, 24)
-            
-            ScrollView(showsIndicators: false) {
-                VStack(spacing: 24) {
-                    
-                    // MARK: Plans List
-                    VStack(spacing: 20) {
-                        PricingPlanCard(
-                            plan: PricingPlan(
-                                title: "Free Plan",
-                                features: [
-                                    "Basic renewal reminders",
-                                    "Track up to 5 subscriptions",
-                                    "Simple expense tracking"
-                                ],
-                                badgeText: "Current Plan",
-                                badgeColor: Color.neutral600,
-                                buttonTitle: "Current Plan",
-                                isCurrent: true,
-                                action: nil
-                            )
-                        )
+                    VStack(alignment: .leading, spacing: 2) {
+                        // MARK: Title
+                        Text("Plans & Pricing")
+                            .font(.appRegular(24))
+                            .foregroundColor(Color.neutralMain700)
+                            .padding(.top, 20)
                         
-                        PricingPlanCard(
-                            plan: PricingPlan(
-                                title: "Premium Plan",
-                                price: getPremiumPrice(),
-                                priceSubtitle: selectedSegment == .second ? "/ year" : "/ month",
-                                features: [
-                                    "Basic renewal reminders",
-                                    "Track up to 5 subscriptions",
-                                    "Simple expense tracking"
-                                ],
-                                badgeText: "Recommended",
-                                badgeColor: nil, // Will use gradient
-                                buttonTitle: "Upgrade",
-                                isCurrent: false,
-                                action: {
-                                    buyPremium()
-                                }
-                            )
-                        )
-                        
-                        PricingPlanCard(
-                            plan: PricingPlan(
-                                title: "Family",
-                                price: getFamilyPrice(),
-                                priceSubtitle: selectedSegment == .second ? "/ year" : "/ month",
-                                features: [
-                                    "Basic renewal reminders",
-                                    "Track up to 5 subscriptions",
-                                    "Simple expense tracking"
-                                ],
-                                badgeText: "Family Favorite",
-                                badgeColor: nil, // Will use gradient
-                                buttonTitle: "Upgrade",
-                                isCurrent: false,
-                                action: {
-                                    buyFamily()
-                                }
-                            )
-                        )
+                        // MARK: SubTitle
+                        Text("Here's subscription Plans")
+                            .font(.appRegular(18))
+                            .foregroundColor(Color.neutral500)
                     }
-                    
-                    // MARK: tip view
-                    GradienCustomeView(title: "Need help choosing?", subTitle: "Compare all features and find the perfect plan for your subscription management needs.")
-                    
-                    Button("Restore Purchases") {
-                        restorePurchases()
-                    }
-                    .font(.appSemiBold(14))
-                    .foregroundColor(.neutral500)
-                    .padding(.top, 10)
+                    Spacer()
                 }
+                .padding(.top, 50)
                 .padding(.horizontal, 24)
-                .padding(.bottom, 40)
+                .padding(.bottom, 24)
+                
+                // MARK: Toggle
+                PlanToggleView(selectedSegment : $selectedSegment,
+                               leftText        : "Monthly",
+                               rightText       : "Annually")
+                .padding(.bottom, 24)
+                .padding(.horizontal, 24)
+                
+                ScrollView(showsIndicators: false) {
+                    VStack(spacing: 24) {
+                        
+                        // MARK: Plans List
+                        VStack(spacing: 20) {
+                            PricingPlanCard(
+                                plan: PricingPlan(
+                                    title       : "Free Plan",
+                                    features    : [
+                                        "Basic renewal reminders",
+                                        "Track up to 5 subscriptions",
+                                        "Simple expense tracking"
+                                    ],
+                                    badgeText   : "Current Plan",
+                                    badgeColor  : Color.neutral600,
+                                    buttonTitle : "Current Plan",
+                                    isCurrent   : true,
+                                    action      : nil
+                                )
+                            )
+                            
+                            PricingPlanCard(
+                                plan: PricingPlan(
+                                    title           : "Premium Plan",
+                                    price           : getSilverPrice(),
+                                    priceSubtitle   : selectedSegment == .second ? "/ year" : "/ month",
+                                    features        : [
+                                        "Basic renewal reminders",
+                                        "Track up to 5 subscriptions",
+                                        "Simple expense tracking"
+                                    ],
+                                    badgeText       : "Recommended",
+                                    badgeColor      : nil,
+                                    buttonTitle     : storeManager.purchasedProductIDs.contains(getSilverID()) ? "Purchased" : "Upgrade",
+                                    isCurrent       : storeManager.purchasedProductIDs.contains(getSilverID()),
+                                    action          : {
+                                        buySilver()
+                                    }
+                                )
+                            )
+                            
+                            PricingPlanCard(
+                                plan: PricingPlan(
+                                    title           : "Family",
+                                    price           : getGoldPrice(),
+                                    priceSubtitle   : selectedSegment == .second ? "/ year" : "/ month",
+                                    features        : [
+                                        "Basic renewal reminders",
+                                        "Track up to 5 subscriptions",
+                                        "Simple expense tracking"
+                                    ],
+                                    badgeText       : "Family Favorite",
+                                    badgeColor      : nil,
+                                    buttonTitle     : storeManager.purchasedProductIDs.contains(getGoldID()) ? "Purchased" : "Upgrade",
+                                    isCurrent       : storeManager.purchasedProductIDs.contains(getGoldID()),
+                                    action          : {
+                                        buyGold()
+                                    }
+                                )
+                            )
+                        }
+                        
+                        // MARK: tip view
+                        GradienCustomeView(title    : "Need help choosing?",
+                                           subTitle : "Compare all features and find the perfect plan for your subscription management needs.")
+                        
+                        Button("Restore Purchases") {
+                            Task {
+                                try? await storeManager.restorePurchases()
+                            }
+                        }
+                        .font(.appSemiBold(14))
+                        .foregroundColor(.neutral500)
+                        .padding(.top, 10)
+                    }
+                    .padding(.horizontal, 24)
+                    .padding(.bottom, 40)
+                }
+            }
+            .background(Color.neutralBg100)
+            .ignoresSafeArea()
+            .navigationBarBackButtonHidden(true)
+            .blur(radius: storeManager.purchaseState != .idle ? 3 : 0)
+            
+            // MARK: Loading/Error Overlay
+            if storeManager.purchaseState != .idle {
+                PricingPlanLoadingView(
+                    type: storeManager.purchaseState == .loading ? .loading : .failed,
+                    onTryAgain: {
+                        storeManager.purchaseState = .idle
+                    }
+                )
+                .transition(.opacity)
             }
         }
-        .background(Color.neutralBg100)
-        .ignoresSafeArea()
-        .navigationBarBackButtonHidden(true)
-        .onAppear{
+        .onAppear {
             justAppeared = true
-            fetchProducts()
-            //api call
+            Task {
+                await storeManager.fetchProducts(productIDs: SubzilloProducts.productIdentifiers)
+                await storeManager.updatePurchasedProducts()
+            }
             DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
                 justAppeared = false
             }
         }
-        .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("RefreshScreenData"))) { _ in
-            if !justAppeared {
-                fetchProducts()
-            }
-        }
-        .onReceive(NotificationCenter.default.publisher(for: .IAPHelperPurchaseNotification)) { notification in
-            handlePurchaseNotification(notification)
-        }
     }
     
-    // MARK: - Logic Methods
+    //MARK: - User defined methods
     
-    private func fetchProducts() {
-        SubzilloProducts.store.requestProducts { success, products in
-            if success, let products = products {
-                DispatchQueue.main.async {
-                    self.products = products
-                }
-            }
-        }
+    private func getSilverID() -> String {
+        return (selectedSegment == .second) ? SubzilloProducts.silverYearly : SubzilloProducts.silverMonthly
     }
     
-    private func getPremiumPrice() -> String {
-        let id = (selectedSegment == .second) ? SubzilloProducts.premiumYearly : SubzilloProducts.premiumMonthly
-        if let product = products.first(where: { $0.productIdentifier == id }) {
-            return formatPrice(for: product)
+    private func getGoldID() -> String {
+        return (selectedSegment == .second) ? SubzilloProducts.goldYearly : SubzilloProducts.goldMonthly
+    }
+
+    private func getSilverPrice() -> String {
+        let id = getSilverID()
+        if let product = storeManager.products.first(where: { $0.id == id }) {
+            return product.displayPrice
         }
         return (selectedSegment == .second) ? "$19.99" : "$1.99" // Fallback
     }
     
-    private func getFamilyPrice() -> String {
-        let id = (selectedSegment == .second) ? SubzilloProducts.familyYearly : SubzilloProducts.familyMonthly
-        if let product = products.first(where: { $0.productIdentifier == id }) {
-            return formatPrice(for: product)
+    private func getGoldPrice() -> String {
+        let id = getGoldID()
+        if let product = storeManager.products.first(where: { $0.id == id }) {
+            return product.displayPrice
         }
         return (selectedSegment == .second) ? "$69.99" : "$6.99" // Fallback
     }
     
-    private func formatPrice(for product: SKProduct) -> String {
-        let formatter = NumberFormatter()
-        formatter.numberStyle = .currency
-        formatter.locale = product.priceLocale
-        return formatter.string(from: product.price) ?? "\(product.price)"
-    }
-    
-    private func buyPremium() {
-        let id = (selectedSegment == .second) ? SubzilloProducts.premiumYearly : SubzilloProducts.premiumMonthly
-        if let product = products.first(where: { $0.productIdentifier == id }) {
-            SubzilloProducts.store.buyProduct(product)
+    private func buySilver() {
+        let id = getSilverID()
+        if let product = storeManager.products.first(where: { $0.id == id }) {
+            Task {
+                try? await storeManager.purchase(product)
+            }
         }
     }
     
-    private func buyFamily() {
-        let id = (selectedSegment == .second) ? SubzilloProducts.familyYearly : SubzilloProducts.familyMonthly
-        if let product = products.first(where: { $0.productIdentifier == id }) {
-            SubzilloProducts.store.buyProduct(product)
+    private func buyGold() {
+        let id = getGoldID()
+        if let product = storeManager.products.first(where: { $0.id == id }) {
+            Task {
+                try? await storeManager.purchase(product)
+            }
         }
-    }
-    
-    private func restorePurchases() {
-        SubzilloProducts.store.restorePurchases()
-    }
-    
-    private func handlePurchaseNotification(_ notification: Notification) {
-        guard let transaction = notification.object as? SKPaymentTransaction else { return }
-        print("Purchase completed: \(transaction.payment.productIdentifier)")
-        // Implement further logic like API validation here
     }
 }
 
 // MARK: - Subviews
-
 struct PricingPlanCard: View {
     let plan: PricingPlan
     
@@ -345,10 +320,6 @@ struct PricingPlanCard: View {
     }
 }
 
-#Preview {
-    PricingPlansView()
-}
-
 struct PlanToggleView: View {
     
     @Binding var selectedSegment    : Segment?
@@ -380,7 +351,6 @@ struct PlanToggleView: View {
                     }
                 )
                 .overlay(
-                    // keep the stroke visually inside by padding the shape inward
                     RoundedCorner(radius: 8, corners: [.topLeft, .bottomLeft])
                         .stroke(
                             LinearGradient(
@@ -390,8 +360,8 @@ struct PlanToggleView: View {
                             ),
                             lineWidth: 2
                         )
-                        .padding(1)                  // <- keeps stroke inside bounds
-                        .opacity(selectedSegment == .first ? 0 : 1) // <- hide border when selected (without changing layout)
+                        .padding(1)
+                        .opacity(selectedSegment == .first ? 0 : 1)
                 )
             }
             
@@ -430,7 +400,6 @@ struct PlanToggleView: View {
                     }
                 )
                 .overlay(
-                    // keep the stroke visually inside by padding the shape inward
                     RoundedCorner(radius: 8, corners: [.topRight, .bottomRight])
                         .stroke(
                             LinearGradient(
@@ -440,8 +409,8 @@ struct PlanToggleView: View {
                             ),
                             lineWidth: 2
                         )
-                        .padding(1)                  // <- keeps stroke inside bounds
-                        .opacity(selectedSegment == .second ? 0 : 1) // <- hide border when selected (without changing layout)
+                        .padding(1)
+                        .opacity(selectedSegment == .second ? 0 : 1)
                 )
             }
         }

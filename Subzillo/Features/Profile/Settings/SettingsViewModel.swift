@@ -80,6 +80,56 @@ class SettingsViewModel: ObservableObject {
         .store(in: &self.subscriptions)
     }
     
+    func emailAutoSync(input:EmailAutoSyncRequest) {
+        apiReference.postApi(endPoint: APIEndpoint.emailAutoSync, method: .POST,token: authKey,body: input,showLoader: true, responseType: GeneralResponse.self)
+            .sink { [unowned self] completion in
+                if case let .failure(error) = completion {
+                    self.handleError(error,endPoint: APIEndpoint.emailAutoSync)
+                }
+            }
+        receiveValue: { response in
+            PrintLogger.modelLog(response, type: .response, isInput: false)
+            ToastManager.shared.showToast(message: response.message ?? "")
+        }
+        .store(in: &self.subscriptions)
+    }
+    
+    func exportSubscriptionData(input: ExportSubscriptionDataRequest,showLoader:Bool = true) {
+        apiReference.postApiData(endPoint: APIEndpoint.exportSubscriptionData, method: .POST,token: authKey,body: input,showLoader: showLoader)
+            .sink { [unowned self] completion in
+                if case let .failure(error) = completion {
+                    self.handleError(error,endPoint: APIEndpoint.exportSubscriptionData)
+                }
+            }
+        receiveValue: { [unowned self] data in
+            self.saveDataToFile(data: data)
+        }
+        .store(in: &self.subscriptions)
+    }
+    
+    private func saveDataToFile(data: Data) {
+        let fileName = "GmailSyncLogs_\(Int(Date().timeIntervalSince1970)).xlsx"
+        
+        guard let documentsURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first else {
+            print("Error: Could not find documents directory")
+            return
+        }
+        
+        let fileURL = documentsURL.appendingPathComponent(fileName)
+        
+        do {
+            try data.write(to: fileURL)
+            DispatchQueue.main.async {
+                ToastManager.shared.showToast(message: "File saved successfully to Files app", style: .success)
+            }
+        } catch {
+            print("Error saving file: \(error)")
+            DispatchQueue.main.async {
+                ToastManager.shared.showToast(message: "Failed to save file", style: .error)
+            }
+        }
+    }
+    
     func navigate(to route: NavigationRoute){
         self.router.navigate(to: route)
     }

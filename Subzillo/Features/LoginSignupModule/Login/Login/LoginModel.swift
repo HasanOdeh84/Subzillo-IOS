@@ -62,6 +62,7 @@ struct SocialLoginModel:Codable{
     var loginType     : loginType?  = nil
     var fullName      : String?     = nil
     var emailAddress  : String?     = nil
+    var profileImage  : Data?       = Data()
 }
 
 public struct SocialLoginRequest: Codable {

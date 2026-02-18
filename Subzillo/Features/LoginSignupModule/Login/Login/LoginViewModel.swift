@@ -65,6 +65,8 @@ class LoginViewModel: ObservableObject {
     }
     
     func socialLogin(loginType:loginType,deviceId: String){
+        let timestamp = Int(Date().timeIntervalSince1970)
+        let filename = "image_\(timestamp).jpg"
         if loginType == .google{
             SocialLogins.shared.signInWithGoogle { [weak self] data in
                 guard let data else { return }
@@ -72,7 +74,13 @@ class LoginViewModel: ObservableObject {
                                                                email                : data.emailAddress ?? "",
                                                                socialId             : data.id ?? "",
                                                                deviceId             : deviceId,
-                                                               fullName             : data.fullName ?? ""))
+                                                               fullName             : data.fullName ?? ""),
+                                     fileData: [MultiPartFileInput(
+                                        fieldName   : "profile",
+                                        fileName    : filename,
+                                        mimeType    : "image/jpeg",
+                                        fileData    : data.profileImage ?? Data()
+                                     )])
             }
         }else if loginType == .apple{
             SocialLogins.shared.signInWithApple { [weak self] data in
@@ -83,7 +91,8 @@ class LoginViewModel: ObservableObject {
                                                                email                : data.emailAddress ?? "",
                                                                socialId             : data.id ?? "",
                                                                deviceId             : deviceId,
-                                                               fullName             : data.fullName ?? ""))
+                                                               fullName             : data.fullName ?? ""),
+                                     fileData: [])
             }
         }else if loginType == .microsoft{
             SocialLogins.shared.signInWithMicrosoft { [weak self] data in
@@ -94,13 +103,14 @@ class LoginViewModel: ObservableObject {
                                                                email                : data.emailAddress ?? "",
                                                                socialId             : data.id ?? "",
                                                                deviceId             : deviceId,
-                                                               fullName             : data.fullName ?? ""))
+                                                               fullName             : data.fullName ?? ""),
+                                     fileData: [])
             }
         }
     }
     
-    func socialLoginApi(input:SocialLoginRequest) {
-        apiReference.postApi(endPoint: APIEndpoint.socialLogin, method: .POST,token: defaultAuthKey,body: input,showLoader: true, responseType: LoginResponse.self)
+    func socialLoginApi(input:SocialLoginRequest, fileData:[MultiPartFileInput]) {
+        apiReference.postMultipartApi(endPoint: APIEndpoint.socialLogin, method: .POST,token: defaultAuthKey,body: MultipartInput(parameters: input, fileInput: fileData),showLoader: true, responseType: LoginResponse.self)
             .sink { [unowned self] completion in
                 if case let .failure(error) = completion {
                     self.handleError(error,endPoint: APIEndpoint.socialLogin)

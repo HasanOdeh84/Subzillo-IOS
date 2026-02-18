@@ -928,7 +928,29 @@ struct YearOverviewChartView: View {
     //MARK: Computed Properties
     private var yAxisValues: [Double] {
         let maxAmount = data.map { $0.amount }.max() ?? 0
-        let effectiveMax = maxAmount == 0 ? 5 : maxAmount
+        if maxAmount == 0 {
+            return [0, 1, 2, 3, 4, 5]
+        }
+        
+        let effectiveMax: Double
+        if maxAmount <= 5 {
+            effectiveMax = 5
+        } else if maxAmount <= 10 {
+            effectiveMax = 10
+        } else if maxAmount <= 25 {
+            effectiveMax = 25
+        } else if maxAmount <= 50 {
+            effectiveMax = 50
+        } else if maxAmount <= 100 {
+            effectiveMax = 100
+        } else if maxAmount <= 500 {
+            effectiveMax = ceil(maxAmount / 50.0) * 50.0
+        } else if maxAmount <= 1000 {
+            effectiveMax = ceil(maxAmount / 100.0) * 100.0
+        } else {
+            effectiveMax = ceil(maxAmount / 500.0) * 500.0
+        }
+        
         let step = effectiveMax / 5
         return (0...5).map { Double($0) * step }
     }
@@ -1052,31 +1074,11 @@ struct YearOverviewChartView: View {
                             }
                         }
                         AxisValueLabel(anchor: .trailing) { // Anchor trailing to place labels left of the line
-                            //                            if let y = value.as(Double.self) {
-                            //                                let rounded = Int((y / 100).rounded() * 100)
-                            //
-                            //                                Text("\(rounded)")
-                            //                                    .font(.appRegular(16))
-                            //                                    .foregroundStyle(Color.neutralMain700)
-                            //                                    .padding(.trailing, 5)
-                            //                            }
                             if let y = value.as(Double.self) {
-                                let maxAmount = data.map { $0.amount }.max() ?? 0
-                                
-                                if maxAmount <= 5 {
-                                    // If everything is 0 (or very small), show exact integers (0, 1, 2, 3, 4, 5)
-                                    Text("\(Int(y))")
-                                        .font(.appRegular(16))
-                                        .foregroundStyle(Color.neutralMain700)
-                                        .padding(.trailing, 5)
-                                } else {
-                                    // Otherwise, apply your rounding to the nearest hundred
-                                    let rounded = Int((y / 100).rounded() * 100)
-                                    Text("\(rounded)")
-                                        .font(.appRegular(16))
-                                        .foregroundStyle(Color.neutralMain700)
-                                        .padding(.trailing, 5)
-                                }
+                                Text("\(Int(y))")
+                                    .font(.appRegular(16))
+                                    .foregroundStyle(Color.neutralMain700)
+                                    .padding(.trailing, 5)
                             }
                         }
                     }

@@ -66,7 +66,7 @@ public struct SubscriptionData: Codable, Hashable {
     var nickName                    : String?
     var color                       : String?
     var title                       : String?
-    var sourceReference             : Int?
+    var sourceReference             : String?
 }
 
 extension SubscriptionData {

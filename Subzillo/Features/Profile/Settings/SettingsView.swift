@@ -21,6 +21,7 @@ struct SettingsView: View {
     @State var showDeletePopup                      : Bool = false
     @State private var deleteSheetHeight            : CGFloat = .zero
     @State var showPermissionPopup                  : Bool = false
+    @State var showEmailSyncBottomSheet             : Bool = false
     
     // MARK: - Body
     var body: some View {
@@ -70,22 +71,44 @@ struct SettingsView: View {
                         
                         Divider().overlay(Color.neutral300Border)
                         
+//                        SettingsRow(
+//                            title: "Email Connection",
+//                            subtitle: "Process data on device when possible",
+//                            trailingContent: AnyView(
+//                                Toggle("", isOn: $isEmailConnectionEnabled)
+//                                    .toggleStyle(SwitchToggleStyle(tint: .blueMain700))
+//                                    .labelsHidden()
+//                                    .onChange(of: isEmailConnectionEnabled) { newValue in
+//                                        //                                        if newValue != (commonApiVM.userInfoResponse?.isEmailConnection ?? false) {
+//                                        //                                            settingsVM.toggleReminders(input: ToggleRemindersRequest(userId               : Constants.getUserId(),
+//                                        //                                                                                                   type                 : 3,
+//                                        //                                                                                                   status               : newValue))
+//                                        //                                        }
+//                                    }
+//                            )
+//                        )
+                        
                         SettingsRow(
-                            title: "Email Connection",
-                            subtitle: "Process data on device when possible",
+                            title: "Auto Email Sync",
+                            subtitle: "Automatically syncs data via email",
                             trailingContent: AnyView(
-                                Toggle("", isOn: $isEmailConnectionEnabled)
-                                    .toggleStyle(SwitchToggleStyle(tint: .blueMain700))
-                                    .labelsHidden()
-                                    .onChange(of: isEmailConnectionEnabled) { newValue in
-                                        //                                        if newValue != (commonApiVM.userInfoResponse?.isEmailConnection ?? false) {
-                                        //                                            settingsVM.toggleReminders(input: ToggleRemindersRequest(userId               : Constants.getUserId(),
-                                        //                                                                                                   type                 : 3,
-                                        //                                                                                                   status               : newValue))
-                                        //                                        }
-                                    }
-                            )
+                                Image("arrow-right-01-round")
+                                    .renderingMode(.template)
+                                    .foregroundColor(.secondaryNavyBlue400)
+                                    .frame(width: 24, height: 24)
+                            ),
+                            action: {
+                                showEmailSyncBottomSheet = true
+                            }
                         )
+                        .sheet(isPresented: $showEmailSyncBottomSheet) {
+                            AutoEmailSyncBottomSheet(onSelect: {_ in 
+                                settingsVM.emailAutoSync(input: EmailAutoSyncRequest(userId : Constants.getUserId(),
+                                                                                     type   : 1))
+                            })
+                                .presentationDragIndicator(.hidden)
+                                .presentationDetents([.height(420)])
+                        }
                         
                         Divider().overlay(Color.neutral300Border)
                         
@@ -99,7 +122,7 @@ struct SettingsView: View {
                             //                                    .frame(width: 24, height: 24)
                             //                            ),
                             action: {
-                                // Export action
+                                settingsVM.exportSubscriptionData(input: ExportSubscriptionDataRequest(userId: Constants.getUserId()))
                             }
                         )
                         
@@ -108,12 +131,6 @@ struct SettingsView: View {
                         SettingsRow(
                             title: "Delete Account",
                             subtitle: "Permanently delete all data",
-                            //                            trailingContent: AnyView(
-                            //                                Image("arrow-right-01-round")
-                            //                                    .renderingMode(.template)
-                            //                                    .foregroundColor(.secondaryNavyBlue400)
-                            //                                    .frame(width: 24, height: 24)
-                            //                            ),
                             action: {
                                 showDeletePopup = true
                             }
@@ -279,7 +296,7 @@ struct SettingsView: View {
         .onChange(of: commonApiVM.userInfoResponse) { _ in
             renewalRemindersEnabled     = commonApiVM.userInfoResponse?.renewalReminders ?? false
             priceChangesEnabled         = commonApiVM.userInfoResponse?.priceChangeReminders ?? false
-            isEmailConnectionEnabled    = commonApiVM.userInfoResponse?.isEmailConnection ?? false
+//            isEmailConnectionEnabled    = commonApiVM.userInfoResponse?.isEmailConnection ?? false
         }
         .onChange(of: settingsVM.isUpdateSuccess) { _ in
             if settingsVM.isUpdateSuccess{
