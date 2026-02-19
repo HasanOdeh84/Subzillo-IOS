@@ -14,6 +14,8 @@ struct AddSubscriptionsView: View {
     @State private var isUploading             = false
     @StateObject private var sharedImageManager = SharedImageManager.shared
     @StateObject private var uploadImageVM      = UploadImageViewModel()
+    @State var showUpgradeNowPopup              : Bool = false
+    @State private var upgradeNowSheetHeight    : CGFloat = .zero
     
     //MARK: Body
     var body: some View {
@@ -88,6 +90,26 @@ struct AddSubscriptionsView: View {
             .presentationDragIndicator(.hidden)
             .presentationDetents([.height(560)])
         }
+        .sheet(isPresented: $showUpgradeNowPopup) {
+            InfoAlertSheet(
+                onDelegate: {
+                    uploadImageVM.navigate(to: .pricingPlans)
+                }, title                : "Upgrade Required",
+                subTitle                : "Upgrade your plan to continue adding subscriptions",
+//                imageName               : "del_red_big",
+//                buttonIcon              : "deleteIcon",
+                buttonTitle             : "Upgrade Now",
+                imageSize               : 70,
+                isCancelButtonVisible   : true
+            )
+            .onPreferenceChange(InnerHeightPreferenceKey.self) { height in
+                if height > 0 {
+                    upgradeNowSheetHeight = height
+                }
+            }
+            .presentationDragIndicator(.hidden)
+            .presentationDetents([.height(upgradeNowSheetHeight)])
+        }
     }
     
     //MARK: User defined methods
@@ -116,7 +138,8 @@ struct AddSubscriptionsView: View {
         ToastManager.shared.showToast(message: "Coming soon in S4",style:ToastStyle.info)
     }
     private func clickOnSmartAssistant() {
-        ToastManager.shared.showToast(message: "Coming soon in S5",style:ToastStyle.info)
+//        showUpgradeNowPopup = true
+//        ToastManager.shared.showToast(message: "Coming soon in S5",style:ToastStyle.info)
     }
     private func clickOnAddByVoice() {
         AppIntentRouter.shared.navigate(to: .voiceCommandView)

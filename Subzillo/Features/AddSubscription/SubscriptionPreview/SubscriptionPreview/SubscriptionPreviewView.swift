@@ -64,6 +64,8 @@ struct SubscriptionPreviewView: View {
     @State var isServiceChanged                 = false
     @State private var previousBillingCycle     : String?
     @State private var deleteSheetHeight        : CGFloat = .zero
+    @State private var limitExceedSheetHeight   : CGFloat = .zero
+    @State var showLimitExceedPopup             : Bool = false
     
     //MARK: - body
     var body: some View {
@@ -526,6 +528,25 @@ struct SubscriptionPreviewView: View {
                 handleLocalDiscard()
                 subscriptionPreviewVM.isDiscardSuccess = false
             }
+        }
+        .sheet(isPresented: $showLimitExceedPopup) {
+            InfoAlertSheet(
+                onDelegate: {
+                    
+                }, title                : "Plan Limit Exceeded",
+                subTitle                : "Your current plan allows only 3 active subscriptions.",
+                buttonTitle             : "Ok",
+                imageSize               : 70,
+                isCancelButtonVisible   : false,
+                isImageVisible          : false
+            )
+            .onPreferenceChange(InnerHeightPreferenceKey.self) { height in
+                if height > 0 {
+                    limitExceedSheetHeight = height
+                }
+            }
+            .presentationDragIndicator(.hidden)
+            .presentationDetents([.height(limitExceedSheetHeight)])
         }
     }
     

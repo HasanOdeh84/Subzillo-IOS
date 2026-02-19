@@ -82,6 +82,8 @@ enum APIEndpoint: String {
     case exportGmailSyncLogs            = "/exportGmailSyncLogs"
     case emailAutoSync                  = "/emailAutoSync"
     case exportSubscriptionData        = "/exportSubscriptionData"
+    case listPricingPlans               = "/listPricingPlans"
+
 
     //new api's
     case deleteAccount                  = "/deleteAccount"

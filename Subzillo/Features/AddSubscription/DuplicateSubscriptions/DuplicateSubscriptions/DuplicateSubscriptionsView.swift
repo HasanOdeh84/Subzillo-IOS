@@ -447,7 +447,8 @@ struct SubItem: View {
                     VStack(alignment: .leading, spacing: 9) {
                         Image(isSelected == true ? "Checkmark" : "UnCheckmark")
                             .frame(width: 24, height: 24)
-                            .offset(x: 0, y: -5)
+                            .padding(.top, 16)
+//                            .offset(x: 0, y: -5)
                     }
                     .onTapGesture {
                         checkBtnAction()

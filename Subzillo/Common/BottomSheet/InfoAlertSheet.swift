@@ -20,6 +20,7 @@ struct InfoAlertSheet: View {
     var titleFont                           : Font? = .appRegular(18)
     var imageSize                           : CGFloat = 100
     var isCancelButtonVisible               : Bool = false
+    var isImageVisible                      : Bool = true
     
     //MARK: - body
     var body: some View {
@@ -30,12 +31,14 @@ struct InfoAlertSheet: View {
                 .padding(.top,24)
             
             if !isCancelButtonVisible{
-                ZStack(alignment: .topTrailing) {
-                    Image(imageName ?? "")
-                        .frame(width: imageSize, height: imageSize)
+                if isImageVisible{
+                    ZStack(alignment: .topTrailing) {
+                        Image(imageName ?? "")
+                            .frame(width: imageSize, height: imageSize)
+                    }
+                    .frame(width: imageSize, height: imageSize, alignment: .center)
+                    .frame(maxWidth: .infinity, alignment: .center)
                 }
-                .frame(width: imageSize, height: imageSize, alignment: .center)
-                .frame(maxWidth: .infinity, alignment: .center)
             }
             
             if subTitle != ""

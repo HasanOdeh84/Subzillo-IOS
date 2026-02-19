@@ -1044,8 +1044,11 @@ struct ManualEntryView: View {
             fromSiri = true
             print(siriData)
             serviceName = siriData["serviceName"] as? String ?? ""
+            serviceLastActionText = serviceName
             amount = "\(siriData["price"] as? Double ?? 0.00)"
+            amountLastActionText = amount
             planType = siriData["planName"] as? String ?? ""
+            planLastActionText = planType
             selectedPlanType = siriData["planName"] as? String ?? ""
             currency = siriData["currencyCode"] as? String ?? ""
             category = siriData["category"] as? String ?? ""
@@ -1073,9 +1076,12 @@ struct ManualEntryView: View {
             }
             notes = globalSubscriptionData?.notes ?? ""
             serviceName = globalSubscriptionData?.serviceName ?? ""
+            serviceLastActionText = serviceName
             amount = "\(globalSubscriptionData?.amount ?? 0.00)"
+            amountLastActionText = amount
             currency = globalSubscriptionData?.currency ?? ""
             planType = globalSubscriptionData?.subscriptionType ?? ""
+            planLastActionText = planType
             selectedPlanType = globalSubscriptionData?.subscriptionType ?? ""
             chargeDate = (globalSubscriptionData?.nextPaymentDate ?? "").formattedDate(to: "dd/MM/yyyy")
             let billing = globalSubscriptionData?.billingCycle ?? ""
@@ -1085,9 +1091,6 @@ struct ManualEntryView: View {
             //                billingIndex = index
             //            }
             selectedBilling = billing//billingData.first(where: { $0.title == billing})
-            serviceLastActionText = serviceName
-            planLastActionText = planType
-            amountLastActionText = amount
             if let categories = commonApiVM.categoriesResponse,
                let categoryName = globalSubscriptionData?.categoryName {
                 selectedCategory = categories.first {

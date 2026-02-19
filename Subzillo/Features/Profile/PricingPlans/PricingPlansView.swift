@@ -8,7 +8,7 @@
 import SwiftUI
 import StoreKit
 
-struct PricingPlan: Identifiable {
+struct PricingPlanUI: Identifiable {
     let id = UUID()
     let title: String
     let price: String?
@@ -33,6 +33,7 @@ struct PricingPlan: Identifiable {
     }
 }
 
+
 struct PricingPlansView: View {
     
     //MARK: - Properties
@@ -40,6 +41,7 @@ struct PricingPlansView: View {
     @State private var selectedSegment          : Segment? = .first
     @EnvironmentObject var commonApiVM          : CommonAPIViewModel
     @StateObject private var storeManager       = StoreManager.shared
+    @StateObject private var viewModel          = PricingPlansViewModel()
     @State private var justAppeared             : Bool = false
     
     //MARK: - Body
@@ -88,75 +90,37 @@ struct PricingPlansView: View {
                         
                         // MARK: Plans List
                         VStack(spacing: 20) {
-                            PricingPlanCard(
-                                plan: PricingPlan(
-                                    title       : "Free Plan",
-                                    features    : [
-                                        "Basic renewal reminders",
-                                        "Track up to 5 subscriptions",
-                                        "Simple expense tracking"
-                                    ],
-                                    badgeText   : "Current Plan",
-                                    badgeColor  : Color.neutral600,
-                                    buttonTitle : "Current Plan",
-                                    isCurrent   : true,
-                                    action      : nil
-                                )
-                            )
-                            
-                            PricingPlanCard(
-                                plan: PricingPlan(
-                                    title           : "Premium Plan",
-                                    price           : getSilverPrice(),
-                                    priceSubtitle   : selectedSegment == .second ? "/ year" : "/ month",
-                                    features        : [
-                                        "Basic renewal reminders",
-                                        "Track up to 5 subscriptions",
-                                        "Simple expense tracking"
-                                    ],
-                                    badgeText       : "Recommended",
-                                    badgeColor      : nil,
-                                    buttonTitle     : storeManager.purchasedProductIDs.contains(getSilverID()) ? "Purchased" : "Upgrade",
-                                    isCurrent       : storeManager.purchasedProductIDs.contains(getSilverID()),
-                                    action          : {
-                                        buySilver()
-                                    }
-                                )
-                            )
-                            
-                            PricingPlanCard(
-                                plan: PricingPlan(
-                                    title           : "Family",
-                                    price           : getGoldPrice(),
-                                    priceSubtitle   : selectedSegment == .second ? "/ year" : "/ month",
-                                    features        : [
-                                        "Basic renewal reminders",
-                                        "Track up to 5 subscriptions",
-                                        "Simple expense tracking"
-                                    ],
-                                    badgeText       : "Family Favorite",
-                                    badgeColor      : nil,
-                                    buttonTitle     : storeManager.purchasedProductIDs.contains(getGoldID()) ? "Purchased" : "Upgrade",
-                                    isCurrent       : storeManager.purchasedProductIDs.contains(getGoldID()),
-                                    action          : {
-                                        buyGold()
-                                    }
-                                )
-                            )
+                            ForEach(viewModel.pricingPlans) { plan in
+                                PricingPlanCard(plan: getUIPlan(from: plan))
+                            }
                         }
                         
                         // MARK: tip view
-                        GradienCustomeView(title    : "Need help choosing?",
-                                           subTitle : "Compare all features and find the perfect plan for your subscription management needs.")
+//                        GradienCustomeView(title    : "Need help choosing?",
+//                                           subTitle : "Compare all features and find the perfect plan for your subscription management needs.")
                         
-                        Button("Restore Purchases") {
+                        Text(getAttributedText())
+                            .font(.appRegular(14))
+                            .multilineTextAlignment(.center)
+                            .environment(\.openURL, OpenURLAction { url in
+                                if url.absoluteString.contains("privacy") {
+//                                    AppIntentRouter.shared.navigate(to: .termsAndPrivacy(isTerm: false))
+                                } else if url.absoluteString.contains("terms") {
+//                                    AppIntentRouter.shared.navigate(to: .termsAndPrivacy(isTerm: true))
+                                }
+                                return .handled
+                            })
+                        
+                        Button {
                             Task {
                                 try? await storeManager.restorePurchases()
                             }
+                        } label: {
+                            Text("Restore Purchases")
+                                .font(.appBold(14))
+                                .foregroundColor(.neutralMain700)
+                                .underline(true, color: .neutralMain700)
                         }
-                        .font(.appSemiBold(14))
-                        .foregroundColor(.neutral500)
-                        .padding(.top, 10)
                     }
                     .padding(.horizontal, 24)
                     .padding(.bottom, 40)
@@ -170,8 +134,8 @@ struct PricingPlansView: View {
             // MARK: Loading/Error Overlay
             if storeManager.purchaseState != .idle {
                 PricingPlanLoadingView(
-                    type: storeManager.purchaseState == .loading ? .loading : .failed,
-                    onTryAgain: {
+                    type        : storeManager.purchaseState == .loading ? .loading : .failed,
+                    onTryAgain  : {
                         storeManager.purchaseState = .idle
                     }
                 )
@@ -181,9 +145,11 @@ struct PricingPlansView: View {
         .onAppear {
             justAppeared = true
             Task {
+                viewModel.listPricingPlans()
                 await storeManager.fetchProducts(productIDs: SubzilloProducts.productIdentifiers)
                 await storeManager.updatePurchasedProducts()
             }
+
             DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
                 justAppeared = false
             }
@@ -192,52 +158,76 @@ struct PricingPlansView: View {
     
     //MARK: - User defined methods
     
-    private func getSilverID() -> String {
-        return (selectedSegment == .second) ? SubzilloProducts.silverYearly : SubzilloProducts.silverMonthly
-    }
-    
-    private func getGoldID() -> String {
-        return (selectedSegment == .second) ? SubzilloProducts.goldYearly : SubzilloProducts.goldMonthly
-    }
-
-    private func getSilverPrice() -> String {
-        let id = getSilverID()
-        if let product = storeManager.products.first(where: { $0.id == id }) {
-            return product.displayPrice
+    private func getAttributedText() -> AttributedString {
+        var attriString = AttributedString(
+            localized: "This is an auto-renewing subscription. You will be charged automatically at the end of each billing period unless you cancel at least 24 hours before the renewal date. You can manage or cancel your subscription anytime from your Apple ID settings. For more information please visit our Terms & Conditions and Privacy Policy"
+        )
+        attriString.foregroundColor = .neutralMain700
+        if let privacyRange = attriString.range(of: "Privacy Policy") {
+            attriString[privacyRange].link = URL(string: "app://privacy")
+            attriString[privacyRange].foregroundColor = .blueMain700
+            attriString[privacyRange].font = .appBold(12)
         }
-        return (selectedSegment == .second) ? "$19.99" : "$1.99" // Fallback
-    }
-    
-    private func getGoldPrice() -> String {
-        let id = getGoldID()
-        if let product = storeManager.products.first(where: { $0.id == id }) {
-            return product.displayPrice
+        if let termsRange = attriString.range(of: "Terms & Conditions") {
+            attriString[termsRange].link = URL(string: "app://terms")
+            attriString[termsRange].foregroundColor = .blueMain700
+            attriString[termsRange].font = .appBold(12)
         }
-        return (selectedSegment == .second) ? "$69.99" : "$6.99" // Fallback
+        return attriString
     }
     
-    private func buySilver() {
-        let id = getSilverID()
-        if let product = storeManager.products.first(where: { $0.id == id }) {
-            Task {
-                try? await storeManager.purchase(product)
+    private func getUIPlan(from plan: PricingPlan) -> PricingPlanUI {
+        let name = plan.planName ?? ""
+        let isSilver = name.lowercased().contains("silver")
+        let isGold = name.lowercased().contains("gold")
+        let isFree = name.lowercased().contains("free")
+        
+        var productID: String?
+        if isSilver {
+            productID = (selectedSegment == .second) ? SubzilloProducts.silverYearly : SubzilloProducts.silverMonthly
+        } else if isGold {
+            productID = (selectedSegment == .second) ? SubzilloProducts.goldYearly : SubzilloProducts.goldMonthly
+        }
+        
+        var displayPrice: String = ""
+        var billingCycle: String = ""
+        if let id = productID, let product = storeManager.products.first(where: { $0.id == id }) {
+            displayPrice = product.displayPrice
+            let period = product.subscription?.subscriptionPeriod
+            if period?.unit == .month {
+                billingCycle = "/ month"
             }
-        }
-    }
-    
-    private func buyGold() {
-        let id = getGoldID()
-        if let product = storeManager.products.first(where: { $0.id == id }) {
-            Task {
-                try? await storeManager.purchase(product)
+            if period?.unit == .year {
+                billingCycle = "/ month"
             }
+        } else {
+            displayPrice = "\(plan.currencySymbol ?? "$")\(plan.price ?? 0.0)"
+            billingCycle = (selectedSegment == .second ? "/ year" : "/ month")
         }
+        
+        return PricingPlanUI(
+            title           : name,
+            price           : isFree ? nil : displayPrice,
+            priceSubtitle   : isFree ? nil : billingCycle,
+            features        : [plan.description ?? "Basic features"],
+            //            badgeColor      : isFree && (plan.isCurrentPlan ?? false) ? Color.neutral600 : nil,
+            badgeColor      : (plan.isCurrentPlan ?? false) ? Color.neutral600 : nil,
+            buttonTitle     : (plan.isCurrentPlan ?? false) ? "Current Plan" : (isFree ? "" : "Upgrade"),
+            isCurrent       : plan.isCurrentPlan ?? false,
+            action          : {
+                if let id = productID, let product = storeManager.products.first(where: { $0.id == id }) {
+                    Task {
+                        try? await storeManager.purchase(product)
+                    }
+                }
+            }
+        )
     }
 }
 
 // MARK: - Subviews
 struct PricingPlanCard: View {
-    let plan: PricingPlan
+    let plan: PricingPlanUI
     
     var body: some View {
         ZStack(alignment: .topTrailing) {
@@ -251,7 +241,7 @@ struct PricingPlanCard: View {
                 }
                 
                 if let price = plan.price {
-                    HStack(alignment: .bottom, spacing: 4) {
+                    HStack(alignment: .center, spacing: 4) {
                         Text(price)
                             .font(.appSemiBold(28))
                             .foregroundColor(.primaryBlue800)
@@ -278,14 +268,16 @@ struct PricingPlanCard: View {
                     }
                 }
                 
-                CustomButton(title: plan.buttonTitle,
-                             background: plan.isCurrent ? Color.neutralDisabled200 : Color.primaryBlue800,
-                             textColor: plan.isCurrent ? Color.neutral500 : Color.white,
-                             height: 48,
-                             action: {
-                    plan.action?()
-                })
-                .disabled(plan.isCurrent)
+                if plan.buttonTitle != ""{
+                    CustomButton(title      : plan.buttonTitle,
+                                 background : plan.isCurrent ? Color.neutralDisabled200 : Color.primaryBlue800,
+                                 textColor  : plan.isCurrent ? Color.neutral500 : Color.white,
+                                 height     : 48,
+                                 action: {
+                        plan.action?()
+                    })
+                    .disabled(plan.isCurrent)
+                }
             }
             .padding(24)
             .background(Color.white)
@@ -295,21 +287,21 @@ struct PricingPlanCard: View {
                     .stroke(Color.neutral300Border, lineWidth: 1)
             )
             
-            if let badge = plan.badgeText {
-                Text(badge)
-                    .font(.appSemiBold(14))
-                    .foregroundColor(.white)
-                    .padding(.horizontal, 16)
-                    .padding(.vertical, 8)
-                    .background(badgeBackground(for: plan))
-                    .clipShape(RoundedCorner(radius: 8, corners: [.bottomLeft, .bottomRight]))
-                    .padding(.trailing, 24)
-            }
+            //            if let badge = plan.badgeText {
+            //                Text(badge)
+            //                    .font(.appSemiBold(14))
+            //                    .foregroundColor(.white)
+            //                    .padding(.horizontal, 16)
+            //                    .padding(.vertical, 8)
+            //                    .background(badgeBackground(for: plan))
+            //                    .clipShape(RoundedCorner(radius: 8, corners: [.bottomLeft, .bottomRight]))
+            //                    .padding(.trailing, 24)
+            //            }
         }
     }
     
     @ViewBuilder
-    private func badgeBackground(for plan: PricingPlan) -> some View {
+    private func badgeBackground(for plan: PricingPlanUI) -> some View {
         if let color = plan.badgeColor {
             color
         } else {
@@ -320,6 +312,7 @@ struct PricingPlanCard: View {
     }
 }
 
+//MARK: - PlanToggleView
 struct PlanToggleView: View {
     
     @Binding var selectedSegment    : Segment?

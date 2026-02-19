@@ -26,6 +26,7 @@ struct UploadImageSheet: View {
     @State private var showLocalLoader          = false
     @State private var showPreview              = false
     var onDelegate                              : (() -> Void)?
+    @State var permissionBottomTitle            : String = ""
     
     //MARK: - body
     var body: some View {
@@ -140,9 +141,12 @@ struct UploadImageSheet: View {
             .sheet(isPresented: $showPermissionAlert) {
                 PermissionSheet(onDelegate: {
                     dismiss()
-                }, title: isCamera == true ? "We need camera access to add subscriptions by take photo" : "We need gallery access to add subscriptions by image upload", type: isCamera == true ? "camera" : "gallery", value: isCamera == true ? "Tap Camera" : "Tap Photos")
+                }, title                        : fromProfile ? (isCamera ? "We need camera access to update profile photo" : "We need gallery access to update profile photo") : (isCamera ? "We need camera access to add subscriptions by take photo" : "We need gallery access to add subscriptions by image upload" ),
+                                type            : isCamera == true ? "camera" : "gallery",
+                                value           : isCamera == true ? "Tap Camera" : "Tap Photos",
+                                hideManualBtn   : fromProfile ? true : false)
                 .presentationDragIndicator(.hidden)
-                .presentationDetents([.height(580)])
+                .presentationDetents([.height(fromProfile ? 530 : 580)])
             }
             .onReceive(NotificationCenter.default.publisher(for: .closeAllBottomSheets)) { _ in
                 showImagePicker = false
@@ -151,6 +155,19 @@ struct UploadImageSheet: View {
             }
             .onAppear{
                 originalImage = nil
+//                if fromProfile{
+//                    if isCamera{
+//                        permissionBottomTitle = "We need camera access to update profile photo"
+//                    }else{
+//                        permissionBottomTitle = "We need camera access to add subscriptions by take photo"
+//                    }
+//                }else{
+//                    if isCamera{
+//                        permissionBottomTitle = "We need gallery access to update profile photo"
+//                    }else{
+//                        permissionBottomTitle = "We need gallery access to add subscriptions by image upload"
+//                    }
+//                }
             }
             if showLocalLoader {
                 ZStack {
