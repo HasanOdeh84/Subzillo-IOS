@@ -2,6 +2,26 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.29.0] (Alpha) - 2026-02-19
+
+### Modified
+- Build shared with stage url
+- Changed the toast while deleting the email when it's syncing.
+- Duplicate screen checkbox alignment issue fixed.
+
+## [1.28.0] (Alpha) - 2026-02-18
+
+### Modified
+- Build shared with stage url
+- Plan type modifications in preview screen.
+
+## [1.27.0] (Alpha) - 2026-02-16
+
+### Modified
+- Build shared with stage url
+- Redirection to the connected emails list once the email is connected.
+- All S4 features and APIs are hidden except Gmail sync.
+
 ## [1.26.0] (Alpha) - 2026-02-14
 
 ### Modified
