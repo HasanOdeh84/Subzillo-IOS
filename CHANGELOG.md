@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.30.0] (Alpha) - 2026-02-19
+
+### Modified
+- Build shared with stage url
+- Changed the connected emails list UI alignment.
+
 ## [1.29.0] (Alpha) - 2026-02-19
 
 ### Modified
