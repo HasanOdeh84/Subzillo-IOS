@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.3.0] (Beta) - 2026-02-23
+
+### Delivered
+- Gmail account connection
+- Gmail syncing
+- View subscriptions detected from the connected Gmail account and add them
+- Delete connected Gmail account
+
 ## [1.30.0] (Alpha) - 2026-02-19
 
 ### Modified
