@@ -29,25 +29,25 @@ All notable changes to this project will be documented in this file.
 - Build shared with stage url
 - Plan type modifications in preview screen.
 
-## [1.27.0] (Alpha) - 2026-02-16
+## [1.27.0] (Alpha-Stage) - 2026-02-16
 
 ### Modified
 - Build shared with stage url
 - Redirection to the connected emails list once the email is connected.
 - All S4 features and APIs are hidden except Gmail sync.
 
-## [1.26.0] (Alpha) - 2026-02-14
+## [1.26.0] (Alpha-Dev) - 2026-02-14
 
 ### Modified
 - changed the gmailOauthCallback api name to oauthCallback. 
 
-## [1.25.0] (Alpha) - 2026-02-13
+## [1.25.0] (Alpha-Dev) - 2026-02-13
 
 ### Added
 - Connect Email, connected emails list, no subscriptions bottom sheet UI's.
 - Gmail connect, gmail sync, delete mail and email subscriptions list. 
 
-## [1.24.0] (Beta) - 2026-01-24
+## [1.24.0] (Beta-Stage) - 2026-01-24
 
 ### Delivered
 - Next Renewal Date: The next renewal date is not being captured correctly for some subscriptions.
@@ -56,17 +56,17 @@ All notable changes to this project will be documented in this file.
 - Expired Subscription Detection:An expired subscription was identified. The system shows the user whether they want to replace the existing subscription or add it as a new one.
 - Dark Theme Image Support:Data extraction from images in dark theme is now working correctly.
 
-## [1.24.0] (Alpha) - 2026-01-24
+## [1.24.0] (Alpha-Stage) - 2026-01-24
 
 ### Fixed
 - Bug fixes and modifications.
 
-## [1.23.0] (Alpha) - 2026-01-23
+## [1.23.0] (Alpha-Stage) - 2026-01-23
 
 ### Fixed
 - Client feedback points and modifications and build sent with stage url.
 
-## [1.22.0] (Beta) - 2026-01-21
+## [1.22.0] (Beta-Stage) - 2026-01-21
 
 ### Delivered
 - Manual subscription data has been updated in the database.
@@ -75,52 +75,52 @@ All notable changes to this project will be documented in this file.
 - In the Manual entry screen, the Monthly billing cycle will be selected by default.
 - The Plan Type will now be displayed as a dropdown instead of an input field. If no plan types are available for a specific subscription, Basic and Free will be shown as default options.
 
-## [1.20.0] (Alpha) - 2026-01-20
+## [1.20.0] (Alpha-Stage) - 2026-01-20
 
 ### Fixed
 - Validation agent modifications and build sent with stage url.
 
-## [1.19.0] (Alpha) - 2026-01-20
+## [1.19.0] (Alpha-Dev) - 2026-01-20
 
 ### Fixed
 - Validation agent modifications and build sent with dev url.
 
-## [1.18.0] (Alpha) - 2026-01-10
+## [1.18.0] (Alpha-Stage) - 2026-01-10
 
 ### Fixed
 - New modifications and bug fixes.
 
-## [1.17.0] (Alpha) - 2026-01-09
+## [1.17.0] (Alpha-Dev) - 2026-01-09
 
 ### Fixed
 - Auto fill details changes in manual and preview screens and build shared with dev url.
 
-## [1.16.0] (Alpha) - 2026-01-08
+## [1.16.0] (Alpha-Dev) - 2026-01-08
 
 ### Fixed
 - Sprint3 new client feedback points and build shared with dev url.
 
-## [1.15.0] (Alpha) - 2026-01-07
+## [1.15.0] (Alpha-Stage) - 2026-01-07
 
 ### Fixed
 - Sprint3 new client feedback points.
 
-## [1.2.0] (Beta) - 2025-12-29
+## [1.2.0] (Beta-Stage) - 2025-12-29
 
 ### Delivered
 - Sprint3 new client feedback points.
 
-## [1.14.0] (Alpha) - 2025-12-29
+## [1.14.0] (Alpha-Stage) - 2025-12-29
 
 ### Fixed
 - Sprint3 client feedback Bug fixes.
 
-## [1.13.0] (Alpha) - 2025-12-26
+## [1.13.0] (Alpha-Stage) - 2025-12-26
 
 ### Updated
 - Sprint3 client new feedback points.
 
-## [1.1.0] (Beta) - 2025-12-23
+## [1.1.0] (Beta-Stage) - 2025-12-23
 
 ### Fixed
 - Sprint3 minor changes.
@@ -173,7 +173,7 @@ All notable changes to this project will be documented in this file.
 ### Added
 - Manual entry auto filling details.
 
-## [1.7.0] (Alpha-Stage) - 2025-12-09
+## [1.7.0] (Alpha) - 2025-12-09
 
 ### Updated
 - Voice related UI changes.
@@ -195,18 +195,18 @@ All notable changes to this project will be documented in this file.
 ### Delivered
 - Sprint 3 features
 
-## [1.5.0] (Alpha) - 2025-12-01
+## [1.5.0] (Alpha-Stage) - 2025-12-01
 
 ### Fixed
 - Sprint 3 bug fixes
 
-## [1.4.0] (Alpha) - 2025-11-28
+## [1.4.0] (Alpha-Stage) - 2025-11-28
 
 ### Fixed
 - Sprint 3 bug fixes
 - Apple signin issue in release mode
 
-## [1.2.0] (Alpha) - 2025-11-27
+## [1.2.0] (Alpha-Stage) - 2025-11-27
 
 ### Fixed
 - Sprint 3 bug fixes
