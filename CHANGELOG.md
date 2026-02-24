@@ -128,7 +128,7 @@ All notable changes to this project will be documented in this file.
 ### Delivered
 - Sprint3 client feedback points.
 
-## [1.12.0] (Alpha) - 2025-12-22
+## [1.12.0] (Alpha-Stage) - 2025-12-22
 
 ### Fixed
 - Sprint3 bug fixes.
@@ -136,7 +136,7 @@ All notable changes to this project will be documented in this file.
 ### Updated
 - Phone number formatting in signup screen.
 
-## [1.11.0] (Alpha) - 2025-12-22
+## [1.11.0] (Alpha-Stage) - 2025-12-22
 
 ### Fixed
 - Sprint3 bug fixes.
@@ -145,12 +145,12 @@ All notable changes to this project will be documented in this file.
 - Voice flow.
 - Phone number formatting library has been changed.
 
-## [1.10.0] (Alpha) - 2025-12-18
+## [1.10.0] (Alpha-Dev) - 2025-12-18
 
 ### Added
 - Voice missing details flow.
 
-## [1.9.0] (Alpha) - 2025-12-17
+## [1.9.0] (Alpha-Dev) - 2025-12-17
 
 ### Updated
 - Filter and sort separation for subscriptions.
@@ -168,12 +168,12 @@ All notable changes to this project will be documented in this file.
 - Subscription preview Auto filling details.
 - Redirection to subscriptions screen in appstore.
 
-## [1.8.0] (Alpha) - 2025-12-13
+## [1.8.0] (Alpha-Dev) - 2025-12-13
 
 ### Added
 - Manual entry auto filling details.
 
-## [1.7.0] (Alpha) - 2025-12-09
+## [1.7.0] (Alpha-Stage) - 2025-12-09
 
 ### Updated
 - Voice related UI changes.
@@ -190,7 +190,7 @@ All notable changes to this project will be documented in this file.
 ### Pending
 - Prefill details in Manual Add and Preview screens.
 
-## [1.0.0] (Beta) - 2025-12-01
+## [1.0.0] (Beta-Stage) - 2025-12-01
 
 ### Delivered
 - Sprint 3 features
@@ -214,7 +214,7 @@ All notable changes to this project will be documented in this file.
 ### Added 
 - Kept alerts to check apple signin issue
 
-## [1.1.0] (Alpha) - 2025-11-25
+## [1.1.0] (Alpha-Stage) - 2025-11-25
 
 ### Fixed
 - Sprint 3 bug fixes
@@ -225,7 +225,7 @@ All notable changes to this project will be documented in this file.
 ### Changed
 - Dev to staging server
 
-## [1.0.0] (Alpha) - 2025-11-21
+## [1.0.0] (Alpha-Dev) - 2025-11-21
 
 ### Added
 Sprint 3 features:
