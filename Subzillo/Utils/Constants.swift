@@ -19,6 +19,7 @@ struct Constants{
     static let isLoggedIn                           = "isLoggedIn"
     static let isFirstLoggedIn                      = "isFirstLoggedIn"
     static let userId                               = "userId"
+    static let referrerId                           = "referrerId"
     static let providerBaseUrl                      = "providerBaseUrl"
     static let username                             = "username"
     static let latitude                             = "latitude"
@@ -445,6 +446,6 @@ class AppState: ObservableObject {
                 defaults.removeObject(forKey: key)
             }
         }
-        KeychainHelper().deleteAllKeychainItems()
+        KeychainHelperApp().deleteAllKeychainItems()
     }
 }

@@ -26,11 +26,16 @@ class PricingPlansViewModel: ObservableObject {
     }
     
     // MARK: - API Calls
-    func listPricingPlans() {
-        self.apiReference.getApi(
-            endPoint: .listPricingPlans,
-            token: authKey,
-            showLoader: true,
+    func listPricingPlans(type:Int) {
+        self.pricingPlans = []
+        let request = PricingPlanRequest(userId : Constants.getUserId(),
+                                         type   : type)
+        self.apiReference.postApi(
+            endPoint    : .listPricingPlans,
+            method      : .POST,
+            token       : authKey,
+            body        : request,
+            showLoader  : true,
             responseType: PricingPlanResponse.self
         )
         .sink { completion in

@@ -215,14 +215,14 @@ struct SubscriptionsView: View {
             //                    }
             //MARK: Analytics view
             if viewMode == .analytics {
-//                ToastManager.shared.showToast(message: "Coming soon in S4",style:ToastStyle.info)
-//                AnalyticalView()
+                //                ToastManager.shared.showToast(message: "Coming soon in S4",style:ToastStyle.info)
+                //                AnalyticalView()
             } else if let segment = selectedSegment {
                 //MARK: Calender view
                 if segment == .second{
                     if monthlySubscriptions.count != 0{
                         List {
-                            ForEach(Array(subscriptions.enumerated()), id: \.offset) { index, subscription in
+                            ForEach(Array(subscriptions.enumerated()), id: \.element.id) { index, subscription in
                                 SubscriptionRow(subscriptionData: subscription)
                                     .onTapGesture {
                                         toggleSubscription(at: index)
@@ -254,71 +254,170 @@ struct SubscriptionsView: View {
                 }  else if segment == .first{
                     if subscriptionsList.count != 0{
                         //MARK: - subscriptions list view
-                        List {
-                            ForEach(Array(subscriptionsList.enumerated()), id: \.offset) { index, sub in
-                                SwipeActionCard(
-                                    id: index,
-                                    openCardIndex: $openCardIndex,
-                                    isScrollDisabled: $isScrollDisabled,
-                                    selectionMode: selectionMode,
-                                    onEdit: {
-                                        editSubscription(sub: sub)
-                                    },
-                                    
-                                    onDelete: {
-                                        // Clear any previous selections
-                                        for i in subscriptionsList.indices {
-                                            subscriptionsList[i].isSelected = false
-                                        }
-                                        
-                                        // Mark ONLY this item
-                                        subscriptionsList[index].isSelected = true
-                                        showDeletePopup = true
-                                    }
-                                    
-                                ) {
-                                    subscriptionListCard(
-                                        subscriptionData   : sub,
-                                        selectionMode      : selectionMode,
-                                        onSelect           : {
-                                            toggleSelection(at: index)
+//                        ScrollViewReader { proxy in
+//                            List {
+//                                ForEach(Array(subscriptionsList.enumerated()), id: \.element.id) { index, sub in
+//                                    SwipeActionCard(
+//                                        id              : index,
+//                                        openCardIndex   : $openCardIndex,
+//                                        isScrollDisabled: $isScrollDisabled,
+//                                        selectionMode   : selectionMode,
+//                                        viewStatus      : sub.viewStatus ?? false,
+//                                        onEdit          : {
+//                                            editSubscription(sub: sub)
+//                                        },
+//                                        onDelete        : {
+//                                            // Clear any previous selections
+//                                            for i in subscriptionsList.indices {
+//                                                subscriptionsList[i].isSelected = false
+//                                            }
+//                                            // Mark ONLY this item
+//                                            subscriptionsList[index].isSelected = true
+//                                            showDeletePopup = true
+//                                        }
+//                                    ) {
+//                                        subscriptionListCard(
+//                                            subscriptionData   : sub,
+//                                            selectionMode      : selectionMode,
+//                                            onSelect           : {
+//                                                toggleSelection(at: index)
+//                                            },
+//                                            onLongPress        : {
+//                                                handleLongPress(at: index) }
+//                                        )
+//                                        .contentShape(Rectangle())
+//                                    }
+//                                    .onTapGesture {
+//                                        guard openCardIndex == nil else { return }
+//                                        if selectionMode {
+//                                            toggleSelection(at: index)
+//                                        } else {
+//                                            if sub.viewStatus ?? false{
+//                                                AppIntentRouter.shared.navigate(
+//                                                    to: .subscriptionMatchView(
+//                                                        fromList: true,
+//                                                        subscriptionId: sub.id ?? ""
+//                                                    )
+//                                                )
+//                                            } else {
+//                                                SheetManager.shared.isUpgradeSheetVisible = true
+//                                            }
+//                                        }
+//                                    }
+//                                    .listRowSeparator(.hidden)
+//                                    .listRowInsets(.init(top: 0, leading: 0, bottom: 8, trailing: 0))
+//                                    .listRowBackground(Color.clear)
+//                                    .onAppear {
+//                                        if index == subscriptionsList.count - 1 {
+//                                            loadNextPageIfNeeded()
+//                                        }
+//                                    }
+//                                    .padding(.bottom, index == subscriptionsList.count - 1 ? 90 : 0)
+//                                }
+//                                .background(Color.clear)
+//                                .padding(.top, 5)
+//                            }
+//                            .listStyle(.plain)
+//                            .scrollIndicators(.hidden)
+//                            .background(Color.clear)
+//                            .scrollContentBackground(.hidden)
+//                            .scrollDisabled(isScrollDisabled)
+//                            .onChange(of: subscriptionsList) { _ in
+//                                if page == 0, let firstId = subscriptionsList.first?.id {
+//                                    DispatchQueue.main.async {
+//                                        withAnimation {
+//                                            proxy.scrollTo(firstId, anchor: .top)
+//                                        }
+//                                    }
+//                                }
+//                            }
+//                            .onAppear {
+//                                subscriptionsVM.isLoading = false
+//                            }
+//                        }
+                        ScrollViewReader { proxy in
+                            List {
+                                ForEach(Array(subscriptionsList.enumerated()), id: \.element.id) { index, sub in
+                                    SwipeActionCard(
+                                        id              : index,
+                                        openCardIndex   : $openCardIndex,
+                                        isScrollDisabled: $isScrollDisabled,
+                                        selectionMode   : selectionMode,
+                                        viewStatus      : sub.viewStatus ?? false,
+                                        onEdit          : {
+                                            editSubscription(sub: sub)
                                         },
-                                        onLongPress        : {
-                                            handleLongPress(at: index) }
-                                    )
-                                    .contentShape(Rectangle())
-                                }
-                                .onTapGesture {
-                                    guard openCardIndex == nil else { return }
-                                    if selectionMode {
-                                        toggleSelection(at: index)
-                                    } else {
-                                        AppIntentRouter.shared.navigate(
-                                            to: .subscriptionMatchView(
-                                                fromList: true,
-                                                subscriptionId: sub.id ?? ""
-                                            )
+                                        onDelete        : {
+                                            for i in subscriptionsList.indices {
+                                                subscriptionsList[i].isSelected = false
+                                            }
+                                            subscriptionsList[index].isSelected = true
+                                            showDeletePopup = true
+                                        }
+                                    ) {
+                                        subscriptionListCard(
+                                            subscriptionData   : sub,
+                                            selectionMode      : selectionMode,
+                                            onSelect           : {
+                                                toggleSelection(at: index)
+                                            },
+                                            onLongPress        : {
+                                                handleLongPress(at: index)
+                                            }
                                         )
+                                        .contentShape(Rectangle())
                                     }
-                                }
-                                .listRowSeparator(.hidden)
-                                .listRowInsets(.init(top: 0, leading: 0, bottom: 8, trailing: 0))
-                                .listRowBackground(Color.clear)
-                                .onAppear {
-                                    if index == subscriptionsList.count - 1 {
-                                        loadNextPageIfNeeded()
+                                    .onTapGesture {
+                                        guard openCardIndex == nil else { return }
+                                        if selectionMode {
+                                            toggleSelection(at: index)
+                                        } else {
+                                            if sub.viewStatus ?? false {
+                                                AppIntentRouter.shared.navigate(
+                                                    to: .subscriptionMatchView(
+                                                        fromList: true,
+                                                        subscriptionId: sub.id ?? ""
+                                                    )
+                                                )
+                                            } else {
+                                                SheetManager.shared.isUpgradeSheetVisible = true
+                                            }
+                                        }
                                     }
+                                    .listRowSeparator(.hidden)
+                                    .listRowInsets(.init(top: 0, leading: 0, bottom: 8, trailing: 0))
+                                    .listRowBackground(Color.clear)
+                                    .onAppear {
+                                        if index == subscriptionsList.count - 1 {
+                                            loadNextPageIfNeeded()
+                                        }
+                                    }
+                                    .padding(.bottom, index == subscriptionsList.count - 1 ? 90 : 0)
                                 }
-                                .padding(.bottom, index == subscriptionsList.count - 1 ? 90 : 0)
+                                .background(Color.clear)
+                                .padding(.top, 5)
                             }
+                            .listStyle(.plain)
+                            .scrollIndicators(.hidden)
                             .background(Color.clear)
-                            .padding(.top, 5)
+                            .scrollContentBackground(.hidden)
+                            .scrollDisabled(isScrollDisabled)
+                            .onChange(of: subscriptionsList) { _ in
+                                if page == 0, let firstId = subscriptionsList.first?.id {
+                                    DispatchQueue.main.async {
+                                        withAnimation {
+                                            proxy.scrollTo(firstId, anchor: .top)
+                                        }
+                                    }
+                                }
+                            }
+                            .onAppear {
+                                subscriptionsVM.isLoading = false
+                                DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+                                    loadNextPageIfNeeded()
+                                }
+                            }
                         }
-                        .listStyle(.plain)
-                        .scrollIndicators(.hidden)
-                        .background(Color.clear)
-                        .scrollContentBackground(.hidden)
-                        .scrollDisabled(isScrollDisabled)
                         /*VStack{
                          ScrollView {
                          VStack(spacing: 0) {
@@ -478,7 +577,7 @@ struct SubscriptionsView: View {
                 viewMode = .calendar
             } else {
                 ToastManager.shared.showToast(message: "Coming soon in S4",style:ToastStyle.info)
-//                viewMode = .analytics
+                //                viewMode = .analytics
             }
             callApis()
         }
@@ -519,11 +618,23 @@ struct SubscriptionsView: View {
         subscriptionsVM.listSubscriptions(input: input, showLoader: showLoader)
     }
     
-    func loadNextPageIfNeeded(){
-        if self.subscriptionsVM.listSubsResponse?.totalPages ?? 0 > page{
-            page += 1
-            listSubsApi(showLoader: false)
-        }
+//    func loadNextPageIfNeeded(){
+//        guard !subscriptionsVM.isLoading else { return }
+//        if let totalPages = self.subscriptionsVM.listSubsResponse?.totalPages, (page + 1) < totalPages {
+//            page += 1
+//            listSubsApi(showLoader: false)
+//        }
+//    }
+    func loadNextPageIfNeeded() {
+        guard !subscriptionsVM.isLoading else { return }
+
+        guard let totalPages = subscriptionsVM.listSubsResponse?.totalPages else { return }
+
+        guard page + 1 < totalPages else { return }
+
+        subscriptionsVM.isLoading = true
+        page += 1
+        listSubsApi(showLoader: false)
     }
     
     func getSubsByMonthApi(){
@@ -539,19 +650,18 @@ struct SubscriptionsView: View {
     
     func updateSubsList(){
         guard let listResponse = self.subscriptionsVM.listSubsResponse else { return }
-        DispatchQueue.main.async {
-            if page == 0 {
-                self.subscriptionsList.removeAll()
-//                SubscriptionDBManager.shared.deleteAllSubscription()
-            }
-            let listArray = listResponse.subscriptions ?? []
-            for item in listArray
-            {
-                SubscriptionDBManager.shared.updateSubscription(params: item)
-            }
-            self.subscriptionsList.append(contentsOf: self.subscriptionsVM.listSubsResponse?.subscriptions ?? [])
-            print("data from response")
+        let listArray = listResponse.subscriptions ?? []
+        for item in listArray
+        {
+            SubscriptionDBManager.shared.updateSubscription(params: item)
         }
+        
+        if page == 0 {
+            self.subscriptionsList = listArray
+        } else {
+            self.subscriptionsList.append(contentsOf: listArray)
+        }
+        print("data from response")
     }
     
     func updateMonthSubsList(){
@@ -650,6 +760,7 @@ struct SubscriptionsView: View {
     
     func toggleSelection(at index: Int) {
         var obj = subscriptionsList[index]
+        guard obj.viewStatus != false else { return }
         if (obj.isSelected ?? false ) == true
         {
             obj.isSelected = false
@@ -661,8 +772,9 @@ struct SubscriptionsView: View {
     }
     
     func handleLongPress(at index: Int) {
-        selectionMode = true
         var obj = subscriptionsList[index]
+        guard obj.viewStatus != false else { return }
+        selectionMode = true
         obj.isSelected = true
         subscriptionsList[index] = obj
     }
@@ -691,13 +803,13 @@ struct SubscriptionsView: View {
     }
     
     private func goToNotifications() {
-//        subscriptionsVM.navigate(to: .notifications)
+        //        subscriptionsVM.navigate(to: .notifications)
         ToastManager.shared.showToast(message: "Coming soon in S4",style:ToastStyle.info)
     }
     
     private func clickOnChat() {
         selectedSegment = nil
-//        ToastManager.shared.showToast(message: "Coming soon in S4",style:ToastStyle.info)
+        //        ToastManager.shared.showToast(message: "Coming soon in S4",style:ToastStyle.info)
         viewMode = .analytics
     }
     
@@ -743,30 +855,32 @@ struct SubscriptionsView: View {
 //MARK: - SwipeActionCard
 struct SwipeActionCard<Content: View>: View {
     
-    let id: Int
-    @Binding var openCardIndex: Int?
-    @Binding var isScrollDisabled: Bool
-    let selectionMode: Bool
-    let onEdit: () -> Void
-    let onDelete: () -> Void
-    let content: Content
-    
-    @State private var offsetX: CGFloat = 0
-    private let maxOffset: CGFloat = -130
+    let id                          : Int
+    @Binding var openCardIndex      : Int?
+    @Binding var isScrollDisabled   : Bool
+    let selectionMode               : Bool
+    let viewStatus                  : Bool
+    let onEdit                      : () -> Void
+    let onDelete                    : () -> Void
+    let content                     : Content
+    @State private var offsetX      : CGFloat = 0
+    private let maxOffset           : CGFloat = -130
     
     init(
-        id: Int,
-        openCardIndex: Binding<Int?>,
+        id              : Int,
+        openCardIndex   : Binding<Int?>,
         isScrollDisabled: Binding<Bool>,
-        selectionMode: Bool,
-        onEdit: @escaping () -> Void,
-        onDelete: @escaping () -> Void,
+        selectionMode   : Bool,
+        viewStatus      : Bool,
+        onEdit          : @escaping () -> Void,
+        onDelete        : @escaping () -> Void,
         @ViewBuilder content: () -> Content
     ) {
         self.id = id
         self._openCardIndex = openCardIndex
         self._isScrollDisabled = isScrollDisabled
         self.selectionMode = selectionMode
+        self.viewStatus = viewStatus
         self.onEdit = onEdit
         self.onDelete = onDelete
         self.content = content()
@@ -840,6 +954,7 @@ struct SwipeActionCard<Content: View>: View {
                 .simultaneousGesture(
                     DragGesture(minimumDistance: 30) // Provide more headroom for vertical scroll
                         .onChanged { value in
+                            guard viewStatus != false else { return }
                             // Prioritize vertical scroll if vertical translation is significant
                             let isHorizontal = abs(value.translation.width) > abs(value.translation.height) * 1.5
                             guard isHorizontal else { return }
@@ -860,6 +975,7 @@ struct SwipeActionCard<Content: View>: View {
                             }
                         }
                         .onEnded { value in
+                            guard viewStatus != false else { return }
                             isScrollDisabled = false
                             
                             guard !selectionMode else {

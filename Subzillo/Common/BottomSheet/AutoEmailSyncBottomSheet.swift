@@ -11,8 +11,8 @@ struct AutoEmailSyncBottomSheet: View {
     
     // MARK: - Properties
     @Environment(\.dismiss) private var dismiss
-    @State private var selectedDuration : String = "6 months"
-    let durations                       = ["6 months", "1 Year", "2 Years", "Never"]
+    @StateObject var settingsVM         = SettingsViewModel()
+    @State private var selectedId       : String = ""
     var onSelect                        : (String) -> Void
     
     // MARK: - Body
@@ -39,21 +39,26 @@ struct AutoEmailSyncBottomSheet: View {
                     
                     // Options
                     VStack(alignment: .leading, spacing: 16) {
-                        ForEach(durations, id: \.self) { duration in
-                            Button(action: {
-                                selectedDuration = duration
-                            }) {
-                                HStack(spacing: 12) {
-                                    Image(selectedDuration == duration ? "SelectedRadio" : "UnSelectedRadio")
-                                        .resizable()
-                                        .frame(width: 24, height: 24)
-                                    
-                                    Text(duration)
-                                        .font(.appRegular(14))
-                                        .foregroundColor(Color.neutralMain700)
+                        if let syncPeriods = settingsVM.listSyncPeriods {
+                            ForEach(syncPeriods, id: \.id) { period in
+                                Button(action: {
+                                    selectedId = period.id ?? ""
+                                }) {
+                                    HStack(spacing: 12) {
+                                        Image(selectedId == period.id ? "SelectedRadio" : "UnSelectedRadio")
+                                            .resizable()
+                                            .frame(width: 24, height: 24)
+                                        
+                                        Text(period.label ?? "")
+                                            .font(.appRegular(14))
+                                            .foregroundColor(Color.neutralMain700)
+                                    }
                                 }
+                                .buttonStyle(PlainButtonStyle())
                             }
-                            .buttonStyle(PlainButtonStyle())
+                        } else {
+                            ProgressView()
+                                .frame(maxWidth: .infinity)
                         }
                     }
                 }
@@ -64,13 +69,16 @@ struct AutoEmailSyncBottomSheet: View {
                     isBtn           : true,
                     buttonImage     : "update",
                     action          : {
-                        onSelect(selectedDuration)
+                        if !selectedId.isEmpty {
+                            onSelect(selectedId)
+                        }
                         dismiss()
                     },
                     backgroundColor : .white,
                     buttonHeight    : 56
                 )
                 .padding(.top, 8)
+                .disabled(selectedId.isEmpty)
             }
             .padding(.horizontal, 24)
             .padding(.bottom, 40)
@@ -79,10 +87,18 @@ struct AutoEmailSyncBottomSheet: View {
         }
         .background(Color.white)
         .cornerRadius(24, corners: [.topLeft, .topRight])
+        .onAppear {
+            settingsVM.listSyncPeriods(input: ListSyncPeriodRequest(userId: Constants.getUserId()))
+        }
+        .onChange(of: settingsVM.listSyncPeriods) { _ in
+            if let selected = settingsVM.listSyncPeriods?.first(where: { $0.isSelected == true }) {
+                selectedId = selected.id ?? ""
+            }
+        }
     }
 }
 
 // MARK: - Preview
 #Preview {
-    AutoEmailSyncBottomSheet(onSelect: { _ in })
+    AutoEmailSyncBottomSheet(settingsVM: SettingsViewModel(), onSelect: { _ in })
 }

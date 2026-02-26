@@ -16,7 +16,7 @@ class ManualEntryViewModel: ObservableObject {
     var apiReference                                = NetworkRequest.shared
     @Published var addSubscriptionResponse          : AddSubscriptionResponseData?
     @Published var listUserCardsResponse            : [ListUserCardsResponseData]?
-    @Published var listFamilyMembersResponse        : [ListFamilyMembersResponseData]?
+    @Published var listFamilyMembersResponse        : ListFamilyData?//[ListFamilyMembersResponseData]?
     @Published var servicesList                     : [GetServiceProvidersListData]?
     @Published var providerData                     : FetchProviderData?
     @Published var isLoading                        : Bool = false

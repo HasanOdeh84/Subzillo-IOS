@@ -27,7 +27,7 @@ class NetworkRequest {
     func regenerateAccessAPI() -> Future<Void, APIError> {
         return Future<Void, APIError> { promise in
             self.getApi(endPoint    : .regenerateAccessToken,
-                        token       : KeychainHelper.read(account: Constants.refreshKey) ?? "",
+                        token       : KeychainHelperApp.read(account: Constants.refreshKey) ?? "",
                         showLoader  : false,
                         responseType: RefreshTokenResponse.self)
             .sink { completion in
@@ -35,8 +35,8 @@ class NetworkRequest {
                     promise(.failure(error))
                 }
             } receiveValue: { refreshData in
-                KeychainHelper.save(refreshData.data?.accessToken, account: Constants.authKey)
-                KeychainHelper.save(refreshData.data?.refreshToken, account: Constants.refreshKey)
+                KeychainHelperApp.save(refreshData.data?.accessToken, account: Constants.authKey)
+                KeychainHelperApp.save(refreshData.data?.refreshToken, account: Constants.refreshKey)
                 promise(.success(()))
             }
             .store(in: &self.subscriptions)

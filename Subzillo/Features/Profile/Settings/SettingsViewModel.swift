@@ -18,6 +18,7 @@ class SettingsViewModel: ObservableObject {
     @Published var isUpdateSuccess          : Bool = false
     @Published var isUpdateError1           : Bool = false
     @Published var isUpdateError2           : Bool = false
+    @Published var listSyncPeriods          : [ListSyncPeriodResponseData]?
     
     init(router: AppIntentRouter = .shared) {
         self.router = router
@@ -128,6 +129,36 @@ class SettingsViewModel: ObservableObject {
                 ToastManager.shared.showToast(message: "Failed to save file", style: .error)
             }
         }
+    }
+    
+    func listSyncPeriods(input:ListSyncPeriodRequest) {
+        listSyncPeriods = nil
+        apiReference.postApi(endPoint: APIEndpoint.listSyncPeriods, method: .POST,token: authKey,body: input,showLoader: true, responseType: ListSyncPeriodResponse.self)
+            .sink { [unowned self] completion in
+                if case let .failure(error) = completion {
+                    self.handleError(error,endPoint: APIEndpoint.listSyncPeriods)
+                }
+            }
+        receiveValue: { response in
+            self.listSyncPeriods = response.data
+            PrintLogger.modelLog(response, type: .response, isInput: false)
+//            ToastManager.shared.showToast(message: response.message ?? "")
+        }
+        .store(in: &self.subscriptions)
+    }
+    
+    func updateSyncPeriod(input:UpdateSyncPeriodRequest) {
+        apiReference.postApi(endPoint: APIEndpoint.updateSyncPeriod, method: .POST,token: authKey,body: input,showLoader: true, responseType: GeneralResponse.self)
+            .sink { [unowned self] completion in
+                if case let .failure(error) = completion {
+                    self.handleError(error,endPoint: APIEndpoint.updateSyncPeriod)
+                }
+            }
+        receiveValue: { response in
+            PrintLogger.modelLog(response, type: .response, isInput: false)
+            ToastManager.shared.showToast(message: response.message ?? "")
+        }
+        .store(in: &self.subscriptions)
     }
     
     func navigate(to route: NavigationRoute){

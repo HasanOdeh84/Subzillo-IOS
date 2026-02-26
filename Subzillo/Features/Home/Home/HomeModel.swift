@@ -88,30 +88,32 @@ struct MonthlySpendData: Codable, Hashable, Identifiable{
 }
 
 public struct SubscriptionListData: Codable, Hashable, Identifiable{
-    public let id         : String?
-    let serviceName       : String?
-    let serviceLogo       : String?
-    let amount            : Double?
-    let currency          : String?
-    let currencySymbol    : String?
-    let billingCycle      : String?
-    let subscriptionType  : String?
-    let subscriptionFor   : String?
-    let category          : String?
-    let paymentMethod       : String?
-    let paymentMethodName   : String?
-    let paymentMethodDataId : String?
-    let nextPaymentDate   : String?
-    let renewalReminder   : [String]?
-    let nickName          : String?
-    let color             : String?
-    let cardName          : String?
-    let notes             : String?
-    let status            : String?
-    var isSelected        : Bool? = false
-    var cardNumber        : String?
-    var categoryName      : String?
-    var paymentMethodDataName: String?
+    public let id               : String?
+    let serviceName             : String?
+    let serviceLogo             : String?
+    let amount                  : Double?
+    let currency                : String?
+    let currencySymbol          : String?
+    let billingCycle            : String?
+    let subscriptionType        : String?
+    let subscriptionFor         : String?
+    let category                : String?
+    let paymentMethod           : String?
+    let paymentMethodName       : String?
+    let paymentMethodDataId     : String?
+    let nextPaymentDate         : String?
+    let renewalReminder         : [String]?
+    let nickName                : String?
+    let color                   : String?
+    let cardName                : String?
+    let notes                   : String?
+    let status                  : String?
+    var isSelected              : Bool? = false
+    var cardNumber              : String?
+    var categoryName            : String?
+    var paymentMethodDataName   : String?
+    var viewStatus              : Bool? //for lock and unlock subscriptions
+    var renewBtnStatus          : Bool? 
 }
 
 public struct TopCategoriesData: Codable, Hashable, Identifiable {

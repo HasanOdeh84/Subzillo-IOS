@@ -11,10 +11,12 @@ import UIKit
 import Firebase
 import MSAL
 import BranchSDK
+import Combine
 
 class AppDelegate: NSObject, ObservableObject, UIApplicationDelegate, UNUserNotificationCenterDelegate {
     @Published var deviceToken          : String? = nil
     @Published var permissionGranted    : Bool = false
+    private var cancellables = Set<AnyCancellable>()
     
     // Called when app launches
     func application(
@@ -25,7 +27,18 @@ class AppDelegate: NSObject, ObservableObject, UIApplicationDelegate, UNUserNoti
         UNUserNotificationCenter.current().delegate = self
         
         // Initialize Branch.io
-//        BranchManager.shared.initSession(launchOptions: launchOptions)
+        //        BranchManager.shared.initSession(launchOptions: launchOptions)
+        
+        //Configure ULink synchronously to handle early access/listeners
+        let ulinkConfig = ULinkConfig(
+            apiKey: "ulk_e7ceb2717958baacfd613045f27abc945273b947cec90cbd",
+            debug: true,
+            enableDeepLinkIntegration: true
+        )
+        ULink.configure(config: ulinkConfig)
+        
+        //Set up stream listeners
+        setupLinkListeners()
         
         return true
     }
@@ -97,14 +110,14 @@ class AppDelegate: NSObject, ObservableObject, UIApplicationDelegate, UNUserNoti
             let target: NavigationRoute? = {
                 switch type {
                 case 1:  return .connectedEmailsList(isIntegrations: false)
-                case 2:  return .subscriptionMatchView(fromList: true, subscriptionId: subscriptionId)
+                case 2:  return .subscriptionMatchView(fromList: true, fromPush: true, subscriptionId: subscriptionId)
                 case 3:  return .pricingPlans
                 default: return nil
                 }
             }()
             
             if let targetRoute = target {
-                // Add a small delay to ensure the app is fully active and 
+                // Add a small delay to ensure the app is fully active and
                 // NavigationStack is ready for a structural change
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
                     if !AppIntentRouter.shared.isAppWarm {
@@ -121,6 +134,7 @@ class AppDelegate: NSObject, ObservableObject, UIApplicationDelegate, UNUserNoti
     func application(_ app: UIApplication,
                      open url: URL,
                      options: [UIApplication.OpenURLOptionsKey : Any] = [:]) -> Bool {
+        print("AppDelegate: open URL called with \(url.absoluteString)")
         // Handle Branch deep links
         let branchHandled = Branch.getInstance().application(app, open: url, options: options)
         
@@ -134,8 +148,41 @@ class AppDelegate: NSObject, ObservableObject, UIApplicationDelegate, UNUserNoti
     func application(_ application: UIApplication,
                      continue userActivity: NSUserActivity,
                      restorationHandler: @escaping ([UIUserActivityRestoring]?) -> Void) -> Bool {
+        print("AppDelegate: continue userActivity called")
         // Handle Branch universal links
-        return Branch.getInstance().continue(userActivity)
+        //        return Branch.getInstance().continue(userActivity)
+        return false
+    }
+    
+    func setupLinkListeners() {
+        // Listen for dynamic links
+        ULink.shared.dynamicLinkStream
+            .sink { [weak self] resolved in
+                self?.handleDynamicLink(resolved)
+            }
+            .store(in: &cancellables)
+        
+        // Listen for unified links
+        ULink.shared.unifiedLinkStream
+            .sink { [weak self] resolved in
+                self?.handleUnifiedLink(resolved)
+            }
+            .store(in: &cancellables)
+    }
+    
+    func handleDynamicLink(_ data: ULinkResolvedData) {
+        print("Received dynamic link:")
+        print("  Slug: \(data.slug ?? "N/A")")
+        print("  Parameters: \(data.parameters ?? [:])")
+        if let referrerId = data.parameters?["referrerId"] as? String {
+            print("AppDelegate: Storing Referrer ID: \(referrerId)")
+            Constants.saveDefaults(value: referrerId, key: Constants.referrerId)
+        }
+    }
+    
+    func handleUnifiedLink(_ data: ULinkResolvedData) {
+        print("Received unified link:")
+        print("  Slug: \(data.slug ?? "N/A")")
     }
 }
 
@@ -147,6 +194,21 @@ struct SubzilloApp: App {
         item.leadingBarButtonGroups = []
         item.trailingBarButtonGroups = []
         FirebaseApp.configure()
+        
+        // ULink initialization
+        let config = ULinkConfig(
+            apiKey: "ulk_e7ceb2717958baacfd613045f27abc945273b947cec90cbd",
+            debug: true,
+            enableDeepLinkIntegration: true
+        )
+        
+        Task {
+            do {
+                try await ULink.initialize(config: config)
+            } catch {
+                print("SubzilloApp: Failed to initialize ULink: \(error)")
+            }
+        }
     }
     
     @StateObject private var router             = AppIntentRouter.shared
@@ -188,6 +250,10 @@ struct SubzilloApp: App {
                     sharedViewModel.getCountries()
                 }
                 .onOpenURL { url in
+                    print("SubzilloApp: onOpenURL received: \(url.absoluteString)")
+                    
+                    ULink.shared.handleIncomingURL(url)
+                    
                     if url.scheme == "subzillo" && url.host == "share" {
                         if AppState.shared.isLoggedIn {
                             SharedImageManager.shared.checkSharedImage()
@@ -228,12 +294,12 @@ struct SubzilloApp: App {
         let storedToken = Constants.getUserDefaultsValue(for: "device_token")
         let isLoggedIn = AppState.shared.isLoggedIn
         if storedToken != token && isLoggedIn {
-//            sharedViewModel.updateDeviceId(input: UpdateDeviceIdRequest(
-//                userId: Constants.getUserId(),
-//                deviceId: token,
-//                uniqueId: UUID().uuidString
-//            ))
-//            Constants.saveDefaults(value: token, key: "device_token")
+            //            sharedViewModel.updateDeviceId(input: UpdateDeviceIdRequest(
+            //                userId: Constants.getUserId(),
+            //                deviceId: token,
+            //                uniqueId: UUID().uuidString
+            //            ))
+            //            Constants.saveDefaults(value: token, key: "device_token")
             print("✅ Device token API called and saved to defaults")
         } else if storedToken != token {
             print("ℹ️ Device token changed but user not logged in. Waiting for login to sync.")
@@ -250,6 +316,7 @@ struct RootView: View {
     @StateObject var sheetManager   = SheetManager.shared
     @EnvironmentObject var themeManager: ThemeManager
     @Environment(\.colorScheme) private var systemScheme
+    @State private var upgradeNowSheetHeight    : CGFloat = .zero
     
     var body: some View {
         NavigationStack(path: $path) {
@@ -289,14 +356,14 @@ struct RootView: View {
                     SuccessView(isOtp:isOtp ?? false,isMobile:isMobile)
                 case .welcome:
                     WelcomeHomeView()
-                case .manualEntry(let isFromEdit, let isFromListEdit, let subscriptionId, let familyMemberId, let isFromEmail):
-                    ManualEntryView(isFromEdit: isFromEdit, isFromListEdit: isFromListEdit, subscriptionId: subscriptionId, familyMemberId: familyMemberId, isFromEmail: isFromEmail)
+                case .manualEntry(let isFromEdit, let isFromListEdit, let isRenew, let subscriptionId, let familyMemberId, let isFromEmail):
+                    ManualEntryView(isFromEdit: isFromEdit, isFromListEdit: isFromListEdit, isRenew: isRenew, subscriptionId: subscriptionId, familyMemberId: familyMemberId, isFromEmail: isFromEmail)
                 case .voiceCommandView:
                     VoiceCommandView()
                 case .subscriptionPreviewView(let subscriptionsData, let content, let isFromImage, let isFromEmail, let audioUrl):
                     SubscriptionPreviewView(isFromImage:isFromImage, isFromEmail: isFromEmail, subscriptionsData: subscriptionsData, content: content, audioURL: audioUrl)
-                case .subscriptionMatchView(let subscriptionData, let fromList, let subscriptionId):
-                    SubscriptionMatchView(subscriptionData: subscriptionData, subscriptionId: subscriptionId, fromList: fromList)
+                case .subscriptionMatchView(let subscriptionData, let fromList, let fromPush, let subscriptionId):
+                    SubscriptionMatchView(subscriptionData: subscriptionData, subscriptionId: subscriptionId, fromList: fromList, fromPush: fromPush)
                 case .pasteTextView:
                     PasteTextView()
                 case .duplicateSubscriptionsView(let duplicateSubsList, let fromFamily, let isFromEmail):
@@ -333,20 +400,20 @@ struct RootView: View {
             router.isAppWarm = true
         }
         .onChange(of: router.navigatingRoute) { new in
-//            guard let new = new else { return }
-//            let alreadyOnTarget = path.last?.isSameRoute(as: new) ?? false
-//            if new == .home {
-//                path = [.home]
-//            } else if alreadyOnTarget {
-//                NotificationCenter.default.post(
-//                    name    : NSNotification.Name("RefreshScreenData"),
-//                    object  : nil,
-//                    userInfo: ["subscriptionId": new.subId ?? ""]
-//                )
-//            } else {
-//                path.append(new)
-//            }
-//            router.hasNavigatedFromSplash = true
+            //            guard let new = new else { return }
+            //            let alreadyOnTarget = path.last?.isSameRoute(as: new) ?? false
+            //            if new == .home {
+            //                path = [.home]
+            //            } else if alreadyOnTarget {
+            //                NotificationCenter.default.post(
+            //                    name    : NSNotification.Name("RefreshScreenData"),
+            //                    object  : nil,
+            //                    userInfo: ["subscriptionId": new.subId ?? ""]
+            //                )
+            //            } else {
+            //                path.append(new)
+            //            }
+            //            router.hasNavigatedFromSplash = true
             guard let new = new else { return }
             path.append(new)
             router.navigatingRoute = nil
@@ -358,7 +425,7 @@ struct RootView: View {
             let alreadyOnTarget = currentTop != nil && targetTop != nil && currentTop!.isSameRoute(as: targetTop!)
             if alreadyOnTarget {
                 // Determine if the underlying stack structure (the 'Back' path) is actually different.
-                let isStackDifferent = path.count != newStack.count || 
+                let isStackDifferent = path.count != newStack.count ||
                 (path.first != nil && newStack.first != nil && !path.first!.isSameRoute(as: newStack.first!))
                 if isStackDifferent {
                     // Update the path to correct the Back button flow.
@@ -396,6 +463,24 @@ struct RootView: View {
             OfflineSheet()
                 .presentationDragIndicator(.hidden)
                 .presentationDetents([.height(540)])
+        }
+        .sheet(isPresented: $sheetManager.isUpgradeSheetVisible) {
+            InfoAlertSheet(
+                onDelegate: {
+                    router.navigate(to: .pricingPlans)
+                }, title                : "Upgrade Required",
+                subTitle                : "You've reached your current plan limit. Upgrade to continue adding more.",
+                buttonTitle             : "Upgrade Now",
+                imageSize               : 70,
+                isCancelButtonVisible   : true
+            )
+            .onPreferenceChange(InnerHeightPreferenceKey.self) { height in
+                if height > 0 {
+                    upgradeNowSheetHeight = height
+                }
+            }
+            .presentationDragIndicator(.hidden)
+            .presentationDetents([.height(upgradeNowSheetHeight)])
         }
         .preferredColorScheme(
             themeManager.userChangedTheme

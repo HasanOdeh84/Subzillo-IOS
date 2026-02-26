@@ -26,6 +26,7 @@ struct ManualEntryView: View {
     //MARK: - Properties
     var isFromEdit                              = false
     var isFromListEdit                          = false
+    var isRenew                                 = false
     @State private var showActionSheet          = false
     @State private var showImagePicker          = false
     @State private var selectedImage            : UIImage? = nil
@@ -41,6 +42,7 @@ struct ManualEntryView: View {
     @State var canAddMembers                    = false
     @EnvironmentObject var commonApiVM          : CommonAPIViewModel
     @StateObject var addSubscriptionVM          = ManualEntryViewModel()
+    @StateObject var subscriptionMatchVM        = SubscriptionMatchViewModel()
     @State private var serviceName              : String = ""
     @State private var amount                   : String = ""
     @State private var currency                 : String = ""
@@ -163,6 +165,8 @@ struct ManualEntryView: View {
                             }
                         }
                     )
+                    .allowsHitTesting(!isRenew)
+                    .opacity(isRenew ? 0.6 : 1.0)
                     
                     //MARK: PlanType field
                     Button(action: selectPlanType) {
@@ -397,8 +401,20 @@ struct ManualEntryView: View {
                             .frame(height: Double(75 + (52 * cardsData.count)))
                         }
                         
-                        ListView(type: .relations, title: "Who will benefit from this subscription?", addMore: canAddMembers, data: $relationsData, selectedIndex: $relationIndex)
-                            .frame(height: canAddMembers == true ? Double(75 + (52 * relationsData.count)) : Double(30 + (52 * relationsData.count)))
+                        ListView(type           : .relations,
+                                 title          : "Who will benefit from this subscription?",
+                                 addMore        : canAddMembers,
+                                 data           : $relationsData,
+                                 selectedIndex  : $relationIndex,
+                                 onAddFamily    : {nickName, phone, countryCode, colorHex in
+                            let input = AddFamilyMemberRequest(userId       : Constants.getUserId(),
+                                                               nickName     : nickName.trimmed,
+                                                               phoneNumber  : phone,
+                                                               countryCode  : countryCode,
+                                                               color        : colorHex)
+                            addSubscriptionVM.addfamilyMember(input: input)
+                        })
+                        .frame(height: canAddMembers == true ? Double(75 + (52 * relationsData.count)) : Double(30 + (52 * relationsData.count)))
                         
                         ListView(type: .reminders, title: "Renewal Reminders", addMore: false, data: $remindersData, selectedIndex: $reminderInedex)
                             .frame(height: Double(30 + (52 * remindersData.count)))
@@ -532,7 +548,7 @@ struct ManualEntryView: View {
         .onChange(of: commonApiVM.paymentMethodResponse) { _ in updatePaymentInfo() }
         .onChange(of: commonApiVM.categoriesResponse) { _ in updateCatInfo() }
         .onChange(of: commonApiVM.userInfoResponse) { _ in updateUserInfo() }
-        .onChange(of: addSubscriptionVM.listFamilyMembersResponse) { _ in updateRelationInfo() }
+        .onChange(of: addSubscriptionVM.listFamilyMembersResponse?.familyMembers) { _ in updateRelationInfo() }
         .onChange(of: addSubscriptionVM.listUserCardsResponse) { _ in updateCardsInfo() }
         .onChange(of: commonApiVM.currencyResponse) { _ in updateCountryAndCurrency() }
         .onChange(of: addSubscriptionVM.isManualEntrySuccess) { _ in
@@ -549,6 +565,16 @@ struct ManualEntryView: View {
         .contentShape(Rectangle())
         .onTapGesture {
             hideKeyboard()
+        }
+        .onChange(of: addSubscriptionVM.isAddFamilyMember) { value in
+            if value{
+                addSubscriptionVM.listFamilyMembers(input: ListFamilyMembersRequest(userId: Constants.getUserId()))
+            }
+        }
+        .onChange(of: subscriptionMatchVM.isRenewSuccess) { value in
+            if value{
+                goBack()
+            }
         }
     }
     
@@ -916,13 +942,18 @@ struct ManualEntryView: View {
     
     func updateUserInfo()
     {
-        if commonApiVM.userInfoResponse?.tierName?.lowercased() == "family plan"
-        {
-            let familyMembersLimit = commonApiVM.userInfoResponse?.familyMembersLimit ?? 0
-            if familyMembersLimit > relationsData.count - 1
-            {
-                canAddMembers = true
-            }
+        //        if commonApiVM.userInfoResponse?.tierName?.lowercased() == "family plan"
+        //        {
+        //            let familyMembersLimit = commonApiVM.userInfoResponse?.familyMembersLimit ?? 0
+        //            if familyMembersLimit > relationsData.count - 1
+        //            {
+        //                canAddMembers = true
+        //            }
+        //        }
+        if addSubscriptionVM.listFamilyMembersResponse?.remainingFamilyMembersLimit ?? 0 > 0{
+            canAddMembers = true
+        }else{
+            canAddMembers = false
         }
         updateCountryAndCurrency()
     }
@@ -931,7 +962,7 @@ struct ManualEntryView: View {
     {
         relationsData.removeAll()
         relationsData.append(ManualDataInfo(id: Constants.getUserId(), title: "Me"))
-        if let familyCards = addSubscriptionVM.listFamilyMembersResponse {
+        if let familyCards = addSubscriptionVM.listFamilyMembersResponse?.familyMembers {
             for family in familyCards {
                 relationsData.append(
                     ManualDataInfo(
@@ -952,6 +983,11 @@ struct ManualEntryView: View {
                     }
                 }
             }
+        }
+        if addSubscriptionVM.listFamilyMembersResponse?.remainingFamilyMembersLimit ?? 0 > 0{
+            canAddMembers = true
+        }else{
+            canAddMembers = false
         }
     }
     
@@ -1034,6 +1070,8 @@ struct ManualEntryView: View {
                                                 code    : globalSubscriptionData?.currency ?? "",
                                                 flag    : "")
                 }
+            } else if let currencyCode = globalSubscriptionData?.currency {
+                selectedCurrency = Currency(id: nil, name: "", symbol: globalSubscriptionData?.currencySymbol ?? "", code: currencyCode, flag: "")
             }
         }
     }
@@ -1107,6 +1145,26 @@ struct ManualEntryView: View {
                     paymentMethod = selectedPayment?.name ?? ""
                 }else{
                     paymentMethod = globalSubscriptionData?.paymentMethodName ?? ""
+                }
+            }
+            if billing != ""{
+                if isRenew {
+                    let formatter = DateFormatter()
+                    formatter.dateFormat = "yyyy-MM-dd"
+                    if let baseDate = formatter.date(from: chargeDate) {
+                        chargeDate = Constants.shared.getNextDateByFrequency(
+                            frequency: billing,
+                            baseDate: baseDate
+                        )
+                    } else {
+                        chargeDate = Constants.shared.getNextDateByFrequency(
+                            frequency: billing
+                        )
+                    }
+                } else {
+                    chargeDate = Constants.shared.getNextDateByFrequency(
+                        frequency: billing
+                    )
                 }
             }
         }
@@ -1276,47 +1334,139 @@ struct ManualEntryView: View {
         if let errorMessage = ManualEntryValidations.shared.manualEntry(input: input, category: selectedCategory?.name ?? "") {
             ToastManager.shared.showToast(message: errorMessage,style:ToastStyle.error)
         } else {
-            if isFromListEdit{
+            if isRenew {
+                handleRenewalSave(billingCycle: billingCycle, paymentMethod: paymentMethod, paymentMethodDataId: paymentMethodDataId, paymentMethodDataName: paymentMethodDataName, category: category, subscriptionFor: subscriptionFor, renewalReminder: renewalReminder)
+            } else if isFromListEdit {
                 addSubscriptionVM.editSubscription(input: editInput)
             }
             else if isFromEdit == true
             {
-                let logo = addSubscriptionVM.servicesList?.first {
-                    $0.name?
-                        .trimmingCharacters(in: .whitespacesAndNewlines)
-                        .lowercased()
-                    ==
-                    serviceName
-                        .trimmingCharacters(in: .whitespacesAndNewlines)
-                        .lowercased()
-                }?.logo
-                globalSubscriptionData?.serviceName = serviceName.trimmed
-                if logo != ""{
-                    globalSubscriptionData?.serviceLogo = logo
-                }
-                globalSubscriptionData?.amount = Double(amount.trimmed) ?? 0.0
-                globalSubscriptionData?.currency = selectedCurrency?.code ?? ""
-                globalSubscriptionData?.currencySymbol = selectedCurrency?.symbol ?? ""
-                globalSubscriptionData?.subscriptionType = planType.trimmed
-                globalSubscriptionData?.nextPaymentDate = chargeDate.formattedDate(from: "dd/MM/yyyy", to: "yyyy-MM-dd")
-                globalSubscriptionData?.billingCycle = billingCycle//.lowercased()
-                globalSubscriptionData?.categoryId = category
-                globalSubscriptionData?.categoryName = selectedCategory?.name ?? ""
-                globalSubscriptionData?.paymentMethodId = paymentMethod
-                globalSubscriptionData?.paymentMethodName = selectedPayment?.name ?? ""
-                globalSubscriptionData?.paymentMethodDataId = paymentMethodDataId
-                globalSubscriptionData?.paymentMethodDataName = paymentMethodDataName
-                globalSubscriptionData?.subscriptionFor = subscriptionFor
-                globalSubscriptionData?.subscriptionForName = subscriptionForName
-                globalSubscriptionData?.notes = notes.trimmed
-                globalSubscriptionData?.renewalReminder = renewalReminder
-                globalSubscriptionData?.renewalReminderValue = renewalReminderValue
+                // ... rest of existing edit logic ...
+                updateGlobalSubscriptionData(billingCycle: billingCycle, paymentMethod: paymentMethod, paymentMethodDataId: paymentMethodDataId, paymentMethodDataName: paymentMethodDataName, category: category, subscriptionFor: subscriptionFor, subscriptionForName: subscriptionForName, renewalReminder: renewalReminder, renewalReminderValue: renewalReminderValue)
                 self.goBack()
             }
             else{
                 addSubscriptionVM.addSubscription(input: input)
             }
         }
+    }
+    
+    private func handleRenewalSave(billingCycle: String, paymentMethod: String, paymentMethodDataId: String, paymentMethodDataName: String, category: String, subscriptionFor: String, renewalReminder: [String]) {
+        let original = globalSubscriptionData
+        
+        let effectiveCurrency = selectedCurrency?.code ?? (original?.currency ?? "")
+        let originalSubFor = (original?.subscriptionFor ?? "").isEmpty ? Constants.getUserId() : (original?.subscriptionFor ?? "")
+        
+        print("Debug Renewal: planType (\(planType.trimmed)) vs (\(original?.subscriptionType ?? ""))")
+        print("Debug Renewal: amount (\(Double(amount.trimmed) ?? 0.0)) vs (\(original?.amount ?? 0.0))")
+        print("Debug Renewal: currency (\(selectedCurrency?.code ?? "")) vs (\(original?.currency ?? ""))")
+        print("Debug Renewal: category (\(category)) vs (\(original?.categoryId ?? ""))")
+        print("Debug Renewal: billingCycle (\(billingCycle)) vs (\(original?.billingCycle ?? ""))")
+        print("Debug Renewal: subscriptionFor (\(subscriptionFor)) vs (\(originalSubFor))")
+        print("Debug Renewal: paymentMethod (\(paymentMethod)) vs (\(original?.paymentMethodId ?? ""))")
+        print("Debug Renewal: paymentMethodDataId (\(paymentMethodDataId)) vs (\(original?.paymentMethodDataId ?? ""))")
+        print("Debug Renewal: renewal reminders (\(renewalReminder)) vs (\(original?.renewalReminder ?? []))")
+        print("Debug Renewal: notes (\(notes.trimmed)) vs (\(original?.notes ?? ""))")
+        
+        // Mandatory fields check
+        let mandatoryChanged =
+        planType.trimmed != (original?.subscriptionType ?? "") ||
+        abs((Double(amount.trimmed) ?? 0.0) - (original?.amount ?? 0.0)) > 0.01 ||
+        effectiveCurrency != (original?.currency ?? "") ||
+//        category != (original?.categoryId ?? "") ||
+        billingCycle != (original?.billingCycle ?? "")
+        //        ||
+        //        subscriptionFor != (original?.subscriptionFor ?? "") ||
+        //        paymentMethod != (original?.paymentMethodId ?? "") ||
+        //        paymentMethodDataId != (original?.paymentMethodDataId ?? "")
+        
+        let nextDateChanged = chargeDate.formattedDate(from: "dd/MM/yyyy", to: "yyyy-MM-dd") != original?.nextPaymentDate
+        
+        let optionalChanged =
+        paymentMethod != (original?.paymentMethodId ?? "") ||
+        paymentMethodDataId != (original?.paymentMethodDataId ?? "") ||
+        subscriptionFor != originalSubFor ||
+        renewalReminder != (original?.renewalReminder ?? []) ||
+        notes.trimmed != original?.notes
+        
+        let renewalRequest = RenewalUpdateRequest(
+            userId: Constants.getUserId(),
+            subscriptionId: subscriptionId,
+            type: mandatoryChanged ? 2 : 1,
+            serviceName: serviceName.trimmed,
+            amount: Double(amount.trimmed),
+            currency: selectedCurrency?.code ?? "",
+            currencySymbol: selectedCurrency?.symbol ?? "",
+            billingCycle: billingCycle,
+            nextPaymentDate: chargeDate.formattedDate(from: "dd/MM/yyyy", to: "yyyy-MM-dd"),
+            subscriptionType: planType.trimmed,
+            paymentMethod: paymentMethod,
+            paymentMethodDataId: paymentMethodDataId,
+            category: category,
+            subscriptionFor: subscriptionFor,
+            renewalReminder: renewalReminder,
+            notes: notes.trimmed
+        )
+        
+        if mandatoryChanged {
+            // If mandatory changed, use type 2.
+            subscriptionMatchVM.renewalUpdate(input: renewalRequest)
+        } else
+        if optionalChanged {
+            // Only optional fields changed (and potentially the date)
+            let editInput = EditSubscriptionRequest(
+                userId: Constants.getUserId(),
+                subscriptionId: subscriptionId,
+                serviceName: serviceName.trimmed,
+                amount: Double(amount.trimmed) ?? 0.0,
+                currency: selectedCurrency?.code ?? "",
+                billingCycle: billingCycle,
+                nextPaymentDate: chargeDate.formattedDate(from: "dd/MM/yyyy", to: "yyyy-MM-dd"),
+                subscriptionType: planType.trimmed,
+                paymentMethod: paymentMethod,
+                paymentMethodDataId: paymentMethodDataId,
+                category: category,
+                subscriptionFor: subscriptionFor,
+                renewalReminder: renewalReminder,
+                notes: notes.trimmed,
+                currencySymbol: selectedCurrency?.symbol ?? ""
+            )
+            addSubscriptionVM.editSubscription(input: editInput)
+        } else {
+            // Only date changed or nothing changed -> use type 1.
+            let renewalRequest = RenewalUpdateRequest(
+                userId          : Constants.getUserId(),
+                subscriptionId  : subscriptionId,
+                type            : 1)
+            subscriptionMatchVM.renewalUpdate(input: renewalRequest)
+        }
+    }
+    
+    private func updateGlobalSubscriptionData(billingCycle: String, paymentMethod: String, paymentMethodDataId: String, paymentMethodDataName: String, category: String, subscriptionFor: String, subscriptionForName: String, renewalReminder: [String], renewalReminderValue: String) {
+        let logo = addSubscriptionVM.servicesList?.first {
+            $0.name?.trimmingCharacters(in: .whitespacesAndNewlines).lowercased() == serviceName.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+        }?.logo
+        globalSubscriptionData?.serviceName = serviceName.trimmed
+        if logo != "" && logo != nil {
+            globalSubscriptionData?.serviceLogo = logo
+        }
+        globalSubscriptionData?.amount = Double(amount.trimmed) ?? 0.0
+        globalSubscriptionData?.currency = selectedCurrency?.code ?? ""
+        globalSubscriptionData?.currencySymbol = selectedCurrency?.symbol ?? ""
+        globalSubscriptionData?.subscriptionType = planType.trimmed
+        globalSubscriptionData?.nextPaymentDate = chargeDate.formattedDate(from: "dd/MM/yyyy", to: "yyyy-MM-dd")
+        globalSubscriptionData?.billingCycle = billingCycle
+        globalSubscriptionData?.categoryId = category
+        globalSubscriptionData?.categoryName = selectedCategory?.name ?? ""
+        globalSubscriptionData?.paymentMethodId = paymentMethod
+        globalSubscriptionData?.paymentMethodName = selectedPayment?.name ?? ""
+        globalSubscriptionData?.paymentMethodDataId = paymentMethodDataId
+        globalSubscriptionData?.paymentMethodDataName = paymentMethodDataName
+        globalSubscriptionData?.subscriptionFor = subscriptionFor
+        globalSubscriptionData?.subscriptionForName = subscriptionForName
+        globalSubscriptionData?.notes = notes.trimmed
+        globalSubscriptionData?.renewalReminder = renewalReminder
+        globalSubscriptionData?.renewalReminderValue = renewalReminderValue
     }
     
     private func handleDone() {
@@ -1852,16 +2002,18 @@ struct FieldSuggestionView1<Item: Identifiable>: View {
 
 //MARK: - ListView
 struct ListView: View {
-    var type                    : ListType = .billing
-    var title                   : String?
-    var addMore                 : Bool = false
-    @Binding var data           : [ManualDataInfo]
-    @Binding var selectedIndex  : Int
-    @State private var showNewCardSheet    = false
-    var onDismiss: (() -> Void)?
-    @State private var shouldCallAPI = false
+    var type                                    : ListType = .billing
+    var title                                   : String?
+    var addMore                                 : Bool = false
+    @Binding var data                           : [ManualDataInfo]
+    @Binding var selectedIndex                  : Int
+    @State private var showNewCardSheet         = false
+    @State private var openFamilyMemberSheet    = false
+    @State private var shouldCallAPI            = false
     @State private var sheetHeight              : CGFloat = .zero
     @State private var sheetID                  = UUID()
+    var onDismiss   : (() -> Void)?
+    var onAddFamily : ((String, String, String, String) -> Void)?
     
     var body: some View {
         VStack(spacing: 0) {
@@ -1943,6 +2095,23 @@ struct ListView: View {
         .padding(5)
         .onReceive(NotificationCenter.default.publisher(for: .closeAllBottomSheets)) { _ in
             showNewCardSheet = false
+        }
+        .sheet(isPresented: $openFamilyMemberSheet) {
+            AddFamilyMemberBottomSheet(header       : "Add Family Member",
+                                       description  : "Add a family member to manage and share plans together.",
+                                       buttonName   : "Save",
+                                       action       : {nickName, phone, countryCode, colorHex in
+                onAddFamily?(nickName, phone, countryCode, colorHex)
+                //                let input = AddFamilyMemberRequest(userId       : Constants.getUserId(),
+                //                                                   nickName     : nickName.trimmed,
+                //                                                   phoneNumber  : phone,
+                //                                                   countryCode  : countryCode,
+                //                                                   color        : colorHex)
+                //                manualVM.addfamilyMember(input: input)
+            })
+            .id(UUID())
+            .presentationDragIndicator(.hidden)
+            .presentationDetents([.height(600)])
         }
     }
     
@@ -2050,6 +2219,10 @@ struct ListView: View {
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
                 sheetID = UUID()
                 showNewCardSheet = true
+            }
+        }else if type == .relations{
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                openFamilyMemberSheet = true
             }
         }
     }

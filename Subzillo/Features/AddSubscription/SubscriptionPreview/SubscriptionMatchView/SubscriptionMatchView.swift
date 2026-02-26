@@ -19,12 +19,15 @@ struct SubscriptionMatchView: View {
     @StateObject var subscriptionMatchVM        = SubscriptionMatchViewModel()
     var subscriptionId                          : String?
     var fromList                                = false
+    @State var fromPush                         = false
     @State private var justAppeared             : Bool = false
     @State var showDeletePopup                  : Bool = false
     @StateObject var subscriptionsVM            = SubscriptionsViewModel()
     @State var renewalReminderValue             = ""
     @State var paymentMethodDataName            = ""
     @State private var deleteSheetHeight        : CGFloat = .zero
+    @State private var showRenewSheet           : Bool = false
+    @State private var renewSheetHeight         : CGFloat = .zero
     
     private var serviceLogoURL: URL? {
         guard let logo = subscriptionData?.serviceLogo,
@@ -86,12 +89,12 @@ struct SubscriptionMatchView: View {
                                     .cornerRadius(64)
                                     .clipped()
                             }else{
-//                                WebImage(url: URL(string: "\(Constants.getUserDefaultsValue(for: Constants.providerBaseUrl))\(subscriptionData?.serviceLogo ?? "")"))
-//                                    .resizable()
-//                                    .scaledToFill()
-//                                    .frame(width: 128, height: 128)
-//                                    .cornerRadius(64)
-//                                    .clipped()
+                                //                                WebImage(url: URL(string: "\(Constants.getUserDefaultsValue(for: Constants.providerBaseUrl))\(subscriptionData?.serviceLogo ?? "")"))
+                                //                                    .resizable()
+                                //                                    .scaledToFill()
+                                //                                    .frame(width: 128, height: 128)
+                                //                                    .cornerRadius(64)
+                                //                                    .clipped()
                                 
                                 if let url = serviceLogoURL {
                                     WebImage(url: url)
@@ -163,44 +166,74 @@ struct SubscriptionMatchView: View {
                 .padding(.horizontal,20)
                 
                 if fromList{
-                    HStack(spacing: 12){
+                    VStack(spacing: 12) {
                         
-                        // MARK: - Delete Button
-                        Button() {
-                            showDeletePopup = true
-                        } label: {
-                            HStack(spacing: 5) {
-                                Image("delete_red")
-                                    .resizable()
-                                    .frame(width: 17, height: 19)
-                                
-                                Text(LocalizedStringKey("Delete"))
-                                    .font(.appSemiBold(14))
-                                    .foregroundColor(Color.disCardRed)
+                        HStack(spacing: 12){
+                            
+                            // MARK: - Delete Button
+                            Button() {
+                                showDeletePopup = true
+                            } label: {
+                                HStack(spacing: 5) {
+                                    Image("delete_red")
+                                        .resizable()
+                                        .frame(width: 17, height: 19)
+                                    
+                                    Text(LocalizedStringKey("Delete"))
+                                        .font(.appSemiBold(14))
+                                        .foregroundColor(Color.disCardRed)
+                                }
+                                .frame(maxWidth: .infinity, minHeight: 56)
+                                .background(Color.whiteBlack)
+                                .cornerRadius(8)
+                                .overlay(
+                                    // keep the stroke visually inside by padding the shape inward
+                                    RoundedCorner(radius: 8)
+                                        .stroke(
+                                            Color.disCardRed,
+                                            lineWidth: 1
+                                        )
+                                )
                             }
-                            .frame(maxWidth: .infinity, minHeight: 56)
-                            .background(Color.whiteBlack)
-                            .cornerRadius(8)
-                            .overlay(
-                                // keep the stroke visually inside by padding the shape inward
-                                RoundedCorner(radius: 8)
-                                    .stroke(
-                                        Color.disCardRed,
-                                        lineWidth: 1
-                                    )
-                            )
+                            
+                            //MARK: Edit button
+                            GradientBorderButton(title: "Edit", isBtn: true, buttonImage: "EditIcon", action: { onEdit()
+                            }, backgroundColor: .whiteBlack, buttonHeight: 56)
                         }
-                        
-                        //MARK: Edit button
-                        GradientBorderButton(title: "Edit", isBtn: true, buttonImage: "EditIcon", action: onEdit, backgroundColor: .whiteBlack, buttonHeight: 56)
+                        .padding(.horizontal)
                     }
-                    .padding(.horizontal)
                     .padding(.bottom,20)
                 }else{
-                    //MARK: Edit button
-                    GradientBorderButton(title: "Edit", isBtn: true, buttonImage: "EditIcon", action: onEdit, backgroundColor: .whiteBlack, buttonHeight: 56)
+                    VStack(spacing: 12) {
+                        //                        if subscriptionData?.status == "expired" {
+                        //                            CustomButton(
+                        //                                title   : "Renew",
+                        //                                height  : 56,
+                        //                                action  : {
+                        //                                    showRenewSheet = true
+                        //                                }
+                        //                            )
+                        //                            //                            GradientBorderButton(title: "Renew", isBtn: true, buttonImage: "update", action: { showRenewSheet = true }, backgroundColor: .whiteBlack, buttonHeight: 56)
+                        //                            //                                .padding(.horizontal)
+                        //                        }
+                        
+                        //MARK: Edit button
+                        GradientBorderButton(title: "Edit", isBtn: true, buttonImage: "EditIcon", action: { onEdit()
+                        }, backgroundColor: .whiteBlack, buttonHeight: 56)
                         .padding(.horizontal)
-                        .padding(.bottom,20)
+                    }
+                    .padding(.bottom,20)
+                }
+                
+                if subscriptionData?.renewBtnStatus ?? false {
+                    CustomButton(
+                        title   : "Renew",
+                        height  : 56,
+                        action  : {
+                            showRenewSheet = true
+                        }
+                    )
+                    .padding(.horizontal)
                 }
             }
             .padding(.top, 10)
@@ -234,6 +267,7 @@ struct SubscriptionMatchView: View {
             .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("RefreshScreenData"))) { notification in
                 if !justAppeared {
                     if fromList {
+                        self.fromPush = true
                         self.showOfflineDetails()
                         let idFromPush = notification.userInfo?["subscriptionId"] as? String
                         let finalId = (idFromPush?.isEmpty == false) ? idFromPush : subscriptionId
@@ -251,8 +285,18 @@ struct SubscriptionMatchView: View {
                     }
                 }
             }
+            .onChange(of: subscriptionMatchVM.isRenewSuccess) { value in
+                if value{
+                    self.showOfflineDetails()
+                    subscriptionMatchVM.getSubscriptionDetails(input: GetSubscriptionDetailsRequest(userId: Constants.getUserId(), subscriptionId: subscriptionId ?? ""))
+                }
+            }
             .onChange(of: globalSubscriptionData) { _ in updateSubDetails() }
             .onChange(of: subscriptionMatchVM.getSubsDetailsResponse) { _ in
+                if fromPush{
+                    showRenewSheet = true
+                    self.fromPush = false
+                }
                 updateSubDetails()
             }
             .onChange(of: subscriptionsVM.isDeletedSubscription) { _ in
@@ -282,6 +326,48 @@ struct SubscriptionMatchView: View {
             }
             .onReceive(NotificationCenter.default.publisher(for: .closeAllBottomSheets)) { _ in
                 showDeletePopup = false
+                showRenewSheet = false
+            }
+            .sheet(isPresented: $showRenewSheet) {
+                RenewSubscriptionBottomSheet(
+                    onRenew: {
+                        if let id = subscriptionData?.id {
+                            let input = RenewalUpdateRequest(userId         : Constants.getUserId(),
+                                                             subscriptionId : id,
+                                                             type           : 1)
+                            subscriptionMatchVM.renewalUpdate(input: input)
+                        }
+                    },
+                    onRenewWithChanges: {
+                        onEdit(isRenew: true)
+                    },
+                    onNo: {
+                        showRenewSheet = false
+                    }
+                )
+                .overlay {
+                    GeometryReader { geo in
+                        Color.clear
+                            .preference(
+                                key: InnerHeightPreferenceKey.self,
+                                value: geo.size.height
+                            )
+                    }
+                }
+                .onPreferenceChange(InnerHeightPreferenceKey.self) { height in
+                    if height > 150 {
+                        renewSheetHeight = height
+                    }
+                }
+                .presentationDetents([.height(renewSheetHeight)])
+                .presentationDragIndicator(.hidden)
+                //                .onPreferenceChange(InnerHeightPreferenceKey.self) { height in
+                //                    if height > 0 {
+                //                        renewSheetHeight = height
+                //                    }
+                //                }
+                //                .presentationDragIndicator(.hidden)
+                //                .presentationDetents([.height(renewSheetHeight)])
             }
         }
         .background(.neutralBg100)
@@ -420,9 +506,9 @@ struct SubscriptionMatchView: View {
         dismiss()
     }
     
-    private func onEdit() {
+    func onEdit(isRenew: Bool = false) {
         globalSubscriptionData = subscriptionData!
-        AppIntentRouter.shared.navigate(to: .manualEntry(isFromEdit: true, isFromListEdit:fromList, subscriptionId: subscriptionData?.id ?? ""))
+        AppIntentRouter.shared.navigate(to: .manualEntry(isFromEdit: true, isFromListEdit:fromList, isRenew: isRenew, subscriptionId: subscriptionData?.id ?? ""))
     }
     
     func deleteSubscription() {

@@ -39,4 +39,6 @@ extension SubscriptionEntity {
     @NSManaged public var cardNumber: String?
     @NSManaged public var categoryName: String?
     @NSManaged public var paymentMethodDataName: String?
+    @NSManaged public var viewStatus: Bool
+    @NSManaged public var renewBtnStatus: Bool
 }

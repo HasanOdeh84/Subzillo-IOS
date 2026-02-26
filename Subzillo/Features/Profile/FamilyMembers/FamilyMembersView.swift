@@ -54,7 +54,7 @@ struct FamilyMembersView: View {
             .padding(.horizontal, 5)
             
             //MARK: Family members list
-            if let members = manualVM.listFamilyMembersResponse, !members.isEmpty {
+            if let members = manualVM.listFamilyMembersResponse?.familyMembers, !members.isEmpty {
                 ScrollView(showsIndicators: false) {
                     VStack(spacing:0) {
                         ForEach(members, id: \.id) { member in
@@ -86,10 +86,14 @@ struct FamilyMembersView: View {
                                     listFamilyMembersApi()
                                 }
                                 , addSubscriptionBtn: { id in
-                                    familyMembersVM.navigate(to: .manualEntry(isFromEdit        : false,
-                                                                              isFromListEdit    : false,
-                                                                              subscriptionId    : "",
-                                                                              familyMemberId    : id))
+                                    if manualVM.listFamilyMembersResponse?.remainingSubscriptionLimit == 0 {
+                                        SheetManager.shared.isUpgradeSheetVisible = true
+                                    } else {
+                                        familyMembersVM.navigate(to: .manualEntry(isFromEdit        : false,
+                                                                                  isFromListEdit    : false,
+                                                                                  subscriptionId    : "",
+                                                                                  familyMemberId    : id))
+                                    }
                                 }
                             )
                             Divider()
@@ -131,18 +135,22 @@ struct FamilyMembersView: View {
             Spacer()
             
             //MARK: Add Family Member Button
-            GradientBorderButton(
-                title: "Add Family Member",
-                isBtn: true,
-                buttonImage: "profile_add",
-                action: {
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                        openFamilyMemberSheet = true
+                GradientBorderButton(
+                    title: "Add Family Member",
+                    isBtn: true,
+                    buttonImage: "profile_add",
+                    action: {
+                        if manualVM.listFamilyMembersResponse?.remainingFamilyMembersLimit ?? 0 > 0{
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                                openFamilyMemberSheet = true
+                            }
+                        }else{
+                            SheetManager.shared.isUpgradeSheetVisible = true
+                        }
+                        print("Add Family Member tapped")
                     }
-                    print("Add Family Member tapped")
-                }
-            )
-            .padding(.bottom, 20)
+                )
+                .padding(.bottom, 20)
         }
         .padding(.horizontal, 15)
         .background(Color.neutralBg100)
@@ -554,9 +562,23 @@ struct SwipeableSubscriptionRow: View {
             )
             .background(Color.white)
             .offset(x: offset)
+//            .onTapGesture {
+//                guard activeCardId == nil else { return }
+//                if sub.viewStatus ?? false {
+//                    AppIntentRouter.shared.navigate(
+//                        to: .subscriptionMatchView(
+//                            fromList: true,
+//                            subscriptionId: sub.id ?? ""
+//                        )
+//                    )
+//                } else {
+//                    SheetManager.shared.isUpgradeSheetVisible = true
+//                }
+//            }
             .simultaneousGesture(
                 DragGesture(minimumDistance: 10, coordinateSpace: .local)
                     .onChanged { value in
+                        guard sub.viewStatus != false else { return }
                         guard abs(value.translation.width) > abs(value.translation.height) else {
                             isScrollDisabled = false
                             return
@@ -576,6 +598,7 @@ struct SwipeableSubscriptionRow: View {
                     }
                     .onEnded { value in
                         isScrollDisabled = false
+                        guard sub.viewStatus != false else { return }
                         guard abs(value.translation.width) > abs(value.translation.height) else { return }
                         withAnimation(.spring()) {
                             if value.translation.width < swipeThreshold {

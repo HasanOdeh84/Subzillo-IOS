@@ -33,8 +33,8 @@ class LoginViewModel: ObservableObject {
         receiveValue: { [unowned self] response in
             PrintLogger.modelLog(response, type: .response, isInput: false)
             ToastManager.shared.showToast(message: response.message ?? "")
-            KeychainHelper.save(response.data?.accessToken, account: Constants.authKey)
-            KeychainHelper.save(response.data?.refreshToken, account: Constants.refreshKey)
+            KeychainHelperApp.save(response.data?.accessToken, account: Constants.authKey)
+            KeychainHelperApp.save(response.data?.refreshToken, account: Constants.refreshKey)
             Constants.saveDefaults(value: response.data?.userId, key: Constants.userId)
             self.loginResponse = response
 //            if response.data?.emailOtpVerified ?? false{
@@ -119,8 +119,8 @@ class LoginViewModel: ObservableObject {
         receiveValue: { response in
             PrintLogger.modelLog(response, type: .response, isInput: false)
             ToastManager.shared.showToast(message: response.message ?? "")
-            KeychainHelper.save(response.data?.accessToken, account: Constants.authKey)
-            KeychainHelper.save(response.data?.refreshToken, account: Constants.refreshKey)
+            KeychainHelperApp.save(response.data?.accessToken, account: Constants.authKey)
+            KeychainHelperApp.save(response.data?.refreshToken, account: Constants.refreshKey)
             Constants.saveDefaults(value: response.data?.id, key: Constants.userId)
             let data = LoginSignupVerifyData(verifyType             : 2,//input.authProvider?.rawValue ?? 1,
                                              email                  : input.authProvider == loginType.apple ? response.data?.email : input.email,//input.email,

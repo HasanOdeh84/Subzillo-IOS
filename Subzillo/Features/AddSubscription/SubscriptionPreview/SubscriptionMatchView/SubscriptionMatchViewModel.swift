@@ -14,6 +14,7 @@ class SubscriptionMatchViewModel: NSObject, ObservableObject {
     var apiReference                            = NetworkRequest.shared
     private let router                          : AppIntentRouter
     @Published var getSubsDetailsResponse       : SubscriptionData?
+    @Published var isRenewSuccess               : Bool = false
     
     init(router: AppIntentRouter = .shared) {
         self.router = router
@@ -36,6 +37,22 @@ class SubscriptionMatchViewModel: NSObject, ObservableObject {
     
     func navigate(to route: NavigationRoute){
         self.router.navigate(to: route)
+    }
+    
+    func renewalUpdate(input:RenewalUpdateRequest){
+        isRenewSuccess = false
+        apiReference.postApi(endPoint: APIEndpoint.renewalUpdate, method: .POST,token: authKey,body: input,showLoader: true, responseType: GeneralResponse.self)
+            .sink { [unowned self] completion in
+                if case let .failure(error) = completion {
+                    self.handleError(error,endPoint: APIEndpoint.renewalUpdate)
+                }
+            }
+        receiveValue: { [self] response in
+            PrintLogger.modelLog(response, type: .response, isInput: false)
+            ToastManager.shared.showToast(message: response.message ?? "")
+            isRenewSuccess = true
+        }
+        .store(in: &self.subscriptions)
     }
     
     // MARK: - Handle errors

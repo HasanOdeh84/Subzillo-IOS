@@ -14,8 +14,7 @@ struct AddSubscriptionsView: View {
     @State private var isUploading             = false
     @StateObject private var sharedImageManager = SharedImageManager.shared
     @StateObject private var uploadImageVM      = UploadImageViewModel()
-    @State var showUpgradeNowPopup              : Bool = false
-    @State private var upgradeNowSheetHeight    : CGFloat = .zero
+    @StateObject var commonVM                   = CommonAPIViewModel()
     
     //MARK: Body
     var body: some View {
@@ -76,6 +75,7 @@ struct AddSubscriptionsView: View {
                 handleSharedImageUpload(image)
                 sharedImageManager.sharedImage = nil
             }
+            commonVM.getUserInfo(input: getUserInfoRequest(userId: Constants.getUserId()))
         }
         .sheet(isPresented: $uploadImageVM.showErrorPopup, onDismiss: {
             isUploading = false
@@ -89,26 +89,6 @@ struct AddSubscriptionsView: View {
             )
             .presentationDragIndicator(.hidden)
             .presentationDetents([.height(560)])
-        }
-        .sheet(isPresented: $showUpgradeNowPopup) {
-            InfoAlertSheet(
-                onDelegate: {
-                    uploadImageVM.navigate(to: .pricingPlans)
-                }, title                : "Upgrade Required",
-                subTitle                : "Upgrade your plan to continue adding subscriptions",
-//                imageName               : "del_red_big",
-//                buttonIcon              : "deleteIcon",
-                buttonTitle             : "Upgrade Now",
-                imageSize               : 70,
-                isCancelButtonVisible   : true
-            )
-            .onPreferenceChange(InnerHeightPreferenceKey.self) { height in
-                if height > 0 {
-                    upgradeNowSheetHeight = height
-                }
-            }
-            .presentationDragIndicator(.hidden)
-            .presentationDetents([.height(upgradeNowSheetHeight)])
         }
     }
     
@@ -138,21 +118,41 @@ struct AddSubscriptionsView: View {
         ToastManager.shared.showToast(message: "Coming soon in S4",style:ToastStyle.info)
     }
     private func clickOnSmartAssistant() {
-//        showUpgradeNowPopup = true
-//        ToastManager.shared.showToast(message: "Coming soon in S5",style:ToastStyle.info)
+        if commonVM.userInfoResponse?.remainingSubscriptionLimit == 0 {
+            SheetManager.shared.isUpgradeSheetVisible = true
+        } else {
+            //        showUpgradeNowPopup = true
+            ToastManager.shared.showToast(message: "Coming soon in S5",style:ToastStyle.info)
+        }
     }
     private func clickOnAddByVoice() {
-        AppIntentRouter.shared.navigate(to: .voiceCommandView)
+        if commonVM.userInfoResponse?.remainingSubscriptionLimit == 0 {
+            SheetManager.shared.isUpgradeSheetVisible = true
+        } else {
+            AppIntentRouter.shared.navigate(to: .voiceCommandView)
+        }
     }
     private func clickOnConnectEmail() {
-        AppIntentRouter.shared.navigate(to: .connectEmail)
-//        ToastManager.shared.showToast(message: "Coming soon in S4",style:ToastStyle.info)
+        if commonVM.userInfoResponse?.remainingSubscriptionLimit == 0 {
+            SheetManager.shared.isUpgradeSheetVisible = true
+        } else {
+            AppIntentRouter.shared.navigate(to: .connectEmail)
+    //        ToastManager.shared.showToast(message: "Coming soon in S4",style:ToastStyle.info)
+        }
     }
     private func clickOnUploadScreenshot() {
-        showUploadPopup = true
+        if commonVM.userInfoResponse?.remainingSubscriptionLimit == 0 {
+            SheetManager.shared.isUpgradeSheetVisible = true
+        } else {
+            showUploadPopup = true
+        }
     }
     private func clickOnManuvalEntry() {
-        AppIntentRouter.shared.navigate(to: .manualEntry(isFromEdit: false))
+        if commonVM.userInfoResponse?.remainingSubscriptionLimit == 0 {
+            SheetManager.shared.isUpgradeSheetVisible = true
+        } else {
+            AppIntentRouter.shared.navigate(to: .manualEntry(isFromEdit: false))
+        }
     }
     private func clickOnUploasBankNotification() {
         ToastManager.shared.showToast(message: "Coming soon in next version",style:ToastStyle.info)

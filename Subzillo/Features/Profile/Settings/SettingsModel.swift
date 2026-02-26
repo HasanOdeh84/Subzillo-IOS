@@ -36,3 +36,25 @@ public struct EmailAutoSyncRequest: Codable {
 struct ExportSubscriptionDataRequest: Codable{
     let userId          : String
 }
+
+struct ListSyncPeriodRequest: Codable{
+    let userId          : String
+}
+
+public struct ListSyncPeriodResponse: Codable {
+    var message : String?
+    var data    : [ListSyncPeriodResponseData]?
+}
+
+public struct ListSyncPeriodResponseData: Codable,Equatable {
+    var id              : String?
+    var label           : String?
+    var durationValue   : Int?
+    var durationType    : String?
+    var isSelected      : Bool?
+}
+
+public struct UpdateSyncPeriodRequest: Codable {
+    let userId              : String
+    let syncPeriodId        : String
+}

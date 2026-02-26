@@ -41,8 +41,8 @@ struct ProfileView: View {
     var body: some View {
         VStack{
             ProfileHeader(title: "My Profile", onSettings: {
-                ToastManager.shared.showToast(message: "Coming soon in S4",style:ToastStyle.info)
-//                profileVM.navigate(to: .settings)
+//                ToastManager.shared.showToast(message: "Coming soon in S4",style:ToastStyle.info)
+                profileVM.navigate(to: .settings)
             }, onNotificationAction: {
 //                profileVM.navigate(to: .notifications)
                 ToastManager.shared.showToast(message: "Coming soon in S4",style:ToastStyle.info)
@@ -145,10 +145,46 @@ struct ProfileView: View {
                             .multilineTextAlignment(.center)
                     }
                     
-                    GradientBgBtn(title: "Upgrade today", action: {
-                        ToastManager.shared.showToast(message: "Coming soon in S4",style:ToastStyle.info)
-//                        profileVM.navigate(to: .pricingPlans)
-                    })
+                    VStack(alignment: .leading){
+                        Text("Current Plan")
+                            .font(.appSemiBold(14))
+                            .foregroundStyle(Color.neutral600)
+                        
+                        HStack(alignment: .bottom, spacing: 4) {
+                            Text(commonApiVM.userInfoResponse?.tierName ?? "Free plan")
+                                .font(.appSemiBold(24))
+                                .foregroundStyle(Color.buttonsText)
+                            if let billingCycle = commonApiVM.userInfoResponse?.planBillingCycle {
+                                if billingCycle != ""{
+                                    Text("(\(billingCycle))")
+                                        .font(.appSemiBold(16))
+                                        .foregroundColor(.buttonsText)
+                                }
+                            }
+                        }
+//                        .padding(.bottom, 14)
+                        if let planExpiresAt = commonApiVM.userInfoResponse?.planExpiresAt {
+                            if planExpiresAt != ""{
+                                Text("Next renewal is \(planExpiresAt)")
+                                    .font(.appSemiBold(14))
+                                    .foregroundColor(.neutral600)
+                            }
+                        }
+                        
+                        if commonApiVM.userInfoResponse?.UpgradeBtnStatus ?? false{
+                            GradientBgBtn(title: "Upgrade today", action: {
+                                //                        ToastManager.shared.showToast(message: "Coming soon in S4",style:ToastStyle.info)
+                                profileVM.navigate(to: .pricingPlans)
+                            })
+                        }
+                    }
+                    .padding(24)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .cornerRadius(16)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 16)
+                            .stroke(Color.neutral300Border, lineWidth: 1)
+                    )
                     
                     VStack(spacing: 0) {
                         HStack{
@@ -193,8 +229,8 @@ struct ProfileView: View {
                     
                     VStack(spacing: 0) {
                         ProfileItem(title: "Plans & Pricing", image: "award", action:{
-                            ToastManager.shared.showToast(message: "Coming soon in S4",style:ToastStyle.info)
-//                            profileVM.navigate(to: .pricingPlans)
+//                            ToastManager.shared.showToast(message: "Coming soon in S4",style:ToastStyle.info)
+                            profileVM.navigate(to: .pricingPlans)
                         })
                         Divider()
                             .overlay(Color.border)
@@ -216,8 +252,8 @@ struct ProfileView: View {
                         Divider()
                             .overlay(Color.border)
                         ProfileItem(title: "Family Members", image: "familyMembers", action:{
-//                            profileVM.navigate(to: NavigationRoute.familyMembersView)
-                            ToastManager.shared.showToast(message: "Coming soon in S4",style:ToastStyle.info)
+                            profileVM.navigate(to: NavigationRoute.familyMembersView)
+//                            ToastManager.shared.showToast(message: "Coming soon in S4",style:ToastStyle.info)
                         })
                         Divider()
                             .overlay(Color.border)

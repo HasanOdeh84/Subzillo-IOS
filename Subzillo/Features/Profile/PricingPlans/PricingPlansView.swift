@@ -96,17 +96,17 @@ struct PricingPlansView: View {
                         }
                         
                         // MARK: tip view
-//                        GradienCustomeView(title    : "Need help choosing?",
-//                                           subTitle : "Compare all features and find the perfect plan for your subscription management needs.")
+                        //                        GradienCustomeView(title    : "Need help choosing?",
+                        //                                           subTitle : "Compare all features and find the perfect plan for your subscription management needs.")
                         
                         Text(getAttributedText())
                             .font(.appRegular(14))
                             .multilineTextAlignment(.center)
                             .environment(\.openURL, OpenURLAction { url in
                                 if url.absoluteString.contains("privacy") {
-//                                    AppIntentRouter.shared.navigate(to: .termsAndPrivacy(isTerm: false))
+                                    //                                    AppIntentRouter.shared.navigate(to: .termsAndPrivacy(isTerm: false))
                                 } else if url.absoluteString.contains("terms") {
-//                                    AppIntentRouter.shared.navigate(to: .termsAndPrivacy(isTerm: true))
+                                    //                                    AppIntentRouter.shared.navigate(to: .termsAndPrivacy(isTerm: true))
                                 }
                                 return .handled
                             })
@@ -145,14 +145,17 @@ struct PricingPlansView: View {
         .onAppear {
             justAppeared = true
             Task {
-                viewModel.listPricingPlans()
+                viewModel.listPricingPlans(type: selectedSegment == .first ? 1 : 2)
                 await storeManager.fetchProducts(productIDs: SubzilloProducts.productIdentifiers)
                 await storeManager.updatePurchasedProducts()
             }
-
+            
             DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
                 justAppeared = false
             }
+        }
+        .onChange(of: selectedSegment) { _ in
+            viewModel.listPricingPlans(type: selectedSegment == .first ? 1 : 2)
         }
     }
     
@@ -366,17 +369,17 @@ struct PlanToggleView: View {
                         .font(.appSemiBold(14))
                         .foregroundColor(selectedSegment == .second ? Color.white : .navyBlueCTA700)
                     
-//                    Text("SAVE %24")
-//                        .font(.appSemiBold(14))
-//                        .foregroundColor(.white)
-//                        .padding(.horizontal, 8)
-//                        .padding(.vertical, 4)
-//                        .background(
-//                            LinearGradient(colors: [Color.linearGradient3, Color.linearGradient4, Color.blueMain700],
-//                                           startPoint: .top,
-//                                           endPoint: .bottom)
-//                        )
-//                        .cornerRadius(18)
+                    //                    Text("SAVE %24")
+                    //                        .font(.appSemiBold(14))
+                    //                        .foregroundColor(.white)
+                    //                        .padding(.horizontal, 8)
+                    //                        .padding(.vertical, 4)
+                    //                        .background(
+                    //                            LinearGradient(colors: [Color.linearGradient3, Color.linearGradient4, Color.blueMain700],
+                    //                                           startPoint: .top,
+                    //                                           endPoint: .bottom)
+                    //                        )
+                    //                        .cornerRadius(18)
                 }
                 .padding(12)
                 .frame(maxWidth: .infinity, minHeight: 40)

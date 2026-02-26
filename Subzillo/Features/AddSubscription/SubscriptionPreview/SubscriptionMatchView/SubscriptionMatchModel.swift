@@ -38,3 +38,22 @@ public struct GetSubscriptionDetailsResponseData: Codable {
     let nickName                : String?
     let color                   : String?
 }
+
+public struct RenewalUpdateRequest: Codable {
+    var userId                 : String?
+    var subscriptionId         : String?
+    var type                   : Int?
+    var serviceName            : String?
+    var amount                 : Double?
+    var currency               : String?
+    var currencySymbol         : String?
+    var billingCycle           : String?
+    var nextPaymentDate        : String?
+    var subscriptionType       : String?
+    var paymentMethod          : String?
+    var paymentMethodDataId    : String?
+    var category               : String?
+    var subscriptionFor        : String?
+    var renewalReminder        : [String]?
+    var notes                  : String?
+}

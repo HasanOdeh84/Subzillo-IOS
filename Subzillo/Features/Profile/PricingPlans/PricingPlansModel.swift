@@ -7,6 +7,11 @@
 
 import Foundation
 
+struct PricingPlanRequest: Codable {
+    let userId  : String
+    let type    : Int // type -> 1-Monthly,2-Yearly
+}
+
 struct PricingPlanResponse: Codable {
     let message     : String?
     let data        : [PricingPlan]?

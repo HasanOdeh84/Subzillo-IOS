@@ -123,7 +123,7 @@ struct AnalyticalView: View {
                 analyticsApi()
                 listFamilyMembersApi()
             }
-            .onChange(of: manualVM.listFamilyMembersResponse) { _ in updateRelationInfo() }
+            .onChange(of: manualVM.listFamilyMembersResponse?.familyMembers) { _ in updateRelationInfo() }
         }
     }
     
@@ -144,7 +144,7 @@ struct AnalyticalView: View {
         relationsData.removeAll()
         relationsData.append(ManualDataInfo(id: "all", title: "All"))
         relationsData.append(ManualDataInfo(id: "me", title: "Me"))
-        if let familyCards = manualVM.listFamilyMembersResponse {
+        if let familyCards = manualVM.listFamilyMembersResponse?.familyMembers {
             for family in familyCards {
                 relationsData.append(
                     ManualDataInfo(

@@ -19,25 +19,32 @@ class SubscriptionsViewModel: ObservableObject {
     @Published var getSubsByMonthResponse     : MonthlySubscriptionsData?
     @Published var analyticsResponse          : AnalyticsData?
     @Published var isDeletedSubscription      : Bool?
+    @Published var isLoading                  : Bool = false
     
     init(router: AppIntentRouter = .shared) {
         self.router = router
     }
     
     func listSubscriptions(input: ListSubscriptionsRequest,showLoader:Bool = true) {
-        self.listSubsResponse = nil
+        if input.page == 0 {
+            self.listSubsResponse = nil
+        }
+        self.isLoading = true
         apiReference.postApi(endPoint: APIEndpoint.listSubscriptions, method: .POST,token: authKey,body: input,showLoader: showLoader, responseType: ListSubscriptionsResponse.self)
+            .receive(on: DispatchQueue.main)
             .sink { [unowned self] completion in
                 if case let .failure(error) = completion {
+                    self.isLoading = false
                     self.handleError(error,endPoint: APIEndpoint.listSubscriptions)
                 }
             }
         receiveValue: { response in
             PrintLogger.modelLog(response, type: .response, isInput: false)
-            self.listSubsResponse = response.data
             if input.page == 0 {
                 SubscriptionDBManager.shared.deleteAllSubscription()
             }
+            self.isLoading = false
+            self.listSubsResponse = response.data
         }
         .store(in: &self.subscriptions)
     }

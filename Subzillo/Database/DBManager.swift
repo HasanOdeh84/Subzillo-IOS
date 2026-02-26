@@ -44,6 +44,8 @@ final class DBManager {
         subscription.cardNumber             = params.cardNumber
         subscription.categoryName           = params.categoryName
         subscription.paymentMethodDataName  = params.paymentMethodDataName
+        subscription.viewStatus             = params.viewStatus ?? false
+        subscription.renewBtnStatus         = params.renewBtnStatus ?? false
         stack.create(object: subscription)
     }
     
@@ -85,6 +87,8 @@ final class DBManager {
         object.cardNumber                   = params.cardNumber
         object.categoryName                 = params.categoryName
         object.paymentMethodDataName        = params.paymentMethodDataName
+        object.viewStatus                   = params.viewStatus ?? false
+        object.renewBtnStatus               = params.renewBtnStatus ?? false
         stack.update(object: object)
     }
     
@@ -118,7 +122,9 @@ final class DBManager {
                 isSelected                  : entity.isSelected,
                 cardNumber                  : entity.cardNumber,
                 categoryName                : entity.categoryName,
-                paymentMethodDataName       : entity.paymentMethodDataName
+                paymentMethodDataName       : entity.paymentMethodDataName,
+                viewStatus                  : entity.viewStatus,
+                renewBtnStatus              : entity.renewBtnStatus
             )
         }
     }

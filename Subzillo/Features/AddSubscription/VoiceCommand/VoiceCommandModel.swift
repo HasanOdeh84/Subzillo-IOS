@@ -67,6 +67,7 @@ public struct SubscriptionData: Codable, Hashable {
     var color                       : String?
     var title                       : String?
     var sourceReference             : String?
+    var renewBtnStatus              : Bool?
 }
 
 extension SubscriptionData {

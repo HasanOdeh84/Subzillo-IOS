@@ -8,7 +8,7 @@ enum urlType:Int{
     case prod  = 2
 }
 
-let Environment = urlType.stage
+let Environment = urlType.dev
 var baseurl: String {
     switch Environment {
     case .dev:
@@ -81,9 +81,11 @@ enum APIEndpoint: String {
     case analytics                      = "/analytics"
     case exportGmailSyncLogs            = "/exportGmailSyncLogs"
     case emailAutoSync                  = "/emailAutoSync"
-    case exportSubscriptionData        = "/exportSubscriptionData"
+    case exportSubscriptionData         = "/exportSubscriptionData"
     case listPricingPlans               = "/listPricingPlans"
-
+    case listSyncPeriods                = "/listSyncPeriods"
+    case updateSyncPeriod               = "/updateSyncPeriod"
+    case renewalUpdate                  = "/renewalUpdate"
 
     //new api's
     case deleteAccount                  = "/deleteAccount"
@@ -97,6 +99,6 @@ enum APIEndpoint: String {
 
 var authKey: String {
     get {
-        return "Bearer \(KeychainHelper.read(account: Constants.authKey) ?? "")"
+        return "Bearer \(KeychainHelperApp.read(account: Constants.authKey) ?? "")"
     }
 }

@@ -102,9 +102,9 @@ struct SettingsView: View {
                             }
                         )
                         .sheet(isPresented: $showEmailSyncBottomSheet) {
-                            AutoEmailSyncBottomSheet(onSelect: {_ in 
-                                settingsVM.emailAutoSync(input: EmailAutoSyncRequest(userId : Constants.getUserId(),
-                                                                                     type   : 1))
+                            AutoEmailSyncBottomSheet(onSelect: { id in
+                                settingsVM.updateSyncPeriod(input: UpdateSyncPeriodRequest(userId       : Constants.getUserId(),
+                                                                                           syncPeriodId : id))
                             })
                                 .presentationDragIndicator(.hidden)
                                 .presentationDetents([.height(420)])
@@ -175,35 +175,35 @@ struct SettingsView: View {
                             )
                         )
                         
-                        Divider().overlay(Color.neutral300Border)
-                        
-                        SettingsRow(
-                            title           : "Price Changes",
-                            subtitle        : "Notify when subscription costs change",
-                            trailingContent : AnyView(
-                                Toggle("", isOn: $priceChangesEnabled)
-                                    .toggleStyle(SwitchToggleStyle(tint: .blueMain700))
-                                    .labelsHidden()
-                                    .onChange(of: priceChangesEnabled) { newValue in
-                                        if newValue {
-                                            checkNotificationPermission { granted in
-                                                if granted {
-                                                    if newValue != (commonApiVM.userInfoResponse?.priceChangeReminders ?? false) {
-                                                        settingsVM.toggleReminders(input: ToggleRemindersRequest(userId: Constants.getUserId(), type: 2, status: newValue))
-                                                    }
-                                                } else {
-                                                    showPermissionPopup = true
-                                                    priceChangesEnabled = false
-                                                }
-                                            }
-                                        } else {
-                                            if newValue != (commonApiVM.userInfoResponse?.priceChangeReminders ?? false) {
-                                                settingsVM.toggleReminders(input: ToggleRemindersRequest(userId: Constants.getUserId(), type: 2, status: newValue))
-                                            }
-                                        }
-                                    }
-                            )
-                        )
+//                        Divider().overlay(Color.neutral300Border)
+//                        
+//                        SettingsRow(
+//                            title           : "Price Changes",
+//                            subtitle        : "Notify when subscription costs change",
+//                            trailingContent : AnyView(
+//                                Toggle("", isOn: $priceChangesEnabled)
+//                                    .toggleStyle(SwitchToggleStyle(tint: .blueMain700))
+//                                    .labelsHidden()
+//                                    .onChange(of: priceChangesEnabled) { newValue in
+//                                        if newValue {
+//                                            checkNotificationPermission { granted in
+//                                                if granted {
+//                                                    if newValue != (commonApiVM.userInfoResponse?.priceChangeReminders ?? false) {
+//                                                        settingsVM.toggleReminders(input: ToggleRemindersRequest(userId: Constants.getUserId(), type: 2, status: newValue))
+//                                                    }
+//                                                } else {
+//                                                    showPermissionPopup = true
+//                                                    priceChangesEnabled = false
+//                                                }
+//                                            }
+//                                        } else {
+//                                            if newValue != (commonApiVM.userInfoResponse?.priceChangeReminders ?? false) {
+//                                                settingsVM.toggleReminders(input: ToggleRemindersRequest(userId: Constants.getUserId(), type: 2, status: newValue))
+//                                            }
+//                                        }
+//                                    }
+//                            )
+//                        )
                     }
                     
                     //MARK: Privacy & Data (Legal/Support) Section

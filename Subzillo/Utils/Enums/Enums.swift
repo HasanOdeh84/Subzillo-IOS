@@ -25,10 +25,10 @@ enum NavigationRoute: Hashable{
     case chat
     case appearance
     case notifications
-    case manualEntry(isFromEdit:Bool = false, isFromListEdit: Bool = false, subscriptionId:String = "", familyMemberId:String = "", isFromEmail: Bool = false)
+    case manualEntry(isFromEdit:Bool = false, isFromListEdit: Bool = false, isRenew: Bool = false, subscriptionId:String = "", familyMemberId:String = "", isFromEmail: Bool = false)
     case voiceCommandView
     case subscriptionPreviewView(subscriptionsData:[SubscriptionData]?, content: String, isFromImage:Bool, isFromEmail: Bool = false, audioUrl:URL?)
-    case subscriptionMatchView(subscriptionData:SubscriptionData = SubscriptionData(), fromList:Bool = false, subscriptionId:String = "")
+    case subscriptionMatchView(subscriptionData:SubscriptionData = SubscriptionData(), fromList:Bool = false, fromPush:Bool = false, subscriptionId:String = "")
     case pasteTextView
     case duplicateSubscriptionsView(duplicateSubsList: [DuplicateDataInfo], fromFamily:Bool = false, isFromEmail: Bool = false)
     case duplicateUpdateView(duplicateSubsList: DuplicateDataInfo?, selectedIndex: Int, fromFamily:Bool = false, isFromEmail: Bool = false)
@@ -48,9 +48,9 @@ enum NavigationRoute: Hashable{
 extension NavigationRoute {
     var subId: String? {
         switch self {
-        case .manualEntry(_, _, let id, _, _):
+        case .manualEntry(_, _, _, let id, _, _):
             return id
-        case .subscriptionMatchView(_, _, let id):
+        case .subscriptionMatchView(_, _, _, let id):
             return id
         default:
             return nil
@@ -61,7 +61,7 @@ extension NavigationRoute {
         switch (self, other) {
         case (.home, .home): 
             return true
-        case (.subscriptionMatchView(_, _, let id1), .subscriptionMatchView(_, _, let id2)):
+        case (.subscriptionMatchView(_, _, _, let id1), .subscriptionMatchView(_, _, _, let id2)):
             return id1 == id2 && !id1.isEmpty
         case (.connectedEmailsList(let i1), .connectedEmailsList(let i2)):
             return i1 == i2

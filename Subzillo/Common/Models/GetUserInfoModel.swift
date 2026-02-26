@@ -40,6 +40,10 @@ public struct UserInfo: Codable, Hashable {
     var planSubscriptionLimit       : Int?
     var usedSubscriptionCount       : Int?
     var remainingSubscriptionLimit  : Int?
+    var currentPlan                 : String?
+    var planBillingCycle            : String?
+    var UpgradeBtnStatus            : Bool?
+    var planExpiresAt               : String?
 }
 
 public struct UnreadNotificationCountRequest: Codable {

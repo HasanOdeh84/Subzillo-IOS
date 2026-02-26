@@ -303,7 +303,7 @@ struct FilterSheet: View {
             }
         }
         .onChange(of: commonApiVM.categoriesResponse) { _ in updateCatInfo() }
-        .onChange(of: addSubscriptionVM.listFamilyMembersResponse) { _ in updateRelationInfo() }
+        .onChange(of: addSubscriptionVM.listFamilyMembersResponse?.familyMembers) { _ in updateRelationInfo() }
         .onChange(of: selectedFamilyMembers) { members in
             filterData.familyMemberIds = members.compactMap { $0.id }
         }
@@ -356,7 +356,7 @@ struct FilterSheet: View {
     func updateRelationInfo()
     {
         relationsData.removeAll()
-        if let familyCards = addSubscriptionVM.listFamilyMembersResponse {
+        if let familyCards = addSubscriptionVM.listFamilyMembersResponse?.familyMembers {
             for family in familyCards {
                 relationsData.append(
                     ManualDataInfo(
@@ -402,7 +402,7 @@ struct FilterSheet: View {
             nickName: "Me"
         )
         list.append(me)
-        let apiMembers = addSubscriptionVM.listFamilyMembersResponse?
+        let apiMembers = addSubscriptionVM.listFamilyMembersResponse?.familyMembers?
             .filter { $0.id != Constants.getUserId() } ?? []
         list.append(contentsOf: apiMembers)
         return list

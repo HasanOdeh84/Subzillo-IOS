@@ -86,7 +86,13 @@ public struct ListFamilyMembersRequest: Codable {
 
 public struct ListFamilyMembersResponse: Codable {
     var message                 : String?
-    var data                    : [ListFamilyMembersResponseData]?
+    var data                    : ListFamilyData?
+}
+
+public struct ListFamilyData: Codable {
+    var familyMembers                    : [ListFamilyMembersResponseData]?
+    var remainingFamilyMembersLimit      : Int?
+    var remainingSubscriptionLimit       : Int?
 }
 
 public struct ListFamilyMembersResponseData: Codable, Hashable {

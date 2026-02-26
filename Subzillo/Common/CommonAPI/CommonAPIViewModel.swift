@@ -77,8 +77,8 @@ class CommonAPIViewModel: ObservableObject {
             }
         receiveValue: { response in
             PrintLogger.modelLog(response, type: .response, isInput: false)
-            KeychainHelper.save(response.data?.accessToken, account: Constants.authKey)
-            KeychainHelper.save(response.data?.refreshToken, account: Constants.refreshKey)
+            KeychainHelperApp.save(response.data?.accessToken, account: Constants.authKey)
+            KeychainHelperApp.save(response.data?.refreshToken, account: Constants.refreshKey)
         }
         .store(in: &self.subscriptions)
     }

@@ -8,7 +8,7 @@
 import Security
 import Foundation
 
-struct KeychainHelper {
+struct KeychainHelperApp {
     static func save(_ value: String?, service: String? = AppInfo.bundleId, account: String) {
         if let data = value?.data(using: .utf8) {
             let query: [String: Any] = [

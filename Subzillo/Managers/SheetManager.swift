@@ -12,6 +12,7 @@ final class SheetManager: ObservableObject {
     static let shared = SheetManager()
     
     @Published var isOfflineSheetVisible = false
+    @Published var isUpgradeSheetVisible = false
         
     private init() {}
 }
