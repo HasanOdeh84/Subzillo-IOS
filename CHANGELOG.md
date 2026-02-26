@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
-## [1.3.0] (Beta) - 2026-02-23
+## [1.3.0] (Beta-Stage) - 2026-02-23
 
 ### Delivered
 - Gmail account connection
@@ -10,20 +10,20 @@ All notable changes to this project will be documented in this file.
 - View subscriptions detected from the connected Gmail account and add them
 - Delete connected Gmail account
 
-## [1.30.0] (Alpha) - 2026-02-19
+## [1.30.0] (Alpha-Stage) - 2026-02-19
 
 ### Modified
 - Build shared with stage url
 - Changed the connected emails list UI alignment.
 
-## [1.29.0] (Alpha) - 2026-02-19
+## [1.29.0] (Alpha-Stage) - 2026-02-19
 
 ### Modified
 - Build shared with stage url
 - Changed the toast while deleting the email when it's syncing.
 - Duplicate screen checkbox alignment issue fixed.
 
-## [1.28.0] (Alpha) - 2026-02-18
+## [1.28.0] (Alpha-Stage) - 2026-02-18
 
 ### Modified
 - Build shared with stage url
