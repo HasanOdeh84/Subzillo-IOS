@@ -290,6 +290,8 @@ struct ManualEntryView: View {
                     Button(action: selectCategory) {
                         FieldView(text: $category, textValue: selectedCategory?.name ?? category, title: "Category", image: "gridIcon", placeHolder: "Please select", isButton: true, isText: true)
                     }
+                    .allowsHitTesting(!isRenew)
+                    .opacity(isRenew ? 0.6 : 1.0)
                     .sheet(isPresented: $showCategorySheet) {
                         CategoriesBottomSheet(selectedCategory: $selectedCategory, categoryResponse:commonApiVM.categoriesResponse, header: "Select Category", placeholder: "Search Category")
                             .presentationDetents([.large])

@@ -44,6 +44,7 @@ public struct UserInfo: Codable, Hashable {
     var planBillingCycle            : String?
     var UpgradeBtnStatus            : Bool?
     var planExpiresAt               : String?
+    var uLink                       : String?
 }
 
 public struct UnreadNotificationCountRequest: Codable {

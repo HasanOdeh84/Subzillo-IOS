@@ -42,7 +42,7 @@ enum NavigationRoute: Hashable{
     case settings
     case contactUs
     case pricingPlans
-    case inviteFriends
+    case inviteFriends(uLink: String? = nil)
 }
 
 extension NavigationRoute {

@@ -25,7 +25,8 @@ struct InviteFriendsView: View {
     
     // MARK: - Properties
     @Environment(\.dismiss) private var dismiss
-    @State private var referralLink: String = "link.com"
+    @State private var referralLink: String = ""
+    var uLink : String? = ""
     
     // Data list representing the sections in the rewards card
     let rewardPlans = [
@@ -108,6 +109,11 @@ struct InviteFriendsView: View {
                                          width: 100,
                                          height: 48,
                                          action: {
+                                if !referralLink.isEmpty {
+                                    shareLink(referralLink)
+                                } else {
+                                    ToastManager.shared.showToast(message: "No referral link available", style: .info)
+                                }
                             })
                             .frame(width: 100)
                         }
@@ -178,6 +184,27 @@ struct InviteFriendsView: View {
         .background(Color.neutralBg100)
         .ignoresSafeArea()
         .navigationBarBackButtonHidden(true)
+        .onAppear {
+            if let link = uLink, !link.isEmpty {
+                referralLink = link
+            } else {
+                referralLink = "https://subzillo.com" // Default fallback or empty
+            }
+        }
+    }
+    
+    private func shareLink(_ link: String) {
+        let activityVC = UIActivityViewController(activityItems: [link], applicationActivities: nil)
+        // For iPad compatibility
+        if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+           let rootVC = windowScene.windows.first?.rootViewController {
+            if let popover = activityVC.popoverPresentationController {
+                popover.sourceView = rootVC.view
+                popover.sourceRect = CGRect(x: rootVC.view.bounds.midX, y: rootVC.view.bounds.midY, width: 0, height: 0)
+                popover.permittedArrowDirections = []
+            }
+            rootVC.present(activityVC, animated: true, completion: nil)
+        }
     }
 }
 

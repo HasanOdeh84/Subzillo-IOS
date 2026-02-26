@@ -390,8 +390,8 @@ struct RootView: View {
                     ContactUsView()
                 case .pricingPlans:
                     PricingPlansView()
-                case .inviteFriends:
-                    InviteFriendsView()
+                case .inviteFriends(let uLink):
+                    InviteFriendsView(uLink: uLink)
                 }
             }
         }

@@ -258,8 +258,8 @@ struct ProfileView: View {
                         Divider()
                             .overlay(Color.border)
                         ProfileItem(title: "Invite friends", image: "user-add-02", action:{
-                            ToastManager.shared.showToast(message: "Coming soon in S4",style:ToastStyle.info)
-//                            profileVM.navigate(to: .inviteFriends)
+//                            ToastManager.shared.showToast(message: "Coming soon in S4",style:ToastStyle.info)
+                            profileVM.navigate(to: .inviteFriends(uLink: commonApiVM.userInfoResponse?.uLink))
                         })
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)
