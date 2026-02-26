@@ -17,27 +17,29 @@ public struct getUserInfoResponse: Codable {
 }
 
 public struct UserInfo: Codable, Hashable {
-    var id                      : String?
-    var fullName                : String?
-    var email                   : String?
-    var phoneNumber             : String?
-    var countryCode             : String?
-    var preferredCurrency       : String?
-    var preferredCurrencySymbol : String?
-    var noofSubscriptions       : Int?
-    var averageMonthlySpend     : Int?
-    var profileImage            : String?
-    var registrationComplete    : Bool?
-    var emailNotifications      : Bool?
-    var smsNotifications        : Bool?
-    var pushNotifications       : Bool?
-    var createdAt               : String?
-    var tierId                  : String?
-    var tierName                : String?
-    var familyMembersLimit      : Int?
-    var renewalReminders        : Bool?
-    var priceChangeReminders    : Bool?
-//    var isEmailConnection       : Bool?
+    var id                          : String?
+    var fullName                    : String?
+    var email                       : String?
+    var phoneNumber                 : String?
+    var countryCode                 : String?
+    var preferredCurrency           : String?
+    var preferredCurrencySymbol     : String?
+    var noofSubscriptions           : Int?
+    var averageMonthlySpend         : Int?
+    var profileImage                : String?
+    var registrationComplete        : Bool?
+    var emailNotifications          : Bool?
+    var smsNotifications            : Bool?
+    var pushNotifications           : Bool?
+    var createdAt                   : String?
+    var tierId                      : String?
+    var tierName                    : String?
+    var familyMembersLimit          : Int?
+    var renewalReminders            : Bool?
+    var priceChangeReminders        : Bool?
+    var planSubscriptionLimit       : Int?
+    var usedSubscriptionCount       : Int?
+    var remainingSubscriptionLimit  : Int?
 }
 
 public struct UnreadNotificationCountRequest: Codable {

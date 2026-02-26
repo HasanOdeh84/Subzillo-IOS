@@ -148,15 +148,15 @@ struct GradientBgBtn: View {
         Button(action: action) {
             ZStack {
                 HStack {
-                    Image(image)
-                        .frame(width: 20, height: 20)
-                        .padding(.leading, 24)
+//                    Image(image)
+//                        .frame(width: 20, height: 20)
+//                        .padding(.leading, 24)
                     HStack{
                         Text(title)
                             .font(.appSemiBold(18))
                             .foregroundColor(.white)
                             .padding(.horizontal, 18)
-                        Spacer()
+//                        Spacer()
                     }
                 }
             }

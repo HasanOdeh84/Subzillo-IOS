@@ -296,8 +296,8 @@ struct WelcomeHomeView: View {
         ToastManager.shared.showToast(message: "Coming soon in S5",style:ToastStyle.info)
     }
     private func goToUploadImage() {
-        ToastManager.shared.showToast(message: "Coming soon",style:ToastStyle.info)
-//        showUploadPopup = true
+//        ToastManager.shared.showToast(message: "Coming soon",style:ToastStyle.info)
+        showUploadPopup = true
     }
     private func goToConnectEmail() {
 //        AppIntentRouter.shared.navigate(to: .connectEmail)

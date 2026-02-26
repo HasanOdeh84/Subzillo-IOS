@@ -145,7 +145,7 @@ struct ProfileView: View {
                             .multilineTextAlignment(.center)
                     }
                     
-                    GradientBgBtn(title: "Upgrade today and save 30%", image: "percentage", action: {
+                    GradientBgBtn(title: "Upgrade today", action: {
                         ToastManager.shared.showToast(message: "Coming soon in S4",style:ToastStyle.info)
 //                        profileVM.navigate(to: .pricingPlans)
                     })

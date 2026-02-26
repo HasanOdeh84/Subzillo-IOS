@@ -300,8 +300,8 @@ struct SettingsView: View {
         }
         .onChange(of: settingsVM.isUpdateSuccess) { _ in
             if settingsVM.isUpdateSuccess{
-                renewalRemindersEnabled     = false
-                priceChangesEnabled         = false
+                renewalRemindersEnabled     = true
+                priceChangesEnabled         = true
             }
         }
         .onChange(of: settingsVM.isUpdateError1) { errorOccurred in

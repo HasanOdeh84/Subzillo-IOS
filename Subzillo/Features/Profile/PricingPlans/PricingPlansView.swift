@@ -326,8 +326,7 @@ struct PlanToggleView: View {
             Button {
                 selectedSegment = .first
             } label: {
-                HStack(spacing: 5) {
-                    
+                HStack() {
                     Text(LocalizedStringKey(leftText))
                         .font(.appSemiBold(14))
                         .foregroundColor(selectedSegment == .first ? Color.white : .navyBlueCTA700)
@@ -362,23 +361,22 @@ struct PlanToggleView: View {
             Button {
                 selectedSegment = .second
             } label: {
-                HStack(spacing: 8) {
-                    
+                HStack() {
                     Text(LocalizedStringKey(rightText))
                         .font(.appSemiBold(14))
                         .foregroundColor(selectedSegment == .second ? Color.white : .navyBlueCTA700)
                     
-                    Text("SAVE %24")
-                        .font(.appSemiBold(14))
-                        .foregroundColor(.white)
-                        .padding(.horizontal, 8)
-                        .padding(.vertical, 4)
-                        .background(
-                            LinearGradient(colors: [Color.linearGradient3, Color.linearGradient4, Color.blueMain700],
-                                           startPoint: .top,
-                                           endPoint: .bottom)
-                        )
-                        .cornerRadius(18)
+//                    Text("SAVE %24")
+//                        .font(.appSemiBold(14))
+//                        .foregroundColor(.white)
+//                        .padding(.horizontal, 8)
+//                        .padding(.vertical, 4)
+//                        .background(
+//                            LinearGradient(colors: [Color.linearGradient3, Color.linearGradient4, Color.blueMain700],
+//                                           startPoint: .top,
+//                                           endPoint: .bottom)
+//                        )
+//                        .cornerRadius(18)
                 }
                 .padding(12)
                 .frame(maxWidth: .infinity, minHeight: 40)

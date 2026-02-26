@@ -21,6 +21,7 @@ struct InfoAlertSheet: View {
     var imageSize                           : CGFloat = 100
     var isCancelButtonVisible               : Bool = false
     var isImageVisible                      : Bool = true
+    var isBtn                               : Bool = true
     
     //MARK: - body
     var body: some View {
@@ -70,7 +71,7 @@ struct InfoAlertSheet: View {
             
             if !isCancelButtonVisible{
                 GradientBorderButton(title          : buttonTitle ?? "",
-                                     isBtn          : true,
+                                     isBtn          : isBtn,
                                      buttonImage    : buttonIcon ?? "") {
                     onDelegate?()
                     dismiss()

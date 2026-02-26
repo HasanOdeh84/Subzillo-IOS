@@ -485,6 +485,10 @@ struct SubscriptionPreviewView: View {
             if subscriptionData?.serviceName ?? "" != ""{
                 fetchProviderDataApi()
             }
+//            commonApiVM.getUserInfo(input: getUserInfoRequest(userId: Constants.getUserId()))
+//            if commonApiVM.userInfoResponse?.remainingSubscriptionLimit ?? 0 < numberOfSubscriptions{
+//                showLimitExceedPopup = true
+//            }
         }
         .onChange(of: globalSubscriptionData) { _ in updateSubDetails() }
         .onChange(of: commonApiVM.currencyResponse) { _ in getSubDetails() }
@@ -534,11 +538,12 @@ struct SubscriptionPreviewView: View {
                 onDelegate: {
                     
                 }, title                : "Plan Limit Exceeded",
-                subTitle                : "Your current plan allows only 3 active subscriptions.",
+                subTitle                : commonApiVM.userInfoResponse?.remainingSubscriptionLimit ?? 0 == 0 ? "Your current plan limit exceeded, Upgrade now." : "Your current plan allows only \(commonApiVM.userInfoResponse?.remainingSubscriptionLimit ?? 0) active subscriptions.",
                 buttonTitle             : "Ok",
                 imageSize               : 70,
                 isCancelButtonVisible   : false,
-                isImageVisible          : false
+                isImageVisible          : false,
+                isBtn                   : false
             )
             .onPreferenceChange(InnerHeightPreferenceKey.self) { height in
                 if height > 0 {
@@ -773,43 +778,48 @@ struct SubscriptionPreviewView: View {
                 ToastManager.shared.showToast(message: errorMessage,style:ToastStyle.error)
             }
             else {
-                //source -> 1- manual, 2 - voice, 3 - image, 4 - email
-                var source = 2
-                if isFromEmail {
-                    source = 4
-                } else if isFromImage == true {
-                    source = 3
-                }
-                var subsctionsArray: [ConfirmedSubscription] = []
-                for i in 0..<subscriptionsData!.count
-                {
-                    let objc = subscriptionsData![i]
-                    var currency = objc.currency ?? ""
-                    if objc.currency == "" || objc.currency == nil || objc.currency == "null" {
-                        currency = Constants.shared.currencyCode
+//                if commonApiVM.userInfoResponse?.remainingSubscriptionLimit ?? 0 < numberOfSubscriptions{
+//                    showLimitExceedPopup = true
+//                }else{
+                    
+                    //source -> 1- manual, 2 - voice, 3 - image, 4 - email
+                    var source = 2
+                    if isFromEmail {
+                        source = 4
+                    } else if isFromImage == true {
+                        source = 3
                     }
-                    //                    let currency = (objc.currency ?? "" == "") ? Constants.shared.currencyCode : (objc.currency ?? "")
-                    let logoUrl = getFileName(from: objc.serviceLogo ?? "")
-                    let subObjc = ConfirmedSubscription(serviceName         : objc.serviceName ?? "",
-                                                        serviceLogo         : logoUrl,
-                                                        amount              : objc.amount ?? 0.0,
-                                                        currency            : currency,//objc.currency ?? "",
-                                                        billingCycle        : objc.billingCycle ?? "",
-                                                        nextPaymentDate     : (objc.nextPaymentDate ?? "").formattedDate(from: "dd/MM/yyyy", to: "yyyy-MM-dd"),
-                                                        subscriptionType    : objc.subscriptionType ?? "",
-                                                        paymentMethod       : objc.paymentMethodId ?? "",
-                                                        paymentMethodDataId : objc.paymentMethodDataId ?? "",
-                                                        category            : objc.categoryId ?? "",
-                                                        subscriptionFor     : objc.subscriptionFor ?? Constants.getUserId(),
-                                                        renewalReminder     : objc.renewalReminder ?? [],
-                                                        notes               : objc.reason ?? "",
-                                                        currencySymbol      : objc.currencySymbol ?? "",
-                                                        source              : source,
-                                                        sourceReference     : isFromEmail ? objc.sourceReference : nil)
-                    subsctionsArray.append(subObjc)
-                }
-                let input = PendingSubscriptionConfirmRequest(userId: Constants.getUserId(), confirmedSubscription: subsctionsArray)
-                subscriptionPreviewVM.updateSubscriptions(input: input)
+                    var subsctionsArray: [ConfirmedSubscription] = []
+                    for i in 0..<subscriptionsData!.count
+                    {
+                        let objc = subscriptionsData![i]
+                        var currency = objc.currency ?? ""
+                        if objc.currency == "" || objc.currency == nil || objc.currency == "null" {
+                            currency = Constants.shared.currencyCode
+                        }
+                        //                    let currency = (objc.currency ?? "" == "") ? Constants.shared.currencyCode : (objc.currency ?? "")
+                        let logoUrl = getFileName(from: objc.serviceLogo ?? "")
+                        let subObjc = ConfirmedSubscription(serviceName         : objc.serviceName ?? "",
+                                                            serviceLogo         : logoUrl,
+                                                            amount              : objc.amount ?? 0.0,
+                                                            currency            : currency,//objc.currency ?? "",
+                                                            billingCycle        : objc.billingCycle ?? "",
+                                                            nextPaymentDate     : (objc.nextPaymentDate ?? "").formattedDate(from: "dd/MM/yyyy", to: "yyyy-MM-dd"),
+                                                            subscriptionType    : objc.subscriptionType ?? "",
+                                                            paymentMethod       : objc.paymentMethodId ?? "",
+                                                            paymentMethodDataId : objc.paymentMethodDataId ?? "",
+                                                            category            : objc.categoryId ?? "",
+                                                            subscriptionFor     : objc.subscriptionFor ?? Constants.getUserId(),
+                                                            renewalReminder     : objc.renewalReminder ?? [],
+                                                            notes               : objc.reason ?? "",
+                                                            currencySymbol      : objc.currencySymbol ?? "",
+                                                            source              : source,
+                                                            sourceReference     : isFromEmail ? objc.sourceReference : nil)
+                        subsctionsArray.append(subObjc)
+                    }
+                    let input = PendingSubscriptionConfirmRequest(userId: Constants.getUserId(), confirmedSubscription: subsctionsArray)
+                    subscriptionPreviewVM.updateSubscriptions(input: input)
+//                }
             }
         }
     }
