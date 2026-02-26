@@ -9,40 +9,45 @@ struct ConnectedEmailItemView: View {
     @State var isIntegrations   : Bool = false
     
     var body: some View {
-        HStack(spacing: 12) {
-            // Provider Icon
-            Image(provider.iconName)
-                .resizable()
-                .scaledToFit()
-//                .frame(width: 24, height: 24)
-                .frame(width: 31, height: 31)
-//                .padding(12)
-//                .background(Color.white)
-//                .clipShape(Circle())
-//                .overlay(
-//                    Circle()
-//                        .stroke(Color.border, lineWidth: 0.5)
-//                )
-            
-            VStack(alignment: .leading, spacing: 4) {
-                Text(email.email ?? "")
-                    .font(.appSemiBold(16))
-                    .foregroundStyle(Color.underlineGray)
+        VStack(){
+            HStack(spacing: 12) {
+                // Provider Icon
+                Image(provider.iconName)
+                    .resizable()
+                    .scaledToFit()
+                //                .frame(width: 24, height: 24)
+                    .frame(width: 31, height: 31)
+                //                .padding(12)
+                //                .background(Color.white)
+                //                .clipShape(Circle())
+                //                .overlay(
+                //                    Circle()
+                //                        .stroke(Color.border, lineWidth: 0.5)
+                //                )
                 
-                if email.lastSyncDate != ""{
-                    if email.lastSyncDate != nil{
-                        Text(email.lastSyncDate ?? "")//.formattedDate(from: "DD/MM/YYYY", to: "dd/MM/yyyy"))
-                            .font(.appRegular(14))
-                            .foregroundStyle(Color.underlineGray)
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(email.email ?? "")
+                        .font(.appSemiBold(16))
+                        .foregroundStyle(Color.underlineGray)
+                    
+                    if email.lastSyncDate != ""{
+                        if email.lastSyncDate != nil{
+                            Text(email.lastSyncDate ?? "")//.formattedDate(from: "DD/MM/YYYY", to: "dd/MM/yyyy"))
+                                .font(.appRegular(14))
+                                .foregroundStyle(Color.underlineGray)
+                        }
                     }
                 }
+                
+                Spacer()
             }
-            
-            Spacer()
-            
+
             // Action Button
             if !isIntegrations{
-                actionButton
+                HStack{
+                    Spacer()
+                    actionButton
+                }
             }
         }
         .opacity(email.syncStatus == 1 ? 0.6 : 1.0)
