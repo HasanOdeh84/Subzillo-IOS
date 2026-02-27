@@ -48,6 +48,7 @@ struct ManualEntryView: View {
     @State private var currency                 : String = ""
     @State private var planType                 : String = ""
     @State private var chargeDate               : String = ""
+    @State private var initialRenewDate         : String = ""
     @State private var category                 : String = ""
     @State private var paymentMethod            : String = ""
     @State private var notes                    : String = ""
@@ -1153,7 +1154,8 @@ struct ManualEntryView: View {
                 if isRenew {
                     let formatter = DateFormatter()
                     formatter.dateFormat = "yyyy-MM-dd"
-                    if let baseDate = formatter.date(from: chargeDate) {
+                    // Use the original yyyy-MM-dd string for parsing
+                    if let baseDate = formatter.date(from: globalSubscriptionData?.nextPaymentDate ?? "") {
                         chargeDate = Constants.shared.getNextDateByFrequency(
                             frequency: billing,
                             baseDate: baseDate
@@ -1163,6 +1165,7 @@ struct ManualEntryView: View {
                             frequency: billing
                         )
                     }
+                    initialRenewDate = chargeDate
                 } else {
                     chargeDate = Constants.shared.getNextDateByFrequency(
                         frequency: billing
@@ -1372,17 +1375,13 @@ struct ManualEntryView: View {
         
         // Mandatory fields check
         let mandatoryChanged =
+        serviceName.trimmed != (original?.serviceName ?? "") ||
         planType.trimmed != (original?.subscriptionType ?? "") ||
         abs((Double(amount.trimmed) ?? 0.0) - (original?.amount ?? 0.0)) > 0.01 ||
         effectiveCurrency != (original?.currency ?? "") ||
-//        category != (original?.categoryId ?? "") ||
         billingCycle != (original?.billingCycle ?? "")
-        //        ||
-        //        subscriptionFor != (original?.subscriptionFor ?? "") ||
-        //        paymentMethod != (original?.paymentMethodId ?? "") ||
-        //        paymentMethodDataId != (original?.paymentMethodDataId ?? "")
         
-        let nextDateChanged = chargeDate.formattedDate(from: "dd/MM/yyyy", to: "yyyy-MM-dd") != original?.nextPaymentDate
+        let nextDateChanged = chargeDate != initialRenewDate
         
         let optionalChanged =
         paymentMethod != (original?.paymentMethodId ?? "") ||
@@ -1391,31 +1390,29 @@ struct ManualEntryView: View {
         renewalReminder != (original?.renewalReminder ?? []) ||
         notes.trimmed != original?.notes
         
-        let renewalRequest = RenewalUpdateRequest(
-            userId: Constants.getUserId(),
-            subscriptionId: subscriptionId,
-            type: mandatoryChanged ? 2 : 1,
-            serviceName: serviceName.trimmed,
-            amount: Double(amount.trimmed),
-            currency: selectedCurrency?.code ?? "",
-            currencySymbol: selectedCurrency?.symbol ?? "",
-            billingCycle: billingCycle,
-            nextPaymentDate: chargeDate.formattedDate(from: "dd/MM/yyyy", to: "yyyy-MM-dd"),
-            subscriptionType: planType.trimmed,
-            paymentMethod: paymentMethod,
-            paymentMethodDataId: paymentMethodDataId,
-            category: category,
-            subscriptionFor: subscriptionFor,
-            renewalReminder: renewalReminder,
-            notes: notes.trimmed
-        )
-        
         if mandatoryChanged {
             // If mandatory changed, use type 2.
+            let renewalRequest = RenewalUpdateRequest(
+                userId: Constants.getUserId(),
+                subscriptionId: subscriptionId,
+                type: 2,
+                serviceName: serviceName.trimmed,
+                amount: Double(amount.trimmed),
+                currency: selectedCurrency?.code ?? "",
+                currencySymbol: selectedCurrency?.symbol ?? "",
+                billingCycle: billingCycle,
+                nextPaymentDate: chargeDate.formattedDate(from: "dd/MM/yyyy", to: "yyyy-MM-dd"),
+                subscriptionType: planType.trimmed,
+                paymentMethod: paymentMethod,
+                paymentMethodDataId: paymentMethodDataId,
+                category: category,
+                subscriptionFor: subscriptionFor,
+                renewalReminder: renewalReminder,
+                notes: notes.trimmed
+            )
             subscriptionMatchVM.renewalUpdate(input: renewalRequest)
-        } else
-        if optionalChanged {
-            // Only optional fields changed (and potentially the date)
+        } else if optionalChanged || nextDateChanged {
+            // If optional fields or next charge date changed, call edit API
             let editInput = EditSubscriptionRequest(
                 userId: Constants.getUserId(),
                 subscriptionId: subscriptionId,
@@ -1435,7 +1432,7 @@ struct ManualEntryView: View {
             )
             addSubscriptionVM.editSubscription(input: editInput)
         } else {
-            // Only date changed or nothing changed -> use type 1.
+            // If nothing changed, call renewalUpdate API with type 1
             let renewalRequest = RenewalUpdateRequest(
                 userId          : Constants.getUserId(),
                 subscriptionId  : subscriptionId,

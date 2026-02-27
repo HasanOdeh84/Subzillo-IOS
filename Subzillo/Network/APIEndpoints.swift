@@ -95,6 +95,7 @@ enum APIEndpoint: String {
     case getPaymentMethods              = "/getPaymentMethods"
     case getCurrencies                  = "/getCurrencies"
     case getCountryCodes                = "/getCountryCodes"
+    case getAppVersion                  = "/getAppVersion"
 }
 
 var authKey: String {

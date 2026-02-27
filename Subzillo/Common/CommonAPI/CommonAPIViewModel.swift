@@ -165,6 +165,42 @@ class CommonAPIViewModel: ObservableObject {
         }
         .store(in: &self.subscriptions)
     }
+
+    func getAppVersionInfo() {
+        apiReference.getApi(endPoint: APIEndpoint.getAppVersion, token: defaultAuthKey, responseType: AppVersionResponse.self)
+            .sink { [unowned self] completion in
+                if case let .failure(error) = completion {
+                    self.handleError(error, endPoint: APIEndpoint.getAppVersion)
+                }
+            }
+        receiveValue: { [self] response in
+            PrintLogger.modelLog(response, type: .response, isInput: false)
+            self.checkVersionUpdate(apiData: response.data)
+        }
+        .store(in: &self.subscriptions)
+    }
+
+    private func checkVersionUpdate(apiData: AppVersionData?) {
+        guard let apiVersion = apiData?.appVersion, let isActive = apiData?.isActive, isActive else { return }
+        let currentVersion = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0.0"
+        let result = currentVersion.compare(apiVersion, options: .numeric)
+        if result == .orderedAscending {
+            let isForce = apiData?.forceUpdate ?? false
+            DispatchQueue.main.async {
+                AlertManager.shared.showAlert(
+                    title       : "Update Available",
+                    message     : isForce ? "A new version of the app is available. Please update to continue using the app." : "A new version of the app is available. Would you like to update now?",
+                    okText      : "Update",
+                    cancelText  : isForce ? nil : "Later",
+                    okAction    : {
+                        if let url = URL(string: "https://apps.apple.com/in/app/whatsapp-messenger/id310633997") {
+                            UIApplication.shared.open(url)
+                        }
+                    }
+                )
+            }
+        }
+    }
     
     // MARK: - Handle errors
     func handleError(_ apiError: APIError, endPoint : APIEndpoint) {

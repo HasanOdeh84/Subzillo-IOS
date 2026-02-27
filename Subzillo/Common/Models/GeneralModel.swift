@@ -75,3 +75,18 @@ public struct UpdateDeviceIdData: Codable, Hashable {
     var accessToken             : String?
     var refreshToken            : String?
 }
+
+public struct AppVersionResponse: Codable {
+    let message     : String?
+    let data        : AppVersionData?
+}
+
+public struct AppVersionData: Codable {
+    let id          : Int?
+    let deviceType  : Int?
+    let forceUpdate : Bool?
+    let appVersion  : String?
+    let isActive    : Bool?
+    let createdAt   : String?
+    let updatedAt   : String?
+}

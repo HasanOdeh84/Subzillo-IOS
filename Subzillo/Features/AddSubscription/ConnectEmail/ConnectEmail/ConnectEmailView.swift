@@ -53,6 +53,7 @@ struct ConnectEmailView: View {
 //                    Divider()
 //                        .overlay(Color.neutral300Border)
 //                    UploadItem(title: "Connect Yahoo", subTitle: "Integrate your Yahoo Mail account to organize and manage subscriptions.", image: "yahoo", imageColor: Color.systemInfo, action: yahooAction, isEmail: true)
+//                    UploadItem(title: "Connect iCloud", subTitle: "Integrate your iCloud account to organize and manage subscriptions.", image: "yahoo", imageColor: Color.systemInfo, action: yahooAction, isEmail: true)
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .frame(height: 160)//240)
@@ -121,6 +122,19 @@ struct ConnectEmailView: View {
                 }
             }
         }
+        .onChange(of: connectEmailVM.isIcloudSuccess) { success in
+            if success, let oauthUrlString = connectEmailVM.oauthUrlResponse?.authUrl, let url = URL(string: oauthUrlString) {
+                let callbackScheme = "subzillo"
+                OAuthManager.shared.startOAuth(url: url, callbackScheme: callbackScheme) { callbackURL, error in
+                    if let callbackURL = callbackURL {
+                        connectEmailVM.handleOAuthCallback(url: callbackURL, type: 3)
+                    } else if let error = error {
+                        print("OAuth error: \(error.localizedDescription)")
+                    }
+                    connectEmailVM.isIcloudSuccess = false
+                }
+            }
+        }
     }
     
     //MARK: - Button actions
@@ -168,6 +182,8 @@ struct ConnectEmailView: View {
     
     private func yahooAction() {
         ToastManager.shared.showToast(message: "Coming soon in S4",style:ToastStyle.info)
+//        connectEmailVM.oauthUrl(input: OauthUrlRequest(userId   : Constants.getUserId(),
+//                                                       type     : 3))
     }
 }
 

@@ -248,6 +248,7 @@ struct SubzilloApp: App {
                 .onAppear {
                     sharedViewModel.getCurrencies()
                     sharedViewModel.getCountries()
+//                    sharedViewModel.getAppVersionInfo()
                 }
                 .onOpenURL { url in
                     print("SubzilloApp: onOpenURL received: \(url.absoluteString)")
@@ -275,6 +276,7 @@ struct SubzilloApp: App {
                 //                print("✅ App is in Foreground (Active)")
                 appDelegate.requestAuthorization()
                 checkAndUpdateDeviceToken()
+//                sharedViewModel.getAppVersionInfo()
             case .inactive:
                 print("⚠️ App is Inactive (e.g., transitioning)")
             case .background:
