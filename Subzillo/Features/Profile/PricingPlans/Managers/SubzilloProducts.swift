@@ -20,6 +20,17 @@ public struct SubzilloProducts {
         SubzilloProducts.goldMonthly,
         SubzilloProducts.goldYearly
     ]
+    
+    static func productId(for planName: String, segment: Segment?) -> String? {
+        let name = planName.lowercased()
+        let isYearly = segment == .second
+        if name.contains("silver") {
+            return isYearly ? silverYearly : silverMonthly
+        } else if name.contains("gold") {
+            return isYearly ? goldYearly : goldMonthly
+        }
+        return nil // Free plan has no IAP product
+    }
 }
 
 func resourceNameForProductIdentifier(_ productIdentifier: String) -> String? {

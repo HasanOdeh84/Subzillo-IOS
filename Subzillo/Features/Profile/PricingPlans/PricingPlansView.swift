@@ -113,7 +113,16 @@ struct PricingPlansView: View {
                         
                         Button {
                             Task {
-                                try? await storeManager.restorePurchases()
+                                try? await storeManager.restorePurchases { restoredEntitlements in
+                                    for entitlement in restoredEntitlements {
+                                        if let matchedPlan = viewModel.pricingPlans.first(where: {
+                                            ($0.iosProductId ?? "") == entitlement.productID ||
+                                            SubzilloProducts.productId(for: $0.planName ?? "", segment: selectedSegment) == entitlement.productID
+                                        }), let planId = matchedPlan.id {
+                                            subscribePlanAPI(planId: planId, transactionId: entitlement.transactionId)
+                                        }
+                                    }
+                                }
                             }
                         } label: {
                             Text("Restore Purchases")
@@ -145,6 +154,9 @@ struct PricingPlansView: View {
         .onAppear {
             justAppeared = true
             Task {
+                if commonApiVM.userInfoResponse == nil {
+                    commonApiVM.getUserInfo(input: getUserInfoRequest(userId: Constants.getUserId()))
+                }
                 viewModel.listPricingPlans(type: selectedSegment == .first ? 1 : 2)
                 await storeManager.fetchProducts(productIDs: SubzilloProducts.productIdentifiers)
                 await storeManager.updatePurchasedProducts()
@@ -156,6 +168,11 @@ struct PricingPlansView: View {
         }
         .onChange(of: selectedSegment) { _ in
             viewModel.listPricingPlans(type: selectedSegment == .first ? 1 : 2)
+        }
+        .onChange(of: viewModel.isSubscribe) { value in
+            if value{
+                viewModel.listPricingPlans(type: selectedSegment == .first ? 1 : 2)
+            }
         }
     }
     
@@ -179,6 +196,33 @@ struct PricingPlansView: View {
         return attriString
     }
     
+    private func getPlanRank(from name: String, isYearly: Bool) -> Int {
+        let name = name.lowercased()
+        if name.contains("free") { return 0 }
+        if name.contains("silver") {
+            return isYearly ? 2 : 1
+        }
+        if name.contains("gold") {
+            return isYearly ? 4 : 3
+        }
+        return 0
+    }
+
+    private var currentUserRank: Int {
+        let userPricingPlanId = "62561363-210d-42cd-9eef-3d99f5b605d3"
+        if let currentPlan = viewModel.pricingPlans.first(where: { $0.id == userPricingPlanId }) {
+            let name = currentPlan.planName ?? ""
+            let isYearly = (selectedSegment == .second) && !name.lowercased().contains("free")
+            return getPlanRank(from: name, isYearly: isYearly)
+        }
+//        guard let response = commonApiVM.userInfoResponse else { return 0 }
+//        let name = response.planName ?? "Free"
+//        let cycle = (response.planBillingCycle ?? "").lowercased()
+//        let isYearly = cycle.contains("year") || name.lowercased().contains("yearly") || name.lowercased().contains("annually")
+//        return getPlanRank(from: name, isYearly: isYearly)
+        return 0
+    }
+
     private func getUIPlan(from plan: PricingPlan) -> PricingPlanUI {
         let name = plan.planName ?? ""
         let isSilver = name.lowercased().contains("silver")
@@ -186,10 +230,14 @@ struct PricingPlansView: View {
         let isFree = name.lowercased().contains("free")
         
         var productID: String?
-        if isSilver {
-            productID = (selectedSegment == .second) ? SubzilloProducts.silverYearly : SubzilloProducts.silverMonthly
-        } else if isGold {
-            productID = (selectedSegment == .second) ? SubzilloProducts.goldYearly : SubzilloProducts.goldMonthly
+        if plan.iosProductId == nil || plan.iosProductId == ""{
+            if isSilver {
+                productID = (selectedSegment == .second) ? SubzilloProducts.silverYearly : SubzilloProducts.silverMonthly
+            } else if isGold {
+                productID = (selectedSegment == .second) ? SubzilloProducts.goldYearly : SubzilloProducts.goldMonthly
+            }
+        }else{
+            productID = plan.iosProductId ?? ""
         }
         
         var displayPrice: String = ""
@@ -201,11 +249,29 @@ struct PricingPlansView: View {
                 billingCycle = "/ month"
             }
             if period?.unit == .year {
-                billingCycle = "/ month"
+                billingCycle = "/ year"
             }
         } else {
             displayPrice = "\(plan.currencySymbol ?? "$")\(plan.price ?? 0.0)"
             billingCycle = (selectedSegment == .second ? "/ year" : "/ month")
+        }
+        
+        // Calculate ranks for upgrade logic
+        let isPlanYearly = (selectedSegment == .second) && !isFree
+        let renderedPlanRank = getPlanRank(from: name, isYearly: isPlanYearly)
+        
+        let userPricingPlanId = "62561363-210d-42cd-9eef-3d99f5b605d3"
+        let isActuallyCurrent = (plan.id == userPricingPlanId) && (userPricingPlanId != nil)
+        
+        let userRank = currentUserRank
+        
+        var buttonTitle = ""
+        if isActuallyCurrent {
+            buttonTitle = "Current Plan"
+        } else if renderedPlanRank > userRank {
+            buttonTitle = isFree ? "" : "Upgrade"
+        } else {
+            buttonTitle = ""
         }
         
         return PricingPlanUI(
@@ -213,18 +279,30 @@ struct PricingPlansView: View {
             price           : isFree ? nil : displayPrice,
             priceSubtitle   : isFree ? nil : billingCycle,
             features        : [plan.description ?? "Basic features"],
-            //            badgeColor      : isFree && (plan.isCurrentPlan ?? false) ? Color.neutral600 : nil,
-            badgeColor      : (plan.isCurrentPlan ?? false) ? Color.neutral600 : nil,
-            buttonTitle     : (plan.isCurrentPlan ?? false) ? "Current Plan" : (isFree ? "" : "Upgrade"),
+            badgeColor      : isActuallyCurrent ? Color.neutral600 : nil,
+            buttonTitle     : buttonTitle,
             isCurrent       : plan.isCurrentPlan ?? false,
             action          : {
                 if let id = productID, let product = storeManager.products.first(where: { $0.id == id }) {
                     Task {
-                        try? await storeManager.purchase(product)
+                        if let transaction = try? await storeManager.purchase(product),
+                           let planId = plan.id {
+                            subscribePlanAPI(planId: planId, transactionId: String(transaction.id))
+                        }
                     }
                 }
             }
         )
+    }
+    
+    func subscribePlanAPI(planId: String, transactionId: String) {
+        let request = SubscribePlanRequest(
+            userId        : Constants.getUserId(),
+            pricingPlanId : planId,
+            platform      : 2,
+            transactionId : transactionId
+        )
+        viewModel.subscribePlan(input: request)
     }
 }
 

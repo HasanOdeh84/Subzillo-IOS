@@ -12,7 +12,8 @@ struct SplashView: View {
     @State var isActive               : Bool = false
     @StateObject var appState         = AppState.shared
     @EnvironmentObject var router     : AppIntentRouter
-    
+    @StateObject private var pricingVM = PricingPlansViewModel()
+
     var body: some View {
         ZStack {
             Group {
@@ -44,9 +45,11 @@ struct SplashView: View {
             .ignoresSafeArea(edges: .horizontal)
         }
         .onAppear {
+            if appState.isLoggedIn {
+                pricingVM.retryPendingSubscribePlanIfNeeded()
+            }
+
             DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
-                //                withAnimation {
-                //                }
                 navigateToNextScreen()
             }
         }

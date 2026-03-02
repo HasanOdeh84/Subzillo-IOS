@@ -28,23 +28,18 @@ public struct UserInfo: Codable, Hashable {
     var averageMonthlySpend         : Int?
     var profileImage                : String?
     var registrationComplete        : Bool?
-    var emailNotifications          : Bool?
-    var smsNotifications            : Bool?
-    var pushNotifications           : Bool?
-    var createdAt                   : String?
-    var tierId                      : String?
-    var tierName                    : String?
-    var familyMembersLimit          : Int?
     var renewalReminders            : Bool?
     var priceChangeReminders        : Bool?
+    var pricingPlanId               : String?
+    var planName                    : String?
     var planSubscriptionLimit       : Int?
     var usedSubscriptionCount       : Int?
     var remainingSubscriptionLimit  : Int?
-    var currentPlan                 : String?
     var planBillingCycle            : String?
-    var UpgradeBtnStatus            : Bool?
     var planExpiresAt               : String?
-    var uLink                       : String?
+    var upgradeBtnStatus            : Bool?
+    var referralCode                : String?
+    var referralLink                : String?
 }
 
 public struct UnreadNotificationCountRequest: Codable {

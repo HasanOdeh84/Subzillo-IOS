@@ -91,17 +91,6 @@ struct FamilyMembersBottomSheet: View {
                                 }
                             }
                         }
-                        .background(
-                            GeometryReader { geo in
-                                Color.clear
-                                    .onAppear {
-                                        contentHeight = geo.size.height
-                                    }
-                                    .onChange(of: geo.size.height) { newHeight in
-                                        contentHeight = newHeight
-                                    }
-                            }
-                        )
                         .background(.clear)
                         .cornerRadius(12)
                         .overlay(
@@ -134,8 +123,19 @@ struct FamilyMembersBottomSheet: View {
                 .padding(.horizontal, 24)
                 .padding(.bottom, 24)
             }
+//            .background(
+//                GeometryReader { geo in
+//                    Color.clear
+//                        .onAppear {
+//                            contentHeight = geo.size.height
+//                        }
+//                        .onChange(of: geo.size.height) { newHeight in
+//                            contentHeight = newHeight
+//                        }
+//                }
+//            )
         }
-        .frame(height: min(contentHeight + 300, UIScreen.main.bounds.height - 60)) // Dynamic height with max limit
+//        .frame(height: min(contentHeight + 50, UIScreen.main.bounds.height - 60)) // Dynamic height with max limit
         //        .fixedSize(horizontal: false, vertical: true)
     }
     

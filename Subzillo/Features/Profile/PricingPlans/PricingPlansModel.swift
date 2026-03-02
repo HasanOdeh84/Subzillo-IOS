@@ -26,4 +26,12 @@ struct PricingPlan: Identifiable, Equatable, Codable  {
     let currencySymbol      : String?
     let subscriptionLimit   : Int?
     let isCurrentPlan       : Bool?
+    let iosProductId        : String?
+}
+
+struct SubscribePlanRequest: Codable {
+    let userId              : String
+    let pricingPlanId       : String
+    let platform            : Int
+    let transactionId       : String
 }

@@ -22,6 +22,8 @@ struct Constants{
     static let referrerId                           = "referrerId"
     static let providerBaseUrl                      = "providerBaseUrl"
     static let username                             = "username"
+    static let subscribeApiFail                     = "subscribeApiFail"
+    static let pendingSubscribePlan                 = "pendingSubscribePlan"
     static let latitude                             = "latitude"
     static let longitude                            = "longitude"
     static let loginData                            = "loginData"

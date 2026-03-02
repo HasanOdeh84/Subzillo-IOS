@@ -50,6 +50,8 @@ class NetworkRequest {
         extraParams : String? = nil,
         responseType: T.Type
     ) -> AnyPublisher<T, APIError> {
+        // Retry any pending subscribePlan before firing this request
+        if endPoint != .subscribePlan { SubscribePlanRetryManager.shared.retryIfNeeded() }
         return self.getRequest(endPoint: endPoint, token: token, showLoader: showLoader,extraParams: extraParams, responseType: responseType)
             .catch { error -> AnyPublisher<T, APIError> in
                 if case .unauthorized = error {
@@ -82,6 +84,8 @@ class NetworkRequest {
         body        : U?,
         showLoader  : Bool = false
     ) -> AnyPublisher<Data, APIError> {
+        // Retry any pending subscribePlan before firing this request
+        if endPoint != .subscribePlan { SubscribePlanRetryManager.shared.retryIfNeeded() }
         return self.postRequestData(endPoint: endPoint, method: method,token: token,body: body,showLoader: showLoader)
             .catch { error -> AnyPublisher<Data, APIError> in
                 if case .unauthorized = error {
@@ -117,6 +121,8 @@ class NetworkRequest {
         fromSiri    : Bool = false,
         fromVerifyOtpBottom    : Bool = false
     ) -> AnyPublisher<T, APIError> {
+        // Retry any pending subscribePlan before firing this request
+        if endPoint != .subscribePlan { SubscribePlanRetryManager.shared.retryIfNeeded() }
         return self.postRequest(endPoint: endPoint, method: method,token: token,body: body,showLoader: showLoader, responseType: responseType,fromSiri: fromSiri, fromVerifyOtpBottom: fromVerifyOtpBottom)
             .catch { error -> AnyPublisher<T, APIError> in
                 if case .unauthorized = error {
@@ -150,6 +156,8 @@ class NetworkRequest {
         showLoader: Bool = false,
         responseType: T.Type
     ) -> AnyPublisher<T, APIError> {
+        // Retry any pending subscribePlan before firing this request
+        if endPoint != .subscribePlan { SubscribePlanRetryManager.shared.retryIfNeeded() }
         return self.multiPartRequest(endPoint: endPoint, method: method,token: token,body: body,showLoader: showLoader, responseType: responseType)
             .catch { error -> AnyPublisher<T, APIError> in
                 if case .unauthorized = error {

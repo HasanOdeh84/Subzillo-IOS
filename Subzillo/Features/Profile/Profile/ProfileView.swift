@@ -151,7 +151,7 @@ struct ProfileView: View {
                             .foregroundStyle(Color.neutral600)
                         
                         HStack(alignment: .bottom, spacing: 4) {
-                            Text(commonApiVM.userInfoResponse?.tierName ?? "Free plan")
+                            Text(commonApiVM.userInfoResponse?.planName ?? "Free plan")
                                 .font(.appSemiBold(24))
                                 .foregroundStyle(Color.buttonsText)
                             if let billingCycle = commonApiVM.userInfoResponse?.planBillingCycle {
@@ -171,7 +171,7 @@ struct ProfileView: View {
                             }
                         }
                         
-                        if commonApiVM.userInfoResponse?.UpgradeBtnStatus ?? false{
+                        if commonApiVM.userInfoResponse?.upgradeBtnStatus ?? false{
                             GradientBgBtn(title: "Upgrade today", action: {
                                                         ToastManager.shared.showToast(message: "Coming soon in S4",style:ToastStyle.info)
 //                                profileVM.navigate(to: .pricingPlans)
@@ -229,8 +229,8 @@ struct ProfileView: View {
                     
                     VStack(spacing: 0) {
                         ProfileItem(title: "Plans & Pricing", image: "award", action:{
-                            ToastManager.shared.showToast(message: "Coming soon in S4",style:ToastStyle.info)
-//                            profileVM.navigate(to: .pricingPlans)
+//                            ToastManager.shared.showToast(message: "Coming soon in S4",style:ToastStyle.info)
+                            profileVM.navigate(to: .pricingPlans)
                         })
                         Divider()
                             .overlay(Color.border)
@@ -259,7 +259,7 @@ struct ProfileView: View {
                             .overlay(Color.border)
                         ProfileItem(title: "Invite friends", image: "user-add-02", action:{
                             ToastManager.shared.showToast(message: "Coming soon in S4",style:ToastStyle.info)
-//                            profileVM.navigate(to: .inviteFriends(uLink: commonApiVM.userInfoResponse?.uLink))
+                            profileVM.navigate(to: .inviteFriends(uLink: commonApiVM.userInfoResponse?.referralLink))
                         })
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)

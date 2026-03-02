@@ -143,21 +143,21 @@ struct FilterSheet: View {
                                     //                          members: addSubscriptionVM.listFamilyMembersResponse ?? []
                                     members: familyMembersWithMe
                                 )
-                                .overlay {
-                                    GeometryReader { geo in
-                                        Color.clear
-                                            .preference(
-                                                key: InnerHeightPreferenceKey.self,
-                                                value: geo.size.height
-                                            )
-                                    }
-                                }
-                                .onPreferenceChange(InnerHeightPreferenceKey.self) { height in
-                                    if height > 150 {
-                                        sheetHeight = height
-                                    }
-                                }
-                                .presentationDetents([.height(sheetHeight)])
+//                                .overlay {
+//                                    GeometryReader { geo in
+//                                        Color.clear
+//                                            .preference(
+//                                                key: InnerHeightPreferenceKey.self,
+//                                                value: geo.size.height
+//                                            )
+//                                    }
+//                                }
+//                                .onPreferenceChange(InnerHeightPreferenceKey.self) { height in
+//                                    if height > 150 {
+//                                        sheetHeight = height
+//                                    }
+//                                }
+                                .presentationDetents([.medium, .large])
                                 .presentationDragIndicator(.hidden)
                             }
                             .padding(.horizontal, -5)
@@ -365,21 +365,21 @@ struct FilterSheet: View {
                     )
                 )
             }
-            updateUserInfo()
+//            updateUserInfo()
         }
     }
     
-    func updateUserInfo()
-    {
-        if commonApiVM.userInfoResponse?.tierName?.lowercased() == "family plan"
-        {
-            let familyMembersLimit = commonApiVM.userInfoResponse?.familyMembersLimit ?? 0
-            if familyMembersLimit > relationsData.count - 1
-            {
-                canAddMembers = true
-            }
-        }
-    }
+//    func updateUserInfo()
+//    {
+//        if commonApiVM.userInfoResponse?.tierName?.lowercased() == "family plan"
+//        {
+//            let familyMembersLimit = commonApiVM.userInfoResponse?.familyMembersLimit ?? 0
+//            if familyMembersLimit > relationsData.count - 1
+//            {
+//                canAddMembers = true
+//            }
+//        }
+//    }
     
     func resetFilters() {
         filterData = FilterModel(

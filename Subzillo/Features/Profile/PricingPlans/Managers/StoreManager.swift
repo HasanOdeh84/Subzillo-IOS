@@ -52,10 +52,8 @@ class StoreManager: ObservableObject {
     // MARK: - Purchase
     func purchase(_ product: Product) async throws -> Transaction? {
         purchaseState = .loading
-        
         do {
             let result = try await product.purchase()
-
             switch result {
             case .success(let verification):
                 let transaction = try checkVerified(verification)
@@ -82,24 +80,39 @@ class StoreManager: ObservableObject {
     // MARK: - Update Purchased Products
     func updatePurchasedProducts() async {
         var purchasedIDs = Set<String>()
-
         // CurrentEntitlements contains all active subscriptions and non-consumables
         for await result in Transaction.currentEntitlements {
             if case .verified(let transaction) = result {
                 purchasedIDs.insert(transaction.productID)
             }
         }
-
         self.purchasedProductIDs = purchasedIDs
     }
 
     // MARK: - Restore Purchases
-    func restorePurchases() async throws {
+    func restorePurchases(
+        onRestoredTransactions: ([(productID: String, transactionId: String)]) -> Void = { _ in }
+    ) async throws {
         purchaseState = .loading
         do {
             try await AppStore.sync()
             await updatePurchasedProducts()
             purchaseState = .idle
+
+            // Collect all currently active verified entitlements
+            var restoredEntitlements: [(productID: String, transactionId: String)] = []
+            for await result in Transaction.currentEntitlements {
+                if case .verified(let transaction) = result {
+                    restoredEntitlements.append((
+                        productID     : transaction.productID,
+                        transactionId : String(transaction.id)
+                    ))
+                }
+            }
+
+            if !restoredEntitlements.isEmpty {
+                onRestoredTransactions(restoredEntitlements)
+            }
         } catch {
             purchaseState = .failed(error.localizedDescription)
             throw error
