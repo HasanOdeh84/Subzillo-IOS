@@ -8,8 +8,8 @@ struct SwipeableMailRow: View {
     @Binding var activeCardId       : String?
     @Binding var isScrollDisabled   : Bool
     let onDelete                    : () -> Void
-    let onSync                      : () -> Void
-    let onView                      : () -> Void
+    let onSync                      : (Int) -> Void
+    let onView                      : (Int) -> Void
     let onDownloadLogs              : () -> Void
     @State private var offset       : CGFloat = 0
     @State private var isSwiped     : Bool = false

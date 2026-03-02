@@ -2,8 +2,8 @@ import SwiftUI
 
 struct ConnectedEmailItemView: View {
     let email                   : ListConnectedEmailsData
-    let onSync                  : () -> Void
-    let onView                  : () -> Void
+    let onSync                  : (Int) -> Void
+    let onView                  : (Int) -> Void
     let onDownloadLogs          : () -> Void
     @State var provider         : EmailProvider = EmailProvider.gmail
     @State var isIntegrations   : Bool = false
@@ -26,10 +26,19 @@ struct ConnectedEmailItemView: View {
                 //                )
                 
                 VStack(alignment: .leading, spacing: 4) {
-                    Text(email.email ?? "")
-                        .font(.appSemiBold(16))
-                        .foregroundStyle(Color.underlineGray)
-                    
+                    HStack{
+                        Text(email.email ?? "")
+                            .font(.appSemiBold(16))
+                            .foregroundStyle(Color.underlineGray)
+                        Spacer()
+                        Image("download")
+                            .frame(width: 30, height: 30)
+                            .onTapGesture {
+                                onDownloadLogs()
+                            }
+                            .padding(.trailing, -16)
+                    }
+                        
                     if email.lastSyncDate != ""{
                         if email.lastSyncDate != nil{
                             Text(email.lastSyncDate ?? "")//.formattedDate(from: "DD/MM/YYYY", to: "dd/MM/yyyy"))
@@ -41,7 +50,7 @@ struct ConnectedEmailItemView: View {
                 
                 Spacer()
             }
-
+            
             // Action Button
             if !isIntegrations{
                 HStack{
@@ -72,26 +81,22 @@ struct ConnectedEmailItemView: View {
     
     @ViewBuilder
     private var actionButton: some View {
-        if email.syncStatus == 0 && email.viewStatus == false{
-            HStack(spacing: 12){
-                Text("Sync")
-                    .font(.appSemiBold(14))
-                    .foregroundColor(.white)
-                    .frame(width: 80, height: 30)
-                    .background(Color.blueMain700)
-                    .cornerRadius(5)
-                    .onTapGesture {
-                        onSync()
-                    }
+        if email.syncStatus == 0 && email.viewStatus == false {
+            VStack(alignment: .trailing, spacing: 8) {
+                HStack(spacing: 12) {
+                    syncButton(title: "sync 1", mode: 1)
+                    syncButton(title: "sync 2", mode: 2)
+                    syncButton(title: "sync 3", mode: 3)
+                }
                 
-                Image("download")
-                    .frame(width: 30, height: 30)
-                    .onTapGesture {
-                        onDownloadLogs()
-                    }
+//                Image("download")
+//                    .frame(width: 30, height: 30)
+//                    .onTapGesture {
+//                        onDownloadLogs()
+//                    }
             }
-        } else if email.syncStatus == 1 && email.viewStatus == false{
-            HStack(spacing: 12){
+        } else if email.syncStatus == 1 && email.viewStatus == false {
+            HStack(spacing: 12) {
                 Text("Syncing...")
                     .font(.appSemiBold(14))
                     .foregroundColor(Color.blueMain700)
@@ -101,112 +106,135 @@ struct ConnectedEmailItemView: View {
                             .stroke(Color.blueMain700, lineWidth: 1)
                     )
                 
-                Image("download")
-                    .frame(width: 30, height: 30)
-                    .onTapGesture {
-                        onDownloadLogs()
-                    }
+//                Image("download")
+//                    .frame(width: 30, height: 30)
+//                    .onTapGesture {
+//                        onDownloadLogs()
+//                    }
             }
-        }
-        if email.viewStatus ?? false{
-            HStack(spacing: 12){
-                Text("View")
-                    .font(.appSemiBold(14))
-                    .foregroundStyle(LinearGradient(
-                        gradient: Gradient(colors: [Color.linearGradient3, Color.linearGradient4, Color.blueMain700]),
-                        startPoint: .top,
-                        endPoint: .bottom
-                    ))
-                    .frame(width: 80, height: 30)
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 5)
-                            .stroke(
-                                LinearGradient(
-                                    gradient: Gradient(colors: [Color.linearGradient3, Color.linearGradient4, Color.blueMain700]),
-                                    startPoint: .top,
-                                    endPoint: .bottom
-                                ),
-                                lineWidth: 1
-                            )
-                    )
-                    .onTapGesture {
-                        onView()
-                    }
+        } else if email.viewStatus ?? false {
+            VStack(alignment: .trailing, spacing: 8) {
+                HStack(spacing: 12) {
+                    viewButton(title: "view 1", mode: 1)
+                    viewButton(title: "view 2", mode: 2)
+                    viewButton(title: "view 3", mode: 3)
+                }
                 
-                Image("download")
-                    .frame(width: 30, height: 30)
-                    .onTapGesture {
-                        onDownloadLogs()
-                    }
+//                Image("download")
+//                    .frame(width: 30, height: 30)
+//                    .onTapGesture {
+//                        onDownloadLogs()
+//                    }
             }
         }
-        //        switch email.syncStatus {
-        //        case 1:
-        //            Text("Syncing...")
-        //                .font(.appSemiBold(14))
-        //                .foregroundColor(Color.blueMain700)
-        //                .frame(width: 100, height: 30)
-        //                .overlay(
-        //                    RoundedRectangle(cornerRadius: 5)
-        //                        .stroke(Color.blueMain700, lineWidth: 1)
-        //                )
-        //        case 2:
-        //            Button(action: onView) {
-        //                Text("View")
-        //                    .font(.appSemiBold(14))
-        //                    .foregroundStyle(LinearGradient(
-        //                        gradient: Gradient(colors: [Color.linearGradient3, Color.linearGradient4, Color.blueMain700]),
-        //                        startPoint: .top,
-        //                        endPoint: .bottom
-        //                    ))
-        //                    .frame(width: 80, height: 30)
-        //                    .overlay(
-        //                        RoundedRectangle(cornerRadius: 5)
-        //                            .stroke(
-        //                                LinearGradient(
-        //                                    gradient: Gradient(colors: [Color.linearGradient3, Color.linearGradient4, Color.blueMain700]),
-        //                                    startPoint: .top,
-        //                                    endPoint: .bottom
-        //                                ),
-        //                                lineWidth: 1
-        //                            )
-        //                    )
-        //            }
-        //        case 0:
-        //            Button(action: onSync) {
-        //                Text("Sync")
-        //                    .font(.appSemiBold(14))
-        //                    .foregroundColor(.white)
-        //                    .frame(width: 80, height: 30)
-        //                    .background(Color.blueMain700)
-        //                    .cornerRadius(5)
-        //            }
-        //        case .none:
-        //            if email.viewStatus ?? false{
-        //                Button(action: onView) {
-        //                    Text("View")
-        //                        .font(.appSemiBold(14))
-        //                        .foregroundStyle(LinearGradient(
-        //                            gradient: Gradient(colors: [Color.linearGradient3, Color.linearGradient4, Color.blueMain700]),
-        //                            startPoint: .top,
-        //                            endPoint: .bottom
-        //                        ))
-        //                        .frame(width: 80, height: 30)
-        //                        .overlay(
-        //                            RoundedRectangle(cornerRadius: 5)
-        //                                .stroke(
-        //                                    LinearGradient(
-        //                                        gradient: Gradient(colors: [Color.linearGradient3, Color.linearGradient4, Color.blueMain700]),
-        //                                        startPoint: .top,
-        //                                        endPoint: .bottom
-        //                                    ),
-        //                                    lineWidth: 1
-        //                                )
-        //                        )
-        //                }
-        //            }
-        //        case .some(_):
-        //            Text("")
-        //        }
     }
+    
+    @ViewBuilder
+    private func syncButton(title: String, mode: Int) -> some View {
+        Text(title)
+            .font(.appSemiBold(12))
+            .foregroundColor(.white)
+            .padding(.horizontal, 8)
+            .frame(height: 30)
+            .background(Color.blueMain700)
+            .cornerRadius(5)
+            .onTapGesture {
+                onSync(mode)
+            }
+    }
+    
+    @ViewBuilder
+    private func viewButton(title: String, mode: Int) -> some View {
+        Text(title)
+            .font(.appSemiBold(12))
+            .foregroundStyle(LinearGradient(
+                gradient: Gradient(colors: [Color.linearGradient3, Color.linearGradient4, Color.blueMain700]),
+                startPoint: .top,
+                endPoint: .bottom
+            ))
+            .padding(.horizontal, 8)
+            .frame(height: 30)
+            .overlay(
+                RoundedRectangle(cornerRadius: 5)
+                    .stroke(
+                        LinearGradient(
+                            gradient: Gradient(colors: [Color.linearGradient3, Color.linearGradient4, Color.blueMain700]),
+                            startPoint: .top,
+                            endPoint: .bottom
+                        ),
+                        lineWidth: 1
+                    )
+            )
+            .onTapGesture {
+                onView(mode)
+            }
+    }
+    //        switch email.syncStatus {
+    //        case 1:
+    //            Text("Syncing...")
+    //                .font(.appSemiBold(14))
+    //                .foregroundColor(Color.blueMain700)
+    //                .frame(width: 100, height: 30)
+    //                .overlay(
+    //                    RoundedRectangle(cornerRadius: 5)
+    //                        .stroke(Color.blueMain700, lineWidth: 1)
+    //                )
+    //        case 2:
+    //            Button(action: onView) {
+    //                Text("View")
+    //                    .font(.appSemiBold(14))
+    //                    .foregroundStyle(LinearGradient(
+    //                        gradient: Gradient(colors: [Color.linearGradient3, Color.linearGradient4, Color.blueMain700]),
+    //                        startPoint: .top,
+    //                        endPoint: .bottom
+    //                    ))
+    //                    .frame(width: 80, height: 30)
+    //                    .overlay(
+    //                        RoundedRectangle(cornerRadius: 5)
+    //                            .stroke(
+    //                                LinearGradient(
+    //                                    gradient: Gradient(colors: [Color.linearGradient3, Color.linearGradient4, Color.blueMain700]),
+    //                                    startPoint: .top,
+    //                                    endPoint: .bottom
+    //                                ),
+    //                                lineWidth: 1
+    //                            )
+    //                    )
+    //            }
+    //        case 0:
+    //            Button(action: onSync) {
+    //                Text("Sync")
+    //                    .font(.appSemiBold(14))
+    //                    .foregroundColor(.white)
+    //                    .frame(width: 80, height: 30)
+    //                    .background(Color.blueMain700)
+    //                    .cornerRadius(5)
+    //            }
+    //        case .none:
+    //            if email.viewStatus ?? false{
+    //                Button(action: onView) {
+    //                    Text("View")
+    //                        .font(.appSemiBold(14))
+    //                        .foregroundStyle(LinearGradient(
+    //                            gradient: Gradient(colors: [Color.linearGradient3, Color.linearGradient4, Color.blueMain700]),
+    //                            startPoint: .top,
+    //                            endPoint: .bottom
+    //                        ))
+    //                        .frame(width: 80, height: 30)
+    //                        .overlay(
+    //                            RoundedRectangle(cornerRadius: 5)
+    //                                .stroke(
+    //                                    LinearGradient(
+    //                                        gradient: Gradient(colors: [Color.linearGradient3, Color.linearGradient4, Color.blueMain700]),
+    //                                        startPoint: .top,
+    //                                        endPoint: .bottom
+    //                                    ),
+    //                                    lineWidth: 1
+    //                                )
+    //                        )
+    //                }
+    //            }
+    //        case .some(_):
+    //            Text("")
+    //        }
 }

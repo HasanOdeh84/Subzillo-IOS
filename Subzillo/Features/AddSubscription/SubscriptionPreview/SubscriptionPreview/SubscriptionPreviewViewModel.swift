@@ -8,7 +8,7 @@
 
 import Foundation
 import Combine
-import SwiftUICore
+import SwiftUI
 class SubscriptionPreviewViewModel: NSObject, ObservableObject {
     
     private var subscriptions                   = Set<AnyCancellable>()

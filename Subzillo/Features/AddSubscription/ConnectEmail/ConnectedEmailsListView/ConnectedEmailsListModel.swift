@@ -70,6 +70,7 @@ struct SyncEmailRequest: Codable{
     let userId          : String
     let integrationId   : String
     let type            : Int
+    let syncMode        : Int
 }
 
 struct SyncEmailResponse: Codable {
@@ -92,6 +93,7 @@ struct SyncEmailData: Codable, Hashable, Identifiable {
 struct EmailSubscriptionsListRequest: Codable{
     let userId          : String
     let integrationId   : String
+    let syncMode        : Int
 }
 
 struct ExportGmailSyncLogsRequest: Codable{

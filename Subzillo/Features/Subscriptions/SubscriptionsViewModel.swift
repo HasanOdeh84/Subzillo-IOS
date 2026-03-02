@@ -7,7 +7,6 @@
 
 import SwiftUI
 import Combine
-import SwiftUICore
 import SDWebImageSwiftUI
 
 class SubscriptionsViewModel: ObservableObject {

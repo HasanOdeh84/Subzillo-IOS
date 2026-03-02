@@ -118,41 +118,46 @@ struct AddSubscriptionsView: View {
         ToastManager.shared.showToast(message: "Coming soon in S4",style:ToastStyle.info)
     }
     private func clickOnSmartAssistant() {
-        if commonVM.userInfoResponse?.remainingSubscriptionLimit == 0 {
-            SheetManager.shared.isUpgradeSheetVisible = true
-        } else {
-            //        showUpgradeNowPopup = true
-            ToastManager.shared.showToast(message: "Coming soon in S5",style:ToastStyle.info)
-        }
+//        if commonVM.userInfoResponse?.remainingSubscriptionLimit == 0 {
+//            SheetManager.shared.isUpgradeSheetVisible = true
+//        } else {
+//            //        showUpgradeNowPopup = true
+//            ToastManager.shared.showToast(message: "Coming soon in S5",style:ToastStyle.info)
+//        }
+        ToastManager.shared.showToast(message: "Coming soon in S5",style:ToastStyle.info)
     }
     private func clickOnAddByVoice() {
-        if commonVM.userInfoResponse?.remainingSubscriptionLimit == 0 {
-            SheetManager.shared.isUpgradeSheetVisible = true
-        } else {
-            AppIntentRouter.shared.navigate(to: .voiceCommandView)
-        }
+//        if commonVM.userInfoResponse?.remainingSubscriptionLimit == 0 {
+//            SheetManager.shared.isUpgradeSheetVisible = true
+//        } else {
+//            AppIntentRouter.shared.navigate(to: .voiceCommandView)
+//        }
+        AppIntentRouter.shared.navigate(to: .voiceCommandView)
     }
     private func clickOnConnectEmail() {
-        if commonVM.userInfoResponse?.remainingSubscriptionLimit == 0 {
-            SheetManager.shared.isUpgradeSheetVisible = true
-        } else {
-            AppIntentRouter.shared.navigate(to: .connectEmail)
-    //        ToastManager.shared.showToast(message: "Coming soon in S4",style:ToastStyle.info)
-        }
+//        if commonVM.userInfoResponse?.remainingSubscriptionLimit == 0 {
+//            SheetManager.shared.isUpgradeSheetVisible = true
+//        } else {
+//            AppIntentRouter.shared.navigate(to: .connectEmail)
+//            ToastManager.shared.showToast(message: "Coming soon in S4",style:ToastStyle.info)
+//        }
+        AppIntentRouter.shared.navigate(to: .connectEmail)
     }
     private func clickOnUploadScreenshot() {
-        if commonVM.userInfoResponse?.remainingSubscriptionLimit == 0 {
-            SheetManager.shared.isUpgradeSheetVisible = true
-        } else {
-            showUploadPopup = true
-        }
+//        if commonVM.userInfoResponse?.remainingSubscriptionLimit == 0 {
+//            SheetManager.shared.isUpgradeSheetVisible = true
+//        } else {
+//            showUploadPopup = true
+//        }
+        showUploadPopup = true
     }
     private func clickOnManuvalEntry() {
-        if commonVM.userInfoResponse?.remainingSubscriptionLimit == 0 {
-            SheetManager.shared.isUpgradeSheetVisible = true
-        } else {
-            AppIntentRouter.shared.navigate(to: .manualEntry(isFromEdit: false))
-        }
+//        if commonVM.userInfoResponse?.remainingSubscriptionLimit == 0 {
+//            SheetManager.shared.isUpgradeSheetVisible = true
+//        } else {
+//            AppIntentRouter.shared.navigate(to: .manualEntry(isFromEdit: false))
+//        }
+        AppIntentRouter.shared.navigate(to: .manualEntry(isFromEdit: false))
     }
     private func clickOnUploasBankNotification() {
         ToastManager.shared.showToast(message: "Coming soon in next version",style:ToastStyle.info)

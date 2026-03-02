@@ -8,7 +8,6 @@
 import Foundation
 import GoogleSignIn
 import AuthenticationServices
-import SwiftUICore
 import MSAL
 
 class SocialLogins:NSObject, ObservableObject{

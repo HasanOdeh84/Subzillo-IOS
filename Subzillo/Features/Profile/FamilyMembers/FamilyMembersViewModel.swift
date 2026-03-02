@@ -8,7 +8,6 @@
 import Foundation
 import Combine
 import SwiftUI
-import SwiftUICore
 import UIKit
 
 class FamilyMembersViewModel: ObservableObject {

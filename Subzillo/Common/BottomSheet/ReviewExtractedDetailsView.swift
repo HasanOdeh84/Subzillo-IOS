@@ -62,308 +62,310 @@ struct ReviewExtractedDetailsView: View {
         let (confidenceStr, colorValue, fillRatio) =
         Constants.confidenceInfo(isAssumed: isAssumed, confidence: confidence)
         
-        VStack(alignment: .center) {
-            Capsule()
-                .fill(Color.grayCapsule)
-                .frame(width: 150, height: 5)
-                .padding(.top,24)
-                .padding(.horizontal, -5)
-            
-            Text(LocalizedStringKey(title ?? ""))
-                .font(.appRegular(24))
-                .foregroundStyle(.neutralMain700)
-                .multilineTextAlignment(.center)
-                .padding(.top,24)
-                .padding(.horizontal, -5)
-            
-            //            Text(confidenceStr)
-            //                .frame(maxWidth: .infinity)
-            //                .frame(height: 28)
-            //                .font(.appRegular(14))
-            //                .foregroundColor(.neutralMain700)
-            //                .multilineTextAlignment(.center)
-            //                .padding(.horizontal, 16)
-            //                .background(colorValue)
-            //                .cornerRadius(4)
-            ConfidenceBarView(
-                text        : confidenceStr,
-                color       : colorValue,
-                fillRatio   : fillRatio
-            )
-            .padding(.bottom,36)
+        Capsule()
+            .fill(Color.grayCapsule)
+            .frame(width: 150, height: 5)
+            .padding(.top,24)
             .padding(.horizontal, -5)
-            
-            switch detailType {
-                //MARK: - service
-            case .service:
-                FieldSuggestionView(
-                    text        : $serviceName,
-                    title       : "Service Name",
-                    image       : "gridIcon",
-                    placeHolder : "e.g. Netflix, Spotify, Adobe",
-                    suggestions : servicesList ?? [],
-                    displayKey  : { $0.name ?? "" },
-                    isFocused   : $dummyFocus,
-                    fieldType   : FieldType.serviceName,
-                    activeField : $activeField,
-                    action      : {
-                    }
-                )
-                //MARK: - amount
-            case .amount:
-                FieldSuggestionView(
-                    text        : $amount,
-                    title       : "Amount",
-                    image       : "currencyIcon",
-                    placeHolder : "0.00",
-                    currency    : selectedCurrency?.symbol ?? extractedData?.currencySymbol ?? "",//(extractedData?.currency ?? "" == "") ? (selectedCurrency?.symbol ?? Constants.shared.currencySymbol) : (selectedCurrency?.symbol ?? extractedData?.currencySymbol ?? ""),//Constants.shared.currencySymbol,
-                    isNumberPad : true,
-                    suggestions : filteredPricePlans(),
-                    displayKey  : { plan in
-                        String(format: "%.2f", plan.price ?? 0)
-                    },
-                    isFocused   : $isInputActive,
-                    fieldType   : FieldType.amount,
-                    activeField : $activeField,
-                    action      : {
-                        errorHint(isAmount: true)
-                        isAmountUpdate = true
-                    }
-//                    ,
-//                    onSelect    : { plan in
-//                        selectedCurrency = Currency(id      : nil,
-//                                                    name    : "",
-//                                                    symbol  : plan.currencySymbol,
-//                                                    code    : plan.currencyCode,
-//                                                    flag    : "")
-//                    }
-                )
-                //                .focused($isInputActive)
+        
+        ScrollView(showsIndicators: false) {
+            VStack(alignment: .center) {
                 
-                if isAmountError{
-                    HStack(spacing: 6){
-                        Image("info")
-                            .frame(width: 24, height: 24)
-                        Text("This amount is not available for this service")
-                            .font(.appRegular(14))
-                            .foregroundColor(Color.systemInfoBlue)
-                        Spacer()
-                    }
-                    .padding(.leading, 5)
-                    .padding(.top, -5)
-                }
-                //MARK: - nextChargeDate
-            case .nextChargeDate:
-                Button(action: dateSelection) {
-                    FieldView(text: $chargeDate, textValue: "", title: "Next Charge Date", image: "Calendar1", placeHolder: "dd/mm/yyyy", isButton: false, isText: true, isDate:true)
-                }
-                .background(
-                    DatePickerPopup(isPresented: $isDatePickerPresented, selectedDate: $tempDate) { date in
-                        let formatter = DateFormatter()
-                        formatter.dateFormat = "dd/MM/yyyy"//"yyyy-MM-dd"
-                        self.chargeDate = formatter.string(from: date)
-                        print(chargeDate)
-                    }
-                )
-                //MARK: - currency
-            case .currency:
-                PhoneNumberField(phoneNumber        : .constant(""),
-                                 header             : "Your payment currency",
-                                 placeholder        : selectedCurrency?.name,
-                                 selectedCurrency   : $selectedCurrency,
-                                 selectedCountry    : .constant(nil),
-                                 isCountry          : false,
-                                 fromPreview        : true)
-                //MARK: - category
-            case .category:
-                Button(action: selectCategory) {
-                    FieldView(text: $category, textValue: selectedCategory?.name ?? "", title: "Category", image: "gridIcon", placeHolder: "Please select", isButton: true, isText: true)
-                }
-                .sheet(isPresented: $showCategorySheet) {
-                    CategoriesBottomSheet(selectedCategory: $selectedCategory, categoryResponse:commonApiVM.categoriesResponse, header: "Select Category", placeholder: "Search Category")
-                        .presentationDetents([.large])
-                        .presentationDragIndicator(.hidden)
-                }
-                //MARK: - planType
-            case .planType:
-                //                FieldSuggestionView(
-                //                    text        : $planType,
-                //                    title       : "Plan Type",
-                //                    image       : "gridicon2",
-                //                    placeHolder : "e.g. Free, Pro, Premium",
-                //                    suggestions : providerPlansList ?? [],
-                //                    displayKey  : { $0.planName ?? "" },
-                //                    isFocused   : $dummyFocus,
-                //                    fieldType   : FieldType.planType,
-                //                    activeField : $activeField,
-                //                    action      : {
-                //                        errorHint(isAmount: false)
-                //                        isPlanTypeUpdate = true
-                //                    }
-                //                )
-                //                if isPlanTypeError{
-                //                    HStack(spacing: 6){
-                //                        Image("info")
-                //                            .frame(width: 24, height: 24)
-                //                        Text("This plan is not available for this service")
-                //                            .font(.appRegular(14))
-                //                            .foregroundColor(Color.systemInfoBlue)
-                //                        Spacer()
-                //                    }
-                //                    .padding(.leading, 5)
-                //                    .padding(.top, -5)
-                //                }
+                Text(LocalizedStringKey(title ?? ""))
+                    .font(.appRegular(24))
+                    .foregroundStyle(.neutralMain700)
+                    .multilineTextAlignment(.center)
+                    .padding(.top,24)
+                    .padding(.horizontal, -5)
                 
-                Button(action: selectPlanType) {
-                    FieldView(text: $planType, textValue: selectedPlanType ?? "", title: "Plan Type", image: "gridicon2", placeHolder: "Please select", isButton: true, isText: true)
-                }
-                .sheet(isPresented: $showPlanTypeSheet) {
-                    PlanTypeBottomSheet(selectedPlanType    : $selectedPlanType,
-                                        planTypeResponse    : filteredPlanTypes(),
-                                        header              : "Select Plan Type",
-                                        placeholder         : "Search Plan Type",
-                                        action              : {
-                        planType = selectedPlanType ?? ""
-                        //                        autoFillDetails(isAmount: false)
-                        errorHint(isAmount: false)
-                        isPlanTypeUpdate = true
-                    })
-                    .overlay {
-                        GeometryReader { geo in
-                            Color.clear
-                                .preference(
-                                    key: InnerHeightPreferenceKey.self,
-                                    value: geo.size.height
-                                )
-                        }
-                    }
-                    .onPreferenceChange(InnerHeightPreferenceKey.self) { height in
-                        if height > 150 {
-                            sheetHeight = height
-                        }
-                    }
-                    .presentationDetents([.height(sheetHeight)])
-                    .presentationDragIndicator(.hidden)
-                }
-                //MARK: - billingCycle
-            case .billingCycle:
-                Button(action: selectBilling) {
-                    FieldView(text: $billingCycle, textValue: selectedBilling ?? "", title: "Billing Cycle", image: "billing", placeHolder: "Select billing cycle", isButton: true, isText: true)
-                }
-                .sheet(isPresented: $showBillingCycleSheet) {
-                    BillingCycleBottomSheet(selectedBilling         : $selectedBilling,
-                                            billingCyclesResponse   : filteredBillingCycles(),
-                                            header                  : "Select Billing Cycle",
-                                            placeholder             : "Search billing cycle",
-                                            onSelect: { billing in
-                    })
-                    .overlay {
-                        GeometryReader { geo in
-                            Color.clear
-                                .preference(
-                                    key: InnerHeightPreferenceKey.self,
-                                    value: geo.size.height
-                                )
-                        }
-                    }
-                    .onPreferenceChange(InnerHeightPreferenceKey.self) { height in
-                        if height > 150 {
-                            sheetHeight = height
-                        }
-                    }
-                    .presentationDetents([.height(sheetHeight)])
-                    .presentationDragIndicator(.hidden)
-                }
-            }
-            
-            //MARK: - Update button
-            GradientBorderButton(title          : buttonTitle ?? "",
-                                 isBtn          : true,
-                                 buttonImage    : buttonIcon ?? "") {
+                //            Text(confidenceStr)
+                //                .frame(maxWidth: .infinity)
+                //                .frame(height: 28)
+                //                .font(.appRegular(14))
+                //                .foregroundColor(.neutralMain700)
+                //                .multilineTextAlignment(.center)
+                //                .padding(.horizontal, 16)
+                //                .background(colorValue)
+                //                .cornerRadius(4)
+                ConfidenceBarView(
+                    text        : confidenceStr,
+                    color       : colorValue,
+                    fillRatio   : fillRatio
+                )
+                .padding(.bottom,36)
+                .padding(.horizontal, -5)
+                
                 switch detailType {
+                    //MARK: - service
                 case .service:
-                    if serviceName.trimmed == ""{
-                        toastManager.showToast(message: "Please enter service name",style:ToastStyle.error)
-                        return
-                    }
-                    globalSubscriptionData?.serviceName     = serviceName.trimmed
-                case .amount:
-                    let amountDouble = Double(amount.trimmed) ?? 0.0
-                    //                    if amountDouble == 0.0 || amount.trimmed == ""{
-                    if amount.trimmed == ""{
-                        toastManager.showToast(message: "Amount is required",style:ToastStyle.error)
-                        return
-                    }
-                    globalSubscriptionData?.amount = amountDouble
-                    if isAmountUpdate{
-                        autoFillDetails(isAmount: true)
-                    }
-                    
-                    //need to change the currency if that provider is from other country
-                    globalSubscriptionData?.currency = selectedCurrency?.code ?? ""
-                    globalSubscriptionData?.currencySymbol = selectedCurrency?.symbol ?? ""
-                case .nextChargeDate:
-                    if chargeDate == ""{
-                        toastManager.showToast(message: "Please select next charge date",style:ToastStyle.error)
-                        return
-                    }
-                    globalSubscriptionData?.nextPaymentDate = chargeDate.formattedDate(from: "dd/MM/yyyy", to: "yyyy-MM-dd")
-                case .currency:
-                    if selectedCurrency?.code ?? "" == ""{
-                        toastManager.showToast(message: "Currency selection required",style:ToastStyle.error)
-                        return
-                    }
-                    globalSubscriptionData?.currency = selectedCurrency?.code ?? ""
-                    globalSubscriptionData?.currencySymbol = selectedCurrency?.symbol ?? ""
-                case .category:
-                    if category == ""{
-                        toastManager.showToast(message: "Please select category",style:ToastStyle.error)
-                        return
-                    }
-                    globalSubscriptionData?.categoryId = selectedCategory?.id ?? ""
-                    globalSubscriptionData?.categoryName = selectedCategory?.name ?? ""
-                case .planType:
-                    if selectedPlanType?.trimmed == ""{
-                        toastManager.showToast(message: "Please select plan type",style:ToastStyle.error)
-                        return
-                    }
-                    globalSubscriptionData?.subscriptionType = selectedPlanType?.trimmed
-                    if isPlanTypeUpdate{
-                        autoFillDetails(isAmount: false)
-                    }
-                    //need to change the currency if that provider is from other country
-                    globalSubscriptionData?.currency = selectedCurrency?.code ?? ""
-                    globalSubscriptionData?.currencySymbol = selectedCurrency?.symbol ?? ""
-                case .billingCycle:
-                    if selectedBilling ?? "" == ""{
-                        toastManager.showToast(message: "Please select a billing cycle",style:ToastStyle.error)
-                        return
-                    }
-                    globalSubscriptionData?.billingCycle = selectedBilling ?? ""//.lowercased()
-                    chargeDate = Constants.shared.getNextDateByFrequency(
-                        frequency: selectedBilling ?? ""
+                    FieldSuggestionView(
+                        text        : $serviceName,
+                        title       : "Service Name",
+                        image       : "gridIcon",
+                        placeHolder : "e.g. Netflix, Spotify, Adobe",
+                        suggestions : servicesList ?? [],
+                        displayKey  : { $0.name ?? "" },
+                        isFocused   : $dummyFocus,
+                        fieldType   : FieldType.serviceName,
+                        activeField : $activeField,
+                        action      : {
+                        }
                     )
-                    if globalSubscriptionData?.nextPaymentDate == "" || globalSubscriptionData?.nextPaymentDate == nil{
-                        globalSubscriptionData?.nextPaymentDate = chargeDate.formattedDate(from: "dd/MM/yyyy", to: "yyyy-MM-dd")
-                    }
+                    //MARK: - amount
+                case .amount:
+                    FieldSuggestionView(
+                        text        : $amount,
+                        title       : "Amount",
+                        image       : "currencyIcon",
+                        placeHolder : "0.00",
+                        currency    : selectedCurrency?.symbol ?? extractedData?.currencySymbol ?? "",//(extractedData?.currency ?? "" == "") ? (selectedCurrency?.symbol ?? Constants.shared.currencySymbol) : (selectedCurrency?.symbol ?? extractedData?.currencySymbol ?? ""),//Constants.shared.currencySymbol,
+                        isNumberPad : true,
+                        suggestions : filteredPricePlans(),
+                        displayKey  : { plan in
+                            String(format: "%.2f", plan.price ?? 0)
+                        },
+                        isFocused   : $isInputActive,
+                        fieldType   : FieldType.amount,
+                        activeField : $activeField,
+                        action      : {
+                            errorHint(isAmount: true)
+                            isAmountUpdate = true
+                        }
+                        //                    ,
+                        //                    onSelect    : { plan in
+                        //                        selectedCurrency = Currency(id      : nil,
+                        //                                                    name    : "",
+                        //                                                    symbol  : plan.currencySymbol,
+                        //                                                    code    : plan.currencyCode,
+                        //                                                    flag    : "")
+                        //                    }
+                    )
+                    //                .focused($isInputActive)
                     
-                    //amount should be changed based on the billing cycle
-                    if globalSubscriptionData?.amount == nil{
-                        amountUpdate()
+                    if isAmountError{
+                        HStack(spacing: 6){
+                            Image("info")
+                                .frame(width: 24, height: 24)
+                            Text("This amount is not available for this service")
+                                .font(.appRegular(14))
+                                .foregroundColor(Color.systemInfoBlue)
+                            Spacer()
+                        }
+                        .padding(.leading, 5)
+                        .padding(.top, -5)
                     }
-                    //need to change the currency if that provider is from other country
-                    globalSubscriptionData?.currency = selectedCurrency?.code ?? ""
-                    globalSubscriptionData?.currencySymbol = selectedCurrency?.symbol ?? ""
+                    //MARK: - nextChargeDate
+                case .nextChargeDate:
+                    Button(action: dateSelection) {
+                        FieldView(text: $chargeDate, textValue: "", title: "Next Charge Date", image: "Calendar1", placeHolder: "dd/mm/yyyy", isButton: false, isText: true, isDate:true)
+                    }
+                    .background(
+                        DatePickerPopup(isPresented: $isDatePickerPresented, selectedDate: $tempDate) { date in
+                            let formatter = DateFormatter()
+                            formatter.dateFormat = "dd/MM/yyyy"//"yyyy-MM-dd"
+                            self.chargeDate = formatter.string(from: date)
+                            print(chargeDate)
+                        }
+                    )
+                    //MARK: - currency
+                case .currency:
+                    PhoneNumberField(phoneNumber        : .constant(""),
+                                     header             : "Your payment currency",
+                                     placeholder        : selectedCurrency?.name,
+                                     selectedCurrency   : $selectedCurrency,
+                                     selectedCountry    : .constant(nil),
+                                     isCountry          : false,
+                                     fromPreview        : true)
+                    //MARK: - category
+                case .category:
+                    Button(action: selectCategory) {
+                        FieldView(text: $category, textValue: selectedCategory?.name ?? "", title: "Category", image: "gridIcon", placeHolder: "Please select", isButton: true, isText: true)
+                    }
+                    .sheet(isPresented: $showCategorySheet) {
+                        CategoriesBottomSheet(selectedCategory: $selectedCategory, categoryResponse:commonApiVM.categoriesResponse, header: "Select Category", placeholder: "Search Category")
+                            .presentationDetents([.large])
+                            .presentationDragIndicator(.hidden)
+                    }
+                    //MARK: - planType
+                case .planType:
+                    //                FieldSuggestionView(
+                    //                    text        : $planType,
+                    //                    title       : "Plan Type",
+                    //                    image       : "gridicon2",
+                    //                    placeHolder : "e.g. Free, Pro, Premium",
+                    //                    suggestions : providerPlansList ?? [],
+                    //                    displayKey  : { $0.planName ?? "" },
+                    //                    isFocused   : $dummyFocus,
+                    //                    fieldType   : FieldType.planType,
+                    //                    activeField : $activeField,
+                    //                    action      : {
+                    //                        errorHint(isAmount: false)
+                    //                        isPlanTypeUpdate = true
+                    //                    }
+                    //                )
+                    //                if isPlanTypeError{
+                    //                    HStack(spacing: 6){
+                    //                        Image("info")
+                    //                            .frame(width: 24, height: 24)
+                    //                        Text("This plan is not available for this service")
+                    //                            .font(.appRegular(14))
+                    //                            .foregroundColor(Color.systemInfoBlue)
+                    //                        Spacer()
+                    //                    }
+                    //                    .padding(.leading, 5)
+                    //                    .padding(.top, -5)
+                    //                }
+                    
+                    Button(action: selectPlanType) {
+                        FieldView(text: $planType, textValue: selectedPlanType ?? "", title: "Plan Type", image: "gridicon2", placeHolder: "Please select", isButton: true, isText: true)
+                    }
+                    .sheet(isPresented: $showPlanTypeSheet) {
+                        PlanTypeBottomSheet(selectedPlanType    : $selectedPlanType,
+                                            planTypeResponse    : filteredPlanTypes(),
+                                            header              : "Select Plan Type",
+                                            placeholder         : "Search Plan Type",
+                                            action              : {
+                            planType = selectedPlanType ?? ""
+                            //                        autoFillDetails(isAmount: false)
+                            errorHint(isAmount: false)
+                            isPlanTypeUpdate = true
+                        })
+                        .overlay {
+                            GeometryReader { geo in
+                                Color.clear
+                                    .preference(
+                                        key: InnerHeightPreferenceKey.self,
+                                        value: geo.size.height
+                                    )
+                            }
+                        }
+                        .onPreferenceChange(InnerHeightPreferenceKey.self) { height in
+                            if height > 150 {
+                                sheetHeight = height
+                            }
+                        }
+                        .presentationDetents([.height(sheetHeight)])
+                        .presentationDragIndicator(.hidden)
+                    }
+                    //MARK: - billingCycle
+                case .billingCycle:
+                    Button(action: selectBilling) {
+                        FieldView(text: $billingCycle, textValue: selectedBilling ?? "", title: "Billing Cycle", image: "billing", placeHolder: "Select billing cycle", isButton: true, isText: true)
+                    }
+                    .sheet(isPresented: $showBillingCycleSheet) {
+                        BillingCycleBottomSheet(selectedBilling         : $selectedBilling,
+                                                billingCyclesResponse   : filteredBillingCycles(),
+                                                header                  : "Select Billing Cycle",
+                                                placeholder             : "Search billing cycle",
+                                                onSelect: { billing in
+                        })
+                        .overlay {
+                            GeometryReader { geo in
+                                Color.clear
+                                    .preference(
+                                        key: InnerHeightPreferenceKey.self,
+                                        value: geo.size.height
+                                    )
+                            }
+                        }
+                        .onPreferenceChange(InnerHeightPreferenceKey.self) { height in
+                            if height > 150 {
+                                sheetHeight = height
+                            }
+                        }
+                        .presentationDetents([.height(sheetHeight)])
+                        .presentationDragIndicator(.hidden)
+                    }
                 }
-                onDelegate?()
-                dismiss()
+                
+                //MARK: - Update button
+                GradientBorderButton(title          : buttonTitle ?? "",
+                                     isBtn          : true,
+                                     buttonImage    : buttonIcon ?? "") {
+                    switch detailType {
+                    case .service:
+                        if serviceName.trimmed == ""{
+                            toastManager.showToast(message: "Please enter service name",style:ToastStyle.error)
+                            return
+                        }
+                        globalSubscriptionData?.serviceName     = serviceName.trimmed
+                    case .amount:
+                        let amountDouble = Double(amount.trimmed) ?? 0.0
+                        //                    if amountDouble == 0.0 || amount.trimmed == ""{
+                        if amount.trimmed == ""{
+                            toastManager.showToast(message: "Amount is required",style:ToastStyle.error)
+                            return
+                        }
+                        globalSubscriptionData?.amount = amountDouble
+                        if isAmountUpdate{
+                            autoFillDetails(isAmount: true)
+                        }
+                        
+                        //need to change the currency if that provider is from other country
+                        globalSubscriptionData?.currency = selectedCurrency?.code ?? ""
+                        globalSubscriptionData?.currencySymbol = selectedCurrency?.symbol ?? ""
+                    case .nextChargeDate:
+                        if chargeDate == ""{
+                            toastManager.showToast(message: "Please select next charge date",style:ToastStyle.error)
+                            return
+                        }
+                        globalSubscriptionData?.nextPaymentDate = chargeDate.formattedDate(from: "dd/MM/yyyy", to: "yyyy-MM-dd")
+                    case .currency:
+                        if selectedCurrency?.code ?? "" == ""{
+                            toastManager.showToast(message: "Currency selection required",style:ToastStyle.error)
+                            return
+                        }
+                        globalSubscriptionData?.currency = selectedCurrency?.code ?? ""
+                        globalSubscriptionData?.currencySymbol = selectedCurrency?.symbol ?? ""
+                    case .category:
+                        if category == ""{
+                            toastManager.showToast(message: "Please select category",style:ToastStyle.error)
+                            return
+                        }
+                        globalSubscriptionData?.categoryId = selectedCategory?.id ?? ""
+                        globalSubscriptionData?.categoryName = selectedCategory?.name ?? ""
+                    case .planType:
+                        if selectedPlanType?.trimmed == ""{
+                            toastManager.showToast(message: "Please select plan type",style:ToastStyle.error)
+                            return
+                        }
+                        globalSubscriptionData?.subscriptionType = selectedPlanType?.trimmed
+                        if isPlanTypeUpdate{
+                            autoFillDetails(isAmount: false)
+                        }
+                        //need to change the currency if that provider is from other country
+                        globalSubscriptionData?.currency = selectedCurrency?.code ?? ""
+                        globalSubscriptionData?.currencySymbol = selectedCurrency?.symbol ?? ""
+                    case .billingCycle:
+                        if selectedBilling ?? "" == ""{
+                            toastManager.showToast(message: "Please select a billing cycle",style:ToastStyle.error)
+                            return
+                        }
+                        globalSubscriptionData?.billingCycle = selectedBilling ?? ""//.lowercased()
+                        chargeDate = Constants.shared.getNextDateByFrequency(
+                            frequency: selectedBilling ?? ""
+                        )
+                        if globalSubscriptionData?.nextPaymentDate == "" || globalSubscriptionData?.nextPaymentDate == nil{
+                            globalSubscriptionData?.nextPaymentDate = chargeDate.formattedDate(from: "dd/MM/yyyy", to: "yyyy-MM-dd")
+                        }
+                        
+                        //amount should be changed based on the billing cycle
+                        if globalSubscriptionData?.amount == nil{
+                            amountUpdate()
+                        }
+                        //need to change the currency if that provider is from other country
+                        globalSubscriptionData?.currency = selectedCurrency?.code ?? ""
+                        globalSubscriptionData?.currencySymbol = selectedCurrency?.symbol ?? ""
+                    }
+                    onDelegate?()
+                    dismiss()
+                }
+                                     .padding(.vertical,36)
+                                     .padding(.horizontal, -5)
+                
             }
-                                 .padding(.vertical,36)
-                                 .padding(.horizontal, -5)
-            
-            Spacer()
+            .padding(.horizontal, 24)
         }
-        .padding(.horizontal, 24)
         //MARK: OnAppear
         .onAppear{
             globalSubscriptionData = extractedData
@@ -458,14 +460,14 @@ struct ReviewExtractedDetailsView: View {
     //            // Fallback when API returns no plans
     //            return ["Monthly", "Yearly"]
     //        }
-    //        
+    //
     //        let billingCycleNames = billingCycles.compactMap { $0.billingCycle }
-    //        
+    //
     //        // If plan names are missing or empty, still return fallback
     //        guard !billingCycleNames.isEmpty else {
     //            return ["Monthly", "Yearly"]
     //        }
-    //        
+    //
     //        return Array(Set(billingCycleNames))
     //    }
     

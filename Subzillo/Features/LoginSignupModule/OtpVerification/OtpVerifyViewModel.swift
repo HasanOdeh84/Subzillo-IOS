@@ -6,7 +6,6 @@
 //
 
 import Combine
-import SwiftUICore
 import SwiftUI
 
 class OtpVerifyViewModel: ObservableObject {

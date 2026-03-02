@@ -1,6 +1,6 @@
 import Foundation
 import Network
-import SwiftUICore
+import SwiftUI
 import Combine
 import UIKit
 

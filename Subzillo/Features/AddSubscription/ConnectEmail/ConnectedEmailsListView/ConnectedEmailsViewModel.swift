@@ -1,7 +1,6 @@
 import Foundation
 import SwiftUI
 import Combine
-import SwiftUICore
 import SDWebImageSwiftUI
 
 class ConnectedEmailsViewModel: ObservableObject {
@@ -132,17 +131,19 @@ class ConnectedEmailsViewModel: ObservableObject {
                                                  integrationId     : email.id ?? ""))
     }
     
-    func syncEmail(_ email: ListConnectedEmailsData) {
+    func syncEmail(_ email: ListConnectedEmailsData, syncMode: Int) {
 //        if email.type == 1{
             syncEmailAPI(input: SyncEmailRequest(userId         : Constants.getUserId(),
                                                  integrationId  : email.id ?? "",
-                                                 type           : email.type ?? 1))
+                                                 type           : email.type ?? 1,
+                                                 syncMode       : syncMode))
 //        }
     }
     
-    func viewEmail(_ email: ListConnectedEmailsData) {
+    func viewEmail(_ email: ListConnectedEmailsData, syncMode: Int) {
         emailSubscriptionsList(input: EmailSubscriptionsListRequest(userId          : Constants.getUserId(),
-                                                                    integrationId   : email.id ?? ""))
+                                                                    integrationId   : email.id ?? "",
+                                                                    syncMode        : syncMode))
     }
     
     func downloadLogs(_ email: ListConnectedEmailsData) {

@@ -9,7 +9,7 @@ import Foundation
 import Combine
 import AVFAudio
 import AVFoundation
-import SwiftUICore
+import SwiftUI
 class VoiceCommandViewModel: NSObject, ObservableObject, AVAudioPlayerDelegate, AVAudioRecorderDelegate {
     
     static let shared                           = VoiceCommandViewModel()

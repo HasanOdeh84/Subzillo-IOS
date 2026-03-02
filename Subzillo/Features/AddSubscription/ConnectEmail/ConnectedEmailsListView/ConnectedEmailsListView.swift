@@ -131,10 +131,10 @@ struct ConnectedEmailsListView: View {
                                              onDelete           : {
                                 selectedEmail = email
                                 showDeletePopup = true
-                            },              onSync   : {
-                                viewModel.syncEmail(email)
-                            },              onView   : {
-                                viewModel.viewEmail(email)
+                            },              onSync   : { mode in
+                                viewModel.syncEmail(email, syncMode: mode)
+                            },              onView   : { mode in
+                                viewModel.viewEmail(email, syncMode: mode)
                             }, onDownloadLogs: {
                                 viewModel.downloadLogs(email)
                             }, isIntegrations: isIntegrations)

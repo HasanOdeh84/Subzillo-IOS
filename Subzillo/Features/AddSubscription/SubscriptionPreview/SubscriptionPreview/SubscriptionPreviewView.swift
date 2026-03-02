@@ -486,10 +486,10 @@ struct SubscriptionPreviewView: View {
                 fetchProviderDataApi()
             }
             commonApiVM.getUserInfo(input: getUserInfoRequest(userId: Constants.getUserId()))
-            if let remainingLimit = commonApiVM.userInfoResponse?.remainingSubscriptionLimit,
-               remainingLimit < numberOfSubscriptions {
-                showLimitExceedPopup = true
-            }
+//            if let remainingLimit = commonApiVM.userInfoResponse?.remainingSubscriptionLimit,
+//               remainingLimit < numberOfSubscriptions {
+//                showLimitExceedPopup = true
+//            }
         }
         .onChange(of: globalSubscriptionData) { _ in updateSubDetails() }
         .onChange(of: commonApiVM.currencyResponse) { _ in getSubDetails() }
@@ -779,13 +779,13 @@ struct SubscriptionPreviewView: View {
                 ToastManager.shared.showToast(message: errorMessage,style:ToastStyle.error)
             }
             else {
-                if let remainingLimit = commonApiVM.userInfoResponse?.remainingSubscriptionLimit,
-                   remainingLimit < numberOfSubscriptions {
-                    showLimitExceedPopup = true
+//                if let remainingLimit = commonApiVM.userInfoResponse?.remainingSubscriptionLimit,
+//                   remainingLimit < numberOfSubscriptions {
+//                    showLimitExceedPopup = true
 //                }
 //                if commonApiVM.userInfoResponse?.remainingSubscriptionLimit ?? 0 < numberOfSubscriptions{
 //                    showLimitExceedPopup = true
-                }else{
+//                }else{
                     //source -> 1- manual, 2 - voice, 3 - image, 4 - email
                     var source = 2
                     if isFromEmail {
@@ -823,7 +823,7 @@ struct SubscriptionPreviewView: View {
                     }
                     let input = PendingSubscriptionConfirmRequest(userId: Constants.getUserId(), confirmedSubscription: subsctionsArray)
                     subscriptionPreviewVM.updateSubscriptions(input: input)
-                }
+//                }
             }
         }
     }

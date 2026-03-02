@@ -5,7 +5,7 @@
 //  Created by KSMACMINI-019 on 02/01/26.
 //
 
-import SwiftUICore
+import SwiftUI
 
 //struct ShimmerModifier: ViewModifier {
 //    @State private var animate = true

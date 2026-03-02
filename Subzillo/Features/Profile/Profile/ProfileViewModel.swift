@@ -7,7 +7,6 @@
 
 import Foundation
 import Combine
-import SwiftUICore
 import SwiftUI
 
 class ProfileViewModel: ObservableObject {

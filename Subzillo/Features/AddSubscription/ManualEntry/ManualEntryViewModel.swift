@@ -7,7 +7,6 @@
 
 import Combine
 import SwiftUI
-import SwiftUICore
 import UIKit
 
 class ManualEntryViewModel: ObservableObject {
