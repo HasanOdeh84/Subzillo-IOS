@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [2.0.0] (Alpha-Stage) - 2026-03-03
+
+### Delivered
+- Added three approaches for email sync.
+
 ## [1.3.0] (Beta-Stage) - 2026-02-23
 
 ### Delivered
