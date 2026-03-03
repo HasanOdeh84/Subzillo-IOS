@@ -55,17 +55,23 @@ struct UploadImageSheet: View {
                     //                    .foregroundColor(Color.gray)
                     
                     VStack(spacing: 0) {
-                        UploadItem(title: "Take Photo", subTitle: "Capture a new picture using your camera", image: "camera", imageColor: Color.high, action: cameraAction)
+                        UploadItem(title: LocalizedStringKey("Take Photo"),
+                                   subTitle: LocalizedStringKey("Capture a new picture using your camera"),
+                                   image: "camera", imageColor: Color.high, action: cameraAction)
                         Divider()
                             .overlay(Color.neutral300Border)
-                        UploadItem(title: "Choose from Gallery", subTitle: "Select an existing photo from your device", image: "gallery", imageColor: Color.warning, action: galleryAction)
+                        UploadItem(title: LocalizedStringKey("Choose from Gallery"),
+                                   subTitle: LocalizedStringKey("Select an existing photo from your device"),
+                                   image: "gallery", imageColor: Color.warning, action: galleryAction)
                         //                    Divider()
                         //                        .overlay(Color.neutral300Border)
                         //                    UploadItem(title: "Paste Text", subTitle: "Copy and paste notification text", image: "text-creation", imageColor: Color.purple100, action: pastTextAction)
                         if !fromProfile{
                             Divider()
                                 .overlay(Color.neutral300Border)
-                            UploadItem(title: "Take Screenshot", subTitle: "Take Screenshot for subscriptions", image: "screenshot", imageColor: Color.purple100, action: openSubscriptionsAction)
+                            UploadItem(title: LocalizedStringKey("Take Screenshot"),
+                                       subTitle: LocalizedStringKey("Take Screenshot for subscriptions"),
+                                       image: "screenshot", imageColor: Color.purple100, action: openSubscriptionsAction)
                         }
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)
@@ -418,8 +424,8 @@ struct UploadErrorImageSheet: View {
 }
 
 struct UploadItem: View {
-    var title                   : String
-    var subTitle                : String
+    var title                   : LocalizedStringKey
+    var subTitle                : LocalizedStringKey
     var image                   : String
     var imageColor              : Color
     var action                  : () -> Void
@@ -490,10 +496,10 @@ struct AppstoreRedirectionSheet: View {
                     .foregroundColor(Color.neutralMain700)
                     .multilineTextAlignment(.leading)
                 VStack(alignment: .leading, spacing: 5) {
-                    instructionRow(number: "1.", text: "Take a screenshot of the required subscription.")
-                    instructionRow(number: "2.", text: "Come back to the “Upload Screenshot” screen.")
-                    instructionRow(number: "3.", text: "Click on Choose from Gallery.")
-                    instructionRow(number: "4.", text: "Select the screenshot you just captured.")
+                    instructionRow(number: "1.", text: LocalizedStringKey("Take a screenshot of the required subscription."))
+                    instructionRow(number: "2.", text: LocalizedStringKey("Come back to the “Upload Screenshot” screen."))
+                    instructionRow(number: "3.", text: LocalizedStringKey("Click on Choose from Gallery."))
+                    instructionRow(number: "4.", text: LocalizedStringKey("Select the screenshot you just captured."))
                 }
             }
             
@@ -504,14 +510,14 @@ struct AppstoreRedirectionSheet: View {
     }
     
     //MARK: - User defined methods
-    func instructionRow(number: String, text: String) -> some View {
+    func instructionRow(number: String, text: LocalizedStringKey) -> some View {
         HStack(alignment: .top, spacing: 3) {
             Text(number)
                 .font(.appRegular(18))
                 .foregroundColor(Color.neutralMain700)
                 .frame(width: 22, alignment: .leading)
             
-            Text(LocalizedStringKey(text))
+            Text(text)
                 .font(.appRegular(18))
                 .foregroundColor(Color.neutralMain700)
                 .fixedSize(horizontal: false, vertical: true)
@@ -525,3 +531,4 @@ struct AppstoreRedirectionSheet: View {
         Constants.shared.OpenSubscriptionsInAppStore()
     }
 }
+

@@ -128,3 +128,34 @@
 
 //Home screen
 "Your subscriptions at a glance" = "Your subscriptions at a glance";
+"Profile Picture" = "Profile Picture";
+"Upload a Screenshot" = "Upload a Screenshot";
+"Take Photo" = "Take Photo";
+"Capture a new picture using your camera" = "Capture a new picture using your camera";
+"Choose from Gallery" = "Choose from Gallery";
+"Select an existing photo from your device" = "Select an existing photo from your device";
+"Take Screenshot" = "Take Screenshot";
+"Take Screenshot for subscriptions" = "Take Screenshot for subscriptions";
+"Privacy Notice" = "Privacy Notice";
+"We only parse the content you provide to detect subscription payments. No data is stored permanently." = "We only parse the content you provide to detect subscription payments. No data is stored permanently.";
+"Couldn't Read Image" = "Couldn't Read Image";
+"No Subscriptions Found" = "No Subscriptions Found";
+"We couldn't extract subscription details from this image. Try these tips:" = "We couldn't extract subscription details from this image. Try these tips:";
+"We scanned your recent emails but didn't find any subscription receipts." = "We scanned your recent emails but didn't find any subscription receipts.";
+"Ensure text is clear and well-lit" = "Ensure text is clear and well-lit";
+"Recurring payment receipts" = "Recurring payment receipts";
+"Crop to show only the relevant text" = "Crop to show only the relevant text";
+"Subscription confirmations" = "Subscription confirmations";
+"Make sure text is in English" = "Make sure text is in English";
+"Billing notifications" = "Billing notifications";
+"Retry" = "Retry";
+"Add Manually Instead" = "Add Manually Instead";
+"You will be redirected to the subscription list in Appstore." = "You will be redirected to the subscription list in Appstore.";
+"Please follow these steps carefully:" = "Please follow these steps carefully:";
+"Take a screenshot of the required subscription." = "Take a screenshot of the required subscription.";
+"Come back to the “Upload Screenshot” screen." = "Come back to the “Upload Screenshot” screen.";
+"Click on Choose from Gallery." = "Click on Choose from Gallery.";
+"Select the screenshot you just captured." = "Select the screenshot you just captured.";
+"Continue" = "Continue";
+"Review Original Image" = "Review Original Image";
+

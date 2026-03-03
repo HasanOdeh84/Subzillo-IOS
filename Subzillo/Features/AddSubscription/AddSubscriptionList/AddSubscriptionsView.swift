@@ -114,17 +114,13 @@ struct AddSubscriptionsView: View {
     
     //MARK: - Button actions
     private func goToNotifications() {
-//        uploadImageVM.navigate(to: .notifications)
-        ToastManager.shared.showToast(message: "Coming soon in S4",style:ToastStyle.info)
+        Constants.FeatureConfig.performS4Action {
+            uploadImageVM.navigate(to: .notifications)
+        }
     }
     private func clickOnSmartAssistant() {
-//        if commonVM.userInfoResponse?.remainingSubscriptionLimit == 0 {
-//            SheetManager.shared.isUpgradeSheetVisible = true
-//        } else {
-//            //        showUpgradeNowPopup = true
-//            ToastManager.shared.showToast(message: "Coming soon in S5",style:ToastStyle.info)
-//        }
-        ToastManager.shared.showToast(message: "Coming soon in S5",style:ToastStyle.info)
+        Constants.FeatureConfig.performS5Action {
+        }
     }
     private func clickOnAddByVoice() {
 //        if commonVM.userInfoResponse?.remainingSubscriptionLimit == 0 {
@@ -160,7 +156,8 @@ struct AddSubscriptionsView: View {
         AppIntentRouter.shared.navigate(to: .manualEntry(isFromEdit: false))
     }
     private func clickOnUploasBankNotification() {
-        ToastManager.shared.showToast(message: "Coming soon in next version",style:ToastStyle.info)
+        Constants.FeatureConfig.performS5Action {
+        }
     }
 }
 

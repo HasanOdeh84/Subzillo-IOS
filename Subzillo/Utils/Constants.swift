@@ -11,6 +11,43 @@ struct Constants{
     static let shared = Constants()
     private init() {}
     
+    // MARK: - Feature Phases
+    enum AppPhase {
+        case s3
+        case s4
+        case s5
+    }
+    
+    struct FeatureConfig {
+        static let currentPhase: AppPhase = .s3
+        
+        static var isS4Enabled: Bool {
+            return currentPhase == .s4 || currentPhase == .s5
+        }
+        
+        static var isS5Enabled: Bool {
+            return currentPhase == .s5
+        }
+        
+        //Performs an action if S4 is enabled, otherwise shows a "Coming soon" toast.
+        static func performS4Action(action: @escaping () -> Void) {
+            if isS4Enabled {
+                action()
+            } else {
+                ToastManager.shared.showToast(message: "Coming soon in S4", style: .info)
+            }
+        }
+        
+        // Performs an action if S5 is enabled, otherwise shows a "Coming soon" toast.
+        static func performS5Action(action: @escaping () -> Void) {
+            if isS5Enabled {
+                action()
+            } else {
+                ToastManager.shared.showToast(message: "Coming soon in S5", style: .info)
+            }
+        }
+    }
+    
     static let platform                             = 2
     static let deviceType                           = 2
     static let authKey                              = "authKey"
@@ -41,7 +78,7 @@ struct Constants{
     //    static let webClientId                          = "955282043815-shgvrph5q1jiogm6es7lc143jad27vk0.apps.googleusercontent.com"
     //    static let webClientId                          = "955282043815-uither25lbuv22smj2tdhje513ilg5je.apps.googleusercontent.com" //soniya for dev
     static let webClientId                          = "955282043815-4rckggvbc5m8dtsrtdhecrjl25e0lbg6.apps.googleusercontent.com" //new soniya for staging
-//    static let appGroupID                           = "group.com.krify.Subzillo" //krify
+    //    static let appGroupID                           = "group.com.krify.Subzillo" //krify
     static let appGroupID                           = "group.com.subzillo.app" //client
     
     let regionCode      = Locale.current.region?.identifier ?? "US"

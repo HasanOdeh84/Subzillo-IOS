@@ -38,8 +38,8 @@ public struct UserInfo: Codable, Hashable {
     var planBillingCycle            : String?
     var planExpiresAt               : String?
     var upgradeBtnStatus            : Bool?
-    var referralCode                : String?
-    var referralLink                : String?
+//    var referralCode                : String?
+//    var referralLink                : String?
 }
 
 public struct UnreadNotificationCountRequest: Codable {

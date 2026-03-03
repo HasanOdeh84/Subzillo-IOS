@@ -113,13 +113,12 @@ struct ConnectedEmailItemView: View {
             viewButton(title: "View \(label)", mode: mode)
         } else if syncStatus == 0 && viewStatus{
             viewButton(title: "View \(label)", mode: mode)
-        } else if syncStatus == 0{
+        } else if syncStatus == 0 || (syncStatus == 2 && viewStatus == false){
             syncButton(title: "Sync \(label)", mode: mode)
         }
     }
 
     // MARK: - Reusable Button Builders
-
     @ViewBuilder
     private func syncButton(title: String, mode: Int) -> some View {
         Text(title)

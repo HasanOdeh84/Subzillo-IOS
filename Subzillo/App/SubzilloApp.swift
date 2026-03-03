@@ -26,19 +26,16 @@ class AppDelegate: NSObject, ObservableObject, UIApplicationDelegate, UNUserNoti
         //        sleep(1)
         UNUserNotificationCenter.current().delegate = self
         
-        // Initialize Branch.io
-        //        BranchManager.shared.initSession(launchOptions: launchOptions)
-        
         //Configure ULink synchronously to handle early access/listeners
-//        let ulinkConfig = ULinkConfig(
-//            apiKey: "ulk_e7ceb2717958baacfd613045f27abc945273b947cec90cbd",
-//            debug: true,
-//            enableDeepLinkIntegration: true
-//        )
-//        ULink.configure(config: ulinkConfig)
+        let ulinkConfig = ULinkConfig(
+            apiKey: "ulk_e7ceb2717958baacfd613045f27abc945273b947cec90cbd",
+            debug: true,
+            enableDeepLinkIntegration: true
+        )
+        ULink.configure(config: ulinkConfig)
         
-        //Set up stream listeners
-//        setupLinkListeners()
+        //        Set up stream listeners
+        setupLinkListeners()
         
         return true
     }
@@ -135,13 +132,10 @@ class AppDelegate: NSObject, ObservableObject, UIApplicationDelegate, UNUserNoti
                      open url: URL,
                      options: [UIApplication.OpenURLOptionsKey : Any] = [:]) -> Bool {
         print("AppDelegate: open URL called with \(url.absoluteString)")
-        // Handle Branch deep links
-//        let branchHandled = Branch.getInstance().application(app, open: url, options: options)
-        
         // Handle MSAL authentication
         let msalHandled = MSALPublicClientApplication.handleMSALResponse(url, sourceApplication: options[.sourceApplication] as? String)
         
-        return msalHandled//branchHandled || msalHandled
+        return msalHandled
     }
     
     // MARK: - Universal Links (for Branch)
@@ -149,8 +143,6 @@ class AppDelegate: NSObject, ObservableObject, UIApplicationDelegate, UNUserNoti
                      continue userActivity: NSUserActivity,
                      restorationHandler: @escaping ([UIUserActivityRestoring]?) -> Void) -> Bool {
         print("AppDelegate: continue userActivity called")
-        // Handle Branch universal links
-        //        return Branch.getInstance().continue(userActivity)
         return false
     }
     
@@ -248,7 +240,7 @@ struct SubzilloApp: App {
                 .onAppear {
                     sharedViewModel.getCurrencies()
                     sharedViewModel.getCountries()
-//                    sharedViewModel.getAppVersionInfo()
+                    //                    sharedViewModel.getAppVersionInfo()
                 }
                 .onOpenURL { url in
                     print("SubzilloApp: onOpenURL received: \(url.absoluteString)")
@@ -276,7 +268,7 @@ struct SubzilloApp: App {
                 //                print("✅ App is in Foreground (Active)")
                 appDelegate.requestAuthorization()
                 checkAndUpdateDeviceToken()
-//                sharedViewModel.getAppVersionInfo()
+                //                sharedViewModel.getAppVersionInfo()
             case .inactive:
                 print("⚠️ App is Inactive (e.g., transitioning)")
             case .background:

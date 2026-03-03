@@ -41,11 +41,13 @@ struct ProfileView: View {
     var body: some View {
         VStack{
             ProfileHeader(title: "My Profile", onSettings: {
-                ToastManager.shared.showToast(message: "Coming soon in S4",style:ToastStyle.info)
-//                profileVM.navigate(to: .settings)
+                Constants.FeatureConfig.performS4Action {
+                    profileVM.navigate(to: .settings)
+                }
             }, onNotificationAction: {
-//                profileVM.navigate(to: .notifications)
-                ToastManager.shared.showToast(message: "Coming soon in S4",style:ToastStyle.info)
+                Constants.FeatureConfig.performS4Action {
+                    profileVM.navigate(to: .notifications)
+                }
             })
             .padding(.top, 50)
 //            .padding(.horizontal, 20)
@@ -87,8 +89,9 @@ struct ProfileView: View {
                             
                             VStack(spacing: 0) {
                                 Button(action: {
-                                    ToastManager.shared.showToast(message: "Coming soon in S4",style:ToastStyle.info)
-//                                    showUploadPopup = true
+                                    Constants.FeatureConfig.performS4Action {
+                                        showUploadPopup = true
+                                    }
                                 }) {
                                     Image("camera_white")
                                         .frame(width: 16, height: 16)
@@ -173,8 +176,9 @@ struct ProfileView: View {
                         
                         if commonApiVM.userInfoResponse?.upgradeBtnStatus ?? false{
                             GradientBgBtn(title: "Upgrade today", action: {
-                                                        ToastManager.shared.showToast(message: "Coming soon in S4",style:ToastStyle.info)
-//                                profileVM.navigate(to: .pricingPlans)
+                                Constants.FeatureConfig.performS4Action {
+                                    profileVM.navigate(to: .pricingPlans)
+                                }
                             })
                         }
                     }
@@ -198,26 +202,30 @@ struct ProfileView: View {
                         Divider()
                             .overlay(Color.border)
                         AccountInfo(title: "Full Name", subTitle: fullName) {
-                            selectedAccountType = .name
-//                            ToastManager.shared.showToast(message: "Coming soon in S4",style:ToastStyle.info)
+                            Constants.FeatureConfig.performS4Action {
+                                selectedAccountType = .name
+                            }
                         }
                         Divider()
                             .overlay(Color.border)
                         AccountInfo(title: "Email", subTitle: email) {
-                            selectedAccountType = .email
-//                            ToastManager.shared.showToast(message: "Coming soon in S4",style:ToastStyle.info)
+                            Constants.FeatureConfig.performS4Action {
+                                selectedAccountType = .email
+                            }
                         }
                         Divider()
                             .overlay(Color.border)
                         AccountInfo(title: "Mobile Number", subTitle: mobile) {
-                            selectedAccountType = .mobile
-//                            ToastManager.shared.showToast(message: "Coming soon in S4",style:ToastStyle.info)
+                            Constants.FeatureConfig.performS4Action {
+                                selectedAccountType = .mobile
+                            }
                         }
                         Divider()
                             .overlay(Color.border)
                         AccountInfo(title: "Currency", subTitle: currency) {
-                            selectedAccountType = .currency
-//                            ToastManager.shared.showToast(message: "Coming soon in S4",style:ToastStyle.info)
+                            Constants.FeatureConfig.performS4Action {
+                                selectedAccountType = .currency
+                            }
                         }
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)
@@ -229,37 +237,43 @@ struct ProfileView: View {
                     
                     VStack(spacing: 0) {
                         ProfileItem(title: "Plans & Pricing", image: "award", action:{
-                            ToastManager.shared.showToast(message: "Coming soon in S4",style:ToastStyle.info)
-//                            profileVM.navigate(to: .pricingPlans)
+                            Constants.FeatureConfig.performS4Action {
+                                profileVM.navigate(to: .pricingPlans)
+                            }
                         })
                         Divider()
                             .overlay(Color.border)
                         ProfileItem(title: "My Cards", image: "card", action:{
-//                            profileVM.navigate(to: NavigationRoute.myCards)
-                            ToastManager.shared.showToast(message: "Coming soon in S4",style:ToastStyle.info)
+                            Constants.FeatureConfig.performS4Action {
+                                profileVM.navigate(to: NavigationRoute.myCards)
+                            }
                         })
                         Divider()
                             .overlay(Color.border)
                         ProfileItem(title: "Dark Mode", image: "darkMode", action:{
-                            ToastManager.shared.showToast(message: "Coming soon in S4",style:ToastStyle.info)
+                            Constants.FeatureConfig.performS4Action {
+                            }
                         }, isDarkMode: true)
                         Divider()
                             .overlay(Color.border)
                         ProfileItem(title: "Integrations", image: "link", action:{
-//                            profileVM.navigate(to: NavigationRoute.connectedEmailsList(isIntegrations: true))
-                            ToastManager.shared.showToast(message: "Coming soon in S4",style:ToastStyle.info)
+                            Constants.FeatureConfig.performS4Action {
+                                profileVM.navigate(to: NavigationRoute.connectedEmailsList(isIntegrations: true))
+                            }
                         })
                         Divider()
                             .overlay(Color.border)
                         ProfileItem(title: "Family Members", image: "familyMembers", action:{
-//                            profileVM.navigate(to: NavigationRoute.familyMembersView)
-                            ToastManager.shared.showToast(message: "Coming soon in S4",style:ToastStyle.info)
+                            Constants.FeatureConfig.performS4Action {
+                                profileVM.navigate(to: NavigationRoute.familyMembersView)
+                            }
                         })
                         Divider()
                             .overlay(Color.border)
                         ProfileItem(title: "Invite friends", image: "user-add-02", action:{
-                            ToastManager.shared.showToast(message: "Coming soon in S4",style:ToastStyle.info)
-//                            profileVM.navigate(to: .inviteFriends(uLink: commonApiVM.userInfoResponse?.referralLink))
+                            Constants.FeatureConfig.performS4Action {
+//                                profileVM.navigate(to: .inviteFriends(uLink: commonApiVM.userInfoResponse?.referralLink))
+                            }
                         })
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)

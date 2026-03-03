@@ -187,9 +187,9 @@ class CommonAPIViewModel: ObservableObject {
             let isForce = apiData?.forceUpdate ?? false
             DispatchQueue.main.async {
                 AlertManager.shared.showAlert(
-                    title       : "Update Available",
-                    message     : isForce ? "A new version of the app is available. Please update to continue using the app." : "A new version of the app is available. Would you like to update now?",
-                    okText      : "Update",
+                    title       : isForce ? "Update Required" : "New version available",
+                    message     : isForce ? "An app update to Subzillo (V \(apiVersion)) is required to continue." : "Please update to new version (V \(apiVersion))",
+                    okText      : isForce ? "UPDATE" :"Update",
                     cancelText  : isForce ? nil : "Later",
                     okAction    : {
                         if let url = URL(string: "https://apps.apple.com/in/app/whatsapp-messenger/id310633997") {

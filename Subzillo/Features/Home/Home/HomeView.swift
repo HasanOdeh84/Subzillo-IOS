@@ -324,13 +324,13 @@ struct HomeView: View {
     //MARK: - User defined methods
     //MARK: goToNotifications
     private func goToNotifications() {
-//        homeVM.navigate(to: .notifications)
-        ToastManager.shared.showToast(message: "Coming soon in S4",style:ToastStyle.info)
+        Constants.FeatureConfig.performS4Action {
+            homeVM.navigate(to: .notifications)
+        }
     }
     
     private func clickOnSave() {
         showSaveSheet = true
-//        ToastManager.shared.showToast(message: "Coming soon in S4",style:ToastStyle.info)
     }
     
     private func clickOnYouSaved() {
@@ -596,8 +596,9 @@ struct TopSpendingSubscriptionsView: View {
                     .foregroundColor(.blueMain700)
                     .contentShape(Rectangle())
                     .onTapGesture {
-                        ToastManager.shared.showToast(message: "Coming soon in S4",style:ToastStyle.info)
-//                        AppIntentRouter.shared.navigate(to: .subscriptionsListView(selectedSegment: .third))
+                        Constants.FeatureConfig.performS4Action {
+                            AppIntentRouter.shared.navigate(to: .subscriptionsListView(selectedSegment: .third))
+                        }
                     }
                 Spacer()
             }
@@ -1221,8 +1222,9 @@ struct YearOverviewChartView: View {
                 }
                 .contentShape(Rectangle())
                 .onTapGesture {
-                    ToastManager.shared.showToast(message: "Coming soon in S4",style:ToastStyle.info)
-//                    AppIntentRouter.shared.navigate(to: .subscriptionsListView(selectedSegment: .third))
+                    Constants.FeatureConfig.performS4Action {
+                        AppIntentRouter.shared.navigate(to: .subscriptionsListView(selectedSegment: .third))
+                    }
                 }
                 Spacer()
             }

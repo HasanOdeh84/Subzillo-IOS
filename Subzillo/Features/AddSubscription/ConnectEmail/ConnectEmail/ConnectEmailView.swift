@@ -157,33 +157,34 @@ struct ConnectEmailView: View {
     }
     
     private func outlookAction() {
-        //Using api auth url
-//        connectEmailVM.oauthUrl(input: OauthUrlRequest(userId   : Constants.getUserId(),
-//                                                       type     : 2))
-        ToastManager.shared.showToast(message: "Coming soon in S4",style:ToastStyle.info)
-        
-        
-        //USing SDK
-//        guard let presentingVC = UIApplication.shared.rootViewController else {
-//            return
-//        }
-//        SocialLogins.shared.microsoftSignInOAuth(presentingVC: presentingVC) { authCode in
-//            guard let code = authCode else {
-//                print("❌ Microsoft authCode is nil")
-//                return
-//            }
-//            print("✅ Microsoft authCode:", code)
-////            connectEmailVM.gmailOauthCallBack(input: GmailOauthCallBackRequest(userId: Constants.getUserId(), code: code, type: 2))
-////            connectEmailVM.microsoftOauthCallBack(input: GmailOauthCallBackRequest(userId   : Constants.getUserId(),
-////                                                                                   code     : code,
-////                                                                                   type     : 2))
-//        }
+        Constants.FeatureConfig.performS4Action {
+            //            Using api auth url
+            connectEmailVM.oauthUrl(input: OauthUrlRequest(userId   : Constants.getUserId(),
+                                                           type     : 2))
+            
+            //USing SDK
+            //        guard let presentingVC = UIApplication.shared.rootViewController else {
+            //            return
+            //        }
+            //        SocialLogins.shared.microsoftSignInOAuth(presentingVC: presentingVC) { authCode in
+            //            guard let code = authCode else {
+            //                print("❌ Microsoft authCode is nil")
+            //                return
+            //            }
+            //            print("✅ Microsoft authCode:", code)
+            ////            connectEmailVM.gmailOauthCallBack(input: GmailOauthCallBackRequest(userId: Constants.getUserId(), code: code, type: 2))
+            ////            connectEmailVM.microsoftOauthCallBack(input: GmailOauthCallBackRequest(userId   : Constants.getUserId(),
+            ////                                                                                   code     : code,
+            ////                                                                                   type     : 2))
+            //        }
+        }
     }
     
     private func yahooAction() {
-        ToastManager.shared.showToast(message: "Coming soon in S4",style:ToastStyle.info)
-//        connectEmailVM.oauthUrl(input: OauthUrlRequest(userId   : Constants.getUserId(),
-//                                                       type     : 3))
+        Constants.FeatureConfig.performS4Action {
+            connectEmailVM.oauthUrl(input: OauthUrlRequest(userId   : Constants.getUserId(),
+                                                           type     : 3))
+        }
     }
 }
 

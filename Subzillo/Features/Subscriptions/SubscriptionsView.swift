@@ -60,7 +60,9 @@ struct SubscriptionsView: View {
             VStack(spacing: 0) {
                 // MARK: - Header
                 HeaderView(title: "Your subscriptions",titleFont: 24) {
-                    goToNotifications()
+                    Constants.FeatureConfig.performS4Action {
+                        goToNotifications()
+                    }
                 }
                 .padding(.top, 50)
                 .frame(alignment: .leading)
@@ -215,8 +217,7 @@ struct SubscriptionsView: View {
             //                    }
             //MARK: Analytics view
             if viewMode == .analytics {
-                //                ToastManager.shared.showToast(message: "Coming soon in S4",style:ToastStyle.info)
-                //                AnalyticalView()
+                //                    AnalyticalView()
             } else if let segment = selectedSegment {
                 //MARK: Calender view
                 if segment == .second{
@@ -576,8 +577,9 @@ struct SubscriptionsView: View {
             } else if newValue == .second {
                 viewMode = .calendar
             } else {
-                ToastManager.shared.showToast(message: "Coming soon in S4",style:ToastStyle.info)
-                //                viewMode = .analytics
+                Constants.FeatureConfig.performS4Action {
+                    viewMode = .analytics
+                }
             }
             callApis()
         }
@@ -803,13 +805,13 @@ struct SubscriptionsView: View {
     }
     
     private func goToNotifications() {
-        //        subscriptionsVM.navigate(to: .notifications)
-        ToastManager.shared.showToast(message: "Coming soon in S4",style:ToastStyle.info)
+        Constants.FeatureConfig.performS4Action {
+            subscriptionsVM.navigate(to: .notifications)
+        }
     }
     
     private func clickOnChat() {
         selectedSegment = nil
-        //        ToastManager.shared.showToast(message: "Coming soon in S4",style:ToastStyle.info)
         viewMode = .analytics
     }
     

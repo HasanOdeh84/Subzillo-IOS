@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import SwiftUI
 extension Encodable {
   func encodePrint() -> String? {
     let encoder = JSONEncoder()
@@ -79,5 +80,44 @@ func getFileName(from value: String) -> String {
 extension String {
     var fileNameOnly: String {
         return URL(string: self)?.lastPathComponent ?? self
+    }
+}
+
+// MARK: - Feature Visibility
+extension View {
+    /// Only shows the view if the current app phase is S4 or higher.
+    @ViewBuilder
+    func showOnlyInS4() -> some View {
+        if Constants.FeatureConfig.isS4Enabled {
+            self
+        }
+    }
+    
+    /// Hides the view if the current app phase is S3.
+    @ViewBuilder
+    func hideInS3() -> some View {
+        if !Constants.FeatureConfig.isS4Enabled {
+            EmptyView()
+        } else {
+            self
+        }
+    }
+
+    /// Only shows the view if the current app phase is S5.
+    @ViewBuilder
+    func showOnlyInS5() -> some View {
+        if Constants.FeatureConfig.isS5Enabled {
+            self
+        }
+    }
+
+    /// Hides the view if the current app phase is S3 or S4.
+    @ViewBuilder
+    func hideInS4() -> some View {
+        if !Constants.FeatureConfig.isS5Enabled {
+            EmptyView()
+        } else {
+            self
+        }
     }
 }

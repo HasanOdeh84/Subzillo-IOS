@@ -196,54 +196,37 @@ struct PricingPlansView: View {
         return attriString
     }
     
-    private func getPlanRank(from name: String, isYearly: Bool) -> Int {
-        let name = name.lowercased()
-        if name.contains("free") { return 0 }
-        if name.contains("silver") {
-            return isYearly ? 2 : 1
-        }
-        if name.contains("gold") {
-            return isYearly ? 4 : 3
-        }
-        return 0
-    }
-
-    private var currentUserRank: Int {
-        let userPricingPlanId = "62561363-210d-42cd-9eef-3d99f5b605d3"
-        if let currentPlan = viewModel.pricingPlans.first(where: { $0.id == userPricingPlanId }) {
-            let name = currentPlan.planName ?? ""
-            let isYearly = (selectedSegment == .second) && !name.lowercased().contains("free")
-            return getPlanRank(from: name, isYearly: isYearly)
-        }
-//        guard let response = commonApiVM.userInfoResponse else { return 0 }
-//        let name = response.planName ?? "Free"
-//        let cycle = (response.planBillingCycle ?? "").lowercased()
-//        let isYearly = cycle.contains("year") || name.lowercased().contains("yearly") || name.lowercased().contains("annually")
-//        return getPlanRank(from: name, isYearly: isYearly)
-        return 0
-    }
-
     private func getUIPlan(from plan: PricingPlan) -> PricingPlanUI {
-        let name = plan.planName ?? ""
-        let isSilver = name.lowercased().contains("silver")
-        let isGold = name.lowercased().contains("gold")
-        let isFree = name.lowercased().contains("free")
+        let planName            = plan.planName ?? ""
+        let lowercasedPlanName  = planName.lowercased()
+        
+        let isFreePlan      = lowercasedPlanName.contains("free")
+        let isSilverPlan    = lowercasedPlanName.contains("silver")
+        let isGoldPlan      = lowercasedPlanName.contains("gold")
+        
+        let isYearlySelected    = selectedSegment == .second
+        
+        let loggedInUserPlanName        = commonApiVM.userInfoResponse?.planName ?? ""
+        let loggedInUserBillingCycle    = commonApiVM.userInfoResponse?.planBillingCycle ?? ""
+        
+        var buttonTitle         = ""
+        let isCurrentPlan       = plan.isCurrentPlan ?? false
         
         var productID: String?
         if plan.iosProductId == nil || plan.iosProductId == ""{
-            if isSilver {
-                productID = (selectedSegment == .second) ? SubzilloProducts.silverYearly : SubzilloProducts.silverMonthly
-            } else if isGold {
-                productID = (selectedSegment == .second) ? SubzilloProducts.goldYearly : SubzilloProducts.goldMonthly
+            if isSilverPlan {
+                productID = isYearlySelected ? SubzilloProducts.silverYearly : SubzilloProducts.silverMonthly
+            } else if isGoldPlan {
+                productID = isYearlySelected ? SubzilloProducts.goldYearly : SubzilloProducts.goldMonthly
             }
         }else{
             productID = plan.iosProductId ?? ""
         }
         
-        var displayPrice: String = ""
+        var price: String = ""
         var billingCycle: String = ""
         if let id = productID, let product = storeManager.products.first(where: { $0.id == id }) {
-            displayPrice = product.displayPrice
+            price = product.displayPrice
             let period = product.subscription?.subscriptionPeriod
             if period?.unit == .month {
                 billingCycle = "/ month"
@@ -252,34 +235,35 @@ struct PricingPlansView: View {
                 billingCycle = "/ year"
             }
         } else {
-            displayPrice = "\(plan.currencySymbol ?? "$")\(plan.price ?? 0.0)"
-            billingCycle = (selectedSegment == .second ? "/ year" : "/ month")
+            price = "\(plan.currencySymbol ?? "$")\(plan.price ?? 0.0)"
+            billingCycle = isYearlySelected ? "/ year" : "/ month"
         }
         
-        // Calculate ranks for upgrade logic
-        let isPlanYearly = (selectedSegment == .second) && !isFree
-        let renderedPlanRank = getPlanRank(from: name, isYearly: isPlanYearly)
-        
-        let userPricingPlanId = "62561363-210d-42cd-9eef-3d99f5b605d3"
-        let isActuallyCurrent = (plan.id == userPricingPlanId) && (userPricingPlanId != nil)
-        
-        let userRank = currentUserRank
-        
-        var buttonTitle = ""
-        if isActuallyCurrent {
+        if isCurrentPlan {
             buttonTitle = "Current Plan"
-        } else if renderedPlanRank > userRank {
-            buttonTitle = isFree ? "" : "Upgrade"
-        } else {
+        }
+        else if isFreePlan {
             buttonTitle = ""
+        }
+        else {
+            if loggedInUserPlanName == "Free" {
+                buttonTitle = "Upgrade"
+            }
+            else if loggedInUserPlanName.lowercased() == planName.lowercased() {
+                if loggedInUserBillingCycle == "monthly" && isYearlySelected {
+                    buttonTitle = "Upgrade"
+                } else {
+                    buttonTitle = ""
+                }
+            }
         }
         
         return PricingPlanUI(
-            title           : name,
-            price           : isFree ? nil : displayPrice,
-            priceSubtitle   : isFree ? nil : billingCycle,
+            title           : planName,
+            price           : isFreePlan ? nil : price,
+            priceSubtitle   : isFreePlan ? nil : billingCycle,
             features        : [plan.description ?? "Basic features"],
-            badgeColor      : isActuallyCurrent ? Color.neutral600 : nil,
+            badgeColor      : (plan.isCurrentPlan ?? false) ? Color.neutral600 : nil, //isActuallyCurrent ? Color.neutral600 : nil,
             buttonTitle     : buttonTitle,
             isCurrent       : plan.isCurrentPlan ?? false,
             action          : {
