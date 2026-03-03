@@ -166,10 +166,10 @@ class CommonAPIViewModel: ObservableObject {
     }
 
     func getAppVersionInfo() {
-        apiReference.getApi(endPoint: APIEndpoint.getAppVersion, token: defaultAuthKey, responseType: AppVersionResponse.self)
+        apiReference.getApi(endPoint: APIEndpoint.appUpdate, token: defaultAuthKey, responseType: AppVersionResponse.self)
             .sink { [unowned self] completion in
                 if case let .failure(error) = completion {
-                    self.handleError(error, endPoint: APIEndpoint.getAppVersion)
+                    self.handleError(error, endPoint: APIEndpoint.appUpdate)
                 }
             }
         receiveValue: { [self] response in
@@ -180,7 +180,7 @@ class CommonAPIViewModel: ObservableObject {
     }
 
     private func checkVersionUpdate(apiData: AppVersionData?) {
-        guard let apiVersion = apiData?.appVersion, let isActive = apiData?.isActive, isActive else { return }
+        guard let apiVersion = apiData?.appVersion else { return }
         let currentVersion = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0.0"
         let result = currentVersion.compare(apiVersion, options: .numeric)
         if result == .orderedAscending {
@@ -206,3 +206,4 @@ class CommonAPIViewModel: ObservableObject {
         print("API Error : \(endPoint) - \(apiError.localizedDescription)")
     }
 }
+

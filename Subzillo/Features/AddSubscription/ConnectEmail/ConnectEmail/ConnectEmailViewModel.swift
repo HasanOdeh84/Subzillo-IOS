@@ -78,7 +78,7 @@ class ConnectEmailViewModel: ObservableObject {
     func handleOAuthCallback(url: URL, type:Int = 2) {
         print("OAuth Callback URL: \(url.absoluteString)")
         if url.absoluteString.contains("oauth-error"){
-            ToastManager.shared.showToast(message: type == 2 ? "Microsoft account connection failed" : "iCloud account connection failed")
+            ToastManager.shared.showToast(message: type == 2 ? "Microsoft account connection failed" : "iCloud account connection failed", style: .error)
         }else if url.absoluteString.contains("oauth-success"){
             ToastManager.shared.showToast(message: type == 2 ? "Microsoft account connected successfully" : "iCloud account connected successfully")
             navigate(to: .connectedEmailsList(isIntegrations: false))

@@ -16,7 +16,7 @@ public struct checkLoginRequest: Codable {
     let deviceId        : String
     var uniqueId        : String = UUID().uuidString
     var pushMode        : Int = Constants.shared.pushMode
-    var referralCode    : String?
+//    var referralCode    : String?
 }
 
 public struct LoginResponse: Codable {
@@ -75,4 +75,5 @@ public struct SocialLoginRequest: Codable {
     var uniqueId     : String = UUID().uuidString
     var pushMode     : Int = Constants.shared.pushMode
     let fullName     : String
+    let referralCode : String?
 }

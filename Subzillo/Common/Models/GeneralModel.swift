@@ -77,11 +77,6 @@ public struct AppVersionResponse: Codable {
 }
 
 public struct AppVersionData: Codable {
-    let id          : Int?
-    let deviceType  : Int?
     let forceUpdate : Bool?
     let appVersion  : String?
-    let isActive    : Bool?
-    let createdAt   : String?
-    let updatedAt   : String?
 }

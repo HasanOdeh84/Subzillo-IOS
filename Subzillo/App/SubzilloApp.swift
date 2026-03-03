@@ -10,7 +10,7 @@ import UserNotifications
 import UIKit
 import Firebase
 import MSAL
-import BranchSDK
+//import BranchSDK
 import Combine
 
 class AppDelegate: NSObject, ObservableObject, UIApplicationDelegate, UNUserNotificationCenterDelegate {
@@ -30,15 +30,15 @@ class AppDelegate: NSObject, ObservableObject, UIApplicationDelegate, UNUserNoti
         //        BranchManager.shared.initSession(launchOptions: launchOptions)
         
         //Configure ULink synchronously to handle early access/listeners
-        let ulinkConfig = ULinkConfig(
-            apiKey: "ulk_e7ceb2717958baacfd613045f27abc945273b947cec90cbd",
-            debug: true,
-            enableDeepLinkIntegration: true
-        )
-        ULink.configure(config: ulinkConfig)
+//        let ulinkConfig = ULinkConfig(
+//            apiKey: "ulk_e7ceb2717958baacfd613045f27abc945273b947cec90cbd",
+//            debug: true,
+//            enableDeepLinkIntegration: true
+//        )
+//        ULink.configure(config: ulinkConfig)
         
         //Set up stream listeners
-        setupLinkListeners()
+//        setupLinkListeners()
         
         return true
     }
@@ -136,12 +136,12 @@ class AppDelegate: NSObject, ObservableObject, UIApplicationDelegate, UNUserNoti
                      options: [UIApplication.OpenURLOptionsKey : Any] = [:]) -> Bool {
         print("AppDelegate: open URL called with \(url.absoluteString)")
         // Handle Branch deep links
-        let branchHandled = Branch.getInstance().application(app, open: url, options: options)
+//        let branchHandled = Branch.getInstance().application(app, open: url, options: options)
         
         // Handle MSAL authentication
         let msalHandled = MSALPublicClientApplication.handleMSALResponse(url, sourceApplication: options[.sourceApplication] as? String)
         
-        return branchHandled || msalHandled
+        return msalHandled//branchHandled || msalHandled
     }
     
     // MARK: - Universal Links (for Branch)

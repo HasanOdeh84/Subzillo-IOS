@@ -73,7 +73,8 @@ class LoginViewModel: ObservableObject {
                                                                email                : data.emailAddress ?? "",
                                                                socialId             : data.id ?? "",
                                                                deviceId             : deviceId,
-                                                               fullName             : data.fullName ?? ""),
+                                                               fullName             : data.fullName ?? "",
+                                                               referralCode         : Constants.getUserDefaultsValue(for: Constants.referrerId)),
                                      fileData: [MultiPartFileInput(
                                         fieldName   : "profile",
                                         fileName    : filename,
@@ -90,7 +91,8 @@ class LoginViewModel: ObservableObject {
                                                                email                : data.emailAddress ?? "",
                                                                socialId             : data.id ?? "",
                                                                deviceId             : deviceId,
-                                                               fullName             : data.fullName ?? ""),
+                                                               fullName             : data.fullName ?? "",
+                                                               referralCode         : Constants.getUserDefaultsValue(for: Constants.referrerId)),
                                      fileData: [])
             }
         }else if loginType == .microsoft{
@@ -102,7 +104,8 @@ class LoginViewModel: ObservableObject {
                                                                email                : data.emailAddress ?? "",
                                                                socialId             : data.id ?? "",
                                                                deviceId             : deviceId,
-                                                               fullName             : data.fullName ?? ""),
+                                                               fullName             : data.fullName ?? "",
+                                                               referralCode         : Constants.getUserDefaultsValue(for: Constants.referrerId)),
                                      fileData: [])
             }
         }

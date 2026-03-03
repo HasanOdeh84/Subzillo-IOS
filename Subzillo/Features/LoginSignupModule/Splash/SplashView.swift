@@ -45,9 +45,9 @@ struct SplashView: View {
             .ignoresSafeArea(edges: .horizontal)
         }
         .onAppear {
-            if appState.isLoggedIn {
-                pricingVM.retryPendingSubscribePlanIfNeeded()
-            }
+//            if appState.isLoggedIn {
+//                pricingVM.retryPendingSubscribePlanIfNeeded()
+//            }
 
             DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
                 navigateToNextScreen()

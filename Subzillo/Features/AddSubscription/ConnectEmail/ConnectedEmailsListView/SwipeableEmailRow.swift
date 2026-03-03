@@ -54,10 +54,15 @@ struct SwipeableMailRow: View {
                     offset = 0
                     isSwiped = false
                 }
-                if email.syncStatus != 1{
+                let isAnySyncing = [
+                    email.approaches?.advanced?.syncStatus,
+                    email.approaches?.mvp?.syncStatus,
+                    email.approaches?.hybrid?.syncStatus
+                ].contains(1)
+                if !isAnySyncing {
                     onDelete()
-                }else{
-                    ToastManager.shared.showToast(message: "Email is syncing. Deletion will be available once complete.")
+                } else {
+                    ToastManager.shared.showToast(message: "Email is syncing. Deletion will be available once complete.", style: .error)
                 }
             }
             

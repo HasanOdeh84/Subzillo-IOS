@@ -21,27 +21,18 @@ enum EmailProvider: Int {
     }
 }
 
-enum EmailSyncStatus: Int {
-    case syncing = 1
-    case view = 0
-    case sync = 2
-    
-    var buttonText: String {
-        switch self {
-        case .syncing: return "Syncing..."
-        case .view: return "View"
-        case .sync: return "Sync"
-        }
-    }
+struct EmailApproachStatus: Codable, Hashable {
+    let viewStatus  : Bool?
+    let syncStatus  : Int?  // 0 - Sync, 1 - Syncing, 2 - Completed (show View if viewStatus true)
 }
 
-struct ConnectedEmail: Identifiable {
-    let id : String
-    let email: String
-    let date: String
-    let status: EmailSyncStatus
-    let provider: EmailProvider
-}
+//struct ConnectedEmail: Identifiable {
+//    let id : String
+//    let email: String
+//    let date: String
+//    let status: EmailSyncStatus
+//    let provider: EmailProvider
+//}
 
 struct ListConnectedEmailsRequest: Codable{
     let userId  : String
@@ -52,13 +43,18 @@ struct ListConnectedEmailsResponse: Codable {
     let data    : [ListConnectedEmailsData]?
 }
 
+struct EmailApproaches: Codable, Hashable {
+    let advanced    : EmailApproachStatus?
+    let mvp         : EmailApproachStatus?
+    let hybrid      : EmailApproachStatus?
+}
+
 struct ListConnectedEmailsData: Codable, Hashable, Identifiable {
     var id                  : String?
     let email               : String?
-    let type                : Int? // type -> 1- Gmail, 2- Microsoft
-    let viewStatus          : Bool?
-    let syncStatus          : Int? //syncStatus -> 0 - Not synced/ Sync completed, 1 - In Progres
-    let lastSyncDate        : String? 
+    let type                : Int?          // 1 - Gmail, 2 - Microsoft, 3 - Yahoo
+    let lastSyncDate        : String?
+    let approaches          : EmailApproaches?
 }
 
 struct DeleteEmailRequest: Codable{

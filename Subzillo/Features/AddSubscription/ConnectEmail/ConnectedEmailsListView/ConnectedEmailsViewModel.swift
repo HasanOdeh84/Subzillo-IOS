@@ -115,7 +115,7 @@ class ConnectedEmailsViewModel: ObservableObject {
         do {
             try data.write(to: fileURL)
             DispatchQueue.main.async {
-                ToastManager.shared.showToast(message: "File saved successfully to Files app", style: .success)
+                ToastManager.shared.showToast(message: "File saved successfully to Files app")
             }
         } catch {
             print("Error saving file: \(error)")

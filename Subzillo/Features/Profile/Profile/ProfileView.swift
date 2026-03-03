@@ -229,8 +229,8 @@ struct ProfileView: View {
                     
                     VStack(spacing: 0) {
                         ProfileItem(title: "Plans & Pricing", image: "award", action:{
-//                            ToastManager.shared.showToast(message: "Coming soon in S4",style:ToastStyle.info)
-                            profileVM.navigate(to: .pricingPlans)
+                            ToastManager.shared.showToast(message: "Coming soon in S4",style:ToastStyle.info)
+//                            profileVM.navigate(to: .pricingPlans)
                         })
                         Divider()
                             .overlay(Color.border)
@@ -259,7 +259,7 @@ struct ProfileView: View {
                             .overlay(Color.border)
                         ProfileItem(title: "Invite friends", image: "user-add-02", action:{
                             ToastManager.shared.showToast(message: "Coming soon in S4",style:ToastStyle.info)
-                            profileVM.navigate(to: .inviteFriends(uLink: commonApiVM.userInfoResponse?.referralLink))
+//                            profileVM.navigate(to: .inviteFriends(uLink: commonApiVM.userInfoResponse?.referralLink))
                         })
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)
