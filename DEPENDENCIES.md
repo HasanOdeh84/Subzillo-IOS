@@ -57,16 +57,15 @@ This document lists all **dependencies** used in the project.
   - Automatically formatting phone numbers based on the selected country code.
 - **Resources**: [PhoneNumberKit github project](https://github.com/iziz/libPhoneNumber-iOS)
 
-## 7. Branch.io
-- **Dependency**: branch-ios-sdk
-- **Purpose**: Branch-iOS is a deep linking SDK that enables secure and trackable referral links inside the app. In Subzillo, it is primarily used to implement the Invite Friends functionality by generating shareable referral links that direct users to specific in-app content.
+## 7. ULink
+- **Dependency**: ULink
+- **Purpose**: ULink is a deep linking SDK that enables secure and trackable referral links inside the app. In Subzillo, it is primarily used to implement the Invite Friends functionality by generating shareable referral links that direct users to specific in-app content.
 - **Use Cases in Subzillo**:
   - Generating unique referral/invite links for each user.
   - Sharing invite links via WhatsApp, Email, Messages, etc.
-  - Supporting deferred deep linking (user installs the app and lands on the correct screen).
+  - Supporting deferred deep linking (user installs the app and opens the app).
   - Tracking successful installs and signups from invite links.
-  - Enabling referral-based growth tracking.
-- **Resources**: [Branch io github project](https://github.com/BranchMetrics/ios-branch-sdk-spm)
+- **Note** : Directly added files into the project.
 
 
 
