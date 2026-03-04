@@ -154,12 +154,12 @@ struct ProfileView: View {
                             .foregroundStyle(Color.neutral600)
                         
                         HStack(alignment: .bottom, spacing: 4) {
-                            Text(commonApiVM.userInfoResponse?.planName ?? "Free plan")
+                            Text(LocalizedStringKey(commonApiVM.userInfoResponse?.planName ?? "Free plan"))
                                 .font(.appSemiBold(24))
                                 .foregroundStyle(Color.buttonsText)
                             if let billingCycle = commonApiVM.userInfoResponse?.planBillingCycle {
                                 if billingCycle != ""{
-                                    Text("(\(billingCycle))")
+                                    Text(LocalizedStringKey("(\(billingCycle))"))
                                         .font(.appSemiBold(16))
                                         .foregroundColor(.buttonsText)
                                 }
@@ -168,7 +168,7 @@ struct ProfileView: View {
 //                        .padding(.bottom, 14)
                         if let planExpiresAt = commonApiVM.userInfoResponse?.planExpiresAt {
                             if planExpiresAt != ""{
-                                Text("Next renewal is \(planExpiresAt)")
+                                Text(LocalizedStringKey("Next renewal is \(planExpiresAt)"))
                                     .font(.appSemiBold(14))
                                     .foregroundColor(.neutral600)
                             }
@@ -272,7 +272,7 @@ struct ProfileView: View {
                             .overlay(Color.border)
                         ProfileItem(title: "Invite friends", image: "user-add-02", action:{
                             Constants.FeatureConfig.performS4Action {
-//                                profileVM.navigate(to: .inviteFriends(uLink: commonApiVM.userInfoResponse?.referralLink))
+                                profileVM.navigate(to: .inviteFriends(uLink: commonApiVM.userInfoResponse?.referralLink))
                             }
                         })
                     }
@@ -296,11 +296,11 @@ struct ProfileView: View {
                     }
                     
                     HStack(spacing: 4) {
-                        Text("Version \(appVersion)")
+                        Text(LocalizedStringKey("Version \(appVersion)"))
                             .font(.footnote)
                             .foregroundColor(.gray)
                         
-                        Text("Build \(buildNumber)")
+                        Text(LocalizedStringKey("Build \(buildNumber)"))
                             .font(.footnote)
                             .foregroundColor(.gray)
                     }
@@ -354,7 +354,8 @@ struct ProfileView: View {
                                  onDelegate:{
                 getUserDetailsApi()
             })
-            .presentationDetents([.height(550)])
+            .presentationDetents([.medium, .large])
+//            .presentationDetents([.height(550)])
             .presentationDragIndicator(.hidden)
         }
         .onChange(of: profileVM.isUpdate) { value in

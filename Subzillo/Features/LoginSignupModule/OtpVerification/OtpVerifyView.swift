@@ -21,7 +21,7 @@ struct OtpVerifyView: View {
     @FocusState private var pinFocusState   : FocusPin?
     @Environment(\.dismiss) private var dismiss
     @State private var isPasting            = false
-//    @State private var showNumberSheet      = false
+    //    @State private var showNumberSheet      = false
     @State private var phoneNumber          : String = ""
     @State private var selectedCurrency     : Currency?
     @State var verifyData                   : LoginSignupVerifyData?
@@ -176,7 +176,7 @@ struct OtpVerifyView: View {
                         verifyData = data
                         if fromLogin{
                             if verifyData?.verifyType == 1{
-                               verifyText = "Verify Phone Number"
+                                verifyText = "Verify Phone Number"
                                 sendCodeText = "phone number"
                                 changeNumberEmail = "number"
                                 buttonText = "Phone Number"
@@ -187,19 +187,19 @@ struct OtpVerifyView: View {
                                 buttonText = "Email"
                             }
                         }else{
-//                            if verifyData?.verifyType == 1{
-//                                verifyText = "Verify Email Address"
-//                                sendCodeText = "email"
-//                                changeNumberEmail = "email"
-//                                buttonText = "Email"
-//                            }else{
-//                                verifyText = "Verify Phone Number"
-//                                sendCodeText = "phone number"
-//                                changeNumberEmail = "number"
-//                                buttonText = "Phone Number"
-//                            }
+                            //                            if verifyData?.verifyType == 1{
+                            //                                verifyText = "Verify Email Address"
+                            //                                sendCodeText = "email"
+                            //                                changeNumberEmail = "email"
+                            //                                buttonText = "Email"
+                            //                            }else{
+                            //                                verifyText = "Verify Phone Number"
+                            //                                sendCodeText = "phone number"
+                            //                                changeNumberEmail = "number"
+                            //                                buttonText = "Phone Number"
+                            //                            }
                             if verifyData?.verifyType == 1{
-                               verifyText = "Verify Phone Number"
+                                verifyText = "Verify Phone Number"
                                 sendCodeText = "phone number"
                                 changeNumberEmail = "number"
                                 buttonText = "Phone Number"
@@ -215,8 +215,8 @@ struct OtpVerifyView: View {
                 .onChange(of: otpVerifyVM.resendOtpResponse) { newValue in
                     if newValue {
                         otpFields = Array(repeating: "", count: 6)
-                        startTimer()                 // ⏱ restart timer
-                        otpVerifyVM.resendOtpResponse = false // reset flag
+                        startTimer()
+                        otpVerifyVM.resendOtpResponse = false
                     }
                 }
                 .onChange(of: otpVerifyVM.otpVerified) { verified in
@@ -229,16 +229,16 @@ struct OtpVerifyView: View {
                         changeNumberEmail   = "number"
                         buttonText          = "Phone Number"
                         otpFields = Array(repeating: "", count: 6)
-                        startTimer()                 // ⏱ restart timer
+                        startTimer()
                     }
                 }
                 .navigationBarBackButtonHidden(true)
-//                .sheet(isPresented: $showNumberSheet) {
-//                    BottomSheetView(header:"Change mobile number",selectedCurrency: $selectedCurrency, phoneNumber: $phoneNumber)
-//                        .presentationDragIndicator(.hidden)
-//                    //                        .presentationDetents([.medium])
-//                        .presentationDetents([.height(320)])
-//                }
+                //                .sheet(isPresented: $showNumberSheet) {
+                //                    BottomSheetView(header:"Change mobile number",selectedCurrency: $selectedCurrency, phoneNumber: $phoneNumber)
+                //                        .presentationDragIndicator(.hidden)
+                //                    //                        .presentationDetents([.medium])
+                //                        .presentationDetents([.height(320)])
+                //                }
             }
         }
     }
@@ -426,7 +426,3 @@ struct UITextFieldWrapper: UIViewRepresentable {
         }
     }
 }
-
-//#Preview {
-//    OtpVerifyView()
-//}

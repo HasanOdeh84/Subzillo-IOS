@@ -284,7 +284,7 @@ struct CalendarCardView: View {
     var body: some View {
         VStack(spacing: 0) {
             // Top Month Section
-            Text(month)
+            Text(LocalizedStringKey(month))
                 .font(.appSemiBold(14))
                 .foregroundColor(.white)
                 .frame(maxWidth: .infinity)
@@ -383,7 +383,7 @@ struct RelationView: View {
                     .foregroundColor(.whiteBlackBGnoPic)
             }
             else{
-                Text(name!)
+                Text(LocalizedStringKey(name!))
                     .font(.appRegular(12))
                     .foregroundColor(.fieldBG)
             }

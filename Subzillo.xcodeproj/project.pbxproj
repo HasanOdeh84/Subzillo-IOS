@@ -12,7 +12,6 @@
 		C5AE441A2EF90836007677EB /* libPhoneNumberShortNumber in Frameworks */ = {isa = PBXBuildFile; productRef = C5AE44192EF90836007677EB /* libPhoneNumberShortNumber */; };
 		C5C4AFDF2EE17A67008E7432 /* FirebaseCrashlytics in Frameworks */ = {isa = PBXBuildFile; productRef = C5C4AFDE2EE17A67008E7432 /* FirebaseCrashlytics */; };
 		C5C4B2C12EE1943C008E7432 /* MSAL in Frameworks */ = {isa = PBXBuildFile; productRef = C5C4B2C02EE1943C008E7432 /* MSAL */; };
-		C5E012812F3B27260084A642 /* BranchSDK in Frameworks */ = {isa = PBXBuildFile; productRef = C5E012802F3B27260084A642 /* BranchSDK */; };
 		C5E416102E9A4DE600E739A3 /* Lottie in Frameworks */ = {isa = PBXBuildFile; productRef = C5E4160F2E9A4DE600E739A3 /* Lottie */; };
 		C5E417872E9A71C900E739A3 /* SDWebImageSwiftUI in Frameworks */ = {isa = PBXBuildFile; productRef = C5E417862E9A71C900E739A3 /* SDWebImageSwiftUI */; };
 		C5E4178A2E9A73BF00E739A3 /* GoogleSignIn in Frameworks */ = {isa = PBXBuildFile; productRef = C5E417892E9A73BF00E739A3 /* GoogleSignIn */; };
@@ -115,7 +114,6 @@
 				C5C4B2C12EE1943C008E7432 /* MSAL in Frameworks */,
 				C5E417872E9A71C900E739A3 /* SDWebImageSwiftUI in Frameworks */,
 				C5AE44182EF90836007677EB /* libPhoneNumberGeocoding in Frameworks */,
-				C5E012812F3B27260084A642 /* BranchSDK in Frameworks */,
 				C5C4AFDF2EE17A67008E7432 /* FirebaseCrashlytics in Frameworks */,
 				C5E4178A2E9A73BF00E739A3 /* GoogleSignIn in Frameworks */,
 				C5AE441A2EF90836007677EB /* libPhoneNumberShortNumber in Frameworks */,
@@ -236,7 +234,6 @@
 				C5C4AFDD2EE17A67008E7432 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
 				C5C4B2BF2EE1943C008E7432 /* XCRemoteSwiftPackageReference "microsoft-authentication-library-for-objc" */,
 				C5AE44142EF90836007677EB /* XCRemoteSwiftPackageReference "libPhoneNumber-iOS" */,
-				C5E0127F2F3B27260084A642 /* XCRemoteSwiftPackageReference "ios-branch-sdk-spm" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = C5DA9EEE2E7A7B38008901A6 /* Products */;
@@ -453,7 +450,6 @@
 				INFOPLIST_KEY_NSCameraUsageDescription = "This app requires access to your camera to let you capture photos or documents for your profile and uploads.";
 				INFOPLIST_KEY_NSMicrophoneUsageDescription = "We need access to the microphone to record your voice to add subscription.";
 				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "This app requires access to your photo library so you can select and upload existing images from your device.";
-				INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = "This app requires access of speech to add subscription through voice.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -499,7 +495,6 @@
 				INFOPLIST_KEY_NSCameraUsageDescription = "This app requires access to your camera to let you capture photos or documents for your profile and uploads.";
 				INFOPLIST_KEY_NSMicrophoneUsageDescription = "We need access to the microphone to record your voice to add subscription.";
 				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "This app requires access to your photo library so you can select and upload existing images from your device.";
-				INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = "This app requires access of speech to add subscription through voice.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -640,14 +635,6 @@
 				minimumVersion = 2.6.0;
 			};
 		};
-		C5E0127F2F3B27260084A642 /* XCRemoteSwiftPackageReference "ios-branch-sdk-spm" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/BranchMetrics/ios-branch-sdk-spm";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 3.13.3;
-			};
-		};
 		C5E4160E2E9A4DE600E739A3 /* XCRemoteSwiftPackageReference "lottie-spm" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/airbnb/lottie-spm.git";
@@ -699,11 +686,6 @@
 			isa = XCSwiftPackageProductDependency;
 			package = C5C4B2BF2EE1943C008E7432 /* XCRemoteSwiftPackageReference "microsoft-authentication-library-for-objc" */;
 			productName = MSAL;
-		};
-		C5E012802F3B27260084A642 /* BranchSDK */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = C5E0127F2F3B27260084A642 /* XCRemoteSwiftPackageReference "ios-branch-sdk-spm" */;
-			productName = BranchSDK;
 		};
 		C5E4160F2E9A4DE600E739A3 /* Lottie */ = {
 			isa = XCSwiftPackageProductDependency;

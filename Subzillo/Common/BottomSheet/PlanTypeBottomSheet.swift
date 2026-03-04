@@ -103,7 +103,7 @@ struct PlanTypeBottomSheet: View {
                                 dismiss()
                             } label: {
                                 HStack {
-                                    Text(planType)
+                                    Text(LocalizedStringKey(planType))
                                         .font(.appRegular(16))
                                         .foregroundColor(.neutralMain700)
                                         .padding(.horizontal, 14)

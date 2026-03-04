@@ -26,7 +26,7 @@ struct RootTabBar: View {
                 case .addSubscription:
                     AddSubscriptionsView()
                 case .smartAI:
-                    AnalyticsView()
+                    SmartAIAssistantView()
                 case .profile:
                     ProfileView()
                 }
@@ -140,16 +140,22 @@ struct TabBarItem: View {
             VStack(spacing: 4) {
                 Image(iconName)
                     .frame(width: 24,height: 24)
-                Text(label)
-                    .foregroundStyle(
-                        selectedTab == tab
-                        ? AnyShapeStyle(
-                            LinearGradient(colors: [Color.linearGradient3, Color.linearGradient4, Color.blueMain700],
-                                           startPoint: .leading,
-                                           endPoint: .trailing)
+                if selectedTab == tab {
+                    Text(label)
+                        .overlay(
+                            LinearGradient(
+                                colors: [Color.linearGradient3, Color.linearGradient4, Color.blueMain700],
+                                startPoint: .leading,
+                                endPoint: .trailing
+                            )
                         )
-                        : AnyShapeStyle(Color.neutral400)
-                    )
+                        .mask(
+                            Text(label)
+                        )
+                } else {
+                    Text(label)
+                        .foregroundColor(.neutral400)
+                }
             }
         }
         .frame(maxWidth: .infinity)

@@ -59,7 +59,7 @@ struct ResetPasswordView: View {
                     Spacer()
                     CustomButton(title: "Reset Password") {
                         if let errorMessage = LoginSignupValidations().validateResetPassword(password: password, confirmPassword: confirmPassword) {
-                            ToastManager.shared.showToast(message: errorMessage)
+                            ToastManager.shared.showToast(message: errorMessage.localized)
                         } else {
                             resetVM.resetPassword(input: ResetPasswordRequest(username: username,newPassword: password))
                         }

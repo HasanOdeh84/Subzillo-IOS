@@ -49,7 +49,7 @@ struct AutoEmailSyncBottomSheet: View {
                                             .resizable()
                                             .frame(width: 24, height: 24)
                                         
-                                        Text(period.label ?? "")
+                                        Text(LocalizedStringKey(period.label ?? ""))
                                             .font(.appRegular(14))
                                             .foregroundColor(Color.neutralMain700)
                                     }

@@ -8,8 +8,8 @@
 import SwiftUI
 
 struct GradientBorderView: View {
-    var title           : String
-    var subTitle        : String
+    var title           : LocalizedStringKey
+    var subTitle        : LocalizedStringKey
     var buttonImage     : String?
     var nextBtnImage    : String = "arrow-right-01"
     var action          : () -> Void
@@ -29,11 +29,11 @@ struct GradientBorderView: View {
                 
                 VStack(alignment: .leading, spacing: 2) {
                     
-                    Text(LocalizedStringKey(title))
+                    Text(title)
                         .font(.appSemiBold(CGFloat(titleFont)))
                         .foregroundColor(titleColor)
                     
-                    Text(LocalizedStringKey(subTitle))
+                    Text(subTitle)
                         .font(.appRegular(CGFloat(subTitleFont)))
                         .foregroundColor(Color.neutral500)
                         .multilineTextAlignment(.leading)
@@ -102,7 +102,7 @@ struct GradienCustomeView: View {
                             instructionRow(number: "•", text: "We cannot send emails or access personal messages")
                         }
                     }else{
-                        Text(LocalizedStringKey(subTitle))
+                        Text(subTitle)
                             .font(.appRegular(14))
                             .foregroundColor(.white)
                             .multilineTextAlignment(.leading)
@@ -121,14 +121,26 @@ struct GradienCustomeView: View {
             )
             .cornerRadius(12)
         }
-   // }
+    
+    func instructionRow(number: String, text: LocalizedStringKey) -> some View {
+        HStack(alignment: .top, spacing: 3) {
+            Text(number)
+                .font(.appRegular(18))
+                .foregroundColor(.white)
+            
+            Text(text)
+                .font(.appRegular(14))
+                .foregroundColor(.white)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+    }
 }
 
 //MARK: - NormalOptionView
 struct NormalOptionView: View {
     
-    var title       : String
-    var subTitle    : String
+    var title       : LocalizedStringKey
+    var subTitle    : LocalizedStringKey
     var buttonImage : String
     var titleColor  : Color
     var action      : () -> Void

@@ -29,7 +29,7 @@ struct PermissionSheet: View {
                     .frame(width: 84, height: 84)
                     .padding(.bottom, 16)
                 
-                Text(LocalizedStringKey("Permission Required"))
+                Text("Permission Required")
                     .font(.appSemiBold(24))
                     .foregroundColor(Color.neutralMain700)
                 
@@ -49,7 +49,7 @@ struct PermissionSheet: View {
             
             VStack(alignment: .leading, spacing: 8) {
                 
-                Text(LocalizedStringKey("• Go to Settings → Privacy & Security"))
+                Text("• Go to Settings → Privacy & Security")
                     .font(.appRegular(16))
                     .foregroundColor(Color.neutralMain700)
                     .frame(maxWidth: .infinity, alignment: .leading)
@@ -57,7 +57,7 @@ struct PermissionSheet: View {
                     .font(.appRegular(16))
                     .foregroundColor(Color.neutralMain700)
                     .frame(maxWidth: .infinity, alignment: .leading)
-                Text(LocalizedStringKey("• Enable for Subzillo"))
+                Text("• Enable for Subzillo")
                     .font(.appRegular(16))
                     .foregroundColor(Color.neutralMain700)
                     .frame(maxWidth: .infinity, alignment: .leading)

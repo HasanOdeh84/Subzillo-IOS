@@ -5,8 +5,6 @@
 //  Created by KSMACMINI-019 on 18/09/25.
 //
 import SwiftUI
-import Vision
-import Speech
 import AVFoundation
 
 struct VoiceCommandView: View {

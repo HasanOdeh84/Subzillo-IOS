@@ -82,7 +82,7 @@ struct underlineText: View{
         HStack{
             Image(image)
             Button(action: action){
-                Text(text)
+                Text(LocalizedStringKey(text))
                     .font(.appRegular(16))
                     .foregroundColor(.navyBlueCTA700)
                     .underline()

@@ -190,7 +190,7 @@ struct LoginView: View {
 //            referralCode    : Constants.getUserDefaultsValue(for: Constants.referrerId)
         )
         if let errorMessage = LoginSignupValidations().validateLogin(input: input) {
-            ToastManager.shared.showToast(message: errorMessage,style: ToastStyle.error)
+            ToastManager.shared.showToast(message: errorMessage.localized,style: ToastStyle.error)
         } else {
             loginVM.login(input: input, formattedPhNo: ph)
         }

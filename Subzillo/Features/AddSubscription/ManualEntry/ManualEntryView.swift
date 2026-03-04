@@ -68,22 +68,22 @@ struct ManualEntryView: View {
     @State var selectedBilling                  : String?
     @State private var showBillingCycleSheet    = false
     @State private var billingData              = [
-        ManualDataInfo(id: "1", title: "Daily", subtitle: "Every 24 hours"),
-        ManualDataInfo(id: "2", title: "Weekly", subtitle: "Every 7 Days"),
-        ManualDataInfo(id: "3", title: "Monthly", subtitle: "Every 30 Days"),
-        ManualDataInfo(id: "4", title: "Quarterly", subtitle: "Every 90 Days"),
-        ManualDataInfo(id: "5", title: "Biannually", subtitle: "Every 180 Days"),
-        ManualDataInfo(id: "6", title: "Yearly", subtitle: "Every 360 Days")
+        ManualDataInfo(id: "1", title: "Daily".localized, subtitle: "Every 24 hours".localized),
+        ManualDataInfo(id: "2", title: "Weekly".localized, subtitle: "Every 7 Days".localized),
+        ManualDataInfo(id: "3", title: "Monthly".localized, subtitle: "Every 30 Days".localized),
+        ManualDataInfo(id: "4", title: "Quarterly".localized, subtitle: "Every 90 Days".localized),
+        ManualDataInfo(id: "5", title: "Biannually".localized, subtitle: "Every 180 Days".localized),
+        ManualDataInfo(id: "6", title: "Yearly".localized, subtitle: "Every 360 Days".localized)
     ]
     @State private var billingIndex             : Int = -1
     @State private var cardsData                : [ManualDataInfo] = []
     @State private var relationsData            = [
-        ManualDataInfo(id: Constants.getUserId(), title: "Me")
+        ManualDataInfo(id: Constants.getUserId(), title: "Me".localized)
     ]
     @State private var remindersData            = [
-        ManualDataInfo(id: "1", title: "3 days before renewal", value: "-3d"),
-        ManualDataInfo(id: "2", title: "1 day before renewal", value: "-1d"),
-        ManualDataInfo(id: "3", title: "On renewal day", value:"0d")
+        ManualDataInfo(id: "1", title: "3 days before renewal".localized, value: "-3d"),
+        ManualDataInfo(id: "2", title: "1 day before renewal".localized, value: "-1d"),
+        ManualDataInfo(id: "3", title: "On renewal day".localized, value:"0d")
     ]
     @State var isPlanTypeError                  : Bool = false
     @State var isAmountError                    : Bool = false
@@ -117,13 +117,13 @@ struct ManualEntryView: View {
                 
                 VStack(alignment: .leading, spacing: 2) {
                     // MARK: Title
-                    Text(isFromEdit == true ? "Edit Details" : "Manual Entry")
+                    Text(LocalizedStringKey(isFromEdit == true ? "Edit Details" : "Manual Entry"))
                         .font(.appRegular(24))
                         .foregroundColor(Color.neutralMain700)
                         .padding(.top, 20)
                     
                     // MARK: SubTitle
-                    Text(isFromEdit == true ? "Update your details" : "Add your subscription details manually.")
+                    Text(LocalizedStringKey(isFromEdit == true ? "Update your details" : "Add your subscription details manually."))
                         .font(.appRegular(18))
                         .foregroundColor(Color.neutral500)
                 }
@@ -964,7 +964,7 @@ struct ManualEntryView: View {
     func updateRelationInfo()
     {
         relationsData.removeAll()
-        relationsData.append(ManualDataInfo(id: Constants.getUserId(), title: "Me"))
+        relationsData.append(ManualDataInfo(id: Constants.getUserId(), title: "Me".localized))
         if let familyCards = addSubscriptionVM.listFamilyMembersResponse?.familyMembers {
             for family in familyCards {
                 relationsData.append(
@@ -1283,7 +1283,7 @@ struct ManualEntryView: View {
         }
         let category                = selectedCategory?.id ?? ""
         var subscriptionFor         = Constants.getUserId()
-        var subscriptionForName     = "Me"
+        var subscriptionForName     = "Me".localized
         if relationsData.indices.contains(relationIndex) {
             let selectedRelation = relationsData[relationIndex]
             subscriptionFor     = selectedRelation.id
@@ -1513,8 +1513,7 @@ struct SecureCCVField: View
                 .font(.appRegular(14))
                 .foregroundColor(.neutralMain700)
             HStack{
-                
-                SecureField(placeHolder ?? "", text: $ccv)
+                SecureField(LocalizedStringKey(placeHolder ?? ""), text: $ccv)
                     .keyboardType(.numberPad)
                     .padding(6)
                     .textContentType(.oneTimeCode)
@@ -1583,7 +1582,7 @@ struct FieldView: View
                                 .frame(maxWidth:.infinity, alignment: .leading)
                         }
                         else{
-                            Text(placeHolder ?? "")
+                            Text(LocalizedStringKey(placeHolder ?? ""))
                                 .padding(6)
                                 .multilineTextAlignment(.leading)
                                 .font(.appRegular(14))
@@ -1593,7 +1592,7 @@ struct FieldView: View
                     }else{
                         if textValue != ""
                         {
-                            Text(textValue ?? "")
+                            Text(LocalizedStringKey(textValue ?? ""))
                                 .padding(6)
                                 .multilineTextAlignment(.leading)
                                 .font(.appRegular(14))
@@ -1601,7 +1600,7 @@ struct FieldView: View
                                 .frame(maxWidth:.infinity, alignment: .leading)
                         }
                         else{
-                            Text(placeHolder ?? "")
+                            Text(LocalizedStringKey(placeHolder ?? ""))
                                 .padding(6)
                                 .multilineTextAlignment(.leading)
                                 .font(.appRegular(14))
@@ -1617,7 +1616,7 @@ struct FieldView: View
                                 Text("**** **** ****")
                                     .foregroundColor(.whiteBlackBGnoPic)
                             }
-                            TextField(maxDigits == 4 ? "" : placeHolder ?? "", text: $text)
+                            TextField(LocalizedStringKey(maxDigits == 4 ? "" : placeHolder ?? ""), text: $text)
                                 .keyboardType(isNumberPad == true ? .decimalPad : .default)
                                 .keyboardType(.default)
                                 .autocapitalization(.none)
@@ -1639,7 +1638,7 @@ struct FieldView: View
                                 Text("**** **** ****")
                                     .foregroundColor(.whiteBlackBGnoPic)
                             }
-                            TextField(maxDigits == 4 ? "" : placeHolder ?? "", text: $text)
+                            TextField(LocalizedStringKey(maxDigits == 4 ? "" : placeHolder ?? ""), text: $text)
                                 .keyboardType(isNumberPad == true ? .numberPad : .default)
                                 .keyboardType(.default)
                                 .autocapitalization(.none)
@@ -1758,7 +1757,7 @@ struct FieldSuggestionView<Item: Identifiable>: View {
                 }else{
                     Image(image ?? "")
                 }
-                TextField(placeHolder ?? "", text: $text)
+                TextField(LocalizedStringKey(placeHolder ?? ""), text: $text)
                     .keyboardType(isNumberPad ? .decimalPad : .default)
                     .autocapitalization(.none)
                     .font(.appRegular(14))
@@ -1814,7 +1813,7 @@ struct FieldSuggestionView<Item: Identifiable>: View {
                     ForEach(Array(filtered.enumerated()), id: \.element.id) { index, item in
                         VStack(spacing: 0) {
                             HStack {
-                                Text(displayKey(item))
+                                Text(LocalizedStringKey(displayKey(item)))
                                     .foregroundColor(.neutralMain700)
                                 Spacer()
                             }
@@ -1904,7 +1903,7 @@ struct FieldSuggestionView1<Item: Identifiable>: View {
                 }else{
                     Image(image ?? "")
                 }
-                TextField(placeHolder ?? "", text: $text)
+                TextField(LocalizedStringKey(placeHolder ?? ""), text: $text)
                     .keyboardType(isNumberPad ? .decimalPad : .default)
                     .autocapitalization(.none)
                     .font(.appRegular(14))
@@ -1960,7 +1959,7 @@ struct FieldSuggestionView1<Item: Identifiable>: View {
                     ForEach(Array(filtered.enumerated()), id: \.element.id) { index, item in
                         VStack(spacing: 0) {
                             HStack {
-                                Text(displayKey(item))
+                                Text(LocalizedStringKey(displayKey(item)))
                                     .foregroundColor(.neutralMain700)
                                 Spacer()
                             }
@@ -2038,7 +2037,7 @@ struct ListView: View {
                             HStack(spacing: 8) {
                                 Image("AddMore")
                                     .frame(width: 20, height: 20)
-                                Text(type == .cards ? "Add New Card" : "Add New Member")
+                                Text(LocalizedStringKey(type == .cards ? "Add New Card" : "Add New Member"))
                                     .font(.appRegular(14))
                                     .foregroundColor(Color.blueMain700)
                             }
@@ -2052,29 +2051,30 @@ struct ListView: View {
                             }
                         }) {
                             AddNewCardSheet(shouldCallAPI:$shouldCallAPI)
-                                .onAppear {
-                                    DispatchQueue.main.async {
-                                        sheetHeight = sheetHeight
-                                    }
-                                }
-                                .id(sheetID)
-                                .overlay {
-                                    GeometryReader { geo in
-                                        Color.clear
-                                            .preference(
-                                                key: InnerHeightPreferenceKey.self,
-                                                value: geo.size.height
-                                            )
-                                    }
-                                }
-                                .onPreferenceChange(InnerHeightPreferenceKey.self) { height in
-                                    if height > 150 {
-                                        sheetHeight = height
-                                    }
-                                }
-                                .presentationDetents([.height(sheetHeight)])
+//                                .onAppear {
+//                                    DispatchQueue.main.async {
+//                                        sheetHeight = sheetHeight
+//                                    }
+//                                }
+//                                .id(sheetID)
+//                                .overlay {
+//                                    GeometryReader { geo in
+//                                        Color.clear
+//                                            .preference(
+//                                                key: InnerHeightPreferenceKey.self,
+//                                                value: geo.size.height
+//                                            )
+//                                    }
+//                                }
+//                                .onPreferenceChange(InnerHeightPreferenceKey.self) { height in
+//                                    if height > 150 {
+//                                        sheetHeight = height
+//                                    }
+//                                }
+//                                .presentationDetents([.height(sheetHeight)])
+                                .presentationDetents([.medium, .large])
                                 .presentationDragIndicator(.hidden)
-                                .interactiveDismissDisabled(false)
+//                                .interactiveDismissDisabled(false)
                         }
                         //                        .onChange(of: showNewCardSheet) { newValue in
                         //                            if newValue == false {
@@ -2237,12 +2237,12 @@ struct BillingCycleItem: View {
         HStack(spacing: 12) {
             HStack(spacing: 12) {
                 Image(isSelected == true ? "SelectedRadio" : "UnSelectedRadio")
-                Text(title ?? "")
+                Text(LocalizedStringKey(title ?? ""))
                     .font(.appRegular(14))
                     .foregroundColor(.neutralMain700)
             }
             Spacer()
-            Text(subtitle ?? "")
+            Text(LocalizedStringKey(subtitle ?? ""))
                 .font(.appRegular(14))
                 .foregroundColor(.neutral500)
                 .multilineTextAlignment(.trailing)
@@ -2263,7 +2263,7 @@ struct SubscriptionItem: View {
     var body: some View {
         HStack(spacing: 12) {
             Image(isSelected == true ? "SelectedRadio" : "UnSelectedRadio")
-            Text(title ?? "")
+            Text(LocalizedStringKey(title ?? ""))
                 .font(.appRegular(14))
                 .foregroundColor(.neutralMain700)
             if isSubTitlePresent == true {
@@ -2288,7 +2288,7 @@ struct ReminderItem: View {
     var body: some View {
         HStack(spacing: 12) {
             Image(isSelected == true ? "Checkmark" : "UnCheckmark")
-            Text(title ?? "")
+            Text(LocalizedStringKey(title ?? ""))
                 .font(.appRegular(14))
                 .foregroundColor(.neutralMain700)
         }
@@ -2312,7 +2312,7 @@ struct OriginalImageView: View {
                 .padding(.vertical, 24)
             
             VStack(alignment: .center, spacing: 8) {
-                Text(LocalizedStringKey("Review Original Image"))
+                Text("Review Original Image")
                     .font(.appRegular(24))
                     .foregroundColor(Color.neutralMain700)
             }

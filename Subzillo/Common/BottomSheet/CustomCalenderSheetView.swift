@@ -35,7 +35,7 @@ struct CustomCalenderSheet: View {
                     ForEach(Array(months.enumerated()), id: \.offset) { index, month in
                         //                    ForEach(months, id: \.self) { month in
                         //                        Text(String(format: "%02d", month)).tag(month)
-                        Text(month).tag(index+1)
+                        Text(LocalizedStringKey(month)).tag(index+1)
                     }
                 }
                 .frame(maxWidth: .infinity)

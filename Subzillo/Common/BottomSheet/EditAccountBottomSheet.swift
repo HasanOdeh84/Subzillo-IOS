@@ -64,7 +64,7 @@ struct EditAccountBottomSheet: View {
             case .currency:
                 PhoneNumberField(phoneNumber        : .constant(""),
                                  header             : "Your payment currency",
-                                 placeholder        : selectedCurrency?.name,
+                                 placeholder        : (selectedCurrency?.name ?? "").localized,
                                  selectedCurrency   : $selectedCurrency,
                                  selectedCountry    : $selectedCountry,
                                  isCountry          : false)
@@ -82,7 +82,7 @@ struct EditAccountBottomSheet: View {
                                                  currency       : selectedCurrency?.code ?? "",
                                                  currencySymbol : selectedCurrency?.symbol ?? "")
                 if let errorMessage = ProfileValidations.shared.editAccountDetails(input: input) {
-                    toastManager.showToast(message: errorMessage,style:ToastStyle.error)
+                    toastManager.showToast(message: errorMessage.localized, style: .error)
                 } else {
 //                    if accountType.rawValue == 1 || accountType.rawValue == 4{
 //                        action(name.trimmed, email.trimmed, mobile.trimmed, selectedCurrency?.code ?? "", accountType.rawValue, selectedCountry?.dialCode ?? "", selectedCurrency?.symbol ?? "")
@@ -107,7 +107,7 @@ struct EditAccountBottomSheet: View {
         .toolbar {
             ToolbarItemGroup(placement: .keyboard) {
                 Spacer()
-                Button("Done") {
+                Button(LocalizedStringKey("Done")) {
                     isInputActive = false
                 }
             }

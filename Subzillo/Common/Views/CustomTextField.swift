@@ -16,7 +16,7 @@ struct CustomTextField: View {
     var keyboardType    : UIKeyboardType = .default
     
     var body: some View {
-        TextField(placeholder, text: $text)
+        TextField(LocalizedStringKey(placeholder), text: $text)
             .padding()
             .background(Color(.systemGray6))
             .cornerRadius(8)
@@ -36,12 +36,15 @@ struct ReusableTextField: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text(LocalizedStringKey(header ?? ""))
-                .font(.appRegular(14))
-                .foregroundColor(Color.neutralMain700)
+            if let header = header {
+                Text(LocalizedStringKey(header))
+                    .font(.appRegular(14))
+                    .foregroundColor(Color.neutralMain700)
+            }
             HStack{
                 Image("profile")
-                TextField(placeholder, text: $text)
+//                TextField(LocalizedStringKey(placeholder), text: $text)
+                TextField("", text: $text, prompt: Text(verbatim: placeholder.localized))
                     .keyboardType(isEmail ? .emailAddress : .default)
                     .padding(6)
                     .autocapitalization(.none)
@@ -65,20 +68,23 @@ struct ReusableTextField2: View {
     var placeholder     : String
     @Binding var text   : String
     var isEmail         : Bool = false
-    var header          : String?
+    var header          : LocalizedStringKey?
     var isDisabled      : Bool = false
     var isImage         = true
     
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text(LocalizedStringKey(header ?? ""))
-                .font(.appRegular(14))
-                .foregroundColor(Color.neutralMain700)
+            if let header = header {
+                Text(header)
+                    .font(.appRegular(14))
+                    .foregroundColor(Color.neutralMain700)
+            }
             HStack{
                 if isImage{
                     Image("profile")
                 }
-                TextField(placeholder, text: $text)
+                //                TextField(placeholder, text: $text)
+                TextField("", text: $text, prompt: Text(verbatim: placeholder))
                     .keyboardType(isEmail ? .emailAddress : .default)
                     .padding(6)
                     .autocapitalization(.none)

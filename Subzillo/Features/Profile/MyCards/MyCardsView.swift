@@ -115,29 +115,30 @@ struct MyCardsView: View {
                             action: {
                 self.userCardsApi()
             })
-            .onAppear {
-                DispatchQueue.main.async {
-                    sheetHeight = sheetHeight
-                }
-            }
-            .id(sheetID)
-            .overlay {
-                GeometryReader { geo in
-                    Color.clear
-                        .preference(
-                            key: InnerHeightPreferenceKey.self,
-                            value: geo.size.height
-                        )
-                }
-            }
-            .onPreferenceChange(InnerHeightPreferenceKey.self) { height in
-                if height > 150 {
-                    sheetHeight = height
-                }
-            }
-            .presentationDetents([.height(sheetHeight)])
+//            .onAppear {
+//                DispatchQueue.main.async {
+//                    sheetHeight = sheetHeight
+//                }
+//            }
+//            .id(sheetID)
+//            .overlay {
+//                GeometryReader { geo in
+//                    Color.clear
+//                        .preference(
+//                            key: InnerHeightPreferenceKey.self,
+//                            value: geo.size.height
+//                        )
+//                }
+//            }
+//            .onPreferenceChange(InnerHeightPreferenceKey.self) { height in
+//                if height > 150 {
+//                    sheetHeight = height
+//                }
+//            }
+//            .presentationDetents([.height(sheetHeight)])
+            .presentationDetents([.medium, .large])
             .presentationDragIndicator(.hidden)
-            .interactiveDismissDisabled(false)
+//            .interactiveDismissDisabled(false)
         }
         .sheet(item: $editingCard) { wrapper in
             AddNewCardSheet(nickName        : wrapper.data.nickName ?? "",
@@ -149,7 +150,8 @@ struct MyCardsView: View {
                             action: {
                 self.userCardsApi()
             })
-            .presentationDetents([.height(500), .large])
+            .presentationDetents([.medium, .large])
+//            .presentationDetents([.height(500), .large])
             .presentationDragIndicator(.hidden)
         }
         .sheet(isPresented: $showDeletePopup) {

@@ -172,7 +172,7 @@ struct AnalyticsMemberFilterView: View {
                     Button {
                         handleSelection(member.id)
                     } label: {
-                        Text(member.title ?? "")
+                        Text(LocalizedStringKey(member.title ?? ""))
                             .font(.appRegular(14))
                             .padding(.horizontal, 16)
                             .padding(.vertical, 8)
@@ -553,21 +553,6 @@ extension Shape {
     }
 }
 
-//extension SubscriptionData {
-//    var uiColor: Color {
-//        // Map colors to design system or standard colors
-//        // Mockup uses a specific palette
-//        switch color?.lowercased() {
-//        case "red": return Color(hex: "FF5C5C") // Estimate
-//        case "blue": return Color(hex: "2E5BFF")
-//        case "purple": return .purple
-//        case "indigo": return .indigo
-//        case "cyan": return .cyan
-//        default: return .gray
-//        }
-//    }
-//}
-
 //MARK: - AnalyticsYearOverviewChartView
 struct AnalyticsYearOverviewChartView: View {
     
@@ -666,7 +651,7 @@ struct AnalyticsYearOverviewChartView: View {
                     
                     ForEach(0..<12, id: \.self) { index in
                         HStack(spacing: 12) {
-                            Text(months[index])
+                            Text(LocalizedStringKey(months[index]))
                                 .font(.appRegular(14))
                                 .foregroundColor(.neutralMain700)
                                 .frame(width: 30, alignment: .leading)

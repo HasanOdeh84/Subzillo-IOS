@@ -109,7 +109,7 @@ struct BillingCycleBottomSheet: View {
                             onSelect(billing)
                         } label: {
                             HStack {
-                                Text(billing)
+                                Text(LocalizedStringKey(billing))
                                     .font(.appRegular(16))
                                     .foregroundColor(.neutralMain700)
                                     .padding(.horizontal, 14)

@@ -41,7 +41,7 @@ struct ForgotPasswordView: View {
                 Spacer()
                 CustomButton(title: "Reset") {
                     if let errorMessage = LoginSignupValidations().validateForgotPassword(username: username) {
-                        ToastManager.shared.showToast(message: errorMessage)
+                        ToastManager.shared.showToast(message: errorMessage.localized)
                     } else {
                         forgotVM.forgotPassword(input: ForgotPasswordRequest(username: username))
                     }

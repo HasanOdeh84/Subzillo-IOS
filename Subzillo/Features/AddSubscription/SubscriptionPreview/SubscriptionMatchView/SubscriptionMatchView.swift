@@ -141,7 +141,7 @@ struct SubscriptionMatchView: View {
                             }
                             //subscriptionFor Need to change with nickName
                             if subscriptionData?.subscriptionFor ?? "" == "" || subscriptionData?.subscriptionFor ?? "" == Constants.getUserId(){
-                                SubscriptionDetailsPlainItem(title: "Benefit From", value: "Me")
+                                SubscriptionDetailsPlainItem(title: "Benefit From", value: "Me".localized)
                             }else{
                                 SubscriptionDetailsPlainItem(title: "Benefit From", value: subscriptionData?.nickName)
                             }
@@ -154,7 +154,7 @@ struct SubscriptionMatchView: View {
                             SubscriptionDetailsPlainItem(title: "Benefit From", value: subscriptionData?.subscriptionForName ?? "")
                             SubscriptionDetailsPlainItem(title: "Renewal Reminders", value: subscriptionData?.renewalReminderValue ?? "")
                         }
-                        SubscriptionDetailsPlainItem(title: "Status", value: fromList ? subscriptionData?.status : "Active")
+                        SubscriptionDetailsPlainItem(title: "Status", value: fromList ? subscriptionData?.status : "Active".localized)
                         SubscriptionDetailsPlainItem(title: "Note", value: subscriptionData?.notes ?? "")
                     }
                     .padding(24)
@@ -179,7 +179,7 @@ struct SubscriptionMatchView: View {
                                         .resizable()
                                         .frame(width: 17, height: 19)
                                     
-                                    Text(LocalizedStringKey("Delete"))
+                                    Text("Delete")
                                         .font(.appSemiBold(14))
                                         .foregroundColor(Color.disCardRed)
                                 }

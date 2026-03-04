@@ -90,6 +90,7 @@ struct InfoAlertSheet: View {
                     .padding(.horizontal)
                 }
             }
+            Spacer()
         }
         .padding(.horizontal, 20)
         .fixedSize(horizontal: false, vertical: true)

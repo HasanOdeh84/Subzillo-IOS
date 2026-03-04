@@ -12,17 +12,24 @@ public enum LogType: String {
 }
 
 public struct PrintLogger {
+  private static let logQueue = DispatchQueue(label: "com.subzillo.logger", qos: .background)
+
   public static func log(type: LogType, message: String) {
     #if DEBUG
-    print("[Subzillo] \(type.rawValue) \(message)\n")
+    logQueue.async {
+        print("[Subzillo] \(type.rawValue) \(message)\n")
+    }
     #endif
   }
 
   public static func modelLog<T: Encodable>(_ data: T, type: LogType, isInput: Bool = true) {
     #if DEBUG
-    print("[Subzillo] \(type.rawValue): \n\(data.encodePrint().orEmpty)\n")
-    if !isInput {
-      print("-------------------------------------------------------------------------------------------------------\n")
+    logQueue.async {
+        let stringData = data.encodePrint().orEmpty
+        print("[Subzillo] \(type.rawValue): \n\(stringData)\n")
+        if !isInput {
+          print("-------------------------------------------------------------------------------------------------------\n")
+        }
     }
     #endif
   }

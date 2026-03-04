@@ -30,6 +30,7 @@ struct ConnectedEmailItemView: View {
 //                            }
 //                            .padding(.trailing, -16)
                     }
+                    .tint(Color.underlineGray) // prevents email address from appearing blue (iOS data detection)
 
                     if email.lastSyncDate != "" {
                         if email.lastSyncDate != nil {

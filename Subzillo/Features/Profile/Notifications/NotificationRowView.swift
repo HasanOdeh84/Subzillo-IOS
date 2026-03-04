@@ -30,7 +30,7 @@ struct NotificationRowView: View {
             
             VStack(alignment: .leading, spacing: 4) {
                 HStack {
-                    Text(notification.title ?? "")
+                    Text(LocalizedStringKey(notification.title ?? ""))
                         .font(.appSemiBold(16))
                         .foregroundColor(.navyBlueCTA700)
                     
@@ -41,7 +41,7 @@ struct NotificationRowView: View {
                     //                        .foregroundColor(.neutral500)
                 }
                 
-                Text(notification.message ?? "")
+                Text(LocalizedStringKey(notification.message ?? ""))
                     .font(.appRegular(14))
                     .foregroundColor(.neutral500)
                 //                    .lineLimit(3)

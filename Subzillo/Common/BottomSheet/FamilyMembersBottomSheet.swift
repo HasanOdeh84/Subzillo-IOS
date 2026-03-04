@@ -41,7 +41,7 @@ struct FamilyMembersBottomSheet: View {
                         .frame(width: 20, height: 20)
                         .padding(.leading, 16)
                     
-                    TextField("Search Member", text: $searchText)
+                    TextField(LocalizedStringKey("Search Member"), text: $searchText)
                         .textFieldStyle(.plain)
                         .padding(.trailing, 10)
                 }
@@ -71,7 +71,7 @@ struct FamilyMembersBottomSheet: View {
                                             : "UnCheckmark"
                                         )
                                         
-                                        Text(member.nickName ?? "")
+                                        Text(LocalizedStringKey(member.nickName ?? ""))
                                             .font(.appRegular(16))
                                             .foregroundColor(.neutralMain700)
                                         

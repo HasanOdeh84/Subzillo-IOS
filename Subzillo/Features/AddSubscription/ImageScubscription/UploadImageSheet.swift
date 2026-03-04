@@ -43,7 +43,7 @@ struct UploadImageSheet: View {
                     
                     HStack {
                         Spacer()
-                        Text(LocalizedStringKey(fromProfile ? "Profile Picture" : "Upload a Screenshot"))
+                        Text(fromProfile ? "Profile Picture" : "Upload a Screenshot")
                             .font(.appSemiBold(24))
                             .foregroundColor(Color.neutralMain700)
                             .multilineTextAlignment(.center)
@@ -55,13 +55,13 @@ struct UploadImageSheet: View {
                     //                    .foregroundColor(Color.gray)
                     
                     VStack(spacing: 0) {
-                        UploadItem(title: LocalizedStringKey("Take Photo"),
-                                   subTitle: LocalizedStringKey("Capture a new picture using your camera"),
+                        UploadItem(title: "Take Photo",
+                                   subTitle: "Capture a new picture using your camera",
                                    image: "camera", imageColor: Color.high, action: cameraAction)
                         Divider()
                             .overlay(Color.neutral300Border)
-                        UploadItem(title: LocalizedStringKey("Choose from Gallery"),
-                                   subTitle: LocalizedStringKey("Select an existing photo from your device"),
+                        UploadItem(title: "Choose from Gallery",
+                                   subTitle: "Select an existing photo from your device",
                                    image: "gallery", imageColor: Color.warning, action: galleryAction)
                         //                    Divider()
                         //                        .overlay(Color.neutral300Border)
@@ -69,8 +69,8 @@ struct UploadImageSheet: View {
                         if !fromProfile{
                             Divider()
                                 .overlay(Color.neutral300Border)
-                            UploadItem(title: LocalizedStringKey("Take Screenshot"),
-                                       subTitle: LocalizedStringKey("Take Screenshot for subscriptions"),
+                            UploadItem(title: "Take Screenshot",
+                                       subTitle: "Take Screenshot for subscriptions",
                                        image: "screenshot", imageColor: Color.purple100, action: openSubscriptionsAction)
                         }
                     }
@@ -147,9 +147,9 @@ struct UploadImageSheet: View {
             .sheet(isPresented: $showPermissionAlert) {
                 PermissionSheet(onDelegate: {
                     dismiss()
-                }, title                        : fromProfile ? (isCamera ? "We need camera access to update profile photo" : "We need gallery access to update profile photo") : (isCamera ? "We need camera access to add subscriptions by take photo" : "We need gallery access to add subscriptions by image upload" ),
+                }, title                        : fromProfile ? (isCamera ? "We need camera access to update profile photo".localized : "We need gallery access to update profile photo".localized) : (isCamera ? "We need camera access to add subscriptions by take photo".localized : "We need gallery access to add subscriptions by image upload".localized ),
                                 type            : isCamera == true ? "camera" : "gallery",
-                                value           : isCamera == true ? "Tap Camera" : "Tap Photos",
+                                value           : isCamera == true ? "Tap Camera".localized : "Tap Photos".localized,
                                 hideManualBtn   : fromProfile ? true : false)
                 .presentationDragIndicator(.hidden)
                 .presentationDetents([.height(fromProfile ? 530 : 580)])
@@ -346,11 +346,11 @@ struct UploadErrorImageSheet: View {
                     .frame(width: 84, height: 84)
                     .padding(.bottom, 16)
                 
-                Text(LocalizedStringKey(isImage ? "Couldn't Read Image" : "No Subscriptions Found"))
+                Text(isImage ? "Couldn't Read Image" : "No Subscriptions Found")
                     .font(.appSemiBold(24))
                     .foregroundColor(Color.neutralMain700)
                 
-                Text(LocalizedStringKey(isImage ? "We couldn't extract subscription details from this image. Try these tips:" : "We scanned your recent emails but didn't find any subscription receipts."))
+                Text(isImage ? "We couldn't extract subscription details from this image. Try these tips:" : "We scanned your recent emails but didn't find any subscription receipts.")
                     .font(.appRegular(18))
                     .foregroundColor(Color.neutralMain700)
                     .multilineTextAlignment(.center)
@@ -361,7 +361,7 @@ struct UploadErrorImageSheet: View {
                 HStack(spacing: 16) {
                     Image("bulb-charging")
                         .frame(width: 24, height: 24)
-                    Text(LocalizedStringKey(isImage ? "Ensure text is clear and well-lit" : "Recurring payment receipts"))
+                    Text(isImage ? "Ensure text is clear and well-lit" : "Recurring payment receipts")
                         .font(.appRegular(16))
                         .foregroundColor(Color.neutralMain700)
                         .frame(maxWidth: .infinity, alignment: .leading)
@@ -369,7 +369,7 @@ struct UploadErrorImageSheet: View {
                 HStack(spacing: 16) {
                     Image("image-crop")
                         .frame(width: 24, height: 24)
-                    Text(LocalizedStringKey(isImage ? "Crop to show only the relevant text" : "Subscription confirmations"))
+                    Text(isImage ? "Crop to show only the relevant text" : "Subscription confirmations")
                         .font(.appRegular(16))
                         .foregroundColor(Color.neutralMain700)
                         .frame(maxWidth: .infinity, alignment: .leading)
@@ -379,7 +379,7 @@ struct UploadErrorImageSheet: View {
                     HStack(spacing: 16) {
                         Image("book-03")
                             .frame(width: 24, height: 24)
-                        Text(LocalizedStringKey(isImage ? "Make sure text is in English" : "Billing notifications"))
+                        Text(isImage ? "Make sure text is in English" : "Billing notifications")
                             .font(.appRegular(16))
                             .foregroundColor(Color.neutralMain700)
                             .frame(maxWidth: .infinity, alignment: .leading)
@@ -486,20 +486,20 @@ struct AppstoreRedirectionSheet: View {
             
             VStack(alignment: .leading, spacing: 15) {
                 
-                Text(LocalizedStringKey("You will be redirected to the subscription list in Appstore."))
+                Text("You will be redirected to the subscription list in Appstore.")
                     .font(.appSemiBold(24))
                     .foregroundColor(Color.neutralMain700)
                     .multilineTextAlignment(.center)
                 
-                Text(LocalizedStringKey("Please follow these steps carefully:"))
+                Text("Please follow these steps carefully:")
                     .font(.appRegular(18))
                     .foregroundColor(Color.neutralMain700)
                     .multilineTextAlignment(.leading)
                 VStack(alignment: .leading, spacing: 5) {
-                    instructionRow(number: "1.", text: LocalizedStringKey("Take a screenshot of the required subscription."))
-                    instructionRow(number: "2.", text: LocalizedStringKey("Come back to the “Upload Screenshot” screen."))
-                    instructionRow(number: "3.", text: LocalizedStringKey("Click on Choose from Gallery."))
-                    instructionRow(number: "4.", text: LocalizedStringKey("Select the screenshot you just captured."))
+                    instructionRow(number: "1.", text: "Take a screenshot of the required subscription.")
+                    instructionRow(number: "2.", text: "Come back to the “Upload Screenshot” screen.")
+                    instructionRow(number: "3.", text: "Click on Choose from Gallery.")
+                    instructionRow(number: "4.", text: "Select the screenshot you just captured.")
                 }
             }
             

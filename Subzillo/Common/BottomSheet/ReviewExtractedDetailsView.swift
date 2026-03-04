@@ -285,7 +285,7 @@ struct ReviewExtractedDetailsView: View {
                     switch detailType {
                     case .service:
                         if serviceName.trimmed == ""{
-                            toastManager.showToast(message: "Please enter service name",style:ToastStyle.error)
+                            toastManager.showToast(message: "Please enter service name".localized, style: .error)
                             return
                         }
                         globalSubscriptionData?.serviceName     = serviceName.trimmed
@@ -293,7 +293,7 @@ struct ReviewExtractedDetailsView: View {
                         let amountDouble = Double(amount.trimmed) ?? 0.0
                         //                    if amountDouble == 0.0 || amount.trimmed == ""{
                         if amount.trimmed == ""{
-                            toastManager.showToast(message: "Amount is required",style:ToastStyle.error)
+                            toastManager.showToast(message: "Amount is required".localized, style: .error)
                             return
                         }
                         globalSubscriptionData?.amount = amountDouble
@@ -306,27 +306,27 @@ struct ReviewExtractedDetailsView: View {
                         globalSubscriptionData?.currencySymbol = selectedCurrency?.symbol ?? ""
                     case .nextChargeDate:
                         if chargeDate == ""{
-                            toastManager.showToast(message: "Please select next charge date",style:ToastStyle.error)
+                            toastManager.showToast(message: "Please select next charge date".localized, style: .error)
                             return
                         }
                         globalSubscriptionData?.nextPaymentDate = chargeDate.formattedDate(from: "dd/MM/yyyy", to: "yyyy-MM-dd")
                     case .currency:
                         if selectedCurrency?.code ?? "" == ""{
-                            toastManager.showToast(message: "Currency selection required",style:ToastStyle.error)
+                            toastManager.showToast(message: "Currency selection required".localized, style: .error)
                             return
                         }
                         globalSubscriptionData?.currency = selectedCurrency?.code ?? ""
                         globalSubscriptionData?.currencySymbol = selectedCurrency?.symbol ?? ""
                     case .category:
                         if category == ""{
-                            toastManager.showToast(message: "Please select category",style:ToastStyle.error)
+                            toastManager.showToast(message: "Please select category".localized, style: .error)
                             return
                         }
                         globalSubscriptionData?.categoryId = selectedCategory?.id ?? ""
                         globalSubscriptionData?.categoryName = selectedCategory?.name ?? ""
                     case .planType:
                         if selectedPlanType?.trimmed == ""{
-                            toastManager.showToast(message: "Please select plan type",style:ToastStyle.error)
+                            toastManager.showToast(message: "Please select plan type".localized, style: .error)
                             return
                         }
                         globalSubscriptionData?.subscriptionType = selectedPlanType?.trimmed
@@ -338,7 +338,7 @@ struct ReviewExtractedDetailsView: View {
                         globalSubscriptionData?.currencySymbol = selectedCurrency?.symbol ?? ""
                     case .billingCycle:
                         if selectedBilling ?? "" == ""{
-                            toastManager.showToast(message: "Please select a billing cycle",style:ToastStyle.error)
+                            toastManager.showToast(message: "Please select a billing cycle".localized, style: .error)
                             return
                         }
                         globalSubscriptionData?.billingCycle = selectedBilling ?? ""//.lowercased()
@@ -379,7 +379,7 @@ struct ReviewExtractedDetailsView: View {
         .toolbar {
             ToolbarItemGroup(placement: .keyboard) {
                 Spacer()
-                Button("Done") {
+                Button(LocalizedStringKey("Done")) {
                     isInputActive = false
                     if detailType == .amount{
                         errorHint(isAmount: true)

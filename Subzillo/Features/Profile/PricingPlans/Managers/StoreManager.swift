@@ -139,4 +139,21 @@ class StoreManager: ObservableObject {
             return safe
         }
     }
+    
+    func checkActiveSubscription() async -> Bool {
+        for await result in Transaction.currentEntitlements {
+            guard case .verified(let transaction) = result else { continue }
+            
+            guard transaction.productType == .autoRenewable else { continue }
+            
+            guard transaction.revocationDate == nil else { continue }
+            
+            if let expirationDate = transaction.expirationDate,
+               expirationDate > Date() {
+                return true
+            }
+        }
+        return false
+    }
 }
+

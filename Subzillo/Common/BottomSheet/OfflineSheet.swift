@@ -27,17 +27,17 @@ struct OfflineSheet: View {
                     .frame(width: 84, height: 84)
                     .padding(.bottom, 16)
                 
-                Text(LocalizedStringKey("You're Offline"))
+                Text("You're Offline")
                     .font(.appSemiBold(24))
                     .foregroundColor(Color.neutralMain700)
                 
-                Text(LocalizedStringKey("Some features are limited without internet"))
+                Text("Some features are limited without internet")
                     .font(.appRegular(18))
                     .foregroundColor(Color.neutralMain700)
                     .multilineTextAlignment(.center)
             }
             
-            Text(LocalizedStringKey("Available Offline:"))
+            Text("Available Offline:")
                 .font(.appSemiBold(16))
                 .foregroundColor(Color.neutralMain700)
                 .multilineTextAlignment(.leading)
@@ -46,7 +46,7 @@ struct OfflineSheet: View {
                 .padding(.bottom, 8)
             
             VStack(alignment: .leading, spacing: 8) {
-                Text(LocalizedStringKey("• View existing subscriptions"))
+                Text("• View existing subscriptions")
                     .font(.appRegular(16))
                     .foregroundColor(Color.neutralMain700)
                     .frame(maxWidth: .infinity, alignment: .leading)
@@ -54,7 +54,7 @@ struct OfflineSheet: View {
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(.horizontal, 30)
             
-            Text(LocalizedStringKey("Requires Internet:"))
+            Text("Requires Internet:")
                 .font(.appSemiBold(16))
                 .foregroundColor(Color.neutralMain700)
                 .multilineTextAlignment(.leading)
@@ -63,19 +63,19 @@ struct OfflineSheet: View {
                 .padding(.bottom, 8)
             
             VStack(alignment: .leading, spacing: 8) {
-                Text(LocalizedStringKey("• Email scanning"))
+                Text("• Email scanning")
                     .font(.appRegular(16))
                     .foregroundColor(Color.neutralMain700)
                     .frame(maxWidth: .infinity, alignment: .leading)
-                Text(LocalizedStringKey("• Voice recognition"))
+                Text("• Voice recognition")
                     .font(.appRegular(16))
                     .foregroundColor(Color.neutralMain700)
                     .frame(maxWidth: .infinity, alignment: .leading)
-                Text(LocalizedStringKey("• OCR image processing"))
+                Text("• OCR image processing")
                     .font(.appRegular(16))
                     .foregroundColor(Color.neutralMain700)
                     .frame(maxWidth: .infinity, alignment: .leading)
-                Text(LocalizedStringKey("• Sync across devices"))
+                Text("• Sync across devices")
                     .font(.appRegular(16))
                     .foregroundColor(Color.neutralMain700)
                     .frame(maxWidth: .infinity, alignment: .leading)

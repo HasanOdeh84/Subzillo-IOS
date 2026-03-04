@@ -22,6 +22,7 @@ struct SettingsView: View {
     @State private var deleteSheetHeight            : CGFloat = .zero
     @State var showPermissionPopup                  : Bool = false
     @State var showEmailSyncBottomSheet             : Bool = false
+    @State var accountDeleteDescription             : String = ""
     
     // MARK: - Body
     var body: some View {
@@ -132,7 +133,15 @@ struct SettingsView: View {
                             title: "Delete Account",
                             subtitle: "Permanently delete all data",
                             action: {
-                                showDeletePopup = true
+                                Task {
+                                    let isActive = await StoreManager.shared.checkActiveSubscription()
+//                                    if isActive {
+                                        accountDeleteDescription = "Your account and all associated data will be permanently deleted.\n\n If you have an active subscription, it will remain active and must be cancelled from your App Store account settings. Deleting your account does not automatically cancel your subscription." //Are you sure you want to delete account? \n\n
+//                                    } else {
+//                                        accountDeleteDescription = "Are you sure you want to delete account?"
+//                                    }
+                                    showDeletePopup = true
+                                }
                             }
                         )
                     }
@@ -206,11 +215,13 @@ struct SettingsView: View {
 //                        )
                     }
                     
-                    //MARK: Privacy & Data (Legal/Support) Section
-                    SettingsSection(title: "Privacy & Data") {
+                    //MARK: Support & Legal Section
+//                    SettingsSection(title: "Privacy & Data") { //antigravity changed to suport & legal
+                    SettingsSection(title: "Support & Legal") {
                         
                         SettingsRow(
-                            title: "Privacy & Data"
+//                            title: "Privacy & Data" //antigravity changed to suport & legal
+                            title: "Support & Legal"
                         )
                         
                         Divider().overlay(Color.neutral300Border)
@@ -319,7 +330,7 @@ struct SettingsView: View {
                 onDelegate: {
                     settingsVM.deleteAccount(input: DeleteAccountRequest(userId: Constants.getUserId()))
                 }, title                : "Delete Account",
-                subTitle                : "Are you sure you want to delete account?",
+                subTitle                : accountDeleteDescription ?? "Are you sure you want to delete account?",
                 imageName               : "del_red_big",
                 buttonIcon              : "deleteIcon",
                 buttonTitle             : "Delete",

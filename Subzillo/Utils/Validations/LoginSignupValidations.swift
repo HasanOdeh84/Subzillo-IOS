@@ -11,25 +11,16 @@ struct LoginSignupValidations {
     
     //MARK: - SignUp
     func validateSignup(input: RegisterRequest,isSocialLogin:Bool = false) -> String? {
-        //        if !input.phoneNumber.trimmed.isEmpty && !Validations().isValidMobile(input.phoneNumber.trimmed){
-        //            return "Enter a valid phone number"
-        //        }
         if input.fullName.trimmed.isEmpty{
-            return "Please enter your full name"
+            return "Please enter your full name".localized
         }
-        //        if input.fullName.trimmed.count < 3 {
-        //            return "Full name must be at least 3 characters"
-        //        }
-        //        if !Validations().isValidName(input.fullName.trimmed){
-        //            return "Enter a valid name"
-        //        }
         if isSocialLogin{
             if input.email.trimmed.isEmpty{
-                return "Please enter email address"
+                return "Please enter email address".localized
             }
         }
         if !input.email.trimmed.isEmpty && !Validations().isValidEmail(input.email.trimmed) {
-            return "Enter a valid email address"
+            return "Enter a valid email address".localized
         }
         return nil
     }
@@ -37,9 +28,9 @@ struct LoginSignupValidations {
     //MARK: - Verify OTP
     func validateVerifyOtp(otp: String) -> String? {
         if otp.isEmpty{
-            return "Please enter the OTP"
+            return "Please enter the OTP".localized
         }else if otp.count != 6{
-            return "Please enter a 6-digit code"
+            return "Please enter a 6-digit code".localized
         }
         return nil
     }
@@ -49,17 +40,13 @@ struct LoginSignupValidations {
         if input.loginType == 1{
             if input.phoneNumber.isEmpty{
                 print("number is here\(input.phoneNumber)")
-                return "Phone number is required"
+                return "Phone number is required".localized
             }
-            //            else if !Validations().isValidMobile(input.phoneNumber){
-            //                print("number is \(input.phoneNumber)")
-            //                return "Mobile number must be between 6 to 15 digits"
-            //            }
         }else{
             if input.email.trimmed.isEmpty {
-                return "Email is required"
+                return "Email is required".localized
             }else if !Validations().isValidEmail(input.email.trimmed){
-                return "Enter valid email"
+                return "Enter valid email".localized
             }
         }
         return nil
@@ -68,7 +55,7 @@ struct LoginSignupValidations {
     //MARK: - Onboarding
     func validateOnboarding(input: UpdateOnboardingRequest) -> String? {
         if input.noofSubscriptions == 0 || input.averageMonthlySpend == 0{
-            return "Please answer all questions"
+            return "Please answer all questions".localized
         }
         return nil
     }
@@ -76,10 +63,10 @@ struct LoginSignupValidations {
     //MARK: - Forgot Password
     func validateForgotPassword(username: String) -> String? {
         if username.trimmed.isEmpty{
-            return "Please enter username"
+            return "Please enter username".localized
         }
         if username.trimmed.count < 3 {
-            return "Username must be at least 3 characters"
+            return "Username must be at least 3 characters".localized
         }
         return nil // All validations passed
     }
@@ -87,16 +74,16 @@ struct LoginSignupValidations {
     //MARK: - Reset Password
     func validateResetPassword(password: String, confirmPassword: String) -> String? {
         if password.trimmed.isEmpty{
-            return "Please enter password"
+            return "Please enter password".localized
         }
         if !Validations().isValidPassword(password.trimmed) {
-            return "Please enter valid password"
+            return "Please enter valid password".localized
         }
         if confirmPassword.trimmed.isEmpty{
-            return "Please enter confirm password"
+            return "Please enter confirm password".localized
         }
         if password.trimmed != confirmPassword.trimmed {
-            return "Password and confirm password should be same"
+            return "Password and confirm password should be same".localized
         }
         return nil // All validations passed
     }

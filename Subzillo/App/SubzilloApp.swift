@@ -10,7 +10,6 @@ import UserNotifications
 import UIKit
 import Firebase
 import MSAL
-//import BranchSDK
 import Combine
 
 class AppDelegate: NSObject, ObservableObject, UIApplicationDelegate, UNUserNotificationCenterDelegate {
@@ -163,9 +162,9 @@ class AppDelegate: NSObject, ObservableObject, UIApplicationDelegate, UNUserNoti
     }
     
     func handleDynamicLink(_ data: ULinkResolvedData) {
-        print("Received dynamic link:")
-        print("  Slug: \(data.slug ?? "N/A")")
-        print("  Parameters: \(data.parameters ?? [:])")
+//        print("Received dynamic link:")
+//        print("  Slug: \(data.slug ?? "N/A")")
+//        print("  Parameters: \(data.parameters ?? [:])")
         if let referrerId = data.parameters?["referrerId"] as? String {
             print("AppDelegate: Storing Referrer ID: \(referrerId)")
             Constants.saveDefaults(value: referrerId, key: Constants.referrerId)
@@ -173,8 +172,8 @@ class AppDelegate: NSObject, ObservableObject, UIApplicationDelegate, UNUserNoti
     }
     
     func handleUnifiedLink(_ data: ULinkResolvedData) {
-        print("Received unified link:")
-        print("  Slug: \(data.slug ?? "N/A")")
+//        print("Received unified link:")
+//        print("  Slug: \(data.slug ?? "N/A")")
     }
 }
 
@@ -244,9 +243,7 @@ struct SubzilloApp: App {
                 }
                 .onOpenURL { url in
                     print("SubzilloApp: onOpenURL received: \(url.absoluteString)")
-                    
                     ULink.shared.handleIncomingURL(url)
-                    
                     if url.scheme == "subzillo" && url.host == "share" {
                         if AppState.shared.isLoggedIn {
                             SharedImageManager.shared.checkSharedImage()
@@ -294,11 +291,11 @@ struct SubzilloApp: App {
             //                uniqueId: UUID().uuidString
             //            ))
             //            Constants.saveDefaults(value: token, key: "device_token")
-            print("✅ Device token API called and saved to defaults")
+            print(" Device token API called and saved to defaults")
         } else if storedToken != token {
-            print("ℹ️ Device token changed but user not logged in. Waiting for login to sync.")
+            print("Device token changed but user not logged in. Waiting for login to sync.")
         } else {
-            print("ℹ️ Device token is already up to date.")
+            print("Device token is already up to date.")
         }
     }
 }

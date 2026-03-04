@@ -36,16 +36,6 @@
 			<key>CFBundleTypeRole</key>
 			<string>Editor</string>
 			<key>CFBundleURLName</key>
-			<string>io.branch</string>
-			<key>CFBundleURLSchemes</key>
-			<array>
-				<string>subzilloapp</string>
-			</array>
-		</dict>
-		<dict>
-			<key>CFBundleTypeRole</key>
-			<string>Editor</string>
-			<key>CFBundleURLName</key>
 			<string>com.subzillo.app</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
@@ -55,8 +45,6 @@
 	</array>
 	<key>GIDClientID</key>
 	<string>955282043815-5tm4dfjcs5uv5qkvne9uv6jkf64div4a.apps.googleusercontent.com</string>
-	<key>ITSAppUsesNonExemptEncryption</key>
-	<false/>
 	<key>LSApplicationQueriesSchemes</key>
 	<array>
 		<string>msauthv2</string>
@@ -85,18 +73,5 @@
 	</array>
 	<key>UIFileSharingEnabled</key>
 	<true/>
-	<key>branch_key</key>
-	<dict>
-		<key>live</key>
-		<string>key_live_YOUR_BRANCH_KEY_HERE</string>
-		<key>test</key>
-		<string>key_test_YOUR_BRANCH_TEST_KEY_HERE</string>
-	</dict>
-	<key>branch_universal_link_domains</key>
-	<array>
-		<string>subzillo.app.link</string>
-		<string>subzillo-alternate.app.link</string>
-		<string>subzillo.test-app.link</string>
-	</array>
 </dict>
 </plist>

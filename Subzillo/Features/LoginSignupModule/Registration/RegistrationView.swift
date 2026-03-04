@@ -156,7 +156,7 @@ struct RegistrationView: View {
                                     phoneNumber         : phone.trimmed)
         }
         if let errorMessage = LoginSignupValidations().validateSignup(input: input,isSocialLogin: fromSocialLogin) {
-            ToastManager.shared.showToast(message: errorMessage,style: ToastStyle.error)
+            ToastManager.shared.showToast(message: errorMessage.localized, style: ToastStyle.error)
         } else {
             registerVM.register(input: input, verifyType: verifyData?.verifyType ?? 0,fromSocialLogin:fromSocialLogin,appleEmail: appleEmail, verifyData: verifyData)
         }
@@ -164,7 +164,7 @@ struct RegistrationView: View {
 }
 
 struct PasswordRuleView: View {
-    var rule: String
+    var rule: LocalizedStringKey
     var isValid: Bool
     
     var body: some View {

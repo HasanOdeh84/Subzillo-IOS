@@ -37,7 +37,7 @@ struct FilterSheet: View {
     @State private var showFamilySheet          = false
     @State private var selectedFamilyMembers    : [ListFamilyMembersResponseData] = []
     @State private var relationsData            = [
-        ManualDataInfo(id: Constants.getUserId(), title: "Me")
+        ManualDataInfo(id: Constants.getUserId(), title: "Me".localized)
     ]
     @State private var sheetHeight              : CGFloat = 400
     
@@ -399,7 +399,7 @@ struct FilterSheet: View {
         var list: [ListFamilyMembersResponseData] = []
         let me = ListFamilyMembersResponseData(
             id: Constants.getUserId(),
-            nickName: "Me"
+            nickName: "Me".localized
         )
         list.append(me)
         let apiMembers = addSubscriptionVM.listFamilyMembersResponse?.familyMembers?

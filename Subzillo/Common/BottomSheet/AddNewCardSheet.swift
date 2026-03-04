@@ -29,67 +29,69 @@ struct AddNewCardSheet: View {
     //MARK: - body
     var body: some View {
         VStack {
-            VStack(spacing: 24) {
-                Capsule()
-                    .fill(Color.grayCapsule)
-                    .frame(width: 150, height: 5)
-                
-                Text(LocalizedStringKey(isEdit ? "Edit card" : "Add new card"))
-                    .font(.appRegular(24))
-                    .foregroundColor(.neutralMain700)
-                
-                FieldView(text: $nickName, title: "Card Nickname", image: "Calendar2", placeHolder: "Nickname")
-                    .onChange(of: nickName) { newValue in
-                        if newValue.count > 15 {
-                            nickName = String(newValue.prefix(15))
-                            toastManager.showToast(message: "Card Nickname cannot exceed 15 characters",style:ToastStyle.error)
+            Capsule()
+                .fill(Color.grayCapsule)
+                .frame(width: 150, height: 5)
+                .padding(.top, 24)
+            ScrollView{
+                VStack(spacing: 24) {
+                    Text(LocalizedStringKey(isEdit ? "Edit card" : "Add new card"))
+                        .font(.appRegular(24))
+                        .foregroundColor(.neutralMain700)
+                    
+                    FieldView(text: $nickName, title: "Card Nickname", image: "Calendar2", placeHolder: "Nickname")
+                        .onChange(of: nickName) { newValue in
+                            if newValue.count > 15 {
+                                nickName = String(newValue.prefix(15))
+                                toastManager.showToast(message: "Card Nickname cannot exceed 15 characters".localized, style: .error)
+                            }
                         }
-                    }
-                FieldView(text: $cardNumber, title: "Card number", image: "cardNumberIcon", placeHolder: "Number Card", maxDigits: 4, isNumberPad: true, isCardNo: true)
-                FieldView(text: $cardName, title: "Name of the card", image: "profile", placeHolder: "Name")
+                    FieldView(text: $cardNumber, title: "Card number", image: "cardNumberIcon", placeHolder: "Number Card", maxDigits: 4, isNumberPad: true, isCardNo: true)
+                    FieldView(text: $cardName, title: "Name of the card", image: "profile", placeHolder: "Name")
+                    
+                    /*HStack(spacing: 24) {
+                     
+                     Button(action: {
+                     showExpiryPopup = true
+                     }) {
+                     FieldView(text: $expDate, textValue: expDate, title: "Amount", image: "expDateIcon", placeHolder: "MM / YY", isText:  true)
+                     }
+                     .sheet(isPresented: $showExpiryPopup) {
+                     CustomCalenderSheet(
+                     isPresented: $showExpiryPopup,
+                     selectedMonth: Binding(
+                     get: { selectedMonth },
+                     set: { month in
+                     selectedMonth = month
+                     updateExpDate()
+                     }
+                     ),
+                     selectedYear: Binding(
+                     get: { selectedYear },
+                     set: { year in
+                     selectedYear = year
+                     updateExpDate()
+                     }
+                     )
+                     )
+                     .presentationDetents([.height(300)])
+                     .presentationDragIndicator(.hidden)
+                     }
+                     
+                     SecureCCVField(ccv: $ccv, title: "CCV", placeHolder: "***", maxDigits: 3)
+                     .frame(width: 120, alignment: .trailing)
+                     }
+                     */
+                }
+                .padding(20)
                 
-                /*HStack(spacing: 24) {
-                 
-                 Button(action: {
-                 showExpiryPopup = true
-                 }) {
-                 FieldView(text: $expDate, textValue: expDate, title: "Amount", image: "expDateIcon", placeHolder: "MM / YY", isText:  true)
-                 }
-                 .sheet(isPresented: $showExpiryPopup) {
-                 CustomCalenderSheet(
-                 isPresented: $showExpiryPopup,
-                 selectedMonth: Binding(
-                 get: { selectedMonth },
-                 set: { month in
-                 selectedMonth = month
-                 updateExpDate()
-                 }
-                 ),
-                 selectedYear: Binding(
-                 get: { selectedYear },
-                 set: { year in
-                 selectedYear = year
-                 updateExpDate()
-                 }
-                 )
-                 )
-                 .presentationDetents([.height(300)])
-                 .presentationDragIndicator(.hidden)
-                 }
-                 
-                 SecureCCVField(ccv: $ccv, title: "CCV", placeHolder: "***", maxDigits: 3)
-                 .frame(width: 120, alignment: .trailing)
-                 }
-                 */
+                GradientBorderButton(title: (isEdit ? "Update" : "Add card"), isBtn: true, buttonImage: (isEdit ? "update" : "addCardIcon"), action: addCard)
+                    . padding(.horizontal)
+                
+                Spacer()
             }
-            .padding(20)
-            
-            GradientBorderButton(title: (isEdit ? "Update" : "Add card"),isBtn:true, buttonImage: (isEdit ? "update" : "addCardIcon"), action:addCard)
-                . padding(.horizontal)
-            
-            Spacer()
         }
-        .fixedSize(horizontal: false, vertical: true)
+//        .fixedSize(horizontal: false, vertical: true)
         .modifier(ToastModifier(toast: toastManager))
         .onChange(of: myCardsVM.isEdit) { value in
             if value == true{
@@ -113,7 +115,7 @@ struct AddNewCardSheet: View {
                                    nickName         : nickName.trimmed,
                                    cardHolderName   : cardName.trimmed)
         if let errorMessage = ManualEntryValidations.shared.addCard(input: input) {
-            toastManager.showToast(message: errorMessage,style:ToastStyle.error)
+            toastManager.showToast(message: errorMessage.localized, style: .error)
         } else {
             if isEdit{
                 let input = EditCardRequest(userId          : Constants.getUserId(),

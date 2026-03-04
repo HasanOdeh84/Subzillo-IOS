@@ -211,7 +211,7 @@ struct ConnectedEmailsListView: View {
                 onDelegate: {
                     deleteEmailAction()
                 }, title    : "Are you sure you want to delete the mail \(selectedEmail?.email ?? "")",
-                subTitle    :"",
+                subTitle    : "",
                 imageName   : "del_red_big",
                 buttonIcon  : "deleteIcon",
                 buttonTitle : "Delete",

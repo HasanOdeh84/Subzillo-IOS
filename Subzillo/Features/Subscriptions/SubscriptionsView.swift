@@ -677,7 +677,7 @@ struct SubscriptionsView: View {
                     var relations           : [String] = []
                     for subscription in subscriptions{
                         //subscriptionFor Need to change with nickName
-                        let relation = (subscription.subscriptionFor == "" || subscription.subscriptionFor == Constants.getUserId()) ? "Me" : subscription.subscriptionFor
+                        let relation = (subscription.subscriptionFor == "" || subscription.subscriptionFor == Constants.getUserId()) ? "Me".localized : subscription.subscriptionFor
                         if !relations.contains(relation ?? "Me") {
                             relations.append(relation ?? "Me")
                         }
@@ -689,7 +689,7 @@ struct SubscriptionsView: View {
                         for sub in subscriptions {
                             //subscriptionFor Need to change with nickName
                             //                            let rel     = sub.subscriptionFor == "" ? "Me" : sub.subscriptionFor
-                            let rel     = (sub.subscriptionFor == "" || sub.subscriptionFor == Constants.getUserId()) ? "Me" : sub.subscriptionFor
+                            let rel     = (sub.subscriptionFor == "" || sub.subscriptionFor == Constants.getUserId()) ? "Me".localized : sub.subscriptionFor
                             relationId  = (sub.subscriptionFor == "" ? Constants.getUserId() : sub.subscriptionFor) ?? ""
                             if rel == relation {
                                 plans.append(PlanInfo(id        : sub.id ?? "",

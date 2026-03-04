@@ -25,7 +25,7 @@ struct HomeView: View {
     @StateObject var homeVM                 = HomeViewModel()
     @State var homeResponse                 : HomeResponseData?
     @State var fullName                     = ""
-    @State private var isHome               : Bool? = nil
+    @State private var isHome               : Bool? = false
     @State var selectedYear                 = 2025
     @State private var showYouSavedSheet    = false
     @State private var showSaveSheet        = false
@@ -46,9 +46,10 @@ struct HomeView: View {
     //MARK: - body
     var body: some View {
         Group {
-            if isHome == nil{
-                ProgressView()
-            }else if isHome == true{
+//            if isHome == nil{
+//                ProgressView()
+//            }else
+            if isHome == true{
                 VStack(spacing: 16){
                     // MARK: - Header
                     HeaderView(title: "Hi \(fullName)") {
@@ -396,7 +397,7 @@ struct SubscriptionAnalyticsCard: View {
                     Spacer()
                     Button(action: action) {
                         HStack{
-                            Text("View analytics ")
+                            Text("View analytics")
                                 .font(.appRegular(14))
                                 .foregroundColor(.navyBlueCTA700)
                             Image("arrow_blue")
@@ -422,8 +423,8 @@ struct SubscriptionAnalyticsCard: View {
 struct HeaderView: View {
     
     //MARK: - Properties
-    var title                           : String
-    var subTitle                        : String = "Here's your subscription overview"
+    var title                           : LocalizedStringKey
+    var subTitle                        : LocalizedStringKey = "Here's your subscription overview"
     var titleFont                       = 28
     let action                          : () -> Void
     @EnvironmentObject var commonApiVM  : CommonAPIViewModel
@@ -1112,19 +1113,17 @@ struct YearOverviewChartView: View {
                             .foregroundStyle(Color.dashClr)
                     }
                     
-                    //                    // 2. Month Labels perfectly aligned with the graph points
-                    //                    AxisMarks(values: [0, 3, 5, 7, 9, 11]) { value in
-                    //                        AxisValueLabel {
-                    //                            if let index = value.as(Int.self) {
-                    //                                let months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
-                    //                                Text(months[index])
-                    //                                    .font(.appRegular(16))
-                    //                                    .foregroundColor(Color.neutralMain700)
-                    //                            }
-                    //                        }
-                    //                    }
-                    
-                    
+//                    // 2. Month Labels perfectly aligned with the graph points
+//                    AxisMarks(values: [0, 3, 5, 7, 9, 11]) { value in
+//                        AxisValueLabel {
+//                            if let index = value.as(Int.self) {
+//                                let months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+//                                Text(LocalizedStringKey(months[index]))
+//                                    .font(.appRegular(16))
+//                                    .foregroundColor(Color.neutralMain700)
+//                            }
+//                        }
+//                    }                    
                 }
                 .frame(height: 220)
                 .chartOverlay { proxy in
@@ -1203,7 +1202,7 @@ struct YearOverviewChartView: View {
             
             HStack(spacing: 0) {
                 ForEach(fakeMonths, id: \.self) { month in
-                    Text(month)
+                    Text(LocalizedStringKey(month))
                         .font(.appRegular(16))
                         .foregroundColor(Color.neutralMain700)
                         .frame(maxWidth: .infinity)

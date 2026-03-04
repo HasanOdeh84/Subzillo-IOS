@@ -8,6 +8,10 @@
 import Foundation
 
 extension String {
+    var localized: String {
+        return NSLocalizedString(self, comment: "")
+    }
+    
     func htmlToAttributedString() -> AttributedString? {
         guard let data = self.data(using: .utf8) else { return nil }
         

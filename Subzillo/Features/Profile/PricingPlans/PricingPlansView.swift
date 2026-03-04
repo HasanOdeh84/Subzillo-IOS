@@ -104,9 +104,9 @@ struct PricingPlansView: View {
                             .multilineTextAlignment(.center)
                             .environment(\.openURL, OpenURLAction { url in
                                 if url.absoluteString.contains("privacy") {
-                                    //                                    AppIntentRouter.shared.navigate(to: .termsAndPrivacy(isTerm: false))
+                                    viewModel.navigate(to: .termsAndPrivacy(isTerm: false))
                                 } else if url.absoluteString.contains("terms") {
-                                    //                                    AppIntentRouter.shared.navigate(to: .termsAndPrivacy(isTerm: true))
+                                    viewModel.navigate(to: .termsAndPrivacy(isTerm: true))
                                 }
                                 return .handled
                             })

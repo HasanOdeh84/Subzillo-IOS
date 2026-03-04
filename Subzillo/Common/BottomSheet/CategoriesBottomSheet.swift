@@ -66,7 +66,7 @@ struct CategoriesBottomSheet: View {
                                 dismiss()
                             } label: {
                                 HStack {
-                                    Text(category.name ?? "")
+                                    Text(LocalizedStringKey(category.name ?? ""))
                                         .font(.appRegular(16))
                                         .foregroundColor(.neutralMain700)
                                         .padding(.horizontal, 14)

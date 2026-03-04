@@ -51,7 +51,7 @@ struct NotificationsView: View {
             }else{
                 // MARK: - Unread Count
                 HStack {
-                    Text("Unread notifications - \(viewModel.unreadCount)")
+                    Text(LocalizedStringKey("Unread notifications - \(viewModel.unreadCount)"))
                         .font(.appRegular(14))
                         .foregroundColor(.blueMain700)
                     Spacer()

@@ -10,8 +10,8 @@ import SwiftUI
 struct ProfileHeaderView: View {
     
     //MARK: - Properties
-    var title           : String
-    var trailingTitle   : String? = nil
+    var title           : LocalizedStringKey
+    var trailingTitle   : LocalizedStringKey? = nil
     var onBack          : (() -> Void)? = nil
     var onTrailingAction: (() -> Void)? = nil
     
@@ -49,7 +49,7 @@ struct ProfileHeaderView: View {
 struct ProfileHeader: View {
     
     //MARK: - Properties
-    var title                           : String
+    var title                           : LocalizedStringKey
     var onSettings                      : (() -> Void)? = nil
     var onNotificationAction            : (() -> Void)? = nil
     @EnvironmentObject var commonApiVM  : CommonAPIViewModel
@@ -140,7 +140,7 @@ struct ProfileHeader: View {
 //}
 
 struct GradientBgBtn: View {
-    var title   : String = "Add Subscription by AI Agent"
+    var title   : LocalizedStringKey = "Add Subscription by AI Agent"
     var image   : String = "robotic"
     var action  : () -> Void
     
@@ -175,7 +175,7 @@ struct GradientBgBtn: View {
 }
 
 struct AccountInfo: View {
-    var title                   : String
+    var title                   : LocalizedStringKey
     var subTitle                : String
     var action                  : () -> Void
     
@@ -218,7 +218,7 @@ struct AccountInfo: View {
 }
 
 struct ProfileItem: View {
-    var title                           : String
+    var title                           : LocalizedStringKey
     var image                           : String
     var action                          : () -> Void
     var isDarkMode                      = false

@@ -104,7 +104,7 @@ struct AddFamilyMemberBottomSheet: View {
                                                 countryCode: countryCode,
                                                 color: colorHex)
             if let errorMessage = ProfileValidations.shared.editfamilyMember(input: input) {
-                toastManager.showToast(message: errorMessage, style: .error)
+                toastManager.showToast(message: errorMessage.localized, style: .error)
             } else {
                 action(nickName, phoneNumber, countryCode, colorHex)
                 dismiss()
@@ -116,7 +116,7 @@ struct AddFamilyMemberBottomSheet: View {
                                                countryCode: countryCode,
                                                color: colorHex)
             if let errorMessage = ProfileValidations.shared.addfamilyMember(input: input) {
-                toastManager.showToast(message: errorMessage, style: .error)
+                toastManager.showToast(message: errorMessage.localized, style: .error)
             } else {
                 action(nickName, phoneNumber, countryCode, colorHex)
                 dismiss()

@@ -19,7 +19,7 @@ struct Constants{
     }
     
     struct FeatureConfig {
-        static let currentPhase: AppPhase = .s3
+        static let currentPhase: AppPhase = .s4
         
         static var isS4Enabled: Bool {
             return currentPhase == .s4 || currentPhase == .s5
