@@ -171,7 +171,7 @@ struct NormalOptionView: View {
                     .foregroundColor(titleColor)
             }
             .padding(16)
-            .frame(maxWidth: .infinity)
+//            .frame(maxWidth: .infinity)
             .overlay(
                 RoundedRectangle(cornerRadius: 8)
                     .strokeBorder(Color.black.opacity(0.08), lineWidth: 2)

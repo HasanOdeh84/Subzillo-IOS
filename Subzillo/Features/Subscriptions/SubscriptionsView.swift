@@ -28,6 +28,7 @@ struct SubscriptionsView: View {
     @State var filterData                       : FilterModel = FilterModel()
     @State private var subscriptions            = [SubscriptionInfoo]()
     @State private var openCardIndex            : Int?
+    @State private var openCalendarId           : String? = nil
     @State private var selectedDate             = Date()
     @State private var filterSelect             : Bool = false
     @State private var pendingFilterSelect      : Bool? = nil
@@ -217,16 +218,23 @@ struct SubscriptionsView: View {
             //                    }
             //MARK: Analytics view
             if viewMode == .analytics {
-                //                    AnalyticalView()
+                if Constants.FeatureConfig.currentPhase == .s4 {
+                    AnalyticalView()
+                }
             } else if let segment = selectedSegment {
                 //MARK: Calender view
                 if segment == .second{
                     if monthlySubscriptions.count != 0{
                         List {
-                            ForEach(Array(subscriptions.enumerated()), id: \.element.id) { index, subscription in
-                                SubscriptionRow(subscriptionData: subscription)
+                            ForEach(subscriptions, id: \.id) { subscription in
+                                let isOpen = openCalendarId == subscription.id
+                                SubscriptionRow(subscriptionData: subscription, isOpen: isOpen)
                                     .onTapGesture {
-                                        toggleSubscription(at: index)
+                                        if openCalendarId == subscription.id {
+                                            openCalendarId = nil
+                                        } else {
+                                            openCalendarId = subscription.id
+                                        }
                                     }
                                     .listRowSeparator(.hidden)
                                     .listRowInsets(EdgeInsets())
@@ -708,7 +716,7 @@ struct SubscriptionsView: View {
                     }
                     print("relations \(relations)")
                 }
-                subscriptions.append(SubscriptionInfoo(id           : day.id ?? "",
+                subscriptions.append(SubscriptionInfoo(id           : (day.id == nil || day.id == "") ? "\(day.date ?? "")_\(index)" : day.id ?? "",
                                                        amount       : day.totalAmount,
                                                        currency     : day.currencySymbol,
                                                        createdAt    : day.date,
@@ -1044,3 +1052,4 @@ struct SwipeActionCard<Content: View>: View {
         }
     }
 }
+

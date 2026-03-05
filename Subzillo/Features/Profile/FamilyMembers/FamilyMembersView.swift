@@ -140,12 +140,12 @@ struct FamilyMembersView: View {
                     isBtn: true,
                     buttonImage: "profile_add",
                     action: {
-                        if manualVM.listFamilyMembersResponse?.remainingFamilyMembersLimit ?? 0 > 0{
+                        if manualVM.listFamilyMembersResponse?.remainingSubscriptionLimit == 0 {
+                            SheetManager.shared.isUpgradeSheetVisible = true
+                        }else{
                             DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
                                 openFamilyMemberSheet = true
                             }
-                        }else{
-                            SheetManager.shared.isUpgradeSheetVisible = true
                         }
                         print("Add Family Member tapped")
                     }

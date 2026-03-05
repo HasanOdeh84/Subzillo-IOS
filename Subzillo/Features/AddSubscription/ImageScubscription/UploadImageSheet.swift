@@ -108,8 +108,14 @@ struct UploadImageSheet: View {
                     .presentationDetents([.height(450)])
             }
             .onChange(of: selectedImage) { image in
-                if image != nil {
-                    showPreview = true
+                if let image = image {
+                    if isCamera {
+                        // Directly upload for camera, skip preview
+                        uploadImage()
+                        selectedImage = nil // Reset so gallery can still work after
+                    } else {
+                        showPreview = true
+                    }
                 }
             }
             .sheet(isPresented: $showPreview) {

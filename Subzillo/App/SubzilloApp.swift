@@ -239,7 +239,9 @@ struct SubzilloApp: App {
                 .onAppear {
                     sharedViewModel.getCurrencies()
                     sharedViewModel.getCountries()
-                    //                    sharedViewModel.getAppVersionInfo()
+                    Constants.FeatureConfig.performS4Action {
+                        sharedViewModel.getAppVersionInfo()
+                    }
                 }
                 .onOpenURL { url in
                     print("SubzilloApp: onOpenURL received: \(url.absoluteString)")
@@ -265,7 +267,9 @@ struct SubzilloApp: App {
                 //                print("✅ App is in Foreground (Active)")
                 appDelegate.requestAuthorization()
                 checkAndUpdateDeviceToken()
-                //                sharedViewModel.getAppVersionInfo()
+                Constants.FeatureConfig.performS4Action {
+                    sharedViewModel.getAppVersionInfo()
+                }
             case .inactive:
                 print("⚠️ App is Inactive (e.g., transitioning)")
             case .background:
@@ -285,12 +289,14 @@ struct SubzilloApp: App {
         let storedToken = Constants.getUserDefaultsValue(for: "device_token")
         let isLoggedIn = AppState.shared.isLoggedIn
         if storedToken != token && isLoggedIn {
-            //            sharedViewModel.updateDeviceId(input: UpdateDeviceIdRequest(
-            //                userId: Constants.getUserId(),
-            //                deviceId: token,
-            //                uniqueId: UUID().uuidString
-            //            ))
-            //            Constants.saveDefaults(value: token, key: "device_token")
+            Constants.FeatureConfig.performS4Action {
+                sharedViewModel.updateDeviceId(input: UpdateDeviceIdRequest(
+                    userId: Constants.getUserId(),
+                    deviceId: token,
+                    uniqueId: UUID().uuidString
+                ))
+                Constants.saveDefaults(value: token, key: "device_token")
+            }
             print(" Device token API called and saved to defaults")
         } else if storedToken != token {
             print("Device token changed but user not logged in. Waiting for login to sync.")

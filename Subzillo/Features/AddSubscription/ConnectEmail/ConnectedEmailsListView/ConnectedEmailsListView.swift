@@ -37,14 +37,12 @@ struct ConnectedEmailsListView: View {
     var body: some View {
         VStack(spacing: 19) {
             // MARK: Header
-            HStack(spacing: 8) {
+            HStack(alignment: .top, spacing: 8) {
                 // MARK: back
                 Button(action: goBack) {
-                    HStack {
                         Image("back_gray")
-                    }
-                    .foregroundColor(.blue)
                 }
+                .padding(.top, isIntegrations ? 0 : 20)
                 
                 VStack(alignment: .leading, spacing: 2) {
                     // MARK: Title
@@ -87,7 +85,7 @@ struct ConnectedEmailsListView: View {
                         .foregroundColor(.gray)
                         .padding(.leading, 16)
                     
-                    TextField(LocalizedStringKey(placeholder ?? "Search Email"), text: $viewModel.searchText)
+                    TextField(LocalizedStringKey(placeholder ?? "Search"), text: $viewModel.searchText)
                         .textFieldStyle(PlainTextFieldStyle())
                         .padding(.trailing, 10)
                         .foregroundColor(Color.neutralMain700)

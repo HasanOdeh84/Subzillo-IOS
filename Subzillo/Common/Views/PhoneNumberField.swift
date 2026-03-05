@@ -218,7 +218,7 @@ struct PhoneNumberField: View {
                                  currencyResponse   : commonApiVM.currencyResponse,
                                  countryResponse    : commonApiVM.countriesResponse,
                                  header             : isCountry ? "Select your Country" : "Your payment currency",
-                                 placeholder        : isCountry ? "Search country" : "Search currency")
+                                 placeholder        : isCountry ? "Search" : "Search")
             .presentationDetents([.large])
             .presentationDragIndicator(.hidden)
         }

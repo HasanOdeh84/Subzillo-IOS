@@ -26,7 +26,7 @@ class SettingsViewModel: ObservableObject {
     
     func getPrivacyData(type:Int) {
         //type -> 1-privacy policy, 2- terms & Conditions, 3-contact us for contact us in data object in response, instead of content, there will email & phone
-        apiReference.getApi(endPoint: APIEndpoint.privacyData, token: authKey, showLoader: true, extraParams: "/\(type)", responseType: PrivacyDataResponse.self)
+        apiReference.getApi(endPoint: APIEndpoint.privacyData, token: defaultAuthKey, showLoader: true, extraParams: "/\(type)", responseType: PrivacyDataResponse.self)
             .sink { [unowned self] completion in
                 if case let .failure(error) = completion {
                     self.handleError(error,endPoint: APIEndpoint.privacyData)

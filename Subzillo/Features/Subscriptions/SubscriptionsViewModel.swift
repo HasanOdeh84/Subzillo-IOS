@@ -105,6 +105,7 @@ class SubscriptionsViewModel: ObservableObject {
 
 struct SubscriptionRow: View {
     let subscriptionData: SubscriptionInfoo
+    var isOpen          : Bool
     var body: some View {
         HStack(spacing: 0) {
             VStack(alignment: .center){
@@ -122,7 +123,7 @@ struct SubscriptionRow: View {
                 
                 VStack(spacing: 8) {
                     
-                    let isOpen = subscriptionData.isOpen ?? false
+//                    let isOpen = subscriptionData.isOpen ?? false
                     
                     HStack(spacing: 0) {
                         Text("\(subscriptionData.currency ?? "") \(String(describing: subscriptionData.amount ?? 0.0))")
@@ -237,7 +238,7 @@ struct SubscriptionRow: View {
     }
     
     func calculatedHeight(for subscriptionData: SubscriptionInfoo) -> Double {
-        guard subscriptionData.isOpen ?? false else {
+        guard isOpen else {//subscriptionData.isOpen ?? false else {
             return 76
         }
         

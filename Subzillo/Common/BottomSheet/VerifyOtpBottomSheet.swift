@@ -169,8 +169,7 @@ struct VerifyOtpBottomSheet: View {
             }
         }
         .navigationBarBackButtonHidden(true)
-        .background(.neutralBg100)
-        .ignoresSafeArea()
+        .background(Color.neutralBg100.ignoresSafeArea(.all, edges: .all))
         .modifier(ToastModifier(toast: toastManager))
     }
     

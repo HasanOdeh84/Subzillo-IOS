@@ -291,7 +291,11 @@ struct WelcomeHomeView: View {
     }
     private func upgradePlan() {
         Constants.FeatureConfig.performS4Action {
-            AppIntentRouter.shared.navigate(to: .pricingPlans)
+            if Constants.FeatureConfig.featurePhase == .invite_plans{
+                AppIntentRouter.shared.navigate(to: .pricingPlans)
+            }else{
+                ToastManager.shared.showToast(message: "Coming soon in S4", style: .info)
+            }
         }
     }
     private func goToSmartAssistant() {

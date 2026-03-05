@@ -469,10 +469,10 @@ struct HeaderView: View {
         }
         .offset(x: 0, y: -5)
         .onAppear{
-//            if commonApiVM.unreadCountResponse == nil{
-//                commonApiVM.unreadNotificationCount(input: UnreadNotificationCountRequest(userId: Constants.getUserId()))
-//            }
-//            commonApiVM.unreadNotificationCount(input: UnreadNotificationCountRequest(userId: Constants.getUserId()))
+            if commonApiVM.unreadCountResponse == nil{
+                commonApiVM.unreadNotificationCount(input: UnreadNotificationCountRequest(userId: Constants.getUserId()))
+            }
+            commonApiVM.unreadNotificationCount(input: UnreadNotificationCountRequest(userId: Constants.getUserId()))
         }
     }
 }

@@ -41,7 +41,7 @@ struct FamilyMembersBottomSheet: View {
                         .frame(width: 20, height: 20)
                         .padding(.leading, 16)
                     
-                    TextField(LocalizedStringKey("Search Member"), text: $searchText)
+                    TextField(LocalizedStringKey("Search"), text: $searchText)
                         .textFieldStyle(.plain)
                         .padding(.trailing, 10)
                 }

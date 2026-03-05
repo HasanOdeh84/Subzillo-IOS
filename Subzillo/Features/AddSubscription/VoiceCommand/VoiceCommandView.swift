@@ -24,13 +24,10 @@ struct VoiceCommandView: View {
         VStack(alignment: .leading,spacing: 0) {
             
             // MARK: - Header
-            HStack(spacing: 8) {
+            HStack(alignment: .top, spacing: 8) {
                 // MARK: - back
                 Button(action: goBack) {
-                    HStack {
-                        Image("back_gray")
-                    }
-                    .foregroundColor(.blue)
+                    Image("back_gray")
                 }
                 
                 VStack(alignment: .leading, spacing: 2) {
@@ -38,7 +35,6 @@ struct VoiceCommandView: View {
                     Text("Add by Voice")
                         .font(.appRegular(24))
                         .foregroundColor(Color.neutralMain700)
-                        .padding(.top, 20)
                     
                     // MARK: - SubTitle
                     Text("Add your subscriptions using simple voice commands")
@@ -48,7 +44,7 @@ struct VoiceCommandView: View {
                 Spacer()
             }
             .padding(.horizontal)
-            .padding(.top, 0)
+            .padding(.top, 15)
             
             ScrollView {
                 

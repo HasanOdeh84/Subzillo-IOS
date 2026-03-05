@@ -73,7 +73,7 @@ struct ProfileView: View {
                                     .cornerRadius(96/2)
                                     .shadow(color: Color.dropShadow, radius: 2, x: 0, y: 2)
                             }else{
-                                Image(systemName: "person.crop.circle.fill")
+                                Image("profile_avatar")
                                     .resizable()
                                     .scaledToFit()
                                     .frame(width: 96, height: 96)
@@ -177,7 +177,11 @@ struct ProfileView: View {
                         if commonApiVM.userInfoResponse?.upgradeBtnStatus ?? false{
                             GradientBgBtn(title: "Upgrade today", action: {
                                 Constants.FeatureConfig.performS4Action {
-                                    profileVM.navigate(to: .pricingPlans)
+                                    if Constants.FeatureConfig.featurePhase == .invite_plans{
+                                        profileVM.navigate(to: .pricingPlans)
+                                    }else{
+                                        ToastManager.shared.showToast(message: "Coming soon in S4", style: .info)
+                                    }
                                 }
                             })
                         }
@@ -238,7 +242,11 @@ struct ProfileView: View {
                     VStack(spacing: 0) {
                         ProfileItem(title: "Plans & Pricing", image: "award", action:{
                             Constants.FeatureConfig.performS4Action {
-                                profileVM.navigate(to: .pricingPlans)
+                                if Constants.FeatureConfig.featurePhase == .invite_plans{
+                                    profileVM.navigate(to: .pricingPlans)
+                                }else{
+                                    ToastManager.shared.showToast(message: "Coming soon in S4", style: .info)
+                                }
                             }
                         })
                         Divider()
@@ -272,7 +280,11 @@ struct ProfileView: View {
                             .overlay(Color.border)
                         ProfileItem(title: "Invite friends", image: "user-add-02", action:{
                             Constants.FeatureConfig.performS4Action {
-                                profileVM.navigate(to: .inviteFriends(uLink: commonApiVM.userInfoResponse?.referralLink))
+                                if Constants.FeatureConfig.featurePhase == .invite_plans{
+                                    profileVM.navigate(to: .inviteFriends(uLink: commonApiVM.userInfoResponse?.referralLink))
+                                }else{
+                                    ToastManager.shared.showToast(message: "Coming soon in S4", style: .info)
+                                }
                             }
                         })
                     }

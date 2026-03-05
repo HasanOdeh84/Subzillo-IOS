@@ -3,16 +3,19 @@ import UIKit
 import Combine
 
 enum urlType:Int{
-    case dev   = 0
-    case stage = 1
-    case prod  = 2
+    case dev    = 0
+    case qa     = 1
+    case stage  = 2
+    case prod   = 3
 }
 
-let Environment = urlType.dev
+let Environment = urlType.qa
 var baseurl: String {
     switch Environment {
     case .dev:
         return "https://devsubzillo.krify.com/api"
+    case .qa:
+        return "https://qasubzillo.krify.com/api"
     case .stage:
         return "https://stagingsubzillo.krify.com/api"
     case .prod:

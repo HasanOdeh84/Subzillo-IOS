@@ -18,8 +18,14 @@ struct Constants{
         case s5
     }
     
+    enum FeaturePhase {
+        case invite_plans
+        case remaining
+    }
+    
     struct FeatureConfig {
         static let currentPhase: AppPhase = .s4
+        static let featurePhase: FeaturePhase = .remaining
         
         static var isS4Enabled: Bool {
             return currentPhase == .s4 || currentPhase == .s5
@@ -77,7 +83,8 @@ struct Constants{
     static let miscrosoftClientId                   = "d81f4f2f-5591-4cae-bcfb-bd219a7d4016"//soniya's
     //    static let webClientId                          = "955282043815-shgvrph5q1jiogm6es7lc143jad27vk0.apps.googleusercontent.com"
     //    static let webClientId                          = "955282043815-uither25lbuv22smj2tdhje513ilg5je.apps.googleusercontent.com" //soniya for dev
-    static let webClientId                          = "955282043815-4rckggvbc5m8dtsrtdhecrjl25e0lbg6.apps.googleusercontent.com" //new soniya for staging
+//    static let webClientId                          = "955282043815-4rckggvbc5m8dtsrtdhecrjl25e0lbg6.apps.googleusercontent.com" //new soniya for staging
+    static let webClientId                          = "955282043815-2bdqjsqk1ailb6dbvron7td1os6hipg6.apps.googleusercontent.com" //new soniya for QA
     //    static let appGroupID                           = "group.com.krify.Subzillo" //krify
     static let appGroupID                           = "group.com.subzillo.app" //client
     

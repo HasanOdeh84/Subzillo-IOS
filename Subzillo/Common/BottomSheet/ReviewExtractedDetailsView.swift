@@ -55,7 +55,7 @@ struct ReviewExtractedDetailsView: View {
     @State var providerPlansList                : [ProviderSubscriptionPlan]?
     @State private var showPlanTypeSheet        = false
     @State var selectedPlanType                 : String?
-    @State private var sheetHeight              : CGFloat = 300
+    @State private var sheetHeight              : CGFloat = 400
     
     //MARK: - body
     var body: some View {
@@ -182,7 +182,7 @@ struct ReviewExtractedDetailsView: View {
                         FieldView(text: $category, textValue: selectedCategory?.name ?? "", title: "Category", image: "gridIcon", placeHolder: "Please select", isButton: true, isText: true)
                     }
                     .sheet(isPresented: $showCategorySheet) {
-                        CategoriesBottomSheet(selectedCategory: $selectedCategory, categoryResponse:commonApiVM.categoriesResponse, header: "Select Category", placeholder: "Search Category")
+                        CategoriesBottomSheet(selectedCategory: $selectedCategory, categoryResponse:commonApiVM.categoriesResponse, header: "Select Category", placeholder: "Search")
                             .presentationDetents([.large])
                             .presentationDragIndicator(.hidden)
                     }
@@ -223,28 +223,33 @@ struct ReviewExtractedDetailsView: View {
                         PlanTypeBottomSheet(selectedPlanType    : $selectedPlanType,
                                             planTypeResponse    : filteredPlanTypes(),
                                             header              : "Select Plan Type",
-                                            placeholder         : "Search Plan Type",
+                                            placeholder         : "Search",
                                             action              : {
                             planType = selectedPlanType ?? ""
                             //                        autoFillDetails(isAmount: false)
                             errorHint(isAmount: false)
                             isPlanTypeUpdate = true
                         })
-                        .overlay {
-                            GeometryReader { geo in
-                                Color.clear
-                                    .preference(
-                                        key: InnerHeightPreferenceKey.self,
-                                        value: geo.size.height
-                                    )
-                            }
-                        }
-                        .onPreferenceChange(InnerHeightPreferenceKey.self) { height in
-                            if height > 150 {
-                                sheetHeight = height
-                            }
-                        }
-                        .presentationDetents([.height(sheetHeight)])
+//                        .overlay {
+//                            GeometryReader { geo in
+//                                Color.clear
+//                                    .preference(
+//                                        key: InnerHeightPreferenceKey.self,
+//                                        value: geo.size.height
+//                                    )
+//                            }
+//                        }
+//                        .onPreferenceChange(InnerHeightPreferenceKey.self) { height in
+//                            if height > 150 {
+//                                sheetHeight = height
+//                            }
+//                        }
+//                        .presentationDetents(
+//                            sheetHeight > UIScreen.main.bounds.height * 0.75
+//                                ? [.large]
+//                                : [.height(sheetHeight), .large]
+//                        )
+                        .presentationDetents([.medium, .large])
                         .presentationDragIndicator(.hidden)
                     }
                     //MARK: - billingCycle
@@ -256,7 +261,7 @@ struct ReviewExtractedDetailsView: View {
                         BillingCycleBottomSheet(selectedBilling         : $selectedBilling,
                                                 billingCyclesResponse   : filteredBillingCycles(),
                                                 header                  : "Select Billing Cycle",
-                                                placeholder             : "Search billing cycle",
+                                                placeholder             : "Search",
                                                 onSelect: { billing in
                         })
                         .overlay {
@@ -273,7 +278,11 @@ struct ReviewExtractedDetailsView: View {
                                 sheetHeight = height
                             }
                         }
-                        .presentationDetents([.height(sheetHeight)])
+                        .presentationDetents(
+                            sheetHeight > UIScreen.main.bounds.height * 0.75
+                                ? [.large]
+                                : [.height(sheetHeight), .large]
+                        )
                         .presentationDragIndicator(.hidden)
                     }
                 }

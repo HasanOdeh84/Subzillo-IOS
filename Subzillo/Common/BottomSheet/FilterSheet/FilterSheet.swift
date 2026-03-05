@@ -75,7 +75,7 @@ struct FilterSheet: View {
                                 selectedCategory : $selectedCategory,
                                 categoryResponse : commonApiVM.categoriesResponse,
                                 header           : "Select Category",
-                                placeholder      : "Search Category"
+                                placeholder      : "Search"
                             )
                             .presentationDetents([.large])
                             .presentationDragIndicator(.hidden)

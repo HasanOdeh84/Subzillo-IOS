@@ -85,7 +85,13 @@ struct ConnectEmailView: View {
                 .frame(height: 56)
                 .contentShape(Rectangle())
                 .onTapGesture {
-                    AppIntentRouter.shared.navigate(to: NavigationRoute.connectedEmailsList())
+                    Constants.FeatureConfig.performS4Action {
+                        if Constants.FeatureConfig.featurePhase == .invite_plans{
+                            AppIntentRouter.shared.navigate(to: NavigationRoute.connectedEmailsList())
+                        }else{
+                            ToastManager.shared.showToast(message: "Coming soon in S4", style: .info)
+                        }
+                    }
                 }
                 .cornerRadius(12)
                 .overlay(

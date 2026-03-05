@@ -91,7 +91,7 @@ struct ManualEntryView: View {
     @State private var showPlanTypeSheet        = false
     @State var selectedPlanType                 : String?
     var familyMemberId                          = ""
-    @State private var sheetHeight              : CGFloat = .zero
+    @State private var sheetHeight              : CGFloat = 400
     @State private var sheetID                  = UUID()
     @State private var serviceLastActionText    : String = ""
     @State private var planLastActionText       : String = ""
@@ -106,13 +106,10 @@ struct ManualEntryView: View {
         VStack(alignment: .leading,spacing: 0) {
             
             // MARK: Header
-            HStack(spacing: 8) {
+            HStack(alignment: .top, spacing: 8) {
                 // MARK: - back
                 Button(action: goBack) {
-                    HStack {
-                        Image("back_gray")
-                    }
-                    .foregroundColor(.blue)
+                    Image("back_gray")
                 }
                 
                 VStack(alignment: .leading, spacing: 2) {
@@ -120,7 +117,6 @@ struct ManualEntryView: View {
                     Text(LocalizedStringKey(isFromEdit == true ? "Edit Details" : "Manual Entry"))
                         .font(.appRegular(24))
                         .foregroundColor(Color.neutralMain700)
-                        .padding(.top, 20)
                     
                     // MARK: SubTitle
                     Text(LocalizedStringKey(isFromEdit == true ? "Update your details" : "Add your subscription details manually."))
@@ -130,7 +126,7 @@ struct ManualEntryView: View {
                 Spacer()
             }
             .padding(.horizontal)
-            .padding(.top, 0)
+            .padding(.top, 15)
             
             ScrollView(showsIndicators: false) {
                 VStack(spacing: 24) {
@@ -177,35 +173,39 @@ struct ManualEntryView: View {
                         PlanTypeBottomSheet(selectedPlanType    : $selectedPlanType,
                                             planTypeResponse    : filteredPlanTypes(),
                                             header              : "Select Plan Type",
-                                            placeholder         : "Search Plan Type",
+                                            placeholder         : "Search",
                                             action              : {
                             planLastActionText = selectedPlanType ?? ""
                             planType = selectedPlanType ?? ""
                             autoFillDetails(isAmount: false)
                         })
-                        .onAppear {
-                            DispatchQueue.main.async {
-                                sheetHeight = sheetHeight
-                            }
-                        }
-                        .id(sheetID)
-                        .overlay {
-                            GeometryReader { geo in
-                                Color.clear
-                                    .preference(
-                                        key: InnerHeightPreferenceKey.self,
-                                        value: geo.size.height
-                                    )
-                            }
-                        }
-                        .onPreferenceChange(InnerHeightPreferenceKey.self) { height in
-                            if height > 150 {
-                                sheetHeight = height
-                            }
-                        }
-                        .presentationDetents([.height(sheetHeight)])
+//                        .onAppear {
+//                            DispatchQueue.main.async {
+//                                sheetHeight = sheetHeight
+//                            }
+//                        }
+//                        .id(sheetID)
+//                        .overlay {
+//                            GeometryReader { geo in
+//                                Color.clear
+//                                    .preference(
+//                                        key: InnerHeightPreferenceKey.self,
+//                                        value: geo.size.height
+//                                    )
+//                            }
+//                        }
+//                        .onPreferenceChange(InnerHeightPreferenceKey.self) { height in
+//                            if height > 150 {
+//                                sheetHeight = height
+//                            }
+//                        }
+//                        .presentationDetents(
+//                            sheetHeight > UIScreen.main.bounds.height * 0.75
+//                                ? [.large]
+//                                : [.height(sheetHeight)]// .large]
+//                        )
+                        .presentationDetents([.medium, .large])
                         .presentationDragIndicator(.hidden)
-                        .interactiveDismissDisabled(false)
                     }
                     
                     HStack(spacing: 24) {
@@ -247,7 +247,7 @@ struct ManualEntryView: View {
                                                      currencyResponse   : commonApiVM.currencyResponse,
                                                      countryResponse    : commonApiVM.countriesResponse,
                                                      header             : "Currency",
-                                                     placeholder        : "Search currency",
+                                                     placeholder        : "Search",
                                                      action             : {
                                     self.handleCurrencySelection()
                                 })
@@ -294,7 +294,7 @@ struct ManualEntryView: View {
                     .allowsHitTesting(!isRenew)
                     .opacity(isRenew ? 0.6 : 1.0)
                     .sheet(isPresented: $showCategorySheet) {
-                        CategoriesBottomSheet(selectedCategory: $selectedCategory, categoryResponse:commonApiVM.categoriesResponse, header: "Select Category", placeholder: "Search Category")
+                        CategoriesBottomSheet(selectedCategory: $selectedCategory, categoryResponse:commonApiVM.categoriesResponse, header: "Select Category", placeholder: "Search")
                             .presentationDetents([.large])
                             .presentationDragIndicator(.hidden)
                     }
@@ -307,7 +307,7 @@ struct ManualEntryView: View {
                         BillingCycleBottomSheet(selectedBilling         : $selectedBilling,
                                                 billingCyclesResponse   : filteredBillingCycles(),
                                                 header                  : "Select Billing Cycle",
-                                                placeholder             : "Search billing cycle",
+                                                placeholder             : "Search",
                                                 onSelect: { billing in
                             //amount should be changed based on the billing cycle
                             self.updateAmount(billing: billing)
@@ -388,7 +388,7 @@ struct ManualEntryView: View {
                             FieldView(text: $paymentMethod, textValue: paymentMethod, title: "Payment Method", image: "Calendar2", placeHolder: "Select payment method", isButton: true, isText: true)
                         }
                         .sheet(isPresented: $showPaymentMethodSheet) {
-                            PaymentMethodsSheet(selectedPaymentMethod: $selectedPayment, paymentMethodResponse:commonApiVM.paymentMethodResponse, header: "Select Payment Method", placeholder: "Search Payment Method")
+                            PaymentMethodsSheet(selectedPaymentMethod: $selectedPayment, paymentMethodResponse:commonApiVM.paymentMethodResponse, header: "Select Payment Method", placeholder: "Search")
                                 .presentationDetents([.large])
                                 .presentationDragIndicator(.hidden)
                         }

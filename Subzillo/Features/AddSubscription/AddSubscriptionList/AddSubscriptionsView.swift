@@ -123,37 +123,40 @@ struct AddSubscriptionsView: View {
         }
     }
     private func clickOnAddByVoice() {
-//        if commonVM.userInfoResponse?.remainingSubscriptionLimit == 0 {
-//            SheetManager.shared.isUpgradeSheetVisible = true
-//        } else {
-//            AppIntentRouter.shared.navigate(to: .voiceCommandView)
-//        }
-        AppIntentRouter.shared.navigate(to: .voiceCommandView)
+        Constants.FeatureConfig.performS4Action {
+            if commonVM.userInfoResponse?.remainingSubscriptionLimit == 0 {
+                SheetManager.shared.isUpgradeSheetVisible = true
+            } else {
+                AppIntentRouter.shared.navigate(to: .voiceCommandView)
+            }
+        }
     }
     private func clickOnConnectEmail() {
-//        if commonVM.userInfoResponse?.remainingSubscriptionLimit == 0 {
-//            SheetManager.shared.isUpgradeSheetVisible = true
-//        } else {
-//            AppIntentRouter.shared.navigate(to: .connectEmail)
-//            ToastManager.shared.showToast(message: "Coming soon in S4",style:ToastStyle.info)
-//        }
-        AppIntentRouter.shared.navigate(to: .connectEmail)
+        Constants.FeatureConfig.performS4Action {
+            if commonVM.userInfoResponse?.remainingSubscriptionLimit == 0 {
+                SheetManager.shared.isUpgradeSheetVisible = true
+            } else {
+                AppIntentRouter.shared.navigate(to: .connectEmail)
+            }
+        }
     }
     private func clickOnUploadScreenshot() {
-//        if commonVM.userInfoResponse?.remainingSubscriptionLimit == 0 {
-//            SheetManager.shared.isUpgradeSheetVisible = true
-//        } else {
-//            showUploadPopup = true
+//        Constants.FeatureConfig.performS4Action {
+//            if commonVM.userInfoResponse?.remainingSubscriptionLimit == 0 {
+//                SheetManager.shared.isUpgradeSheetVisible = true
+//            } else {
+                showUploadPopup = true
+//            }
 //        }
-        showUploadPopup = true
     }
     private func clickOnManuvalEntry() {
-//        if commonVM.userInfoResponse?.remainingSubscriptionLimit == 0 {
-//            SheetManager.shared.isUpgradeSheetVisible = true
-//        } else {
-//            AppIntentRouter.shared.navigate(to: .manualEntry(isFromEdit: false))
+//        Constants.FeatureConfig.performS4Action {
+//            if commonVM.userInfoResponse?.remainingSubscriptionLimit == 0 {
+//                SheetManager.shared.isUpgradeSheetVisible = true
+//            } else {
+                AppIntentRouter.shared.navigate(to: .manualEntry(isFromEdit: false))
+//            }
 //        }
-        AppIntentRouter.shared.navigate(to: .manualEntry(isFromEdit: false))
     }
     private func clickOnUploasBankNotification() {
         Constants.FeatureConfig.performS5Action {

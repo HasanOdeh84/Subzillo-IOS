@@ -135,11 +135,11 @@ struct SettingsView: View {
                             action: {
                                 Task {
                                     let isActive = await StoreManager.shared.checkActiveSubscription()
-//                                    if isActive {
+                                    if isActive {
                                         accountDeleteDescription = "Your account and all associated data will be permanently deleted.\n\n If you have an active subscription, it will remain active and must be cancelled from your App Store account settings. Deleting your account does not automatically cancel your subscription." //Are you sure you want to delete account? \n\n
-//                                    } else {
-//                                        accountDeleteDescription = "Are you sure you want to delete account?"
-//                                    }
+                                    } else {
+                                        accountDeleteDescription = "Are you sure you want to delete account?"
+                                    }
                                     showDeletePopup = true
                                 }
                             }

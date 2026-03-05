@@ -121,17 +121,17 @@ struct PlanTypeBottomSheet: View {
                             }
                         }
                     }
-                    .background(
-                        GeometryReader { geo in
-                            Color.clear
-                                .onAppear {
-                                    contentHeight = geo.size.height
-                                }
-                                .onChange(of: geo.size.height) { newHeight in
-                                    contentHeight = newHeight
-                                }
-                        }
-                    )
+//                    .background(
+//                        GeometryReader { geo in
+//                            Color.clear
+//                                .onAppear {
+//                                    contentHeight = geo.size.height
+//                                }
+//                                .onChange(of: geo.size.height) { newHeight in
+//                                    contentHeight = newHeight
+//                                }
+//                        }
+//                    )
                     .background(.clear)
                     .cornerRadius(12)
                     .overlay(
@@ -149,7 +149,8 @@ struct PlanTypeBottomSheet: View {
             }
             //            Spacer()
         }
-        //        .fixedSize(horizontal: false, vertical: true)
-        .frame(height: min(contentHeight + 200, UIScreen.main.bounds.height - 60)) // Dynamic height with max limit
+//        .frame(height: min(contentHeight + 200, UIScreen.main.bounds.height - 60)) // Dynamic height with max limit
+//        .frame(minHeight: contentHeight + 200, maxHeight: min(contentHeight + 220, UIScreen.main.bounds.height - 60))
+        .background(Color.neutralBg100.ignoresSafeArea(.all, edges: .all))
     }
 }
