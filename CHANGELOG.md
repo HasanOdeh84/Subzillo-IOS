@@ -2,6 +2,22 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.2.2(39)] (Alpha&Beta-Stage) - 2026-03-06
+
+### Delivered
+- Hide the S4 related features
+- Three approaches of email sync to send the build to client.
+
+## [1.2.1(38)] (Alpha-Stage) - 2026-03-06
+
+### Delivered
+- Three approaches of email sync to send the build to client.
+
+## [1.4.0(37)] (Alpha-QA) - 2026-03-05
+
+### Added
+- All S4 functionalities are done except pending points.
+
 ## [2.1.0] (Alpha-Stage) - 2026-03-03
 
 ### Delivered
