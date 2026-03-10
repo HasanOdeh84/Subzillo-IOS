@@ -107,7 +107,7 @@ class AppDelegate: NSObject, ObservableObject, UIApplicationDelegate, UNUserNoti
                 switch type {
                 case 1:  return .connectedEmailsList(isIntegrations: false)
                 case 2:  return .subscriptionMatchView(fromList: true, fromPush: true, subscriptionId: subscriptionId)
-                case 3:  return .pricingPlans
+                case 3:  return .pricingPlans //removed as now, we don't have this type
                 default: return nil
                 }
             }()

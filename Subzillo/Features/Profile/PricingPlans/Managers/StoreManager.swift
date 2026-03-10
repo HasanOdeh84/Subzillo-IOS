@@ -22,6 +22,7 @@ class StoreManager: ObservableObject {
     @Published var purchaseState: StorePurchaseState = .idle
     @Published private(set) var products: [Product] = []
     @Published private(set) var purchasedProductIDs = Set<String>()
+    @Published private(set) var currentActiveProductID: String?
     
     private var updates: Task<Void, Never>? = nil
 
@@ -80,13 +81,21 @@ class StoreManager: ObservableObject {
     // MARK: - Update Purchased Products
     func updatePurchasedProducts() async {
         var purchasedIDs = Set<String>()
+        var activeID: String?
         // CurrentEntitlements contains all active subscriptions and non-consumables
         for await result in Transaction.currentEntitlements {
             if case .verified(let transaction) = result {
                 purchasedIDs.insert(transaction.productID)
+                // For subzillo, we only care about auto-renewable subscriptions for "Current Plan"
+                if transaction.productType == .autoRenewable && 
+                   transaction.revocationDate == nil &&
+                   (transaction.expirationDate == nil || transaction.expirationDate! > Date()) {
+                    activeID = transaction.productID
+                }
             }
         }
         self.purchasedProductIDs = purchasedIDs
+        self.currentActiveProductID = activeID
     }
 
     // MARK: - Restore Purchases
@@ -141,19 +150,8 @@ class StoreManager: ObservableObject {
     }
     
     func checkActiveSubscription() async -> Bool {
-        for await result in Transaction.currentEntitlements {
-            guard case .verified(let transaction) = result else { continue }
-            
-            guard transaction.productType == .autoRenewable else { continue }
-            
-            guard transaction.revocationDate == nil else { continue }
-            
-            if let expirationDate = transaction.expirationDate,
-               expirationDate > Date() {
-                return true
-            }
-        }
-        return false
+        await updatePurchasedProducts()
+        return currentActiveProductID != nil
     }
 }
 

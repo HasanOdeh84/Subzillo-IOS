@@ -206,12 +206,6 @@ struct PricingPlansView: View {
         
         let isYearlySelected    = selectedSegment == .second
         
-        let loggedInUserPlanName        = commonApiVM.userInfoResponse?.planName ?? ""
-        let loggedInUserBillingCycle    = commonApiVM.userInfoResponse?.planBillingCycle ?? ""
-        
-        var buttonTitle         = ""
-        let isCurrentPlan       = plan.isCurrentPlan ?? false
-        
         var productID: String?
         if plan.iosProductId == nil || plan.iosProductId == ""{
             if isSilverPlan {
@@ -222,6 +216,10 @@ struct PricingPlansView: View {
         }else{
             productID = plan.iosProductId ?? ""
         }
+        
+        let isActuallyCurrent = (productID != nil && storeManager.currentActiveProductID == productID) || (isFreePlan && storeManager.currentActiveProductID == nil)
+
+        var buttonTitle         = ""
         
         var price: String = ""
         var billingCycle: String = ""
@@ -239,22 +237,31 @@ struct PricingPlansView: View {
             billingCycle = isYearlySelected ? "/ year" : "/ month"
         }
         
-        if isCurrentPlan {
+        let hierarchy = [
+            "free",
+            SubzilloProducts.silverMonthly,
+            SubzilloProducts.silverYearly,
+            SubzilloProducts.goldMonthly,
+            SubzilloProducts.goldYearly
+        ]
+        
+        let currentProductID = storeManager.currentActiveProductID ?? "free"
+        let targetProductID = productID ?? "free"
+        
+        let currentRank = hierarchy.firstIndex(of: currentProductID) ?? 0
+        let targetRank = hierarchy.firstIndex(of: targetProductID) ?? 0
+
+        if isActuallyCurrent {
             buttonTitle = "Current Plan"
         }
         else if isFreePlan {
             buttonTitle = ""
         }
         else {
-            if loggedInUserPlanName == "Free" {
+            if targetRank > currentRank {
                 buttonTitle = "Upgrade"
-            }
-            else if loggedInUserPlanName.lowercased() == planName.lowercased() {
-                if loggedInUserBillingCycle == "monthly" && isYearlySelected {
-                    buttonTitle = "Upgrade"
-                } else {
-                    buttonTitle = ""
-                }
+            } else {
+                buttonTitle = ""
             }
         }
         
@@ -263,9 +270,9 @@ struct PricingPlansView: View {
             price           : isFreePlan ? nil : price,
             priceSubtitle   : isFreePlan ? nil : billingCycle,
             features        : [plan.description ?? "Basic features"],
-            badgeColor      : (plan.isCurrentPlan ?? false) ? Color.neutral600 : nil, //isActuallyCurrent ? Color.neutral600 : nil,
+            badgeColor      : isActuallyCurrent ? Color.neutral600 : nil,
             buttonTitle     : buttonTitle,
-            isCurrent       : plan.isCurrentPlan ?? false,
+            isCurrent       : isActuallyCurrent,
             action          : {
                 if let id = productID, let product = storeManager.products.first(where: { $0.id == id }) {
                     Task {
