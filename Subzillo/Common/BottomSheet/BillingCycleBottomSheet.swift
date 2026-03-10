@@ -32,7 +32,7 @@ struct BillingCycleBottomSheet: View {
             return billingCyclesResponse ?? []
         }
         return billingCyclesResponse?.filter {
-            $0.localizedCaseInsensitiveContains(searchText) ?? false
+            $0.localizedCaseInsensitiveContains(searchText)
         } ?? []
     }
     

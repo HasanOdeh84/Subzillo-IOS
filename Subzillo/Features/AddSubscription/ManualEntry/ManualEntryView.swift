@@ -1027,12 +1027,18 @@ struct ManualEntryView: View {
                                     flag    : Constants.shared.flag(from: Constants.shared.regionCode))
         if let currencies = commonApiVM.currencyResponse {
             selectedCurrency = currencies.first(where: { $0.code == currencyCode })
-            if selectedCurrency == nil{
+            if selectedCurrency == nil && currencyCode != ""{
                 selectedCurrency = Currency(id      : nil,
                                             name    : "",
                                             symbol  : currencySymbol,
                                             code    : currencyCode,
                                             flag    : "")
+            }else{
+                selectedCurrency = Currency(id      : nil,
+                                            name    : Constants.shared.currencyCode,
+                                            symbol  : Constants.shared.currencySymbol,
+                                            code    : Constants.shared.currencyCode,
+                                            flag    : Constants.shared.flag(from: Constants.shared.regionCode))
             }
         }else{
             commonApiVM.getCurrencies()
@@ -1049,12 +1055,18 @@ struct ManualEntryView: View {
                                         flag    : Constants.shared.flag(from: Constants.shared.regionCode))
             if let currencies = commonApiVM.currencyResponse {
                 selectedCurrency = currencies.first(where: { $0.code == commonApiVM.userInfoResponse?.preferredCurrency })
-                if selectedCurrency == nil{
+                if selectedCurrency == nil && commonApiVM.userInfoResponse?.preferredCurrency ?? "" != ""{
                     selectedCurrency = Currency(id      : nil,
                                                 name    : "",
                                                 symbol  : commonApiVM.userInfoResponse?.preferredCurrencySymbol,
                                                 code    : commonApiVM.userInfoResponse?.preferredCurrency,
                                                 flag    : "")//Constants.shared.flag(from: Constants.shared.regionCode))
+                }else{
+                    selectedCurrency = Currency(id      : nil,
+                                                name    : Constants.shared.currencyCode,
+                                                symbol  : Constants.shared.currencySymbol,
+                                                code    : Constants.shared.currencyCode,
+                                                flag    : Constants.shared.flag(from: Constants.shared.regionCode))
                 }
             }else{
                 commonApiVM.getCurrencies()
@@ -1066,12 +1078,18 @@ struct ManualEntryView: View {
         {
             if let currencies = commonApiVM.currencyResponse {
                 selectedCurrency = currencies.first(where: { $0.code == globalSubscriptionData?.currency ?? ""})
-                if selectedCurrency == nil{
+                if selectedCurrency == nil && globalSubscriptionData?.currency ?? "" != ""{
                     selectedCurrency = Currency(id      : nil,
                                                 name    : "",
                                                 symbol  : globalSubscriptionData?.currencySymbol ?? "",
                                                 code    : globalSubscriptionData?.currency ?? "",
                                                 flag    : "")
+                }else{
+                    selectedCurrency = Currency(id      : nil,
+                                                name    : Constants.shared.currencyCode,
+                                                symbol  : Constants.shared.currencySymbol,
+                                                code    : Constants.shared.currencyCode,
+                                                flag    : Constants.shared.flag(from: Constants.shared.regionCode))
                 }
             } else if let currencyCode = globalSubscriptionData?.currency {
                 selectedCurrency = Currency(id: nil, name: "", symbol: globalSubscriptionData?.currencySymbol ?? "", code: currencyCode, flag: "")

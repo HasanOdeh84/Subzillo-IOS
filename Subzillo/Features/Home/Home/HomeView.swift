@@ -438,7 +438,7 @@ struct HeaderView: View {
             }
             if let count = commonApiVM.unreadCountResponse?.unreadCount{
                 if count != 0{
-                    var filterCount = count >= 10 ? "9+" : "\(count)"
+                    let filterCount = count >= 10 ? "9+" : "\(count)"
                     Text(filterCount)
                         .font(.appBold(11))
                         .foregroundColor(Color.white)
@@ -469,10 +469,12 @@ struct HeaderView: View {
         }
         .offset(x: 0, y: -5)
         .onAppear{
-            if commonApiVM.unreadCountResponse == nil{
+            if Constants.FeatureConfig.currentPhase == .s4 {
+                if commonApiVM.unreadCountResponse == nil{
+                    commonApiVM.unreadNotificationCount(input: UnreadNotificationCountRequest(userId: Constants.getUserId()))
+                }
                 commonApiVM.unreadNotificationCount(input: UnreadNotificationCountRequest(userId: Constants.getUserId()))
             }
-            commonApiVM.unreadNotificationCount(input: UnreadNotificationCountRequest(userId: Constants.getUserId()))
         }
     }
 }

@@ -252,12 +252,21 @@ struct SubscriptionPreviewView: View {
                                 
                                 //MARK: Currency
                                 if subscriptionData?.currency == nil || subscriptionData?.currency ?? "" == "" || subscriptionData?.currencyConfidence ?? 0.0 == 0.0{
-                                    SubscriptionDetailsItem(title: "Currency", value: subscriptionData?.currency ?? Constants.shared.currencyCode, confidence: subscriptionData?.currencyConfidence ?? 0.0, isAssumed: true)
-                                        .onTapGesture {
-                                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                                                showCurrencyBottom = true
+                                    if subscriptionData?.currency ?? "" == ""{
+                                        SubscriptionDetailsItem(title: "Currency", value: Constants.shared.currencyCode, confidence: subscriptionData?.currencyConfidence ?? 0.0, isAssumed: true)
+                                            .onTapGesture {
+                                                DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                                                    showCurrencyBottom = true
+                                                }
                                             }
-                                        }
+                                    }else{
+                                        SubscriptionDetailsItem(title: "Currency", value: subscriptionData?.currency ?? Constants.shared.currencyCode, confidence: subscriptionData?.currencyConfidence ?? 0.0, isAssumed: true)
+                                            .onTapGesture {
+                                                DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                                                    showCurrencyBottom = true
+                                                }
+                                            }
+                                    }
                                 }
                                 else{
                                     SubscriptionDetailsItem(title: "Currency", value: subscriptionData?.currency ?? "", confidence: subscriptionData?.currencyConfidence ?? 0.0)

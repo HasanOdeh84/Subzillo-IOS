@@ -243,7 +243,7 @@ struct SubzilloApp: App {
                 .onAppear {
                     sharedViewModel.getCurrencies()
                     sharedViewModel.getCountries()
-                    Constants.FeatureConfig.performS4Action {
+                    if Constants.FeatureConfig.currentPhase == .s4 {
                         sharedViewModel.getAppVersionInfo()
                     }
                 }
@@ -271,7 +271,7 @@ struct SubzilloApp: App {
                 //                print("✅ App is in Foreground (Active)")
                 appDelegate.requestAuthorization()
                 checkAndUpdateDeviceToken()
-                Constants.FeatureConfig.performS4Action {
+                if Constants.FeatureConfig.currentPhase == .s4 {
                     sharedViewModel.getAppVersionInfo()
                 }
             case .inactive:
@@ -293,7 +293,7 @@ struct SubzilloApp: App {
         let storedToken = Constants.getUserDefaultsValue(for: "device_token")
         let isLoggedIn = AppState.shared.isLoggedIn
         if storedToken != token && isLoggedIn {
-            Constants.FeatureConfig.performS4Action {
+            if Constants.FeatureConfig.currentPhase == .s4 {
                 sharedViewModel.updateDeviceId(input: UpdateDeviceIdRequest(
                     userId: Constants.getUserId(),
                     deviceId: token,

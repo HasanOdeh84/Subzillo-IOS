@@ -7,112 +7,144 @@
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
-            uuid = "D852615C-CC8B-42DF-8A26-91D314F9EA8B"
+            uuid = "8E4C0547-3D25-4D86-88B1-41B65D5D8F1F"
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "Subzillo/Features/AddSubscription/SubscriptionPreview/SubscriptionPreview/SubscriptionPreviewView.swift"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "272"
+            endingLineNumber = "272"
+            landmarkName = "body"
+            landmarkType = "24">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "0326BEA5-701A-4496-A809-D9229B1B28EB"
             shouldBeEnabled = "Yes"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "Subzillo/Features/AddSubscription/ManualEntry/ManualEntryView.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "1094"
-            endingLineNumber = "1094"
-            landmarkName = "updateSubDetailsTOView()"
+            startingLineNumber = "1029"
+            endingLineNumber = "1029"
+            landmarkName = "updateCurrency(currencyCode:currencySymbol:)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
-            uuid = "1349C6FA-05FC-4E6D-A74F-64915E4E50B1"
+            uuid = "BF9674B4-AE5D-42E1-A329-2D1530C0C387"
             shouldBeEnabled = "Yes"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "Subzillo/Features/AddSubscription/ManualEntry/ManualEntryView.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "903"
-            endingLineNumber = "903"
-            landmarkName = "updateCatInfo()"
+            startingLineNumber = "1023"
+            endingLineNumber = "1023"
+            landmarkName = "updateCurrency(currencyCode:currencySymbol:)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
-            uuid = "AC55E7C0-4C66-43E7-9329-448DA915BA78"
+            uuid = "1E9E2E4C-756C-454D-A6F4-DA63903556AA"
             shouldBeEnabled = "Yes"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "Subzillo/Features/AddSubscription/ManualEntry/ManualEntryView.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "658"
-            endingLineNumber = "658"
-            landmarkName = "updateProviderData()"
+            startingLineNumber = "1051"
+            endingLineNumber = "1051"
+            landmarkName = "updateCountryAndCurrency()"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
-            uuid = "77929969-AE03-4910-9E61-D82D6D2AE83B"
+            uuid = "FA83BA7A-53FB-4596-8776-246AE60F23E8"
             shouldBeEnabled = "Yes"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "Subzillo/Features/AddSubscription/ManualEntry/ManualEntryView.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "702"
-            endingLineNumber = "702"
-            landmarkName = "clearData()"
+            startingLineNumber = "1059"
+            endingLineNumber = "1059"
+            landmarkName = "updateCountryAndCurrency()"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
-            uuid = "B02B9F2D-1099-44AC-8094-FA4C65CD3C1B"
+            uuid = "C47B5C05-BC1B-40BD-93A6-21D743268D7C"
             shouldBeEnabled = "Yes"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "Subzillo/Features/AddSubscription/ManualEntry/ManualEntryView.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "899"
-            endingLineNumber = "899"
-            landmarkName = "updateCatInfo()"
+            startingLineNumber = "1080"
+            endingLineNumber = "1080"
+            landmarkName = "updateCountryAndCurrency()"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
-            uuid = "70138589-F163-40F2-B193-65906A71B9DB"
+            uuid = "CE62ADBA-B111-48C4-B840-D327CECE270A"
             shouldBeEnabled = "Yes"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "Subzillo/Features/AddSubscription/ManualEntry/ManualEntryView.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "909"
-            endingLineNumber = "909"
-            landmarkName = "updateCatInfo()"
+            startingLineNumber = "1082"
+            endingLineNumber = "1082"
+            landmarkName = "updateCountryAndCurrency()"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
-            uuid = "F5234A75-700E-4893-84B8-F9153569A620"
+            uuid = "85885726-2628-47B0-80BB-B3FD3915691B"
             shouldBeEnabled = "Yes"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "Subzillo/Features/AddSubscription/ManualEntry/ManualEntryView.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "1090"
-            endingLineNumber = "1090"
-            landmarkName = "updateSubDetailsTOView()"
+            startingLineNumber = "1095"
+            endingLineNumber = "1095"
+            landmarkName = "ManualEntryView"
+            landmarkType = "14">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "0E48B23B-E372-4E8F-B0FE-726A97CCBA88"
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "Subzillo/Features/AddSubscription/ManualEntry/ManualEntryView.swift"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "1058"
+            endingLineNumber = "1058"
+            landmarkName = "updateCountryAndCurrency()"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>

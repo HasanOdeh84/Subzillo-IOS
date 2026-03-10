@@ -381,16 +381,35 @@ struct SubscriptionsView: View {
                                         if selectionMode {
                                             toggleSelection(at: index)
                                         } else {
-                                            if sub.viewStatus ?? false {
+                                            if Constants.FeatureConfig.currentPhase == .s4 {
+                                                if sub.viewStatus ?? false {
+                                                    AppIntentRouter.shared.navigate(
+                                                        to: .subscriptionMatchView(
+                                                            fromList: true,
+                                                            subscriptionId: sub.id ?? ""
+                                                        )
+                                                    )
+                                                } else {
+                                                    SheetManager.shared.isUpgradeSheetVisible = true
+                                                }
+                                            }else{
                                                 AppIntentRouter.shared.navigate(
                                                     to: .subscriptionMatchView(
                                                         fromList: true,
                                                         subscriptionId: sub.id ?? ""
                                                     )
                                                 )
-                                            } else {
-                                                SheetManager.shared.isUpgradeSheetVisible = true
                                             }
+//                                            if sub.viewStatus ?? false {
+//                                                AppIntentRouter.shared.navigate(
+//                                                    to: .subscriptionMatchView(
+//                                                        fromList: true,
+//                                                        subscriptionId: sub.id ?? ""
+//                                                    )
+//                                                )
+//                                            } else {
+//                                                SheetManager.shared.isUpgradeSheetVisible = true
+//                                            }
                                         }
                                     }
                                     .listRowSeparator(.hidden)
@@ -770,7 +789,9 @@ struct SubscriptionsView: View {
     
     func toggleSelection(at index: Int) {
         var obj = subscriptionsList[index]
-        guard obj.viewStatus != false else { return }
+        if Constants.FeatureConfig.currentPhase == .s4 {
+            guard obj.viewStatus != false else { return }
+        }
         if (obj.isSelected ?? false ) == true
         {
             obj.isSelected = false
@@ -783,7 +804,9 @@ struct SubscriptionsView: View {
     
     func handleLongPress(at index: Int) {
         var obj = subscriptionsList[index]
-        guard obj.viewStatus != false else { return }
+        if Constants.FeatureConfig.currentPhase == .s4 {
+            guard obj.viewStatus != false else { return }
+        }
         selectionMode = true
         obj.isSelected = true
         subscriptionsList[index] = obj
@@ -964,7 +987,9 @@ struct SwipeActionCard<Content: View>: View {
                 .simultaneousGesture(
                     DragGesture(minimumDistance: 30) // Provide more headroom for vertical scroll
                         .onChanged { value in
-                            guard viewStatus != false else { return }
+                            if Constants.FeatureConfig.currentPhase == .s4 {
+                                guard viewStatus != false else { return }
+                            }
                             // Prioritize vertical scroll if vertical translation is significant
                             let isHorizontal = abs(value.translation.width) > abs(value.translation.height) * 1.5
                             guard isHorizontal else { return }
@@ -985,7 +1010,9 @@ struct SwipeActionCard<Content: View>: View {
                             }
                         }
                         .onEnded { value in
-                            guard viewStatus != false else { return }
+                            if Constants.FeatureConfig.currentPhase == .s4 {
+                                guard viewStatus != false else { return }
+                            }
                             isScrollDisabled = false
                             
                             guard !selectionMode else {

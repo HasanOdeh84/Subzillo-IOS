@@ -85,9 +85,10 @@ struct ConnectEmailView: View {
                 .frame(height: 56)
                 .contentShape(Rectangle())
                 .onTapGesture {
-                    Constants.FeatureConfig.performS4Action {
-                        AppIntentRouter.shared.navigate(to: NavigationRoute.connectedEmailsList())
-                    }
+//                    Constants.FeatureConfig.performS4Action {
+//                        AppIntentRouter.shared.navigate(to: NavigationRoute.connectedEmailsList())
+//                    }
+                    AppIntentRouter.shared.navigate(to: NavigationRoute.connectedEmailsList())
                 }
                 .cornerRadius(12)
                 .overlay(

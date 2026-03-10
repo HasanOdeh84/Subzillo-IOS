@@ -204,7 +204,7 @@ class NetworkRequest {
                 LoaderManager.shared.showLoader()
                 // Retry any pending subscribePlan before firing this request
                 if endPoint != .subscribePlan {
-                    Constants.FeatureConfig.performS4Action {
+                    if Constants.FeatureConfig.currentPhase == .s4 {
                         PricingPlansViewModel.shared.retryIfNeeded()
                     }//SubscribePlanRetryManager.shared.retryIfNeeded() }
                 }
@@ -358,7 +358,7 @@ class NetworkRequest {
                 LoaderManager.shared.showLoader()
                 // Retry any pending subscribePlan before firing this request
                 if endPoint != .subscribePlan {
-                    Constants.FeatureConfig.performS4Action {
+                    if Constants.FeatureConfig.currentPhase == .s4 {
                         PricingPlansViewModel.shared.retryIfNeeded()
                     }//SubscribePlanRetryManager.shared.retryIfNeeded() }
                 }
@@ -527,7 +527,7 @@ class NetworkRequest {
                 LoaderManager.shared.showLoader()
                 // Retry any pending subscribePlan before firing this request
                 if endPoint != .subscribePlan {
-                    Constants.FeatureConfig.performS4Action {
+                    if Constants.FeatureConfig.currentPhase == .s4 {
                         PricingPlansViewModel.shared.retryIfNeeded()
                     }//SubscribePlanRetryManager.shared.retryIfNeeded() }
                 }
@@ -694,7 +694,7 @@ class NetworkRequest {
                 LoaderManager.shared.showLoader()
                 // Retry any pending subscribePlan before firing this request
                 if endPoint != .subscribePlan {
-                    Constants.FeatureConfig.performS4Action {
+                    if Constants.FeatureConfig.currentPhase == .s4 {
                         PricingPlansViewModel.shared.retryIfNeeded()
                     }//SubscribePlanRetryManager.shared.retryIfNeeded() }
                 }

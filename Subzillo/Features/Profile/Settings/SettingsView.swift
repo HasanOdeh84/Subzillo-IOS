@@ -330,7 +330,7 @@ struct SettingsView: View {
                 onDelegate: {
                     settingsVM.deleteAccount(input: DeleteAccountRequest(userId: Constants.getUserId()))
                 }, title                : "Delete Account",
-                subTitle                : accountDeleteDescription ?? "Are you sure you want to delete account?",
+                subTitle                : accountDeleteDescription,
                 imageName               : "del_red_big",
                 buttonIcon              : "deleteIcon",
                 buttonTitle             : "Delete",
