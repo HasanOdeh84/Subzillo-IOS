@@ -28,7 +28,7 @@ class AppDelegate: NSObject, ObservableObject, UIApplicationDelegate, UNUserNoti
         //Configure ULink synchronously to handle early access/listeners
         let ulinkConfig = ULinkConfig(
             apiKey: "ulk_e7ceb2717958baacfd613045f27abc945273b947cec90cbd",
-            debug: true,
+            debug: false,
             enableDeepLinkIntegration: true
         )
         ULink.configure(config: ulinkConfig)
@@ -162,18 +162,22 @@ class AppDelegate: NSObject, ObservableObject, UIApplicationDelegate, UNUserNoti
     }
     
     func handleDynamicLink(_ data: ULinkResolvedData) {
-//        print("Received dynamic link:")
-//        print("  Slug: \(data.slug ?? "N/A")")
-//        print("  Parameters: \(data.parameters ?? [:])")
+        print("🔗 [ULink] Resolved Dynamic Link: \(data.slug ?? "N/A")")
+        if let params = data.parameters {
+            print("📦 [ULink] Parameters: \(params)")
+        }
+        
         if let referrerId = data.parameters?["referrerId"] as? String {
-            print("AppDelegate: Storing Referrer ID: \(referrerId)")
+            print("💎 [Referral] Found Referrer ID: \(referrerId)")
             Constants.saveDefaults(value: referrerId, key: Constants.referrerId)
         }
     }
     
     func handleUnifiedLink(_ data: ULinkResolvedData) {
-//        print("Received unified link:")
-//        print("  Slug: \(data.slug ?? "N/A")")
+        print("🔗 [ULink] Resolved Unified Link: \(data.slug ?? "N/A")")
+        if let params = data.parameters {
+            print("📦 [ULink] Parameters: \(params)")
+        }
     }
 }
 
@@ -189,7 +193,7 @@ struct SubzilloApp: App {
         // ULink initialization
         let config = ULinkConfig(
             apiKey: "ulk_e7ceb2717958baacfd613045f27abc945273b947cec90cbd",
-            debug: true,
+            debug: false,
             enableDeepLinkIntegration: true
         )
         

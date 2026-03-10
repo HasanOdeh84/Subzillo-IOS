@@ -50,8 +50,8 @@ class NetworkRequest {
         extraParams : String? = nil,
         responseType: T.Type
     ) -> AnyPublisher<T, APIError> {
-        // Retry any pending subscribePlan before firing this request
-        if endPoint != .subscribePlan { SubscribePlanRetryManager.shared.retryIfNeeded() }
+//        // Retry any pending subscribePlan before firing this request
+//        if endPoint != .subscribePlan { PricingPlansViewModel.shared.retryIfNeeded() }
         return self.getRequest(endPoint: endPoint, token: token, showLoader: showLoader,extraParams: extraParams, responseType: responseType)
             .catch { error -> AnyPublisher<T, APIError> in
                 if case .unauthorized = error {
@@ -84,8 +84,6 @@ class NetworkRequest {
         body        : U?,
         showLoader  : Bool = false
     ) -> AnyPublisher<Data, APIError> {
-        // Retry any pending subscribePlan before firing this request
-        if endPoint != .subscribePlan { SubscribePlanRetryManager.shared.retryIfNeeded() }
         return self.postRequestData(endPoint: endPoint, method: method,token: token,body: body,showLoader: showLoader)
             .catch { error -> AnyPublisher<Data, APIError> in
                 if case .unauthorized = error {
@@ -121,8 +119,6 @@ class NetworkRequest {
         fromSiri    : Bool = false,
         fromVerifyOtpBottom    : Bool = false
     ) -> AnyPublisher<T, APIError> {
-        // Retry any pending subscribePlan before firing this request
-        if endPoint != .subscribePlan { SubscribePlanRetryManager.shared.retryIfNeeded() }
         return self.postRequest(endPoint: endPoint, method: method,token: token,body: body,showLoader: showLoader, responseType: responseType,fromSiri: fromSiri, fromVerifyOtpBottom: fromVerifyOtpBottom)
             .catch { error -> AnyPublisher<T, APIError> in
                 if case .unauthorized = error {
@@ -156,8 +152,6 @@ class NetworkRequest {
         showLoader: Bool = false,
         responseType: T.Type
     ) -> AnyPublisher<T, APIError> {
-        // Retry any pending subscribePlan before firing this request
-        if endPoint != .subscribePlan { SubscribePlanRetryManager.shared.retryIfNeeded() }
         return self.multiPartRequest(endPoint: endPoint, method: method,token: token,body: body,showLoader: showLoader, responseType: responseType)
             .catch { error -> AnyPublisher<T, APIError> in
                 if case .unauthorized = error {
@@ -208,6 +202,12 @@ class NetworkRequest {
             
             if showLoader{
                 LoaderManager.shared.showLoader()
+                // Retry any pending subscribePlan before firing this request
+                if endPoint != .subscribePlan {
+                    Constants.FeatureConfig.performS4Action {
+                        PricingPlansViewModel.shared.retryIfNeeded()
+                    }//SubscribePlanRetryManager.shared.retryIfNeeded() }
+                }
             }
             var finalEndpoint : String = endPoint.rawValue
             if extraParams != nil || extraParams != ""{
@@ -293,22 +293,22 @@ class NetworkRequest {
                 .decode(type: T.self,
                         decoder: self.jsonDecoder)
                 .receive(on: RunLoop.main)
-                .sink { completion in
-                    if case let .failure(error) = completion {
-                        LoaderManager.shared.hideLoader()
-                        switch error {
-                        case let urlError as URLError:
-                            promise(.failure(.urlError(urlError)))
-                        case let decodingError as DecodingError:
-                            promise(.failure(.decodingError(decodingError)))
-                        case let apiError as APIError:
-                            ToastManager.shared.showToast(message: apiError.localizedDescription,style: .error)
-                            promise(.failure(apiError))
-                        default:
-                            promise(.failure(.unknown))
-                        }
+            .sink { completion in
+                if case let .failure(error) = completion {
+                    LoaderManager.shared.hideLoader()
+                    switch error {
+                    case let urlError as URLError:
+                        promise(.failure(.urlError(urlError)))
+                    case let decodingError as DecodingError:
+                        promise(.failure(.decodingError(decodingError)))
+                    case let apiError as APIError:
+                        ToastManager.shared.showToast(message: apiError.localizedDescription,style: .error)
+                        promise(.failure(apiError))
+                    default:
+                        promise(.failure(.unknown))
                     }
                 }
+            }
             receiveValue: {
                 if showLoader {
                     LoaderManager.shared.hideLoader()
@@ -356,6 +356,12 @@ class NetworkRequest {
             
             if showLoader{
                 LoaderManager.shared.showLoader()
+                // Retry any pending subscribePlan before firing this request
+                if endPoint != .subscribePlan {
+                    Constants.FeatureConfig.performS4Action {
+                        PricingPlansViewModel.shared.retryIfNeeded()
+                    }//SubscribePlanRetryManager.shared.retryIfNeeded() }
+                }
             }
             
             guard let url = self.createURL(with: endPoint.rawValue)
@@ -444,22 +450,22 @@ class NetworkRequest {
                     }
                 }
                 .receive(on: DispatchQueue.main)
-                .sink { completion in
-                    if case let .failure(error) = completion {
-                        if showLoader {
-                            LoaderManager.shared.hideLoader()
-                        }
-                        switch error {
-                        case let urlError as URLError:
-                            promise(.failure(.urlError(urlError)))
-                        case let apiError as APIError:
-                            ToastManager.shared.showToast(message: apiError.localizedDescription,style: .error)
-                            promise(.failure(apiError))
-                        default:
-                            promise(.failure(.unknown))
-                        }
+            .sink { completion in
+                if case let .failure(error) = completion {
+                    if showLoader {
+                        LoaderManager.shared.hideLoader()
+                    }
+                    switch error {
+                    case let urlError as URLError:
+                        promise(.failure(.urlError(urlError)))
+                    case let apiError as APIError:
+                        ToastManager.shared.showToast(message: apiError.localizedDescription,style: .error)
+                        promise(.failure(apiError))
+                    default:
+                        promise(.failure(.unknown))
                     }
                 }
+            }
             receiveValue: {
                 if showLoader {
                     LoaderManager.shared.hideLoader()
@@ -519,6 +525,12 @@ class NetworkRequest {
             
             if showLoader{
                 LoaderManager.shared.showLoader()
+                // Retry any pending subscribePlan before firing this request
+                if endPoint != .subscribePlan {
+                    Constants.FeatureConfig.performS4Action {
+                        PricingPlansViewModel.shared.retryIfNeeded()
+                    }//SubscribePlanRetryManager.shared.retryIfNeeded() }
+                }
             }
             
             guard let url = self.createURL(with: endPoint.rawValue)
@@ -618,30 +630,30 @@ class NetworkRequest {
                 }
                 .decode(type: T.self, decoder: JSONDecoder())
                 .receive(on: DispatchQueue.main)
-                .sink { completion in
-                    if case let .failure(error) = completion {
-                        if showLoader {
-                            LoaderManager.shared.hideLoader()
-                        }
-                        switch error {
-                        case let urlError as URLError:
-                            promise(.failure(.urlError(urlError)))
-                        case let decodingError as DecodingError:
-                            promise(.failure(.decodingError(decodingError)))
-                        case let apiError as APIError:
-                            if !fromSiri{
-                                if endPoint != .fetchProviderData{
-                                    if !fromVerifyOtpBottom{
-                                        ToastManager.shared.showToast(message: apiError.localizedDescription,style: .error)
-                                    }
+            .sink { completion in
+                if case let .failure(error) = completion {
+                    if showLoader {
+                        LoaderManager.shared.hideLoader()
+                    }
+                    switch error {
+                    case let urlError as URLError:
+                        promise(.failure(.urlError(urlError)))
+                    case let decodingError as DecodingError:
+                        promise(.failure(.decodingError(decodingError)))
+                    case let apiError as APIError:
+                        if !fromSiri{
+                            if endPoint != .fetchProviderData{
+                                if !fromVerifyOtpBottom{
+                                    ToastManager.shared.showToast(message: apiError.localizedDescription,style: .error)
                                 }
                             }
-                            promise(.failure(apiError))
-                        default:
-                            promise(.failure(.unknown))
                         }
+                        promise(.failure(apiError))
+                    default:
+                        promise(.failure(.unknown))
                     }
                 }
+            }
             receiveValue: {
                 if showLoader {
                     LoaderManager.shared.hideLoader()
@@ -680,6 +692,12 @@ class NetworkRequest {
             
             if showLoader{
                 LoaderManager.shared.showLoader()
+                // Retry any pending subscribePlan before firing this request
+                if endPoint != .subscribePlan {
+                    Constants.FeatureConfig.performS4Action {
+                        PricingPlansViewModel.shared.retryIfNeeded()
+                    }//SubscribePlanRetryManager.shared.retryIfNeeded() }
+                }
             }
             
             guard let url = self.createURL(with: endPoint.rawValue)

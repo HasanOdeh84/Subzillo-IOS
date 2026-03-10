@@ -13,6 +13,7 @@ final class SubscribePlanRetryManager {
 
     private var subscriptions = Set<AnyCancellable>()
     private var isRetrying    = false
+    var apiReference          = NetworkRequest.shared
 
     // MARK: - Public entry point
 
@@ -24,7 +25,7 @@ final class SubscribePlanRetryManager {
         isRetrying = true
         print("[SubscribePlanRetryManager] Retrying pending subscribePlan...")
 
-        NetworkRequest.shared
+        apiReference
             .postApi(
                 endPoint    : .subscribePlan,
                 method      : .POST,

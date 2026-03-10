@@ -41,7 +41,7 @@ struct PricingPlansView: View {
     @State private var selectedSegment          : Segment? = .first
     @EnvironmentObject var commonApiVM          : CommonAPIViewModel
     @StateObject private var storeManager       = StoreManager.shared
-    @StateObject private var viewModel          = PricingPlansViewModel()
+    @StateObject private var viewModel          = PricingPlansViewModel.shared
     @State private var justAppeared             : Bool = false
     
     //MARK: - Body
@@ -271,6 +271,7 @@ struct PricingPlansView: View {
                     Task {
                         if let transaction = try? await storeManager.purchase(product),
                            let planId = plan.id {
+                            print("Transaction ID \(String(transaction.id))")
                             subscribePlanAPI(planId: planId, transactionId: String(transaction.id))
                         }
                     }

@@ -19,12 +19,12 @@ struct Constants{
     }
     
     enum FeaturePhase {
-        case invite_plans
+        case all
         case remaining
     }
     
     struct FeatureConfig {
-        static let currentPhase: AppPhase = .s4
+        static let currentPhase: AppPhase = .s3
         static let featurePhase: FeaturePhase = .remaining
         
         static var isS4Enabled: Bool {

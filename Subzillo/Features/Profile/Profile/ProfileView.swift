@@ -177,7 +177,7 @@ struct ProfileView: View {
                         if commonApiVM.userInfoResponse?.upgradeBtnStatus ?? false{
                             GradientBgBtn(title: "Upgrade today", action: {
                                 Constants.FeatureConfig.performS4Action {
-                                    if Constants.FeatureConfig.featurePhase == .invite_plans{
+                                    if Constants.FeatureConfig.featurePhase == .all{
                                         profileVM.navigate(to: .pricingPlans)
                                     }else{
                                         ToastManager.shared.showToast(message: "Coming soon in S4", style: .info)
@@ -242,7 +242,7 @@ struct ProfileView: View {
                     VStack(spacing: 0) {
                         ProfileItem(title: "Plans & Pricing", image: "award", action:{
                             Constants.FeatureConfig.performS4Action {
-                                if Constants.FeatureConfig.featurePhase == .invite_plans{
+                                if Constants.FeatureConfig.featurePhase == .all{
                                     profileVM.navigate(to: .pricingPlans)
                                 }else{
                                     ToastManager.shared.showToast(message: "Coming soon in S4", style: .info)
@@ -280,7 +280,7 @@ struct ProfileView: View {
                             .overlay(Color.border)
                         ProfileItem(title: "Invite friends", image: "user-add-02", action:{
                             Constants.FeatureConfig.performS4Action {
-                                if Constants.FeatureConfig.featurePhase == .invite_plans{
+                                if Constants.FeatureConfig.featurePhase == .all{
                                     profileVM.navigate(to: .inviteFriends(uLink: commonApiVM.userInfoResponse?.referralLink))
                                 }else{
                                     ToastManager.shared.showToast(message: "Coming soon in S4", style: .info)

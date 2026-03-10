@@ -16,6 +16,8 @@ class PricingPlansViewModel: ObservableObject {
     private let router                              : AppIntentRouter
     private let sessionManager                      : SessionManager
     @Published var isSubscribe                      : Bool = false
+    private var isRetrying                          = false
+    static let shared                               = PricingPlansViewModel()
     
     init(router: AppIntentRouter = .shared,sessionManager: SessionManager = .shared){
         self.router = router
@@ -65,6 +67,7 @@ class PricingPlansViewModel: ObservableObject {
             responseType: GeneralResponse.self
         )
         .sink { completion in
+            self.isRetrying = false
             if case .failure(let error) = completion {
                 self.handleError(error, endPoint: .subscribePlan)
             }
@@ -98,12 +101,32 @@ class PricingPlansViewModel: ObservableObject {
 
     // Retry the subscribePlan API if a previous attempt failed.
     func retryPendingSubscribePlanIfNeeded() {
-        SubscribePlanRetryManager.shared.retryIfNeeded()
+//        SubscribePlanRetryManager.shared.retryIfNeeded()
+        retryIfNeeded()
     }
     
     // MARK: - Handle errors
     func handleError(_ apiError: APIError, endPoint : APIEndpoint) {
         print("API Error : \(endPoint) - \(apiError.localizedDescription)")
     }
+    
+    func retryIfNeeded() {
+        guard !isRetrying else { return }
+        let hasFailed = Constants.getUserDefaultsBooleanValue(for: Constants.subscribeApiFail)
+        guard hasFailed, let pending = loadPendingRequest() else { return }
+        if AppState.shared.isLoggedIn{
+            isRetrying = true
+            print("[SubscribePlanRetryManager] Retrying pending subscribePlan...")
+            subscribePlan(input: pending)
+        }
+    }
+    
+    // MARK: - Persistence helpers
+    private func loadPendingRequest() -> SubscribePlanRequest? {
+        guard let data = UserDefaults.standard.data(forKey: Constants.pendingSubscribePlan),
+              let request = try? JSONDecoder().decode(SubscribePlanRequest.self, from: data) else {
+            return nil
+        }
+        return request
+    }
 }
-

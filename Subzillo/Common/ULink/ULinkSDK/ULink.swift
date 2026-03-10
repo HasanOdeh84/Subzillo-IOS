@@ -316,8 +316,8 @@ import Combine
      */
     private func logWarning(_ message: String, tag: String? = nil) {
         let logTag = tag ?? Self.LOG_TAG
-        print("[\(logTag)] WARNING: \(message)")
         if config.debug {
+            print("[\(logTag)] WARNING: \(message)")
             let entry = ULinkLogEntry.warning(tag: logTag, message: message)
             bufferLogEntry(entry)
             _logSubject.send(entry)
@@ -330,8 +330,8 @@ import Combine
     private func logError(_ message: String, error: Error? = nil, tag: String? = nil) {
         let logTag = tag ?? Self.LOG_TAG
         let fullMessage = error != nil ? "\(message): \(error!.localizedDescription)" : message
-        print("[\(logTag)] ERROR: \(fullMessage)")
         if config.debug {
+            print("[\(logTag)] ERROR: \(fullMessage)")
             let entry = ULinkLogEntry.error(tag: logTag, message: fullMessage)
             bufferLogEntry(entry)
             _logSubject.send(entry)
