@@ -204,6 +204,8 @@ struct SubzilloApp: App {
                 print("SubzilloApp: Failed to initialize ULink: \(error)")
             }
         }
+        
+        StoreManager.shared.initializeStore()
     }
     
     @StateObject private var router             = AppIntentRouter.shared

@@ -102,6 +102,7 @@ struct PricingPlansView: View {
                         Text(getAttributedText())
                             .font(.appRegular(14))
                             .multilineTextAlignment(.center)
+                            .padding(.vertical, 16)
                             .environment(\.openURL, OpenURLAction { url in
                                 if url.absoluteString.contains("privacy") {
                                     viewModel.navigate(to: .termsAndPrivacy(isTerm: false))
@@ -119,6 +120,7 @@ struct PricingPlansView: View {
                                             ($0.iosProductId ?? "") == entitlement.productID ||
                                             SubzilloProducts.productId(for: $0.planName ?? "", segment: selectedSegment) == entitlement.productID
                                         }), let planId = matchedPlan.id {
+                                            viewModel.pendingTransaction = entitlement.transaction
                                             subscribePlanAPI(planId: planId, transactionId: entitlement.transactionId)
                                         }
                                     }
@@ -196,6 +198,100 @@ struct PricingPlansView: View {
         return attriString
     }
     
+//    private func getUIPlan(from plan: PricingPlan) -> PricingPlanUI {
+//        let planName            = plan.planName ?? ""
+//        let lowercasedPlanName  = planName.lowercased()
+//        
+//        let isFreePlan      = lowercasedPlanName.contains("free")
+//        let isSilverPlan    = lowercasedPlanName.contains("silver")
+//        let isGoldPlan      = lowercasedPlanName.contains("gold")
+//        
+//        let isYearlySelected    = selectedSegment == .second
+//        
+//        var productID: String?
+//        if plan.iosProductId == nil || plan.iosProductId == ""{
+//            if isSilverPlan {
+//                productID = isYearlySelected ? SubzilloProducts.silverYearly : SubzilloProducts.silverMonthly
+//            } else if isGoldPlan {
+//                productID = isYearlySelected ? SubzilloProducts.goldYearly : SubzilloProducts.goldMonthly
+//            }
+//        }else{
+//            productID = plan.iosProductId ?? ""
+//        }
+//        
+//        let isActuallyCurrent = (productID != nil && storeManager.currentActiveProductID == productID) || (isFreePlan && storeManager.currentActiveProductID == nil)
+//
+//        var buttonTitle         = ""
+//        
+//        let isCurrentPlan = plan.isCurrentPlan ?? false
+//        
+//        var price: String = ""
+//        var billingCycle: String = ""
+//        if let id = productID, let product = storeManager.products.first(where: { $0.id == id }) {
+//            price = product.displayPrice
+//            let period = product.subscription?.subscriptionPeriod
+//            if period?.unit == .month {
+//                billingCycle = "/ month"
+//            }
+//            if period?.unit == .year {
+//                billingCycle = "/ year"
+//            }
+//        } else {
+//            price = "\(plan.currencySymbol ?? "$")\(plan.price ?? 0.0)"
+//            billingCycle = isYearlySelected ? "/ year" : "/ month"
+//        }
+//        
+//        let hierarchy = [
+//            "free",
+//            SubzilloProducts.silverMonthly,
+//            SubzilloProducts.silverYearly,
+//            SubzilloProducts.goldMonthly,
+//            SubzilloProducts.goldYearly
+//        ]
+//        
+//        let currentProductID = storeManager.currentActiveProductID ?? "free"
+//        let targetProductID = productID ?? "free"
+//        
+//        let currentRank = hierarchy.firstIndex(of: currentProductID) ?? 0
+//        let targetRank = hierarchy.firstIndex(of: targetProductID) ?? 0
+//
+//        if isActuallyCurrent {
+//            buttonTitle = "Current Plan"
+//        }
+//        else if isFreePlan {
+//            buttonTitle = ""
+//        }
+//        else {
+//            if targetRank > currentRank {
+//                buttonTitle = "Upgrade"
+//            } else {
+//                buttonTitle = ""
+//            }
+//        }
+//        
+//        return PricingPlanUI(
+//            title           : planName,
+//            price           : isFreePlan ? nil : price,
+//            priceSubtitle   : isFreePlan ? nil : billingCycle,
+//            features        : [plan.description ?? "Basic features"],
+//            badgeColor      : isActuallyCurrent ? Color.neutral600 : nil,
+//            buttonTitle     : buttonTitle,
+//            isCurrent       : isActuallyCurrent,
+//            action          : {
+//                if let id = productID, let product = storeManager.products.first(where: { $0.id == id }) {
+//                    Task {
+//                        if let transaction = try? await storeManager.purchase(product),
+//                           let planId = plan.id {
+//                            viewModel.pendingTransaction = transaction
+//                            print("Transaction ID \(String(transaction.id))")
+//                            subscribePlanAPI(planId: planId, transactionId: String(transaction.id))
+//                        }
+//                    }
+//                }
+//            }
+//        )
+//    }
+    
     private func getUIPlan(from plan: PricingPlan) -> PricingPlanUI {
         let planName            = plan.planName ?? ""
         let lowercasedPlanName  = planName.lowercased()
@@ -205,6 +301,11 @@ struct PricingPlansView: View {
         let isGoldPlan      = lowercasedPlanName.contains("gold")
         
         let isYearlySelected    = selectedSegment == .second
+        
+        // Current User Rank (from Backend)
+        let currentUserRank = commonApiVM.userInfoResponse?.internalPlanType ?? 0
+        // Plan Rank (from Backend Pricing API)
+        let targetPlanRank = plan.internalPlanType ?? 0
         
         var productID: String?
         if plan.iosProductId == nil || plan.iosProductId == ""{
@@ -216,10 +317,6 @@ struct PricingPlansView: View {
         }else{
             productID = plan.iosProductId ?? ""
         }
-        
-        let isActuallyCurrent = (productID != nil && storeManager.currentActiveProductID == productID) || (isFreePlan && storeManager.currentActiveProductID == nil)
-
-        var buttonTitle         = ""
         
         var price: String = ""
         var billingCycle: String = ""
@@ -237,28 +334,17 @@ struct PricingPlansView: View {
             billingCycle = isYearlySelected ? "/ year" : "/ month"
         }
         
-        let hierarchy = [
-            "free",
-            SubzilloProducts.silverMonthly,
-            SubzilloProducts.silverYearly,
-            SubzilloProducts.goldMonthly,
-            SubzilloProducts.goldYearly
-        ]
+        var buttonTitle         = ""
+        let isCurrentPlan       = plan.isCurrentPlan ?? false
         
-        let currentProductID = storeManager.currentActiveProductID ?? "free"
-        let targetProductID = productID ?? "free"
-        
-        let currentRank = hierarchy.firstIndex(of: currentProductID) ?? 0
-        let targetRank = hierarchy.firstIndex(of: targetProductID) ?? 0
-
-        if isActuallyCurrent {
+        if isCurrentPlan {
             buttonTitle = "Current Plan"
         }
         else if isFreePlan {
             buttonTitle = ""
         }
         else {
-            if targetRank > currentRank {
+            if targetPlanRank > currentUserRank {
                 buttonTitle = "Upgrade"
             } else {
                 buttonTitle = ""
@@ -270,14 +356,15 @@ struct PricingPlansView: View {
             price           : isFreePlan ? nil : price,
             priceSubtitle   : isFreePlan ? nil : billingCycle,
             features        : [plan.description ?? "Basic features"],
-            badgeColor      : isActuallyCurrent ? Color.neutral600 : nil,
+            badgeColor      : isCurrentPlan ? Color.neutral600 : nil,
             buttonTitle     : buttonTitle,
-            isCurrent       : isActuallyCurrent,
+            isCurrent       : isCurrentPlan,
             action          : {
                 if let id = productID, let product = storeManager.products.first(where: { $0.id == id }) {
                     Task {
                         if let transaction = try? await storeManager.purchase(product),
                            let planId = plan.id {
+                            viewModel.pendingTransaction = transaction
                             print("Transaction ID \(String(transaction.id))")
                             subscribePlanAPI(planId: planId, transactionId: String(transaction.id))
                         }

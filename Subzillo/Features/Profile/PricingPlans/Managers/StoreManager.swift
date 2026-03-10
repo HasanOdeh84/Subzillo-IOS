@@ -28,10 +28,25 @@ class StoreManager: ObservableObject {
 
     private init() {
         // Observe transaction updates as they happen
-        updates = Task.detached {
+//        updates = Task.detached {
+//            for await result in Transaction.updates {
+//                await self.handle(transactionVerification: result)
+//            }
+//        }
+//        updates = Task {
+//            for await result in Transaction.updates {
+//                await handle(transactionVerification: result)
+//            }
+//        }
+        
+        updates = Task {
             for await result in Transaction.updates {
-                await self.handle(transactionVerification: result)
+                await handle(transactionVerification: result)
             }
+        }
+
+        Task {
+            await updatePurchasedProducts()
         }
     }
 
@@ -43,7 +58,8 @@ class StoreManager: ObservableObject {
     func fetchProducts(productIDs: Set<String>) async {
         do {
             let fetchedProducts = try await Product.products(for: productIDs)
-            self.products = fetchedProducts.sorted(by: { $0.price < $1.price })
+//            self.products = fetchedProducts.sorted(by: { $0.price < $1.price }) //Price sorting sometimes wrong hierarchy create chesthundi if yearly cheaper per month.
+            self.products = fetchedProducts
             print("Successfully fetched \(self.products.count) products from StoreKit 2")
         } catch {
             print("Failed to fetch products: \(error)")
@@ -58,8 +74,8 @@ class StoreManager: ObservableObject {
             switch result {
             case .success(let verification):
                 let transaction = try checkVerified(verification)
+//                await transaction.finish()
                 await updatePurchasedProducts()
-                await transaction.finish()
                 purchaseState = .idle
                 return transaction
             case .userCancelled:
@@ -79,28 +95,61 @@ class StoreManager: ObservableObject {
     }
 
     // MARK: - Update Purchased Products
+//    func updatePurchasedProducts() async {
+//        try? await AppStore.sync()
+//        var purchasedIDs = Set<String>()
+//        var activeID: String?
+//        // CurrentEntitlements contains all active subscriptions and non-consumables
+//        for await result in Transaction.currentEntitlements {
+//            if case .verified(let transaction) = result {
+//                purchasedIDs.insert(transaction.productID)
+//                // For subzillo, we only care about auto-renewable subscriptions for "Current Plan"
+//                if transaction.productType == .autoRenewable && 
+//                   transaction.revocationDate == nil &&
+//                   (transaction.expirationDate == nil || transaction.expirationDate! > Date()) {
+//                    activeID = transaction.productID
+//                }
+//            }
+//        }
+//        self.purchasedProductIDs = purchasedIDs
+//        self.currentActiveProductID = activeID
+//    }
     func updatePurchasedProducts() async {
+
+//        try? await AppStore.sync()
+
         var purchasedIDs = Set<String>()
         var activeID: String?
-        // CurrentEntitlements contains all active subscriptions and non-consumables
+        var latestExpiration: Date?
+
         for await result in Transaction.currentEntitlements {
+
             if case .verified(let transaction) = result {
+
                 purchasedIDs.insert(transaction.productID)
-                // For subzillo, we only care about auto-renewable subscriptions for "Current Plan"
-                if transaction.productType == .autoRenewable && 
-                   transaction.revocationDate == nil &&
-                   (transaction.expirationDate == nil || transaction.expirationDate! > Date()) {
-                    activeID = transaction.productID
+
+                if transaction.productType == .autoRenewable &&
+                   transaction.revocationDate == nil {
+
+                    if let expiration = transaction.expirationDate,
+                       expiration > Date() {
+
+                        if latestExpiration == nil || expiration > latestExpiration! {
+                            latestExpiration = expiration
+                            activeID = transaction.productID
+                        }
+                    }
                 }
             }
         }
+        print("Active subscription:", activeID ?? "none")
         self.purchasedProductIDs = purchasedIDs
         self.currentActiveProductID = activeID
     }
 
     // MARK: - Restore Purchases
     func restorePurchases(
-        onRestoredTransactions: ([(productID: String, transactionId: String)]) -> Void = { _ in }
+        onRestoredTransactions: ([(productID: String, transactionId: String, transaction: Transaction)]) -> Void = { _ in }
     ) async throws {
         purchaseState = .loading
         do {
@@ -109,12 +158,13 @@ class StoreManager: ObservableObject {
             purchaseState = .idle
 
             // Collect all currently active verified entitlements
-            var restoredEntitlements: [(productID: String, transactionId: String)] = []
+            var restoredEntitlements: [(productID: String, transactionId: String, transaction: Transaction)] = []
             for await result in Transaction.currentEntitlements {
                 if case .verified(let transaction) = result {
                     restoredEntitlements.append((
                         productID     : transaction.productID,
-                        transactionId : String(transaction.id)
+                        transactionId : String(transaction.id),
+                        transaction   : transaction
                     ))
                 }
             }
@@ -132,8 +182,10 @@ class StoreManager: ObservableObject {
     private func handle(transactionVerification result: VerificationResult<Transaction>) async {
         switch result {
         case .verified(let transaction):
+            // Transctions are now finished in PricingPlansViewModel after back-end sync success.
+            // This ensures we don't finish the transaction if the back-end hasn't registered the purchase.
+            // await transaction.finish() 
             await updatePurchasedProducts()
-            await transaction.finish()
         case .unverified:
             // Handle unverified transaction (e.g., skip or show error)
             break
@@ -150,8 +202,19 @@ class StoreManager: ObservableObject {
     }
     
     func checkActiveSubscription() async -> Bool {
-        await updatePurchasedProducts()
+//        await updatePurchasedProducts()
         return currentActiveProductID != nil
+    }
+    
+    func refreshEntitlementsFromAppStore() async {
+        try? await AppStore.sync()
+        await updatePurchasedProducts()
+    }
+    
+    func initializeStore() {
+        Task {
+            await updatePurchasedProducts()
+        }
     }
 }
 

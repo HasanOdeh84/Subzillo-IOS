@@ -27,6 +27,7 @@ struct PricingPlan: Identifiable, Equatable, Codable  {
     let subscriptionLimit   : Int?
     let isCurrentPlan       : Bool?
     let iosProductId        : String?
+    let internalPlanType    : Int? // Must match UserInfo.planType ranking
 }
 
 struct SubscribePlanRequest: Codable {

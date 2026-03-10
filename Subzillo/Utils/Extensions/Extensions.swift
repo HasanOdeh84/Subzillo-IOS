@@ -44,6 +44,19 @@ extension String {
         outputFormatter.dateFormat = outputFormat
         return outputFormatter.string(from: date)
     }
+
+    func toLocalizedStringDate(inputFormat: String = "yyyy-MM-dd'T'HH:mm:ss.SSSZ", 
+                               outputFormat: String = "dd/MM/yyyy h:mm a") -> String {
+        let formatter = DateFormatter()
+        formatter.dateFormat = inputFormat
+        formatter.timeZone = TimeZone(abbreviation: "UTC")
+        guard let date = formatter.date(from: self) else {
+            return self
+        }
+        formatter.timeZone = TimeZone.current
+        formatter.dateFormat = outputFormat
+        return formatter.string(from: date)
+    }
     
     func normalizedPhoneNumber() -> String {
         return self.filter { $0.isNumber }

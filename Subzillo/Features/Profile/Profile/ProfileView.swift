@@ -174,7 +174,7 @@ struct ProfileView: View {
 //                        .padding(.bottom, 14)
                         if let planExpiresAt = commonApiVM.userInfoResponse?.planExpiresAt {
                             if planExpiresAt != ""{
-                                Text(LocalizedStringKey("Next renewal is \(planExpiresAt)"))
+                                Text(LocalizedStringKey("Next renewal is \(planExpiresAt.toLocalizedStringDate().lowercased())"))
                                     .font(.appSemiBold(14))
                                     .foregroundColor(.neutral600)
                             }

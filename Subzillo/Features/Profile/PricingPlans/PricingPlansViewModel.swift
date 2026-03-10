@@ -5,7 +5,7 @@
 //  Created by KSMACMINI-019 on 19/02/26.
 //
 
-import Foundation
+import StoreKit
 import Combine
 
 class PricingPlansViewModel: ObservableObject {
@@ -16,6 +16,7 @@ class PricingPlansViewModel: ObservableObject {
     private let router                              : AppIntentRouter
     private let sessionManager                      : SessionManager
     @Published var isSubscribe                      : Bool = false
+    var pendingTransaction                          : Transaction?
     private var isRetrying                          = false
     static let shared                               = PricingPlansViewModel()
     
@@ -76,6 +77,13 @@ class PricingPlansViewModel: ObservableObject {
             self.isSubscribe = true
             Constants.saveDefaults(value: false, key: Constants.subscribeApiFail)
             self.clearPendingSubscribePlan()
+            if let transaction = self.pendingTransaction {
+                Task {
+                    await transaction.finish()
+                    await StoreManager.shared.updatePurchasedProducts()
+                }
+                self.pendingTransaction = nil
+            }
         }
         .store(in: &self.subscriptions)
     }
