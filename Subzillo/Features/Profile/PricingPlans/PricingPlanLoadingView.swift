@@ -47,7 +47,7 @@ struct PricingPlanLoadingView: View {
                 .font(.appBold(20))
                 .foregroundColor(Color.primaryBlue800)
             
-            Text("Please wait we load the screen for you.")
+            Text("Please wait")
                 .font(.appMedium(16))
                 .foregroundColor(.black)
                 .multilineTextAlignment(.center)

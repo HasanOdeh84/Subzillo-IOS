@@ -39,6 +39,7 @@ public struct UserInfo: Codable, Hashable {
     var planExpiresAt               : String?
     var upgradeBtnStatus            : Bool?
     var internalPlanType            : Int? // 0: Free, 1: Silver Monthly, 2: Silver Yearly, 3: Gold Monthly, 4: Gold Yearly
+    var subscribedPlatformType      : Int? = 2// 1: Android, 2: iOS, 3: Web
     var referralCode                : String?
     var referralLink                : String?
 }

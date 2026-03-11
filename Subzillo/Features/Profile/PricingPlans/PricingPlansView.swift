@@ -18,9 +18,10 @@ struct PricingPlanUI: Identifiable {
     let badgeColor: Color?
     let buttonTitle: String
     let isCurrent: Bool
+    let isLoading: Bool
     let action: (() -> Void)?
     
-    init(title: String, price: String? = nil, priceSubtitle: String? = nil, features: [String], badgeText: String? = nil, badgeColor: Color? = nil, buttonTitle: String, isCurrent: Bool = false, action: (() -> Void)? = nil) {
+    init(title: String, price: String? = nil, priceSubtitle: String? = nil, features: [String], badgeText: String? = nil, badgeColor: Color? = nil, buttonTitle: String, isCurrent: Bool = false, isLoading: Bool = false, action: (() -> Void)? = nil) {
         self.title = title
         self.price = price
         self.priceSubtitle = priceSubtitle
@@ -29,6 +30,7 @@ struct PricingPlanUI: Identifiable {
         self.badgeColor = badgeColor
         self.buttonTitle = buttonTitle
         self.isCurrent = isCurrent
+        self.isLoading = isLoading
         self.action = action
     }
 }
@@ -43,6 +45,9 @@ struct PricingPlansView: View {
     @StateObject private var storeManager       = StoreManager.shared
     @StateObject private var viewModel          = PricingPlansViewModel.shared
     @State private var justAppeared             : Bool = false
+    @State private var showPlatformAlert        : Bool = false
+    @State private var platformAlertMessage     : String = ""
+    @State private var pendingProduct           : (Product, String)?
     
     //MARK: - Body
     var body: some View {
@@ -176,6 +181,18 @@ struct PricingPlansView: View {
                 viewModel.listPricingPlans(type: selectedSegment == .first ? 1 : 2)
             }
         }
+        .alert(isPresented: $showPlatformAlert) {
+            Alert(
+                title           : Text("Subscription Notice"),
+                message         : Text(platformAlertMessage),
+                primaryButton   : .default(Text("Continue")) {
+                    if let (product, planId) = pendingProduct {
+                        purchaseInternal(product: product, planId: planId)
+                    }
+                },
+                secondaryButton: .cancel()
+            )
+        }
     }
     
     //MARK: - User defined methods
@@ -198,99 +215,100 @@ struct PricingPlansView: View {
         return attriString
     }
     
-//    private func getUIPlan(from plan: PricingPlan) -> PricingPlanUI {
-//        let planName            = plan.planName ?? ""
-//        let lowercasedPlanName  = planName.lowercased()
-//        
-//        let isFreePlan      = lowercasedPlanName.contains("free")
-//        let isSilverPlan    = lowercasedPlanName.contains("silver")
-//        let isGoldPlan      = lowercasedPlanName.contains("gold")
-//        
-//        let isYearlySelected    = selectedSegment == .second
-//        
-//        var productID: String?
-//        if plan.iosProductId == nil || plan.iosProductId == ""{
-//            if isSilverPlan {
-//                productID = isYearlySelected ? SubzilloProducts.silverYearly : SubzilloProducts.silverMonthly
-//            } else if isGoldPlan {
-//                productID = isYearlySelected ? SubzilloProducts.goldYearly : SubzilloProducts.goldMonthly
-//            }
-//        }else{
-//            productID = plan.iosProductId ?? ""
-//        }
-//        
-//        let isActuallyCurrent = (productID != nil && storeManager.currentActiveProductID == productID) || (isFreePlan && storeManager.currentActiveProductID == nil)
-//
-//        var buttonTitle         = ""
-//        
-//        let isCurrentPlan = plan.isCurrentPlan ?? false
-//        
-//        var price: String = ""
-//        var billingCycle: String = ""
-//        if let id = productID, let product = storeManager.products.first(where: { $0.id == id }) {
-//            price = product.displayPrice
-//            let period = product.subscription?.subscriptionPeriod
-//            if period?.unit == .month {
-//                billingCycle = "/ month"
-//            }
-//            if period?.unit == .year {
-//                billingCycle = "/ year"
-//            }
-//        } else {
-//            price = "\(plan.currencySymbol ?? "$")\(plan.price ?? 0.0)"
-//            billingCycle = isYearlySelected ? "/ year" : "/ month"
-//        }
-//        
-//        let hierarchy = [
-//            "free",
-//            SubzilloProducts.silverMonthly,
-//            SubzilloProducts.silverYearly,
-//            SubzilloProducts.goldMonthly,
-//            SubzilloProducts.goldYearly
-//        ]
-//        
-//        let currentProductID = storeManager.currentActiveProductID ?? "free"
-//        let targetProductID = productID ?? "free"
-//        
-//        let currentRank = hierarchy.firstIndex(of: currentProductID) ?? 0
-//        let targetRank = hierarchy.firstIndex(of: targetProductID) ?? 0
-//
-//        if isActuallyCurrent {
-//            buttonTitle = "Current Plan"
-//        }
-//        else if isFreePlan {
-//            buttonTitle = ""
-//        }
-//        else {
-//            if targetRank > currentRank {
-//                buttonTitle = "Upgrade"
-//            } else {
-//                buttonTitle = ""
-//            }
-//        }
-//        
-//        return PricingPlanUI(
-//            title           : planName,
-//            price           : isFreePlan ? nil : price,
-//            priceSubtitle   : isFreePlan ? nil : billingCycle,
-//            features        : [plan.description ?? "Basic features"],
-//            badgeColor      : isActuallyCurrent ? Color.neutral600 : nil,
-//            buttonTitle     : buttonTitle,
-//            isCurrent       : isActuallyCurrent,
-//            action          : {
-//                if let id = productID, let product = storeManager.products.first(where: { $0.id == id }) {
-//                    Task {
-//                        if let transaction = try? await storeManager.purchase(product),
-//                           let planId = plan.id {
-//                            viewModel.pendingTransaction = transaction
-//                            print("Transaction ID \(String(transaction.id))")
-//                            subscribePlanAPI(planId: planId, transactionId: String(transaction.id))
-//                        }
-//                    }
-//                }
-//            }
-//        )
-//    }
+    //upgrade button with storekit
+    //    private func getUIPlan(from plan: PricingPlan) -> PricingPlanUI {
+    //        let planName            = plan.planName ?? ""
+    //        let lowercasedPlanName  = planName.lowercased()
+    //        
+    //        let isFreePlan      = lowercasedPlanName.contains("free")
+    //        let isSilverPlan    = lowercasedPlanName.contains("silver")
+    //        let isGoldPlan      = lowercasedPlanName.contains("gold")
+    //        
+    //        let isYearlySelected    = selectedSegment == .second
+    //        
+    //        var productID: String?
+    //        if plan.iosProductId == nil || plan.iosProductId == ""{
+    //            if isSilverPlan {
+    //                productID = isYearlySelected ? SubzilloProducts.silverYearly : SubzilloProducts.silverMonthly
+    //            } else if isGoldPlan {
+    //                productID = isYearlySelected ? SubzilloProducts.goldYearly : SubzilloProducts.goldMonthly
+    //            }
+    //        }else{
+    //            productID = plan.iosProductId ?? ""
+    //        }
+    //        
+    //        let isActuallyCurrent = (productID != nil && storeManager.currentActiveProductID == productID) || (isFreePlan && storeManager.currentActiveProductID == nil)
+    //
+    //        var buttonTitle         = ""
+    //        
+    //        let isCurrentPlan = plan.isCurrentPlan ?? false
+    //        
+    //        var price: String = ""
+    //        var billingCycle: String = ""
+    //        if let id = productID, let product = storeManager.products.first(where: { $0.id == id }) {
+    //            price = product.displayPrice
+    //            let period = product.subscription?.subscriptionPeriod
+    //            if period?.unit == .month {
+    //                billingCycle = "/ month"
+    //            }
+    //            if period?.unit == .year {
+    //                billingCycle = "/ year"
+    //            }
+    //        } else {
+    //            price = "\(plan.currencySymbol ?? "$")\(plan.price ?? 0.0)"
+    //            billingCycle = isYearlySelected ? "/ year" : "/ month"
+    //        }
+    //        
+    //        let hierarchy = [
+    //            "free",
+    //            SubzilloProducts.silverMonthly,
+    //            SubzilloProducts.silverYearly,
+    //            SubzilloProducts.goldMonthly,
+    //            SubzilloProducts.goldYearly
+    //        ]
+    //        
+    //        let currentProductID = storeManager.currentActiveProductID ?? "free"
+    //        let targetProductID = productID ?? "free"
+    //        
+    //        let currentRank = hierarchy.firstIndex(of: currentProductID) ?? 0
+    //        let targetRank = hierarchy.firstIndex(of: targetProductID) ?? 0
+    //
+    //        if isActuallyCurrent {
+    //            buttonTitle = "Current Plan"
+    //        }
+    //        else if isFreePlan {
+    //            buttonTitle = ""
+    //        }
+    //        else {
+    //            if targetRank > currentRank {
+    //                buttonTitle = "Upgrade"
+    //            } else {
+    //                buttonTitle = ""
+    //            }
+    //        }
+    //        
+    //        return PricingPlanUI(
+    //            title           : planName,
+    //            price           : isFreePlan ? nil : price,
+    //            priceSubtitle   : isFreePlan ? nil : billingCycle,
+    //            features        : [plan.description ?? "Basic features"],
+    //            badgeColor      : isActuallyCurrent ? Color.neutral600 : nil,
+    //            buttonTitle     : buttonTitle,
+    //            isCurrent       : isActuallyCurrent,
+    //            action          : {
+    //                if let id = productID, let product = storeManager.products.first(where: { $0.id == id }) {
+    //                    Task {
+    //                        if let transaction = try? await storeManager.purchase(product),
+    //                           let planId = plan.id {
+    //                            viewModel.pendingTransaction = transaction
+    //                            print("Transaction ID \(String(transaction.id))")
+    //                            subscribePlanAPI(planId: planId, transactionId: String(transaction.id))
+    //                        }
+    //                    }
+    //                }
+    //            }
+    //        )
+    //    }
     
     private func getUIPlan(from plan: PricingPlan) -> PricingPlanUI {
         let planName            = plan.planName ?? ""
@@ -320,16 +338,26 @@ struct PricingPlansView: View {
         
         var price: String = ""
         var billingCycle: String = ""
-        if let id = productID, let product = storeManager.products.first(where: { $0.id == id }) {
-            price = product.displayPrice
-            let period = product.subscription?.subscriptionPeriod
-            if period?.unit == .month {
-                billingCycle = "/ month"
-            }
-            if period?.unit == .year {
-                billingCycle = "/ year"
+        var isLoadingPrice: Bool = false
+        
+        if let id = productID, !id.isEmpty {
+            if let product = storeManager.products.first(where: { $0.id == id }) {
+                price = product.displayPrice
+                let period = product.subscription?.subscriptionPeriod
+                if period?.unit == .month {
+                    billingCycle = "/ month"
+                }
+                if period?.unit == .year {
+                    billingCycle = "/ year"
+                }
+            } else {
+                // Product ID exists but product not fetched from StoreKit yet
+                isLoadingPrice = true
+                price = "$ 0.00"
+                billingCycle = isYearlySelected ? "/ year" : "/ month"
             }
         } else {
+            // Free plan or fallback
             price = "\(plan.currencySymbol ?? "$")\(plan.price ?? 0.0)"
             billingCycle = isYearlySelected ? "/ year" : "/ month"
         }
@@ -359,19 +387,48 @@ struct PricingPlansView: View {
             badgeColor      : isCurrentPlan ? Color.neutral600 : nil,
             buttonTitle     : buttonTitle,
             isCurrent       : isCurrentPlan,
+            isLoading       : isLoadingPrice,
             action          : {
                 if let id = productID, let product = storeManager.products.first(where: { $0.id == id }) {
-                    Task {
-                        if let transaction = try? await storeManager.purchase(product),
-                           let planId = plan.id {
-                            viewModel.pendingTransaction = transaction
-                            print("Transaction ID \(String(transaction.id))")
-                            subscribePlanAPI(planId: planId, transactionId: String(transaction.id))
-                        }
-                    }
+                    handleUpgradeSelected(product: product, planId: plan.id ?? "")
                 }
             }
         )
+    }
+    
+    private func handleUpgradeSelected(product: Product, planId: String) {
+        let platform = commonApiVM.userInfoResponse?.subscribedPlatformType ?? 2
+        print("--- handleUpgradeSelected ---")
+        print("Selected Plan ID: \(planId)")
+        print("Current User Platform: \(platform)")
+        
+        if platform == 1 { // Android
+            print("Showing Android Platform Alert")
+            platformAlertMessage = "We noticed that you initially subscribed through our Android application. To avoid duplicate billing, please cancel your existing subscription on the Android application before proceeding with the upgrade here. If this step is skipped, both subscriptions will remain active and charges will be deducted from both platforms automatically."
+            pendingProduct = (product, planId)
+            showPlatformAlert = true
+        } else if platform == 3 { // Web
+            print("Showing Web Platform Alert")
+            platformAlertMessage = "We noticed that you initially subscribed through our web application. To avoid duplicate billing, please cancel your existing subscription on the web application before proceeding with the upgrade here. If this step is skipped, both subscriptions will remain active and charges will be deducted from both platforms automatically."
+            pendingProduct = (product, planId)
+            showPlatformAlert = true
+        } else {
+            print("Proceeding to purchaseInternal")
+            purchaseInternal(product: product, planId: planId)
+        }
+    }
+    
+    private func purchaseInternal(product: Product, planId: String) {
+        print("--- purchaseInternal started ---")
+        Task {
+            if let transaction = try? await storeManager.purchase(product) {
+                print("Purchase success in View: Transaction ID \(transaction.id)")
+                viewModel.pendingTransaction = transaction
+                subscribePlanAPI(planId: planId, transactionId: String(transaction.id))
+            } else {
+                print("Purchase failed or returned nil in View")
+            }
+        }
     }
     
     func subscribePlanAPI(planId: String, transactionId: String) {
@@ -412,6 +469,7 @@ struct PricingPlanCard: View {
                                 .foregroundColor(.neutral500)
                         }
                     }
+                    .redacted(reason: plan.isLoading ? .placeholder : [])
                 }
                 
                 VStack(alignment: .leading, spacing: 12) {
@@ -436,7 +494,7 @@ struct PricingPlanCard: View {
                                  action: {
                         plan.action?()
                     })
-                    .disabled(plan.isCurrent)
+                    .disabled(plan.isCurrent || plan.isLoading)
                 }
             }
             .padding(24)

@@ -74,7 +74,11 @@ class StoreManager: ObservableObject {
             switch result {
             case .success(let verification):
                 let transaction = try checkVerified(verification)
-//                await transaction.finish()
+                print("--- StoreKit 2 Purchase Success ---")
+                print("Transaction ID: \(transaction.id)")
+                print("Product ID: \(transaction.productID)")
+                print("Purchase Date: \(transaction.purchaseDate)")
+                print("----------------------------------");
                 await updatePurchasedProducts()
                 purchaseState = .idle
                 return transaction
