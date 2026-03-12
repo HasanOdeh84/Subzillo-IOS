@@ -13,6 +13,7 @@ class PricingPlansViewModel: ObservableObject {
     private var subscriptions                       = Set<AnyCancellable>()
     var apiReference                                = NetworkRequest.shared
     @Published var pricingPlans                     : [PricingPlan] = []
+    @Published var pricingPlanResponse              : PricingPlanResponse?
     private let router                              : AppIntentRouter
     private let sessionManager                      : SessionManager
     @Published var isSubscribe                      : Bool = false
@@ -49,13 +50,15 @@ class PricingPlansViewModel: ObservableObject {
         } receiveValue: { response in
             PrintLogger.modelLog(response, type: .response, isInput: false)
             if let plans = response.data {
-                self.pricingPlans = plans
+                self.pricingPlans = plans.plans ?? []
             }
+            self.pricingPlanResponse = response
         }
         .store(in: &self.subscriptions)
     }
     
     func subscribePlan(input: SubscribePlanRequest) {
+        print("Plan ID: \(input.pricingPlanId), Transaction ID: \(input.transactionId)")
         isSubscribe = false
         savePendingSubscribePlan(input)
         Constants.saveDefaults(value: true, key: Constants.subscribeApiFail)
@@ -84,17 +87,39 @@ class PricingPlansViewModel: ObservableObject {
                 }
                 self.pendingTransaction = nil
             }
+            else if let transactionId = UInt64(input.transactionId) {
+                // If it was a retry from a previous session, find and finish it
+                Task {
+                    for await result in Transaction.unfinished {
+                        if case .verified(let transaction) = result, transaction.id == transactionId {
+                            await transaction.finish()
+                            await StoreManager.shared.updatePurchasedProducts()
+                            print("[PricingPlansViewModel] Result: Finished unfinished transaction \(transactionId)")
+                            break
+                        }
+                    }
+                }
+            }
         }
         .store(in: &self.subscriptions)
     }
-
+    
+    func cancelPurchase() {
+        self.isSubscribe = false
+        self.isRetrying = false
+        Constants.saveDefaults(value: false, key: Constants.subscribeApiFail)
+        self.clearPendingSubscribePlan()
+        self.pendingTransaction = nil
+    }
+    
     // MARK: - Pending SubscribePlan persistence helpers
     func savePendingSubscribePlan(_ input: SubscribePlanRequest) {
         if let data = try? JSONEncoder().encode(input) {
             Constants.saveDefaults(value: data, key: Constants.pendingSubscribePlan)
         }
     }
-
+    
+    // MARK: - Persistence helpers
     func loadPendingSubscribePlan() -> SubscribePlanRequest? {
         guard let data = UserDefaults.standard.data(forKey: Constants.pendingSubscribePlan),
               let request = try? JSONDecoder().decode(SubscribePlanRequest.self, from: data) else {
@@ -102,14 +127,13 @@ class PricingPlansViewModel: ObservableObject {
         }
         return request
     }
-
+    
     func clearPendingSubscribePlan() {
         Constants.removeDefaults(key: Constants.pendingSubscribePlan)
     }
-
+    
     // Retry the subscribePlan API if a previous attempt failed.
     func retryPendingSubscribePlanIfNeeded() {
-//        SubscribePlanRetryManager.shared.retryIfNeeded()
         retryIfNeeded()
     }
     
@@ -121,20 +145,12 @@ class PricingPlansViewModel: ObservableObject {
     func retryIfNeeded() {
         guard !isRetrying else { return }
         let hasFailed = Constants.getUserDefaultsBooleanValue(for: Constants.subscribeApiFail)
-        guard hasFailed, let pending = loadPendingRequest() else { return }
-        if AppState.shared.isLoggedIn{
+        guard hasFailed, let pending = loadPendingSubscribePlan() else { return }
+        // Ensure we are logged in and not currently processing another IAP in the UI
+        if AppState.shared.isLoggedIn {
             isRetrying = true
-            print("[SubscribePlanRetryManager] Retrying pending subscribePlan...")
+            print("[PricingPlansViewModel] Retrying pending subscribePlan...")
             subscribePlan(input: pending)
         }
-    }
-    
-    // MARK: - Persistence helpers
-    private func loadPendingRequest() -> SubscribePlanRequest? {
-        guard let data = UserDefaults.standard.data(forKey: Constants.pendingSubscribePlan),
-              let request = try? JSONDecoder().decode(SubscribePlanRequest.self, from: data) else {
-            return nil
-        }
-        return request
     }
 }

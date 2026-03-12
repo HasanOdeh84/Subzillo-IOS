@@ -204,9 +204,9 @@ class NetworkRequest {
                 LoaderManager.shared.showLoader()
                 // Retry any pending subscribePlan before firing this request
                 if endPoint != .subscribePlan {
-                    if Constants.FeatureConfig.currentPhase == .s4 {
+                    if Constants.FeatureConfig.isS4Enabled {
                         PricingPlansViewModel.shared.retryIfNeeded()
-                    }//SubscribePlanRetryManager.shared.retryIfNeeded() }
+                    }
                 }
             }
             var finalEndpoint : String = endPoint.rawValue
@@ -358,9 +358,9 @@ class NetworkRequest {
                 LoaderManager.shared.showLoader()
                 // Retry any pending subscribePlan before firing this request
                 if endPoint != .subscribePlan {
-                    if Constants.FeatureConfig.currentPhase == .s4 {
+                    if Constants.FeatureConfig.isS4Enabled {
                         PricingPlansViewModel.shared.retryIfNeeded()
-                    }//SubscribePlanRetryManager.shared.retryIfNeeded() }
+                    }
                 }
             }
             
@@ -527,9 +527,9 @@ class NetworkRequest {
                 LoaderManager.shared.showLoader()
                 // Retry any pending subscribePlan before firing this request
                 if endPoint != .subscribePlan {
-                    if Constants.FeatureConfig.currentPhase == .s4 {
+                    if Constants.FeatureConfig.isS4Enabled {
                         PricingPlansViewModel.shared.retryIfNeeded()
-                    }//SubscribePlanRetryManager.shared.retryIfNeeded() }
+                    }
                 }
             }
             
@@ -694,9 +694,9 @@ class NetworkRequest {
                 LoaderManager.shared.showLoader()
                 // Retry any pending subscribePlan before firing this request
                 if endPoint != .subscribePlan {
-                    if Constants.FeatureConfig.currentPhase == .s4 {
+                    if Constants.FeatureConfig.isS4Enabled {
                         PricingPlansViewModel.shared.retryIfNeeded()
-                    }//SubscribePlanRetryManager.shared.retryIfNeeded() }
+                    }
                 }
             }
             

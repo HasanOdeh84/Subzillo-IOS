@@ -8,11 +8,11 @@
 import SwiftUI
 
 struct SplashView: View {
-    @State private var animateBubbles = false
-    @State var isActive               : Bool = false
-    @StateObject var appState         = AppState.shared
-    @EnvironmentObject var router     : AppIntentRouter
-    @StateObject private var pricingVM = PricingPlansViewModel()
+    @State private var animateBubbles   = false
+    @State var isActive                 : Bool = false
+    @StateObject var appState           = AppState.shared
+    @EnvironmentObject var router       : AppIntentRouter
+    @StateObject private var pricingVM  = PricingPlansViewModel.shared
 
     var body: some View {
         ZStack {
@@ -45,9 +45,9 @@ struct SplashView: View {
             .ignoresSafeArea(edges: .horizontal)
         }
         .onAppear {
-//            if appState.isLoggedIn {
-//                pricingVM.retryPendingSubscribePlanIfNeeded()
-//            }
+            if appState.isLoggedIn {
+                pricingVM.retryPendingSubscribePlanIfNeeded()
+            }
 
             DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
                 navigateToNextScreen()

@@ -156,11 +156,11 @@ struct ProfileView: View {
                         HStack(alignment: .bottom, spacing: 4) {
                             if commonApiVM.userInfoResponse?.planName ?? "" == "" {
                                 Text("Free plan")
-                                    .font(.appSemiBold(24))
+                                    .font(.appSemiBold(18))
                                     .foregroundStyle(Color.buttonsText)
                             }else{
                                 Text(LocalizedStringKey(commonApiVM.userInfoResponse?.planName ?? "Free plan"))
-                                    .font(.appSemiBold(24))
+                                    .font(.appSemiBold(18))
                                     .foregroundStyle(Color.buttonsText)
                             }
                             if let billingCycle = commonApiVM.userInfoResponse?.planBillingCycle {

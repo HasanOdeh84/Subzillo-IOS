@@ -13,8 +13,14 @@ struct PricingPlanRequest: Codable {
 }
 
 struct PricingPlanResponse: Codable {
-    let message     : String?
-    let data        : [PricingPlan]?
+    let message                     : String?
+    let data                        : pricingPlanData?
+}
+
+struct pricingPlanData : Codable{
+    let plans                       : [PricingPlan]?
+    let currentInternalPlanType     : Int?// 0: Free, 1: Silver Monthly, 2: Silver Yearly, 3: Gold Monthly, 4: Gold Yearly
+    var subscribedPlatformType      : Int? = 2// 1: Android, 2: iOS, 3: Web
 }
 
 struct PricingPlan: Identifiable, Equatable, Codable  {

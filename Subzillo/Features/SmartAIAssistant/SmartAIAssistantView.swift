@@ -82,6 +82,12 @@ struct ChatbotWebView: UIViewRepresentable {
         webView.uiDelegate = context.coordinator
         
         webView.scrollView.bounces = false
+
+        // Disable zoom
+        webView.scrollView.maximumZoomScale = 1.0
+        webView.scrollView.minimumZoomScale = 1.0
+        webView.scrollView.pinchGestureRecognizer?.isEnabled = false
+        
         webView.backgroundColor = .clear
         webView.isOpaque = false
         
