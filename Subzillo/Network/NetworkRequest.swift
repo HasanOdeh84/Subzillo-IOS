@@ -641,12 +641,19 @@ class NetworkRequest {
                     case let decodingError as DecodingError:
                         promise(.failure(.decodingError(decodingError)))
                     case let apiError as APIError:
-                        if !fromSiri{
-                            if endPoint != .fetchProviderData{
-                                if !fromVerifyOtpBottom{
-                                    ToastManager.shared.showToast(message: apiError.localizedDescription,style: .error)
-                                }
-                            }
+//                        if !fromSiri{
+//                            if endPoint != .fetchProviderData{
+//                                if !fromVerifyOtpBottom{
+//                                    if endPoint != .subscribePlan{
+//                                        ToastManager.shared.showToast(message: apiError.localizedDescription,style: .error)
+//                                    }
+//                                }
+//                            }
+//                        }
+                        if fromSiri || endPoint == .fetchProviderData || fromVerifyOtpBottom || endPoint == .subscribePlan{
+                            
+                        }else{
+                            ToastManager.shared.showToast(message: apiError.localizedDescription,style: .error)
                         }
                         promise(.failure(apiError))
                     default:

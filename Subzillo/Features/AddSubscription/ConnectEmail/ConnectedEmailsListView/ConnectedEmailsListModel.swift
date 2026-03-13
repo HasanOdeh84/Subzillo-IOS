@@ -43,18 +43,20 @@ struct ListConnectedEmailsResponse: Codable {
     let data    : [ListConnectedEmailsData]?
 }
 
-struct EmailApproaches: Codable, Hashable {
-    let advanced    : EmailApproachStatus?
-    let mvp         : EmailApproachStatus?
-    let hybrid      : EmailApproachStatus?
-}
+//struct EmailApproaches: Codable, Hashable {
+//    let advanced    : EmailApproachStatus?
+//    let mvp         : EmailApproachStatus?
+//    let hybrid      : EmailApproachStatus?
+//}
 
 struct ListConnectedEmailsData: Codable, Hashable, Identifiable {
     var id                  : String?
     let email               : String?
     let type                : Int?          // 1 - Gmail, 2 - Microsoft, 3 - Yahoo
     let lastSyncDate        : String?
-    let approaches          : EmailApproaches?
+    let viewStatus          : Bool?
+    let syncStatus          : Int?
+//    let approaches          : EmailApproaches?
 }
 
 struct DeleteEmailRequest: Codable{
@@ -66,7 +68,6 @@ struct SyncEmailRequest: Codable{
     let userId          : String
     let integrationId   : String
     let type            : Int
-    let syncMode        : Int
 }
 
 struct SyncEmailResponse: Codable {
@@ -89,7 +90,6 @@ struct SyncEmailData: Codable, Hashable, Identifiable {
 struct EmailSubscriptionsListRequest: Codable{
     let userId          : String
     let integrationId   : String
-    let syncMode        : Int
 }
 
 struct ExportGmailSyncLogsRequest: Codable{

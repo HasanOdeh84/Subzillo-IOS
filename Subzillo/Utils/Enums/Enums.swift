@@ -43,6 +43,8 @@ enum NavigationRoute: Hashable{
     case contactUs
     case pricingPlans
     case inviteFriends(uLink: String? = nil)
+    case gmailSyncProgress(emailData: ListConnectedEmailsData)
+    case extractedSubscriptions(subscriptions: [SubscriptionData])
 }
 
 extension NavigationRoute {

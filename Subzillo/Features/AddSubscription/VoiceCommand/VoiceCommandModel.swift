@@ -21,6 +21,9 @@ public struct VoiceSubscriptionResponseData: Codable, Hashable {
     var subscriptions               : [SubscriptionData]?
     var hasMultipleSubscriptions    : Bool?
     var userFinalRecordingCount     : Int?
+    var emailsScanned               : Int?
+    var subscriptionsFoundCount     : Int?
+    var syncStatus                  : Int? // 0 - Sync, 1 - Syncing, 2 - Completed
 }
 
 public struct SubscriptionData: Codable, Hashable {
@@ -68,6 +71,11 @@ public struct SubscriptionData: Codable, Hashable {
     var title                       : String?
     var sourceReference             : String?
     var renewBtnStatus              : Bool?
+    
+    // New fields for recently found subscriptions
+    var subject                     : String?
+    var from                        : String?
+    var date                        : String?
 }
 
 extension SubscriptionData {

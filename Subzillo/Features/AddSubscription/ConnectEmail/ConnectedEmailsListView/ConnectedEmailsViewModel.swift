@@ -61,6 +61,7 @@ class ConnectedEmailsViewModel: ObservableObject {
         receiveValue: { response in
             PrintLogger.modelLog(response, type: .response, isInput: false)
             self.listConnectedEmails(input: ListConnectedEmailsRequest(userId: Constants.getUserId()))
+//            navigate(to: .gmailSyncProgress(emailData: email))
         }
         .store(in: &self.subscriptions)
     }
@@ -83,7 +84,8 @@ class ConnectedEmailsViewModel: ObservableObject {
                 NotificationCenter.default.post(name: .closeAllBottomSheets, object: nil)
                 Constants.saveDefaults(value: response.providerLogoBaseUrl, key: Constants.providerBaseUrl)
                 globalSubscriptionData = nil
-                self.router.navigate(to: .subscriptionPreviewView(subscriptionsData: response.data?.subscriptions, content: "", isFromImage:false, isFromEmail: true, audioUrl: nil))
+                self.router.navigate(to: .extractedSubscriptions(subscriptions: response.data?.subscriptions ?? []))
+//                self.router.navigate(to: .subscriptionPreviewView(subscriptionsData: response.data?.subscriptions, content: "", isFromImage:false, isFromEmail: true, audioUrl: nil))
             }
         }
         .store(in: &self.subscriptions)
@@ -131,19 +133,16 @@ class ConnectedEmailsViewModel: ObservableObject {
                                                  integrationId     : email.id ?? ""))
     }
     
-    func syncEmail(_ email: ListConnectedEmailsData, syncMode: Int) {
-//        if email.type == 1{
-            syncEmailAPI(input: SyncEmailRequest(userId         : Constants.getUserId(),
-                                                 integrationId  : email.id ?? "",
-                                                 type           : email.type ?? 1,
-                                                 syncMode       : syncMode))
-//        }
+    func syncEmail(_ email: ListConnectedEmailsData) {
+        syncEmailAPI(input: SyncEmailRequest(userId         : Constants.getUserId(),
+                                             integrationId  : email.id ?? "",
+                                             type           : email.type ?? 1))
+
     }
     
-    func viewEmail(_ email: ListConnectedEmailsData, syncMode: Int) {
+    func viewEmail(_ email: ListConnectedEmailsData) {
         emailSubscriptionsList(input: EmailSubscriptionsListRequest(userId          : Constants.getUserId(),
-                                                                    integrationId   : email.id ?? "",
-                                                                    syncMode        : syncMode))
+                                                                    integrationId   : email.id ?? ""))
     }
     
     func downloadLogs(_ email: ListConnectedEmailsData) {

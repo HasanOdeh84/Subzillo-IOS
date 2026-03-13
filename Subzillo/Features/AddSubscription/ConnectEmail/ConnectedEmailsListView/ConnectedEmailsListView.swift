@@ -107,32 +107,32 @@ struct ConnectedEmailsListView: View {
                 ScrollView(showsIndicators: false) {
                     LazyVStack(spacing: 16) {
                         ForEach(viewModel.filteredEmails) { email in
-                            //                        SwipeableEmailRow(
-                            //                            email           : email,
-                            //                            activeEmailId   : $activeEmailId,
-                            //                            isScrollDisabled: $isScrollDisabled,
-                            //                            onDelete: {
-                            //                                withAnimation {
-                            //                                    viewModel.deleteEmail(email)
-                            //                                }
-                            //                            },
-                            //                            onSync: {
-                            //                                viewModel.syncEmail(email)
-                            //                            },
-                            //                            onView: {
-                            //                                viewModel.viewEmail(email)
-                            //                            }
-                            //                        )
+//                                                    SwipeableEmailRow(
+//                                                        email           : email,
+//                                                        activeEmailId   : $activeEmailId,
+//                                                        isScrollDisabled: $isScrollDisabled,
+//                                                        onDelete: {
+//                                                            withAnimation {
+//                                                                viewModel.deleteEmail(email)
+//                                                            }
+//                                                        },
+//                                                        onSync: {
+//                                                            viewModel.syncEmail(email)
+//                                                        },
+//                                                        onView: {
+//                                                            viewModel.viewEmail(email)
+//                                                        }
+//                                                    )
                             SwipeableMailRow(email              : email,
                                              activeCardId       : $activeEmailId,
                                              isScrollDisabled   : $isScrollDisabled,
                                              onDelete           : {
                                 selectedEmail = email
                                 showDeletePopup = true
-                            },              onSync   : { mode in
-                                viewModel.syncEmail(email, syncMode: mode)
-                            },              onView   : { mode in
-                                viewModel.viewEmail(email, syncMode: mode)
+                            },              onSync   : {
+                                viewModel.syncEmail(email)
+                            },              onView   : {
+                                viewModel.viewEmail(email)
                             }, onDownloadLogs: {
                                 viewModel.downloadLogs(email)
                             }, isIntegrations: isIntegrations)

@@ -69,13 +69,13 @@ class StoreManager: ObservableObject {
                 purchaseState = .idle
                 return transaction
             case .userCancelled:
-                purchaseState = .idle
+                purchaseState = .failed("User cancelled the payment process.")
                 return nil
             case .pending:
                 purchaseState = .loading
                 return nil
             @unknown default:
-                purchaseState = .idle
+                purchaseState = .failed("An unexpected error occurred.")
                 return nil
             }
         } catch {

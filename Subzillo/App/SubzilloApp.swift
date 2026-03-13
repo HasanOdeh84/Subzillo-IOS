@@ -395,6 +395,10 @@ struct RootView: View {
                     PricingPlansView()
                 case .inviteFriends(let uLink):
                     InviteFriendsView(uLink: uLink)
+                case .gmailSyncProgress(let emailData):
+                    GmailSyncProgressView(emailData: emailData)
+                case .extractedSubscriptions(let subscriptions):
+                    ExtractedSubscriptionsView(subscriptions: subscriptions)
                 }
             }
         }

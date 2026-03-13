@@ -8,8 +8,8 @@ struct SwipeableMailRow: View {
     @Binding var activeCardId       : String?
     @Binding var isScrollDisabled   : Bool
     let onDelete                    : () -> Void
-    let onSync                      : (Int) -> Void
-    let onView                      : (Int) -> Void
+    let onSync                      : () -> Void
+    let onView                      : () -> Void
     let onDownloadLogs              : () -> Void
     @State private var offset       : CGFloat = 0
     @State private var isSwiped     : Bool = false
@@ -54,12 +54,7 @@ struct SwipeableMailRow: View {
                     offset = 0
                     isSwiped = false
                 }
-                let isAnySyncing = [
-                    email.approaches?.advanced?.syncStatus,
-                    email.approaches?.mvp?.syncStatus,
-                    email.approaches?.hybrid?.syncStatus
-                ].contains(1)
-                if !isAnySyncing {
+                if email.syncStatus != 1 {
                     onDelete()
                 } else {
                     ToastManager.shared.showToast(message: "Email is syncing. Deletion will be available once complete.", style: .error)

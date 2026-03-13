@@ -2,8 +2,8 @@ import SwiftUI
 
 struct ConnectedEmailItemView: View {
     let email                   : ListConnectedEmailsData
-    let onSync                  : (Int) -> Void
-    let onView                  : (Int) -> Void
+    let onSync                  : () -> Void
+    let onView                  : () -> Void
     let onDownloadLogs          : () -> Void
     @State var provider         : EmailProvider = EmailProvider.gmail
     @State var isIntegrations   : Bool = false
@@ -75,9 +75,7 @@ struct ConnectedEmailItemView: View {
     // MARK: - Helpers
     private var isAllSyncing: Bool {
         let statuses = [
-            email.approaches?.advanced?.syncStatus,
-            email.approaches?.mvp?.syncStatus,
-            email.approaches?.hybrid?.syncStatus
+            email.syncStatus
         ]
         return statuses.allSatisfy { $0 == 1 }
     }
@@ -87,23 +85,19 @@ struct ConnectedEmailItemView: View {
     @ViewBuilder
     private var actionButtons: some View {
         HStack(spacing: 12) {
-            approachButton(approach: email.approaches?.advanced, mode: 1, label: "1")
-            approachButton(approach: email.approaches?.mvp,      mode: 2, label: "2")
-            approachButton(approach: email.approaches?.hybrid,   mode: 3, label: "3")
+            approachButton()
         }
     }
 
     @ViewBuilder
-    private func approachButton(approach: EmailApproachStatus?,
-                                mode: Int,
-                                label: String) -> some View {
-        let syncStatus = approach?.syncStatus ?? 0
-        let viewStatus = approach?.viewStatus ?? false
+    private func approachButton() -> some View {
+        let syncStatus = email.syncStatus ?? 0
+        let viewStatus = email.viewStatus ?? false
         if syncStatus == 1 {
-            Text("Syncing \(label)")
-                .font(.appSemiBold(12))
+            Text("Syncing...")
+                .font(.appSemiBold(14))
                 .foregroundColor(Color.blueMain700)
-                .padding(.horizontal, 8)
+                .padding(.horizontal, 24)
                 .frame(height: 30)
                 .overlay(
                     RoundedRectangle(cornerRadius: 5)
@@ -111,39 +105,39 @@ struct ConnectedEmailItemView: View {
                 )
                 .opacity(0.6)
         } else if syncStatus == 2 && viewStatus {
-            viewButton(title: "View \(label)", mode: mode)
+            viewButton(title: "View")
         } else if syncStatus == 0 && viewStatus{
-            viewButton(title: "View \(label)", mode: mode)
+            viewButton(title: "View")
         } else if syncStatus == 0 || (syncStatus == 2 && viewStatus == false){
-            syncButton(title: "Sync \(label)", mode: mode)
+            syncButton(title: "Sync")
         }
     }
 
     // MARK: - Reusable Button Builders
     @ViewBuilder
-    private func syncButton(title: String, mode: Int) -> some View {
+    private func syncButton(title: String) -> some View {
         Text(title)
-            .font(.appSemiBold(12))
+            .font(.appSemiBold(14))
             .foregroundColor(.white)
-            .padding(.horizontal, 8)
+            .padding(.horizontal, 24)
             .frame(height: 30)
             .background(Color.blueMain700)
             .cornerRadius(5)
             .onTapGesture {
-                onSync(mode)
+                onSync()
             }
     }
 
     @ViewBuilder
-    private func viewButton(title: String, mode: Int) -> some View {
+    private func viewButton(title: String) -> some View {
         Text(title)
-            .font(.appSemiBold(12))
+            .font(.appSemiBold(14))
             .foregroundStyle(LinearGradient(
                 gradient: Gradient(colors: [Color.linearGradient3, Color.linearGradient4, Color.blueMain700]),
                 startPoint: .top,
                 endPoint: .bottom
             ))
-            .padding(.horizontal, 8)
+            .padding(.horizontal, 24)
             .frame(height: 30)
             .overlay(
                 RoundedRectangle(cornerRadius: 5)
@@ -157,7 +151,7 @@ struct ConnectedEmailItemView: View {
                     )
             )
             .onTapGesture {
-                onView(mode)
+                onView()
             }
     }
 }
