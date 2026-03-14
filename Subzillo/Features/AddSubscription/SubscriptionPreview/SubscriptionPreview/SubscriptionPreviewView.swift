@@ -854,8 +854,8 @@ struct SubscriptionPreviewView: View {
     private func performDeleteAction() {
         if isFromEmail {
             if let subId = subscriptionData?.id {
-                let input = DiscardEmailSubscriptionRequest(userId          : Constants.getUserId(),
-                                                            subscriptionId  : subId)
+                let input = DiscardEmailSubscriptionRequest(userId           : Constants.getUserId(),
+                                                            subscriptionIds  : [subId])
                 subscriptionPreviewVM.discardEmailSubscriptionApi(input: input)
             } else {
                 handleLocalDiscard()

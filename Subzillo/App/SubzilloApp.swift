@@ -327,79 +327,7 @@ struct RootView: View {
                 SplashView()
             }
             .navigationDestination(for: NavigationRoute.self) { screen in
-                switch screen {
-                case .emailIntegration:
-                    Text("Test")
-                case .bankStatement:
-                    Text("Test")
-                case .chat:
-                    Text("Test")
-                case .appearance:
-                    Text("Test")
-                case .notifications:
-                    NotificationsView()
-                case .home:
-                    RootTabBar()
-                case .signup(let fromSocialLogin):
-                    RegistrationView(fromSocialLogin: fromSocialLogin)
-                case .login:
-                    LoginView()
-                    //                        .onAppear {
-                    //                            if !path.isEmpty {
-                    //                                path.removeLast(path.count) // reset stack on login view
-                    //                            }
-                    //                        }
-                case .onboarding:
-                    OnboardingView()
-                case .verifyOtp(let fromLogin, let verifyMergeType):
-                    OtpVerifyView(fromLogin:fromLogin, verifyMergeType:verifyMergeType)
-                case .termsAndPrivacy(isTerm: let isTerm):
-                    TermsAndPrivacyView(isTerm:isTerm ?? false)
-                case .SuccessView(isOtp: let isOtp,let isMobile):
-                    SuccessView(isOtp:isOtp ?? false,isMobile:isMobile)
-                case .welcome:
-                    WelcomeHomeView()
-                case .manualEntry(let isFromEdit, let isFromListEdit, let isRenew, let subscriptionId, let familyMemberId, let isFromEmail):
-                    ManualEntryView(isFromEdit: isFromEdit, isFromListEdit: isFromListEdit, isRenew: isRenew, subscriptionId: subscriptionId, familyMemberId: familyMemberId, isFromEmail: isFromEmail)
-                case .voiceCommandView:
-                    VoiceCommandView()
-                case .subscriptionPreviewView(let subscriptionsData, let content, let isFromImage, let isFromEmail, let audioUrl):
-                    SubscriptionPreviewView(isFromImage:isFromImage, isFromEmail: isFromEmail, subscriptionsData: subscriptionsData, content: content, audioURL: audioUrl)
-                case .subscriptionMatchView(let subscriptionData, let fromList, let fromPush, let subscriptionId):
-                    SubscriptionMatchView(subscriptionData: subscriptionData, subscriptionId: subscriptionId, fromList: fromList, fromPush: fromPush)
-                case .pasteTextView:
-                    PasteTextView()
-                case .duplicateSubscriptionsView(let duplicateSubsList, let fromFamily, let isFromEmail):
-                    DuplicateSubscriptionsView(duplicateSubsList: duplicateSubsList, fromFamily: fromFamily, isFromEmail: isFromEmail)
-                case .duplicateUpdateView(let duplicateSubsList, let selectedIndex, let fromFamily, let isFromEmail):
-                    DuplicateUpdateView(duplicateSubsList: duplicateSubsList, selectedIndex: selectedIndex, fromFamily: fromFamily, isFromEmail: isFromEmail)
-                case .addSubscriptionsView:
-                    RootTabBar(selectedTab: .addSubscription)
-                case .duplicateSubDetailsView(let subscriptionData):
-                    DuplicateSubDetailsView(subscriptionData: subscriptionData)
-                case .subscriptionsListView(let selectedSegment):
-                    RootTabBar(selectedTab: .subscriptions, selectedSegment: selectedSegment)
-                case .myCards:
-                    MyCardsView()
-                case .familyMembersView:
-                    FamilyMembersView()
-                case .connectEmail:
-                    ConnectEmailView()
-                case .connectedEmailsList(let isIntegrations):
-                    ConnectedEmailsListView(isIntegrations: isIntegrations)
-                case .settings:
-                    SettingsView()
-                case .contactUs:
-                    ContactUsView()
-                case .pricingPlans:
-                    PricingPlansView()
-                case .inviteFriends(let uLink):
-                    InviteFriendsView(uLink: uLink)
-                case .gmailSyncProgress(let emailData):
-                    GmailSyncProgressView(emailData: emailData)
-                case .extractedSubscriptions(let subscriptions):
-                    ExtractedSubscriptionsView(subscriptions: subscriptions)
-                }
+                destinationView(for: screen)
             }
         }
         .environmentObject(appState)
@@ -496,6 +424,83 @@ struct RootView: View {
         )
         .onChange(of: systemScheme) { newScheme in
             themeManager.applySystemTheme(newScheme == .dark)
+        }
+    }
+    
+    @ViewBuilder
+    private func destinationView(for screen: NavigationRoute) -> some View {
+        switch screen {
+        case .emailIntegration:
+            Text("Test")
+        case .bankStatement:
+            Text("Test")
+        case .chat:
+            Text("Test")
+        case .appearance:
+            Text("Test")
+        case .notifications:
+            NotificationsView()
+        case .home:
+            RootTabBar()
+        case .signup(let fromSocialLogin):
+            RegistrationView(fromSocialLogin: fromSocialLogin)
+        case .login:
+            LoginView()
+            //                        .onAppear {
+            //                            if !path.isEmpty {
+            //                                path.removeLast(path.count) // reset stack on login view
+            //                            }
+            //                        }
+        case .onboarding:
+            OnboardingView()
+        case .verifyOtp(let fromLogin, let verifyMergeType):
+            OtpVerifyView(fromLogin:fromLogin, verifyMergeType:verifyMergeType)
+        case .termsAndPrivacy(isTerm: let isTerm):
+            TermsAndPrivacyView(isTerm:isTerm ?? false)
+        case .SuccessView(isOtp: let isOtp,let isMobile):
+            SuccessView(isOtp:isOtp ?? false,isMobile:isMobile)
+        case .welcome:
+            WelcomeHomeView()
+        case .manualEntry(let isFromEdit, let isFromListEdit, let isRenew, let subscriptionId, let familyMemberId, let isFromEmail):
+            ManualEntryView(isFromEdit: isFromEdit, isFromListEdit: isFromListEdit, isRenew: isRenew, subscriptionId: subscriptionId, familyMemberId: familyMemberId, isFromEmail: isFromEmail)
+        case .voiceCommandView:
+            VoiceCommandView()
+        case .subscriptionPreviewView(let subscriptionsData, let content, let isFromImage, let isFromEmail, let audioUrl):
+            SubscriptionPreviewView(isFromImage:isFromImage, isFromEmail: isFromEmail, subscriptionsData: subscriptionsData, content: content, audioURL: audioUrl)
+        case .subscriptionMatchView(let subscriptionData, let fromList, let fromPush, let subscriptionId):
+            SubscriptionMatchView(subscriptionData: subscriptionData, subscriptionId: subscriptionId, fromList: fromList, fromPush: fromPush)
+        case .pasteTextView:
+            PasteTextView()
+        case .duplicateSubscriptionsView(let duplicateSubsList, let fromFamily, let isFromEmail):
+            DuplicateSubscriptionsView(duplicateSubsList: duplicateSubsList, fromFamily: fromFamily, isFromEmail: isFromEmail)
+        case .duplicateUpdateView(let duplicateSubsList, let selectedIndex, let fromFamily, let isFromEmail):
+            DuplicateUpdateView(duplicateSubsList: duplicateSubsList, selectedIndex: selectedIndex, fromFamily: fromFamily, isFromEmail: isFromEmail)
+        case .addSubscriptionsView:
+            RootTabBar(selectedTab: .addSubscription)
+        case .duplicateSubDetailsView(let subscriptionData):
+            DuplicateSubDetailsView(subscriptionData: subscriptionData)
+        case .subscriptionsListView(let selectedSegment):
+            RootTabBar(selectedTab: .subscriptions, selectedSegment: selectedSegment)
+        case .myCards:
+            MyCardsView()
+        case .familyMembersView:
+            FamilyMembersView()
+        case .connectEmail:
+            ConnectEmailView()
+        case .connectedEmailsList(let isIntegrations):
+            ConnectedEmailsListView(isIntegrations: isIntegrations)
+        case .settings:
+            SettingsView()
+        case .contactUs:
+            ContactUsView()
+        case .pricingPlans:
+            PricingPlansView()
+        case .inviteFriends(let uLink):
+            InviteFriendsView(uLink: uLink)
+        case .emailSyncProgress(let logId):
+            EmailSyncProgressView(logId: logId)
+        case .extractedSubscriptions(let subscriptions, let fromEmailSync):
+            ExtractedSubscriptionsView(subscriptions: subscriptions, fromEmailSyncScreen: fromEmailSync)
         }
     }
 }

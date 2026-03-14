@@ -10,11 +10,14 @@ import SwiftUI
 
 class ExtractedSubscriptionsViewModel: ObservableObject {
     
-    private var subscriptionsCancellables            = Set<AnyCancellable>()
+    var apiReference                                = NetworkRequest.shared
+    private var subscriptionsCancellables           = Set<AnyCancellable>()
     private let router                              : AppIntentRouter
     
     @Published var subscriptions                    : [SubscriptionData] = []
     @Published var selectedIds                      : Set<String> = []
+    @Published var showDeletePopup                  : Bool = false
+    @State var fromEmailSyncScreen                  : Bool = false
     
     var showActionButtons: Bool {
         !selectedIds.isEmpty
@@ -33,21 +36,16 @@ class ExtractedSubscriptionsViewModel: ObservableObject {
         }
     }
     
-    func deleteSelected() {
-        subscriptions.removeAll { sub in
-            if let id = sub.id {
-                return selectedIds.contains(id)
-            }
-            return false
-        }
-        selectedIds.removeAll()
-        
-        checkIfListIsEmpty()
+    func deleteSelected(fromEmailSyncScreen:Bool) {
+        self.fromEmailSyncScreen = fromEmailSyncScreen
+        var deleteIds : [String]?
+        deleteIds = Array(selectedIds)
+        discardEmailSubscriptionApi(input: DiscardEmailSubscriptionRequest(userId: Constants.getUserId(), subscriptionIds: deleteIds ?? []))
     }
     
-    func skipAll() {
-        router.navigate(to: .connectedEmailsList(isIntegrations: false))
-    }
+//    func skipAll() {
+//        router.navigate(to: .connectedEmailsList(isIntegrations: false))
+//    }
     
     func continueAction() {
         let selectedSubs = subscriptions.filter { sub in
@@ -68,7 +66,38 @@ class ExtractedSubscriptionsViewModel: ObservableObject {
     
     func checkIfListIsEmpty() {
         if subscriptions.isEmpty {
-            router.navigate(to: .connectedEmailsList(isIntegrations: false))
+            if fromEmailSyncScreen{
+                AppIntentRouter.shared.pop(count: 1)
+            }else{
+                AppIntentRouter.shared.pop(count: 2)
+            }
         }
+    }
+    
+    func discardEmailSubscriptionApi(input: DiscardEmailSubscriptionRequest) {
+        apiReference.postApi(endPoint: APIEndpoint.discardEmailSubscription, method: .POST, token: authKey, body: input, showLoader: true, responseType: GeneralResponse.self)
+            .sink { [unowned self] completion in
+                if case let .failure(error) = completion {
+                    self.handleError(error, endPoint: APIEndpoint.discardEmailSubscription)
+                }
+            }
+        receiveValue: { [self] response in
+            PrintLogger.modelLog(response, type: .response, isInput: false)
+            ToastManager.shared.showToast(message: response.message ?? "")
+            subscriptions.removeAll { sub in
+                if let id = sub.id {
+                    return selectedIds.contains(id)
+                }
+                return false
+            }
+            selectedIds.removeAll()
+            checkIfListIsEmpty()
+        }
+        .store(in: &self.subscriptionsCancellables)
+    }
+    
+    // MARK: - Handle errors
+    func handleError(_ apiError: APIError, endPoint : APIEndpoint) {
+        print("API Error : \(endPoint) - \(apiError.localizedDescription)")
     }
 }

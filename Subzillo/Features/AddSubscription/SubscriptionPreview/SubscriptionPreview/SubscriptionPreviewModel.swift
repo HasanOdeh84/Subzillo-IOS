@@ -42,5 +42,5 @@ public struct PendingSubscriptionConfirmResponseData: Codable {
 
 public struct DiscardEmailSubscriptionRequest: Codable {
     let userId                  : String
-    let subscriptionId          : String
+    let subscriptionIds         : [String]
 }

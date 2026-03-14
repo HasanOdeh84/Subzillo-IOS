@@ -74,8 +74,7 @@ public struct SubscriptionData: Codable, Hashable {
     
     // New fields for recently found subscriptions
     var subject                     : String?
-    var from                        : String?
-    var date                        : String?
+    var emailDate                   : String?
 }
 
 extension SubscriptionData {

@@ -72,20 +72,24 @@ struct SyncEmailRequest: Codable{
 
 struct SyncEmailResponse: Codable {
     let message : String?
-//    let data    : [SyncEmailData]?
+    let data    : SyncEmailData?
 }
 
-struct SyncEmailData: Codable, Hashable, Identifiable {
-    var id                  : String?
-    var userId              : String?
-    var integrationId       : String?
-    let email               : String?
-    let serviceName         : String?
-    let amount              : Double?
-    let subject             : String?
-    let from                : String?
-    let date                : String? 
+struct SyncEmailData: Codable {
+    let logId : String?
 }
+
+//struct SyncEmailData: Codable, Hashable, Identifiable {
+//    var id                  : String?
+//    var userId              : String?
+//    var integrationId       : String?
+//    let email               : String?
+//    let serviceName         : String?
+//    let amount              : Double?
+//    let subject             : String?
+//    let from                : String?
+//    let date                : String? 
+//}
 
 struct EmailSubscriptionsListRequest: Codable{
     let userId          : String
@@ -99,4 +103,30 @@ struct ExportGmailSyncLogsRequest: Codable{
 
 struct ExportGmailSyncLogsResponse: Codable {
     let message : String?
+}
+
+struct SyncStatusResponse: Codable {
+    let message             : String?
+    let data                : SyncStatusData?
+}
+
+struct SyncStatusData: Codable {
+    let syncStatus          : String? //syncStatus -> pending, in_progress, completed, failed
+    let emailsScanned       : Int?
+    let subscriptionsFound  : Int?
+    let latestService       : String?
+    let integrationId       : String?
+    let recentSubscriptions : [RecentSubscriptionData]?
+}
+
+struct RecentSubscriptionData : Codable, Identifiable, Hashable {
+    var id                  : String? = UUID().uuidString
+    let serviceName         : String?
+    let subject             : String?
+    let emailDate           : String?
+    
+    enum CodingKeys: String, CodingKey {
+        case id = "_id"
+        case serviceName, subject, emailDate
+    }
 }

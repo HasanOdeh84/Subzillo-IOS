@@ -10,11 +10,14 @@ import SwiftUI
 struct ExtractedSubscriptionsView: View {
     
     // MARK: - Properties
-    @StateObject var viewModel: ExtractedSubscriptionsViewModel
     @Environment(\.dismiss) private var dismiss
+    @StateObject var viewModel                  : ExtractedSubscriptionsViewModel
+    @State private var deleteSheetHeight        : CGFloat = .zero
+    @State var fromEmailSyncScreen              : Bool = false
     
-    init(subscriptions: [SubscriptionData]) {
+    init(subscriptions: [SubscriptionData], fromEmailSyncScreen:Bool = false) {
         _viewModel = StateObject(wrappedValue: ExtractedSubscriptionsViewModel(subscriptions: subscriptions))
+        self.fromEmailSyncScreen = fromEmailSyncScreen
     }
     
     var body: some View {
@@ -23,7 +26,11 @@ struct ExtractedSubscriptionsView: View {
             // MARK: - Header
             HStack(spacing: 8) {
                 Button(action: {
-                    dismiss()
+                    if fromEmailSyncScreen{
+                        dismiss()
+                    }else{
+                        AppIntentRouter.shared.pop(count: 2)
+                    }
                 }) {
                     Image("back_gray")
                 }
@@ -34,7 +41,6 @@ struct ExtractedSubscriptionsView: View {
                 
                 Spacer()
             }
-            .padding(.horizontal)
             .padding(.top, 20)
             
             // MARK: - Quick Navigation & Skip All
@@ -45,13 +51,18 @@ struct ExtractedSubscriptionsView: View {
                 
                 Spacer()
                 
-                Button(action: { viewModel.skipAll() }) {
+                Button(action: {
+                    if fromEmailSyncScreen{
+                        dismiss()
+                    }else{
+                        AppIntentRouter.shared.pop(count: 2)
+                    }
+                }) {
                     Text("Skip all")
                         .font(.appBold(16))
-                        .foregroundColor(Color.blueMain700) // Assuming blueMain700 is the primary blue
+                        .foregroundColor(Color.navyBlueCTA700)
                 }
             }
-            .padding(.horizontal)
             .padding(.top, 20)
             
             // MARK: - Subscriptions List
@@ -74,7 +85,6 @@ struct ExtractedSubscriptionsView: View {
                     RoundedRectangle(cornerRadius: 12)
                         .stroke(Color.neutral300Border, lineWidth: 1)
                 )
-                .padding(.horizontal)
                 .padding(.top, 12)
             }
             .padding(.top, 10)
@@ -82,7 +92,9 @@ struct ExtractedSubscriptionsView: View {
             // MARK: - Action Buttons
             if viewModel.showActionButtons {
                 HStack(spacing: 16) {
-                    Button(action: { viewModel.deleteSelected() }) {
+                    Button(action: {
+                        viewModel.showDeletePopup = true
+                    }) {
                         Text("Delete")
                             .font(.appBold(18))
                             .foregroundColor(Color("redColor"))
@@ -106,50 +118,75 @@ struct ExtractedSubscriptionsView: View {
                             .cornerRadius(10)
                     }
                 }
-                .padding(.horizontal)
-                .padding(.bottom, 30)
+                .padding(.bottom, 20)
                 .padding(.top, 20)
             }
         }
+        .padding(.horizontal, 20)
         .navigationBarBackButtonHidden()
         .background(Color.neutralBg100)
+        .sheet(isPresented: $viewModel.showDeletePopup , onDismiss: {
+//            if !selectionMode {
+//                for i in subscriptionsList.indices {
+//                    subscriptionsList[i].isSelected = false
+//                }
+//            }
+        }) {
+            InfoAlertSheet(
+                onDelegate: {
+                    viewModel.deleteSelected(fromEmailSyncScreen: fromEmailSyncScreen)
+                }, title    : "Are you sure you want to delete the subscriptions?\nData will be permanently deleted",
+                subTitle    :"",
+                imageName   : "del_red_big",
+                buttonIcon  : "deleteIcon",
+                buttonTitle : "Delete",
+                imageSize   : 70
+            )
+            .onPreferenceChange(InnerHeightPreferenceKey.self) { height in
+                if height > 0 {
+                    deleteSheetHeight = height
+                }
+            }
+            .presentationDragIndicator(.hidden)
+            .presentationDetents([.height(deleteSheetHeight)])
+        }
     }
 }
 
 // MARK: - row component
 struct SubscriptionRowEmail: View {
-    let subscription: SubscriptionData
-    let isSelected: Bool
-    let onToggle: () -> Void
+    let subscription    : SubscriptionData
+    let isSelected      : Bool
+    let onToggle        : () -> Void
     
     var body: some View {
         HStack(spacing: 12) {
             // Checkbox
             Button(action: onToggle) {
-                Image(systemName: isSelected ? "checkmark.square.fill" : "square")
+                Image(isSelected ? "Checkmark" : "UnCheckmark")
                     .resizable()
-                    .frame(width: 20, height: 20)
-                    .foregroundColor(isSelected ? Color.blueMain700 : Color.neutral400)
+                    .frame(width: 24, height: 24)
+//                    .foregroundColor(isSelected ? Color.blueMain700 : Color.neutral400)
             }
             
             // Service Name and Status
             HStack(spacing: 8) {
                 Text(subscription.serviceName ?? "Unknown")
-                    .font(.appRegular(16))
+                    .font(.appRegular(14))
                     .foregroundColor(Color.neutralMain700)
                 
                 if subscription.status?.lowercased() == "expired" {
                     Text("Expired")
                         .font(.appBold(14))
-                        .foregroundColor(.red)
+                        .foregroundColor(.disCardRed)
                 }
             }
             
             Spacer()
             
             // Amount and Currency
-            Text("\(String(format: "%.2f", subscription.amount ?? 0.0)) \(subscription.currency ?? "USD")")
-                .font(.appRegular(16))
+            Text("\(subscription.currency ?? "USD") \(String(format: "%.2f", subscription.amount ?? 0.0))")
+                .font(.appRegular(14))
                 .foregroundColor(Color.neutralMain700)
         }
         .padding(.vertical, 16)

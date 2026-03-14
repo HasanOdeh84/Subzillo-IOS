@@ -52,16 +52,16 @@ class ConnectedEmailsViewModel: ObservableObject {
     }
     
     func syncEmailAPI(input: SyncEmailRequest,showLoader:Bool = true) {
-        apiReference.postApi(endPoint: APIEndpoint.syncEmail, method: .POST,token: authKey,body: input,showLoader: showLoader, responseType: GeneralResponse.self)
+        apiReference.postApi(endPoint: APIEndpoint.syncEmail, method: .POST,token: authKey,body: input,showLoader: showLoader, responseType: SyncEmailResponse.self)
             .sink { [unowned self] completion in
                 if case let .failure(error) = completion {
                     self.handleError(error,endPoint: APIEndpoint.syncEmail)
                 }
             }
-        receiveValue: { response in
+        receiveValue: { [self] response in
             PrintLogger.modelLog(response, type: .response, isInput: false)
             self.listConnectedEmails(input: ListConnectedEmailsRequest(userId: Constants.getUserId()))
-//            navigate(to: .gmailSyncProgress(emailData: email))
+            navigate(to: .emailSyncProgress(logId: response.data?.logId ?? ""))
         }
         .store(in: &self.subscriptions)
     }
@@ -84,7 +84,7 @@ class ConnectedEmailsViewModel: ObservableObject {
                 NotificationCenter.default.post(name: .closeAllBottomSheets, object: nil)
                 Constants.saveDefaults(value: response.providerLogoBaseUrl, key: Constants.providerBaseUrl)
                 globalSubscriptionData = nil
-                self.router.navigate(to: .extractedSubscriptions(subscriptions: response.data?.subscriptions ?? []))
+                self.router.navigate(to: .extractedSubscriptions(subscriptions: response.data?.subscriptions ?? [], fromEmailSync: false))
 //                self.router.navigate(to: .subscriptionPreviewView(subscriptionsData: response.data?.subscriptions, content: "", isFromImage:false, isFromEmail: true, audioUrl: nil))
             }
         }

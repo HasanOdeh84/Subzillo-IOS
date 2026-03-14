@@ -30,7 +30,7 @@ struct ConnectedEmailItemView: View {
 //                            }
 //                            .padding(.trailing, -16)
                     }
-                    .tint(Color.underlineGray) // prevents email address from appearing blue (iOS data detection)
+                    .tint(Color.underlineGray)
 
                     if email.lastSyncDate != "" {
                         if email.lastSyncDate != nil {
@@ -94,22 +94,28 @@ struct ConnectedEmailItemView: View {
         let syncStatus = email.syncStatus ?? 0
         let viewStatus = email.viewStatus ?? false
         if syncStatus == 1 {
-            Text("Syncing...")
-                .font(.appSemiBold(14))
-                .foregroundColor(Color.blueMain700)
-                .padding(.horizontal, 24)
-                .frame(height: 30)
-                .overlay(
-                    RoundedRectangle(cornerRadius: 5)
-                        .stroke(Color.blueMain700, lineWidth: 1)
-                )
-                .opacity(0.6)
+            HStack(spacing: 10){
+                Text("Syncing...")
+                    .font(.appSemiBold(14))
+                    .foregroundColor(Color.blueMain700)
+                    .padding(.horizontal, 24)
+                    .frame(height: 30)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 5)
+                            .stroke(Color.blueMain700, lineWidth: 1)
+                    )
+                    .opacity(0.6)
+                viewButton(title: "View")
+            }
         } else if syncStatus == 2 && viewStatus {
             viewButton(title: "View")
         } else if syncStatus == 0 && viewStatus{
             viewButton(title: "View")
         } else if syncStatus == 0 || (syncStatus == 2 && viewStatus == false){
-            syncButton(title: "Sync")
+            HStack(spacing: 10){
+                syncButton(title: "Sync")
+                viewButton(title: "View")
+            }
         }
     }
 

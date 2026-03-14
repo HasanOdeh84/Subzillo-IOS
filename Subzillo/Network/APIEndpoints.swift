@@ -91,6 +91,7 @@ enum APIEndpoint: String {
     case renewalUpdate                  = "/renewalUpdate"
     case subscribePlan                  = "/subscribePlan"
     case appUpdate                      = "/appUpdate"
+    case syncStatus                     = "/syncStatus"
 
     //new api's
     case deleteAccount                  = "/deleteAccount"

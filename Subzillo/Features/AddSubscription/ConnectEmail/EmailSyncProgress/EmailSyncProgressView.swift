@@ -1,5 +1,5 @@
 //
-//  GmailSyncProgressView.swift
+//  EmailSyncProgressView.swift
 //  Subzillo
 //
 //  Created by Antigravity on 13/03/26.
@@ -7,19 +7,15 @@
 
 import SwiftUI
 
-struct GmailSyncProgressView: View {
+struct EmailSyncProgressView: View {
     
     // MARK: - Properties
-    @StateObject var viewModel: GmailSyncProgressViewModel
+    @StateObject var viewModel  = EmailSyncProgressViewModel()
+    @State var logId            : String
     @Environment(\.dismiss) private var dismiss
-    
-    init(emailData: ListConnectedEmailsData) {
-        _viewModel = StateObject(wrappedValue: GmailSyncProgressViewModel(emailData: emailData))
-    }
     
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            
             // MARK: - Header
             HStack(spacing: 8) {
                 Button(action: {
@@ -31,7 +27,7 @@ struct GmailSyncProgressView: View {
                 }
                 
                 Text("Gmail Sync Progress")
-                    .font(.appRegular(24))
+                    .font(.appRegular(20))
                     .foregroundColor(Color.neutralMain700)
                 
                 Spacer()
@@ -41,10 +37,10 @@ struct GmailSyncProgressView: View {
             
             // MARK: - Subtitle
             Text("We're scanning your Gmail inbox for subscription emails.")
-                .font(.appRegular(18))
+                .font(.appRegular(16))
                 .foregroundColor(Color.neutral500)
                 .multilineTextAlignment(.center)
-                .padding(.horizontal, 40)
+                .padding(.horizontal, 20)
                 .padding(.top, 16)
                 .frame(maxWidth: .infinity)
             
@@ -58,10 +54,10 @@ struct GmailSyncProgressView: View {
             
             // MARK: - Recently Found Section
             Text("Recently Found Subscription")
-                .font(.appRegular(20))
+                .font(.appRegular(18))
                 .foregroundColor(Color.neutralMain700)
                 .padding(.horizontal)
-                .padding(.top, 32)
+                .padding(.top, 24)
             
             // MARK: - Subscriptions List
             ScrollView {
@@ -78,10 +74,9 @@ struct GmailSyncProgressView: View {
                         .frame(maxWidth: .infinity)
                     } else {
                         VStack(spacing: 0) {
-                            ForEach(viewModel.recentlyFoundSubscriptions.prefix(10), id: \.id) { sub in
+                            ForEach(viewModel.recentlyFoundSubscriptions, id: \.id) { sub in
                                 RecentlyFoundCard(subscription: sub)
-                                
-                                if sub.id != viewModel.recentlyFoundSubscriptions.prefix(10).last?.id {
+                                if sub.id != viewModel.recentlyFoundSubscriptions.last?.id {
                                     Divider()
                                         .background(Color.neutral300Border)
                                 }
@@ -103,10 +98,26 @@ struct GmailSyncProgressView: View {
         .navigationBarBackButtonHidden()
         .background(Color.neutralBg100)
         .onAppear {
-            viewModel.startPolling()
+//            viewModel.startPolling(logId: logId)
+            viewModel.recentlyFoundSubscriptions.append(RecentSubscriptionData(serviceName: "NEtflis", subject: "ksjhg", emailDate: "lkhgkdghj"))
+            viewModel.recentlyFoundSubscriptions.append(RecentSubscriptionData(serviceName: "NEtflis", subject: "ksjhg", emailDate: "lkhgkdghj"))
+            viewModel.recentlyFoundSubscriptions.append(RecentSubscriptionData(serviceName: "NEtflis", subject: "ksjhg", emailDate: "lkhgkdghj"))
         }
         .onDisappear {
             viewModel.stopPolling()
+        }
+        .sheet(isPresented: $viewModel.showErrorPopup, onDismiss: {
+            dismiss()
+        }) {
+            UploadErrorImageSheet(
+                isImage     : false,
+                onDelegate  : {
+                },
+                onDismiss   : {
+                }
+            )
+            .presentationDragIndicator(.hidden)
+            .presentationDetents([.height(500)])
         }
     }
 }
@@ -123,31 +134,35 @@ struct StatCard: View {
                 .foregroundColor(Color.neutral500)
             
             Text(value)
-                .font(.appBold(24))
-                .foregroundColor(Color.blueMain700)
+                .font(.appBold(16))
+                .foregroundColor(Color.navyBlueCTA700)
         }
         .padding()
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(Color.white)
-        .cornerRadius(12)
-        .shadow(color: Color.black.opacity(0.05), radius: 5, x: 0, y: 2)
+        .cornerRadius(7)
+        .overlay(
+            RoundedRectangle(cornerRadius: 7)
+                .stroke(Color.neutral300Border, lineWidth: 1)
+        )
+//        .shadow(color: Color.black.opacity(0.05), radius: 5, x: 0, y: 2)
     }
 }
 
 struct RecentlyFoundCard: View {
-    let subscription: SubscriptionData
+    let subscription: RecentSubscriptionData
     
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
             Text(subscription.serviceName ?? "Unknown Service")
-                .font(.appSemiBold(18))
+                .font(.appBold(16))
                 .foregroundColor(Color.blueMain700)
             
             Text("Found in : \(subscription.subject ?? "Email")")
                 .font(.appRegular(14))
                 .foregroundColor(Color.neutralMain700)
             
-            Text("Date : \(subscription.date ?? "Unknown Date")")
+            Text("Date : \(subscription.emailDate ?? "Unknown Date")")
                 .font(.appRegular(12))
                 .foregroundColor(Color.neutral500)
         }
@@ -158,5 +173,5 @@ struct RecentlyFoundCard: View {
 }
 
 #Preview {
-//    GmailSyncProgressView(emailData: ListConnectedEmailsData(id: "1", email: "test@gmail.com", type: 1, lastSyncDate: nil))
+    EmailSyncProgressView(logId: "")
 }
