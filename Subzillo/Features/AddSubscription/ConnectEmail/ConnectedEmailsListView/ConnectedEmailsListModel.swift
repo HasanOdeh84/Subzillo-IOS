@@ -112,7 +112,8 @@ struct SyncStatusResponse: Codable {
 
 struct SyncStatusData: Codable {
     let syncStatus          : String? //syncStatus -> pending, in_progress, completed, failed
-    let emailsScanned       : Int?
+    let emailsFiltered      : Int?
+    let emailsAnalyzed      : Int?
     let subscriptionsFound  : Int?
     let latestService       : String?
     let integrationId       : String?

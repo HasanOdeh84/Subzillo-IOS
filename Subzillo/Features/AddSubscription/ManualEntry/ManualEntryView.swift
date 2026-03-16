@@ -100,6 +100,7 @@ struct ManualEntryView: View {
     @State var isCurrency                       = false
     @State var isCurrencyUpdate                 = false
     var isFromEmail                             : Bool = false
+    var fromEmailSync                           : Bool = false
     
     //MARK: - body
     var body: some View {
@@ -876,24 +877,24 @@ struct ManualEntryView: View {
                     //                    AppIntentRouter.shared.navigate(to: .subscriptionsListView)
                     //                }
                     if isFromListEdit{
-                        dismiss()
+                        goBack()
                     }else{
                         if familyMemberId == ""{
                             AppIntentRouter.shared.navigate(to: .subscriptionsListView())
                         }else{
-                            dismiss()
+                            goBack()
                         }
                     }
                 }
             }
             else{
                 if isFromListEdit{
-                    dismiss()
+                    goBack()
                 }else{
                     if familyMemberId == ""{
                         AppIntentRouter.shared.navigate(to: .subscriptionsListView())
                     }else{
-                        dismiss()
+                        goBack()
                     }
                 }
             }
@@ -1195,7 +1196,11 @@ struct ManualEntryView: View {
     
     //MARK: - Button actions
     private func goBack() {
-        dismiss()
+        if fromEmailSync{
+            AppIntentRouter.shared.pop(count: 2)
+        }else{
+            dismiss()
+        }
     }
     
     private func infoButtonAction() {

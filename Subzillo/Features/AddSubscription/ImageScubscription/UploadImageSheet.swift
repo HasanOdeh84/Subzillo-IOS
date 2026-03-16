@@ -333,9 +333,10 @@ struct UploadImageSheet: View {
 struct UploadErrorImageSheet: View {
     
     //MARK: - Properties
-    var isImage     = true
-    var onDelegate  : (() -> Void)?
-    var onDismiss   : (() -> Void)?
+    var isImage         = true
+    var fromEmailSync   : Bool = false
+    var onDelegate      : (() -> Void)?
+    var onDismiss       : (() -> Void)?
     @Environment(\.dismiss) private var dismiss
     
     //MARK: - body
@@ -416,10 +417,15 @@ struct UploadErrorImageSheet: View {
     
     //MARK: - Button actions
     private func onManualAction() {
-        onDelegate?()
-        dismiss()
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-            AppIntentRouter.shared.navigate(to: .manualEntry(isFromEdit: false))
+        if fromEmailSync{
+            onDelegate?()
+            dismiss()
+        }else{
+            onDelegate?()
+            dismiss()
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                AppIntentRouter.shared.navigate(to: .manualEntry(isFromEdit: false))
+            }
         }
     }
     

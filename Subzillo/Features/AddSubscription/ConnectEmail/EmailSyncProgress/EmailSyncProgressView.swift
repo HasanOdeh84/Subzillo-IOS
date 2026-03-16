@@ -13,6 +13,7 @@ struct EmailSyncProgressView: View {
     @StateObject var viewModel  = EmailSyncProgressViewModel()
     @State var logId            : String
     @Environment(\.dismiss) private var dismiss
+    @State private var isNavigatingToManualEntry = false
     
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -64,11 +65,20 @@ struct EmailSyncProgressView: View {
                 VStack(spacing: 0) {
                     if viewModel.recentlyFoundSubscriptions.isEmpty {
                         VStack(spacing: 10) {
-                            ProgressView()
-                                .scaleEffect(1.5)
-                            Text("Searching...")
-                                .font(.appRegular(16))
-                                .foregroundColor(.neutral500)
+//                            if viewModel.syncStatusData?.syncStatus == "in_progress" ||  viewModel.syncStatusData?.syncStatus == "pending"{
+//                                ProgressView()
+//                                    .scaleEffect(1.5)
+//                                Text("Searching...")
+//                                    .font(.appRegular(16))
+//                                    .foregroundColor(.neutral500)
+//                            }
+                            if viewModel.syncStatusData?.syncStatus != "completed"{
+                                ProgressView()
+                                    .scaleEffect(1.5)
+                                Text("Scanning...")
+                                    .font(.appRegular(16))
+                                    .foregroundColor(.neutral500)
+                            }
                         }
                         .padding(.top, 60)
                         .frame(maxWidth: .infinity)
@@ -98,22 +108,27 @@ struct EmailSyncProgressView: View {
         .navigationBarBackButtonHidden()
         .background(Color.neutralBg100)
         .onAppear {
-//            viewModel.startPolling(logId: logId)
-            viewModel.recentlyFoundSubscriptions.append(RecentSubscriptionData(serviceName: "NEtflis", subject: "ksjhg", emailDate: "lkhgkdghj"))
-            viewModel.recentlyFoundSubscriptions.append(RecentSubscriptionData(serviceName: "NEtflis", subject: "ksjhg", emailDate: "lkhgkdghj"))
-            viewModel.recentlyFoundSubscriptions.append(RecentSubscriptionData(serviceName: "NEtflis", subject: "ksjhg", emailDate: "lkhgkdghj"))
+            viewModel.startPolling(logId: logId)
         }
         .onDisappear {
             viewModel.stopPolling()
         }
         .sheet(isPresented: $viewModel.showErrorPopup, onDismiss: {
-            dismiss()
+            if !isNavigatingToManualEntry {
+                dismiss()
+            }
+            isNavigatingToManualEntry = false
         }) {
             UploadErrorImageSheet(
-                isImage     : false,
-                onDelegate  : {
+                isImage         : false,
+                fromEmailSync   : true,
+                onDelegate      : {
+                    isNavigatingToManualEntry = true
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                        AppIntentRouter.shared.navigate(to: .manualEntry(isFromEdit: false, fromEmailSync: true))
+                    }
                 },
-                onDismiss   : {
+                onDismiss       : {
                 }
             )
             .presentationDragIndicator(.hidden)

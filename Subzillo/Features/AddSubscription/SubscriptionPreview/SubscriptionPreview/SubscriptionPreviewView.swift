@@ -66,6 +66,7 @@ struct SubscriptionPreviewView: View {
     @State private var deleteSheetHeight        : CGFloat = .zero
     @State private var limitExceedSheetHeight   : CGFloat = .zero
     @State var showLimitExceedPopup             : Bool = false
+    @State var fromEmailSync                    : Bool = false
     
     //MARK: - body
     var body: some View {
@@ -730,7 +731,12 @@ struct SubscriptionPreviewView: View {
     //MARK: - Button actions
     private func goBack() {
         playerManager.discardAll()
-        dismiss()
+//        if fromEmailSync{
+//            AppIntentRouter.shared.pop(count: 2)
+//        }
+//        else{
+            dismiss()
+//        }
     }
     
     private func showImage() {

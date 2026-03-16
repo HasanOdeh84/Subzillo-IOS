@@ -11,14 +11,15 @@ struct ExtractedSubscriptionsView: View {
     
     // MARK: - Properties
     @Environment(\.dismiss) private var dismiss
-    @StateObject var viewModel                  : ExtractedSubscriptionsViewModel
+    @StateObject var viewModel                  = ExtractedSubscriptionsViewModel()
     @State private var deleteSheetHeight        : CGFloat = .zero
+    @State var subscriptions                    = [SubscriptionData]()
     @State var fromEmailSyncScreen              : Bool = false
     
-    init(subscriptions: [SubscriptionData], fromEmailSyncScreen:Bool = false) {
-        _viewModel = StateObject(wrappedValue: ExtractedSubscriptionsViewModel(subscriptions: subscriptions))
-        self.fromEmailSyncScreen = fromEmailSyncScreen
-    }
+//    init(subscriptions: [SubscriptionData], fromEmailSyncScreen:Bool = false) {
+//        _viewModel = StateObject(wrappedValue: ExtractedSubscriptionsViewModel(subscriptions: subscriptions))
+//        self.fromEmailSyncScreen = fromEmailSyncScreen
+//    }
     
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -27,9 +28,10 @@ struct ExtractedSubscriptionsView: View {
             HStack(spacing: 8) {
                 Button(action: {
                     if fromEmailSyncScreen{
-                        dismiss()
+                        AppIntentRouter.shared.navigateAndReplace(to: .connectedEmailsList(isIntegrations: false))
+//                        AppIntentRouter.shared.pop(count: 2)
                     }else{
-                        AppIntentRouter.shared.pop(count: 2)
+                        dismiss()
                     }
                 }) {
                     Image("back_gray")
@@ -53,9 +55,10 @@ struct ExtractedSubscriptionsView: View {
                 
                 Button(action: {
                     if fromEmailSyncScreen{
-                        dismiss()
+                        AppIntentRouter.shared.navigateAndReplace(to: .connectedEmailsList(isIntegrations: false))
+//                        AppIntentRouter.shared.pop(count: 2)
                     }else{
-                        AppIntentRouter.shared.pop(count: 2)
+                        dismiss()
                     }
                 }) {
                     Text("Skip all")
@@ -150,6 +153,9 @@ struct ExtractedSubscriptionsView: View {
             .presentationDragIndicator(.hidden)
             .presentationDetents([.height(deleteSheetHeight)])
         }
+        .onAppear{
+            self.viewModel.subscriptions = subscriptions
+        }
     }
 }
 
@@ -199,9 +205,9 @@ struct SubscriptionRowEmail: View {
 }
 
 #Preview {
-    ExtractedSubscriptionsView(subscriptions: [
-        SubscriptionData(id: "1", serviceName: "Replit", amount: 50.20, currency: "USD", status: "Expired"),
-        SubscriptionData(id: "2", serviceName: "Replit", amount: 50.20, currency: "USD", status: "Active"),
-        SubscriptionData(id: "3", serviceName: "Replit", amount: 50.20, currency: "USD", status: "Expired")
-    ])
+//    ExtractedSubscriptionsView(subscriptions: [
+//        SubscriptionData(id: "1", serviceName: "Replit", amount: 50.20, currency: "USD", status: "Expired"),
+//        SubscriptionData(id: "2", serviceName: "Replit", amount: 50.20, currency: "USD", status: "Active"),
+//        SubscriptionData(id: "3", serviceName: "Replit", amount: 50.20, currency: "USD", status: "Expired")
+//    ])
 }

@@ -18,6 +18,7 @@ class EmailSyncProgressViewModel: ObservableObject {
     @Published var emailsScannedCount               : Int = 0
     @Published var subscriptionsFoundCount          : Int = 0
     @Published var recentlyFoundSubscriptions       : [RecentSubscriptionData] = []
+    @Published var syncStatusData                   : SyncStatusData?
     @Published var showErrorPopup                   : Bool = false
     
     init(router: AppIntentRouter = .shared) {
@@ -55,12 +56,17 @@ class EmailSyncProgressViewModel: ObservableObject {
     
     private func handleResponse(_ response: SyncStatusResponse) {
         guard let data = response.data else { return }
-        self.emailsScannedCount         = data.emailsScanned ?? 0
+        syncStatusData = data
+        self.emailsScannedCount         = data.emailsAnalyzed ?? 0
         self.subscriptionsFoundCount    = data.subscriptionsFound ?? 0
         self.recentlyFoundSubscriptions = data.recentSubscriptions ?? []
         if data.syncStatus == "completed" { //syncStatus -> pending, in_progress, completed, failed
             self.stopPolling()
             emailSubscriptionsList(input: EmailSubscriptionsListRequest(userId: Constants.getUserId(), integrationId: response.data?.integrationId ?? ""))
+        }else if data.syncStatus == "failed" {
+            self.stopPolling()
+            ToastManager.shared.showToast(message: "Email Syncing failed")
+            AppIntentRouter.shared.pop(count: 1)
         }
     }
     
@@ -69,20 +75,24 @@ class EmailSyncProgressViewModel: ObservableObject {
             .sink { [unowned self] completion in
                 if case let .failure(error) = completion {
                     self.handleError(error,endPoint: APIEndpoint.emailSubscriptionsList)
-                    self.showErrorPopup = true
+//                    self.showErrorPopup = true
+                    ToastManager.shared.showToast(message: "No Subscriptions found")
+                    AppIntentRouter.shared.pop(count: 1)
                 }
             }
         receiveValue: { response in
             PrintLogger.modelLog(response, type: .response, isInput: false)
             if response.data == nil || response.data?.subscriptions?.count == 0
             {
-                self.showErrorPopup = true
+//                self.showErrorPopup = true
+                ToastManager.shared.showToast(message: "No Subscriptions found")
+                AppIntentRouter.shared.pop(count: 1)
             }
             else{
                 NotificationCenter.default.post(name: .closeAllBottomSheets, object: nil)
                 Constants.saveDefaults(value: response.providerLogoBaseUrl, key: Constants.providerBaseUrl)
                 globalSubscriptionData = nil
-                self.router.navigate(to: .extractedSubscriptions(subscriptions: response.data?.subscriptions ?? [], fromEmailSync: true))
+                self.router.navigateAndReplace(to: .extractedSubscriptions(subscriptions: response.data?.subscriptions ?? [], fromEmailSync: true))
                 //                self.router.navigate(to: .subscriptionPreviewView(subscriptionsData: response.data?.subscriptions, content: "", isFromImage:false, isFromEmail: true, audioUrl: nil))
             }
         }

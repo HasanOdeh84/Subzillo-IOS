@@ -264,6 +264,31 @@ struct ReviewExtractedDetailsView: View {
                                                 placeholder             : "Search",
                                                 onSelect: { billing in
                         })
+//                        .overlay {
+//                            GeometryReader { geo in
+//                                Color.clear
+//                                    .preference(
+//                                        key: InnerHeightPreferenceKey.self,
+//                                        value: geo.size.height
+//                                    )
+//                            }
+//                        }
+//                        .onPreferenceChange(InnerHeightPreferenceKey.self) { height in
+//                            if height > 150 {
+//                                sheetHeight = height
+//                            }
+//                        }
+//                        .presentationDetents(
+//                            sheetHeight > UIScreen.main.bounds.height * 0.75
+//                                ? [.large]
+//                                : [.height(sheetHeight), .large]
+//                        )
+//                        .presentationDragIndicator(.hidden)
+                        .onAppear {
+                            DispatchQueue.main.async {
+                                sheetHeight = sheetHeight
+                            }
+                        }
                         .overlay {
                             GeometryReader { geo in
                                 Color.clear
@@ -278,11 +303,7 @@ struct ReviewExtractedDetailsView: View {
                                 sheetHeight = height
                             }
                         }
-                        .presentationDetents(
-                            sheetHeight > UIScreen.main.bounds.height * 0.75
-                                ? [.large]
-                                : [.height(sheetHeight), .large]
-                        )
+                        .presentationDetents([.height(sheetHeight)])
                         .presentationDragIndicator(.hidden)
                     }
                 }

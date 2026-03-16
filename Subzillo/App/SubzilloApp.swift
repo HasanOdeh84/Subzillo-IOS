@@ -353,6 +353,14 @@ struct RootView: View {
             path.append(new)
             router.navigatingRoute = nil
         }
+        .onChange(of: router.replaceTopRoute) { new in
+            guard let new = new else { return }
+            if !path.isEmpty {
+                path.removeLast()
+            }
+            path.append(new)
+            router.replaceTopRoute = nil
+        }
         .onChange(of: router.resetStackTo) { newStack in
             guard let newStack = newStack else { return }
             let currentTop = path.last
@@ -461,12 +469,12 @@ struct RootView: View {
             SuccessView(isOtp:isOtp ?? false,isMobile:isMobile)
         case .welcome:
             WelcomeHomeView()
-        case .manualEntry(let isFromEdit, let isFromListEdit, let isRenew, let subscriptionId, let familyMemberId, let isFromEmail):
-            ManualEntryView(isFromEdit: isFromEdit, isFromListEdit: isFromListEdit, isRenew: isRenew, subscriptionId: subscriptionId, familyMemberId: familyMemberId, isFromEmail: isFromEmail)
+        case .manualEntry(let isFromEdit, let isFromListEdit, let isRenew, let subscriptionId, let familyMemberId, let isFromEmail, let fromEmailSync):
+            ManualEntryView(isFromEdit: isFromEdit, isFromListEdit: isFromListEdit, isRenew: isRenew, subscriptionId: subscriptionId, familyMemberId: familyMemberId, isFromEmail: isFromEmail, fromEmailSync: fromEmailSync)
         case .voiceCommandView:
             VoiceCommandView()
-        case .subscriptionPreviewView(let subscriptionsData, let content, let isFromImage, let isFromEmail, let audioUrl):
-            SubscriptionPreviewView(isFromImage:isFromImage, isFromEmail: isFromEmail, subscriptionsData: subscriptionsData, content: content, audioURL: audioUrl)
+        case .subscriptionPreviewView(let subscriptionsData, let content, let isFromImage, let isFromEmail, let audioUrl, let fromEmailSync):
+            SubscriptionPreviewView(isFromImage:isFromImage, isFromEmail: isFromEmail, subscriptionsData: subscriptionsData, content: content, audioURL: audioUrl, fromEmailSync: fromEmailSync)
         case .subscriptionMatchView(let subscriptionData, let fromList, let fromPush, let subscriptionId):
             SubscriptionMatchView(subscriptionData: subscriptionData, subscriptionId: subscriptionId, fromList: fromList, fromPush: fromPush)
         case .pasteTextView:
@@ -510,6 +518,7 @@ final class AppIntentRouter: ObservableObject {
     private init() {}
     
     @Published var navigatingRoute    : NavigationRoute? = nil
+    @Published var replaceTopRoute    : NavigationRoute? = nil
     @Published var popCount           : Int = 0
     @Published var pendingNotification: NavigationRoute? = nil
     @Published var resetStackTo       : [NavigationRoute]? = nil
@@ -520,6 +529,10 @@ final class AppIntentRouter: ObservableObject {
 extension AppIntentRouter {
     func navigate(to route: NavigationRoute) {
         navigatingRoute = route
+    }
+    
+    func navigateAndReplace(to route: NavigationRoute) {
+        replaceTopRoute = route
     }
     
     func pop(count: Int = 1) {

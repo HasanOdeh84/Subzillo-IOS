@@ -25,9 +25,9 @@ enum NavigationRoute: Hashable{
     case chat
     case appearance
     case notifications
-    case manualEntry(isFromEdit:Bool = false, isFromListEdit: Bool = false, isRenew: Bool = false, subscriptionId:String = "", familyMemberId:String = "", isFromEmail: Bool = false)
+    case manualEntry(isFromEdit:Bool = false, isFromListEdit: Bool = false, isRenew: Bool = false, subscriptionId:String = "", familyMemberId:String = "", isFromEmail: Bool = false, fromEmailSync:Bool = false)
     case voiceCommandView
-    case subscriptionPreviewView(subscriptionsData:[SubscriptionData]?, content: String, isFromImage:Bool, isFromEmail: Bool = false, audioUrl:URL?)
+    case subscriptionPreviewView(subscriptionsData:[SubscriptionData]?, content: String, isFromImage:Bool, isFromEmail: Bool = false, audioUrl:URL?, fromEmailSync:Bool = false)
     case subscriptionMatchView(subscriptionData:SubscriptionData = SubscriptionData(), fromList:Bool = false, fromPush:Bool = false, subscriptionId:String = "")
     case pasteTextView
     case duplicateSubscriptionsView(duplicateSubsList: [DuplicateDataInfo], fromFamily:Bool = false, isFromEmail: Bool = false)
@@ -50,7 +50,7 @@ enum NavigationRoute: Hashable{
 extension NavigationRoute {
     var subId: String? {
         switch self {
-        case .manualEntry(_, _, _, let id, _, _):
+        case .manualEntry(_, _, _, let id, _, _, _):
             return id
         case .subscriptionMatchView(_, _, _, let id):
             return id

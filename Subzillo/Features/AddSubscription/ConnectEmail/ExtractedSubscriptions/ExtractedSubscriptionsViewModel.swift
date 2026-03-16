@@ -23,8 +23,9 @@ class ExtractedSubscriptionsViewModel: ObservableObject {
         !selectedIds.isEmpty
     }
     
-    init(subscriptions: [SubscriptionData], router: AppIntentRouter = .shared) {
-        self.subscriptions = subscriptions
+    init(router: AppIntentRouter = .shared) {
+//    init(subscriptions: [SubscriptionData], router: AppIntentRouter = .shared) {
+//        self.subscriptions = subscriptions
         self.router = router
     }
     
@@ -55,21 +56,25 @@ class ExtractedSubscriptionsViewModel: ObservableObject {
             return false
         }
         
-        router.navigate(to: .subscriptionPreviewView(
+//        router.navigate(to: .subscriptionPreviewView(
+        router.navigateAndReplace(to: .subscriptionPreviewView(
             subscriptionsData   : selectedSubs,
             content             : "",
             isFromImage         : false,
             isFromEmail         : true,
-            audioUrl            : nil
+            audioUrl            : nil,
+            fromEmailSync       : true
         ))
     }
     
     func checkIfListIsEmpty() {
         if subscriptions.isEmpty {
             if fromEmailSyncScreen{
-                AppIntentRouter.shared.pop(count: 1)
+                AppIntentRouter.shared.navigateAndReplace(to: .connectedEmailsList(isIntegrations: false))
+//                AppIntentRouter.shared.pop(count: 2)
             }else{
-                AppIntentRouter.shared.pop(count: 2)
+                AppIntentRouter.shared.navigateAndReplace(to: .connectedEmailsList(isIntegrations: false))
+//                AppIntentRouter.shared.pop(count: 1)
             }
         }
     }
