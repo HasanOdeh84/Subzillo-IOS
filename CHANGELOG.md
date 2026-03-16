@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.2.3(40)] (Alpha-QA) - 2026-03-16
+
+### Added
+- Build shared with QA server to internal testers.
+- Added email sync progress and extracted subsriptions list screens as per client request.
+
 ## [1.2.2(39)] (Alpha&Beta-Stage) - 2026-03-06
 
 ### Delivered
