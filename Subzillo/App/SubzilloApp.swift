@@ -442,8 +442,8 @@ struct RootView: View {
             Text("Test")
         case .bankStatement:
             Text("Test")
-        case .chat:
-            Text("Test")
+        case .smartAssistantAI:
+            SmartAIAssistantView()
         case .appearance:
             Text("Test")
         case .notifications:

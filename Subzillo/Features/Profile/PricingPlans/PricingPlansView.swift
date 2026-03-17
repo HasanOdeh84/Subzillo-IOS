@@ -407,14 +407,15 @@ struct PricingPlansView: View {
         let platform = viewModel.pricingPlanResponse?.data?.subscribedPlatformType ?? 2
         if platform == 1 { // Android
             platformAlertMessage = "Dear User,We noticed that you initially registered your account and subscribed through our Android application, and you are now trying to upgrade your plan via the iOS application. avoid duplicate billing, please cancel your existing subscription on the Android application before proceeding with the upgrade here.You can find the “Cancel Subscription” option under play store.If this step is skipped, both subscriptions (Android and iOS) will remain active, and charges will be deducted from both platforms automatically during the renewal process.Thank you for your understanding and cooperation."
-            AlertManager.shared.showAlert(title: "Subscription Notice",
-                                          message: platformAlertMessage,
-                                          okText: "Continue",
-                                          cancelText: "Cancel",
-                                          isDestructive: true,
-                                          okAction: {
-                purchaseInternal(product: product, planId: planId)
-            })
+            AlertManager.shared.showAlert(title: "Subscription Notice", message: platformAlertMessage)
+//            AlertManager.shared.showAlert(title: "Subscription Notice",
+//                                          message: platformAlertMessage,
+//                                          okText: "Continue",
+//                                          cancelText: "Cancel",
+//                                          isDestructive: true,
+//                                          okAction: {
+//                purchaseInternal(product: product, planId: planId)
+//            })
         } else if platform == 3 { // Web
             platformAlertMessage = "Dear User, We noticed that you initially registered your account and subscribed through our web application, and you are now trying to upgrade your plan via the iOS application. To avoid duplicate billing, please cancel your existing subscription on the web application before proceeding with the upgrade here. You can find the “Cancel Subscription” option under Account Settings on the web platform. If this step is skipped, both subscriptions (web and mobile) will remain active, and charges will be deducted from both platforms automatically during the renewal process.Thank you for your understanding and cooperation."
             AlertManager.shared.showAlert(title: "Subscription Notice", message: platformAlertMessage)

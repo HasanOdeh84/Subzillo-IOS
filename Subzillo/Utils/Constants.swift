@@ -24,8 +24,8 @@ struct Constants{
     }
     
     struct FeatureConfig {
-        static let currentPhase: AppPhase = .s3
-        static let featurePhase: FeaturePhase = .remaining
+        static let currentPhase: AppPhase = .s5
+        static let featurePhase: FeaturePhase = .all
         
         static var isS4Enabled: Bool {
             return currentPhase == .s4 || currentPhase == .s5
@@ -94,7 +94,8 @@ struct Constants{
     
     //    static let appGroupID                           = "group.com.krify.Subzillo" //krify
     static let appGroupID                           = "group.com.subzillo.app" //client
-    static let chatbotUrl                           = "https://carmelia-terminatory-palely.ngrok-free.dev"
+//    static let chatbotUrl                           = "https://carmelia-terminatory-palely.ngrok-free.dev"
+    static let chatbotUrl                           = "http://10.1.10.77:5173/public-chat"
     static let domain                               = "https://api.subzillo.com"
     
     let regionCode      = Locale.current.region?.identifier ?? "US"

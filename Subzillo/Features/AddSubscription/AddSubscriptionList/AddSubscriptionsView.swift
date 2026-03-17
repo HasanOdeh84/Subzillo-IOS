@@ -120,6 +120,7 @@ struct AddSubscriptionsView: View {
     }
     private func clickOnSmartAssistant() {
         Constants.FeatureConfig.performS5Action {
+            AppIntentRouter.shared.navigate(to: .smartAssistantAI)
         }
     }
     private func clickOnAddByVoice() {

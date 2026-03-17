@@ -105,7 +105,8 @@ struct CurvedTabBar: View {
                 
                 TabBarItem(label: "Smart AI", iconName: selectedTab == .smartAI ? "smartAI-tabSelected" : "smartAI-tab", action: {
                     Constants.FeatureConfig.performS5Action {
-                        selectedTab = .smartAI
+                        AppIntentRouter.shared.navigate(to: .smartAssistantAI)
+//                        selectedTab = .smartAI
                     }
                 }, selectedTab: $selectedTab, tab: .smartAI)
                 TabBarItem(label: "My Profile", iconName: selectedTab == .profile ? "profile-tabSelected" : "profile-tab", action: {

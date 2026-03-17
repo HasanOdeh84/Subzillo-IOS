@@ -22,7 +22,7 @@ enum NavigationRoute: Hashable{
     case home
     case emailIntegration
     case bankStatement
-    case chat
+    case smartAssistantAI
     case appearance
     case notifications
     case manualEntry(isFromEdit:Bool = false, isFromListEdit: Bool = false, isRenew: Bool = false, subscriptionId:String = "", familyMemberId:String = "", isFromEmail: Bool = false, fromEmailSync:Bool = false)

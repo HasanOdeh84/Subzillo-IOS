@@ -447,9 +447,9 @@
 				INFOPLIST_KEY_CFBundleDisplayName = Subzillo;
 				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 				INFOPLIST_KEY_LSSupportsOpeningDocumentsInPlace = YES;
-				INFOPLIST_KEY_NSCameraUsageDescription = "This app requires access to your camera to let you capture photos or documents for your profile and uploads.";
-				INFOPLIST_KEY_NSMicrophoneUsageDescription = "We need access to the microphone to record your voice to add subscription.";
-				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "This app requires access to your photo library so you can select and upload existing images from your device.";
+				INFOPLIST_KEY_NSCameraUsageDescription = "This app requires access to your camera to let you capture photos or documents for your profile and for adding subscriptions and to upload images to chatbot.";
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "We need access to the microphone to record your voice to add subscription and used to send voice messages to chatbot.";
+				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "This app requires access to your photo library so you can select and upload existing images from your device and used to select images for chatbot.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -492,9 +492,9 @@
 				INFOPLIST_KEY_CFBundleDisplayName = Subzillo;
 				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 				INFOPLIST_KEY_LSSupportsOpeningDocumentsInPlace = YES;
-				INFOPLIST_KEY_NSCameraUsageDescription = "This app requires access to your camera to let you capture photos or documents for your profile and uploads.";
-				INFOPLIST_KEY_NSMicrophoneUsageDescription = "We need access to the microphone to record your voice to add subscription.";
-				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "This app requires access to your photo library so you can select and upload existing images from your device.";
+				INFOPLIST_KEY_NSCameraUsageDescription = "This app requires access to your camera to let you capture photos or documents for your profile and for adding subscriptions and to upload images to chatbot.";
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "We need access to the microphone to record your voice to add subscription and used to send voice messages to chatbot.";
+				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "This app requires access to your photo library so you can select and upload existing images from your device and used to select images for chatbot.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;

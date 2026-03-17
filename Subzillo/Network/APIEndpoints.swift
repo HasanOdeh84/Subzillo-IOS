@@ -9,7 +9,7 @@ enum urlType:Int{
     case prod   = 3
 }
 
-let Environment = urlType.stage
+let Environment = urlType.dev
 var baseurl: String {
     switch Environment {
     case .dev:
@@ -106,5 +106,11 @@ enum APIEndpoint: String {
 var authKey: String {
     get {
         return "Bearer \(KeychainHelperApp.read(account: Constants.authKey) ?? "")"
+    }
+}
+
+var chatBotAuthKey: String {
+    get {
+        return "\(KeychainHelperApp.read(account: Constants.authKey) ?? "")"
     }
 }
