@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.2.4(41)] (Beta-Stage) - 2026-03-17
+
+### Delivered
+- Build shared with Stage server to client.
+- Added Email sync progress and extracted subsriptions list screens.
+
 ## [1.2.3(40)] (Alpha-QA) - 2026-03-16
 
 ### Added
