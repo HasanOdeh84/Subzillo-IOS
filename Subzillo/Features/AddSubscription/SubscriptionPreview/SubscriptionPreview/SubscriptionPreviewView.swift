@@ -210,7 +210,7 @@ struct SubscriptionPreviewView: View {
                                 
                                 //MARK: Amount
                                 SubscriptionDetailsItem(title       : "Amount",
-                                                        value       : "\(subscriptionData?.currencySymbol ?? "")\(subscriptionData?.amount ?? 0.0)",
+                                                        value       : "\(subscriptionData?.currencySymbol ?? Constants.shared.currencySymbol)\(subscriptionData?.amount ?? 0.0)",
                                                         confidence  : subscriptionData?.amountConfidence ?? 0.0)
                                 .onTapGesture {
                                     DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
@@ -495,8 +495,8 @@ struct SubscriptionPreviewView: View {
             if subscriptionData?.serviceName ?? "" != ""{
                 fetchProviderDataApi()
             }
-            commonApiVM.getUserInfo(input: getUserInfoRequest(userId: Constants.getUserId()))
             if Constants.FeatureConfig.currentPhase == .s4 {
+                commonApiVM.getUserInfo(input: getUserInfoRequest(userId: Constants.getUserId()))
                 if let remainingLimit = commonApiVM.userInfoResponse?.remainingSubscriptionLimit,
                    remainingLimit < numberOfSubscriptions {
                     showLimitExceedPopup = true
@@ -766,6 +766,9 @@ struct SubscriptionPreviewView: View {
     
     private func onNextAction() {
         playerManager.pausePlayback()
+//        if subscriptionData?.currencySymbol == nil{
+//            subscriptionData?.currencySymbol = Constants.shared.currencySymbol
+//        }
         if let errorMessage = ManualEntryValidations.shared.updateManualEntry(input: subscriptionData!) {
             ToastManager.shared.showToast(message: errorMessage,style:ToastStyle.error)
         }

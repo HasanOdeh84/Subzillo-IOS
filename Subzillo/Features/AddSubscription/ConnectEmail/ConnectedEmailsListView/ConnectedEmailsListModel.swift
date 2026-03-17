@@ -120,14 +120,25 @@ struct SyncStatusData: Codable {
     let recentSubscriptions : [RecentSubscriptionData]?
 }
 
-struct RecentSubscriptionData : Codable, Identifiable, Hashable {
-    var id                  : String? = UUID().uuidString
-    let serviceName         : String?
-    let subject             : String?
-    let emailDate           : String?
-    
+//struct RecentSubscriptionData : Codable, Identifiable, Hashable {
+//    var id                  : String? = UUID().uuidString
+//    let serviceName         : String?
+//    let subject             : String?
+//    let emailDate           : String?
+//    
+//    enum CodingKeys: String, CodingKey {
+//        case id = "_id"
+//        case serviceName, subject, emailDate
+//    }
+//}
+
+struct RecentSubscriptionData: Codable, Identifiable, Hashable {
+    let id          = UUID()
+    let serviceName : String?
+    let subject     : String?
+    let emailDate   : String?
+
     enum CodingKeys: String, CodingKey {
-        case id = "_id"
         case serviceName, subject, emailDate
     }
 }

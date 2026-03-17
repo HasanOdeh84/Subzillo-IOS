@@ -15,7 +15,7 @@ struct ExtractedSubscriptionsView: View {
     @State private var deleteSheetHeight        : CGFloat = .zero
     @State var subscriptions                    = [SubscriptionData]()
     @State var fromEmailSyncScreen              : Bool = false
-    
+
 //    init(subscriptions: [SubscriptionData], fromEmailSyncScreen:Bool = false) {
 //        _viewModel = StateObject(wrappedValue: ExtractedSubscriptionsViewModel(subscriptions: subscriptions))
 //        self.fromEmailSyncScreen = fromEmailSyncScreen
@@ -27,12 +27,7 @@ struct ExtractedSubscriptionsView: View {
             // MARK: - Header
             HStack(spacing: 8) {
                 Button(action: {
-                    if fromEmailSyncScreen{
-                        AppIntentRouter.shared.navigateAndReplace(to: .connectedEmailsList(isIntegrations: false))
-//                        AppIntentRouter.shared.pop(count: 2)
-                    }else{
-                        dismiss()
-                    }
+                    dismiss()
                 }) {
                     Image("back_gray")
                 }
@@ -54,12 +49,7 @@ struct ExtractedSubscriptionsView: View {
                 Spacer()
                 
                 Button(action: {
-                    if fromEmailSyncScreen{
-                        AppIntentRouter.shared.navigateAndReplace(to: .connectedEmailsList(isIntegrations: false))
-//                        AppIntentRouter.shared.pop(count: 2)
-                    }else{
-                        dismiss()
-                    }
+                    dismiss()
                 }) {
                     Text("Skip all")
                         .font(.appBold(16))
@@ -89,6 +79,7 @@ struct ExtractedSubscriptionsView: View {
                         .stroke(Color.neutral300Border, lineWidth: 1)
                 )
                 .padding(.top, 12)
+                .padding(.horizontal, 2)
             }
             .padding(.top, 10)
             
@@ -180,8 +171,8 @@ struct SubscriptionRowEmail: View {
                 Text(subscription.serviceName ?? "Unknown")
                     .font(.appRegular(14))
                     .foregroundColor(Color.neutralMain700)
-                
-                if subscription.status?.lowercased() == "expired" {
+                let status = Constants.shared.isSubscriptionExpired(nextPaymentDate: subscription.nextPaymentDate ?? "")
+                if status{
                     Text("Expired")
                         .font(.appBold(14))
                         .foregroundColor(.disCardRed)
@@ -191,7 +182,7 @@ struct SubscriptionRowEmail: View {
             Spacer()
             
             // Amount and Currency
-            Text("\(subscription.currency ?? "USD") \(String(format: "%.2f", subscription.amount ?? 0.0))")
+            Text("\(subscription.currencySymbol ?? Constants.shared.currencySymbol) \(String(format: "%.2f", subscription.amount ?? 0.0))")
                 .font(.appRegular(14))
                 .foregroundColor(Color.neutralMain700)
         }

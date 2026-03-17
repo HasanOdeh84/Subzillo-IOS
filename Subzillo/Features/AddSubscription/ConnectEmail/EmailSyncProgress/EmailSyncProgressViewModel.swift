@@ -62,11 +62,21 @@ class EmailSyncProgressViewModel: ObservableObject {
         self.recentlyFoundSubscriptions = data.recentSubscriptions ?? []
         if data.syncStatus == "completed" { //syncStatus -> pending, in_progress, completed, failed
             self.stopPolling()
-            emailSubscriptionsList(input: EmailSubscriptionsListRequest(userId: Constants.getUserId(), integrationId: response.data?.integrationId ?? ""))
+            if data.subscriptionsFound == 0{
+                self.stopPolling()
+                ToastManager.shared.showToast(message: "No Subscriptions found", style: .error)
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                    AppIntentRouter.shared.pop(count: 1)
+                }
+            }else{
+                emailSubscriptionsList(input: EmailSubscriptionsListRequest(userId: Constants.getUserId(), integrationId: response.data?.integrationId ?? ""))
+            }
         }else if data.syncStatus == "failed" {
             self.stopPolling()
-            ToastManager.shared.showToast(message: "Email Syncing failed")
-            AppIntentRouter.shared.pop(count: 1)
+            ToastManager.shared.showToast(message: "Email Syncing failed", style: .error)
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                AppIntentRouter.shared.pop(count: 1)
+            }
         }
     }
     
@@ -76,8 +86,10 @@ class EmailSyncProgressViewModel: ObservableObject {
                 if case let .failure(error) = completion {
                     self.handleError(error,endPoint: APIEndpoint.emailSubscriptionsList)
 //                    self.showErrorPopup = true
-                    ToastManager.shared.showToast(message: "No Subscriptions found")
-                    AppIntentRouter.shared.pop(count: 1)
+                    ToastManager.shared.showToast(message: "No Subscriptions found", style: .error)
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                        AppIntentRouter.shared.pop(count: 1)
+                    }
                 }
             }
         receiveValue: { response in
@@ -85,8 +97,10 @@ class EmailSyncProgressViewModel: ObservableObject {
             if response.data == nil || response.data?.subscriptions?.count == 0
             {
 //                self.showErrorPopup = true
-                ToastManager.shared.showToast(message: "No Subscriptions found")
-                AppIntentRouter.shared.pop(count: 1)
+                ToastManager.shared.showToast(message: "No Subscriptions found", style: .error)
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                    AppIntentRouter.shared.pop(count: 1)
+                }
             }
             else{
                 NotificationCenter.default.post(name: .closeAllBottomSheets, object: nil)

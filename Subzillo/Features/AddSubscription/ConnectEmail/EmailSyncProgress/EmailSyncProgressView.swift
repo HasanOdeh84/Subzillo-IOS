@@ -63,42 +63,43 @@ struct EmailSyncProgressView: View {
             // MARK: - Subscriptions List
             ScrollView {
                 VStack(spacing: 0) {
-                    if viewModel.recentlyFoundSubscriptions.isEmpty {
-                        VStack(spacing: 10) {
-//                            if viewModel.syncStatusData?.syncStatus == "in_progress" ||  viewModel.syncStatusData?.syncStatus == "pending"{
-//                                ProgressView()
-//                                    .scaleEffect(1.5)
-//                                Text("Searching...")
-//                                    .font(.appRegular(16))
-//                                    .foregroundColor(.neutral500)
-//                            }
-                            if viewModel.syncStatusData?.syncStatus != "completed"{
-                                ProgressView()
-                                    .scaleEffect(1.5)
-                                Text("Scanning...")
-                                    .font(.appRegular(16))
-                                    .foregroundColor(.neutral500)
-                            }
+                    VStack(spacing: 10) {
+                        if viewModel.syncStatusData?.syncStatus != "completed"{
+                            ProgressView()
+                                .scaleEffect(1.5)
+                            Text("Scanning...")
+                                .font(.appRegular(16))
+                                .foregroundColor(.neutral500)
                         }
-                        .padding(.top, 60)
-                        .frame(maxWidth: .infinity)
-                    } else {
-                        VStack(spacing: 0) {
-                            ForEach(viewModel.recentlyFoundSubscriptions, id: \.id) { sub in
-                                RecentlyFoundCard(subscription: sub)
-                                if sub.id != viewModel.recentlyFoundSubscriptions.last?.id {
-                                    Divider()
-                                        .background(Color.neutral300Border)
-                                }
-                            }
-                        }
-                        .background(Color.white)
-                        .cornerRadius(12)
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 12)
-                                .stroke(Color.neutral300Border, lineWidth: 1)
-                        )
                     }
+                    .padding(.top, 5)
+                    .padding(.bottom, 10)
+                    .frame(maxWidth: .infinity)
+                    
+                    //                    VStack(spacing: 0) {
+                    //                        ForEach(viewModel.recentlyFoundSubscriptions, id: \.id) { sub in
+                    //                            RecentlyFoundCard(subscription: sub)
+                    //                            if sub.id != viewModel.recentlyFoundSubscriptions.last?.id {
+                    //                                Divider()
+                    //                                    .background(Color.neutral300Border)
+                    //                            }
+                    //                        }
+                    //                    }
+                    VStack(spacing: 0) {
+                        ForEach(viewModel.recentlyFoundSubscriptions.indices, id: \.self) { index in
+                            RecentlyFoundCard(subscription: viewModel.recentlyFoundSubscriptions[index])
+                            if index < viewModel.recentlyFoundSubscriptions.count - 1 {
+                                Divider()
+                                    .background(Color.neutral300Border)
+                            }
+                        }
+                    }
+                    .background(Color.white)
+                    .cornerRadius(12)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 12)
+                            .stroke(Color.neutral300Border, lineWidth: 1)
+                    )
                 }
                 .padding(.horizontal)
                 .padding(.top, 12)
@@ -160,7 +161,7 @@ struct StatCard: View {
             RoundedRectangle(cornerRadius: 7)
                 .stroke(Color.neutral300Border, lineWidth: 1)
         )
-//        .shadow(color: Color.black.opacity(0.05), radius: 5, x: 0, y: 2)
+        //        .shadow(color: Color.black.opacity(0.05), radius: 5, x: 0, y: 2)
     }
 }
 

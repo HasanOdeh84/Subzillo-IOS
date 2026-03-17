@@ -43,6 +43,7 @@ struct ConnectedEmailItemView: View {
 
                 Spacer()
             }
+            .opacity(isAllSyncing ? 0.6 : 1.0)
 
             // Action Buttons
             if !isIntegrations {
@@ -52,7 +53,6 @@ struct ConnectedEmailItemView: View {
                 }
             }
         }
-        .opacity(isAllSyncing ? 0.6 : 1.0)
         .padding(.horizontal, 16)
         .padding(.vertical, 14)
         .background(Color.white)

@@ -46,9 +46,9 @@ struct ManualEntryValidations {
         guard let amount = input.amount else {
             return "Amount is required"
         }
-        if input.currency == "" {
-            return "Currency selection required"
-        }
+//        if input.currency == "" {
+//            return "Currency selection required"
+//        }
         if category.isEmpty{
             return "Please select category"
         }
@@ -78,9 +78,9 @@ struct ManualEntryValidations {
 //        guard let amount = input.amount else {
 //            return "Amount is required"
 //        }
-        if input.currency == "" {
-            return "Currency selection required"
-        }
+//        if input.currency == "" {
+//            return "Currency selection required"
+//        }
         if (input.subscriptionType == nil || input.subscriptionType ?? "" == "") {
             return "Please select plan type"
         }

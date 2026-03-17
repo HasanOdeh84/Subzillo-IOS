@@ -69,13 +69,7 @@ class ExtractedSubscriptionsViewModel: ObservableObject {
     
     func checkIfListIsEmpty() {
         if subscriptions.isEmpty {
-            if fromEmailSyncScreen{
-                AppIntentRouter.shared.navigateAndReplace(to: .connectedEmailsList(isIntegrations: false))
-//                AppIntentRouter.shared.pop(count: 2)
-            }else{
-                AppIntentRouter.shared.navigateAndReplace(to: .connectedEmailsList(isIntegrations: false))
-//                AppIntentRouter.shared.pop(count: 1)
-            }
+            AppIntentRouter.shared.pop(count: 1)
         }
     }
     
