@@ -50,13 +50,13 @@ struct ConnectEmailView: View {
                     Divider()
                         .overlay(Color.neutral300Border)
                     UploadItem(title: "Connect Outlook", subTitle: "Connect your Outlook account to access and manage your subscriptions.", image: "microsoft", imageColor: Color.systemInfo, action: outlookAction, isEmail: true)
-//                    Divider()
-//                        .overlay(Color.neutral300Border)
+                    Divider()
+                        .overlay(Color.neutral300Border)
 //                    UploadItem(title: "Connect Yahoo", subTitle: "Integrate your Yahoo Mail account to organize and manage subscriptions.", image: "yahoo", imageColor: Color.systemInfo, action: yahooAction, isEmail: true)
-//                    UploadItem(title: "Connect iCloud", subTitle: "Integrate your iCloud account to organize and manage subscriptions.", image: "yahoo", imageColor: Color.systemInfo, action: yahooAction, isEmail: true)
+                    UploadItem(title: "Connect iCloud", subTitle: "Integrate your iCloud account to organize and manage subscriptions.", image: "iCloud", imageColor: Color.systemInfo, action: iCloudAction, isEmail: true)
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
-                .frame(height: 160)//240)
+                .frame(height: 240) //160)//
                 .cornerRadius(12)
                 .overlay(
                     RoundedRectangle(cornerRadius: 12)
@@ -183,10 +183,11 @@ struct ConnectEmailView: View {
         }
     }
     
-    private func yahooAction() {
+    private func iCloudAction() {
         Constants.FeatureConfig.performS4Action {
-            connectEmailVM.oauthUrl(input: OauthUrlRequest(userId   : Constants.getUserId(),
-                                                           type     : 3))
+//            connectEmailVM.oauthUrl(input: OauthUrlRequest(userId   : Constants.getUserId(),
+//                                                           type     : 3))
+            connectEmailVM.navigate(to: .connectICloudView)
         }
     }
 }

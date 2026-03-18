@@ -186,8 +186,8 @@ struct LoginView: View {
             phoneNumber     : phone,
             countryCode     : selectedCountry?.dialCode ?? "+\(NBPhoneNumberUtil.sharedInstance().getCountryCode(forRegion: Constants.shared.regionCode))",
             deviceId        : appDelegate.deviceToken ?? ""
-//            ,
-//            referralCode    : Constants.getUserDefaultsValue(for: Constants.referrerId)
+            ,
+            referralCode    : Constants.getUserDefaultsValue(for: Constants.referrerId)
         )
         if let errorMessage = LoginSignupValidations().validateLogin(input: input) {
             ToastManager.shared.showToast(message: errorMessage.localized,style: ToastStyle.error)

@@ -16,7 +16,7 @@ enum EmailProvider: Int {
         switch self {
         case .gmail: return "google2"
         case .microsoft: return "micorsoft2"
-        case .yahoo: return "yahoo"
+        case .yahoo: return "iCloud_2"
         }
     }
 }

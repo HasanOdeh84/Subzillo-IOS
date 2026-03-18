@@ -14,6 +14,11 @@ struct Validations{
         return emailPred.evaluate(with: email)
     }
     
+    func isValidICloudEmail(_ email: String) -> Bool {
+        let regex = "^[A-Z0-9a-z._%+-]+@(?:icloud\\.com|me\\.com|mac\\.com)$"
+        return NSPredicate(format: "SELF MATCHES %@", regex).evaluate(with: email)
+    }
+    
     func isValidPassword(_ password: String) -> Bool {
         let hasUppercase = password.range(of: "[A-Z]", options: .regularExpression) != nil
         let hasNumber = password.range(of: "\\d", options: .regularExpression) != nil

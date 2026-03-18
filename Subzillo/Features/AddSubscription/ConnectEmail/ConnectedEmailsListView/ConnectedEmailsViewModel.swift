@@ -129,7 +129,7 @@ class ConnectedEmailsViewModel: ObservableObject {
     
     func deleteEmail(_ email: ListConnectedEmailsData) {
         connectedEmails.removeAll { $0.id == email.id ?? "" }
-        deleteEmailAPI(input: DeleteEmailRequest(userId         : Constants.getUserId(),
+        deleteEmailAPI(input: DeleteEmailRequest(userId            : Constants.getUserId(),
                                                  integrationId     : email.id ?? ""))
     }
     

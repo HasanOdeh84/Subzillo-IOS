@@ -509,6 +509,8 @@ struct RootView: View {
             EmailSyncProgressView(logId: logId)
         case .extractedSubscriptions(let subscriptions, let fromEmailSync):
             ExtractedSubscriptionsView(subscriptions: subscriptions, fromEmailSyncScreen: fromEmailSync)
+        case .connectICloudView:
+            ConnectICloudView()
         }
     }
 }

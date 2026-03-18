@@ -74,8 +74,8 @@ class LoginViewModel: ObservableObject {
                                                                socialId             : data.id ?? "",
                                                                deviceId             : deviceId,
                                                                fullName             : data.fullName ?? ""
-//                                                               ,
-//                                                               referralCode         : Constants.getUserDefaultsValue(for: Constants.referrerId)
+                                                               ,
+                                                               referralCode         : Constants.getUserDefaultsValue(for: Constants.referrerId)
                                                               ),
                                      fileData: [MultiPartFileInput(
                                         fieldName   : "profile",
@@ -94,8 +94,8 @@ class LoginViewModel: ObservableObject {
                                                                socialId             : data.id ?? "",
                                                                deviceId             : deviceId,
                                                                fullName             : data.fullName ?? ""
-//                                                               ,
-//                                                               referralCode         : Constants.getUserDefaultsValue(for: Constants.referrerId)
+                                                               ,
+                                                               referralCode         : Constants.getUserDefaultsValue(for: Constants.referrerId)
                                                               ),
                                      fileData: [])
             }
@@ -109,8 +109,8 @@ class LoginViewModel: ObservableObject {
                                                                socialId             : data.id ?? "",
                                                                deviceId             : deviceId,
                                                                fullName             : data.fullName ?? ""
-//                                                               ,
-//                                                               referralCode         : Constants.getUserDefaultsValue(for: Constants.referrerId)
+                                                               ,
+                                                               referralCode         : Constants.getUserDefaultsValue(for: Constants.referrerId)
                                                               ),
                                      fileData: [])
             }

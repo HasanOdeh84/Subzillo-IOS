@@ -161,3 +161,58 @@ struct InfoVoiceAlertSheet: View {
         }
     }
 }
+
+struct SubscriptionAlertSheet: View {
+    
+    //MARK: - Properties
+    var onDelegate: (() -> Void)?
+    @Environment(\.dismiss) private var dismiss
+    var title                               : String?
+    var subTitle                            : String?
+    var buttonIcon                          : String?
+    var buttonTitle                         : String?
+    var titleFont                           : Font? = .appRegular(18)
+    var isBtn                               : Bool = true
+    
+    //MARK: - body
+    var body: some View {
+        VStack(alignment: .center, spacing: 24) {
+            Capsule()
+                .fill(Color.grayCapsule)
+                .frame(width: 150, height: 5)
+                .padding(.top,24)
+            
+            VStack(alignment: .center, spacing: 8) {
+                Text(LocalizedStringKey(title ?? ""))
+                    .font(.appSemiBold(24))
+                    .foregroundStyle(.neutralMain700)
+                    .multilineTextAlignment(.center)
+                    .fixedSize(horizontal: false, vertical: true)
+                
+                Text(LocalizedStringKey(subTitle ?? ""))
+                    .font(.appRegular(18))
+                    .foregroundStyle(.underlineGray)
+                    .multilineTextAlignment(.center)
+                    .lineSpacing(4)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            
+            CustomButton(title: buttonTitle ?? "", height:50, action: {
+                onDelegate?()
+                dismiss()
+            })
+            Spacer()
+        }
+        .padding(.horizontal, 20)
+        .fixedSize(horizontal: false, vertical: true)
+        .overlay {
+            GeometryReader { geo in
+                Color.clear
+                    .preference(
+                        key: InnerHeightPreferenceKey.self,
+                        value: geo.size.height
+                    )
+            }
+        }
+    }
+}

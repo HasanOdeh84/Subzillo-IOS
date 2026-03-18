@@ -101,3 +101,39 @@ struct ReusableTextField2: View {
         }
     }
 }
+
+struct iCloudReusableTextField: View {
+    
+    //MARK: - Properties
+    var placeholder     : String
+    @Binding var text   : String
+    var isEmail         : Bool = false
+    var header          : LocalizedStringKey?
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            if let header = header {
+                Text(header)
+                    .font(.appRegular(14))
+                    .foregroundColor(Color.neutralMain700)
+            }
+            HStack{
+                SecureField(LocalizedStringKey(placeholder), text: $text)
+                    .keyboardType(.default)
+                    .padding(6)
+                    .disableAutocorrection(true)
+                    .autocapitalization(.none)
+//                    .font(.appRegular(14))
+//                    .foregroundColor(.neutral2500)
+            }
+            .padding(16)
+            .frame(height: 52)
+            .background(.whiteNeutralCardBG)
+            .cornerRadius(12)
+            .overlay(
+                RoundedRectangle(cornerRadius: 12)
+                    .stroke(Color.neutral2200, lineWidth: 1)
+            )
+        }
+    }
+}

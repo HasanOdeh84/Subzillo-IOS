@@ -290,6 +290,7 @@ struct HomeView: View {
             }
             homeVM.home(input: HomeRequest(userId: Constants.getUserId()))
             homeYearlyGraphApi()
+            commonApiVM.getUserInfo(input: getUserInfoRequest(userId: Constants.getUserId()))
 //            commonApiVM.unreadNotificationCount(input: UnreadNotificationCountRequest(userId: Constants.getUserId()))
         }
         .onChange(of: homeVM.homeResponse){ _ in updateHomeResponse() }

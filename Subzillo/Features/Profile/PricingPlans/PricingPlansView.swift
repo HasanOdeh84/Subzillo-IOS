@@ -48,6 +48,7 @@ struct PricingPlansView: View {
     @State private var showPlatformAlert        : Bool = false
     @State private var platformAlertMessage     : String = ""
     @State private var pendingProduct           : (Product, String)?
+    @State private var platformSheetHeight      : CGFloat = .zero
     
     //MARK: - Body
     var body: some View {
@@ -182,19 +183,23 @@ struct PricingPlansView: View {
                 viewModel.listPricingPlans(type: selectedSegment == .first ? 1 : 2)
             }
         }
-        //        .alert(isPresented: $showPlatformAlert) {
-        //            Alert(
-        //                title           : Text("Subscription Notice"),
-        //                message         : Text(platformAlertMessage),
-        //                primaryButton   : .default(Text("Ok")) {
-        ////                    if let (product, planId) = pendingProduct {
-        ////                        purchaseInternal(product: product, planId: planId)
-        ////                    }
-        //                }
-        ////                ,
-        ////                secondaryButton: .cancel()
-        //            )
-        //        }
+        .sheet(isPresented: $showPlatformAlert) {
+            SubscriptionAlertSheet(
+                onDelegate: {
+                    
+                }, title                : "Subscription Notice",
+                subTitle                : platformAlertMessage,
+                buttonTitle             : "Ok",
+                isBtn                   : false
+            )
+            .onPreferenceChange(InnerHeightPreferenceKey.self) { height in
+                if height > 0 {
+                    platformSheetHeight = height
+                }
+            }
+            .presentationDragIndicator(.hidden)
+            .presentationDetents([.height(platformSheetHeight)])
+        }
     }
     
     //MARK: - User defined methods
@@ -406,8 +411,9 @@ struct PricingPlansView: View {
         }
         let platform = viewModel.pricingPlanResponse?.data?.subscribedPlatformType ?? 2
         if platform == 1 { // Android
-            platformAlertMessage = "Dear User,We noticed that you initially registered your account and subscribed through our Android application, and you are now trying to upgrade your plan via the iOS application. avoid duplicate billing, please cancel your existing subscription on the Android application before proceeding with the upgrade here.You can find the “Cancel Subscription” option under play store.If this step is skipped, both subscriptions (Android and iOS) will remain active, and charges will be deducted from both platforms automatically during the renewal process.Thank you for your understanding and cooperation."
-            AlertManager.shared.showAlert(title: "Subscription Notice", message: platformAlertMessage)
+            platformAlertMessage = "Dear User,We noticed that you initially registered your account and subscribed through our Android application, and you are now trying to upgrade your plan via the iOS application.To avoid duplicate billing, please cancel your existing subscription on the Android application before proceeding with the upgrade here.You can find the “Cancel Subscription” option in play store.Thank you for your understanding and cooperation."
+            showPlatformAlert = true
+//            AlertManager.shared.showAlert(title: "Subscription Notice", message: platformAlertMessage)
 //            AlertManager.shared.showAlert(title: "Subscription Notice",
 //                                          message: platformAlertMessage,
 //                                          okText: "Continue",
@@ -417,8 +423,9 @@ struct PricingPlansView: View {
 //                purchaseInternal(product: product, planId: planId)
 //            })
         } else if platform == 3 { // Web
-            platformAlertMessage = "Dear User, We noticed that you initially registered your account and subscribed through our web application, and you are now trying to upgrade your plan via the iOS application. To avoid duplicate billing, please cancel your existing subscription on the web application before proceeding with the upgrade here. You can find the “Cancel Subscription” option under Account Settings on the web platform. If this step is skipped, both subscriptions (web and mobile) will remain active, and charges will be deducted from both platforms automatically during the renewal process.Thank you for your understanding and cooperation."
-            AlertManager.shared.showAlert(title: "Subscription Notice", message: platformAlertMessage)
+            platformAlertMessage = "Dear User, We noticed that you initially registered your account and subscribed through our web application, and you are now trying to upgrade your plan via the iOS application. To avoid duplicate billing, please cancel your existing subscription on the web application before proceeding with the upgrade here. You can find the “Cancel Subscription” option under Account Settings on the web platform.Thank you for your understanding and cooperation."
+//            AlertManager.shared.showAlert(title: "Subscription Notice", message: platformAlertMessage)
+            showPlatformAlert = true
         } else {
             purchaseInternal(product: product, planId: planId)
         }

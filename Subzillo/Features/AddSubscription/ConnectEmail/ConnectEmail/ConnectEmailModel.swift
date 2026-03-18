@@ -28,3 +28,9 @@ struct GmailOauthCallBackRequest: Codable {
     var type                        : Int  //type -> 1- Gmail, 2- Microsoft
     var platform                    : Int = 2 //platform -> 1-android, 2- ios, 3- web
 }
+
+struct ICloudConnectRequest: Codable {
+    var userId                      : String
+    var email                       : String
+    var appPassword                 : String
+}

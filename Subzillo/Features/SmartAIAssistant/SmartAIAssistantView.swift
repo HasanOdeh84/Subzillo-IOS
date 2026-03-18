@@ -23,8 +23,8 @@ struct SmartAIAssistantView: View {
             VStack(spacing: 0) {
                 if let url = getChatbotURL() {
                     ChatbotWebView(url: url, isLoading: $isLoading, loadError: $loadError)
-                        .id(refreshID)
-                        .ignoresSafeArea(.container, edges: .bottom)
+//                        .ignoresSafeArea(.container, edges: .bottom)
+//                        .ignoresSafeArea(edges: .bottom)
                         .padding(.top, 40)
                     //                        .padding(.bottom, 10)
                 } else {
@@ -34,24 +34,28 @@ struct SmartAIAssistantView: View {
             }
             //            .frame(maxWidth: .infinity, maxHeight: .infinity)
             
-            Button(action: {
-                dismiss()
-            }) {
-                Image("back_gray")
-                    .frame(width: 30, height: 30)
-            }
-            .padding(.top, 60)
-            .padding(.leading, 24)
-            .zIndex(1)
-            
             if loadError {
                 errorOverlay
             }
             
             if isLoading{
                 ProgressView()
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .scaleEffect(1.2)
+                            .zIndex(2)
             }
+            
+            //            if !isLoading{
+            
+            Button(action: {
+                dismiss()
+            }) {
+                Image("back_gray")
+                    .frame(width: 30, height: 30)
+            }
+            .padding(.top, 70)
+            .padding(.leading, 24)
+            .zIndex(1)
+            //            }
         }
         .background(Color.neutralBg100)
         .ignoresSafeArea(edges: .top)
@@ -89,7 +93,6 @@ struct SmartAIAssistantView: View {
                 Button(action: {
                     loadError = false
                     isLoading = true
-                    refreshID = UUID()
                 }) {
                     Text("Retry")
                         .font(.appBold(16))
