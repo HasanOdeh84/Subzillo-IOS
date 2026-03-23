@@ -9,6 +9,7 @@ import Foundation
 import GoogleSignIn
 import AuthenticationServices
 import MSAL
+import WebKit
 
 class SocialLogins:NSObject, ObservableObject{
     
@@ -228,7 +229,7 @@ class SocialLogins:NSObject, ObservableObject{
         ]
         let webParams = MSALWebviewParameters(authPresentationViewController: presentingVC)
         let parameters = MSALInteractiveTokenParameters(scopes: emailScopes, webviewParameters: webParams)
-        parameters.promptType = .consent
+        parameters.promptType = .selectAccount
         application.acquireToken(with: parameters) { (result, error) in
             if let error = error as NSError? {
                 print("Microsoft OAuth error: \(error.localizedDescription)")

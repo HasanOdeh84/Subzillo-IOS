@@ -120,6 +120,8 @@ struct PieData: Codable, Hashable {
     let monthYear   : String?
     let totals      : TotalsData?
     let totalAmount : Double?
+    let currency      : String?
+    let currencySymbol: String?
     let categories  : [AnalyticsCategoryData]?
 }
 

@@ -218,7 +218,7 @@ struct SubscriptionsView: View {
             //                    }
             //MARK: Analytics view
             if viewMode == .analytics {
-                if Constants.FeatureConfig.currentPhase == .s4 {
+                if Constants.FeatureConfig.isS4Enabled {
                     AnalyticalView()
                 }
             } else if let segment = selectedSegment {
@@ -381,7 +381,7 @@ struct SubscriptionsView: View {
                                         if selectionMode {
                                             toggleSelection(at: index)
                                         } else {
-                                            if Constants.FeatureConfig.currentPhase == .s4 {
+                                            if Constants.FeatureConfig.isS4Enabled {
                                                 if sub.viewStatus ?? false {
                                                     AppIntentRouter.shared.navigate(
                                                         to: .subscriptionMatchView(
@@ -789,7 +789,7 @@ struct SubscriptionsView: View {
     
     func toggleSelection(at index: Int) {
         var obj = subscriptionsList[index]
-        if Constants.FeatureConfig.currentPhase == .s4 {
+        if Constants.FeatureConfig.isS4Enabled {
             guard obj.viewStatus != false else { return }
         }
         if (obj.isSelected ?? false ) == true
@@ -804,7 +804,7 @@ struct SubscriptionsView: View {
     
     func handleLongPress(at index: Int) {
         var obj = subscriptionsList[index]
-        if Constants.FeatureConfig.currentPhase == .s4 {
+        if Constants.FeatureConfig.isS4Enabled {
             guard obj.viewStatus != false else { return }
         }
         selectionMode = true
@@ -987,7 +987,7 @@ struct SwipeActionCard<Content: View>: View {
                 .simultaneousGesture(
                     DragGesture(minimumDistance: 30) // Provide more headroom for vertical scroll
                         .onChanged { value in
-                            if Constants.FeatureConfig.currentPhase == .s4 {
+                            if Constants.FeatureConfig.isS4Enabled {
                                 guard viewStatus != false else { return }
                             }
                             // Prioritize vertical scroll if vertical translation is significant
@@ -1010,7 +1010,7 @@ struct SwipeActionCard<Content: View>: View {
                             }
                         }
                         .onEnded { value in
-                            if Constants.FeatureConfig.currentPhase == .s4 {
+                            if Constants.FeatureConfig.isS4Enabled {
                                 guard viewStatus != false else { return }
                             }
                             isScrollDisabled = false

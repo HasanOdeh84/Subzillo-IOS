@@ -495,7 +495,7 @@ struct SubscriptionPreviewView: View {
             if subscriptionData?.serviceName ?? "" != ""{
                 fetchProviderDataApi()
             }
-            if Constants.FeatureConfig.currentPhase == .s4 {
+            if Constants.FeatureConfig.isS4Enabled {
                 commonApiVM.getUserInfo(input: getUserInfoRequest(userId: Constants.getUserId()))
                 if let remainingLimit = commonApiVM.userInfoResponse?.remainingSubscriptionLimit,
                    remainingLimit < numberOfSubscriptions {
@@ -504,6 +504,14 @@ struct SubscriptionPreviewView: View {
             }
         }
         .onChange(of: globalSubscriptionData) { _ in updateSubDetails() }
+        .onChange(of: commonApiVM.userInfoResponse) { _ in
+            if Constants.FeatureConfig.isS4Enabled {
+                if let remainingLimit = commonApiVM.userInfoResponse?.remainingSubscriptionLimit,
+                   remainingLimit < numberOfSubscriptions {
+                    showLimitExceedPopup = true
+                }
+            }
+        }
         .onChange(of: commonApiVM.currencyResponse) { _ in getSubDetails() }
         .onChange(of: subscriptionPreviewVM.isEntrySuccess) { _ in
             self.addSubApiResponseHandling()
@@ -651,7 +659,7 @@ struct SubscriptionPreviewView: View {
                 }
             }
             
-            //            subscriptionData?.billingCycle = (subscriptionData?.billingCycle == "" || subscriptionData?.billingCycle == nil) ? "Monthly" : subscriptionData?.billingCycle //no need
+            subscriptionData?.billingCycle = (subscriptionData?.billingCycle == "" || subscriptionData?.billingCycle == nil) ? "Monthly" : subscriptionData?.billingCycle //no need // march 20 , soniya asked to add this for safe side
             let chargeDate = Constants.shared.getNextDateByFrequency(frequency: subscriptionData?.billingCycle ?? "").formattedDate(from: "dd/MM/yyyy", to: "yyyy-MM-dd")
             if subscriptionData?.nextPaymentDate == nil || subscriptionData?.nextPaymentDate == ""{
                 subscriptionData?.nextPaymentDate = chargeDate
@@ -802,7 +810,7 @@ struct SubscriptionPreviewView: View {
                 
 //                if commonApiVM.userInfoResponse?.remainingSubscriptionLimit ?? 0 < numberOfSubscriptions{
 //                    showLimitExceedPopup = true
-                if Constants.FeatureConfig.currentPhase == .s4 {
+                if Constants.FeatureConfig.isS4Enabled {
                     if let remainingLimit = commonApiVM.userInfoResponse?.remainingSubscriptionLimit,
                        remainingLimit < numberOfSubscriptions {
                         showLimitExceedPopup = true

@@ -62,7 +62,7 @@ struct ProfileView: View {
                                     .resizable()
                                 //                                .indicator(.activity)
                                 //                                .transition(.fade(duration: 0.5))
-                                    .scaledToFit()
+                                    .scaledToFill()
                                     .frame(width: 96, height: 96)
                                     .foregroundColor(.gray)
                                     .background(Color.white)
@@ -183,11 +183,7 @@ struct ProfileView: View {
                         if commonApiVM.userInfoResponse?.upgradeBtnStatus ?? false{
                             GradientBgBtn(title: "Upgrade today", action: {
                                 Constants.FeatureConfig.performS4Action {
-                                    if Constants.FeatureConfig.featurePhase == .all{
-                                        profileVM.navigate(to: .pricingPlans)
-                                    }else{
-                                        ToastManager.shared.showToast(message: "Coming soon in S4", style: .info)
-                                    }
+                                    profileVM.navigate(to: .pricingPlans)
                                 }
                             })
                         }

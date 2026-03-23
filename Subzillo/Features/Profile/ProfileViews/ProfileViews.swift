@@ -98,7 +98,7 @@ struct ProfileHeader: View {
         .offset(x: 0, y: -5)
         .frame(height: 32)
         .onAppear{
-            if Constants.FeatureConfig.currentPhase == .s4 {
+            if Constants.FeatureConfig.isS4Enabled {
                 if commonApiVM.unreadCountResponse == nil{
                     commonApiVM.unreadNotificationCount(input: UnreadNotificationCountRequest(userId: Constants.getUserId()))
                 }

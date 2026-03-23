@@ -24,7 +24,7 @@ struct Constants{
     }
     
     struct FeatureConfig {
-        static let currentPhase: AppPhase = .s5
+        static let currentPhase: AppPhase = .s4
         static let featurePhase: FeaturePhase = .all
         
         static var isS4Enabled: Bool {

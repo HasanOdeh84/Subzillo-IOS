@@ -27,9 +27,9 @@ struct ProfileValidations {
         if input.phoneNumber.isEmpty{
             return "Phone number is required"
         }
-//        else if !Validations().isValidMobile(input.phoneNumber){
-//            return "Mobile number must be between 6 to 15 digits"
-//        }
+        else if !Validations().isValidMobile(input.phoneNumber){
+            return "Mobile number must be between 6 to 15 digits"
+        }
         return nil // All validations passed
     }
     
@@ -46,6 +46,9 @@ struct ProfileValidations {
         }
         if input.phoneNumber.isEmpty{
             return "Phone number is required"
+        }
+        else if !Validations().isValidMobile(input.phoneNumber){
+            return "Mobile number must be between 6 to 15 digits"
         }
         return nil
     }

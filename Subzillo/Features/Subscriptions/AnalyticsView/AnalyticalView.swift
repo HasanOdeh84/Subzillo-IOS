@@ -99,7 +99,7 @@ struct AnalyticalView: View {
                 }
                 
                 // Donut Chart (Top Spending)
-                SubscriptionSummaryView(pieData         : viewModel.analyticsResponse?.pie ?? PieData(month: 0, year: 0, monthYear: "", totals: nil, totalAmount: 0.0, categories: []),
+                SubscriptionSummaryView(pieData         : viewModel.analyticsResponse?.pie ?? PieData(month: 0, year: 0, monthYear: "", totals: nil, totalAmount: 0.0, currency: "", currencySymbol: "", categories: []),
                                         subscriptions   : viewModel.analyticsResponse?.pie?.categories ?? [],
                                         currencySymbol  : viewModel.analyticsResponse?.currencySymbol ?? Constants.shared.currencySymbol,
                                         monthYear       : $monthYear,
@@ -302,6 +302,7 @@ struct SubscriptionSummaryView: View {
             
             // Chart
             DonutChartView(data             : subscriptions,
+                           subsCount        : pieData.totals?.totalSubscriptions ?? 0,
                            currencySymbol   : currencySymbol)
             .padding(.vertical, 24)
             .padding(.horizontal, 29)
@@ -379,11 +380,13 @@ struct SubscriptionSummaryView: View {
 struct DonutChartView: View {
     
     var data                     : [AnalyticsCategoryData]
+    var subsCount                : Int?
     var currencySymbol           : String
     @State private var progresses: [CGFloat]
     
-    init(data: [AnalyticsCategoryData], currencySymbol: String) {
+    init(data: [AnalyticsCategoryData], subsCount:Int? , currencySymbol: String) {
         self.data = data
+        self.subsCount = subsCount
         self.currencySymbol = currencySymbol
         _progresses = State(initialValue: Array(repeating: 0, count: data.count))
     }
@@ -437,7 +440,7 @@ struct DonutChartView: View {
             }
             
             VStack(spacing: 4) {
-                Text("\(data.count)")
+                Text("\(subsCount ?? 0)")
                     .font(.appSemiBold(40))
                     .foregroundColor(.navyBlueCTA700)
                 

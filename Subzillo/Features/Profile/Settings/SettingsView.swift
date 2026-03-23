@@ -99,7 +99,9 @@ struct SettingsView: View {
                                     .frame(width: 24, height: 24)
                             ),
                             action: {
-                                showEmailSyncBottomSheet = true
+                                Constants.FeatureConfig.performS5Action {
+                                    showEmailSyncBottomSheet = true
+                                }
                             }
                         )
                         .sheet(isPresented: $showEmailSyncBottomSheet) {

@@ -95,7 +95,7 @@ struct UploadImageSheet: View {
             .padding(0)
             .sheet(isPresented: $showImagePicker) {
                 if pickerSource == .camera {
-                    ImagePicker(sourceType: .camera, selectedImage: $selectedImage)
+                    ImagePicker(sourceType: .camera, selectedImage: $selectedImage, isAllowsEditing: fromProfile ? true : false)
                         .edgesIgnoringSafeArea(.all)
                         .ignoresSafeArea()
                 } else {
