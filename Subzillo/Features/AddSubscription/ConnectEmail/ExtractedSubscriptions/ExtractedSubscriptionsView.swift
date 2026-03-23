@@ -172,11 +172,9 @@ struct SubscriptionRowEmail: View {
                     .font(.appRegular(14))
                     .foregroundColor(Color.neutralMain700)
                 let status = Constants.shared.isSubscriptionExpired(nextPaymentDate: subscription.nextPaymentDate ?? "")
-                if status{
-                    Text("Expired")
-                        .font(.appBold(14))
-                        .foregroundColor(.disCardRed)
-                }
+                Text(status ? "InActive" : "Active")
+                    .font(.appBold(14))
+                    .foregroundColor(status ? .disCardRed : .greenLG)
             }
             
             Spacer()

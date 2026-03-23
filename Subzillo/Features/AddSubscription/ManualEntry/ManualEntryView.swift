@@ -180,31 +180,31 @@ struct ManualEntryView: View {
                             planType = selectedPlanType ?? ""
                             autoFillDetails(isAmount: false)
                         })
-//                        .onAppear {
-//                            DispatchQueue.main.async {
-//                                sheetHeight = sheetHeight
-//                            }
-//                        }
-//                        .id(sheetID)
-//                        .overlay {
-//                            GeometryReader { geo in
-//                                Color.clear
-//                                    .preference(
-//                                        key: InnerHeightPreferenceKey.self,
-//                                        value: geo.size.height
-//                                    )
-//                            }
-//                        }
-//                        .onPreferenceChange(InnerHeightPreferenceKey.self) { height in
-//                            if height > 150 {
-//                                sheetHeight = height
-//                            }
-//                        }
-//                        .presentationDetents(
-//                            sheetHeight > UIScreen.main.bounds.height * 0.75
-//                                ? [.large]
-//                                : [.height(sheetHeight)]// .large]
-//                        )
+                        //                        .onAppear {
+                        //                            DispatchQueue.main.async {
+                        //                                sheetHeight = sheetHeight
+                        //                            }
+                        //                        }
+                        //                        .id(sheetID)
+                        //                        .overlay {
+                        //                            GeometryReader { geo in
+                        //                                Color.clear
+                        //                                    .preference(
+                        //                                        key: InnerHeightPreferenceKey.self,
+                        //                                        value: geo.size.height
+                        //                                    )
+                        //                            }
+                        //                        }
+                        //                        .onPreferenceChange(InnerHeightPreferenceKey.self) { height in
+                        //                            if height > 150 {
+                        //                                sheetHeight = height
+                        //                            }
+                        //                        }
+                        //                        .presentationDetents(
+                        //                            sheetHeight > UIScreen.main.bounds.height * 0.75
+                        //                                ? [.large]
+                        //                                : [.height(sheetHeight)]// .large]
+                        //                        )
                         .presentationDetents([.medium, .large])
                         .presentationDragIndicator(.hidden)
                     }
@@ -362,6 +362,44 @@ struct ManualEntryView: View {
                             print(chargeDate)
                         }
                     )
+                    
+                    if let source = addSubscriptionVM.providerData?.source{
+                        HStack(spacing: 5){
+                            Text("Source: ")
+                                .font(.appBold(14))
+                                .foregroundColor(Color.neutralMain700)
+                                .padding(.leading, 5)
+                            
+                            Text("\(source)")
+                                .font(.appRegular(14))
+                                .foregroundColor(Color.neutralMain700)
+                            
+                            Spacer()
+                        }
+                    }
+                    
+                    if let urls = addSubscriptionVM.providerData?.urls, !urls.isEmpty {
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text("URLs:")
+                                .font(.appBold(14))
+                                .foregroundColor(Color.neutralMain700)
+                            
+                            //                            ForEach(urls, id: \.self) { url in
+                            //                                Text(url)
+                            //                                    .font(.appRegular(14))
+                            //                                    .foregroundColor(Color.neutralMain700)
+                            //                            }
+                            
+                            ForEach(urls, id: \.self) { url in
+                                if let link = URL(string: url) {
+                                    Link(url, destination: link)
+                                        .font(.appRegular(14))
+                                }
+                            }
+                        }
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding(.leading, 5)
+                    }
                     
                     //MARK: Optional Details
                     Button(action: optionalDetailsAction) {
@@ -757,7 +795,7 @@ struct ManualEntryView: View {
         }) {
             amount = String(format: "%.2f", matchedPlan.price ?? 0)
             amountLastActionText = amount
-            updateCurrency(currencyCode     : matchedPlan.currencyCode ?? Constants.shared.regionCode,
+            updateCurrency(currencyCode     : matchedPlan.currencyCode ?? Constants.shared.currencyCode,
                            currencySymbol   : matchedPlan.currencySymbol ?? Constants.shared.currencySymbol)
         }
     }
@@ -784,7 +822,7 @@ struct ManualEntryView: View {
                     selectedBilling = matchedPlan.billingCycle ?? ""
                 }
                 isAmountError = false
-                updateCurrency(currencyCode     : matchedPlan.currencyCode ?? Constants.shared.regionCode,
+                updateCurrency(currencyCode     : matchedPlan.currencyCode ?? Constants.shared.currencyCode,
                                currencySymbol   : matchedPlan.currencySymbol ?? Constants.shared.currencySymbol)
             } else {
                 if addSubscriptionVM.providerData?.providerSubscriptionPlansList?.count != 0{
@@ -820,7 +858,7 @@ struct ManualEntryView: View {
                 }
                 selectedBilling = matchedPlan.billingCycle ?? ""
                 isPlanTypeError = false
-                updateCurrency(currencyCode     : matchedPlan.currencyCode ?? Constants.shared.regionCode,
+                updateCurrency(currencyCode     : matchedPlan.currencyCode ?? Constants.shared.currencyCode,
                                currencySymbol   : matchedPlan.currencySymbol ?? Constants.shared.currencySymbol)
             } else {
                 if planType == "Free" || planType == "Basic"{
@@ -1020,82 +1058,143 @@ struct ManualEntryView: View {
         }
     }
     
-    func updateCurrency(currencyCode:String, currencySymbol:String){
-        selectedCurrency = Currency(id      : nil,
-                                    name    : Constants.shared.currencyCode,
-                                    symbol  : Constants.shared.currencySymbol,
-                                    code    : Constants.shared.currencyCode,
-                                    flag    : Constants.shared.flag(from: Constants.shared.regionCode))
-        if let currencies = commonApiVM.currencyResponse {
-            selectedCurrency = currencies.first(where: { $0.code == currencyCode })
-            if selectedCurrency == nil && currencyCode != ""{
-                selectedCurrency = Currency(id      : nil,
-                                            name    : "",
-                                            symbol  : currencySymbol,
-                                            code    : currencyCode,
-                                            flag    : "")
-            }else{
-                selectedCurrency = Currency(id      : nil,
-                                            name    : Constants.shared.currencyCode,
-                                            symbol  : Constants.shared.currencySymbol,
-                                            code    : Constants.shared.currencyCode,
-                                            flag    : Constants.shared.flag(from: Constants.shared.regionCode))
-            }
-        }else{
-            commonApiVM.getCurrencies()
-        }
+    //    func updateCurrency(currencyCode:String, currencySymbol:String){
+    //        selectedCurrency = Currency(id      : nil,
+    //                                    name    : Constants.shared.currencyCode,
+    //                                    symbol  : Constants.shared.currencySymbol,
+    //                                    code    : Constants.shared.currencyCode,
+    //                                    flag    : Constants.shared.flag(from: Constants.shared.regionCode))
+    //        if let currencies = commonApiVM.currencyResponse {
+    //            selectedCurrency = currencies.first(where: { $0.code == currencyCode })
+    //            if selectedCurrency == nil && currencyCode != ""{
+    //                selectedCurrency = Currency(id      : nil,
+    //                                            name    : "",
+    //                                            symbol  : currencySymbol,
+    //                                            code    : currencyCode,
+    //                                            flag    : "")
+    //            }else{
+    //                selectedCurrency = Currency(id      : nil,
+    //                                            name    : Constants.shared.currencyCode,
+    //                                            symbol  : Constants.shared.currencySymbol,
+    //                                            code    : Constants.shared.currencyCode,
+    //                                            flag    : Constants.shared.flag(from: Constants.shared.regionCode))
+    //            }
+    //        }else{
+    //            commonApiVM.getCurrencies()
+    //        }
+    //        isCurrencyUpdateGlobalManual = true
+    //    }
+    
+    func updateCurrency(currencyCode: String, currencySymbol: String) {
+        selectedCurrency = resolveCurrency(code: currencyCode, symbol: currencySymbol)
         isCurrencyUpdateGlobalManual = true
     }
     
+    //    func updateCountryAndCurrency() {
+    //        if !fromSiri{
+    //            selectedCurrency = Currency(id      : nil,
+    //                                        name    : Constants.shared.currencyCode,
+    //                                        symbol  : Constants.shared.currencySymbol,
+    //                                        code    : Constants.shared.currencyCode,
+    //                                        flag    : Constants.shared.flag(from: Constants.shared.regionCode))
+    //            if let currencies = commonApiVM.currencyResponse {
+    //                selectedCurrency = currencies.first(where: { $0.code == commonApiVM.userInfoResponse?.preferredCurrency })
+    //                if selectedCurrency == nil && commonApiVM.userInfoResponse?.preferredCurrency ?? "" != ""{
+    //                    selectedCurrency = Currency(id      : nil,
+    //                                                name    : "",
+    //                                                symbol  : commonApiVM.userInfoResponse?.preferredCurrencySymbol,
+    //                                                code    : commonApiVM.userInfoResponse?.preferredCurrency,
+    //                                                flag    : "")//Constants.shared.flag(from: Constants.shared.regionCode))
+    //                }else{
+    //                    selectedCurrency = Currency(id      : nil,
+    //                                                name    : Constants.shared.currencyCode,
+    //                                                symbol  : Constants.shared.currencySymbol,
+    //                                                code    : Constants.shared.currencyCode,
+    //                                                flag    : Constants.shared.flag(from: Constants.shared.regionCode))
+    //                }
+    //            }else{
+    //                commonApiVM.getCurrencies()
+    //            }
+    //        }else{
+    //            fromSiri = false
+    //        }
+    //        if isFromEdit == true
+    //        {
+    //            if let currencies = commonApiVM.currencyResponse {
+    //                selectedCurrency = currencies.first(where: { $0.code == globalSubscriptionData?.currency ?? ""})
+    //                if selectedCurrency == nil && globalSubscriptionData?.currency ?? "" != ""{
+    //                    selectedCurrency = Currency(id      : nil,
+    //                                                name    : "",
+    //                                                symbol  : globalSubscriptionData?.currencySymbol ?? "",
+    //                                                code    : globalSubscriptionData?.currency ?? "",
+    //                                                flag    : "")
+    //                }else{
+    //                    selectedCurrency = Currency(id      : nil,
+    //                                                name    : Constants.shared.currencyCode,
+    //                                                symbol  : Constants.shared.currencySymbol,
+    //                                                code    : Constants.shared.currencyCode,
+    //                                                flag    : Constants.shared.flag(from: Constants.shared.regionCode))
+    //                }
+    //            } else if let currencyCode = globalSubscriptionData?.currency {
+    //                selectedCurrency = Currency(id: nil, name: "", symbol: globalSubscriptionData?.currencySymbol ?? "", code: currencyCode, flag: "")
+    //            }
+    //        }
+    //    }
+    
     func updateCountryAndCurrency() {
-        if !fromSiri{
-            selectedCurrency = Currency(id      : nil,
-                                        name    : Constants.shared.currencyCode,
-                                        symbol  : Constants.shared.currencySymbol,
-                                        code    : Constants.shared.currencyCode,
-                                        flag    : Constants.shared.flag(from: Constants.shared.regionCode))
-            if let currencies = commonApiVM.currencyResponse {
-                selectedCurrency = currencies.first(where: { $0.code == commonApiVM.userInfoResponse?.preferredCurrency })
-                if selectedCurrency == nil && commonApiVM.userInfoResponse?.preferredCurrency ?? "" != ""{
-                    selectedCurrency = Currency(id      : nil,
-                                                name    : "",
-                                                symbol  : commonApiVM.userInfoResponse?.preferredCurrencySymbol,
-                                                code    : commonApiVM.userInfoResponse?.preferredCurrency,
-                                                flag    : "")//Constants.shared.flag(from: Constants.shared.regionCode))
-                }else{
-                    selectedCurrency = Currency(id      : nil,
-                                                name    : Constants.shared.currencyCode,
-                                                symbol  : Constants.shared.currencySymbol,
-                                                code    : Constants.shared.currencyCode,
-                                                flag    : Constants.shared.flag(from: Constants.shared.regionCode))
-                }
-            }else{
-                commonApiVM.getCurrencies()
-            }
-        }else{
+        if !fromSiri {
+            selectedCurrency = resolveCurrency(
+                code: commonApiVM.userInfoResponse?.preferredCurrency,
+                symbol: commonApiVM.userInfoResponse?.preferredCurrencySymbol
+            )
+        } else {
             fromSiri = false
         }
-        if isFromEdit == true
-        {
-            if let currencies = commonApiVM.currencyResponse {
-                selectedCurrency = currencies.first(where: { $0.code == globalSubscriptionData?.currency ?? ""})
-                if selectedCurrency == nil && globalSubscriptionData?.currency ?? "" != ""{
-                    selectedCurrency = Currency(id      : nil,
-                                                name    : "",
-                                                symbol  : globalSubscriptionData?.currencySymbol ?? "",
-                                                code    : globalSubscriptionData?.currency ?? "",
-                                                flag    : "")
-                }else{
-                    selectedCurrency = Currency(id      : nil,
-                                                name    : Constants.shared.currencyCode,
-                                                symbol  : Constants.shared.currencySymbol,
-                                                code    : Constants.shared.currencyCode,
-                                                flag    : Constants.shared.flag(from: Constants.shared.regionCode))
-                }
-            } else if let currencyCode = globalSubscriptionData?.currency {
-                selectedCurrency = Currency(id: nil, name: "", symbol: globalSubscriptionData?.currencySymbol ?? "", code: currencyCode, flag: "")
-            }
+        if isFromEdit {
+            selectedCurrency = resolveCurrency(
+                code: globalSubscriptionData?.currency,
+                symbol: globalSubscriptionData?.currencySymbol
+            )
         }
+    }
+    
+    func resolveCurrency(code: String?, symbol: String?) -> Currency {
+        let defaultCurrency = Currency(
+            id: nil,
+            name: Constants.shared.currencyCode,
+            symbol: Constants.shared.currencySymbol,
+            code: Constants.shared.currencyCode,
+            flag: Constants.shared.flag(from: Constants.shared.regionCode)
+        )
+        
+        let currencyCode = code ?? ""
+        
+        guard let currencies = commonApiVM.currencyResponse else {
+            commonApiVM.getCurrencies()
+            return currencyCode.isEmpty ? defaultCurrency : Currency(
+                id: nil,
+                name: "",
+                symbol: symbol,
+                code: currencyCode,
+                flag: ""
+            )
+        }
+        
+        if let matched = currencies.first(where: { $0.code == currencyCode }) {
+            return matched
+        }
+        
+        if !currencyCode.isEmpty {
+            return Currency(
+                id: nil,
+                name: "",
+                symbol: symbol,
+                code: currencyCode,
+                flag: ""
+            )
+        }
+        
+        return defaultCurrency
     }
     
     private func updateSubDetailsTOView() {
@@ -2074,30 +2173,30 @@ struct ListView: View {
                             }
                         }) {
                             AddNewCardSheet(shouldCallAPI:$shouldCallAPI)
-//                                .onAppear {
-//                                    DispatchQueue.main.async {
-//                                        sheetHeight = sheetHeight
-//                                    }
-//                                }
-//                                .id(sheetID)
-//                                .overlay {
-//                                    GeometryReader { geo in
-//                                        Color.clear
-//                                            .preference(
-//                                                key: InnerHeightPreferenceKey.self,
-//                                                value: geo.size.height
-//                                            )
-//                                    }
-//                                }
-//                                .onPreferenceChange(InnerHeightPreferenceKey.self) { height in
-//                                    if height > 150 {
-//                                        sheetHeight = height
-//                                    }
-//                                }
-//                                .presentationDetents([.height(sheetHeight)])
+                            //                                .onAppear {
+                            //                                    DispatchQueue.main.async {
+                            //                                        sheetHeight = sheetHeight
+                            //                                    }
+                            //                                }
+                            //                                .id(sheetID)
+                            //                                .overlay {
+                            //                                    GeometryReader { geo in
+                            //                                        Color.clear
+                            //                                            .preference(
+                            //                                                key: InnerHeightPreferenceKey.self,
+                            //                                                value: geo.size.height
+                            //                                            )
+                            //                                    }
+                            //                                }
+                            //                                .onPreferenceChange(InnerHeightPreferenceKey.self) { height in
+                            //                                    if height > 150 {
+                            //                                        sheetHeight = height
+                            //                                    }
+                            //                                }
+                            //                                .presentationDetents([.height(sheetHeight)])
                                 .presentationDetents([.medium, .large])
                                 .presentationDragIndicator(.hidden)
-//                                .interactiveDismissDisabled(false)
+                            //                                .interactiveDismissDisabled(false)
                         }
                         //                        .onChange(of: showNewCardSheet) { newValue in
                         //                            if newValue == false {

@@ -10,6 +10,11 @@ import SwiftUI
 struct RenewSubscriptionBottomSheet: View {
     
     @Environment(\.dismiss) private var dismiss
+    @State var title                    : String = "Renew Subscription"
+    @State var desc                     : String = "Your plan is about to expire\nWould you like to renew with the current plan\ndetails, or modify it before renewing?"
+    @State var btn1                     : String = "Renew"
+    @State var btn2                     : String = "Renew with Changes"
+    @State var btn3                     : String = "No"
     var onRenew                         : () -> Void
     var onRenewWithChanges              : () -> Void
     var onNo                            : (() -> Void)? = nil
@@ -25,12 +30,12 @@ struct RenewSubscriptionBottomSheet: View {
             
             VStack(spacing: 24) {
                 VStack(spacing: 12) {
-                    Text("Renew Subscription")
+                    Text(title)
                         .font(.appRegular(24))
                         .foregroundColor(.neutralMain700)
                         .padding(.top, 24)
                     
-                    Text("Your plan is about to expire\nWould you like to renew with the current plan\ndetails, or modify it before renewing?")
+                    Text(desc)
                         .font(.appRegular(16))
                         .foregroundColor(.neutralMain700)
                         .multilineTextAlignment(.center)
@@ -39,7 +44,7 @@ struct RenewSubscriptionBottomSheet: View {
                 
                 VStack(spacing: 16) {
                     CustomButton(
-                        title   : "Renew",
+                        title   : btn1,
                         height  : 56,
                         action  : {
                             dismiss()
@@ -48,7 +53,7 @@ struct RenewSubscriptionBottomSheet: View {
                     )
                     
                     GradientBorderButton(
-                        title           : "Renew with Changes",
+                        title           : btn2,
                         isBtn           : true,
                         buttonImage     : "",
                         action          : {
@@ -60,7 +65,7 @@ struct RenewSubscriptionBottomSheet: View {
                     )
                     
                     CustomBorderButton(
-                        title       : "No",
+                        title       : btn3,
                         background  : Color.clear,
                         action      : {
                             dismiss()

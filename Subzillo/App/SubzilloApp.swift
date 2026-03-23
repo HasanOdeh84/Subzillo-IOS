@@ -425,6 +425,23 @@ struct RootView: View {
             .presentationDragIndicator(.hidden)
             .presentationDetents([.height(upgradeNowSheetHeight)])
         }
+        .sheet(isPresented: $sheetManager.isFamilyMemberLimitSheetVisible) {
+            SubscriptionAlertSheet(
+                onDelegate: {
+                    
+                }, title                : "Family Member Limit Reached",
+                subTitle                : "You’ve reached the maximum number of family members allowed.",
+                buttonTitle             : "Ok",
+                isBtn                   : false
+            )
+            .onPreferenceChange(InnerHeightPreferenceKey.self) { height in
+                if height > 0 {
+                    upgradeNowSheetHeight = height
+                }
+            }
+            .presentationDragIndicator(.hidden)
+            .presentationDetents([.height(upgradeNowSheetHeight)])
+        }
         .preferredColorScheme(
             themeManager.userChangedTheme
             ? (themeManager.isDarkMode ? .dark : .light)

@@ -13,6 +13,7 @@ final class SheetManager: ObservableObject {
     
     @Published var isOfflineSheetVisible = false
     @Published var isUpgradeSheetVisible = false
+    @Published var isFamilyMemberLimitSheetVisible = false
         
     private init() {}
 }

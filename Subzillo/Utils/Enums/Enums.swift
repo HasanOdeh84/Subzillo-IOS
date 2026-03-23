@@ -151,3 +151,14 @@ enum PendingUIAction {
     case selectpaymentMethod
     case dateSelection
 }
+
+enum HighlightType:Int,Codable {
+    case none       = 0
+    case service    = 1
+    case amount     = 2
+    case nextCharge = 3
+    case currency   = 4
+    case category   = 5
+    case planType   = 6
+    case billing    = 7
+}

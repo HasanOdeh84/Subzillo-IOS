@@ -67,6 +67,7 @@ struct SubscriptionPreviewView: View {
     @State private var limitExceedSheetHeight   : CGFloat = .zero
     @State var showLimitExceedPopup             : Bool = false
     @State var fromEmailSync                    : Bool = false
+    @State var isHighlight                      : HighlightType = .none
     
     //MARK: - body
     var body: some View {
@@ -171,9 +172,8 @@ struct SubscriptionPreviewView: View {
                         
                         VStack(alignment: .leading, spacing: 16) {
                             HStack(spacing: 16) {
-                                
                                 //MARK: Service
-                                SubscriptionDetailsItem(title: "Service", value: subscriptionData?.serviceName ?? "", confidence: subscriptionData?.serviceNameConfidence ?? 0.0)
+                                SubscriptionDetailsItem(title: "Service", value: subscriptionData?.serviceName ?? "", confidence: subscriptionData?.serviceNameConfidence ?? 0.0, isHighlight: (isHighlight == .service) ? true : false)
                                     .onTapGesture {
                                         DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
                                             showServiceBottom = true
@@ -211,7 +211,8 @@ struct SubscriptionPreviewView: View {
                                 //MARK: Amount
                                 SubscriptionDetailsItem(title       : "Amount",
                                                         value       : "\(subscriptionData?.currencySymbol ?? Constants.shared.currencySymbol)\(subscriptionData?.amount ?? 0.0)",
-                                                        confidence  : subscriptionData?.amountConfidence ?? 0.0)
+                                                        confidence  : subscriptionData?.amountConfidence ?? 0.0,
+                                                        isHighlight : (isHighlight == .amount) ? true : false)
                                 .onTapGesture {
                                     DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
                                         showAmountBottom = true
@@ -234,7 +235,8 @@ struct SubscriptionPreviewView: View {
                             HStack(spacing: 16) {
                                 
                                 //MARK: Next Charge Date
-                                SubscriptionDetailsItem(title: "Next Charge Date", value: (subscriptionData?.nextPaymentDate ?? "").formattedDate(), confidence: subscriptionData?.nextPaymentDateConfidence ?? 0.0)
+                                SubscriptionDetailsItem(title: "Next Charge Date", value: (subscriptionData?.nextPaymentDate ?? "").formattedDate(), confidence: subscriptionData?.nextPaymentDateConfidence ?? 0.0,
+                                                        isHighlight : (isHighlight == .nextCharge) ? true : false)
                                     .onTapGesture {
                                         DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
                                             showNextChargeDateBottom = true
@@ -254,14 +256,16 @@ struct SubscriptionPreviewView: View {
                                 //MARK: Currency
                                 if subscriptionData?.currency == nil || subscriptionData?.currency ?? "" == "" || subscriptionData?.currencyConfidence ?? 0.0 == 0.0{
                                     if subscriptionData?.currency ?? "" == ""{
-                                        SubscriptionDetailsItem(title: "Currency", value: Constants.shared.currencyCode, confidence: subscriptionData?.currencyConfidence ?? 0.0, isAssumed: true)
+                                        SubscriptionDetailsItem(title: "Currency", value: Constants.shared.currencyCode, confidence: subscriptionData?.currencyConfidence ?? 0.0, isAssumed: true,
+                                                                isHighlight : (isHighlight == .currency) ? true : false)
                                             .onTapGesture {
                                                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
                                                     showCurrencyBottom = true
                                                 }
                                             }
                                     }else{
-                                        SubscriptionDetailsItem(title: "Currency", value: subscriptionData?.currency ?? Constants.shared.currencyCode, confidence: subscriptionData?.currencyConfidence ?? 0.0, isAssumed: true)
+                                        SubscriptionDetailsItem(title: "Currency", value: subscriptionData?.currency ?? Constants.shared.currencyCode, confidence: subscriptionData?.currencyConfidence ?? 0.0, isAssumed: true,
+                                                                isHighlight : (isHighlight == .currency) ? true : false)
                                             .onTapGesture {
                                                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
                                                     showCurrencyBottom = true
@@ -270,7 +274,8 @@ struct SubscriptionPreviewView: View {
                                     }
                                 }
                                 else{
-                                    SubscriptionDetailsItem(title: "Currency", value: subscriptionData?.currency ?? "", confidence: subscriptionData?.currencyConfidence ?? 0.0)
+                                    SubscriptionDetailsItem(title: "Currency", value: subscriptionData?.currency ?? "", confidence: subscriptionData?.currencyConfidence ?? 0.0,
+                                                            isHighlight : (isHighlight == .currency) ? true : false)
                                         .onTapGesture {
                                             DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
                                                 showCurrencyBottom = true
@@ -281,7 +286,8 @@ struct SubscriptionPreviewView: View {
                             
                             HStack(spacing: 16) {
                                 //MARK: Category
-                                SubscriptionDetailsItem(title: "Category", value: subscriptionData?.categoryName ?? "", confidence: subscriptionData?.categoryConfidence ?? 0.0)
+                                SubscriptionDetailsItem(title: "Category", value: subscriptionData?.categoryName ?? "", confidence: subscriptionData?.categoryConfidence ?? 0.0,
+                                                        isHighlight : (isHighlight == .category) ? true : false)
                                     .onTapGesture {
                                         DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
                                             showCategoryBottom = true
@@ -299,7 +305,8 @@ struct SubscriptionPreviewView: View {
                                     }
                                 
                                 //MARK: Plan Type
-                                SubscriptionDetailsItem(title: "Plan Type", value: subscriptionData?.subscriptionType ?? "", confidence: subscriptionData?.subscriptionTypeConfidence ?? 0.0)
+                                SubscriptionDetailsItem(title: "Plan Type", value: subscriptionData?.subscriptionType ?? "", confidence: subscriptionData?.subscriptionTypeConfidence ?? 0.0,
+                                                        isHighlight : (isHighlight == .planType) ? true : false)
                                     .onTapGesture {
                                         DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
                                             showPlanTypeBottom = true
@@ -308,7 +315,8 @@ struct SubscriptionPreviewView: View {
                             }
                             
                             //MARK: Billing Cycle
-                            SubscriptionDetailsItem(title: "Billing Cycle", value: subscriptionData?.billingCycle ?? "", confidence: subscriptionData?.billingCycleConfidence ?? 0.0)
+                            SubscriptionDetailsItem(title: "Billing Cycle", value: subscriptionData?.billingCycle ?? "", confidence: subscriptionData?.billingCycleConfidence ?? 0.0,
+                                                    isHighlight : (isHighlight == .billing) ? true : false)
                                 .onTapGesture {
                                     DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
                                         showBillingCycleBottom = true
@@ -777,8 +785,9 @@ struct SubscriptionPreviewView: View {
 //        if subscriptionData?.currencySymbol == nil{
 //            subscriptionData?.currencySymbol = Constants.shared.currencySymbol
 //        }
-        if let errorMessage = ManualEntryValidations.shared.updateManualEntry(input: subscriptionData!) {
-            ToastManager.shared.showToast(message: errorMessage,style:ToastStyle.error)
+        if let (errorMessage, type) = ManualEntryValidations.shared.updateManualEntry(input: subscriptionData!) {
+            ToastManager.shared.showToast(message: errorMessage, style: ToastStyle.error)
+            isHighlight = type
         }
         else{
             currentSubscriptions = currentSubscriptions + 1
@@ -803,8 +812,9 @@ struct SubscriptionPreviewView: View {
         if numberOfSubscriptions > 0
         {
             playerManager.pausePlayback()
-            if let errorMessage = ManualEntryValidations.shared.updateManualEntry(input: subscriptionData!) {
+            if let (errorMessage, type) = ManualEntryValidations.shared.updateManualEntry(input: subscriptionData!) {
                 ToastManager.shared.showToast(message: errorMessage,style:ToastStyle.error)
+                isHighlight = type
             }
             else {
                 
@@ -948,6 +958,7 @@ struct SubscriptionDetailsItem: View {
     var value                   : String?
     var confidence              : Double = 0.0
     var isAssumed               : Bool = false
+    var isHighlight             : Bool = false
     
     var body: some View {
         let (confidenceStr, colorValue, fillRatio) = Constants.confidenceInfo(isAssumed: isAssumed, confidence: confidence)
@@ -973,7 +984,7 @@ struct SubscriptionDetailsItem: View {
         .frame(height: 106)
         .overlay(
             RoundedRectangle(cornerRadius: 12)
-                .stroke(value == "" ? Color.disCardRed : Color.neutral300Border, lineWidth: 1)
+                .stroke((value == "" || isHighlight) ? Color.disCardRed : Color.neutral300Border, lineWidth: 1)
         )
         .background(.whiteNeutralCardBG)
         .cornerRadius(12)

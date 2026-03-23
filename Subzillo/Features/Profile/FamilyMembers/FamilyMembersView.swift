@@ -141,7 +141,7 @@ struct FamilyMembersView: View {
                     buttonImage: "profile_add",
                     action: {
                         if manualVM.listFamilyMembersResponse?.remainingFamilyMembersLimit == 0 {
-                            SheetManager.shared.isUpgradeSheetVisible = true
+                            SheetManager.shared.isFamilyMemberLimitSheetVisible = true
                         }else{
                             DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
                                 openFamilyMemberSheet = true

@@ -23,6 +23,9 @@ struct LoginView: View {
     @State private var selectedCountry          : Country?
     @State var segmentSelected                  : Segment? = .first
     @EnvironmentObject var commonApiVM          : CommonAPIViewModel
+    @State private var restoreAccSheetHeight    : CGFloat = .zero
+    @State var createNewAcc                     = false
+    @State var isLoginClicked                   = true
     
     //MARK: - Body
     var body: some View {
@@ -84,6 +87,7 @@ struct LoginView: View {
                     }
                     
                     CustomButton(title: "Log In"){
+                        isLoginClicked = true
                         loginApi()
                     }
                 }
@@ -127,17 +131,23 @@ struct LoginView: View {
                      */
                     
                     SignInBorderButton(title: "Continue with Apple", buttonImage: "apple_withoutPadding"){
-                        loginVM.socialLogin(loginType: .apple,deviceId: appDelegate.deviceToken ?? "")
+                        isLoginClicked = false
+                        loginType = .apple
+                        loginVM.socialLogin(loginType: .apple,deviceId: appDelegate.deviceToken ?? "", createNewAcc: createNewAcc)
                     }
                     .background(.whiteBlack)
                     
                     SignInBorderButton(title: "Continue with Google", buttonImage: "google"){
-                        loginVM.socialLogin(loginType: .google,deviceId: appDelegate.deviceToken ?? "")
+                        isLoginClicked = false
+                        loginType = .google
+                        loginVM.socialLogin(loginType: .google,deviceId: appDelegate.deviceToken ?? "", createNewAcc: createNewAcc)
                     }
                     .background(.whiteBlack)
                     
                     SignInBorderButton(title: "Continue with Microsoft", buttonImage: "microsoft"){
-                        loginVM.socialLogin(loginType: .microsoft,deviceId: appDelegate.deviceToken ?? "")
+                        isLoginClicked = false
+                        loginType = .microsoft
+                        loginVM.socialLogin(loginType: .microsoft,deviceId: appDelegate.deviceToken ?? "", createNewAcc: createNewAcc)
                     }
                     .background(.whiteBlack)
                 }
@@ -168,6 +178,59 @@ struct LoginView: View {
                     selectedCountry = data.first(where: { $0.countryCode == Constants.shared.regionCode })
                 }
             }
+            .onChange(of: segmentSelected) { value in
+                createNewAcc = false
+            }
+            .sheet(isPresented: $loginVM.showRestoreAccSheet) {
+                RenewSubscriptionBottomSheet(
+                    title   : "Account Found",
+                    desc    : "An account associated with this information was previously deleted. Would you like to restore your account or create a new one?",
+                    btn1    : "Restore Account",
+                    btn2    : "Create New Account",
+                    btn3    : "Cancel",
+                    onRenew : {
+                        let phone = phoneNumber.normalizedPhoneNumber()
+                        let ph = PhoneNumberFormatterService(regionCode: selectedCountry?.countryCode ?? "").formattedNumber(digits: phoneNumber)
+                        loginVM.restoreUser(input           : RestoreUserRequest(userId    : Constants.getUserId(),
+                                                                                 deviceId  : appDelegate.deviceToken ?? "",
+                                                                                 loginType : isLoginClicked ? (segmentSelected == .first ? loginCheckType.mobile : loginCheckType.email).rawValue : loginType.rawValue),
+                                            fromLogin       : isLoginClicked,
+                                            email           : email.trimmed,
+                                            phoneNo         : phone,
+                                            formattedPhNo   : ph,
+                                            countryCode     : selectedCountry?.dialCode ?? "+\(NBPhoneNumberUtil.sharedInstance().getCountryCode(forRegion: Constants.shared.regionCode))")
+                    },
+                    onRenewWithChanges: {
+                        createNewAcc = true
+                        if isLoginClicked{
+                            loginApi()
+                        }else{
+                            loginVM.socialLogin(loginType   : loginType,
+                                                deviceId    : appDelegate.deviceToken ?? "",
+                                                createNewAcc: createNewAcc)
+                        }
+                    },
+                    onNo: {
+                        loginVM.showRestoreAccSheet = false
+                    }
+                )
+                .overlay {
+                    GeometryReader { geo in
+                        Color.clear
+                            .preference(
+                                key: InnerHeightPreferenceKey.self,
+                                value: geo.size.height
+                            )
+                    }
+                }
+                .onPreferenceChange(InnerHeightPreferenceKey.self) { height in
+                    if height > 150 {
+                        restoreAccSheetHeight = height
+                    }
+                }
+                .presentationDetents([.height(restoreAccSheetHeight)])
+                .presentationDragIndicator(.hidden)
+            }
         }
         .keyboardAdaptive()
         .dismissKeyboardOnBackgroundTap()
@@ -187,7 +250,8 @@ struct LoginView: View {
             countryCode     : selectedCountry?.dialCode ?? "+\(NBPhoneNumberUtil.sharedInstance().getCountryCode(forRegion: Constants.shared.regionCode))",
             deviceId        : appDelegate.deviceToken ?? ""
             ,
-            referralCode    : Constants.getUserDefaultsValue(for: Constants.referrerId)
+            referralCode    : Constants.getUserDefaultsValue(for: Constants.referrerId),
+            createNewAcc    : createNewAcc
         )
         if let errorMessage = LoginSignupValidations().validateLogin(input: input) {
             ToastManager.shared.showToast(message: errorMessage.localized,style: ToastStyle.error)

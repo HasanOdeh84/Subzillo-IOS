@@ -146,6 +146,8 @@ struct FetchProviderData: Codable, Hashable, Identifiable {
     var categoryId                      : String? = nil
     var categoryName                    : String? = nil
     var providerSubscriptionPlansList   : [ProviderSubscriptionPlan]? = []
+    var source                          : String? = nil
+    var urls                            : [String]? = nil
 }
 
 struct ProviderSubscriptionPlan: Codable, Identifiable, Hashable {

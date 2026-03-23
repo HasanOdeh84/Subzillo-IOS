@@ -17,6 +17,7 @@ public struct checkLoginRequest: Codable {
     var uniqueId        : String = UUID().uuidString
     var pushMode        : Int = Constants.shared.pushMode
     var referralCode    : String?
+    var createNewAcc    : Bool?
 }
 
 public struct LoginResponse: Codable {
@@ -31,9 +32,11 @@ public struct LoginResponseData: Codable {
     var fullName                    : String?
     var isNewUser                   : Bool?
     var signupCompleted             : Bool?
+    var loginType                   : Int?
     var onboardingStatus            : Bool?
     var accessToken                 : String?
     var refreshToken                : String?
+    var deleteStatus                : Bool?
     public init(
         userId              : String? = nil,
         fullName            : String? = nil,
@@ -41,7 +44,8 @@ public struct LoginResponseData: Codable {
         signupCompleted     : Bool? = nil,
         onboardingStatus    : Bool? = nil,
         accessToken         : String? = nil,
-        refreshToken        : String? = nil
+        refreshToken        : String? = nil,
+        deleteStatus        : Bool? = nil
     ) {
         self.userId                     = userId
         self.fullName                   = fullName
@@ -50,6 +54,7 @@ public struct LoginResponseData: Codable {
         self.onboardingStatus           = onboardingStatus
         self.accessToken                = accessToken
         self.refreshToken               = refreshToken
+        self.deleteStatus               = deleteStatus
     }
 }
 
@@ -76,4 +81,30 @@ public struct SocialLoginRequest: Codable {
     var pushMode     : Int = Constants.shared.pushMode
     let fullName     : String
     let referralCode : String?
+    var createNewAcc : Bool?
+}
+
+public struct RestoreUserRequest: Codable {
+    let userId          : String
+    var platform        : Int = Constants.platform
+    let deviceId        : String
+    var uniqueId        : String = UUID().uuidString
+    var pushMode        : Int = Constants.shared.pushMode
+    let loginType       : Int
+}
+
+public struct RestoreUserResponse: Codable {
+    var message : String?
+    var data    : RestoreUserResponseData?
+}
+
+public struct RestoreUserResponseData: Codable {
+    var userId                      : String?
+    var fullName                    : String?
+    var email                       : String?
+    var isNewUser                   : Bool?
+    var signupCompleted             : Bool?
+    var onboardingStatus            : Bool?
+    var accessToken                 : String?
+    var refreshToken                : String?
 }

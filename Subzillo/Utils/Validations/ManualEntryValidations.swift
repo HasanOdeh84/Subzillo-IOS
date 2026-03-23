@@ -62,12 +62,12 @@ struct ManualEntryValidations {
     }
     
     //MARK: - Manual entry
-    func updateManualEntry(input: SubscriptionData) -> String? {
+    func updateManualEntry(input: SubscriptionData) -> (String, HighlightType)? {
         if (input.serviceName == nil || input.serviceName ?? "" == "") {
-            return "Please enter service name"
+            return ("Please enter service name", .service)
         }
         if input.categoryName ?? "" == ""{
-            return "Please select category"
+            return ("Please select category", .category)
         }
 //        if (input.categoryId == nil || input.categoryId ?? "" == ""){
 //            return "Please select category"
@@ -82,13 +82,13 @@ struct ManualEntryValidations {
 //            return "Currency selection required"
 //        }
         if (input.subscriptionType == nil || input.subscriptionType ?? "" == "") {
-            return "Please select plan type"
+            return ("Please select plan type", .planType)
         }
         if (input.billingCycle == nil || input.billingCycle ?? "" == ""){
-            return "Please select a billing cycle"
+            return ("Please select a billing cycle", .billing)
         }
         if (input.nextPaymentDate == nil || input.nextPaymentDate ?? "" == ""){
-            return "Please select next charge date"
+            return ("Please select next charge date", .nextCharge)
         }
         return nil // All validations passed
     }
