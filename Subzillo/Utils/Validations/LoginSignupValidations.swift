@@ -41,6 +41,8 @@ struct LoginSignupValidations {
             if input.phoneNumber.isEmpty{
                 print("number is here\(input.phoneNumber)")
                 return "Phone number is required".localized
+            }else if !Validations().isValidMobile(input.phoneNumber){
+                return "Invalid mobile number"// must be between 6 to 15 digits"
             }
         }else{
             if input.email.trimmed.isEmpty {

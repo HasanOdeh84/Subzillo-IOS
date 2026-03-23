@@ -650,7 +650,7 @@ class NetworkRequest {
 //                                }
 //                            }
 //                        }
-                        if fromSiri || endPoint == .fetchProviderData || fromVerifyOtpBottom || endPoint == .subscribePlan{
+                        if fromSiri || endPoint == .fetchProviderData || fromVerifyOtpBottom || endPoint == .subscribePlan || endPoint == .addCard{
                             
                         }else{
                             ToastManager.shared.showToast(message: apiError.localizedDescription,style: .error)

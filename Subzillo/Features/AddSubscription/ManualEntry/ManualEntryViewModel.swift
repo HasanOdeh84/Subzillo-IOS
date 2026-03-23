@@ -24,6 +24,8 @@ class ManualEntryViewModel: ObservableObject {
     @Published var isManualEntrySuccess             : Bool?
     @Published var isEditEntrySuccess               : Bool?
     @Published var isAdd                            : Bool = false
+    @Published var isAddToast                       : Bool = false
+    @Published var isAddError                       : String?
     @Published var isAddFamilyMember                : Bool = false
     
     init(router: AppIntentRouter = .shared,sessionManager: SessionManager = .shared){
@@ -100,10 +102,14 @@ class ManualEntryViewModel: ObservableObject {
     
     func addCard(input:AddCardRequest) {
         isAdd = false
+        isAddToast = false
+        isAddError = nil
         apiReference.postApi(endPoint: APIEndpoint.addCard, method: .POST,token: authKey,body: input,showLoader: true, responseType: GeneralResponse.self)
             .sink { [unowned self] completion in
                 if case let .failure(error) = completion {
                     self.handleError(error,endPoint: APIEndpoint.addCard)
+                    isAddToast = true
+                    isAddError = error.localizedDescription
                 }
             }
         receiveValue: { response in

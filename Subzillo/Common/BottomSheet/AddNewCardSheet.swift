@@ -29,11 +29,12 @@ struct AddNewCardSheet: View {
     //MARK: - body
     var body: some View {
         VStack {
-            Capsule()
-                .fill(Color.grayCapsule)
-                .frame(width: 150, height: 5)
-                .padding(.top, 24)
             ScrollView{
+                Capsule()
+                    .fill(Color.grayCapsule)
+                    .frame(width: 150, height: 5)
+                    .padding(.top, 24)
+                
                 VStack(spacing: 24) {
                     Text(LocalizedStringKey(isEdit ? "Edit card" : "Add new card"))
                         .font(.appRegular(24))
@@ -104,6 +105,11 @@ struct AddNewCardSheet: View {
                 shouldCallAPI = true
                 action()
                 dismiss()
+            }
+        }
+        .onChange(of: addSubscriptionVM.isAddError) { value in
+            if addSubscriptionVM.isAddError != nil || addSubscriptionVM.isAddError != ""{
+                toastManager.showToast(message: addSubscriptionVM.isAddError ?? "", style: .error)
             }
         }
     }

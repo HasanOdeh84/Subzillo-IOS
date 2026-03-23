@@ -21,7 +21,7 @@ class NotificationsViewModel: ObservableObject {
     
     init(router: AppIntentRouter = .shared) {
         self.router = router
-        notificationsList.append(NotificationData(id: "1", title: "Hi", message: "Okay bye", readStatus: true, isSelected: false))
+//        notificationsList.append(NotificationData(id: "1", title: "Hi", message: "Okay bye", readStatus: true, isSelected: false))
     }
     
     func notificationsListApi() {
