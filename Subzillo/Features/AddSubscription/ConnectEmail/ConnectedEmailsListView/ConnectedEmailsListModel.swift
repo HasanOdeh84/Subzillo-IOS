@@ -51,6 +51,7 @@ struct ListConnectedEmailsResponse: Codable {
 
 struct ListConnectedEmailsData: Codable, Hashable, Identifiable {
     var id                  : String?
+    var logId               : String?
     let email               : String?
     let type                : Int?          // 1 - Gmail, 2 - Microsoft, 3 - Yahoo
     let lastSyncDate        : String?

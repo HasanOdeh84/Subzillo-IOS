@@ -132,6 +132,7 @@ struct LoginView: View {
                     
                     SignInBorderButton(title: "Continue with Apple", buttonImage: "apple_withoutPadding"){
                         isLoginClicked = false
+                        createNewAcc = false
                         loginType = .apple
                         loginVM.socialLogin(loginType: .apple,deviceId: appDelegate.deviceToken ?? "", createNewAcc: createNewAcc)
                     }
@@ -139,6 +140,7 @@ struct LoginView: View {
                     
                     SignInBorderButton(title: "Continue with Google", buttonImage: "google"){
                         isLoginClicked = false
+                        createNewAcc = false
                         loginType = .google
                         loginVM.socialLogin(loginType: .google,deviceId: appDelegate.deviceToken ?? "", createNewAcc: createNewAcc)
                     }
@@ -146,6 +148,7 @@ struct LoginView: View {
                     
                     SignInBorderButton(title: "Continue with Microsoft", buttonImage: "microsoft"){
                         isLoginClicked = false
+                        createNewAcc = false
                         loginType = .microsoft
                         loginVM.socialLogin(loginType: .microsoft,deviceId: appDelegate.deviceToken ?? "", createNewAcc: createNewAcc)
                     }

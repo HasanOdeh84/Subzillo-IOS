@@ -15,6 +15,7 @@ struct CustomButton: View {
     var height      : CGFloat = 56
     var cornerRadius: CGFloat = 8
     var buttonImage : String = ""
+    var isShare     : Bool = false
     var action      : () -> Void = {}
     
     var body: some View {
@@ -38,7 +39,20 @@ struct CustomButton: View {
             }
         }
         .frame(maxWidth: .infinity, minHeight: height)
-        .background(background)
+//        .background(isShare ? LinearGradient(colors: [Color.linearGradient3, Color.linearGradient4, Color.blueMain700],
+//                                             startPoint: .top,
+//                                             endPoint: .bottom) : background)
+        .background(
+            isShare
+            ? AnyView(
+                LinearGradient(
+                    colors: [Color.linearGradient3, Color.linearGradient4, Color.blueMain700],
+                    startPoint: .top,
+                    endPoint: .bottom
+                )
+            )
+            : AnyView(background)
+        )
         .cornerRadius(cornerRadius)
     }
 }

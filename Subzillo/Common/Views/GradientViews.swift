@@ -72,6 +72,7 @@ struct GradienCustomeView: View {
     var subTitle        : String
     var imageName       : String = "howItWorks"
     var isImage         = true
+    var isInviteFriends : Bool = false
     
     var body: some View {
         //Button(action: action) {
@@ -97,9 +98,17 @@ struct GradienCustomeView: View {
                         .font(.appSemiBold(16))
                         .foregroundColor(.white)
                     if !isImage{
-                        VStack(alignment: .leading, spacing: 5) {
-                            instructionRow(number: "•", text: "We never store full email content")
-                            instructionRow(number: "•", text: "We cannot send emails or access personal messages")
+                        if isInviteFriends{
+                            VStack(alignment: .leading, spacing: 5) {
+                                instructionRow(number: "•", text: "Invite friends using your link")
+                                instructionRow(number: "•", text: "You earn rewards only when they sign up and subscribe")
+                                instructionRow(number: "•", text: "Each successful referral moves you closer to the next reward")
+                            }
+                        }else{
+                            VStack(alignment: .leading, spacing: 5) {
+                                instructionRow(number: "•", text: "We never store full email content")
+                                instructionRow(number: "•", text: "We cannot send emails or access personal messages")
+                            }
                         }
                     }else{
                         Text(subTitle)

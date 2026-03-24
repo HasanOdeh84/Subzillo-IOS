@@ -9,6 +9,7 @@ struct SwipeableMailRow: View {
     @Binding var isScrollDisabled   : Bool
     let onDelete                    : () -> Void
     let onSync                      : () -> Void
+    let onSyncing                   : () -> Void
     let onView                      : () -> Void
     let onDownloadLogs              : () -> Void
     @State private var offset       : CGFloat = 0
@@ -64,6 +65,7 @@ struct SwipeableMailRow: View {
             // Top Card Layer
             ConnectedEmailItemView(email            : email,
                                    onSync           : onSync,
+                                   onSyncing        : onSyncing,
                                    onView           : onView,
                                    onDownloadLogs   : onDownloadLogs,
                                    isIntegrations   : isIntegrations)

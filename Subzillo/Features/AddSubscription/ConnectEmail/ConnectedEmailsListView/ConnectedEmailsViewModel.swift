@@ -143,6 +143,14 @@ class ConnectedEmailsViewModel: ObservableObject {
         }
     }
     
+    func syncingEmail(_ email: ListConnectedEmailsData) {
+        if email.type ?? 1 == 3 {
+            ToastManager.shared.showToast(message: "Coming soon in S4", style: .info)
+        }else{
+            navigate(to: .emailSyncProgress(logId: email.logId ?? ""))
+        }
+    }
+    
     func viewEmail(_ email: ListConnectedEmailsData) {
         if email.type ?? 1 == 3 {
             ToastManager.shared.showToast(message: "Coming soon in S4", style: .info)

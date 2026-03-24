@@ -3,6 +3,7 @@ import SwiftUI
 struct ConnectedEmailItemView: View {
     let email                   : ListConnectedEmailsData
     let onSync                  : () -> Void
+    let onSyncing               : () -> Void
     let onView                  : () -> Void
     let onDownloadLogs          : () -> Void
     @State var provider         : EmailProvider = EmailProvider.gmail
@@ -105,6 +106,9 @@ struct ConnectedEmailItemView: View {
                             .stroke(Color.blueMain700, lineWidth: 1)
                     )
                     .opacity(0.6)
+                    .onTapGesture {
+                        onSyncing()
+                    }
                 viewButton(title: "View")
             }
         } else if syncStatus == 2 && viewStatus {

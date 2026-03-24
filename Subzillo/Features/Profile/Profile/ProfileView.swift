@@ -19,10 +19,10 @@ struct ProfileView: View {
     @EnvironmentObject var router           : AppIntentRouter
     @State var appVersion                   = ""
     @State var buildNumber                  = ""
-    @State var fullName                     = "Alaa Hassan"
-    @State var email                        = "allhassn@gmail.com"
-    @State var mobile                       = "+971 123-4567"
-    @State var currency                     = "USD"
+    @State var fullName                     = ""
+    @State var email                        = ""
+    @State var mobile                       = ""
+    @State var currency                     = ""
     @EnvironmentObject var commonApiVM      : CommonAPIViewModel
     @State var selectedAccountType          : AccountType?
     @State private var showVerifyOtpSheet   = false
@@ -50,7 +50,6 @@ struct ProfileView: View {
                 }
             })
             .padding(.top, 50)
-//            .padding(.horizontal, 20)
             
             ScrollView(showsIndicators: false){
                 VStack(spacing: 24){
@@ -77,8 +76,8 @@ struct ProfileView: View {
                                     .resizable()
                                     .scaledToFit()
                                     .frame(width: 96, height: 96)
-                                    .foregroundColor(.gray)
-                                    .background(Color.white)
+//                                    .foregroundColor(.gray)
+//                                    .background(Color.white)
                                     .overlay(
                                         RoundedRectangle(cornerRadius: 96/2)
                                             .stroke(Color.white, lineWidth: 2)
@@ -171,7 +170,6 @@ struct ProfileView: View {
                                 }
                             }
                         }
-//                        .padding(.bottom, 14)
                         if let planExpiresAt = commonApiVM.userInfoResponse?.planExpiresAt {
                             if planExpiresAt != ""{
                                 Text(LocalizedStringKey("Next renewal is \(planExpiresAt.toLocalizedStringDate().lowercased())"))
@@ -283,8 +281,8 @@ struct ProfileView: View {
                         ProfileItem(title: "Invite friends", image: "user-add-02", action:{
                             Constants.FeatureConfig.performS4Action {
                                 if Constants.FeatureConfig.featurePhase == .all{
-                                    ToastManager.shared.showToast(message: "Coming soon in S4", style: .info)
-//                                    profileVM.navigate(to: .inviteFriends(uLink: commonApiVM.userInfoResponse?.referralLink))
+//                                    ToastManager.shared.showToast(message: "Coming soon in S4", style: .info)
+                                    profileVM.navigate(to: .inviteFriends(uLink: commonApiVM.userInfoResponse?.referralLink))
                                 }else{
                                     ToastManager.shared.showToast(message: "Coming soon in S4", style: .info)
                                 }
@@ -300,14 +298,6 @@ struct ProfileView: View {
                     
                     CustomBorderButton(title: "Logout") {
                         showDeletePopup = true
-//                        AlertManager.shared.showAlert(
-//                            title       : "Logout",
-//                            message     : "Are you sure you want to logout?",
-//                            cancelText  : "Cancel",
-//                            okAction    : {
-//                                loginVM.logout(input: LogoutRequest(userId: Constants.getUserId()))
-//                            }
-//                        )
                     }
                     
                     HStack(spacing: 4) {
@@ -321,7 +311,6 @@ struct ProfileView: View {
                     }
                     .padding(.bottom,90)
                 }
-//                .padding(20)
                 .navigationBarBackButtonHidden(true)
                 .background(MediaPickerHost().allowsHitTesting(false)) // host
                 .onAppear{
@@ -358,7 +347,7 @@ struct ProfileView: View {
                 accountTypeVerify   = type
                 profileVM.updateProfile(input: input)
             })
-            .presentationDetents([.height(350)]) // Increased height slightly to prevent layout cut-off
+            .presentationDetents([.height(350)])
             .presentationDragIndicator(.hidden)
         }
         .sheet(isPresented: $showVerifyOtpSheet) {
@@ -421,10 +410,12 @@ struct ProfileView: View {
     //MARK: - User defined methods
     func updateUserInfo()
     {
-        fullName   = commonApiVM.userInfoResponse?.fullName ?? ""//"Alekya"//
-        email      = commonApiVM.userInfoResponse?.email ?? ""//"alekhya@krify.com"//
-        mobile     = "\(commonApiVM.userInfoResponse?.countryCode ?? "") \(commonApiVM.userInfoResponse?.phoneNumber ?? "")"//"+91 9676442388"//
-        currency   = commonApiVM.userInfoResponse?.preferredCurrency ?? Constants.shared.regionCode//"INR"//
+        fullName   = commonApiVM.userInfoResponse?.fullName ?? ""
+        email      = commonApiVM.userInfoResponse?.email ?? ""
+        if commonApiVM.userInfoResponse?.phoneNumber ?? "" != ""{
+            mobile     = "\(commonApiVM.userInfoResponse?.countryCode ?? "") \(commonApiVM.userInfoResponse?.phoneNumber ?? "")"
+        }
+        currency   = commonApiVM.userInfoResponse?.preferredCurrency ?? Constants.shared.regionCode
     }
     
     func getUserDetailsApi(){

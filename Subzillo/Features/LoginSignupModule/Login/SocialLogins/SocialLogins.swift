@@ -158,6 +158,7 @@ class SocialLogins:NSObject, ObservableObject{
         application.acquireToken(with: parameters) { (result, error) in
             if let error = error {
                 print("Microsoft login failed: \(error.localizedDescription)")
+                ToastManager.shared.showToast(message: "Microsoft login failed. Please try again.", style: .error)
                 completion(nil)
                 return
             }

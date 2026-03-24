@@ -15,11 +15,23 @@ struct ExtractedSubscriptionsView: View {
     @State private var deleteSheetHeight        : CGFloat = .zero
     @State var subscriptions                    = [SubscriptionData]()
     @State var fromEmailSyncScreen              : Bool = false
+    @State private var selectedSegment          : Segment? = .first
 
 //    init(subscriptions: [SubscriptionData], fromEmailSyncScreen:Bool = false) {
 //        _viewModel = StateObject(wrappedValue: ExtractedSubscriptionsViewModel(subscriptions: subscriptions))
 //        self.fromEmailSyncScreen = fromEmailSyncScreen
 //    }
+    
+    private var filteredSubscriptions: [SubscriptionData] {
+        viewModel.subscriptions.filter { sub in
+            let isInactive = Constants.shared.isSubscriptionExpired(nextPaymentDate: sub.nextPaymentDate ?? "")
+            if selectedSegment == .first {
+                return !isInactive // Active
+            } else {
+                return isInactive // Inactive
+            }
+        }
+    }
     
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -58,28 +70,45 @@ struct ExtractedSubscriptionsView: View {
             }
             .padding(.top, 20)
             
+            // MARK: Toggle
+            PlanToggleView(selectedSegment : $selectedSegment,
+                           leftText        : "Active",
+                           rightText       : "Inactive")
+            .padding(.top, 20)
+            
             // MARK: - Subscriptions List
             ScrollView {
-                VStack(spacing: 0) {
-                    ForEach(viewModel.subscriptions, id: \.id) { sub in
-                        SubscriptionRowEmail(subscription: sub, isSelected: viewModel.selectedIds.contains(sub.id ?? ""), onToggle: {
-                            viewModel.toggleSelection(for: sub.id ?? "")
-                        })
-                        
-                        if sub.id != viewModel.subscriptions.last?.id {
-                            Divider()
-                                .background(Color.neutral300Border)
+                if filteredSubscriptions.count != 0{
+                    VStack(spacing: 0) {
+                        ForEach(filteredSubscriptions, id: \.id) { sub in
+                            SubscriptionRowEmail(subscription: sub, isSelected: viewModel.selectedIds.contains(sub.id ?? ""), onToggle: {
+                                viewModel.toggleSelection(for: sub.id ?? "")
+                            })
+                            
+                            if sub.id != filteredSubscriptions.last?.id {
+                                Divider()
+                                    .background(Color.neutral300Border)
+                            }
                         }
                     }
+                    .background(Color.white)
+                    .cornerRadius(12)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 12)
+                            .stroke(Color.neutral300Border, lineWidth: 1)
+                    )
+                    .padding(.top, 12)
+                    .padding(.horizontal, 2)
+                }else{
+                    HStack{
+                        Spacer()
+                        Text("No data found")
+                            .padding(30)
+                            .foregroundStyle(Color.gray)
+                            .font(.appRegular(16))
+                        Spacer()
+                    }
                 }
-                .background(Color.white)
-                .cornerRadius(12)
-                .overlay(
-                    RoundedRectangle(cornerRadius: 12)
-                        .stroke(Color.neutral300Border, lineWidth: 1)
-                )
-                .padding(.top, 12)
-                .padding(.horizontal, 2)
             }
             .padding(.top, 10)
             
@@ -120,11 +149,7 @@ struct ExtractedSubscriptionsView: View {
         .navigationBarBackButtonHidden()
         .background(Color.neutralBg100)
         .sheet(isPresented: $viewModel.showDeletePopup , onDismiss: {
-//            if !selectionMode {
-//                for i in subscriptionsList.indices {
-//                    subscriptionsList[i].isSelected = false
-//                }
-//            }
+            // onDismiss logic
         }) {
             InfoAlertSheet(
                 onDelegate: {
@@ -163,7 +188,6 @@ struct SubscriptionRowEmail: View {
                 Image(isSelected ? "Checkmark" : "UnCheckmark")
                     .resizable()
                     .frame(width: 24, height: 24)
-//                    .foregroundColor(isSelected ? Color.blueMain700 : Color.neutral400)
             }
             
             // Service Name and Status
@@ -171,10 +195,11 @@ struct SubscriptionRowEmail: View {
                 Text(subscription.serviceName ?? "Unknown")
                     .font(.appRegular(14))
                     .foregroundColor(Color.neutralMain700)
-                let status = Constants.shared.isSubscriptionExpired(nextPaymentDate: subscription.nextPaymentDate ?? "")
-                Text(status ? "InActive" : "Active")
-                    .font(.appBold(14))
-                    .foregroundColor(status ? .disCardRed : .greenLG)
+                
+//                let status = Constants.shared.isSubscriptionExpired(nextPaymentDate: subscription.nextPaymentDate ?? "")
+//                Text(status ? "InActive" : "Active")
+//                    .font(.appBold(14))
+//                    .foregroundColor(status ? .disCardRed : .greenLG)
             }
             
             Spacer()

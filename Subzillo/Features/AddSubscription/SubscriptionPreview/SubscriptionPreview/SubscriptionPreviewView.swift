@@ -455,12 +455,12 @@ struct SubscriptionPreviewView: View {
                                 .foregroundColor(Color.disCardRed)
                         }
                     }
-                    .onChange(of: subscriptionPreviewVM.isDiscardSuccess) { newValue in
-                        if newValue == true {
-                            handleLocalDiscard()
-                            subscriptionPreviewVM.isDiscardSuccess = false
-                        }
-                    }
+//                    .onChange(of: subscriptionPreviewVM.isDiscardSuccess) { newValue in
+//                        if newValue == true {
+//                            handleLocalDiscard()
+//                            subscriptionPreviewVM.isDiscardSuccess = false
+//                        }
+//                    }
                     .sheet(isPresented: $showDiscardPopup) {
                         InfoAlertSheet(
                             onDelegate: {

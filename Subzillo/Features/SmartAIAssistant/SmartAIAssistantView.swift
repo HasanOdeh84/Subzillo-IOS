@@ -23,9 +23,11 @@ struct SmartAIAssistantView: View {
             VStack(spacing: 0) {
                 if let url = getChatbotURL() {
                     ChatbotWebView(url: url, isLoading: $isLoading, loadError: $loadError)
-//                        .ignoresSafeArea(.container, edges: .bottom)
-//                        .ignoresSafeArea(edges: .bottom)
+                    //                        .id(refreshID)
+                    //                        .ignoresSafeArea(.container, edges: .bottom)
+                    //                        .ignoresSafeArea(edges: .bottom)
                         .padding(.top, 40)
+                        .ignoresSafeArea(.keyboard)
                     //                        .padding(.bottom, 10)
                 } else {
                     Text("Invalid URL")
@@ -34,28 +36,33 @@ struct SmartAIAssistantView: View {
             }
             //            .frame(maxWidth: .infinity, maxHeight: .infinity)
             
-            if loadError {
-                errorOverlay
-            }
+            errorOverlay
+                .opacity(loadError ? 1 : 0)
+                .zIndex(2)
             
-            if isLoading{
-                ProgressView()
-                    .scaleEffect(1.2)
-                            .zIndex(2)
-            }
+            ProgressView()
+                .scaleEffect(1.2)
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .opacity(isLoading ? 1 : 0)
+                .zIndex(2)
             
-            //            if !isLoading{
-            
-            Button(action: {
-                dismiss()
-            }) {
-                Image("back_gray")
-                    .frame(width: 30, height: 30)
+            // Back Button
+            VStack {
+                HStack {
+                    Button(action: {
+                        dismiss()
+                    }) {
+                        Image("back_gray")
+                            .frame(width: 30, height: 30)
+                    }
+                    .padding(.leading, 24)
+                    .padding(.top, 70)
+                    
+                    Spacer()
+                }
+                Spacer()
             }
-            .padding(.top, 70)
-            .padding(.leading, 24)
-            .zIndex(1)
-            //            }
+            .zIndex(3)
         }
         .background(Color.neutralBg100)
         .ignoresSafeArea(edges: .top)
@@ -113,6 +120,7 @@ struct SmartAIAssistantView: View {
             URLQueryItem(name: "currency", value: commonApiVM.userInfoResponse?.preferredCurrency ?? ""),
             URLQueryItem(name: "userId", value: Constants.getUserId()),
             URLQueryItem(name: "profilePicUrl", value: commonApiVM.userInfoResponse?.profileImage ?? ""),
+            URLQueryItem(name: "source", value: "mobile")
         ]
         return components?.url
     }

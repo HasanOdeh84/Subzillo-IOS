@@ -93,7 +93,9 @@ enum APIEndpoint: String {
     case appUpdate                      = "/appUpdate"
     case syncStatus                     = "/syncStatus"
     case iCloudConnect                  = "/iCloudConnect"
-    case restoreUser                  = "/restoreUser"
+    case restoreUser                    = "/restoreUser"
+    case rewards                        = "/rewards"
+    case redeemReward                   = "/redeemReward"
 
     //new api's
     case deleteAccount                  = "/deleteAccount"

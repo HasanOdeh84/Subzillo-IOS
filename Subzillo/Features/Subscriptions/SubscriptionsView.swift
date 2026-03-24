@@ -962,7 +962,7 @@ struct SwipeActionCard<Content: View>: View {
                         .foregroundColor(.white)
                 }
                 .frame(width: 70, height: 74)
-                .background(Color("green"))
+                .background(Color.greenClr)
                 .clipShape(
                     RoundedCorner(
                         radius: 8,
