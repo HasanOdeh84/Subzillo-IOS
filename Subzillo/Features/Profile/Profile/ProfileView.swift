@@ -281,7 +281,6 @@ struct ProfileView: View {
                         ProfileItem(title: "Invite friends", image: "user-add-02", action:{
                             Constants.FeatureConfig.performS4Action {
                                 if Constants.FeatureConfig.featurePhase == .all{
-//                                    ToastManager.shared.showToast(message: "Coming soon in S4", style: .info)
                                     profileVM.navigate(to: .inviteFriends(uLink: commonApiVM.userInfoResponse?.referralLink))
                                 }else{
                                     ToastManager.shared.showToast(message: "Coming soon in S4", style: .info)

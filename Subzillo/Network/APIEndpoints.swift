@@ -9,7 +9,7 @@ enum urlType:Int{
     case prod   = 3
 }
 
-let Environment = urlType.dev
+let Environment = urlType.qa
 var baseurl: String {
     switch Environment {
     case .dev:
@@ -94,7 +94,7 @@ enum APIEndpoint: String {
     case syncStatus                     = "/syncStatus"
     case iCloudConnect                  = "/iCloudConnect"
     case restoreUser                    = "/restoreUser"
-    case rewards                        = "/rewards"
+    case userRewardsList                = "/userRewardsList"
     case redeemReward                   = "/redeemReward"
 
     //new api's

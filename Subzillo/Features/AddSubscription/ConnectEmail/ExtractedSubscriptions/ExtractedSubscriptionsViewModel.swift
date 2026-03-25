@@ -56,8 +56,8 @@ class ExtractedSubscriptionsViewModel: ObservableObject {
             return false
         }
         
-        router.navigate(to: .subscriptionPreviewView(
-//        router.navigateAndReplace(to: .subscriptionPreviewView(
+//        router.navigate(to: .subscriptionPreviewView(
+        router.navigateAndReplace(to: .subscriptionPreviewView(
             subscriptionsData   : selectedSubs,
             content             : "",
             isFromImage         : false,

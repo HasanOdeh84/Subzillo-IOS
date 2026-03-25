@@ -24,7 +24,7 @@ struct Constants{
     }
     
     struct FeatureConfig {
-        static let currentPhase: AppPhase = .s5
+        static let currentPhase: AppPhase = .s4
         static let featurePhase: FeaturePhase = .all
         
         static var isS4Enabled: Bool {
@@ -86,9 +86,9 @@ struct Constants{
     
     //    static let webClientId                          = "955282043815-shgvrph5q1jiogm6es7lc143jad27vk0.apps.googleusercontent.com"
     
-        static let webClientId                          = "955282043815-uither25lbuv22smj2tdhje513ilg5je.apps.googleusercontent.com" //soniya for dev
+//        static let webClientId                          = "955282043815-uither25lbuv22smj2tdhje513ilg5je.apps.googleusercontent.com" //soniya for dev
     
-//    static let webClientId                          = "955282043815-2bdqjsqk1ailb6dbvron7td1os6hipg6.apps.googleusercontent.com" //new soniya for QA
+    static let webClientId                          = "955282043815-2bdqjsqk1ailb6dbvron7td1os6hipg6.apps.googleusercontent.com" //new soniya for QA
     
 //        static let webClientId                          = "955282043815-4rckggvbc5m8dtsrtdhecrjl25e0lbg6.apps.googleusercontent.com" //new soniya for staging
     
@@ -98,6 +98,9 @@ struct Constants{
     static let chatbotUrl                           = "http://10.1.10.77:5173/public-chat"
     static let domain                               = "https://api.subzillo.com"
     
+    static let webhookUrl_QA = "https://qasubzillo.krify.com/api/appleSubscribeWebhook" //QA
+    static let webhookUrl_staging = "https://stagingsubzillo.krify.com/api/appleSubscribeWebhook" //staging
+
     let regionCode      = Locale.current.region?.identifier ?? "US"
     let currencyCode    = Locale.current.currency?.identifier ?? "USD"
     let currencySymbol  = Locale.current.currencySymbol ?? "$"

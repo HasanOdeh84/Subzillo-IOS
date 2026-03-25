@@ -208,9 +208,12 @@ struct LoginView: View {
                         if isLoginClicked{
                             loginApi()
                         }else{
-                            loginVM.socialLogin(loginType   : loginType,
-                                                deviceId    : appDelegate.deviceToken ?? "",
-                                                createNewAcc: createNewAcc)
+//                            loginVM.socialLogin(loginType   : loginType,
+//                                                deviceId    : appDelegate.deviceToken ?? "",
+//                                                createNewAcc: createNewAcc)
+                            loginVM.socialLogin_createAcc(loginType     : loginType,
+                                                          deviceId      : appDelegate.deviceToken ?? "",
+                                                          createNewAcc  : createNewAcc)
                         }
                     },
                     onNo: {

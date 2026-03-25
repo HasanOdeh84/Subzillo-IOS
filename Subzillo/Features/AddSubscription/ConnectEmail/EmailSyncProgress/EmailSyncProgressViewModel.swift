@@ -26,6 +26,7 @@ class EmailSyncProgressViewModel: ObservableObject {
     }
     
     func startPolling(logId:String) {
+        self.fetchSyncProgress(logId:logId)
         // Poll every 3 seconds
         pollingCancellable = Timer.publish(every: 3, on: .main, in: .common)
             .autoconnect()
@@ -64,7 +65,7 @@ class EmailSyncProgressViewModel: ObservableObject {
             self.stopPolling()
             if data.subscriptionsFound == 0{
                 self.stopPolling()
-                ToastManager.shared.showToast(message: "No Subscriptions found", style: .error)
+//                ToastManager.shared.showToast(message: "No Subscriptions found", style: .error)
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
                     AppIntentRouter.shared.pop(count: 1)
                 }

@@ -18,6 +18,8 @@ class LoginViewModel: ObservableObject {
     private let sessionManager          : SessionManager
     private var cancellables            = Set<AnyCancellable>()
     @Published var socialLoginFullName  : String = ""
+    var socialLoginRequest              : SocialLoginRequest?
+    var fileData                        : [MultiPartFileInput]?
 
     init(router: AppIntentRouter = .shared,sessionManager: SessionManager = .shared) {
         self.router = router
@@ -65,53 +67,78 @@ class LoginViewModel: ObservableObject {
         if loginType == .google{
             SocialLogins.shared.signInWithGoogle { [weak self] data in
                 guard let data else { return }
-                self?.socialLoginApi(input: SocialLoginRequest(authProvider         : data.loginType,
-                                                               email                : data.emailAddress ?? "",
-                                                               socialId             : data.id ?? "",
-                                                               deviceId             : deviceId,
-                                                               fullName             : data.fullName ?? ""
-                                                               ,
-                                                               referralCode         : Constants.getUserDefaultsValue(for: Constants.referrerId),
-                                                               createNewAcc         : createNewAcc
-                                                              ),
-                                     fileData: [MultiPartFileInput(
-                                        fieldName   : "profile",
-                                        fileName    : filename,
-                                        mimeType    : "image/jpeg",
-                                        fileData    : data.profileImage ?? Data()
-                                     )])
+                let input = SocialLoginRequest(authProvider         : data.loginType,
+                                               email                : data.emailAddress ?? "",
+                                               socialId             : data.id ?? "",
+                                               deviceId             : deviceId,
+                                               fullName             : data.fullName ?? ""
+                                               ,
+                                               referralCode         : Constants.getUserDefaultsValue(for: Constants.referrerId),
+                                               createNewAcc         : createNewAcc)
+                let fileData: [MultiPartFileInput] = [MultiPartFileInput(
+                    fieldName   : "profile",
+                    fileName    : filename,
+                    mimeType    : "image/jpeg",
+                    fileData    : data.profileImage ?? Data()
+                 )]
+                self?.socialLoginApi(input      : input,
+                                     fileData   : fileData)
+                self?.socialLoginRequest = input
+                self?.fileData           = fileData
             }
         }else if loginType == .apple{
             SocialLogins.shared.signInWithApple { [weak self] data in
                 guard let data else {
                     return
                 }
-                self?.socialLoginApi(input: SocialLoginRequest(authProvider         : data.loginType,
-                                                               email                : data.emailAddress ?? "",
-                                                               socialId             : data.id ?? "",
-                                                               deviceId             : deviceId,
-                                                               fullName             : data.fullName ?? ""
-                                                               ,
-                                                               referralCode         : Constants.getUserDefaultsValue(for: Constants.referrerId),
-                                                               createNewAcc         : createNewAcc
-                                                              ),
-                                     fileData: [])
+                let input = SocialLoginRequest(authProvider         : data.loginType,
+                                               email                : data.emailAddress ?? "",
+                                               socialId             : data.id ?? "",
+                                               deviceId             : deviceId,
+                                               fullName             : data.fullName ?? ""
+                                               ,
+                                               referralCode         : Constants.getUserDefaultsValue(for: Constants.referrerId),
+                                               createNewAcc         : createNewAcc)
+                self?.socialLoginApi(input      : input,
+                                     fileData   : [])
+                self?.socialLoginRequest = input
             }
         }else if loginType == .microsoft{
             SocialLogins.shared.signInWithMicrosoft { [weak self] data in
                 guard let data else {
                     return
                 }
-                self?.socialLoginApi(input: SocialLoginRequest(authProvider         : data.loginType,
-                                                               email                : data.emailAddress ?? "",
-                                                               socialId             : data.id ?? "",
-                                                               deviceId             : deviceId,
-                                                               fullName             : data.fullName ?? ""
-                                                               ,
-                                                               referralCode         : Constants.getUserDefaultsValue(for: Constants.referrerId),
-                                                               createNewAcc         : createNewAcc
-                                                              ),
-                                     fileData: [])
+                let input = SocialLoginRequest(authProvider         : data.loginType,
+                                               email                : data.emailAddress ?? "",
+                                               socialId             : data.id ?? "",
+                                               deviceId             : deviceId,
+                                               fullName             : data.fullName ?? ""
+                                               ,
+                                               referralCode         : Constants.getUserDefaultsValue(for: Constants.referrerId),
+                                               createNewAcc         : createNewAcc)
+                self?.socialLoginApi(input      : input,
+                                     fileData   : [])
+                self?.socialLoginRequest = input
+            }
+        }
+    }
+    
+    func socialLogin_createAcc(loginType:loginType,deviceId: String, createNewAcc: Bool?){
+        self.socialLoginRequest?.createNewAcc = createNewAcc
+        if loginType == .google{
+            if let data = socialLoginRequest{
+                self.socialLoginApi(input      : data,
+                                    fileData   : self.fileData ?? [])
+            }
+        }else if loginType == .apple{
+            if let data = socialLoginRequest{
+                self.socialLoginApi(input      : data,
+                                    fileData   : [])
+            }
+        }else if loginType == .microsoft{
+            if let data = socialLoginRequest{
+                self.socialLoginApi(input      : data,
+                                    fileData   : [])
             }
         }
     }
@@ -128,10 +155,10 @@ class LoginViewModel: ObservableObject {
             PrintLogger.modelLog(response, type: .response, isInput: false)
             KeychainHelperApp.save(response.data?.accessToken, account: Constants.authKey)
             KeychainHelperApp.save(response.data?.refreshToken, account: Constants.refreshKey)
-            Constants.saveDefaults(value: response.data?.id, key: Constants.userId)
+            Constants.saveDefaults(value: response.data?.userId, key: Constants.userId)
             let data = LoginSignupVerifyData(verifyType             : 2,//input.authProvider?.rawValue ?? 1,
                                              email                  : input.authProvider == loginType.apple ? response.data?.email : input.email,//input.email,
-                                             userId                 : response.data?.id ?? "",
+                                             userId                 : response.data?.userId ?? "",
                                              isNewUser              : response.data?.isNewUser ?? false,
                                              isSignupCompleted      : response.data?.signupCompleted ?? false,
                                              fullName               : input.authProvider == loginType.apple ? response.data?.fullName : input.fullName,
@@ -148,8 +175,12 @@ class LoginViewModel: ObservableObject {
                     }else{
                         ToastManager.shared.showToast(message: response.message ?? "")
                         if response.data?.signupCompleted == true{
-                            AppState.shared.login()
-                            router.navigate(to: .home)
+                            if !(response.data?.onboardingStatus ?? false) && response.data?.signupCompleted == true{
+                                AppIntentRouter.shared.navigate(to: .onboarding)
+                            }else{
+                                AppState.shared.login()
+                                router.navigate(to: .home)
+                            }
                         }else{
                             router.navigate(to: .signup(fromSocialLogin:true))
                         }
@@ -187,7 +218,9 @@ class LoginViewModel: ObservableObject {
             if fromLogin{
                 self.router.navigate(to: .verifyOtp(fromLogin: true))
             }else{
-                self.router.navigate(to: .signup(fromSocialLogin:true))
+//                self.router.navigate(to: .signup(fromSocialLogin:true))
+                AppState.shared.login()
+                self.router.navigate(to: .home)
             }
         }
         .store(in: &self.subscriptions)

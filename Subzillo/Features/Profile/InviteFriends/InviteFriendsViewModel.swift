@@ -18,16 +18,16 @@ class InviteFriendsViewModel: ObservableObject {
     }
     
     func rewards(input:RewardsRequest) {
-        apiReference.postApi(endPoint: APIEndpoint.rewards, method: .POST,token: authKey,body: input,showLoader: true, responseType: RewardsResponse.self)
+        apiReference.postApi(endPoint: APIEndpoint.userRewardsList, method: .POST,token: authKey,body: input,showLoader: true, responseType: RewardsResponse.self)
             .sink { [unowned self] completion in
                 if case let .failure(error) = completion {
-                    self.handleError(error,endPoint: APIEndpoint.rewards)
+                    self.handleError(error,endPoint: APIEndpoint.userRewardsList)
                 }
             }
         receiveValue: { response in
             PrintLogger.modelLog(response, type: .response, isInput: false)
-            ToastManager.shared.showToast(message: response.message ?? "")
-            self.rewards = response.data ?? []
+//            ToastManager.shared.showToast(message: response.message ?? "")
+            self.rewards = response.data?.rewards ?? []
         }
         .store(in: &self.subscriptions)
     }

@@ -19,4 +19,5 @@ public struct ResponseContainer<T: Codable>: Codable {
 
 struct APIErrorResponse: Codable {
     let message: String
+    let errors: [String: String]?
 }

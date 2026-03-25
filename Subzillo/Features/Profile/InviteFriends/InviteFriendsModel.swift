@@ -13,18 +13,28 @@ struct RewardsRequest: Codable {
 
 public struct RewardsResponse: Codable {
     var message                 : String?
-    var data                    : [RewardsData]?
+    var data                    : RewardsResponseData?
+}
+
+struct RewardsResponseData: Codable {
+    let registeredCount     : Int?
+    let subscribedCount     : Int?
+    let availableCount      : Int?
+    let usedCredits         : Int?
+    let extraSlots          : Int?
+    let rewards             : [RewardsData]?
 }
 
 struct RewardsData: Identifiable, Codable {
-    var id                  : String { rewardId ?? UUID().uuidString }
-    let rewardId            : String?
-    let requiredReferrals   : Int?
-    let subscriptionCount   : Int?
-    let status              : Bool?
-    let redeemStatus        : Bool?
+    var id                  : String { UUID().uuidString }
+    var rewardConfigId      : String?
+    let creditsRequired     : Int?
+    let subscriptionReward  : Int?
+    let eligible            : Bool?
+    let redeemed            : Bool?
 }
 
 struct RedeemRewardRequest: Codable {
-    var rewardId: String
+    var userId          : String
+    var rewardConfigId  : String
 }

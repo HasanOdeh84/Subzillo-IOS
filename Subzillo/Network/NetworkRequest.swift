@@ -228,8 +228,8 @@ class NetworkRequest {
             self.urlSession.dataTaskPublisher(for: request)
                 .tryMap { result -> Data in
                     guard let httpResponse = result.response as? HTTPURLResponse else {
-                        if let apiError = try? JSONDecoder().decode(APIErrorResponse.self, from: result.data) {
-                            throw APIError.apiError(apiError.message)
+                        if let error = self.extractAPIError(from: result.data, endPoint: endPoint) {
+                            throw error
                         }else{
                             throw APIError.responseError
                         }
@@ -237,16 +237,16 @@ class NetworkRequest {
                     print("Status Code : \(httpResponse.statusCode)")
                     switch httpResponse.statusCode {
                     case 400 : //Error case
-                        if let apiError = try? JSONDecoder().decode(APIErrorResponse.self, from: result.data) {
-                            throw APIError.apiError(apiError.message)
+                        if let error = self.extractAPIError(from: result.data, endPoint: endPoint) {
+                            throw error
                         }else{
                             throw APIError.badRequest
                         }
                     case 401:
                         throw APIError.unauthorized
                     case 500:
-                        if let apiError = try? JSONDecoder().decode(APIErrorResponse.self, from: result.data) {
-                            throw APIError.apiError(apiError.message)
+                        if let error = self.extractAPIError(from: result.data, endPoint: endPoint) {
+                            throw error
                         }else{
                             throw APIError.internalServerError
                         }
@@ -257,8 +257,8 @@ class NetworkRequest {
                                 AppIntentRouter.shared.navigate(to: .login)
                             })
                         }
-                        if let apiError = try? JSONDecoder().decode(APIErrorResponse.self, from: result.data) {
-                            throw APIError.apiError(apiError.message)
+                        if let error = self.extractAPIError(from: result.data, endPoint: endPoint) {
+                            throw error
                         }else{
                             throw APIError.someOneLoggedInElsewhere
                         }
@@ -269,8 +269,8 @@ class NetworkRequest {
                                 AppIntentRouter.shared.navigate(to: .login)
                             })
                         }
-                        if let apiError = try? JSONDecoder().decode(APIErrorResponse.self, from: result.data) {
-                            throw APIError.apiError(apiError.message)
+                        if let error = self.extractAPIError(from: result.data, endPoint: endPoint) {
+                            throw error
                         }else{
                             throw APIError.accountBlocked
                         }
@@ -281,8 +281,8 @@ class NetworkRequest {
                                 AppIntentRouter.shared.navigate(to: .login)
                             })
                         }
-                        if let apiError = try? JSONDecoder().decode(APIErrorResponse.self, from: result.data) {
-                            throw APIError.apiError(apiError.message)
+                        if let error = self.extractAPIError(from: result.data, endPoint: endPoint) {
+                            throw error
                         }else{
                             throw APIError.notFound
                         }
@@ -386,8 +386,8 @@ class NetworkRequest {
             self.urlSession.dataTaskPublisher(for: request)
                 .tryMap { result -> Data in
                     guard let httpResponse = result.response as? HTTPURLResponse else {
-                        if let apiError = try? JSONDecoder().decode(APIErrorResponse.self, from: result.data) {
-                            throw APIError.apiError(apiError.message)
+                        if let error = self.extractAPIError(from: result.data, endPoint: endPoint) {
+                            throw error
                         }else{
                             throw APIError.responseError
                         }
@@ -396,16 +396,16 @@ class NetworkRequest {
                     
                     switch httpResponse.statusCode {
                     case 400 :
-                        if let apiError = try? JSONDecoder().decode(APIErrorResponse.self, from: result.data) {
-                            throw APIError.apiError(apiError.message)
+                        if let error = self.extractAPIError(from: result.data, endPoint: endPoint) {
+                            throw error
                         }else{
                             throw APIError.badRequest
                         }
                     case 401:
                         throw APIError.unauthorized
                     case 500:
-                        if let apiError = try? JSONDecoder().decode(APIErrorResponse.self, from: result.data) {
-                            throw APIError.apiError(apiError.message)
+                        if let error = self.extractAPIError(from: result.data, endPoint: endPoint) {
+                            throw error
                         }else{
                             throw APIError.internalServerError
                         }
@@ -416,8 +416,8 @@ class NetworkRequest {
                                 AppIntentRouter.shared.navigate(to: .login)
                             })
                         }
-                        if let apiError = try? JSONDecoder().decode(APIErrorResponse.self, from: result.data) {
-                            throw APIError.apiError(apiError.message)
+                        if let error = self.extractAPIError(from: result.data, endPoint: endPoint) {
+                            throw error
                         }else{
                             throw APIError.someOneLoggedInElsewhere
                         }
@@ -428,8 +428,8 @@ class NetworkRequest {
                                 AppIntentRouter.shared.navigate(to: .login)
                             })
                         }
-                        if let apiError = try? JSONDecoder().decode(APIErrorResponse.self, from: result.data) {
-                            throw APIError.apiError(apiError.message)
+                        if let error = self.extractAPIError(from: result.data, endPoint: endPoint) {
+                            throw error
                         }else{
                             throw APIError.accountBlocked
                         }
@@ -440,8 +440,8 @@ class NetworkRequest {
                                 AppIntentRouter.shared.navigate(to: .login)
                             })
                         }
-                        if let apiError = try? JSONDecoder().decode(APIErrorResponse.self, from: result.data) {
-                            throw APIError.apiError(apiError.message)
+                        if let error = self.extractAPIError(from: result.data, endPoint: endPoint) {
+                            throw error
                         }else{
                             throw APIError.notFound
                         }
@@ -555,8 +555,8 @@ class NetworkRequest {
             self.urlSession.dataTaskPublisher(for: request)
                 .tryMap { result -> Data in
                     guard let httpResponse = result.response as? HTTPURLResponse else {
-                        if let apiError = try? JSONDecoder().decode(APIErrorResponse.self, from: result.data) {
-                            throw APIError.apiError(apiError.message)
+                        if let error = self.extractAPIError(from: result.data, endPoint: endPoint) {
+                            throw error
                         }else{
                             throw APIError.responseError
                         }
@@ -575,16 +575,16 @@ class NetworkRequest {
                     
                     switch httpResponse.statusCode {
                     case 400 :
-                        if let apiError = try? JSONDecoder().decode(APIErrorResponse.self, from: result.data) {
-                            throw APIError.apiError(apiError.message)
+                        if let error = self.extractAPIError(from: result.data, endPoint: endPoint) {
+                            throw error
                         }else{
                             throw APIError.badRequest
                         }
                     case 401:
                         throw APIError.unauthorized
                     case 500:
-                        if let apiError = try? JSONDecoder().decode(APIErrorResponse.self, from: result.data) {
-                            throw APIError.apiError(apiError.message)
+                        if let error = self.extractAPIError(from: result.data, endPoint: endPoint) {
+                            throw error
                         }else{
                             throw APIError.internalServerError
                         }
@@ -595,8 +595,8 @@ class NetworkRequest {
                                 AppIntentRouter.shared.navigate(to: .login)
                             })
                         }
-                        if let apiError = try? JSONDecoder().decode(APIErrorResponse.self, from: result.data) {
-                            throw APIError.apiError(apiError.message)
+                        if let error = self.extractAPIError(from: result.data, endPoint: endPoint) {
+                            throw error
                         }else{
                             throw APIError.someOneLoggedInElsewhere
                         }
@@ -607,8 +607,8 @@ class NetworkRequest {
                                 AppIntentRouter.shared.navigate(to: .login)
                             })
                         }
-                        if let apiError = try? JSONDecoder().decode(APIErrorResponse.self, from: result.data) {
-                            throw APIError.apiError(apiError.message)
+                        if let error = self.extractAPIError(from: result.data, endPoint: endPoint) {
+                            throw error
                         }else{
                             throw APIError.accountBlocked
                         }
@@ -619,8 +619,8 @@ class NetworkRequest {
                                 AppIntentRouter.shared.navigate(to: .login)
                             })
                         }
-                        if let apiError = try? JSONDecoder().decode(APIErrorResponse.self, from: result.data) {
-                            throw APIError.apiError(apiError.message)
+                        if let error = self.extractAPIError(from: result.data, endPoint: endPoint) {
+                            throw error
                         }else{
                             throw APIError.notFound
                         }
@@ -728,8 +728,8 @@ class NetworkRequest {
             self.urlSession.dataTaskPublisher(for: request)
                 .tryMap { result -> Data in
                     guard let httpResponse = result.response as? HTTPURLResponse else {
-                        if let apiError = try? JSONDecoder().decode(APIErrorResponse.self, from: result.data) {
-                            throw APIError.apiError(apiError.message)
+                        if let error = self.extractAPIError(from: result.data, endPoint: endPoint) {
+                            throw error
                         }else{
                             throw APIError.responseError
                         }
@@ -737,22 +737,22 @@ class NetworkRequest {
                     print("Status Code : \(httpResponse.statusCode)")
                     switch httpResponse.statusCode {
                     case 400 :
-                        if let apiError = try? JSONDecoder().decode(APIErrorResponse.self, from: result.data) {
-                            throw APIError.apiError(apiError.message)
+                        if let error = self.extractAPIError(from: result.data, endPoint: endPoint) {
+                            throw error
                         }else{
                             throw APIError.badRequest
                         }
                     case 429 : //insufficient quota or quota exceeded cases
-                        if let apiError = try? JSONDecoder().decode(APIErrorResponse.self, from: result.data) {
-                            throw APIError.apiError(apiError.message)
+                        if let error = self.extractAPIError(from: result.data, endPoint: endPoint) {
+                            throw error
                         }else{
                             throw APIError.insufficientQuota
                         }
                     case 401:
                         throw APIError.unauthorized
                     case 500:
-                        if let apiError = try? JSONDecoder().decode(APIErrorResponse.self, from: result.data) {
-                            throw APIError.apiError(apiError.message)
+                        if let error = self.extractAPIError(from: result.data, endPoint: endPoint) {
+                            throw error
                         }else{
                             throw APIError.internalServerError
                         }
@@ -763,8 +763,8 @@ class NetworkRequest {
                                 AppIntentRouter.shared.navigate(to: .login)
                             })
                         }
-                        if let apiError = try? JSONDecoder().decode(APIErrorResponse.self, from: result.data) {
-                            throw APIError.apiError(apiError.message)
+                        if let error = self.extractAPIError(from: result.data, endPoint: endPoint) {
+                            throw error
                         }else{
                             throw APIError.someOneLoggedInElsewhere
                         }
@@ -775,8 +775,8 @@ class NetworkRequest {
                                 AppIntentRouter.shared.navigate(to: .login)
                             })
                         }
-                        if let apiError = try? JSONDecoder().decode(APIErrorResponse.self, from: result.data) {
-                            throw APIError.apiError(apiError.message)
+                        if let error = self.extractAPIError(from: result.data, endPoint: endPoint) {
+                            throw error
                         }else{
                             throw APIError.accountBlocked
                         }
@@ -787,8 +787,8 @@ class NetworkRequest {
                                 AppIntentRouter.shared.navigate(to: .login)
                             })
                         }
-                        if let apiError = try? JSONDecoder().decode(APIErrorResponse.self, from: result.data) {
-                            throw APIError.apiError(apiError.message)
+                        if let error = self.extractAPIError(from: result.data, endPoint: endPoint) {
+                            throw error
                         }else{
                             throw APIError.notFound
                         }
@@ -829,6 +829,21 @@ class NetworkRequest {
         }
     }
     
+    // MARK: - Error Helper
+    private func extractAPIError(from data: Data, endPoint: APIEndpoint) -> APIError? {
+        if let apiError = try? JSONDecoder().decode(APIErrorResponse.self, from: data) {
+            var finalMessage = apiError.message
+            if let errors = apiError.errors, !errors.isEmpty {
+                let errorText = errors.map { "\($0.key): \($0.value)" }
+                    .joined(separator: ", ")
+                finalMessage += " - \(errorText)"
+            }
+            PrintLogger.log(type: .error, message: "\(endPoint)-\(finalMessage)")
+            return .apiError(apiError.message)
+        }
+        return nil
+    }
+
     private func createMultipartBody<T: Encodable>(with input: MultipartInput<T>, boundary: String) throws -> Data {
         var body = Data()
         
@@ -846,12 +861,15 @@ class NetworkRequest {
                 if let jsonString = String(data: jsonData, encoding: .utf8) {
                     body.append(Data("\(jsonString)\r\n".utf8))
                 }
+            } else if let number = value as? NSNumber, CFGetTypeID(number) == CFBooleanGetTypeID() {
+                body.append(Data("\(number.boolValue)\r\n".utf8))
             } else {
                 body.append(Data("\(value)\r\n".utf8))
             }
         }
         
         for (index, obj) in input.fileInput.enumerated() {
+            guard !obj.fileData.isEmpty else { continue }
             body.append(Data("--\(boundary)\r\n".utf8))
             //            body.append(Data("Content-Disposition: form-data; name=\"\(obj.fieldName)\"; filename=\"profileImage\(index).png\"\r\n".utf8))
             body.append(Data("Content-Disposition: form-data; name=\"\(obj.fieldName)\"; filename=\"\(obj.fileName)\"\r\n".utf8))

@@ -668,6 +668,7 @@ struct SubscriptionPreviewView: View {
             }
             
             subscriptionData?.billingCycle = (subscriptionData?.billingCycle == "" || subscriptionData?.billingCycle == nil) ? "Monthly" : subscriptionData?.billingCycle //no need // march 20 , soniya asked to add this for safe side
+//            subscriptionData?.billingCycle = ""
             let chargeDate = Constants.shared.getNextDateByFrequency(frequency: subscriptionData?.billingCycle ?? "").formattedDate(from: "dd/MM/yyyy", to: "yyyy-MM-dd")
             if subscriptionData?.nextPaymentDate == nil || subscriptionData?.nextPaymentDate == ""{
                 subscriptionData?.nextPaymentDate = chargeDate
@@ -984,7 +985,7 @@ struct SubscriptionDetailsItem: View {
         .frame(height: 106)
         .overlay(
             RoundedRectangle(cornerRadius: 12)
-                .stroke((value == "" || isHighlight) ? Color.disCardRed : Color.neutral300Border, lineWidth: 1)
+                .stroke((value == "" || isHighlight) ? Color.disCardRed : Color.neutral300Border, lineWidth: 2)
         )
         .background(.whiteNeutralCardBG)
         .cornerRadius(12)

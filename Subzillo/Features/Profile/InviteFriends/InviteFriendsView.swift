@@ -77,6 +77,21 @@ struct InviteFriendsView: View {
                                 }
                             })
                             .frame(width: 100)
+                            
+//                            ShareLink(item: referralLink, subject: Text("Check out this amazing app!"), message: Text("Hey, I've been using this app and thought you'd like it. Use this link to download it.")) {
+//                                Text("Share")
+//                                    .font(.appSemiBold(16))
+//                                    .foregroundColor(.white)
+//                                    .padding(.horizontal, 13)
+//                                    .padding(.vertical, 11)
+//                                    .background(
+//                                        LinearGradient(colors: [Color.linearGradient3, Color.linearGradient4, Color.blueMain700],
+//                                                       startPoint: .top,
+//                                                       endPoint: .bottom)
+//                                    )
+//                                    .cornerRadius(7)
+//                                    .frame(width: 100, height: 48)
+//                            }
                         }
                     }
                     
@@ -91,9 +106,30 @@ struct InviteFriendsView: View {
                         Text("Rewards")
                             .font(.appSemiBold(24))
                             .foregroundColor(Color.neutralMain700)
-                        ForEach(viewModel.rewards) { reward in
-                            RewardItemView(reward: reward) {
-                                viewModel.redeemReward(input: RedeemRewardRequest(rewardId: reward.rewardId ?? ""))
+                        if viewModel.rewards.isEmpty {
+                            HStack{
+                                Spacer()
+                                Text("No rewards available")
+                                    .padding(30)
+                                    .foregroundStyle(Color.gray)
+                                    .font(.appRegular(16))
+                                Spacer()
+                            }
+                        }else{
+                            ForEach(viewModel.rewards) { reward in
+                                RewardItemView(reward: reward) {
+                                    if let index = viewModel.rewards.firstIndex(where: { $0.rewardConfigId == reward.rewardConfigId }) {
+                                        let hasUnredeemedPrevious = viewModel.rewards[..<index].contains { prevReward in
+                                            (prevReward.eligible ?? false) && !(prevReward.redeemed ?? false)
+                                        }
+                                        if hasUnredeemedPrevious {
+                                            ToastManager.shared.showToast(message: "Please redeem previous rewards first", style: .info)
+                                            return
+                                        }
+                                    }
+                                    viewModel.redeemReward(input: RedeemRewardRequest(userId          : Constants.getUserId(),
+                                                                                      rewardConfigId  : reward.rewardConfigId ?? ""))
+                                }
                             }
                         }
                     }
@@ -106,12 +142,7 @@ struct InviteFriendsView: View {
         .ignoresSafeArea()
         .navigationBarBackButtonHidden(true)
         .onAppear {
-            viewModel.rewards.append(RewardsData(rewardId: "ale", requiredReferrals: 5, subscriptionCount: 1, status: true, redeemStatus: true))
-            viewModel.rewards.append(RewardsData(rewardId: "malu", requiredReferrals: 10, subscriptionCount: 1, status: true, redeemStatus: false))
-            viewModel.rewards.append(RewardsData(rewardId: "anu", requiredReferrals: 15, subscriptionCount: 1, status: false, redeemStatus: false))
-            viewModel.rewards.append(RewardsData(rewardId: "mah", requiredReferrals: 20, subscriptionCount: 1, status: false, redeemStatus: false))
-            viewModel.rewards.append(RewardsData(rewardId: "son", requiredReferrals: 25, subscriptionCount: 1, status: false, redeemStatus: false))
-//            rewardsApi()
+            rewardsApi()
             if let link = uLink, !link.isEmpty {
                 referralLink = link
             } else {
@@ -127,7 +158,19 @@ struct InviteFriendsView: View {
     
     //MARK: - User defined methods
     private func shareLink(_ link: String) {
-        let activityVC = UIActivityViewController(activityItems: [link], applicationActivities: nil)
+        
+        var username = ""
+        if let fullName = SessionManager.shared.loginData?.fullName{
+            username = fullName
+        }
+        
+        let message = """
+            Hey! \(username == "" ? "" : "It’s \(username)")😊
+            I’m using Subzillo to manage subscriptions easily.
+            Check it out here: \(link)
+            """
+        
+        let activityVC = UIActivityViewController(activityItems: [message], applicationActivities: nil)
         // For iPad compatibility
         if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
            let rootVC = windowScene.windows.first?.rootViewController {
@@ -158,17 +201,16 @@ struct RewardItemView: View {
                 .scaledToFit()
                 .frame(width: 24, height: 24, alignment: .top)
             
-            // Texts
             VStack(alignment: .leading, spacing: 6) {
-                Text("Add \(reward.subscriptionCount ?? 0) subscription")
+                Text("Add \(reward.subscriptionReward ?? 0) subscription")
                     .font(.appSemiBold(14))
                     .foregroundColor(Color.neutralMain700)
                 
-                (Text("Unlock at ") + Text("\(reward.requiredReferrals ?? 0)").font(.appSemiBold(14)) + Text(" referral subscriptions"))
+                (Text("Unlock at ") + Text("\(reward.creditsRequired ?? 0)").font(.appSemiBold(14)) + Text(" referral subscriptions"))
                     .font(.appRegular(14))
                     .foregroundColor(Color.neutralMain700)
                 
-                if reward.status ?? false {
+                if reward.eligible ?? false || reward.redeemed ?? false{
                     HStack(spacing: 4) {
                         Image("checkmark_green")
                             .resizable()
@@ -187,8 +229,8 @@ struct RewardItemView: View {
             
             VStack{
                 Spacer()
-                if reward.status ?? false{
-                    if reward.redeemStatus ?? false{
+                if reward.eligible ?? false || reward.redeemed ?? false{
+                    if reward.redeemed ?? false{
                         Text("Redeemed")
                             .font(.appSemiBold(14))
                             .foregroundColor(Color.gray2)

@@ -27,7 +27,7 @@ struct EmailSyncProgressView: View {
                     Image("back_gray")
                 }
                 
-                Text("Gmail Sync Progress")
+                Text("Email Sync Progress")
                     .font(.appRegular(20))
                     .foregroundColor(Color.neutralMain700)
                 
@@ -37,7 +37,7 @@ struct EmailSyncProgressView: View {
             .padding(.top, 20)
             
             // MARK: - Subtitle
-            Text("We're scanning your Gmail inbox for subscription emails.")
+            Text("We're scanning your Email inbox for subscription emails.")
                 .font(.appRegular(16))
                 .foregroundColor(Color.neutral500)
                 .multilineTextAlignment(.center)

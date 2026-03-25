@@ -134,30 +134,30 @@ class ConnectedEmailsViewModel: ObservableObject {
     }
     
     func syncEmail(_ email: ListConnectedEmailsData) {
-        if email.type ?? 1 == 3 {
-            ToastManager.shared.showToast(message: "Coming soon in S4", style: .info)
-        }else{
+//        if email.type ?? 1 == 3 {
+//            ToastManager.shared.showToast(message: "Coming soon in S4", style: .info)
+//        }else{
             syncEmailAPI(input: SyncEmailRequest(userId         : Constants.getUserId(),
                                                  integrationId  : email.id ?? "",
                                                  type           : email.type ?? 1))
-        }
+//        }
     }
     
     func syncingEmail(_ email: ListConnectedEmailsData) {
-        if email.type ?? 1 == 3 {
-            ToastManager.shared.showToast(message: "Coming soon in S4", style: .info)
-        }else{
-            navigate(to: .emailSyncProgress(logId: email.logId ?? ""))
-        }
+//        if email.type ?? 1 == 3 {
+//            ToastManager.shared.showToast(message: "Coming soon in S4", style: .info)
+//        }else{
+            navigate(to: .emailSyncProgress(logId: email.syncLogId ?? ""))
+//        }
     }
     
     func viewEmail(_ email: ListConnectedEmailsData) {
-        if email.type ?? 1 == 3 {
-            ToastManager.shared.showToast(message: "Coming soon in S4", style: .info)
-        }else{
+//        if email.type ?? 1 == 3 {
+//            ToastManager.shared.showToast(message: "Coming soon in S4", style: .info)
+//        }else{
             emailSubscriptionsList(input: EmailSubscriptionsListRequest(userId          : Constants.getUserId(),
                                                                         integrationId   : email.id ?? ""))
-        }
+//        }
     }
     
     func downloadLogs(_ email: ListConnectedEmailsData) {
