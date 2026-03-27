@@ -289,6 +289,8 @@ struct HomeView: View {
                 self.fullName = fullName
             }
             homeVM.home(input: HomeRequest(userId: Constants.getUserId()))
+            let now = Date()
+            selectedYear    = Calendar.current.component(.year, from: now)
             homeYearlyGraphApi()
             commonApiVM.getUserInfo(input: getUserInfoRequest(userId: Constants.getUserId()))
 //            commonApiVM.unreadNotificationCount(input: UnreadNotificationCountRequest(userId: Constants.getUserId()))
