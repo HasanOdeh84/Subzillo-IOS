@@ -2,6 +2,133 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.2.10(47)] (Beta-Stage) - 2026-03-27
+
+### Delivered (S4)
+- Gmail, outlook, iCloud email connection and Sync
+- Analytics
+- Profile module - Upload profile picture, Edit Account details
+- My payment cards
+- Family members
+- Settings module
+- Push notifications
+- Notifications list
+- Offline mode
+- Image sharing
+- Image preview
+- Renew plan
+- social google login profile picture
+- Plans and pricing
+- Invite friends
+
+### And done some of the client feedback points:
+- Email sync:
+1.Active / Inactive tabs in Extracted emails list screen.
+2.Redirecting to the email sync progress screen when click on syncing button in connected emails list.
+- Delete account:
+1.After deleting the user's account, if the user logs in again with same credentials then showing a restore account bottom sheet in Login and social login cases.
+- Review Screen:
+1.If there are validation errors, then highlight the card in red colour in subscriptions review screen
+
+### Feedback by Krishna Sir
+- Manual Entry:
+1.Added the source and URLS in manual screen for testing
+
+### Pending points:
+- Auto email sync in settings
+- Dark mode
+
+## [1.2.9(46)] (Alpha-QA) - 2026-03-26
+
+### Fixed (S4)
+- S4 bug fixes
+
+## [1.2.8(45)] (Alpha-QA) - 2026-03-25
+
+### Delivered (S4)
+- Gmail, outlook, iCloud email connection and Sync
+- Analytics
+- Profile module - Upload profile picture, Edit Account details
+- My payment cards
+- Family members
+- Settings module
+- Push notifications
+- Notifications list
+- Offline mode
+- Image sharing
+- Image preview
+- Renew plan
+- social google login profile picture
+- Plans and pricing
+- Invite friends
+
+### And done some of the client feedback points:
+- Email sync:
+1.Active / Inactive tabs in Extracted emails list screen.
+2.Redirecting to the email sync progress screen when click on syncing button in connected emails list.
+- Delete account:
+1.After deleting the user's account, if the user logs in again with same credentials then showing a restore account bottom sheet in Login and social login cases.
+- Review Screen:
+1.If there are validation errors, then highlight the card in red colour in subscriptions review screen
+
+### Feedback by Krishna Sir
+- Manual Entry:
+1.Added the source and URLS in manual screen for testing
+
+### Pending points:
+- Auto email sync in settings
+- Dark mode
+
+## [1.2.7(44)] (Beta-Stage) - 2026-03-20
+
+### Delivered S4:
+- Gmail, outlook, iCloud email connection
+- Analytics
+- Profile module - Upload profile picture, Edit Account details
+- My payment cards
+- Family members
+- Settings module
+- Push notifications
+- Notifications list
+- Offline mode
+- Image sharing
+- Image preview
+- Renew plan
+- social google login profile picture
+- Plans and pricing
+
+### Pending points:
+- Invite friends 
+- iCloud email Sync
+- Auto email sync in settings
+- Dark mode
+
+## [1.2.5(42)] (Alpha-QA) - 2026-03-18
+
+### Delivered
+- Gmail, outlook, iCloud email connection
+- Analytics
+- Profile module - Upload profile picture, Edit Account details
+- My payment cards
+- Family members
+- Settings module
+- Push notifications
+- Notifications list
+- Offline mode
+- Image sharing
+- Image preview
+- Renew plan
+- social google login profile picture
+- Plans and pricing
+
+### Pending points:
+- Invite friends 
+- iCloud, microsoft email Sync
+
+### Note: 
+- Please don't sync outlook and iCloud mails as they are not completed from backend side but i'm not hiding. Because it'll reflect once she completes from backend.
+- I didn't hide the smartAssistant for testing. So please ignore.
+
 ## [1.2.4(41)] (Beta-Stage) - 2026-03-17
 
 ### Delivered
