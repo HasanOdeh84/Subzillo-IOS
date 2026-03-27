@@ -103,6 +103,11 @@ All notable changes to this project will be documented in this file.
 - Auto email sync in settings
 - Dark mode
 
+## [1.2.6(43)] (Alpha-QA) - 2026-03-20
+
+### Fixed
+- S4 bug fixes
+
 ## [1.2.5(42)] (Alpha-QA) - 2026-03-18
 
 ### Delivered
