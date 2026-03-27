@@ -36,6 +36,7 @@ struct ProfileView: View {
     @State private var isUploading          = false
     @State var showDeletePopup              : Bool = false
     @State private var deleteSheetHeight    : CGFloat = .zero
+    @State private var imageLoadFailed      = false
     
     //MARK: - Body
     var body: some View {
@@ -56,21 +57,30 @@ struct ProfileView: View {
                     VStack(spacing: 8){
                         ZStack(alignment: .topTrailing) {
                             if commonApiVM.userInfoResponse?.profileImage ?? "" != ""{
-                                WebImage(url: URL(string: commonApiVM.userInfoResponse?.profileImage ?? ""))
-                                //                            Image(systemName: "person.crop.circle.fill")
-                                    .resizable()
-                                //                                .indicator(.activity)
-                                //                                .transition(.fade(duration: 0.5))
-                                    .scaledToFill()
-                                    .frame(width: 96, height: 96)
-                                    .foregroundColor(.gray)
-                                    .background(Color.white)
-                                    .overlay(
-                                        RoundedRectangle(cornerRadius: 96/2)
-                                            .stroke(Color.white, lineWidth: 2)
-                                    )
-                                    .cornerRadius(96/2)
-                                    .shadow(color: Color.dropShadow, radius: 2, x: 0, y: 2)
+                                if imageLoadFailed {
+                                    Image("profile_avatar")
+                                        .resizable()
+                                        .scaledToFill()
+                                }else{
+                                    WebImage(url: URL(string: commonApiVM.userInfoResponse?.profileImage ?? ""))
+                                        .onFailure { _ in
+                                            imageLoadFailed = true
+                                        }
+                                    //                            Image(systemName: "person.crop.circle.fill")
+                                        .resizable()
+                                    //                                .indicator(.activity)
+                                    //                                .transition(.fade(duration: 0.5))
+                                        .scaledToFill()
+                                        .frame(width: 96, height: 96)
+                                        .foregroundColor(.gray)
+                                        .background(Color.white)
+                                        .overlay(
+                                            RoundedRectangle(cornerRadius: 96/2)
+                                                .stroke(Color.white, lineWidth: 2)
+                                        )
+                                        .cornerRadius(96/2)
+                                        .shadow(color: Color.dropShadow, radius: 2, x: 0, y: 2)
+                                }
                             }else{
                                 Image("profile_avatar")
                                     .resizable()
@@ -181,7 +191,7 @@ struct ProfileView: View {
                         if commonApiVM.userInfoResponse?.upgradeBtnStatus ?? false{
                             GradientBgBtn(title: "Upgrade today", action: {
                                 Constants.FeatureConfig.performS4Action {
-                                    profileVM.navigate(to: .pricingPlans)
+                                    profileVM.navigate(to: .pricingPlans())
                                 }
                             })
                         }
@@ -243,7 +253,7 @@ struct ProfileView: View {
                         ProfileItem(title: "Plans & Pricing", image: "award", action:{
                             Constants.FeatureConfig.performS4Action {
                                 if Constants.FeatureConfig.featurePhase == .all{
-                                    profileVM.navigate(to: .pricingPlans)
+                                    profileVM.navigate(to: .pricingPlans())
                                 }else{
                                     ToastManager.shared.showToast(message: "Coming soon in S4", style: .info)
                                 }

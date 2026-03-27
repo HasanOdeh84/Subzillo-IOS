@@ -81,10 +81,8 @@ struct OtpVerifyView: View {
                                 }
                             }, onPaste: pasteOTP)
                             .onAppear {
-                                // optional: handle Done button dismissing keyboard
-                                UITextFieldWrapper(text: $otpFields[index], onBackspace: {}, onPaste: {_ in }, onDone: {
-                                    focusedField = nil
-                                })
+                                // Focus the first field on appear is handled by parent, 
+                                // this block was redundant and was creating unused wrappers.
                             }
                         }
                     }
@@ -356,17 +354,19 @@ struct OTPTextField: View {
 
 // MARK: - UIKit Wrapper for Backspace + Paste
 struct UITextFieldWrapper: UIViewRepresentable {
+    
     @Binding var text: String
     var onBackspace: () -> Void
     var onPaste: (String) -> Void
     var onDone: (() -> Void)? = nil  // new Done callback
     
-    func makeUIView(context: Context) -> UITextField {
-        let textField = UITextField()
+    func makeUIView(context: Context) -> BackspaceTextField {
+        let textField = BackspaceTextField()
         textField.textAlignment = .center
         textField.keyboardType = .numberPad
         textField.delegate = context.coordinator
         textField.isSecureTextEntry = true
+        textField.onBackspace = onBackspace
         
         // Add Done button toolbar
         let toolbar = UIToolbar()
@@ -379,8 +379,9 @@ struct UITextFieldWrapper: UIViewRepresentable {
         return textField
     }
     
-    func updateUIView(_ uiView: UITextField, context: Context) {
+    func updateUIView(_ uiView: BackspaceTextField, context: Context) {
         uiView.text = text
+        uiView.onBackspace = onBackspace
     }
     
     func makeCoordinator() -> Coordinator {
@@ -399,13 +400,9 @@ struct UITextFieldWrapper: UIViewRepresentable {
         }
         
         func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
-            if string.isEmpty { // backspace
-                if parent.text.isEmpty {
-                    parent.onBackspace()  // trigger moving to previous field
-                } else {
-                    parent.text = "" // clear current field
-                    parent.onBackspace()
-                }
+            if string.isEmpty { // backspace detected via delegate (non-empty case/standard)
+                parent.text = "" // clear current field anyway
+                parent.onBackspace() // move to previous
                 return false
             }
             
@@ -418,11 +415,23 @@ struct UITextFieldWrapper: UIViewRepresentable {
             }
             
             // accept single digit
-            //            parent.text = String(string.prefix(1))
             DispatchQueue.main.async {
                 self.parent.text = String(text.prefix(1))
             }
             return false
         }
+    }
+}
+
+// MARK: - Backspace Aware TextField
+class BackspaceTextField: UITextField {
+    var onBackspace: (() -> Void)?
+    
+    override func deleteBackward() {
+        // For empty fields, delegate is NOT called, so we trigger onBackspace here
+        if text?.isEmpty ?? true {
+            onBackspace?()
+        }
+        super.deleteBackward()
     }
 }

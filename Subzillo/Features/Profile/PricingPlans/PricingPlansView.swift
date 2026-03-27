@@ -49,6 +49,7 @@ struct PricingPlansView: View {
     @State private var platformAlertMessage     : String = ""
     @State private var pendingProduct           : (Product, String)?
     @State private var platformSheetHeight      : CGFloat = .zero
+    var fromPreview                             : Bool = false
     
     //MARK: - Body
     var body: some View {
@@ -181,6 +182,9 @@ struct PricingPlansView: View {
         .onChange(of: viewModel.isSubscribe) { value in
             if value{
                 viewModel.listPricingPlans(type: selectedSegment == .first ? 1 : 2)
+                if fromPreview{
+                    dismiss()
+                }
             }
         }
         .sheet(isPresented: $showPlatformAlert) {

@@ -14,6 +14,10 @@ struct CustomCalenderSheet: View {
     @Binding var selectedMonth  : Int
     @Binding var selectedYear   : Int
     let onDone                  : () -> Void
+    
+    @State private var tempMonth: Int = 1
+    @State private var tempYear: Int = 2025
+    
     //    let months  = Array(1...12)
     let months                  = ["January", "February", "March", "April", "May", "June",
                                    "July", "August", "September", "October", "November", "December"]
@@ -31,7 +35,7 @@ struct CustomCalenderSheet: View {
                 .font(.headline)
             
             HStack(spacing: 16) {
-                Picker("Month", selection: $selectedMonth) {
+                Picker("Month", selection: $tempMonth) {
                     ForEach(Array(months.enumerated()), id: \.offset) { index, month in
                         //                    ForEach(months, id: \.self) { month in
                         //                        Text(String(format: "%02d", month)).tag(month)
@@ -41,7 +45,7 @@ struct CustomCalenderSheet: View {
                 .frame(maxWidth: .infinity)
                 .pickerStyle(.wheel)
                 
-                Picker("Year", selection: $selectedYear) {
+                Picker("Year", selection: $tempYear) {
                     ForEach(years, id: \.self) { year in
                         Text(String(year)).tag(year)
                     }
@@ -52,6 +56,8 @@ struct CustomCalenderSheet: View {
             .frame(height: 150)
             
             CustomButton(title: "Ok"){
+                selectedMonth = tempMonth
+                selectedYear = tempYear
                 onDone()
                 isPresented = false
             }
@@ -60,6 +66,10 @@ struct CustomCalenderSheet: View {
         }
         .frame(maxWidth: .infinity)
         .background(Color.whiteBlackBG)
+        .onAppear {
+            tempMonth = selectedMonth
+            tempYear = selectedYear
+        }
     }
 }
 
@@ -69,6 +79,9 @@ struct CustomYearBottomSheet: View {
     @Binding var isPresented    : Bool
     @Binding var selectedYear   : Int
     let onDone                  : (Int) -> Void
+    
+    @State private var tempYear: Int = 2025
+    
     let years                   = Array(2025...(Calendar.current.component(.year, from: Date()) + 100))
     
     //MARK: - body
@@ -83,7 +96,7 @@ struct CustomYearBottomSheet: View {
                 .font(.headline)
             
             HStack() {
-                Picker("Year", selection: $selectedYear) {
+                Picker("Year", selection: $tempYear) {
                     ForEach(years, id: \.self) { year in
                         Text(String(year)).tag(year)
                     }
@@ -94,7 +107,8 @@ struct CustomYearBottomSheet: View {
             .frame(height: 150)
             
             CustomButton(title: "Ok"){
-                onDone(selectedYear)
+                selectedYear = tempYear
+                onDone(tempYear)
                 isPresented = false
             }
             .padding(.horizontal)
@@ -102,5 +116,8 @@ struct CustomYearBottomSheet: View {
         }
         .frame(maxWidth: .infinity)
         .background(Color.whiteBlackBG)
+        .onAppear {
+            tempYear = selectedYear
+        }
     }
 }

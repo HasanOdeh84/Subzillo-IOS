@@ -565,14 +565,12 @@ struct SubscriptionPreviewView: View {
         .sheet(isPresented: $showLimitExceedPopup) {
             InfoAlertSheet(
                 onDelegate: {
-                    
+                    AppIntentRouter.shared.navigate(to: .pricingPlans(fromPreview: true))
                 }, title                : "Plan Limit Exceeded",
-                subTitle                : "Your current plan allows only \(commonApiVM.userInfoResponse?.remainingSubscriptionLimit ?? 0) active subscriptions.",
-                buttonTitle             : "Ok",
+                subTitle                : "Your current plan allows only \(commonApiVM.userInfoResponse?.remainingSubscriptionLimit ?? 0) active subscriptions. Upgrade your plan to add more",
+                buttonTitle             : "Upgrade Now",
                 imageSize               : 70,
-                isCancelButtonVisible   : false,
-                isImageVisible          : false,
-                isBtn                   : false
+                isCancelButtonVisible   : true
             )
             .onPreferenceChange(InnerHeightPreferenceKey.self) { height in
                 if height > 0 {

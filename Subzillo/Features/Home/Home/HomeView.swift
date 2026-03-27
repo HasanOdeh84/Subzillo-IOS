@@ -488,6 +488,7 @@ struct AvatarView: View {
     var cornerRadius    : CGFloat = 8
     var fontSize        : CGFloat = 20
     var fromPreview     : Bool = false
+    @State private var imageLoadFailed          = false
     
     private var initials: String {
         let words = serviceName
@@ -533,8 +534,37 @@ struct AvatarView: View {
             } else {
                 if fromPreview{
                     if let url = serviceLogoURL {
-                        WebImage(url: url)
+                        if imageLoadFailed {
+                            Image("profile_avatar")
+                                .resizable()
+                                .scaledToFill()
+                        }else{
+                            WebImage(url: url)
+                                .resizable()
+                                .onFailure { _ in
+                                    imageLoadFailed = true
+                                }
+                                .indicator(.activity)
+                                .transition(.fade(duration: 0.5))
+                                .scaledToFit()
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: cornerRadius)
+                                        .stroke(.neutral300Border, lineWidth: 1)
+                                )
+                                .cornerRadius(cornerRadius)
+                        }
+                    }
+                }else{
+                    if imageLoadFailed {
+                        Image("profile_avatar")
                             .resizable()
+                            .scaledToFill()
+                    }else{
+                        WebImage(url: URL(string: serviceLogo ?? ""))
+                            .resizable()
+                            .onFailure { _ in
+                                imageLoadFailed = true
+                            }
                             .indicator(.activity)
                             .transition(.fade(duration: 0.5))
                             .scaledToFit()
@@ -544,17 +574,6 @@ struct AvatarView: View {
                             )
                             .cornerRadius(cornerRadius)
                     }
-                }else{
-                    WebImage(url: URL(string: serviceLogo ?? ""))
-                        .resizable()
-                        .indicator(.activity)
-                        .transition(.fade(duration: 0.5))
-                        .scaledToFit()
-                        .overlay(
-                            RoundedRectangle(cornerRadius: cornerRadius)
-                                .stroke(.neutral300Border, lineWidth: 1)
-                        )
-                        .cornerRadius(cornerRadius)
                 }
             }
         }
@@ -1239,6 +1258,10 @@ struct YearOverviewChartView: View {
         )
         .background(.whiteBlackBG)
         .cornerRadius(12)
+        .onAppear{
+            let now = Date()
+            year    = Calendar.current.component(.year, from: now)
+        }
         .onChange(of: selected?.id) { _ in
             clearSelectionTask?.cancel()
             guard selected != nil else { return }

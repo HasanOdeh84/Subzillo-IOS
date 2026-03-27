@@ -291,10 +291,10 @@ struct FilterSheet: View {
                 selectedCategory = categories.first { $0.id == categoryId }
             }
             
-            if !filterData.familyMemberIds.isEmpty {
+            if let memberIds = filterData.familyMemberIds, !memberIds.isEmpty {
                 selectedFamilyMembers =
                 familyMembersWithMe.filter {
-                    filterData.familyMemberIds.contains($0.id ?? "")
+                    memberIds.contains($0.id ?? "")
                 }
             }
             if let month = filterData.month,
@@ -304,13 +304,14 @@ struct FilterSheet: View {
         }
         .onChange(of: commonApiVM.categoriesResponse) { _ in updateCatInfo() }
         .onChange(of: addSubscriptionVM.listFamilyMembersResponse?.familyMembers) { _ in updateRelationInfo() }
-        .onChange(of: selectedFamilyMembers) { members in
-            filterData.familyMemberIds = members.compactMap { $0.id }
-        }
         .onChange(of: filterData.includeFamilySubscriptions) { isEnabled in
             if !isEnabled {
                 selectedFamilyMembers.removeAll()
-                filterData.familyMemberIds.removeAll()
+                filterData.familyMemberIds = []
+            } else if filterData.familyMemberIds == nil {
+                // If it was nil (default), populate all
+                selectedFamilyMembers = familyMembersWithMe
+                filterData.familyMemberIds = selectedFamilyMembers.compactMap { $0.id }
             }
         }
         .onChange(of: selectedCategory) { newValue in
@@ -365,6 +366,17 @@ struct FilterSheet: View {
                     )
                 )
             }
+            
+            // Auto-select if includeFamilySubscriptions is true and (it's the first time/nil OR after reset)
+            if filterData.includeFamilySubscriptions && (filterData.familyMemberIds == nil || isClear) {
+                selectedFamilyMembers = familyMembersWithMe
+                filterData.familyMemberIds = selectedFamilyMembers.compactMap { $0.id }
+            } else if let memberIds = filterData.familyMemberIds {
+                // User has made a deliberate selection (could be empty [])
+                selectedFamilyMembers = familyMembersWithMe.filter {
+                    memberIds.contains($0.id ?? "")
+                }
+            }
 //            updateUserInfo()
         }
     }
@@ -383,16 +395,16 @@ struct FilterSheet: View {
     
     func resetFilters() {
         filterData = FilterModel(
-            includeFamilySubscriptions: false,
-            includeExpiredSubscriptions: false,
+            includeFamilySubscriptions: true,
+            includeExpiredSubscriptions: true,
             costOrder: 0,
             renewalDateOrder: .none
         )
-        filterData.familyMemberIds = []
         selectedCategory = nil
         category = ""
-        selectedFamilyMembers.removeAll()
         isClear = true
+        // Set to nil to trigger re-population in updateRelationInfo
+        filterData.familyMemberIds = nil
     }
     
     private var familyMembersWithMe: [ListFamilyMembersResponseData] {
@@ -430,6 +442,9 @@ struct FilterSheet: View {
                                      includeExpiredSubscriptions: false,
                                      costOrder                  : 0,
                                      renewalDateOrder           : .none)
+            filterData.familyMemberIds = []
+        } else {
+            filterData.familyMemberIds = selectedFamilyMembers.compactMap { $0.id }
         }
         onDelegate?(filterData)
         dismiss()

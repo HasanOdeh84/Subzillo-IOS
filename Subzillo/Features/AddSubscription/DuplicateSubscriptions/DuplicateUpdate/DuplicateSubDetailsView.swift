@@ -15,6 +15,7 @@ struct DuplicateSubDetailsView: View {
     @State var subscriptionData                 : SubscriptionInfo?
     @State var initials                         : String  = ""
     @State var renewalReminderValue             = ""
+    @State private var imageLoadFailed          = false
     
     //MARK: - body
     var body: some View {
@@ -56,12 +57,21 @@ struct DuplicateSubDetailsView: View {
                             )
                             .cornerRadius(64)
                         } else {
-                            WebImage(url: URL(string: subscriptionData?.serviceLogo ?? ""))
-                                .resizable()
-                                .scaledToFill()
-                                .frame(width: 128, height: 128)
-                                .cornerRadius(64)
-                                .clipped()
+                            if imageLoadFailed {
+                                Image("profile_avatar")
+                                    .resizable()
+                                    .scaledToFill()
+                            }else{
+                                WebImage(url: URL(string: subscriptionData?.serviceLogo ?? ""))
+                                    .resizable()
+                                    .onFailure { _ in
+                                        imageLoadFailed = true
+                                    }
+                                    .scaledToFill()
+                                    .frame(width: 128, height: 128)
+                                    .cornerRadius(64)
+                                    .clipped()
+                            }
                         }
                     }
                     .frame(width: 140, height: 128, alignment: .center)

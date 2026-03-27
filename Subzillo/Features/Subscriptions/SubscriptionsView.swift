@@ -641,7 +641,7 @@ struct SubscriptionsView: View {
                                                                          includeExpiredSubscriptions : filterData.includeExpiredSubscriptions,
                                                                          
                                                                          categoryId                  : filterData.categoryId,
-                                                                         familyMemberIds             : filterData.familyMemberIds,
+                                                                         familyMembers               : filterData.familyMemberIds,
                                                                          month                       : filterData.month,
                                                                          year                        : filterData.year), sortBy: filterData.costOrder)
         subscriptionsVM.listSubscriptions(input: input, showLoader: showLoader)

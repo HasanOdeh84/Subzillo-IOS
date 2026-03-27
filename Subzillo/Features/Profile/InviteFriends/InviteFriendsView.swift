@@ -109,10 +109,20 @@ struct InviteFriendsView: View {
                         if viewModel.rewards.isEmpty {
                             HStack{
                                 Spacer()
-                                Text("No rewards available")
-                                    .padding(30)
-                                    .foregroundStyle(Color.gray)
-                                    .font(.appRegular(16))
+                                VStack{
+                                    Spacer()
+                                    LottieView(name: "no_product")
+                                        .frame(height: 200)
+                                        .frame(maxWidth: .infinity)
+                                        .background(Color.clear)
+                                    
+                                    Text("No rewards yet. Invite your friends and start earning today!")
+                                        .padding(30)
+                                        .foregroundStyle(Color.gray)
+                                        .multilineTextAlignment(.center)
+                                        .font(.appRegular(16))
+                                    Spacer()
+                                }
                                 Spacer()
                             }
                         }else{

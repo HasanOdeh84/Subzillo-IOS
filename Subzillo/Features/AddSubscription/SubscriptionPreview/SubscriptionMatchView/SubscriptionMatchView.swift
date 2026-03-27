@@ -28,6 +28,7 @@ struct SubscriptionMatchView: View {
     @State private var deleteSheetHeight        : CGFloat = .zero
     @State private var showRenewSheet           : Bool = false
     @State private var renewSheetHeight         : CGFloat = .zero
+    @State private var imageLoadFailed          = false
     
     private var serviceLogoURL: URL? {
         guard let logo = subscriptionData?.serviceLogo,
@@ -82,12 +83,21 @@ struct SubscriptionMatchView: View {
                             .cornerRadius(64)
                         } else {
                             if fromList{
-                                WebImage(url: URL(string: subscriptionData?.serviceLogo ?? ""))
-                                    .resizable()
-                                    .scaledToFill()
-                                    .frame(width: 128, height: 128)
-                                    .cornerRadius(64)
-                                    .clipped()
+                                if imageLoadFailed {
+                                    Image("profile_avatar")
+                                        .resizable()
+                                        .scaledToFill()
+                                }else{
+                                    WebImage(url: URL(string: subscriptionData?.serviceLogo ?? ""))
+                                        .resizable()
+                                        .onFailure { _ in
+                                            imageLoadFailed = true
+                                        }
+                                        .scaledToFill()
+                                        .frame(width: 128, height: 128)
+                                        .cornerRadius(64)
+                                        .clipped()
+                                }
                             }else{
                                 //                                WebImage(url: URL(string: "\(Constants.getUserDefaultsValue(for: Constants.providerBaseUrl))\(subscriptionData?.serviceLogo ?? "")"))
                                 //                                    .resizable()
@@ -96,13 +106,22 @@ struct SubscriptionMatchView: View {
                                 //                                    .cornerRadius(64)
                                 //                                    .clipped()
                                 
-                                if let url = serviceLogoURL {
-                                    WebImage(url: url)
+                                if imageLoadFailed {
+                                    Image("profile_avatar")
                                         .resizable()
                                         .scaledToFill()
-                                        .frame(width: 128, height: 128)
-                                        .cornerRadius(64)
-                                        .clipped()
+                                }else{
+                                    if let url = serviceLogoURL {
+                                        WebImage(url: url)
+                                            .resizable()
+                                            .onFailure { _ in
+                                                imageLoadFailed = true
+                                            }
+                                            .scaledToFill()
+                                            .frame(width: 128, height: 128)
+                                            .cornerRadius(64)
+                                            .clipped()
+                                    }
                                 }
                             }
                         }

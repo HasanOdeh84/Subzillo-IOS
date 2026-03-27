@@ -41,7 +41,7 @@ enum NavigationRoute: Hashable{
     case connectedEmailsList(isIntegrations:Bool = false)
     case settings
     case contactUs
-    case pricingPlans
+    case pricingPlans(fromPreview: Bool = false)
     case inviteFriends(uLink: String? = nil)
     case emailSyncProgress(logId: String)
     case extractedSubscriptions(subscriptions: [SubscriptionData], fromEmailSync: Bool)

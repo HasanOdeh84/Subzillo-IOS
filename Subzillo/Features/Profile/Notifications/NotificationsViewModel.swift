@@ -109,7 +109,7 @@ class NotificationsViewModel: ObservableObject {
             switch notificationsList[index].type ?? 0{
             case 1:  navigate(to: .connectedEmailsList(isIntegrations: false))
             case 2:  navigate(to: .subscriptionMatchView(fromList: true, subscriptionId: notificationsList[index].subscriptionId ?? ""))
-            case 3:  navigate(to: .pricingPlans)//removed as now, we don't have this type
+            case 3:  navigate(to: .pricingPlans())//removed as now, we don't have this type
             default:
                 break
             }

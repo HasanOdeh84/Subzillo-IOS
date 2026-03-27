@@ -292,7 +292,7 @@ struct WelcomeHomeView: View {
     private func upgradePlan() {
         Constants.FeatureConfig.performS4Action {
             if Constants.FeatureConfig.featurePhase == .all{
-                AppIntentRouter.shared.navigate(to: .pricingPlans)
+                AppIntentRouter.shared.navigate(to: .pricingPlans())
             }else{
                 ToastManager.shared.showToast(message: "Coming soon in S4", style: .info)
             }
