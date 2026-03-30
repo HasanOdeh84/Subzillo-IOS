@@ -216,6 +216,35 @@ struct ReviewExtractedDetailsView: View {
                     //                    .padding(.top, -5)
                     //                }
                     
+                    FieldSuggestionView(
+                        text        : $planType,
+                        title       : "Plan Type",
+                        image       : "gridicon2",
+                        placeHolder : "e.g. Free, Pro, Premium",
+                        suggestions : providerPlansList ?? [],
+                        displayKey  : { $0.planName ?? "" },
+                        isFocused   : $dummyFocus,
+                        fieldType   : FieldType.planType,
+                        activeField : $activeField,
+                        action      : {
+                            errorHint(isAmount: false)
+                            isPlanTypeUpdate = true
+                        }
+                    )
+                    if isPlanTypeError{
+                        HStack(spacing: 6){
+                            Image("info")
+                                .frame(width: 24, height: 24)
+                            Text("This plan is not available for this service")
+                                .font(.appRegular(14))
+                                .foregroundColor(Color.systemInfoBlue)
+                            Spacer()
+                        }
+                        .padding(.leading, 5)
+                        .padding(.top, -5)
+                    }
+                    
+                    /*
                     Button(action: selectPlanType) {
                         FieldView(text: $planType, textValue: selectedPlanType ?? "", title: "Plan Type", image: "gridicon2", placeHolder: "Please select", isButton: true, isText: true)
                     }
@@ -251,7 +280,9 @@ struct ReviewExtractedDetailsView: View {
 //                        )
                         .presentationDetents([.medium, .large])
                         .presentationDragIndicator(.hidden)
+                        
                     }
+                     */
                     //MARK: - billingCycle
                 case .billingCycle:
                     Button(action: selectBilling) {
@@ -359,7 +390,8 @@ struct ReviewExtractedDetailsView: View {
                             toastManager.showToast(message: "Please select plan type".localized, style: .error)
                             return
                         }
-                        globalSubscriptionData?.subscriptionType = selectedPlanType?.trimmed
+//                        globalSubscriptionData?.subscriptionType = selectedPlanType?.trimmed
+                        globalSubscriptionData?.subscriptionType = planType.trimmed
                         if isPlanTypeUpdate{
                             autoFillDetails(isAmount: false)
                         }

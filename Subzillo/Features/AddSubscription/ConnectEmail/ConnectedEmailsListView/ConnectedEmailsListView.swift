@@ -32,6 +32,8 @@ struct ConnectedEmailsListView: View {
     @State private var justAppeared         : Bool = false
     @State private var deleteSheetHeight    : CGFloat = .zero
     @State private var isVisible            : Bool = false
+    @State private var upgradeNowSheetHeight: CGFloat = .zero
+    @State private var showPlatformAlert    : Bool = false
     
     //MARK: - body
     var body: some View {
@@ -126,6 +128,9 @@ struct ConnectedEmailsListView: View {
                             SwipeableMailRow(email              : email,
                                              activeCardId       : $activeEmailId,
                                              isScrollDisabled   : $isScrollDisabled,
+                                             isInlineSyncing    : viewModel.isInlineSyncing && viewModel.inlineSyncingId == email.id,
+                                             emailsScanned      : viewModel.inlineEmailsScanned,
+                                             subscriptionsFound : viewModel.inlineSubscriptionsFound,
                                              onDelete           : {
                                 selectedEmail = email
                                 showDeletePopup = true
@@ -190,6 +195,7 @@ struct ConnectedEmailsListView: View {
         .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("RefreshConnectedEmails"))) { _ in
             if isVisible {
                 listConnectedMailsApi()
+                showPlatformAlert = true
             }
         }
         //MARK: No subscriptions found sheet
@@ -224,6 +230,23 @@ struct ConnectedEmailsListView: View {
             }
             .presentationDragIndicator(.hidden)
             .presentationDetents([.height(deleteSheetHeight)])
+        }
+        .sheet(isPresented: $showPlatformAlert) {
+            SubscriptionAlertSheet(
+                onDelegate: {
+                    
+                }, title                : "Mail Sync Complete",
+                subTitle                : "Your emails have been successfully synced. You’re all up to date.",
+                buttonTitle             : "Ok",
+                isBtn                   : false
+            )
+            .onPreferenceChange(InnerHeightPreferenceKey.self) { height in
+                if height > 0 {
+                    upgradeNowSheetHeight = height
+                }
+            }
+            .presentationDragIndicator(.hidden)
+            .presentationDetents([.height(upgradeNowSheetHeight)])
         }
     }
     

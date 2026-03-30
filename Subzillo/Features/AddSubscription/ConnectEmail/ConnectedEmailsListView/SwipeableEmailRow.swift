@@ -7,6 +7,9 @@ struct SwipeableMailRow: View {
     let email                       : ListConnectedEmailsData
     @Binding var activeCardId       : String?
     @Binding var isScrollDisabled   : Bool
+    var isInlineSyncing             : Bool = false
+    var emailsScanned               : Int = 0
+    var subscriptionsFound          : Int = 0
     let onDelete                    : () -> Void
     let onSync                      : () -> Void
     let onSyncing                   : () -> Void
@@ -68,7 +71,10 @@ struct SwipeableMailRow: View {
                                    onSyncing        : onSyncing,
                                    onView           : onView,
                                    onDownloadLogs   : onDownloadLogs,
-                                   isIntegrations   : isIntegrations)
+                                   isIntegrations   : isIntegrations,
+                                   isInlineSyncing  : isInlineSyncing,
+                                   emailsScanned    : emailsScanned,
+                                   subscriptionsFound: subscriptionsFound)
             .background(Color.clear)
             .background(
                 GeometryReader { geo in

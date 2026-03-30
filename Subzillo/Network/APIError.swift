@@ -62,3 +62,34 @@ public enum APIError: Error {
         }
     }
 }
+
+extension APIError: Equatable {
+    public static func == (lhs: APIError, rhs: APIError) -> Bool {
+        switch (lhs, rhs) {
+        case (.unknown, .unknown),
+             (.noInternetConnection, .noInternetConnection),
+             (.tooManyRequests, .tooManyRequests),
+             (.badRequest, .badRequest),
+             (.unauthorized, .unauthorized),
+             (.notFound, .notFound),
+             (.requestTimeout, .requestTimeout),
+             (.internalServerError, .internalServerError),
+             (.accountBlocked, .accountBlocked),
+             (.someOneLoggedInElsewhere, .someOneLoggedInElsewhere),
+             (.badGateway, .badGateway),
+             (.refreshTokenFailed, .refreshTokenFailed),
+             (.responseError, .responseError),
+             (.anyError, .anyError),
+             (.insufficientQuota, .insufficientQuota):
+            return true
+        case (.urlError(let lhsError), .urlError(let rhsError)):
+            return lhsError == rhsError
+        case (.decodingError(let lhsError), .decodingError(let rhsError)):
+            return "\(lhsError)" == "\(rhsError)"
+        case (.apiError(let lhsMsg), .apiError(let rhsMsg)):
+            return lhsMsg == rhsMsg
+        default:
+            return false
+        }
+    }
+}

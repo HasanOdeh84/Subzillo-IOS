@@ -107,7 +107,7 @@ class EmailSyncProgressViewModel: ObservableObject {
                 NotificationCenter.default.post(name: .closeAllBottomSheets, object: nil)
                 Constants.saveDefaults(value: response.providerLogoBaseUrl, key: Constants.providerBaseUrl)
                 globalSubscriptionData = nil
-                self.router.navigateAndReplace(to: .extractedSubscriptions(subscriptions: response.data?.subscriptions ?? [], fromEmailSync: true))
+                self.router.navigateAndReplace(to: .extractedSubscriptions(subscriptions: response.data?.subscriptions ?? [], fromEmailSync: true, integrationId: input.integrationId))
                 //                self.router.navigate(to: .subscriptionPreviewView(subscriptionsData: response.data?.subscriptions, content: "", isFromImage:false, isFromEmail: true, audioUrl: nil))
             }
         }

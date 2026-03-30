@@ -42,7 +42,6 @@ struct PricingPlansView: View {
     @Environment(\.dismiss) private var dismiss
     @State private var selectedSegment          : Segment? = .first
     @EnvironmentObject var commonApiVM          : CommonAPIViewModel
-    @StateObject private var storeManager       = StoreManager.shared
     @StateObject private var viewModel          = PricingPlansViewModel.shared
     @State private var justAppeared             : Bool = false
     @State private var showPlatformAlert        : Bool = false
@@ -50,6 +49,10 @@ struct PricingPlansView: View {
     @State private var pendingProduct           : (Product, String)?
     @State private var platformSheetHeight      : CGFloat = .zero
     var fromPreview                             : Bool = false
+    @State private var products: [SKProduct]    = []
+    @State var planId                           : String?
+    @State private var loadingStatus            : PricingPlanProcessingType? = nil
+    var selectedTab                             : Segment = .first
     
     //MARK: - Body
     var body: some View {
@@ -82,6 +85,20 @@ struct PricingPlansView: View {
                     Spacer()
                 }
                 .padding(.top, 50)
+                .padding(.horizontal, 24)
+                .padding(.bottom, 24)
+                
+                HStack{
+                    Spacer()
+                    Button(action: {
+                        Constants.shared.OpenSubscriptionsInAppStore()
+                    }) {
+                        Text("Manage Subscription")
+                            .font(.appRegular(18))
+                            .foregroundColor(.blue)
+                            .underline()
+                    }
+                }
                 .padding(.horizontal, 24)
                 .padding(.bottom, 24)
                 
@@ -120,18 +137,13 @@ struct PricingPlansView: View {
                             })
                         
                         Button {
-                            Task {
-                                try? await storeManager.restorePurchases { restoredEntitlements in
-                                    for entitlement in restoredEntitlements {
-                                        if let matchedPlan = viewModel.pricingPlans.first(where: {
-                                            ($0.iosProductId ?? "") == entitlement.productID ||
-                                            SubzilloProducts.productId(for: $0.planName ?? "", segment: selectedSegment) == entitlement.productID
-                                        }), let planId = matchedPlan.id {
-                                            viewModel.pendingTransaction = entitlement.transaction
-                                            subscribePlanAPI(planId: planId, transactionId: entitlement.transactionId)
-                                        }
-                                    }
+                            self.loadingStatus = .loading
+                            viewModel.runPrePaymentCheck { isSafe in
+                                guard isSafe else {
+                                    self.loadingStatus = nil
+                                    return
                                 }
+                                restorePurchases()
                             }
                         } label: {
                             Text("Restore Purchases")
@@ -147,34 +159,34 @@ struct PricingPlansView: View {
             .background(Color.neutralBg100)
             .ignoresSafeArea()
             .navigationBarBackButtonHidden(true)
-            .blur(radius: storeManager.purchaseState != .idle ? 3 : 0)
             
-            // MARK: Loading/Error Overlay
-            if storeManager.purchaseState != .idle {
-                PricingPlanLoadingView(
-                    type        : storeManager.purchaseState == .loading ? .loading : .failed,
-                    onTryAgain  : {
-                        viewModel.cancelPurchase()
-                        storeManager.purchaseState = .idle
-                    }
-                )
-                .transition(.opacity)
+            if let status = loadingStatus {
+                PricingPlanLoadingView(type: status) {
+                    self.loadingStatus = nil
+                }
             }
         }
         .onAppear {
+            selectedSegment = selectedTab
             justAppeared = true
             Task {
                 if commonApiVM.userInfoResponse == nil {
                     commonApiVM.getUserInfo(input: getUserInfoRequest(userId: Constants.getUserId()))
                 }
                 viewModel.listPricingPlans(type: selectedSegment == .first ? 1 : 2)
-                await storeManager.fetchProducts(productIDs: SubzilloProducts.productIdentifiers)
-                await storeManager.updatePurchasedProducts()
+                fetchProducts()
             }
             
             DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
                 justAppeared = false
             }
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .IAPHelperPurchaseNotification)) { notification in
+            self.loadingStatus = nil
+            handlePurchaseNotification(notification)
+        }
+        .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("cancelbuying"))) { _ in
+            self.loadingStatus = .failed
         }
         .onChange(of: selectedSegment) { _ in
             viewModel.listPricingPlans(type: selectedSegment == .first ? 1 : 2)
@@ -185,12 +197,13 @@ struct PricingPlansView: View {
                 if fromPreview{
                     dismiss()
                 }
+                planId = ""
             }
         }
         .sheet(isPresented: $showPlatformAlert) {
             SubscriptionAlertSheet(
                 onDelegate: {
-                    
+                    self.loadingStatus = nil
                 }, title                : "Subscription Notice",
                 subTitle                : platformAlertMessage,
                 buttonTitle             : "Ok",
@@ -226,100 +239,36 @@ struct PricingPlansView: View {
         return attriString
     }
     
-    //upgrade button with storekit
-    //    private func getUIPlan(from plan: PricingPlan) -> PricingPlanUI {
-    //        let planName            = plan.planName ?? ""
-    //        let lowercasedPlanName  = planName.lowercased()
-    //
-    //        let isFreePlan      = lowercasedPlanName.contains("free")
-    //        let isSilverPlan    = lowercasedPlanName.contains("silver")
-    //        let isGoldPlan      = lowercasedPlanName.contains("gold")
-    //
-    //        let isYearlySelected    = selectedSegment == .second
-    //
-    //        var productID: String?
-    //        if plan.iosProductId == nil || plan.iosProductId == ""{
-    //            if isSilverPlan {
-    //                productID = isYearlySelected ? SubzilloProducts.silverYearly : SubzilloProducts.silverMonthly
-    //            } else if isGoldPlan {
-    //                productID = isYearlySelected ? SubzilloProducts.goldYearly : SubzilloProducts.goldMonthly
-    //            }
-    //        }else{
-    //            productID = plan.iosProductId ?? ""
-    //        }
-    //
-    //        let isActuallyCurrent = (productID != nil && storeManager.currentActiveProductID == productID) || (isFreePlan && storeManager.currentActiveProductID == nil)
-    //
-    //        var buttonTitle         = ""
-    //
-    //        let isCurrentPlan = plan.isCurrentPlan ?? false
-    //
-    //        var price: String = ""
-    //        var billingCycle: String = ""
-    //        if let id = productID, let product = storeManager.products.first(where: { $0.id == id }) {
-    //            price = product.displayPrice
-    //            let period = product.subscription?.subscriptionPeriod
-    //            if period?.unit == .month {
-    //                billingCycle = "/ month"
-    //            }
-    //            if period?.unit == .year {
-    //                billingCycle = "/ year"
-    //            }
-    //        } else {
-    //            price = "\(plan.currencySymbol ?? "$")\(plan.price ?? 0.0)"
-    //            billingCycle = isYearlySelected ? "/ year" : "/ month"
-    //        }
-    //
-    //        let hierarchy = [
-    //            "free",
-    //            SubzilloProducts.silverMonthly,
-    //            SubzilloProducts.silverYearly,
-    //            SubzilloProducts.goldMonthly,
-    //            SubzilloProducts.goldYearly
-    //        ]
-    //
-    //        let currentProductID = storeManager.currentActiveProductID ?? "free"
-    //        let targetProductID = productID ?? "free"
-    //
-    //        let currentRank = hierarchy.firstIndex(of: currentProductID) ?? 0
-    //        let targetRank = hierarchy.firstIndex(of: targetProductID) ?? 0
-    //
-    //        if isActuallyCurrent {
-    //            buttonTitle = "Current Plan"
-    //        }
-    //        else if isFreePlan {
-    //            buttonTitle = ""
-    //        }
-    //        else {
-    //            if targetRank > currentRank {
-    //                buttonTitle = "Upgrade"
-    //            } else {
-    //                buttonTitle = ""
-    //            }
-    //        }
-    //
-    //        return PricingPlanUI(
-    //            title           : planName,
-    //            price           : isFreePlan ? nil : price,
-    //            priceSubtitle   : isFreePlan ? nil : billingCycle,
-    //            features        : [plan.description ?? "Basic features"],
-    //            badgeColor      : isActuallyCurrent ? Color.neutral600 : nil,
-    //            buttonTitle     : buttonTitle,
-    //            isCurrent       : isActuallyCurrent,
-    //                action          : {
-    //                    if let id = productID, let product = storeManager.products.first(where: { $0.id == id }) {
-    //                        Task {
-    //                            if let transaction = try? await storeManager.purchase(product),
-    //                               let planId = plan.id {
-    //                                viewModel.pendingTransaction = transaction
-    //                                print("Transaction ID \(String(transaction.id))")
-    //                                subscribePlanAPI(planId: planId, transactionId: String(transaction.id))
-    //                            }
-    //                        }
-    //                    }
-    //                }
-    //        )
-    //    }
+    private func fetchProducts() {
+        SubzilloProducts.store.requestProducts { success, products in
+            if success, let products = products {
+                DispatchQueue.main.async {
+                    self.products = products
+                }
+            }
+        }
+    }
+    
+    private func restorePurchases() {
+        SubzilloProducts.store.restorePurchases()
+    }
+    
+    private func handlePurchaseNotification(_ notification: Notification) {
+        guard let transaction = notification.object as? SKPaymentTransaction else { return }
+        print("Purchase completed: \(transaction.payment.productIdentifier)")
+        
+        let transactionId = transaction.transactionIdentifier ?? transaction.original?.transactionIdentifier ?? ""
+        
+        if let pId = self.planId, !pId.isEmpty {
+            if planId != ""{
+                subscribePlanAPI(planId: pId, transactionId: transactionId)
+            }else{
+                print("Error: planId is empty.")
+            }
+        } else {
+            print("Error: No planId found to trigger subscribePlanAPI.")
+        }
+    }
     
     private func getUIPlan(from plan: PricingPlan) -> PricingPlanUI {
         let planName            = plan.planName ?? ""
@@ -352,14 +301,19 @@ struct PricingPlansView: View {
         var isLoadingPrice: Bool = false
         
         if let id = productID, !id.isEmpty {
-            if let product = storeManager.products.first(where: { $0.id == id }) {
-                price = product.displayPrice
-                let period = product.subscription?.subscriptionPeriod
-                if period?.unit == .month {
-                    billingCycle = "/ month"
-                }
-                if period?.unit == .year {
+            if let product = products.first(where: { $0.productIdentifier == id }) {
+                price = formatPrice(for: product)
+                //                let period = product.subscription?.subscriptionPeriod
+                //                if period?.unit == .month {
+                //                    billingCycle = "/ month"
+                //                }
+                //                if period?.unit == .year {
+                //                    billingCycle = "/ year"
+                //                }
+                if isYearlySelected{
                     billingCycle = "/ year"
+                }else{
+                    billingCycle = "/ month"
                 }
             } else {
                 // Product ID exists but product not fetched from StoreKit yet
@@ -386,7 +340,7 @@ struct PricingPlansView: View {
             if targetPlanRank > currentUserRank {
                 buttonTitle = "Upgrade"
             } else {
-                buttonTitle = ""
+                buttonTitle = "Downgrade"
             }
         }
         
@@ -400,57 +354,52 @@ struct PricingPlansView: View {
             isCurrent       : isCurrentPlan,
             isLoading       : isLoadingPrice,
             action          : {
-                if let id = productID, let product = storeManager.products.first(where: { $0.id == id }) {
-                    print("View: Purchase Button Tapped for \(product.id)")
-                    handleUpgradeSelected(product: product, planId: plan.id ?? "")
+                self.loadingStatus = .loading
+                viewModel.runPrePaymentCheck { isSafe in
+                    guard isSafe else {
+                        self.loadingStatus = nil
+                        return
+                    }
+                    
+                    let platform = viewModel.pricingPlanResponse?.data?.subscribedPlatformType ?? 2
+
+                    if viewModel.pricingPlanResponse?.data?.currentInternalPlanType ?? 0 == 0 || platform == 2{
+                        if let id = productID, let product = products.first(where: { $0.productIdentifier == id }) {
+                            print("View: Purchase Button Tapped for \(product.productIdentifier)")
+                            self.planId = plan.id ?? ""
+                            SubzilloProducts.store.buyProduct(product)
+                        } else {
+                            self.loadingStatus = nil
+                        }
+                        return
+                    }
+                    if platform == 1 { // Android
+                        platformAlertMessage = "Dear User,We noticed that you initially registered your account and subscribed through our Android application, and you are now trying to upgrade your plan via the iOS application.To avoid duplicate billing, please cancel your existing subscription on the Android application before proceeding with the upgrade here.You can find the “Cancel Subscription” option in play store.Thank you for your understanding and cooperation."
+                        showPlatformAlert = true
+            //            AlertManager.shared.showAlert(title: "Subscription Notice", message: platformAlertMessage)
+            //            AlertManager.shared.showAlert(title: "Subscription Notice",
+            //                                          message: platformAlertMessage,
+            //                                          okText: "Continue",
+            //                                          cancelText: "Cancel",
+            //                                          isDestructive: true,
+            //                                          okAction: {
+            //                purchaseInternal(product: product, planId: planId)
+            //            })
+                    } else if platform == 3 { // Web
+                        platformAlertMessage = "Dear User, We noticed that you initially registered your account and subscribed through our web application, and you are now trying to upgrade your plan via the iOS application. To avoid duplicate billing, please cancel your existing subscription on the web application before proceeding with the upgrade here. You can find the “Cancel Subscription” option under Account Settings on the web platform.Thank you for your understanding and cooperation."
+            //            AlertManager.shared.showAlert(title: "Subscription Notice", message: platformAlertMessage)
+                        showPlatformAlert = true
+                    }
                 }
             }
         )
     }
     
-    private func handleUpgradeSelected(product: Product, planId: String) {
-        if viewModel.pricingPlanResponse?.data?.currentInternalPlanType ?? 0 == 0 {
-            purchaseInternal(product: product, planId: planId)
-            return
-        }
-        let platform = viewModel.pricingPlanResponse?.data?.subscribedPlatformType ?? 2
-        if platform == 1 { // Android
-            platformAlertMessage = "Dear User,We noticed that you initially registered your account and subscribed through our Android application, and you are now trying to upgrade your plan via the iOS application.To avoid duplicate billing, please cancel your existing subscription on the Android application before proceeding with the upgrade here.You can find the “Cancel Subscription” option in play store.Thank you for your understanding and cooperation."
-            showPlatformAlert = true
-//            AlertManager.shared.showAlert(title: "Subscription Notice", message: platformAlertMessage)
-//            AlertManager.shared.showAlert(title: "Subscription Notice",
-//                                          message: platformAlertMessage,
-//                                          okText: "Continue",
-//                                          cancelText: "Cancel",
-//                                          isDestructive: true,
-//                                          okAction: {
-//                purchaseInternal(product: product, planId: planId)
-//            })
-        } else if platform == 3 { // Web
-            platformAlertMessage = "Dear User, We noticed that you initially registered your account and subscribed through our web application, and you are now trying to upgrade your plan via the iOS application. To avoid duplicate billing, please cancel your existing subscription on the web application before proceeding with the upgrade here. You can find the “Cancel Subscription” option under Account Settings on the web platform.Thank you for your understanding and cooperation."
-//            AlertManager.shared.showAlert(title: "Subscription Notice", message: platformAlertMessage)
-            showPlatformAlert = true
-        } else {
-            purchaseInternal(product: product, planId: planId)
-        }
-    }
-    
-    private func purchaseInternal(product: Product, planId: String) {
-        Task {
-            do {
-                if let transaction = try await storeManager.purchase(product) {
-                    print("View: StoreKit success! Transaction ID: \(transaction.id)")
-                    viewModel.pendingTransaction = transaction
-                    subscribePlanAPI(planId: planId, transactionId: String(transaction.id))
-                } else {
-                    print("View: StoreKit returned nil (User Cancelled or Pending)")
-                    viewModel.cancelPurchase()
-                }
-            } catch {
-                print("View: StoreKit exception caught: \(error.localizedDescription)")
-                viewModel.cancelPurchase()
-            }
-        }
+    private func formatPrice(for product: SKProduct) -> String {
+        let formatter = NumberFormatter()
+        formatter.numberStyle = .currency
+        formatter.locale = product.priceLocale
+        return formatter.string(from: product.price) ?? "\(product.price)"
     }
     
     func subscribePlanAPI(planId: String, transactionId: String) {

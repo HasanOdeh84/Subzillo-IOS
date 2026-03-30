@@ -17,6 +17,7 @@ class ExtractedSubscriptionsViewModel: ObservableObject {
     @Published var subscriptions                    : [SubscriptionData] = []
     @Published var selectedIds                      : Set<String> = []
     @Published var showDeletePopup                  : Bool = false
+    @Published var integrationId                    : String = ""
     @State var fromEmailSyncScreen                  : Bool = false
     
     var showActionButtons: Bool {
@@ -56,8 +57,8 @@ class ExtractedSubscriptionsViewModel: ObservableObject {
             return false
         }
         
-//        router.navigate(to: .subscriptionPreviewView(
-        router.navigateAndReplace(to: .subscriptionPreviewView(
+        router.navigate(to: .subscriptionPreviewView(
+//        router.navigateAndReplace(to: .subscriptionPreviewView(
             subscriptionsData   : selectedSubs,
             content             : "",
             isFromImage         : false,
@@ -69,8 +70,33 @@ class ExtractedSubscriptionsViewModel: ObservableObject {
     
     func checkIfListIsEmpty() {
         if subscriptions.isEmpty {
+            ToastManager.shared.showToast(message: "No Subscriptions found", style: .error)
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                AppIntentRouter.shared.pop(count: 1)
+            }
+        }
+    }
+    
+    func checkIfListIsEmptyDelete() {
+        if subscriptions.isEmpty {
             AppIntentRouter.shared.pop(count: 1)
         }
+    }
+    
+    func getEmailSubscriptionsList() {
+        let input = EmailSubscriptionsListRequest(userId: Constants.getUserId(), integrationId: integrationId)
+        apiReference.postApi(endPoint: APIEndpoint.emailSubscriptionsList, method: .POST, token: authKey, body: input, showLoader: true, responseType: VoiceSubscriptionResponse.self)
+            .sink { [unowned self] completion in
+                if case let .failure(error) = completion {
+                    self.handleError(error, endPoint: APIEndpoint.emailSubscriptionsList)
+                }
+            }
+        receiveValue: { [self] response in
+            PrintLogger.modelLog(response, type: .response, isInput: false)
+            self.subscriptions = response.data?.subscriptions ?? []
+            checkIfListIsEmpty()
+        }
+        .store(in: &self.subscriptionsCancellables)
     }
     
     func discardEmailSubscriptionApi(input: DiscardEmailSubscriptionRequest) {
@@ -90,7 +116,7 @@ class ExtractedSubscriptionsViewModel: ObservableObject {
                 return false
             }
             selectedIds.removeAll()
-            checkIfListIsEmpty()
+            checkIfListIsEmptyDelete()
         }
         .store(in: &self.subscriptionsCancellables)
     }

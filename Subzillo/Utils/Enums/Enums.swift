@@ -41,10 +41,11 @@ enum NavigationRoute: Hashable{
     case connectedEmailsList(isIntegrations:Bool = false)
     case settings
     case contactUs
-    case pricingPlans(fromPreview: Bool = false)
+//    case pricingPlans(fromPreview: Bool = false)
+    case pricingPlans(fromPreview: Bool = false, selectedTab: Segment = .first)
     case inviteFriends(uLink: String? = nil)
     case emailSyncProgress(logId: String)
-    case extractedSubscriptions(subscriptions: [SubscriptionData], fromEmailSync: Bool)
+    case extractedSubscriptions(subscriptions: [SubscriptionData], fromEmailSync: Bool, integrationId: String)
     case connectICloudView
 }
 

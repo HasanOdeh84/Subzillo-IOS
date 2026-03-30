@@ -159,3 +159,8 @@ struct ProviderSubscriptionPlan: Codable, Identifiable, Hashable {
     var currencySymbol  : String? = nil
     var source          : String? = nil
 }
+
+struct PlanTypeItem: Identifiable {
+    let id = UUID()
+    let name: String
+}

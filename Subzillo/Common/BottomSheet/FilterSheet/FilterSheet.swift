@@ -192,8 +192,7 @@ struct FilterSheet: View {
                                 onDone: {
                                     let monthString = String(format: "%02d", month)
                                     chargeDate = "\(monthString)/\(year)"
-                                    filterData.month = month
-                                    filterData.year  = year
+                                    filterData.monthYear = String(format: "%04d-%02d", year, month)
                                     getSubsByMonthApi()
                                 }
                             )
@@ -297,9 +296,15 @@ struct FilterSheet: View {
                     memberIds.contains($0.id ?? "")
                 }
             }
-            if let month = filterData.month,
-               let year = filterData.year {
-                chargeDate = String(format: "%02d/%d", month, year)
+            if let monthYear = filterData.monthYear {
+                let components = monthYear.split(separator: "-")
+                if components.count == 2,
+                   let y = Int(components[0]),
+                   let m = Int(components[1]) {
+                    self.year = y
+                    self.month = m
+                    chargeDate = String(format: "%02d/%d", m, y)
+                }
             }
         }
         .onChange(of: commonApiVM.categoriesResponse) { _ in updateCatInfo() }

@@ -16,16 +16,19 @@ class HomeViewModel: ObservableObject {
     private let router                      : AppIntentRouter
     @Published var homeResponse             : HomeResponseData?
     @Published var homeYearGraphResponse    : HomeYearlyGraphData?
+    @Published var apiError                 : APIError? = nil
     
     init(router: AppIntentRouter = .shared) {
         self.router = router
     }
     
     func home(input: HomeRequest) {
+        self.apiError = nil
         apiReference.postApi(endPoint: APIEndpoint.home, method: .POST,token: authKey,body: input,showLoader: true, responseType: HomeResponse.self)
             .sink { [unowned self] completion in
                 if case let .failure(error) = completion {
                     self.handleError(error,endPoint: APIEndpoint.home)
+                    self.apiError = error
                 }
             }
         receiveValue: { response in

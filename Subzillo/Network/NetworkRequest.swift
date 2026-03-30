@@ -205,7 +205,6 @@ class NetworkRequest {
                 // Retry any pending subscribePlan before firing this request
                 if endPoint != .subscribePlan {
                     if Constants.FeatureConfig.isS4Enabled {
-                        PricingPlansViewModel.shared.retryIfNeeded()
                     }
                 }
             }
@@ -359,7 +358,6 @@ class NetworkRequest {
                 // Retry any pending subscribePlan before firing this request
                 if endPoint != .subscribePlan {
                     if Constants.FeatureConfig.isS4Enabled {
-                        PricingPlansViewModel.shared.retryIfNeeded()
                     }
                 }
             }
@@ -528,7 +526,6 @@ class NetworkRequest {
                 // Retry any pending subscribePlan before firing this request
                 if endPoint != .subscribePlan {
                     if Constants.FeatureConfig.isS4Enabled {
-                        PricingPlansViewModel.shared.retryIfNeeded()
                     }
                 }
             }
@@ -702,7 +699,6 @@ class NetworkRequest {
                 // Retry any pending subscribePlan before firing this request
                 if endPoint != .subscribePlan {
                     if Constants.FeatureConfig.isS4Enabled {
-                        PricingPlansViewModel.shared.retryIfNeeded()
                     }
                 }
             }

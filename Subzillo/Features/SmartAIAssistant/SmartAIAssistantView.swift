@@ -22,13 +22,12 @@ struct SmartAIAssistantView: View {
         ZStack(alignment: .topLeading) {
             VStack(spacing: 0) {
                 if let url = getChatbotURL() {
-                    ChatbotWebView(url: url, isLoading: $isLoading, loadError: $loadError)
+                    ChatbotWebView(url: url, isLoading: $isLoading, loadError: $loadError, reloadTrigger: refreshID)
                     //                        .id(refreshID)
                     //                        .ignoresSafeArea(.container, edges: .bottom)
                     //                        .ignoresSafeArea(edges: .bottom)
                         .padding(.top, 40)
                         .ignoresSafeArea(.keyboard)
-                    //                        .padding(.bottom, 10)
                 } else {
                     Text("Invalid URL")
                         .foregroundColor(.red)
@@ -100,6 +99,7 @@ struct SmartAIAssistantView: View {
                 Button(action: {
                     loadError = false
                     isLoading = true
+                    refreshID = UUID()
                 }) {
                     Text("Retry")
                         .font(.appBold(16))
@@ -132,8 +132,11 @@ struct ChatbotWebView: UIViewRepresentable {
     let url: URL
     @Binding var isLoading: Bool
     @Binding var loadError: Bool
+    let reloadTrigger: UUID
     
     func makeUIView(context: Context) -> WKWebView {
+        
+        context.coordinator.lastReloadID = reloadTrigger
         
         let configuration = WKWebViewConfiguration()
         configuration.allowsInlineMediaPlayback = true
@@ -159,7 +162,13 @@ struct ChatbotWebView: UIViewRepresentable {
         return webView
     }
     
-    func updateUIView(_ webView: WKWebView, context: Context) {}
+    func updateUIView(_ webView: WKWebView, context: Context) {
+        if context.coordinator.lastReloadID != reloadTrigger {
+            context.coordinator.lastReloadID = reloadTrigger
+            let request = URLRequest(url: url)
+            webView.load(request)
+        }
+    }
     
     func makeCoordinator() -> Coordinator {
         Coordinator(self)
@@ -169,6 +178,7 @@ struct ChatbotWebView: UIViewRepresentable {
 class Coordinator: NSObject, WKNavigationDelegate, WKUIDelegate {
     
     var parent: ChatbotWebView
+    var lastReloadID: UUID?
     private let allowedDomain = Constants.chatbotUrl
     
     init(_ parent: ChatbotWebView) {

@@ -21,8 +21,7 @@ public struct SubscriptionFilter: Codable {
     var nextPaymentDateOrder        : String = "asc"
     var categoryId                  : String?
     var familyMembers               : [String]?
-    var month                       : Int?
-    var year                        : Int?
+    var monthYear                   : String?
 }
 
 public struct ListSubscriptionsResponse: Codable {

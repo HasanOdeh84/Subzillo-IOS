@@ -191,7 +191,11 @@ struct ProfileView: View {
                         if commonApiVM.userInfoResponse?.upgradeBtnStatus ?? false{
                             GradientBgBtn(title: "Upgrade today", action: {
                                 Constants.FeatureConfig.performS4Action {
-                                    profileVM.navigate(to: .pricingPlans())
+                                    if commonApiVM.userInfoResponse?.internalPlanType ?? 0 == 3{
+                                        profileVM.navigate(to: .pricingPlans(selectedTab: .second))
+                                    }else{
+                                        profileVM.navigate(to: .pricingPlans())
+                                    }
                                 }
                             })
                         }

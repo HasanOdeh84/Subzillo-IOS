@@ -205,7 +205,6 @@ struct SubzilloApp: App {
             }
         }
         
-        StoreManager.shared.initializeStore()
     }
     
     @StateObject private var router             = AppIntentRouter.shared
@@ -518,14 +517,16 @@ struct RootView: View {
             SettingsView()
         case .contactUs:
             ContactUsView()
-        case .pricingPlans(let fromPreview):
-            PricingPlansView(fromPreview: fromPreview)
+//        case .pricingPlans(let fromPreview):
+//            PricingPlansView(fromPreview: fromPreview)
+        case .pricingPlans(let fromPreview, let selectedTab):
+            PricingPlansView(fromPreview: fromPreview, selectedTab: selectedTab)
         case .inviteFriends(let uLink):
             InviteFriendsView(uLink: uLink)
         case .emailSyncProgress(let logId):
             EmailSyncProgressView(logId: logId)
-        case .extractedSubscriptions(let subscriptions, let fromEmailSync):
-            ExtractedSubscriptionsView(subscriptions: subscriptions, fromEmailSyncScreen: fromEmailSync)
+        case .extractedSubscriptions(let subscriptions, let fromEmailSync, let integrationId):
+            ExtractedSubscriptionsView(subscriptions: subscriptions, fromEmailSyncScreen: fromEmailSync, integrationId: integrationId)
         case .connectICloudView:
             ConnectICloudView()
         }

@@ -530,7 +530,7 @@ struct SwipeableSubscriptionRow: View {
                     .foregroundColor(.white)
             }
             .frame(width: 80, height: 74)
-            .background(Color("green"))
+            .background(Color.greenClr)
             .clipShape(
                 RoundedCorner(
                     radius: 8,

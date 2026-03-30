@@ -377,7 +377,7 @@ struct SwipeableCardRow: View {
                 .frame(width: 70, height: 148)
             }
             .frame(width: 90, height: 148)
-            .background(Color("green"))
+            .background(Color.greenClr)
             .clipShape(
                 RoundedCorner(
                     radius: 14,

@@ -15,6 +15,17 @@ struct AutoEmailSyncBottomSheet: View {
     @State private var selectedId       : String = ""
     var onSelect                        : (String) -> Void
     
+    private let neverId = "never_sync_id"
+    
+    private var allSyncPeriods: [ListSyncPeriodResponseData] {
+        let neverOption = ListSyncPeriodResponseData(id: neverId, label: "Never", durationValue: -1, durationType: "", isSelected: false)
+        var list = settingsVM.listSyncPeriods ?? []
+        if !list.isEmpty || settingsVM.listSyncPeriods != nil {
+            list.insert(neverOption, at: 0)
+        }
+        return list
+    }
+    
     // MARK: - Body
     var body: some View {
         VStack(spacing: 0) {
@@ -39,8 +50,8 @@ struct AutoEmailSyncBottomSheet: View {
                     
                     // Options
                     VStack(alignment: .leading, spacing: 16) {
-                        if let syncPeriods = settingsVM.listSyncPeriods {
-                            ForEach(syncPeriods, id: \.id) { period in
+                        if settingsVM.listSyncPeriods != nil {
+                            ForEach(allSyncPeriods, id: \.id) { period in
                                 Button(action: {
                                     selectedId = period.id ?? ""
                                 }) {
@@ -69,9 +80,7 @@ struct AutoEmailSyncBottomSheet: View {
                     isBtn           : true,
                     buttonImage     : "update",
                     action          : {
-                        if !selectedId.isEmpty {
-                            onSelect(selectedId)
-                        }
+                        onSelect(selectedId == neverId ? "" : selectedId)
                         dismiss()
                     },
                     backgroundColor : .white,
@@ -93,6 +102,9 @@ struct AutoEmailSyncBottomSheet: View {
         .onChange(of: settingsVM.listSyncPeriods) { _ in
             if let selected = settingsVM.listSyncPeriods?.first(where: { $0.isSelected == true }) {
                 selectedId = selected.id ?? ""
+            }
+            else {
+                selectedId = neverId
             }
         }
     }

@@ -46,7 +46,6 @@ struct SplashView: View {
         }
         .onAppear {
             if appState.isLoggedIn {
-                pricingVM.retryPendingSubscribePlanIfNeeded()
             }
 
             DispatchQueue.main.asyncAfter(deadline: .now() + 3) {

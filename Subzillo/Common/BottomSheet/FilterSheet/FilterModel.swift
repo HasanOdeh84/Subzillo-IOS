@@ -13,6 +13,5 @@ struct FilterModel: Codable {
     var costOrder                       : Int = 0
     var renewalDateOrder                : OrderType = .none
     var familyMemberIds                 : [String]? = nil
-    var month                           : Int?
-    var year                            : Int?
+    var monthYear                       : String?
 }

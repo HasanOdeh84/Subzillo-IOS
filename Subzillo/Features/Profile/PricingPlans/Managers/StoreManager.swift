@@ -1,202 +1,134 @@
-//
-//  StoreManager.swift
-//  Subzillo
-//
-//  Created by Antigravity on 17/02/26.
-//
-
-import Foundation
 import StoreKit
 
-enum StorePurchaseState: Equatable {
-    case idle
-    case loading
-    case failed(String)
+public typealias ProductIdentifier = String
+public typealias ProductsRequestCompletionHandler = (_ success: Bool, _ products: [SKProduct]?) -> Void
+extension Notification.Name {
+    static let IAPHelperPurchaseNotification = Notification.Name("IAPHelperPurchaseNotification")
 }
-
-@MainActor
-class StoreManager: ObservableObject {
-    
-    static let shared = StoreManager()
-    
-    @Published var purchaseState: StorePurchaseState = .idle
-    @Published private(set) var products: [Product] = []
-    @Published private(set) var purchasedProductIDs = Set<String>()
-    @Published private(set) var currentActiveProductID: String?
-    
-    private var updates: Task<Void, Never>? = nil
-    
-    private init() {
-        updates = Task {
-            for await result in Transaction.updates {
-                await handle(transactionVerification: result)
+open class IAPHelper: NSObject  {
+    private let productIdentifiers: Set<ProductIdentifier>
+    private var purchasedProductIdentifiers: Set<ProductIdentifier> = []
+    private var productsRequest: SKProductsRequest?
+    private var productsRequestCompletionHandler: ProductsRequestCompletionHandler?
+    public init(productIds: Set<ProductIdentifier>) {
+        productIdentifiers = productIds
+        for productIdentifier in productIds {
+            let purchased = UserDefaults.standard.bool(forKey: productIdentifier)
+            if purchased {
+                purchasedProductIdentifiers.insert(productIdentifier)
+                print("Previously purchased: \(productIdentifier)")
+            } else {
+                print("Not purchased: \(productIdentifier)")
             }
         }
-        
-        Task {
-            await updatePurchasedProducts()
-            await sweepUnfinishedTransactions()
+        super.init()
+        SKPaymentQueue.default().add(self)
+    }
+}
+// MARK: - StoreKit API
+extension IAPHelper {
+    public func requestProducts(_ completionHandler: @escaping ProductsRequestCompletionHandler) {
+        productsRequest?.cancel()
+        productsRequestCompletionHandler = completionHandler
+        productsRequest = SKProductsRequest(productIdentifiers: productIdentifiers)
+        productsRequest!.delegate = self
+        productsRequest!.start()
+    }
+    public func buyProduct(_ product: SKProduct) {
+        print("Buying \(product.productIdentifier)...")
+        let payment = SKPayment(product: product)
+        SKPaymentQueue.default().add(payment)
+    }
+    public func isProductPurchased(_ productIdentifier: ProductIdentifier) -> Bool {
+        return purchasedProductIdentifiers.contains(productIdentifier)
+    }
+    public class func canMakePayments() -> Bool {
+        return SKPaymentQueue.canMakePayments()
+    }
+    public func restorePurchases() {
+        SKPaymentQueue.default().restoreCompletedTransactions()
+    }
+}
+// MARK: - SKProductsRequestDelegate
+extension IAPHelper: SKProductsRequestDelegate {
+    public func productsRequest(_ request: SKProductsRequest, didReceive response: SKProductsResponse) {
+        print("Loaded list of products...")
+        let products = response.products
+        productsRequestCompletionHandler?(true, products)
+        clearRequestAndHandler()
+        for p in products {
+            print("Found product: \(p.productIdentifier) \(p.localizedTitle) \(p.price.floatValue)")
         }
     }
-    
-    deinit {
-        updates?.cancel()
+    public func request(_ request: SKRequest, didFailWithError error: Error) {
+        print("Failed to load list of products.")
+        print("Error: \(error.localizedDescription)")
+        productsRequestCompletionHandler?(false, nil)
+        clearRequestAndHandler()
     }
-    
-    // MARK: - Fetch Products
-    func fetchProducts(productIDs: Set<String>) async {
-        do {
-            let fetchedProducts = try await Product.products(for: productIDs)
-            //            self.products = fetchedProducts.sorted(by: { $0.price < $1.price }) //Price sorting sometimes wrong hierarchy create chesthundi if yearly cheaper per month.
-            self.products = fetchedProducts
-            print("Successfully fetched \(self.products.count) products from StoreKit 2")
-        } catch {
-            print("Failed to fetch products: \(error)")
-        }
+    private func clearRequestAndHandler() {
+        productsRequest = nil
+        productsRequestCompletionHandler = nil
     }
-    
-    // MARK: - Purchase
-    func purchase(_ product: Product) async throws -> Transaction? {
-        print("StoreManager: purchase(_:) called for \(product.id)")
-        purchaseState = .loading
-        do {
-            print("StoreManager: Executing product.purchase()...")
-            let result = try await product.purchase()
-            switch result {
-            case .success(let verification):
-                let transaction = try checkVerified(verification)
-                await updatePurchasedProducts()
-                purchaseState = .idle
-                return transaction
-            case .userCancelled:
-                purchaseState = .failed("User cancelled the payment process.")
-                return nil
-            case .pending:
-                purchaseState = .loading
-                return nil
+}
+// MARK: - SKPaymentTransactionObserver
+extension IAPHelper: SKPaymentTransactionObserver {
+    public func paymentQueue(_ queue: SKPaymentQueue, updatedTransactions transactions: [SKPaymentTransaction]) {
+        for transaction in transactions {
+            switch (transaction.transactionState) {
+            case .purchased:
+                complete(transaction: transaction)
+                break
+            case .failed:
+                fail(transaction: transaction)
+                break
+            case .restored:
+                restore(transaction: transaction)
+                break
+            case .deferred:
+                break
+            case .purchasing:
+                break
             @unknown default:
-                purchaseState = .failed("An unexpected error occurred.")
-                return nil
-            }
-        } catch {
-            purchaseState = .failed(error.localizedDescription)
-            throw error
-        }
-    }
-    
-    // MARK: - Update Purchased Products
-    func updatePurchasedProducts() async {
-        var purchasedIDs = Set<String>()
-        var activeID: String?
-        var latestExpiration: Date?
-        
-        for await result in Transaction.currentEntitlements {
-            
-            if case .verified(let transaction) = result {
-                
-                purchasedIDs.insert(transaction.productID)
-                
-                if transaction.productType == .autoRenewable &&
-                    transaction.revocationDate == nil {
-                    
-                    if let expiration = transaction.expirationDate,
-                       expiration > Date() {
-                        
-                        if latestExpiration == nil || expiration > latestExpiration! {
-                            latestExpiration = expiration
-                            activeID = transaction.productID
-                        }
-                    }
-                }
+                break
             }
         }
-        self.purchasedProductIDs = purchasedIDs
-        self.currentActiveProductID = activeID
     }
-    
-    // MARK: - Restore Purchases
-    func restorePurchases(
-        onRestoredTransactions: ([(productID: String, transactionId: String, transaction: Transaction)]) -> Void = { _ in }
-    ) async throws {
-        purchaseState = .loading
-        do {
-            try await AppStore.sync()
-            await updatePurchasedProducts()
-            purchaseState = .idle
-            
-            // Collect all currently active verified entitlements
-            var restoredEntitlements: [(productID: String, transactionId: String, transaction: Transaction)] = []
-            for await result in Transaction.currentEntitlements {
-                if case .verified(let transaction) = result {
-                    restoredEntitlements.append((
-                        productID     : transaction.productID,
-                        transactionId : String(transaction.id),
-                        transaction   : transaction
-                    ))
-                }
-            }
-            if !restoredEntitlements.isEmpty {
-                onRestoredTransactions(restoredEntitlements)
-            }
-        } catch {
-            purchaseState = .failed(error.localizedDescription)
-            throw error
+    private func complete(transaction: SKPaymentTransaction) {
+        print("complete...")
+//        print(transaction.transactionIdentifier!)
+        deliverPurchaseNotificationFor(identifier: transaction.payment.productIdentifier, transaction:transaction)
+        SKPaymentQueue.default().finishTransaction(transaction)
+    }
+    private func restore(transaction: SKPaymentTransaction) {
+        guard let productIdentifier = transaction.original?.payment.productIdentifier else { return }
+        print("restore... \(productIdentifier)")
+        // print(transaction.transactionIdentifier!)
+        deliverPurchaseNotificationFor(identifier: productIdentifier, transaction:transaction)
+        SKPaymentQueue.default().finishTransaction(transaction)
+    }
+    private func fail(transaction: SKPaymentTransaction) {
+        print("fail...")
+        NotificationCenter.default.post(name: NSNotification.Name(rawValue: "cancelbuying"), object: nil)
+        if let transactionError = transaction.error as NSError?,
+           let localizedDescription = transaction.error?.localizedDescription,
+           transactionError.code != SKError.paymentCancelled.rawValue {
+            print("Transaction Error: \(localizedDescription)")
         }
+        SKPaymentQueue.default().finishTransaction(transaction)
     }
-    
-    // MARK: - Transaction Sweep
-    /// Proactively finishes any verified transactions that might be stuck in the unfinished queue.
-    /// This is a "safety net" to clear blockers like the one skipping the payment sheet.
-    func sweepUnfinishedTransactions() async {
-        var sweepCount = 0
-        for await result in Transaction.unfinished {
-            if case .verified(let transaction) = result {
-                await transaction.finish()
-                sweepCount += 1
-            }
-        }
-        if sweepCount > 0 {
-            await updatePurchasedProducts()
-        }
+    private func deliverPurchaseNotificationFor(identifier: String?,transaction: SKPaymentTransaction) {
+        guard let identifier = identifier else { return }
+        purchasedProductIdentifiers.insert(identifier)
+        UserDefaults.standard.set(true, forKey: identifier)
+        NotificationCenter.default.post(name: .IAPHelperPurchaseNotification, object: transaction)
     }
-    
-    // MARK: - Helper Methods
-    private func handle(transactionVerification result: VerificationResult<Transaction>) async {
-        switch result {
-        case .verified(let transaction):
-            // Transctions are now finished in PricingPlansViewModel after back-end sync success.
-            // This ensures we don't finish the transaction if the back-end hasn't registered the purchase.
-            // await transaction.finish()
-            await updatePurchasedProducts()
-        case .unverified:
-            // Handle unverified transaction (e.g., skip or show error)
-            break
-        }
+    public func paymentQueue(_ queue: SKPaymentQueue, restoreCompletedTransactionsFailedWithError error: Error) {
+        NotificationCenter.default.post(name: NSNotification.Name(rawValue: "cancelbuying"), object: nil)
     }
-    
-    func checkVerified<T>(_ result: VerificationResult<T>) throws -> T {
-        switch result {
-        case .unverified(_, let error):
-            throw error
-        case .verified(let safe):
-            return safe
-        }
-    }
-    
-    func checkActiveSubscription() async -> Bool {
-        //        await updatePurchasedProducts()
-        return currentActiveProductID != nil
-    }
-    
-    func refreshEntitlementsFromAppStore() async {
-        try? await AppStore.sync()
-        await updatePurchasedProducts()
-    }
-    
-    func initializeStore() {
-        Task {
-            await updatePurchasedProducts()
+    public func paymentQueueRestoreCompletedTransactionsFinished(_ queue: SKPaymentQueue) {
+        if queue.transactions.count == 0 {
+            NotificationCenter.default.post(name: NSNotification.Name(rawValue: "cancelbuying"), object: nil)
         }
     }
 }
-

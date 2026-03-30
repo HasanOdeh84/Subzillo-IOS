@@ -96,6 +96,7 @@ enum APIEndpoint: String {
     case restoreUser                    = "/restoreUser"
     case userRewardsList                = "/userRewardsList"
     case redeemReward                   = "/redeemReward"
+    case checkInAppTransaction          = "/checkInAppTransaction"
 
     //new api's
     case deleteAccount                  = "/deleteAccount"

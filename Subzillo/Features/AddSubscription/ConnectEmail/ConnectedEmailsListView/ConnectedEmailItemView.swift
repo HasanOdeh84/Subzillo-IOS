@@ -8,6 +8,9 @@ struct ConnectedEmailItemView: View {
     let onDownloadLogs          : () -> Void
     @State var provider         : EmailProvider = EmailProvider.gmail
     @State var isIntegrations   : Bool = false
+    var isInlineSyncing         : Bool = false
+    var emailsScanned           : Int = 0
+    var subscriptionsFound      : Int = 0
 
     var body: some View {
         VStack() {
@@ -50,7 +53,40 @@ struct ConnectedEmailItemView: View {
             if !isIntegrations {
                 HStack {
                     Spacer()
-                    actionButtons
+                    VStack(alignment: .trailing, spacing: 8) {
+                        actionButtons
+                        
+                        if isInlineSyncing {
+                            
+                            Divider()
+                                .padding(.vertical, 10)
+                            
+                            HStack(spacing: 20) {
+                                VStack(alignment: .leading, spacing: 8) {
+                                    Text("Emails Scanned")
+                                        .font(.appRegular(14))
+                                        .foregroundColor(Color.neutral500)
+                                    
+                                    Text("\(emailsScanned)")
+                                        .font(.appBold(16))
+                                        .foregroundColor(Color.navyBlueCTA700)
+                                }
+                                VStack(alignment: .leading, spacing: 8) {
+                                    Text("Subscription Found")
+                                        .font(.appRegular(14))
+                                        .foregroundColor(Color.neutral500)
+                                    
+                                    Text("\(subscriptionsFound)")
+                                        .font(.appBold(16))
+                                        .foregroundColor(Color.navyBlueCTA700)
+                                }
+                                Spacer()
+                                ProgressView()
+                                    .scaleEffect(1.5)
+//                                Spacer()
+                            }
+                        }
+                    }
                 }
             }
         }

@@ -42,3 +42,18 @@ struct SubscribePlanRequest: Codable {
     let platform            : Int
     let transactionId       : String
 }
+
+struct CheckTransactionRequest: Codable {
+    let originalTransactionId: String
+}
+
+struct CheckTransactionResponse: Codable {
+    let message: String?
+    let data: CheckTransactionData?
+}
+
+struct CheckTransactionData: Codable {
+    let userId              : String?
+    let allowTransfer       : Bool?
+    let subscriptionStatus  : String?
+}

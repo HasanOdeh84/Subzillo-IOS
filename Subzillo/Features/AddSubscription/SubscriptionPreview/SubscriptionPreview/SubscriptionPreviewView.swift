@@ -40,6 +40,9 @@ struct SubscriptionPreviewView: View {
     @State var colorValue                       : Color?
     var confidence                              : Double = 0.0
     @State var initials                         : String  = ""
+    @State private var accumulatedDuplicates    : [DuplicateDataInfo] = []
+    @State private var totalInitialCount             : Int = 0
+    @State private var processedSubscriptionsCount     : Int = 0
     @EnvironmentObject var commonApiVM          : CommonAPIViewModel
     @StateObject var subscriptionPreviewVM      = SubscriptionPreviewViewModel()
     var audioURL                                : URL? = nil
@@ -68,6 +71,7 @@ struct SubscriptionPreviewView: View {
     @State var showLimitExceedPopup             : Bool = false
     @State var fromEmailSync                    : Bool = false
     @State var isHighlight                      : HighlightType = .none
+    @State var isInitialLimit                   = true
     
     //MARK: - body
     var body: some View {
@@ -85,7 +89,7 @@ struct SubscriptionPreviewView: View {
                 
                 VStack(alignment: .leading, spacing: 2) {
                     // MARK: Title
-                    Text("Review entry \(currentSubscriptions) of \(numberOfSubscriptions)")
+                    Text("Review entry \(processedSubscriptionsCount + currentSubscriptions) of \(totalInitialCount)")
                         .font(.appRegular(24))
                         .foregroundColor(Color.neutralMain700)
                         .padding(.top, 20)
@@ -410,41 +414,9 @@ struct SubscriptionPreviewView: View {
                 .padding(.horizontal, 20)
                 
                 VStack(spacing: 10) {
-                    if currentSubscriptions == 1
-                    {
-                        if currentSubscriptions == numberOfSubscriptions
-                        {
-                            CustomButton(title: "Save", height:50, action: onSaveAction)
-                                .padding(.horizontal)
-                                .padding(.bottom, 24)
-                        }
-                        else{
-                            CustomButton(title: "Next", height:50, action: onNextAction)
-                                .padding(.horizontal)
-                                .padding(.bottom, 24)
-                        }
-                    }
-                    else{
-                        if currentSubscriptions == numberOfSubscriptions
-                        {
-                            HStack(spacing: 0) {
-                                GradientBorderButton(title: "Previous", action:onPreviousAction, backgroundColor:.whiteBlack)
-                                    .padding(.horizontal)
-                                CustomButton(title: "Save All", height:50, action: onSaveAction)
-                                    .padding(.horizontal)
-                            }
-                            .padding(.bottom, 24)
-                        }
-                        else{
-                            HStack(spacing: 0)  {
-                                GradientBorderButton(title: "Previous", action:onPreviousAction, backgroundColor:.whiteBlack)
-                                    .padding(.horizontal)
-                                CustomButton(title: "Next", height:50, action: onNextAction)
-                                    .padding(.horizontal)
-                            }
-                            .padding(.bottom, 24)
-                        }
-                    }
+                    CustomButton(title: "Save", height: 50, action: onSaveAction)
+                        .padding(.horizontal)
+                        .padding(.bottom, 24)
                     
                     Button(action: onDiscardAction) {
                         HStack {
@@ -491,6 +463,9 @@ struct SubscriptionPreviewView: View {
         //MARK: OnAppear
         .onAppear{
             numberOfSubscriptions = subscriptionsData?.count ?? 0
+            if totalInitialCount == 0 {
+                totalInitialCount = numberOfSubscriptions
+            }
             getSubDetails()
             if !isFromImage{
                 guard let url = audioURL else {
@@ -505,10 +480,10 @@ struct SubscriptionPreviewView: View {
             }
             if Constants.FeatureConfig.isS4Enabled {
                 commonApiVM.getUserInfo(input: getUserInfoRequest(userId: Constants.getUserId()))
-                if let remainingLimit = commonApiVM.userInfoResponse?.remainingSubscriptionLimit,
-                   remainingLimit < numberOfSubscriptions {
-                    showLimitExceedPopup = true
-                }
+//                if let remainingLimit = commonApiVM.userInfoResponse?.remainingSubscriptionLimit,
+//                   remainingLimit < numberOfSubscriptions {
+//                    showLimitExceedPopup = true
+//                }
             }
         }
         .onChange(of: globalSubscriptionData) { _ in updateSubDetails() }
@@ -516,7 +491,10 @@ struct SubscriptionPreviewView: View {
             if Constants.FeatureConfig.isS4Enabled {
                 if let remainingLimit = commonApiVM.userInfoResponse?.remainingSubscriptionLimit,
                    remainingLimit < numberOfSubscriptions {
-                    showLimitExceedPopup = true
+                    if isInitialLimit{
+                        isInitialLimit = false
+                        showLimitExceedPopup = true
+                    }
                 }
             }
         }
@@ -585,49 +563,52 @@ struct SubscriptionPreviewView: View {
     //MARK: - User defined methods
     //MARK: addSubApiRespons
     private func addSubApiResponseHandling() {
-        if subscriptionPreviewVM.isEntrySuccess == true{
-            if subscriptionPreviewVM.addSubscriptionResponse != nil{
-                
-                let duplicates =  subscriptionPreviewVM.addSubscriptionResponse!.duplicates ?? []
-                if duplicates.count > 0
-                {
+        if subscriptionPreviewVM.isEntrySuccess == true {
+            if let responseData = subscriptionPreviewVM.addSubscriptionResponse {
+                // Extract duplicates from official response
+                let duplicates = responseData.duplicates ?? []
+                if !duplicates.isEmpty {
                     var updatedDuplicates: [DuplicateDataInfo] = []
-                    
                     for (index, item) in duplicates.enumerated() {
-                        
                         var newSubs = item.newSubscription ?? []
                         for i in 0..<newSubs.count {
-                            let currentID = newSubs[i].id ?? ""
-                            if currentID.isEmpty {
+                            if (newSubs[i].id ?? "").isEmpty {
                                 newSubs[i].id = "\(i + 1)"
                             }
                         }
-                        
-                        let oldSubs = item.oldSubscription
-                        let name: String? = newSubs.first?.serviceName ?? ""
-                        
                         let info = DuplicateDataInfo(
-                            id: String(index + 1),
-                            serviceName: name,
+                            id: String(accumulatedDuplicates.count + index + 1),
+                            serviceName: newSubs.first?.serviceName ?? "",
                             newSubscriptions: newSubs,
-                            existingSubscriptions: oldSubs
+                            existingSubscriptions: item.oldSubscription
                         )
-                        
                         updatedDuplicates.append(info)
                     }
-                    isFromAdd = true
-                    playerManager.pausePlayback()
-                    AppIntentRouter.shared.navigate(to: .duplicateSubscriptionsView(duplicateSubsList: updatedDuplicates, isFromEmail: isFromEmail))
+                    accumulatedDuplicates.append(contentsOf: updatedDuplicates)
                 }
-                else{
-                    playerManager.pausePlayback()
+            }
+            
+            // Remove current item and decide what to do next
+            if currentSubscriptions <= (subscriptionsData?.count ?? 0) {
+                subscriptionsData?.remove(at: currentSubscriptions - 1)
+                processedSubscriptionsCount += 1
+            }
+            numberOfSubscriptions = subscriptionsData?.count ?? 0
+            
+            if numberOfSubscriptions == 0 || currentSubscriptions > numberOfSubscriptions {
+                playerManager.pausePlayback()
+                if !accumulatedDuplicates.isEmpty {
+                    isFromAdd = true
+                    AppIntentRouter.shared.navigate(to: .duplicateSubscriptionsView(duplicateSubsList: accumulatedDuplicates, isFromEmail: isFromEmail))
+                } else {
                     AppIntentRouter.shared.navigate(to: .subscriptionsListView())
                 }
+            } else {
+                getSubDetails()
+                // Refresh user info to get updated limit
+                commonApiVM.getUserInfo(input: getUserInfoRequest(userId: Constants.getUserId()))
             }
-            else{
-                playerManager.pausePlayback()
-                AppIntentRouter.shared.navigate(to: .subscriptionsListView())
-            }
+            subscriptionPreviewVM.isEntrySuccess = false
         }
     }
     
@@ -798,73 +779,49 @@ struct SubscriptionPreviewView: View {
         }
     }
     
-    private func onPreviousAction() {
-        currentSubscriptions = currentSubscriptions - 1
-        if currentSubscriptions <= 1
-        {
-            currentSubscriptions = 1
-        }
-        getSubDetails()
-    }
-    
     private func onSaveAction() {
-        if numberOfSubscriptions > 0
-        {
+        if numberOfSubscriptions > 0 {
             playerManager.pausePlayback()
             if let (errorMessage, type) = ManualEntryValidations.shared.updateManualEntry(input: subscriptionData!) {
-                ToastManager.shared.showToast(message: errorMessage,style:ToastStyle.error)
+                ToastManager.shared.showToast(message: errorMessage, style: .error)
                 isHighlight = type
-            }
-            else {
-                
-//                if commonApiVM.userInfoResponse?.remainingSubscriptionLimit ?? 0 < numberOfSubscriptions{
-//                    showLimitExceedPopup = true
+            } else {
                 if Constants.FeatureConfig.isS4Enabled {
                     if let remainingLimit = commonApiVM.userInfoResponse?.remainingSubscriptionLimit,
-                       remainingLimit < numberOfSubscriptions {
+                       remainingLimit <= 0 {
                         showLimitExceedPopup = true
                         return
                     }
                 }
-//                else{
-                    //source -> 1- manual, 2 - voice, 3 - image, 4 - email
-                    var source = 2
-                    if isFromEmail {
-                        source = 4
-                    } else if isFromImage == true {
-                        source = 3
-                    }
-                    var subsctionsArray: [ConfirmedSubscription] = []
-                    for i in 0..<subscriptionsData!.count
-                    {
-                        let objc = subscriptionsData![i]
-                        var currency = objc.currency ?? ""
-                        if objc.currency == "" || objc.currency == nil || objc.currency == "null" {
-                            currency = Constants.shared.currencyCode
-                        }
-                        //                    let currency = (objc.currency ?? "" == "") ? Constants.shared.currencyCode : (objc.currency ?? "")
-                        let logoUrl = getFileName(from: objc.serviceLogo ?? "")
-                        let subObjc = ConfirmedSubscription(serviceName         : objc.serviceName ?? "",
-                                                            serviceLogo         : logoUrl,
-                                                            amount              : objc.amount ?? 0.0,
-                                                            currency            : currency,//objc.currency ?? "",
-                                                            billingCycle        : objc.billingCycle ?? "",
-                                                            nextPaymentDate     : (objc.nextPaymentDate ?? "").formattedDate(from: "dd/MM/yyyy", to: "yyyy-MM-dd"),
-                                                            subscriptionType    : objc.subscriptionType ?? "",
-                                                            paymentMethod       : objc.paymentMethodId ?? "",
-                                                            paymentMethodDataId : objc.paymentMethodDataId ?? "",
-                                                            category            : objc.categoryId ?? "",
-                                                            subscriptionFor     : objc.subscriptionFor ?? Constants.getUserId(),
-                                                            renewalReminder     : objc.renewalReminder ?? [],
-                                                            notes               : objc.reason ?? "",
-                                                            currencySymbol      : objc.currencySymbol ?? "",
-                                                            source              : source,
-                                                            sourceReference     : isFromEmail ? objc.sourceReference : nil)
-                        subsctionsArray.append(subObjc)
-                    }
-                    let input = PendingSubscriptionConfirmRequest(userId: Constants.getUserId(), confirmedSubscription: subsctionsArray)
-                    subscriptionPreviewVM.updateSubscriptions(input: input)
-//                }
+                
+                let source = isFromEmail ? 4 : (isFromImage ? 3 : 2)
+                let objc = subscriptionsData![currentSubscriptions-1]
+                var currency = objc.currency ?? ""
+                if currency.isEmpty || currency == "null" {
+                    currency = Constants.shared.currencyCode
+                }
+                
+                let subObjc = ConfirmedSubscription(
+                    serviceName         : objc.serviceName ?? "",
+                    serviceLogo         : getFileName(from: objc.serviceLogo ?? ""),
+                    amount              : objc.amount ?? 0.0,
+                    currency            : currency,
+                    billingCycle        : objc.billingCycle ?? "",
+                    nextPaymentDate     : (objc.nextPaymentDate ?? "").formattedDate(from: "dd/MM/yyyy", to: "yyyy-MM-dd"),
+                    subscriptionType    : objc.subscriptionType ?? "",
+                    paymentMethod       : objc.paymentMethodId ?? "",
+                    paymentMethodDataId : objc.paymentMethodDataId ?? "",
+                    category            : objc.categoryId ?? "",
+                    subscriptionFor     : objc.subscriptionFor ?? Constants.getUserId(),
+                    renewalReminder     : objc.renewalReminder ?? [],
+                    notes               : objc.reason ?? "",
+                    currencySymbol      : objc.currencySymbol ?? "",
+                    source              : source,
+                    sourceReference     : isFromEmail ? objc.sourceReference : nil
+                )
+                
+                let input = PendingSubscriptionConfirmRequest(userId: Constants.getUserId(), confirmedSubscription: [subObjc])
+                subscriptionPreviewVM.updateSubscriptions(input: input)
             }
         }
     }
@@ -891,22 +848,48 @@ struct SubscriptionPreviewView: View {
         }
     }
     
+//    private func handleLocalDiscard() {
+//        if numberOfSubscriptions < 2
+//        {
+//            playerManager.pausePlayback()
+//            if !accumulatedDuplicates.isEmpty {
+//                isFromAdd = true
+//                AppIntentRouter.shared.navigate(to: .duplicateSubscriptionsView(duplicateSubsList: accumulatedDuplicates, isFromEmail: isFromEmail))
+//            } else {
+//                dismiss()
+//            }
+//        }
+//        else{
+//            subscriptionsData?.remove(at: currentSubscriptions-1)
+//            numberOfSubscriptions = subscriptionsData?.count ?? 0
+//            if currentSubscriptions <= 1
+//            {
+//                currentSubscriptions = 1
+//            }
+//            if currentSubscriptions >= numberOfSubscriptions
+//            {
+//                currentSubscriptions = numberOfSubscriptions
+//            }
+//            getSubDetails()
+//        }
+//    }
+    
     private func handleLocalDiscard() {
-        if numberOfSubscriptions < 2
-        {
-            dismiss()
+        if currentSubscriptions <= (subscriptionsData?.count ?? 0) {
+            subscriptionsData?.remove(at: currentSubscriptions - 1)
+            processedSubscriptionsCount += 1
         }
-        else{
-            subscriptionsData?.remove(at: currentSubscriptions-1)
-            numberOfSubscriptions = subscriptionsData?.count ?? 0
-            if currentSubscriptions <= 1
-            {
-                currentSubscriptions = 1
+        numberOfSubscriptions = subscriptionsData?.count ?? 0
+        
+        if numberOfSubscriptions == 0 || currentSubscriptions > numberOfSubscriptions {
+            playerManager.pausePlayback()
+            if !accumulatedDuplicates.isEmpty {
+                isFromAdd = true
+                AppIntentRouter.shared.navigate(to: .duplicateSubscriptionsView(duplicateSubsList: accumulatedDuplicates, isFromEmail: isFromEmail))
+            } else {
+                dismiss()
             }
-            if currentSubscriptions >= numberOfSubscriptions
-            {
-                currentSubscriptions = numberOfSubscriptions
-            }
+        } else {
             getSubDetails()
         }
     }

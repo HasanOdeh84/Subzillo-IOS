@@ -25,11 +25,12 @@ struct HomeView: View {
     @StateObject var homeVM                 = HomeViewModel()
     @State var homeResponse                 : HomeResponseData?
     @State var fullName                     = ""
-    @State private var isHome               : Bool? = false
+    @State private var isHome               : Bool? = nil
     @State var selectedYear                 = 2025
     @State private var showYouSavedSheet    = false
     @State private var showSaveSheet        = false
     @EnvironmentObject var commonApiVM      : CommonAPIViewModel
+    @State var currentPlan                  : Int = 0
     
     private var currentSubscriptions: [SubscriptionListData] {
         showAll ? activeSubsList : Array(activeSubsList.prefix(1))
@@ -46,10 +47,9 @@ struct HomeView: View {
     //MARK: - body
     var body: some View {
         Group {
-//            if isHome == nil{
-//                ProgressView()
-//            }else
-            if isHome == true{
+            if isHome == nil{
+                ProgressView()
+            }else if isHome == true{
                 VStack(spacing: 16){
                     // MARK: - Header
                     HeaderView(title: "Hi \(fullName)") {
@@ -281,7 +281,8 @@ struct HomeView: View {
                 .padding(20)
             }
             else{
-                WelcomeHomeView()
+//                WelcomeHomeView()
+                WelcomeHomeView(currentPlan: currentPlan)
             }
         }
         .onAppear{
@@ -296,6 +297,12 @@ struct HomeView: View {
 //            commonApiVM.unreadNotificationCount(input: UnreadNotificationCountRequest(userId: Constants.getUserId()))
         }
         .onChange(of: homeVM.homeResponse){ _ in updateHomeResponse() }
+        .onChange(of: homeVM.apiError) { _ in
+            if homeVM.apiError != nil {
+                isHome = false 
+            }
+        }
+        .onChange(of: commonApiVM.userInfoResponse){ _ in getUserDetailsResponse() }
         .sheet(isPresented: $showYouSavedSheet) {
             YouSavedBottomSheet(
                 title       : youSaved,
@@ -352,15 +359,23 @@ struct HomeView: View {
     private func updateHomeResponse() {
         homeResponse        = homeVM.homeResponse
         monthlySpend        = "\(homeResponse?.monthlySpendCurrency ?? "")\(homeResponse?.monthlySpend ?? 0.0)"
-        activeSubs          = homeResponse?.totalSubscriptions ?? 0
+        activeSubs          = homeResponse?.activeSubscriptionCount ?? 0
         activeSubsList      = homeResponse?.expiringSoon ?? []
         subscriptionsList   = homeResponse?.subscriptionList ?? []
         topCategoriesList   = homeResponse?.topCategories ?? []
-        isHome              = (homeVM.homeResponse?.topCategories?.count == 0 || homeVM.homeResponse?.topCategories == nil) ? false : true
+        if let response = homeVM.homeResponse {
+            isHome = (response.topCategories?.count == 0 || response.topCategories == nil) ? false : true
+        } else if homeVM.apiError != nil {
+            isHome = false
+        }
     }
     
     func homeYearlyGraphApi(){
         homeVM.homeYearlyGraph(input: HomeYearlyGraphRequest(userId: Constants.getUserId(), year: selectedYear))
+    }
+    
+    private func getUserDetailsResponse() {
+        currentPlan = commonApiVM.userInfoResponse?.internalPlanType ?? 0
     }
 }
 

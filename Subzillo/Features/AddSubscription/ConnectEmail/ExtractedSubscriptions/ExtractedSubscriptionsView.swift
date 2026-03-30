@@ -15,6 +15,7 @@ struct ExtractedSubscriptionsView: View {
     @State private var deleteSheetHeight        : CGFloat = .zero
     @State var subscriptions                    = [SubscriptionData]()
     @State var fromEmailSyncScreen              : Bool = false
+    var integrationId                           : String = ""
     @State private var selectedSegment          : Segment? = .first
 
 //    init(subscriptions: [SubscriptionData], fromEmailSyncScreen:Bool = false) {
@@ -170,7 +171,13 @@ struct ExtractedSubscriptionsView: View {
             .presentationDetents([.height(deleteSheetHeight)])
         }
         .onAppear{
-            self.viewModel.subscriptions = subscriptions
+            if fromEmailSyncScreen {
+                
+            } else {
+                self.viewModel.subscriptions = subscriptions
+            }
+            self.viewModel.integrationId = integrationId
+            self.viewModel.getEmailSubscriptionsList()
         }
     }
 }

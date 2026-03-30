@@ -12,6 +12,7 @@ struct WelcomeHomeView: View {
     @State var showUploadPopup          : Bool = false
     @State private var isUploading      = false
     @EnvironmentObject var commonApiVM  : CommonAPIViewModel
+    var currentPlan                     : Int = 0
     
     var body: some View {
         VStack(alignment: .leading,spacing: 0) {
@@ -292,7 +293,11 @@ struct WelcomeHomeView: View {
     private func upgradePlan() {
         Constants.FeatureConfig.performS4Action {
             if Constants.FeatureConfig.featurePhase == .all{
-                AppIntentRouter.shared.navigate(to: .pricingPlans())
+                if currentPlan == 3 {
+                    AppIntentRouter.shared.navigate(to: .pricingPlans(selectedTab: .second))
+                }else{
+                    AppIntentRouter.shared.navigate(to: .pricingPlans())
+                }
             }else{
                 ToastManager.shared.showToast(message: "Coming soon in S4", style: .info)
             }

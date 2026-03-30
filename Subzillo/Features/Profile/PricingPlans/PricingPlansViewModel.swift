@@ -17,8 +17,6 @@ class PricingPlansViewModel: ObservableObject {
     private let router                              : AppIntentRouter
     private let sessionManager                      : SessionManager
     @Published var isSubscribe                      : Bool = false
-    var pendingTransaction                          : Transaction?
-    private var isRetrying                          = false
     static let shared                               = PricingPlansViewModel()
     
     init(router: AppIntentRouter = .shared,sessionManager: SessionManager = .shared){
@@ -60,7 +58,6 @@ class PricingPlansViewModel: ObservableObject {
     func subscribePlan(input: SubscribePlanRequest) {
         print("Plan ID: \(input.pricingPlanId), Transaction ID: \(input.transactionId)")
         isSubscribe = false
-        savePendingSubscribePlan(input)
         Constants.saveDefaults(value: true, key: Constants.subscribeApiFail)
         self.apiReference.postApi(
             endPoint    : .subscribePlan,
@@ -71,86 +68,77 @@ class PricingPlansViewModel: ObservableObject {
             responseType: GeneralResponse.self
         )
         .sink { completion in
-            self.isRetrying = false
             if case .failure(let error) = completion {
                 self.handleError(error, endPoint: .subscribePlan)
             }
         } receiveValue: { response in
             PrintLogger.modelLog(response, type: .response, isInput: false)
             self.isSubscribe = true
-            Constants.saveDefaults(value: false, key: Constants.subscribeApiFail)
-            self.clearPendingSubscribePlan()
-            if let transaction = self.pendingTransaction {
-                Task {
-                    await transaction.finish()
-                    await StoreManager.shared.updatePurchasedProducts()
-                }
-                self.pendingTransaction = nil
+        }
+        .store(in: &self.subscriptions)
+    }
+    
+    // MARK: - Pre-payment Check API
+    func checkOriginalTransactionIdUniqueness(originalId: String, completion: @escaping (Bool) -> Void) {
+        let request = CheckTransactionRequest(originalTransactionId: originalId)
+        self.apiReference.postApi(
+            endPoint    : .checkInAppTransaction,
+            method      : .POST,
+            token       : authKey,
+            body        : request,
+            showLoader  : true,
+            responseType: CheckTransactionResponse.self
+        )
+        .sink { completionStatus in
+            if case .failure(let error) = completionStatus {
+                self.handleError(error, endPoint: .checkInAppTransaction)
+                completion(false) // Assume failure on API error for safety
             }
-            else if let transactionId = UInt64(input.transactionId) {
-                // If it was a retry from a previous session, find and finish it
-                Task {
-                    for await result in Transaction.unfinished {
-                        if case .verified(let transaction) = result, transaction.id == transactionId {
-                            await transaction.finish()
-                            await StoreManager.shared.updatePurchasedProducts()
-                            print("[PricingPlansViewModel] Result: Finished unfinished transaction \(transactionId)")
-                            break
-                        }
-                    }
-                }
+        } receiveValue: { response in
+            PrintLogger.modelLog(response, type: .response, isInput: false)
+            let backendUserId = response.data?.userId ?? ""
+            let currentUserId = Constants.getUserId()
+            if backendUserId == "" || backendUserId == currentUserId {
+                completion(true)
+            } else {
+                AlertManager.shared.showAlert(
+                    title   : "Subscription Alert",
+                    message : "This Apple ID is already linked to another Subzillo account. Please use the original account or a different Apple ID."
+                )
+                completion(false)
             }
         }
         .store(in: &self.subscriptions)
     }
     
-    func cancelPurchase() {
-        self.isSubscribe = false
-        self.isRetrying = false
-        Constants.saveDefaults(value: false, key: Constants.subscribeApiFail)
-        self.clearPendingSubscribePlan()
-        self.pendingTransaction = nil
-    }
-    
-    // MARK: - Pending SubscribePlan persistence helpers
-    func savePendingSubscribePlan(_ input: SubscribePlanRequest) {
-        if let data = try? JSONEncoder().encode(input) {
-            Constants.saveDefaults(value: data, key: Constants.pendingSubscribePlan)
+    func runPrePaymentCheck(completion: @escaping (Bool) -> Void) {
+        Task {
+            
+            var originalId = ""
+            if #available(iOS 15.0, *) {
+                for await result in Transaction.all {
+                    if case .verified(let transaction) = result {
+                        originalId = String(transaction.originalID)
+                        break
+                    }
+                }
+            }
+            
+            if originalId == ""{
+                // No past transactions found for this Apple ID, safe to proceed
+                completion(true)
+                return
+            } else {
+                // Check with backend
+                await MainActor.run {
+                    self.checkOriginalTransactionIdUniqueness(originalId: originalId, completion: completion)
+                }
+            }
         }
-    }
-    
-    // MARK: - Persistence helpers
-    func loadPendingSubscribePlan() -> SubscribePlanRequest? {
-        guard let data = UserDefaults.standard.data(forKey: Constants.pendingSubscribePlan),
-              let request = try? JSONDecoder().decode(SubscribePlanRequest.self, from: data) else {
-            return nil
-        }
-        return request
-    }
-    
-    func clearPendingSubscribePlan() {
-        Constants.removeDefaults(key: Constants.pendingSubscribePlan)
-    }
-    
-    // Retry the subscribePlan API if a previous attempt failed.
-    func retryPendingSubscribePlanIfNeeded() {
-        retryIfNeeded()
     }
     
     // MARK: - Handle errors
     func handleError(_ apiError: APIError, endPoint : APIEndpoint) {
         print("API Error : \(endPoint) - \(apiError.localizedDescription)")
-    }
-    
-    func retryIfNeeded() {
-        guard !isRetrying else { return }
-        let hasFailed = Constants.getUserDefaultsBooleanValue(for: Constants.subscribeApiFail)
-        guard hasFailed, let pending = loadPendingSubscribePlan() else { return }
-        // Ensure we are logged in and not currently processing another IAP in the UI
-        if AppState.shared.isLoggedIn {
-            isRetrying = true
-            print("[PricingPlansViewModel] Retrying pending subscribePlan...")
-            subscribePlan(input: pending)
-        }
     }
 }

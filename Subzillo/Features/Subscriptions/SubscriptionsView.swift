@@ -642,8 +642,7 @@ struct SubscriptionsView: View {
                                                                          
                                                                          categoryId                  : filterData.categoryId,
                                                                          familyMembers               : filterData.familyMemberIds,
-                                                                         month                       : filterData.month,
-                                                                         year                        : filterData.year), sortBy: filterData.costOrder)
+                                                                         monthYear                   : filterData.monthYear), sortBy: filterData.costOrder)
         subscriptionsVM.listSubscriptions(input: input, showLoader: showLoader)
     }
     

@@ -12,6 +12,13 @@ class ConnectedEmailsViewModel: ObservableObject {
     @Published var connectedEmails                      : [ListConnectedEmailsData] = []
     @Published var showErrorPopup                       : Bool = false
     
+    // Inline Sync Progress Properties
+    @Published var isInlineSyncing                      : Bool = false
+    @Published var inlineSyncingId                      : String? = nil
+    @Published var inlineEmailsScanned                  : Int = 0
+    @Published var inlineSubscriptionsFound             : Int = 0
+    private var pollingCancellable                      : AnyCancellable?
+    
     var filteredEmails: [ListConnectedEmailsData] {
         if searchText.isEmpty {
             return connectedEmails
@@ -34,6 +41,17 @@ class ConnectedEmailsViewModel: ObservableObject {
         receiveValue: { response in
             PrintLogger.modelLog(response, type: .response, isInput: false)
             self.connectedEmails = response.data ?? []
+            
+            // Persistence: Check if an inline sync should be active
+            if self.connectedEmails.count == 1, let email = self.connectedEmails.first {
+                if email.syncStatus == 1 {
+                    self.isInlineSyncing = true
+                    self.inlineSyncingId = email.id
+                    if self.pollingCancellable == nil {
+                        self.startInlinePolling(logId: email.syncLogId ?? "")
+                    }
+                }
+            }
         }
         .store(in: &self.subscriptions)
     }
@@ -61,7 +79,14 @@ class ConnectedEmailsViewModel: ObservableObject {
         receiveValue: { [self] response in
             PrintLogger.modelLog(response, type: .response, isInput: false)
             self.listConnectedEmails(input: ListConnectedEmailsRequest(userId: Constants.getUserId()))
-            navigate(to: .emailSyncProgress(logId: response.data?.logId ?? ""))
+            
+            if self.connectedEmails.count == 1 {
+                self.isInlineSyncing = true
+                self.inlineSyncingId = input.integrationId
+                self.startInlinePolling(logId: response.data?.logId ?? "")
+            } else {
+                navigate(to: .emailSyncProgress(logId: response.data?.logId ?? ""))
+            }
         }
         .store(in: &self.subscriptions)
     }
@@ -84,7 +109,7 @@ class ConnectedEmailsViewModel: ObservableObject {
                 NotificationCenter.default.post(name: .closeAllBottomSheets, object: nil)
                 Constants.saveDefaults(value: response.providerLogoBaseUrl, key: Constants.providerBaseUrl)
                 globalSubscriptionData = nil
-                self.router.navigate(to: .extractedSubscriptions(subscriptions: response.data?.subscriptions ?? [], fromEmailSync: false))
+                self.router.navigate(to: .extractedSubscriptions(subscriptions: response.data?.subscriptions ?? [], fromEmailSync: false, integrationId: input.integrationId))
 //                self.router.navigate(to: .subscriptionPreviewView(subscriptionsData: response.data?.subscriptions, content: "", isFromImage:false, isFromEmail: true, audioUrl: nil))
             }
         }
@@ -163,6 +188,63 @@ class ConnectedEmailsViewModel: ObservableObject {
     func downloadLogs(_ email: ListConnectedEmailsData) {
         downloadLogAPI(input: ExportGmailSyncLogsRequest(userId         : Constants.getUserId(),
                                                          integrationId  : email.id ?? ""))
+    }
+    
+    // MARK: - Inline Polling Logic
+    func startInlinePolling(logId: String) {
+        self.fetchInlineSyncProgress(logId: logId)
+        pollingCancellable = Timer.publish(every: 3, on: .main, in: .common)
+            .autoconnect()
+            .sink { [weak self] _ in
+                self?.fetchInlineSyncProgress(logId: logId)
+            }
+    }
+    
+    func stopInlinePolling() {
+        pollingCancellable?.cancel()
+        pollingCancellable = nil
+    }
+    
+    func fetchInlineSyncProgress(logId: String) {
+        let extraParams = "/\(logId)"
+        apiReference.getApi(endPoint: .syncStatus, token: authKey, showLoader: false, extraParams: extraParams, responseType: SyncStatusResponse.self)
+            .sink { [weak self] completion in
+                if case let .failure(error) = completion {
+                    self?.handleError(error, endPoint: .syncStatus)
+                    self?.stopInlinePolling()
+                    self?.isInlineSyncing = false
+                }
+            } receiveValue: { [weak self] response in
+                PrintLogger.modelLog(response, type: .response, isInput: false)
+                self?.handleInlineSyncResponse(response)
+            }
+            .store(in: &subscriptions)
+    }
+    
+    private func handleInlineSyncResponse(_ response: SyncStatusResponse) {
+        guard let data = response.data else { return }
+        self.inlineEmailsScanned = data.emailsAnalyzed ?? 0
+        self.inlineSubscriptionsFound = data.subscriptionsFound ?? 0
+        
+        if data.syncStatus == "completed" {
+            self.stopInlinePolling()
+            self.isInlineSyncing = false
+            self.inlineSyncingId = nil
+            self.listConnectedEmails(input: ListConnectedEmailsRequest(userId: Constants.getUserId()))
+            
+            if (data.subscriptionsFound ?? 0) > 0 {
+                emailSubscriptionsList(input: EmailSubscriptionsListRequest(userId: Constants.getUserId(), integrationId: data.integrationId ?? ""))
+            }
+        } else if data.syncStatus == "failed" {
+            // User requested to keep UI and polling even on failure
+            self.isInlineSyncing = true 
+            // We keep polling every 3 seconds as requested
+            // self.stopInlinePolling() // Commented out to continue polling if that's what's intended
+            // self.isInlineSyncing = false // Commented out to keep UI visible
+            // self.inlineSyncingId = nil // Commented out
+            ToastManager.shared.showToast(message: "Email Syncing failed", style: .error)
+            // self.listConnectedEmails(input: ListConnectedEmailsRequest(userId: Constants.getUserId()))
+        }
     }
     
     func navigate(to route: NavigationRoute){

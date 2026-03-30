@@ -104,6 +104,7 @@ struct ManualEntryView: View {
     
     //MARK: - body
     var body: some View {
+        let planTypeSuggestions = filteredPlanTypes()
         VStack(alignment: .leading,spacing: 0) {
             
             // MARK: Header
@@ -167,6 +168,21 @@ struct ManualEntryView: View {
                     .opacity(isRenew ? 0.6 : 1.0)
                     
                     //MARK: PlanType field
+                    FieldSuggestionView1(
+                        text        : $planType,
+                        title       : "Plan Type",
+                        image       : "gridicon2",
+                        placeHolder : "Plan type",
+                        suggestions : planTypeSuggestions,
+                        displayKey  : { (item: PlanTypeItem) in item.name },
+                        fieldType   : FieldType.planType,
+                        activeField : $activeField,
+                        action      : handlePlanTypeChange
+                    )
+                    .allowsHitTesting(!isRenew)
+                    .opacity(isRenew ? 0.6 : 1.0)
+                    
+                    /*
                     Button(action: selectPlanType) {
                         FieldView(text: $planType, textValue: selectedPlanType ?? "", title: "Plan Type", image: "gridicon2", placeHolder: "Please select", isButton: true, isText: true)
                     }
@@ -208,7 +224,8 @@ struct ManualEntryView: View {
                         .presentationDetents([.medium, .large])
                         .presentationDragIndicator(.hidden)
                     }
-                    
+                    */
+                     
                     HStack(spacing: 24) {
                         //MARK: Amount field
                         VStack{
@@ -223,6 +240,7 @@ struct ManualEntryView: View {
                                 displayKey  : { plan in
                                     String(format: "%.2f", plan.price ?? 0)
                                 },
+                                borderColor : !isAmountError,
                                 fieldType   : FieldType.amount,
                                 activeField : $activeField,
                                 //                                lastActionText : $amountLastActionText,
@@ -279,7 +297,7 @@ struct ManualEntryView: View {
                         HStack(spacing: 6){
                             Image("info")
                                 .frame(width: 24, height: 24)
-                            Text("This amount is not available for this service")
+                            Text("Amount is not matching with the existing data. Are you sure you want to continue?")
                                 .font(.appRegular(14))
                                 .foregroundColor(Color.systemInfoBlue)
                             Spacer()
@@ -653,23 +671,46 @@ struct ManualEntryView: View {
         )
     }
     
-    func filteredPlanTypes() -> [String] {
+//    func filteredPlanTypes() -> [String] {
+//        guard
+//            let plans = addSubscriptionVM.providerData?.providerSubscriptionPlansList,
+//            !plans.isEmpty
+//        else {
+//            // Fallback when API returns no plans
+//            return ["Free", "Basic"]
+//        }
+//        
+//        let planNames = plans.compactMap { $0.planName }
+//        
+//        // If plan names are missing or empty, still return fallback
+//        guard !planNames.isEmpty else {
+//            return ["Free", "Basic"]
+//        }
+//        
+//        return Array(Set(planNames))
+//    }
+    
+    func filteredPlanTypes() -> [PlanTypeItem] {
         guard
             let plans = addSubscriptionVM.providerData?.providerSubscriptionPlansList,
             !plans.isEmpty
         else {
-            // Fallback when API returns no plans
-            return ["Free", "Basic"]
+            return [
+                PlanTypeItem(name: "Free"),
+                PlanTypeItem(name: "Basic")
+            ]
         }
         
         let planNames = plans.compactMap { $0.planName }
         
-        // If plan names are missing or empty, still return fallback
         guard !planNames.isEmpty else {
-            return ["Free", "Basic"]
+            return [
+                PlanTypeItem(name: "Free"),
+                PlanTypeItem(name: "Basic")
+            ]
         }
         
-        return Array(Set(planNames))
+        return Array(Set(planNames)).map { PlanTypeItem(name: $0) }
     }
     
     func filteredBillingCycles() -> [String] {
@@ -696,6 +737,15 @@ struct ManualEntryView: View {
         }
         
         return Array(Set(billingCycleNames))
+    }
+    
+    func handlePlanTypeChange() {
+        if planType != "" {
+            if planType.trimmed != planLastActionText {
+                planLastActionText = planType.trimmed
+                autoFillDetails()
+            }
+        }
     }
     
     private func handleCurrencySelection() {
@@ -1986,7 +2036,7 @@ struct FieldSuggestionView1<Item: Identifiable>: View {
     var isNumberPad     : Bool = false
     var suggestions     : [Item]
     var displayKey      : (Item) -> String
-    
+    var borderColor     = true
     @FocusState private var isFocused   : Bool
     var fieldType                       : FieldType
     @Binding var activeField            : FieldType?
@@ -2057,7 +2107,8 @@ struct FieldSuggestionView1<Item: Identifiable>: View {
             .background(Color.whiteNeutralCardBG)
             .overlay(
                 RoundedRectangle(cornerRadius: 12)
-                    .stroke(.neutral300Border, lineWidth: 1)
+//                    .stroke(.neutral300Border, lineWidth: 1)
+                    .stroke(borderColor ? .neutral300Border : .red, lineWidth: borderColor ? 1 : 2)
             )
             .cornerRadius(12)
             
