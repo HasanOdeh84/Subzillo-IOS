@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.2.11(48)] (Alpha-Stage) - 2026-03-27
+
+### Delivered
+- Build shared with stage url with Chatbot in S5.
+
 ## [1.2.10(47)] (Beta-Stage) - 2026-03-27
 
 ### Delivered (S4)
