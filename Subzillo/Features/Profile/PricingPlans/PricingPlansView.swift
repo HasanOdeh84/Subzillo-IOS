@@ -184,11 +184,14 @@ struct PricingPlansView: View {
             }
         }
         .onReceive(NotificationCenter.default.publisher(for: .IAPHelperPurchaseNotification)) { notification in
-            self.loadingStatus = nil
+//            self.loadingStatus = nil
             handlePurchaseNotification(notification)
         }
         .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("cancelbuying"))) { _ in
             self.loadingStatus = .failed
+        }
+        .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("alreadySubscribed"))) { _ in
+            self.loadingStatus = nil
         }
         .onChange(of: selectedSegment) { _ in
             viewModel.listPricingPlans(type: selectedSegment == .first ? 1 : 2)
@@ -263,6 +266,7 @@ struct PricingPlansView: View {
         
         if let pId = self.planId, !pId.isEmpty {
             if planId != ""{
+                self.loadingStatus = nil
                 subscribePlanAPI(planId: pId, transactionId: transactionId)
             }else{
                 print("Error: planId is empty.")

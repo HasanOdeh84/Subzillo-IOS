@@ -86,7 +86,7 @@ class PricingPlansViewModel: ObservableObject {
             method      : .POST,
             token       : authKey,
             body        : request,
-            showLoader  : true,
+            showLoader  : false,
             responseType: CheckTransactionResponse.self
         )
         .sink { completionStatus in

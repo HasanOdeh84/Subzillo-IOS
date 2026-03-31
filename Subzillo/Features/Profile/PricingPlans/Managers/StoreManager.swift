@@ -107,13 +107,31 @@ extension IAPHelper: SKPaymentTransactionObserver {
         deliverPurchaseNotificationFor(identifier: productIdentifier, transaction:transaction)
         SKPaymentQueue.default().finishTransaction(transaction)
     }
+//    private func fail(transaction: SKPaymentTransaction) {
+//        print("fail...")
+//        NotificationCenter.default.post(name: NSNotification.Name(rawValue: "cancelbuying"), object: nil)
+//        if let transactionError = transaction.error as NSError?,
+//           let localizedDescription = transaction.error?.localizedDescription,
+//           transactionError.code != SKError.paymentCancelled.rawValue {
+//            print("Transaction Error: \(localizedDescription)")
+//        }
+//        SKPaymentQueue.default().finishTransaction(transaction)
+//    }
     private func fail(transaction: SKPaymentTransaction) {
         print("fail...")
-        NotificationCenter.default.post(name: NSNotification.Name(rawValue: "cancelbuying"), object: nil)
-        if let transactionError = transaction.error as NSError?,
-           let localizedDescription = transaction.error?.localizedDescription,
-           transactionError.code != SKError.paymentCancelled.rawValue {
-            print("Transaction Error: \(localizedDescription)")
+        if let transactionError = transaction.error as NSError? {
+            // Check for manual cancellation from the sheet
+            if transactionError.code == SKError.paymentCancelled.rawValue || transactionError.code == SKError.paymentInvalid.rawValue || transactionError.code == SKError.paymentNotAllowed.rawValue{
+                NotificationCenter.default.post(name: NSNotification.Name(rawValue: "cancelbuying"), object: nil)
+            }else if transactionError.code == SKError.unknown.rawValue {
+                NotificationCenter.default.post(name: NSNotification.Name(rawValue: "alreadySubscribed"), object: nil)
+            }
+            else {
+                NotificationCenter.default.post(name: NSNotification.Name(rawValue: "cancelbuying"), object: nil)
+            }
+            print("Transaction Error: \(transactionError.localizedDescription)")
+        } else {
+            NotificationCenter.default.post(name: NSNotification.Name(rawValue: "cancelbuying"), object: nil)
         }
         SKPaymentQueue.default().finishTransaction(transaction)
     }
