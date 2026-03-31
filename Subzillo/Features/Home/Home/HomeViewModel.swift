@@ -25,15 +25,15 @@ class HomeViewModel: ObservableObject {
     func home(input: HomeRequest) {
         self.apiError = nil
         apiReference.postApi(endPoint: APIEndpoint.home, method: .POST,token: authKey,body: input,showLoader: true, responseType: HomeResponse.self)
-            .sink { [unowned self] completion in
+            .sink { [weak self] completion in
                 if case let .failure(error) = completion {
-                    self.handleError(error,endPoint: APIEndpoint.home)
-                    self.apiError = error
+                    self?.handleError(error,endPoint: APIEndpoint.home)
+                    self?.apiError = error
                 }
             }
-        receiveValue: { response in
+        receiveValue: { [weak self] response in
             PrintLogger.modelLog(response, type: .response, isInput: false)
-            self.homeResponse = response.data
+            self?.homeResponse = response.data
         }
         .store(in: &self.subscriptions)
     }
@@ -41,14 +41,14 @@ class HomeViewModel: ObservableObject {
     func homeYearlyGraph(input: HomeYearlyGraphRequest) {
         self.homeYearGraphResponse = nil
         apiReference.postApi(endPoint: APIEndpoint.homeYearlyGraph, method: .POST,token: authKey,body: input,showLoader: true, responseType: HomeYearlyGraphResponse.self)
-            .sink { [unowned self] completion in
+            .sink { [weak self] completion in
                 if case let .failure(error) = completion {
-                    self.handleError(error,endPoint: APIEndpoint.homeYearlyGraph)
+                    self?.handleError(error,endPoint: APIEndpoint.homeYearlyGraph)
                 }
             }
-        receiveValue: { response in
+        receiveValue: { [weak self] response in
             PrintLogger.modelLog(response, type: .response, isInput: false)
-            self.homeYearGraphResponse = response.data
+            self?.homeYearGraphResponse = response.data
         }
         .store(in: &self.subscriptions)
     }

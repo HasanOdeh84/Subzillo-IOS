@@ -183,13 +183,28 @@ struct UploadImageSheet: View {
             }
             if showLocalLoader {
                 ZStack {
-                    Color.black.opacity(0.5)
+                    // Invisible shield to block interactions while loader is active
+                    Color.black.opacity(0.001)
                         .ignoresSafeArea()
-                    VStack {
+                        .opacity(showLocalLoader ? 1 : 0)
+                    
+                    VStack(spacing: 12) {
                         LottieView(name: LoaderManager.shared.animationName, loopMode: .loop)
                             .frame(width: 100, height: 100)
                     }
+                    .opacity(showLocalLoader ? 1 : 0)
+                    .scaleEffect(showLocalLoader ? 1.0 : 0.8)
                 }
+//                .animation(.easeInOut(duration: 0.3), value: showLocalLoader)
+                .allowsHitTesting(showLocalLoader)
+                //                ZStack {
+                //                    Color.black.opacity(0.5)
+                //                        .ignoresSafeArea()
+                //                    VStack {
+                //                        LottieView(name: LoaderManager.shared.animationName, loopMode: .loop)
+                //                            .frame(width: 100, height: 100)
+                //                    }
+                //                }
             }
         }
     }

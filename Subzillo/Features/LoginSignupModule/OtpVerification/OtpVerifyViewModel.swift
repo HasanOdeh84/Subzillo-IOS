@@ -25,12 +25,13 @@ class OtpVerifyViewModel: ObservableObject {
     
     func verifyOtp(input:OtpVerifyRequest,fromLogin:Bool,fromSocialLogin:Bool = false) {
         apiReference.postApi(endPoint: APIEndpoint.verifyOtp, method: .POST, token: authKey, body: input, showLoader: true, responseType: GeneralResponse.self)
-            .sink { [unowned self] completion in
+            .sink { [weak self] completion in
                 if case let .failure(error) = completion {
-                    self.handleError(error,endPoint: APIEndpoint.verifyOtp)
+                    self?.handleError(error,endPoint: APIEndpoint.verifyOtp)
                 }
             }
-        receiveValue: { [unowned self] response in
+        receiveValue: { [weak self] response in
+            guard let self = self else { return }
             PrintLogger.modelLog(response, type: .response, isInput: false)
             ToastManager.shared.showToast(message: response.message ?? "")
             self.otpVerifyResponse = response
@@ -77,15 +78,15 @@ class OtpVerifyViewModel: ObservableObject {
     
     func resendOtp(input:ResendOtpRequest) {
         apiReference.postApi(endPoint: APIEndpoint.resendOtp, method: .POST, token: authKey, body: input, showLoader: true, responseType: GeneralResponse.self)
-            .sink { [unowned self] completion in
+            .sink { [weak self] completion in
                 if case let .failure(error) = completion {
-                    self.handleError(error,endPoint: APIEndpoint.resendOtp)
+                    self?.handleError(error,endPoint: APIEndpoint.resendOtp)
                 }
             }
-        receiveValue: { [unowned self] response in
+        receiveValue: { [weak self] response in
             PrintLogger.modelLog(response, type: .response, isInput: false)
             ToastManager.shared.showToast(message: response.message ?? "")
-            self.resendOtpResponse = true
+            self?.resendOtpResponse = true
         }
         .store(in: &self.subscriptions)
     }
@@ -93,17 +94,17 @@ class OtpVerifyViewModel: ObservableObject {
     func verifyOtpEdit(input:OtpVerifyRequest, toastManager: ToastManager) {
         otpVerified = false
         apiReference.postApi(endPoint: APIEndpoint.verifyOtp, method: .POST, token: authKey, body: input, showLoader: true, responseType: GeneralResponse.self, fromVerifyOtpBottom: true)
-            .sink { [unowned self] completion in
+            .sink { [weak self] completion in
                 if case let .failure(error) = completion {
                     toastManager.showToast(message: error.localizedDescription, style: .error)
-                    self.handleError(error,endPoint: APIEndpoint.verifyOtp)
+                    self?.handleError(error,endPoint: APIEndpoint.verifyOtp)
                 }
             }
-        receiveValue: { [unowned self] response in
+        receiveValue: { [weak self] response in
             PrintLogger.modelLog(response, type: .response, isInput: false)
             ToastManager.shared.showToast(message: response.message ?? "")
-            self.otpVerifyResponse = response
-            otpVerified = true
+            self?.otpVerifyResponse = response
+            self?.otpVerified = true
         }
         .store(in: &self.subscriptions)
     }

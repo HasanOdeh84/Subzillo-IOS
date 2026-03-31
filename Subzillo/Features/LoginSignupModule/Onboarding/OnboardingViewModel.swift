@@ -22,16 +22,16 @@ class OnboardingViewModel: ObservableObject {
     
     func updateOnboarding(input:UpdateOnboardingRequest) {
         apiReference.postApi(endPoint: APIEndpoint.updateOnboarding, method: .POST, token: authKey, body: input, showLoader: true, responseType: GeneralResponse.self)
-            .sink { [unowned self] completion in
+            .sink { [weak self] completion in
                 if case let .failure(error) = completion {
-                    self.handleError(error,endPoint: APIEndpoint.updateOnboarding)
+                    self?.handleError(error,endPoint: APIEndpoint.updateOnboarding)
                 }
             }
-        receiveValue: { [unowned self] response in
+        receiveValue: { [weak self] response in
             PrintLogger.modelLog(response, type: .response, isInput: false)
             ToastManager.shared.showToast(message: response.message ?? "")
             AppState.shared.login()
-            router.navigate(to: .home)
+            self?.router.navigate(to: .home)
         }
         .store(in: &self.subscriptions)
     }

@@ -27,31 +27,31 @@ class SettingsViewModel: ObservableObject {
     func getPrivacyData(type:Int) {
         //type -> 1-privacy policy, 2- terms & Conditions, 3-contact us for contact us in data object in response, instead of content, there will email & phone
         apiReference.getApi(endPoint: APIEndpoint.privacyData, token: defaultAuthKey, showLoader: true, extraParams: "/\(type)", responseType: PrivacyDataResponse.self)
-            .sink { [unowned self] completion in
+            .sink { [weak self] completion in
                 if case let .failure(error) = completion {
-                    self.handleError(error,endPoint: APIEndpoint.privacyData)
+                    self?.handleError(error,endPoint: APIEndpoint.privacyData)
                 }
             }
-        receiveValue: { response in
+        receiveValue: { [weak self] response in
             PrintLogger.modelLog(response, type: .response, isInput: false)
-            self.privacyData = response.data
-            self.content = response.data?.content
+            self?.privacyData = response.data
+            self?.content = response.data?.content
         }
         .store(in: &self.subscriptions)
     }
     
     func deleteAccount(input:DeleteAccountRequest) {
         apiReference.postApi(endPoint: APIEndpoint.deleteAccount, method: .POST,token: authKey,body: input,showLoader: true, responseType: GeneralResponse.self)
-            .sink { [unowned self] completion in
+            .sink { [weak self] completion in
                 if case let .failure(error) = completion {
-                    self.handleError(error,endPoint: APIEndpoint.deleteAccount)
+                    self?.handleError(error,endPoint: APIEndpoint.deleteAccount)
                 }
             }
-        receiveValue: { response in
+        receiveValue: { [weak self] response in
             PrintLogger.modelLog(response, type: .response, isInput: false)
             ToastManager.shared.showToast(message: response.message ?? "")
             AppState.shared.logout()
-            self.router.navigate(to: .login)
+            self?.router.navigate(to: .login)
         }
         .store(in: &self.subscriptions)
     }
@@ -61,17 +61,18 @@ class SettingsViewModel: ObservableObject {
         isUpdateError1 = false
         isUpdateError2 = false
         apiReference.postApi(endPoint: APIEndpoint.toggleReminders, method: .POST, token: authKey, body: input, showLoader: false, responseType: GeneralResponse.self)
-            .sink { [unowned self] completion in
+            .sink { [weak self] completion in
                 if case let .failure(error) = completion {
-                    self.handleError(error, endPoint: APIEndpoint.toggleReminders)
+                    self?.handleError(error, endPoint: APIEndpoint.toggleReminders)
                     if input.type == 1{
-                        isUpdateError1 = true
+                        self?.isUpdateError1 = true
                     }else if input.type == 2{
-                        isUpdateError2 = true
+                        self?.isUpdateError2 = true
                     }
                 }
             }
-        receiveValue: { [self] response in
+        receiveValue: { [weak self] response in
+            guard let self = self else { return }
             PrintLogger.modelLog(response, type: .response, isInput: false)
 //            ToastManager.shared.showToast(message: response.message ?? "")
             if input.type == 3{
@@ -83,12 +84,12 @@ class SettingsViewModel: ObservableObject {
     
     func emailAutoSync(input:EmailAutoSyncRequest) {
         apiReference.postApi(endPoint: APIEndpoint.emailAutoSync, method: .POST,token: authKey,body: input,showLoader: true, responseType: GeneralResponse.self)
-            .sink { [unowned self] completion in
+            .sink { [weak self] completion in
                 if case let .failure(error) = completion {
-                    self.handleError(error,endPoint: APIEndpoint.emailAutoSync)
+                    self?.handleError(error,endPoint: APIEndpoint.emailAutoSync)
                 }
             }
-        receiveValue: { response in
+        receiveValue: { [weak self] response in
             PrintLogger.modelLog(response, type: .response, isInput: false)
             ToastManager.shared.showToast(message: response.message ?? "")
         }
@@ -97,13 +98,13 @@ class SettingsViewModel: ObservableObject {
     
     func exportSubscriptionData(input: ExportSubscriptionDataRequest,showLoader:Bool = true) {
         apiReference.postApiData(endPoint: APIEndpoint.exportSubscriptionData, method: .POST,token: authKey,body: input,showLoader: showLoader)
-            .sink { [unowned self] completion in
+            .sink { [weak self] completion in
                 if case let .failure(error) = completion {
-                    self.handleError(error,endPoint: APIEndpoint.exportSubscriptionData)
+                    self?.handleError(error,endPoint: APIEndpoint.exportSubscriptionData)
                 }
             }
-        receiveValue: { [unowned self] data in
-            self.saveDataToFile(data: data)
+        receiveValue: { [weak self] data in
+            self?.saveDataToFile(data: data)
         }
         .store(in: &self.subscriptions)
     }
@@ -134,13 +135,13 @@ class SettingsViewModel: ObservableObject {
     func listSyncPeriods(input:ListSyncPeriodRequest) {
         listSyncPeriods = nil
         apiReference.postApi(endPoint: APIEndpoint.listSyncPeriods, method: .POST,token: authKey,body: input,showLoader: true, responseType: ListSyncPeriodResponse.self)
-            .sink { [unowned self] completion in
+            .sink { [weak self] completion in
                 if case let .failure(error) = completion {
-                    self.handleError(error,endPoint: APIEndpoint.listSyncPeriods)
+                    self?.handleError(error,endPoint: APIEndpoint.listSyncPeriods)
                 }
             }
-        receiveValue: { response in
-            self.listSyncPeriods = response.data
+        receiveValue: { [weak self] response in
+            self?.listSyncPeriods = response.data
             PrintLogger.modelLog(response, type: .response, isInput: false)
 //            ToastManager.shared.showToast(message: response.message ?? "")
         }
@@ -149,12 +150,12 @@ class SettingsViewModel: ObservableObject {
     
     func updateSyncPeriod(input:UpdateSyncPeriodRequest) {
         apiReference.postApi(endPoint: APIEndpoint.updateSyncPeriod, method: .POST,token: authKey,body: input,showLoader: true, responseType: GeneralResponse.self)
-            .sink { [unowned self] completion in
+            .sink { [weak self] completion in
                 if case let .failure(error) = completion {
-                    self.handleError(error,endPoint: APIEndpoint.updateSyncPeriod)
+                    self?.handleError(error,endPoint: APIEndpoint.updateSyncPeriod)
                 }
             }
-        receiveValue: { response in
+        receiveValue: { [weak self] response in
             PrintLogger.modelLog(response, type: .response, isInput: false)
             ToastManager.shared.showToast(message: response.message ?? "")
         }

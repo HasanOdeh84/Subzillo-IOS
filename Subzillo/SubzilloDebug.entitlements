@@ -10,7 +10,7 @@
 	</array>
 	<key>com.apple.developer.associated-domains</key>
 	<array>
-		<string>applinks:stagingsubzillo.shared.ly</string>
+		<string>applinks:qasubzillo.shared.ly</string>
 	</array>
 	<key>com.apple.developer.siri</key>
 	<true/>

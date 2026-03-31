@@ -36,9 +36,9 @@ struct NotificationRowView: View {
                     
                     Spacer()
                     
-                    //                    Text(notification.date ?? "")
-                    //                        .font(.appRegular(12))
-                    //                        .foregroundColor(.neutral500)
+//                    Text(notification.createdAt ?? "")
+//                        .font(.appRegular(12))
+//                        .foregroundColor(.neutral500)
                 }
                 
                 Text(LocalizedStringKey(notification.message ?? ""))

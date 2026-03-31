@@ -30,17 +30,17 @@ class NotificationsViewModel: ObservableObject {
             notificationsList.removeAll()
         }
         apiReference.postApi(endPoint: APIEndpoint.notificationsList, method: .POST, token: authKey, body: input, showLoader: true, responseType: NotificationsListResponse.self)
-            .sink { [unowned self] completion in
+            .sink { [weak self] completion in
                 if case let .failure(error) = completion {
-                    self.handleError(error, endPoint: APIEndpoint.notificationsList)
+                    self?.handleError(error, endPoint: APIEndpoint.notificationsList)
                 }
             }
-        receiveValue: { response in
+        receiveValue: { [weak self] response in
             PrintLogger.modelLog(response, type: .response, isInput: false)
-            self.notificationData = response.data
-            self.notificationsList.append(contentsOf: response.data?.notifications ?? [])
+            self?.notificationData = response.data
+            self?.notificationsList.append(contentsOf: response.data?.notifications ?? [])
             //            self.notificationsList.append(NotificationData(id: "1", title: "ok", message: "bye", readStatus: false, isSelected: false, createdAt: "12/23/34"))
-            self.updateUnreadCount()
+            self?.updateUnreadCount()
         }
         .store(in: &self.subscriptions)
     }
@@ -52,17 +52,18 @@ class NotificationsViewModel: ObservableObject {
     
     func deleteNotificationAPI(input: DeleteNotificationRequest) {
         apiReference.postApi(endPoint: APIEndpoint.deleteNotification, method: .POST, token: authKey, body: input, showLoader: true, responseType: GeneralResponse.self)
-            .sink { [unowned self] completion in
+            .sink { [weak self] completion in
                 if case let .failure(error) = completion {
-                    self.handleError(error, endPoint: APIEndpoint.deleteNotification)
+                    self?.handleError(error, endPoint: APIEndpoint.deleteNotification)
                 }
             }
-        receiveValue: { [self] response in
+        receiveValue: { [weak self] response in
+            guard let self = self else { return }
             PrintLogger.modelLog(response, type: .response, isInput: false)
             ToastManager.shared.showToast(message: response.message ?? "")
-            currentPage = 0
-            notificationsList.removeAll()
-            notificationsListApi()
+            self.currentPage = 0
+            self.notificationsList.removeAll()
+            self.notificationsListApi()
         }
         .store(in: &self.subscriptions)
     }
@@ -75,17 +76,18 @@ class NotificationsViewModel: ObservableObject {
     
     func markNotificationReadAPI(input: MarkNotificationReadRequest) {
         apiReference.postApi(endPoint: APIEndpoint.markNotificationRead, method: .POST, token: authKey, body: input, showLoader: true, responseType: GeneralResponse.self)
-            .sink { [unowned self] completion in
+            .sink { [weak self] completion in
                 if case let .failure(error) = completion {
-                    self.handleError(error, endPoint: APIEndpoint.markNotificationRead)
+                    self?.handleError(error, endPoint: APIEndpoint.markNotificationRead)
                 }
             }
-        receiveValue: { [self] response in
+        receiveValue: { [weak self] response in
+            guard let self = self else { return }
             PrintLogger.modelLog(response, type: .response, isInput: false)
             ToastManager.shared.showToast(message: response.message ?? "")
-            currentPage = 0
-            notificationsList.removeAll()
-            notificationsListApi()
+            self.currentPage = 0
+            self.notificationsList.removeAll()
+            self.notificationsListApi()
         }
         .store(in: &self.subscriptions)
     }

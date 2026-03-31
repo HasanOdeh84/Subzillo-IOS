@@ -33,12 +33,13 @@ class ConnectedEmailsViewModel: ObservableObject {
     
     func listConnectedEmails(input: ListConnectedEmailsRequest,showLoader:Bool = true) {
         apiReference.postApi(endPoint: APIEndpoint.listConnectedEmails, method: .POST,token: authKey,body: input,showLoader: showLoader, responseType: ListConnectedEmailsResponse.self)
-            .sink { [unowned self] completion in
+            .sink { [weak self] completion in
                 if case let .failure(error) = completion {
-                    self.handleError(error,endPoint: APIEndpoint.listConnectedEmails)
+                    self?.handleError(error,endPoint: APIEndpoint.listConnectedEmails)
                 }
             }
-        receiveValue: { response in
+        receiveValue: { [weak self] response in
+            guard let self = self else { return }
             PrintLogger.modelLog(response, type: .response, isInput: false)
             self.connectedEmails = response.data ?? []
             
@@ -58,9 +59,9 @@ class ConnectedEmailsViewModel: ObservableObject {
     
     func deleteEmailAPI(input: DeleteEmailRequest,showLoader:Bool = true) {
         apiReference.postApi(endPoint: APIEndpoint.deleteEmail, method: .POST,token: authKey,body: input,showLoader: showLoader, responseType: GeneralResponse.self)
-            .sink { [unowned self] completion in
+            .sink { [weak self] completion in
                 if case let .failure(error) = completion {
-                    self.handleError(error,endPoint: APIEndpoint.deleteEmail)
+                    self?.handleError(error,endPoint: APIEndpoint.deleteEmail)
                 }
             }
         receiveValue: { response in
@@ -71,12 +72,13 @@ class ConnectedEmailsViewModel: ObservableObject {
     
     func syncEmailAPI(input: SyncEmailRequest,showLoader:Bool = true) {
         apiReference.postApi(endPoint: APIEndpoint.syncEmail, method: .POST,token: authKey,body: input,showLoader: showLoader, responseType: SyncEmailResponse.self)
-            .sink { [unowned self] completion in
+            .sink { [weak self] completion in
                 if case let .failure(error) = completion {
-                    self.handleError(error,endPoint: APIEndpoint.syncEmail)
+                    self?.handleError(error,endPoint: APIEndpoint.syncEmail)
                 }
             }
-        receiveValue: { [self] response in
+        receiveValue: { [weak self] response in
+            guard let self = self else { return }
             PrintLogger.modelLog(response, type: .response, isInput: false)
             self.listConnectedEmails(input: ListConnectedEmailsRequest(userId: Constants.getUserId()))
             
@@ -85,7 +87,7 @@ class ConnectedEmailsViewModel: ObservableObject {
                 self.inlineSyncingId = input.integrationId
                 self.startInlinePolling(logId: response.data?.logId ?? "")
             } else {
-                navigate(to: .emailSyncProgress(logId: response.data?.logId ?? ""))
+                self.navigate(to: .emailSyncProgress(logId: response.data?.logId ?? ""))
             }
         }
         .store(in: &self.subscriptions)
@@ -93,23 +95,23 @@ class ConnectedEmailsViewModel: ObservableObject {
     
     func emailSubscriptionsList(input: EmailSubscriptionsListRequest,showLoader:Bool = true) {
         apiReference.postApi(endPoint: APIEndpoint.emailSubscriptionsList, method: .POST,token: authKey,body: input,showLoader: showLoader, responseType: VoiceSubscriptionResponse.self)
-            .sink { [unowned self] completion in
+            .sink { [weak self] completion in
                 if case let .failure(error) = completion {
-                    self.handleError(error,endPoint: APIEndpoint.emailSubscriptionsList)
-                    self.showErrorPopup = true
+                    self?.handleError(error,endPoint: APIEndpoint.emailSubscriptionsList)
+                    self?.showErrorPopup = true
                 }
             }
-        receiveValue: { response in
+        receiveValue: { [weak self] response in
             PrintLogger.modelLog(response, type: .response, isInput: false)
             if response.data == nil || response.data?.subscriptions?.count == 0
             {
-                self.showErrorPopup = true
+                self?.showErrorPopup = true
             }
             else{
                 NotificationCenter.default.post(name: .closeAllBottomSheets, object: nil)
                 Constants.saveDefaults(value: response.providerLogoBaseUrl, key: Constants.providerBaseUrl)
                 globalSubscriptionData = nil
-                self.router.navigate(to: .extractedSubscriptions(subscriptions: response.data?.subscriptions ?? [], fromEmailSync: false, integrationId: input.integrationId))
+                self?.router.navigate(to: .extractedSubscriptions(subscriptions: response.data?.subscriptions ?? [], fromEmailSync: false, integrationId: input.integrationId))
 //                self.router.navigate(to: .subscriptionPreviewView(subscriptionsData: response.data?.subscriptions, content: "", isFromImage:false, isFromEmail: true, audioUrl: nil))
             }
         }
@@ -118,13 +120,13 @@ class ConnectedEmailsViewModel: ObservableObject {
     
     func downloadLogAPI(input: ExportGmailSyncLogsRequest,showLoader:Bool = true) {
         apiReference.postApiData(endPoint: APIEndpoint.exportGmailSyncLogs, method: .POST,token: authKey,body: input,showLoader: showLoader)
-            .sink { [unowned self] completion in
+            .sink { [weak self] completion in
                 if case let .failure(error) = completion {
-                    self.handleError(error,endPoint: APIEndpoint.exportGmailSyncLogs)
+                    self?.handleError(error,endPoint: APIEndpoint.exportGmailSyncLogs)
                 }
             }
-        receiveValue: { [unowned self] data in
-            self.saveDataToFile(data: data)
+        receiveValue: { [weak self] data in
+            self?.saveDataToFile(data: data)
         }
         .store(in: &self.subscriptions)
     }

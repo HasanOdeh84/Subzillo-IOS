@@ -23,14 +23,14 @@ class SubscriptionMatchViewModel: NSObject, ObservableObject {
     func getSubscriptionDetails(input:GetSubscriptionDetailsRequest) {
         self.getSubsDetailsResponse = nil
         apiReference.postApi(endPoint: APIEndpoint.getSubscriptionDetails, method: .POST,token: authKey,body: input,showLoader: true, responseType: GetSubscriptionDetailsResponse.self)
-            .sink { [unowned self] completion in
+            .sink { [weak self] completion in
                 if case let .failure(error) = completion {
-                    self.handleError(error,endPoint: APIEndpoint.getSubscriptionDetails)
+                    self?.handleError(error,endPoint: APIEndpoint.getSubscriptionDetails)
                 }
             }
-        receiveValue: { response in
+        receiveValue: { [weak self] response in
             PrintLogger.modelLog(response, type: .response, isInput: false)
-            self.getSubsDetailsResponse = response.data
+            self?.getSubsDetailsResponse = response.data
         }
         .store(in: &self.subscriptions)
     }
@@ -42,15 +42,15 @@ class SubscriptionMatchViewModel: NSObject, ObservableObject {
     func renewalUpdate(input:RenewalUpdateRequest){
         isRenewSuccess = false
         apiReference.postApi(endPoint: APIEndpoint.renewalUpdate, method: .POST,token: authKey,body: input,showLoader: true, responseType: GeneralResponse.self)
-            .sink { [unowned self] completion in
+            .sink { [weak self] completion in
                 if case let .failure(error) = completion {
-                    self.handleError(error,endPoint: APIEndpoint.renewalUpdate)
+                    self?.handleError(error,endPoint: APIEndpoint.renewalUpdate)
                 }
             }
-        receiveValue: { [self] response in
+        receiveValue: { [weak self] response in
             PrintLogger.modelLog(response, type: .response, isInput: false)
             ToastManager.shared.showToast(message: response.message ?? "")
-            isRenewSuccess = true
+            self?.isRenewSuccess = true
         }
         .store(in: &self.subscriptions)
     }

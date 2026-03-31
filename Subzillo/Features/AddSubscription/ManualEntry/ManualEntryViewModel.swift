@@ -37,18 +37,18 @@ class ManualEntryViewModel: ObservableObject {
         addSubscriptionResponse = nil
         isManualEntrySuccess = false
         apiReference.postApi(endPoint: APIEndpoint.addSubscription, method: .POST,token: authKey,body: input,showLoader: true, responseType: AddSubscriptionResponse.self)
-            .sink { [unowned self] completion in
+            .sink { [weak self] completion in
                 if case let .failure(error) = completion {
-                    self.handleError(error,endPoint: APIEndpoint.addSubscription)
+                    self?.handleError(error,endPoint: APIEndpoint.addSubscription)
                 }
             }
-        receiveValue: { response in
+        receiveValue: { [weak self] response in
             PrintLogger.modelLog(response, type: .response, isInput: false)
             ToastManager.shared.showToast(message: response.message ?? "")
             if response.data != nil {
-                self.addSubscriptionResponse = response.data
+                self?.addSubscriptionResponse = response.data
             }
-            self.isManualEntrySuccess = true
+            self?.isManualEntrySuccess = true
         }
         .store(in: &self.subscriptions)
     }
@@ -73,14 +73,14 @@ class ManualEntryViewModel: ObservableObject {
     
     func listUserCards(input:ListUserCardsRequest) {
         apiReference.postApi(endPoint: APIEndpoint.listUserCards, method: .POST,token: authKey,body: input,showLoader: true, responseType: ListUserCardsResponse.self)
-            .sink { [unowned self] completion in
+            .sink { [weak self] completion in
                 if case let .failure(error) = completion {
-                    self.handleError(error,endPoint: APIEndpoint.listUserCards)
+                    self?.handleError(error,endPoint: APIEndpoint.listUserCards)
                 }
             }
-        receiveValue: { [self] response in
+        receiveValue: { [weak self] response in
             PrintLogger.modelLog(response, type: .response, isInput: false)
-            listUserCardsResponse = response.data
+            self?.listUserCardsResponse = response.data
         }
         .store(in: &self.subscriptions)
     }
@@ -88,14 +88,14 @@ class ManualEntryViewModel: ObservableObject {
     func listFamilyMembers(input:ListFamilyMembersRequest, showLoader:Bool = false) {
         listFamilyMembersResponse = nil
         apiReference.postApi(endPoint: APIEndpoint.listFamilyMembers, method: .POST,token: authKey,body: input,showLoader: showLoader, responseType: ListFamilyMembersResponse.self)
-            .sink { [unowned self] completion in
+            .sink { [weak self] completion in
                 if case let .failure(error) = completion {
-                    self.handleError(error,endPoint: APIEndpoint.listFamilyMembers)
+                    self?.handleError(error,endPoint: APIEndpoint.listFamilyMembers)
                 }
             }
-        receiveValue: { [self] response in
+        receiveValue: { [weak self] response in
             PrintLogger.modelLog(response, type: .response, isInput: false)
-            listFamilyMembersResponse = response.data
+            self?.listFamilyMembersResponse = response.data
         }
         .store(in: &self.subscriptions)
     }
@@ -105,31 +105,31 @@ class ManualEntryViewModel: ObservableObject {
         isAddToast = false
         isAddError = nil
         apiReference.postApi(endPoint: APIEndpoint.addCard, method: .POST,token: authKey,body: input,showLoader: true, responseType: GeneralResponse.self)
-            .sink { [unowned self] completion in
+            .sink { [weak self] completion in
                 if case let .failure(error) = completion {
-                    self.handleError(error,endPoint: APIEndpoint.addCard)
-                    isAddToast = true
-                    isAddError = error.localizedDescription
+                    self?.handleError(error,endPoint: APIEndpoint.addCard)
+                    self?.isAddToast = true
+                    self?.isAddError = error.localizedDescription
                 }
             }
-        receiveValue: { response in
+        receiveValue: { [weak self] response in
             PrintLogger.modelLog(response, type: .response, isInput: false)
             ToastManager.shared.showToast(message: response.message ?? "")
-            self.isAdd = true
+            self?.isAdd = true
         }
         .store(in: &self.subscriptions)
     }
     
     func getServiceProvidersList() {
         apiReference.getApi(endPoint: APIEndpoint.getServiceProvidersList, token: authKey, responseType: GetServiceProvidersListResponse.self)
-            .sink { [unowned self] completion in
+            .sink { [weak self] completion in
                 if case let .failure(error) = completion {
-                    self.handleError(error,endPoint: APIEndpoint.getServiceProvidersList)
+                    self?.handleError(error,endPoint: APIEndpoint.getServiceProvidersList)
                 }
             }
-        receiveValue: { response in
+        receiveValue: { [weak self] response in
             PrintLogger.modelLog(response, type: .response, isInput: false)
-            self.servicesList = response.data
+            self?.servicesList = response.data
         }
         .store(in: &self.subscriptions)
     }
@@ -137,14 +137,14 @@ class ManualEntryViewModel: ObservableObject {
     func fetchProviderData(input:FetchProviderDataRequest) {
 //        self.providerData = nil
         apiReference.postApi(endPoint: APIEndpoint.fetchProviderData, method: .POST,token: authKey,body: input,showLoader: false, responseType: FetchProviderDataResponse.self)
-            .sink { [unowned self] completion in
+            .sink { [weak self] completion in
                 if case let .failure(error) = completion {
-                    self.handleError(error,endPoint: APIEndpoint.fetchProviderData)
+                    self?.handleError(error,endPoint: APIEndpoint.fetchProviderData)
                 }
             }
-        receiveValue: { response in
+        receiveValue: { [weak self] response in
             PrintLogger.modelLog(response, type: .response, isInput: false)
-            self.providerData = response.data
+            self?.providerData = response.data
         }
         .store(in: &self.subscriptions)
     }
@@ -153,18 +153,18 @@ class ManualEntryViewModel: ObservableObject {
         addSubscriptionResponse = nil
         isEditEntrySuccess = false
         apiReference.postApi(endPoint: APIEndpoint.editSubscription, method: .POST,token: authKey,body: input,showLoader: true, responseType: AddSubscriptionResponse.self)
-            .sink { [unowned self] completion in
+            .sink { [weak self] completion in
                 if case let .failure(error) = completion {
-                    self.handleError(error,endPoint: APIEndpoint.editSubscription)
+                    self?.handleError(error,endPoint: APIEndpoint.editSubscription)
                 }
             }
-        receiveValue: { response in
+        receiveValue: { [weak self] response in
             PrintLogger.modelLog(response, type: .response, isInput: false)
             ToastManager.shared.showToast(message: response.message ?? "")
             if response.data != nil {
-                self.addSubscriptionResponse = response.data
+                self?.addSubscriptionResponse = response.data
             }
-            self.isEditEntrySuccess = true
+            self?.isEditEntrySuccess = true
         }
         .store(in: &self.subscriptions)
     }
@@ -172,15 +172,15 @@ class ManualEntryViewModel: ObservableObject {
     func addfamilyMember(input:AddFamilyMemberRequest) {
         isAddFamilyMember = false
         apiReference.postApi(endPoint: APIEndpoint.addFamilyMember, method: .POST,token: authKey,body: input,showLoader: true, responseType: GeneralResponse.self)
-            .sink { [unowned self] completion in
+            .sink { [weak self] completion in
                 if case let .failure(error) = completion {
-                    self.handleError(error,endPoint: APIEndpoint.addFamilyMember)
+                    self?.handleError(error,endPoint: APIEndpoint.addFamilyMember)
                 }
             }
-        receiveValue: { response in
+        receiveValue: { [weak self] response in
             PrintLogger.modelLog(response, type: .response, isInput: false)
             ToastManager.shared.showToast(message: response.message ?? "")
-            self.isAddFamilyMember = true
+            self?.isAddFamilyMember = true
         }
         .store(in: &self.subscriptions)
     }

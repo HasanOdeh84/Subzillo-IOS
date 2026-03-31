@@ -25,7 +25,6 @@ class CommonAPIViewModel: ObservableObject {
     @Published var paymentMethodError   : Error?
     
     @Published var userInfoResponse     : UserInfo?
-    @Published var userInfError         : Error?
     
     @Published var unreadCountResponse  : UnreadNotificationCountData?
     
@@ -37,15 +36,14 @@ class CommonAPIViewModel: ObservableObject {
     func getUserInfo(input:getUserInfoRequest) {
         self.userInfoResponse = nil
         apiReference.postApi(endPoint: APIEndpoint.getUserInfo, method: .POST,token: authKey,body: input,showLoader: false, responseType: getUserInfoResponse.self)
-            .sink { [unowned self] completion in
+            .sink { [weak self] completion in
                 if case let .failure(error) = completion {
-                    self.userInfError = error
-                    self.handleError(error,endPoint: APIEndpoint.getUserInfo)
+                    self?.handleError(error,endPoint: APIEndpoint.getUserInfo)
                 }
             }
-        receiveValue: { response in
+        receiveValue: { [weak self] response in
             PrintLogger.modelLog(response, type: .response, isInput: false)
-            self.userInfoResponse = response.data
+            self?.userInfoResponse = response.data
         }
         .store(in: &self.subscriptions)
     }
@@ -53,25 +51,23 @@ class CommonAPIViewModel: ObservableObject {
     func unreadNotificationCount(input:UnreadNotificationCountRequest) {
         self.unreadCountResponse = nil
         apiReference.postApi(endPoint: APIEndpoint.unreadNotificationCount, method: .POST,token: authKey,body: input,showLoader: false, responseType: UnreadNotificationCountResponse.self)
-            .sink { [unowned self] completion in
+            .sink { [weak self] completion in
                 if case let .failure(error) = completion {
-                    self.userInfError = error
-                    self.handleError(error,endPoint: APIEndpoint.unreadNotificationCount)
+                    self?.handleError(error,endPoint: APIEndpoint.unreadNotificationCount)
                 }
             }
-        receiveValue: { response in
+        receiveValue: { [weak self] response in
             PrintLogger.modelLog(response, type: .response, isInput: false)
-            self.unreadCountResponse = response.data
+            self?.unreadCountResponse = response.data
         }
         .store(in: &self.subscriptions)
     }
     
     func updateDeviceId(input:UpdateDeviceIdRequest) {
         apiReference.postApi(endPoint: APIEndpoint.updateDeviceId, method: .POST,token: authKey,body: input,showLoader: false, responseType: UpdateDeviceIdResponse.self)
-            .sink { [unowned self] completion in
+            .sink { [weak self] completion in
                 if case let .failure(error) = completion {
-                    self.userInfError = error
-                    self.handleError(error,endPoint: APIEndpoint.updateDeviceId)
+                    self?.handleError(error,endPoint: APIEndpoint.updateDeviceId)
                 }
             }
         receiveValue: { response in
@@ -85,14 +81,14 @@ class CommonAPIViewModel: ObservableObject {
     func getPaymentMethods() {
         self.paymentMethodResponse = nil
         apiReference.getApi(endPoint: APIEndpoint.getPaymentMethods, token: defaultAuthKey, responseType: getPaymentMethodResponse.self)
-            .sink { [unowned self] completion in
+            .sink { [weak self] completion in
                 if case let .failure(error) = completion {
-                    self.paymentMethodError = error
-                    self.handleError(error,endPoint: APIEndpoint.getPaymentMethods)
+                    self?.paymentMethodError = error
+                    self?.handleError(error,endPoint: APIEndpoint.getPaymentMethods)
                 }
             }
-        receiveValue: { response in
-            self.paymentMethodResponse = response.data
+        receiveValue: { [weak self] response in
+            self?.paymentMethodResponse = response.data
         }
         .store(in: &self.subscriptions)
     }
@@ -100,29 +96,29 @@ class CommonAPIViewModel: ObservableObject {
     func getCategories() {
         self.categoriesResponse = nil
         apiReference.getApi(endPoint: APIEndpoint.getCategories, token: defaultAuthKey, responseType: getCategoriesResponse.self)
-            .sink { [unowned self] completion in
+            .sink { [weak self] completion in
                 if case let .failure(error) = completion {
-                    self.categoryError = error
-                    self.handleError(error,endPoint: APIEndpoint.getCategories)
+                    self?.categoryError = error
+                    self?.handleError(error,endPoint: APIEndpoint.getCategories)
                 }
             }
-        receiveValue: { response in
-            self.categoriesResponse = response.data
+        receiveValue: { [weak self] response in
+            self?.categoriesResponse = response.data
         }
         .store(in: &self.subscriptions)
     }
     
     func getCurrencies() {
         apiReference.getApi(endPoint: APIEndpoint.getCurrencies, token: defaultAuthKey, responseType: getCurrenciesResponse.self)
-            .sink { [unowned self] completion in
+            .sink { [weak self] completion in
                 if case let .failure(error) = completion {
-                    self.currencyError = error
-                    self.handleError(error,endPoint: APIEndpoint.getCurrencies)
+                    self?.currencyError = error
+                    self?.handleError(error,endPoint: APIEndpoint.getCurrencies)
                 }
             }
-        receiveValue: { [self] response in
+        receiveValue: { [weak self] response in
             PrintLogger.modelLog(response, type: .response, isInput: false)
-            currencyResponse = response.data
+            self?.currencyResponse = response.data
         }
         .store(in: &self.subscriptions)
     }
@@ -152,29 +148,29 @@ class CommonAPIViewModel: ObservableObject {
     
     func getCountries() {
         apiReference.getApi(endPoint: APIEndpoint.getCountryCodes, token: defaultAuthKey, responseType: getCountriesResponse.self)
-            .sink { [unowned self] completion in
+            .sink { [weak self] completion in
                 if case let .failure(error) = completion {
-                    self.countryError = error
-                    self.handleError(error,endPoint: APIEndpoint.getCountryCodes)
+                    self?.countryError = error
+                    self?.handleError(error,endPoint: APIEndpoint.getCountryCodes)
                 }
             }
-        receiveValue: { [self] response in
+        receiveValue: { [weak self] response in
             PrintLogger.modelLog(response, type: .response, isInput: false)
-            countriesResponse = response.data
+            self?.countriesResponse = response.data
         }
         .store(in: &self.subscriptions)
     }
 
     func getAppVersionInfo() {
         apiReference.getApi(endPoint: APIEndpoint.appUpdate, token: defaultAuthKey, responseType: AppVersionResponse.self)
-            .sink { [unowned self] completion in
+            .sink { [weak self] completion in
                 if case let .failure(error) = completion {
-                    self.handleError(error, endPoint: APIEndpoint.appUpdate)
+                    self?.handleError(error, endPoint: APIEndpoint.appUpdate)
                 }
             }
-        receiveValue: { [self] response in
+        receiveValue: { [weak self] response in
             PrintLogger.modelLog(response, type: .response, isInput: false)
-            self.checkVersionUpdate(apiData: response.data)
+            self?.checkVersionUpdate(apiData: response.data)
         }
         .store(in: &self.subscriptions)
     }

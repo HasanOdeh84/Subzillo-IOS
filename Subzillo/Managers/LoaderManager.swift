@@ -146,32 +146,31 @@ private struct LoaderOverlay: View {
     @ObservedObject private var loader  = LoaderManager.shared
     
     var body: some View {
-        Group {
-            if loader.isShowing {
-                ZStack {
-                    // Transparent background
-                    Color.black.opacity(0.5)
-                        .ignoresSafeArea()
-                    
-                    VStack() {
-                        // Lottie Animation
-                        LottieView(name: loader.animationName, loopMode: .loop)
-                            .frame(width: 100, height: 100)
-                        
-                        // Optional label
-                        if let message = loader.text, !message.isEmpty {
-                            Text(message)
-                                .font(.system(size: 15, weight: .bold))
-                                .foregroundColor(Color.gray)
-                                .multilineTextAlignment(.center)
-                        }
-                    }
+        ZStack {
+            // Invisible shield to block interactions while loader is active
+            Color.black.opacity(0.001)
+                .ignoresSafeArea()
+                .opacity(loader.isShowing ? 1 : 0)
+            
+            VStack(spacing: 12) {
+                // Lottie Animation
+                LottieView(name: loader.animationName, loopMode: .loop)
+                    .frame(width: 100, height: 100)
+                
+                // Optional label
+                if let message = loader.text, !message.isEmpty {
+                    Text(message)
+                        .font(.system(size: 15, weight: .bold))
+                        .foregroundColor(.gray)
+                        .multilineTextAlignment(.center)
+                        .padding(.horizontal, 20)
                 }
-                //                .animation(.easeInOut(duration: 0.2), value: loader.isShowing)
             }
+            .opacity(loader.isShowing ? 1 : 0)
+            .scaleEffect(loader.isShowing ? 1.0 : 0.8)
         }
-        // Ensures this overlay always sits above content
-        //        .allowsHitTesting(loader.isShowing) // blocks touches when showing
+//        .animation(.easeInOut(duration: 0.3), value: loader.isShowing)
+        .allowsHitTesting(loader.isShowing)
     }
 }
 

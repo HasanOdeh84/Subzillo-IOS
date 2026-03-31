@@ -28,19 +28,19 @@ class ConnectEmailViewModel: ObservableObject {
         isSuccess = false
         isIcloudSuccess = false
         apiReference.postApi(endPoint: APIEndpoint.OauthUrl, method: .POST,token: authKey,body: input,showLoader: true, responseType: OauthUrlResponse.self)
-            .sink { [unowned self] completion in
+            .sink { [weak self] completion in
                 if case let .failure(error) = completion {
-                    self.handleError(error,endPoint: APIEndpoint.OauthUrl)
+                    self?.handleError(error,endPoint: APIEndpoint.OauthUrl)
                 }
             }
-        receiveValue: { response in
+        receiveValue: { [weak self] response in
             PrintLogger.modelLog(response, type: .response, isInput: false)
 //            ToastManager.shared.showToast(message: response.message ?? "")
-            self.oauthUrlResponse = response.data
+            self?.oauthUrlResponse = response.data
             if input.type == 2{
-                self.isSuccess = true
+                self?.isSuccess = true
             }else if input.type == 3{
-                self.isIcloudSuccess = true
+                self?.isIcloudSuccess = true
             }
         }
         .store(in: &self.subscriptions)
@@ -48,27 +48,27 @@ class ConnectEmailViewModel: ObservableObject {
     
     func gmailOauthCallBack(input:GmailOauthCallBackRequest) {
         apiReference.postApi(endPoint: APIEndpoint.oauthCallback, method: .POST,token: authKey,body: input,showLoader: true, responseType: GeneralResponse.self)
-            .sink { [unowned self] completion in
+            .sink { [weak self] completion in
                 if case let .failure(error) = completion {
-                    self.handleError(error,endPoint: APIEndpoint.oauthCallback)
+                    self?.handleError(error,endPoint: APIEndpoint.oauthCallback)
                 }
             }
-        receiveValue: { response in
+        receiveValue: { [weak self] response in
             PrintLogger.modelLog(response, type: .response, isInput: false)
             ToastManager.shared.showToast(message: response.message ?? "")
-            self.navigate(to: NavigationRoute.connectedEmailsList(isIntegrations: false))
+            self?.navigate(to: NavigationRoute.connectedEmailsList(isIntegrations: false))
         }
         .store(in: &self.subscriptions)
     }
     
     func microsoftOauthCallBack(input:GmailOauthCallBackRequest) {
         apiReference.postApi(endPoint: APIEndpoint.oauthCallback, method: .POST,token: authKey,body: input,showLoader: true, responseType: GeneralResponse.self)
-            .sink { [unowned self] completion in
+            .sink { [weak self] completion in
                 if case let .failure(error) = completion {
-                    self.handleError(error,endPoint: APIEndpoint.oauthCallback)
+                    self?.handleError(error,endPoint: APIEndpoint.oauthCallback)
                 }
             }
-        receiveValue: { response in
+        receiveValue: { [weak self] response in
             PrintLogger.modelLog(response, type: .response, isInput: false)
 //            ToastManager.shared.showToast(message: response.message ?? "Microsoft email connected successfully")
         }
@@ -87,12 +87,12 @@ class ConnectEmailViewModel: ObservableObject {
     
     func iCloudConnect(input:ICloudConnectRequest) {
         apiReference.postApi(endPoint: APIEndpoint.iCloudConnect, method: .POST,token: authKey,body: input,showLoader: true, responseType: GeneralResponse.self)
-            .sink { [unowned self] completion in
+            .sink { [weak self] completion in
                 if case let .failure(error) = completion {
-                    self.handleError(error,endPoint: APIEndpoint.iCloudConnect)
+                    self?.handleError(error,endPoint: APIEndpoint.iCloudConnect)
                 }
             }
-        receiveValue: { response in
+        receiveValue: { [weak self] response in
             PrintLogger.modelLog(response, type: .response, isInput: false)
             ToastManager.shared.showToast(message: response.message ?? "")
             AppIntentRouter.shared.navigateAndReplace(to: NavigationRoute.connectedEmailsList(isIntegrations: false))

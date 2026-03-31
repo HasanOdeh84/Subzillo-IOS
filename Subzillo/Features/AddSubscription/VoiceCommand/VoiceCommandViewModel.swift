@@ -36,13 +36,14 @@ class VoiceCommandViewModel: NSObject, ObservableObject, AVAudioPlayerDelegate, 
             print("audio url is \(url)")
         }
         apiReference.postMultipartApi(endPoint: APIEndpoint.voiceSubscription, method: .POST,token: authKey,body: MultipartInput(parameters: input, fileInput: fileData),showLoader: true, responseType: VoiceSubscriptionResponse.self)
-            .sink { [unowned self] completion in
+            .sink { [weak self] completion in
                 if case let .failure(error) = completion {
-                    self.handleError(error,endPoint: APIEndpoint.voiceSubscription)
-                    self.showErrorPopup = true
+                    self?.handleError(error,endPoint: APIEndpoint.voiceSubscription)
+                    self?.showErrorPopup = true
                 }
             }
-        receiveValue: { [self] response in
+        receiveValue: { [weak self] response in
+            guard let self = self else { return }
             PrintLogger.modelLog(response, type: .response, isInput: false)
             //            if response.data?.subscriptions?.count == 0
             //            {

@@ -24,15 +24,15 @@ class ProfileViewModel: ObservableObject {
     func updateProfile(input:UpdateProfileRequest) {
         isUpdate = false
         apiReference.postApi(endPoint: APIEndpoint.updateProfile, method: .POST,token: authKey,body: input,showLoader: true, responseType: GeneralResponse.self)
-            .sink { [unowned self] completion in
+            .sink { [weak self] completion in
                 if case let .failure(error) = completion {
-                    self.handleError(error,endPoint: APIEndpoint.updateProfile)
+                    self?.handleError(error,endPoint: APIEndpoint.updateProfile)
                 }
             }
-        receiveValue: { response in
+        receiveValue: { [weak self] response in
             PrintLogger.modelLog(response, type: .response, isInput: false)
             ToastManager.shared.showToast(message: response.message ?? "")
-            self.isUpdate = true
+            self?.isUpdate = true
         }
         .store(in: &self.subscriptions)
     }
@@ -40,15 +40,15 @@ class ProfileViewModel: ObservableObject {
     func updateProfileImage(input:UpdateProfileImageRequest,fileData:[MultiPartFileInput]){
         isProfileUpdate = false
         apiReference.postMultipartApi(endPoint: APIEndpoint.updateProfileImage, method: .POST,token: authKey,body: MultipartInput(parameters: input, fileInput: fileData),showLoader: false, responseType: GeneralResponse.self)
-            .sink { [unowned self] completion in
+            .sink { [weak self] completion in
                 if case let .failure(error) = completion {
-                    self.handleError(error,endPoint: APIEndpoint.updateProfileImage)
+                    self?.handleError(error,endPoint: APIEndpoint.updateProfileImage)
                 }
             }
-        receiveValue: { response in
+        receiveValue: { [weak self] response in
             PrintLogger.modelLog(response, type: .response, isInput: false)
             ToastManager.shared.showToast(message: response.message ?? "")
-            self.isProfileUpdate = true
+            self?.isProfileUpdate = true
         }
         .store(in: &self.subscriptions)
     }

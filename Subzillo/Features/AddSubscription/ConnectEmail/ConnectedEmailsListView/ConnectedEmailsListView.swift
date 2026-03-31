@@ -34,6 +34,7 @@ struct ConnectedEmailsListView: View {
     @State private var isVisible            : Bool = false
     @State private var upgradeNowSheetHeight: CGFloat = .zero
     @State private var showPlatformAlert    : Bool = false
+    @State private var syncSuccessMail      : String?
     
     //MARK: - body
     var body: some View {
@@ -192,9 +193,13 @@ struct ConnectedEmailsListView: View {
                 listConnectedMailsApi()
             }
         }
-        .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("RefreshConnectedEmails"))) { _ in
+        .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("RefreshConnectedEmails"))) { notification in
             if isVisible {
                 listConnectedMailsApi()
+                if let email = notification.userInfo?["email"] as? String {
+                    syncSuccessMail = email
+                }
+//                syncSuccessMail = notification.userInfo?["email"] as? String
                 showPlatformAlert = true
             }
         }
@@ -235,8 +240,8 @@ struct ConnectedEmailsListView: View {
             SubscriptionAlertSheet(
                 onDelegate: {
                     
-                }, title                : "Mail Sync Complete",
-                subTitle                : "Your emails have been successfully synced. You’re all up to date.",
+                }, title                : "Mail Sync Completed",
+                subTitle                : "Your mails for this \(syncSuccessMail ?? "") have been successfully synced. You’re all up to date.",
                 buttonTitle             : "Ok",
                 isBtn                   : false
             )

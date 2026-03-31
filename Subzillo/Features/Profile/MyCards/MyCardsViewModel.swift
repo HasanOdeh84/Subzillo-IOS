@@ -28,15 +28,15 @@ class MyCardsViewModel: ObservableObject {
     func editCard(input:EditCardRequest) {
         isEdit = false
         apiReference.postApi(endPoint: APIEndpoint.editCard, method: .POST,token: authKey,body: input,showLoader: true, responseType: GeneralResponse.self)
-            .sink { [unowned self] completion in
+            .sink { [weak self] completion in
                 if case let .failure(error) = completion {
-                    self.handleError(error,endPoint: APIEndpoint.editCard)
+                    self?.handleError(error,endPoint: APIEndpoint.editCard)
                 }
             }
-        receiveValue: { response in
+        receiveValue: { [weak self] response in
             PrintLogger.modelLog(response, type: .response, isInput: false)
             ToastManager.shared.showToast(message: response.message ?? "")
-            self.isEdit = true
+            self?.isEdit = true
         }
         .store(in: &self.subscriptions)
     }
@@ -44,15 +44,15 @@ class MyCardsViewModel: ObservableObject {
     func deleteCard(input:DeleteCardRequest) {
         isDelete = false
         apiReference.postApi(endPoint: APIEndpoint.deleteCard, method: .POST,token: authKey,body: input,showLoader: true, responseType: GeneralResponse.self)
-            .sink { [unowned self] completion in
+            .sink { [weak self] completion in
                 if case let .failure(error) = completion {
-                    self.handleError(error,endPoint: APIEndpoint.deleteCard)
+                    self?.handleError(error,endPoint: APIEndpoint.deleteCard)
                 }
             }
-        receiveValue: { response in
+        receiveValue: { [weak self] response in
             PrintLogger.modelLog(response, type: .response, isInput: false)
             ToastManager.shared.showToast(message: response.message ?? "")
-            self.isDelete = true
+            self?.isDelete = true
         }
         .store(in: &self.subscriptions)
     }

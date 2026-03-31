@@ -88,9 +88,9 @@ struct Constants{
     
 //        static let webClientId                          = "955282043815-uither25lbuv22smj2tdhje513ilg5je.apps.googleusercontent.com" //soniya for dev
     
-//    static let webClientId                          = "955282043815-2bdqjsqk1ailb6dbvron7td1os6hipg6.apps.googleusercontent.com" //new soniya for QA
+    static let webClientId                          = "955282043815-2bdqjsqk1ailb6dbvron7td1os6hipg6.apps.googleusercontent.com" //new soniya for QA
     
-        static let webClientId                          = "955282043815-4rckggvbc5m8dtsrtdhecrjl25e0lbg6.apps.googleusercontent.com" //new soniya for staging
+//        static let webClientId                          = "955282043815-4rckggvbc5m8dtsrtdhecrjl25e0lbg6.apps.googleusercontent.com" //new soniya for staging
     
     //    static let appGroupID                           = "group.com.krify.Subzillo" //krify
     static let appGroupID                           = "group.com.subzillo.app" //client
@@ -102,6 +102,13 @@ struct Constants{
     static let webhookUrl_dev = "https://devsubzillo.krify.com/api/appleSubscribeWebhook" //dev
     static let webhookUrl_QA = "https://qasubzillo.krify.com/api/appleSubscribeWebhook" //QA
     static let webhookUrl_staging = "https://stagingsubzillo.krify.com/api/appleSubscribeWebhook" //staging
+    
+    static let ulink_staging = "applinks:stagingsubzillo.shared.ly" //staging
+    static let ulink_qa      = "applinks:qasubzillo.shared.ly" //qa
+    
+//    android:host="devsubzillo.shared.ly"
+//    android:host="qasubzillo.shared.ly"
+//    android:host="stagingsubzillo.shared.ly"
 
     let regionCode      = Locale.current.region?.identifier ?? "US"
     let currencyCode    = Locale.current.currency?.identifier ?? "USD"

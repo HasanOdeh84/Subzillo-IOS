@@ -26,21 +26,21 @@ class SubscriptionPreviewViewModel: NSObject, ObservableObject {
         addSubscriptionResponse = nil
         self.isEntrySuccess = false
         apiReference.postApi(endPoint: APIEndpoint.pendingSubscriptionConfirm, method: .POST,token: authKey,body: input,showLoader: true, responseType: PendingSubscriptionConfirmResponse.self)
-            .sink { [unowned self] completion in
+            .sink { [weak self] completion in
                 if case let .failure(error) = completion {
-                    self.handleError(error,endPoint: APIEndpoint.pendingSubscriptionConfirm)
+                    self?.handleError(error,endPoint: APIEndpoint.pendingSubscriptionConfirm)
                 }
             }
-        receiveValue: { response in
+        receiveValue: { [weak self] response in
             PrintLogger.modelLog(response, type: .response, isInput: false)
             ToastManager.shared.showToast(message: response.message ?? "")
             if response.data != nil {
-                self.addSubscriptionResponse = response.data
+                self?.addSubscriptionResponse = response.data
             }
 //            else{
 //                ToastManager.shared.showToast(message: response.message ?? "")
 //            }
-            self.isEntrySuccess = true
+            self?.isEntrySuccess = true
         }
         .store(in: &self.subscriptions)
     }
@@ -48,15 +48,15 @@ class SubscriptionPreviewViewModel: NSObject, ObservableObject {
     func discardEmailSubscriptionApi(input: DiscardEmailSubscriptionRequest) {
         self.isDiscardSuccess = false
         apiReference.postApi(endPoint: APIEndpoint.discardEmailSubscription, method: .POST, token: authKey, body: input, showLoader: true, responseType: GeneralResponse.self)
-            .sink { [unowned self] completion in
+            .sink { [weak self] completion in
                 if case let .failure(error) = completion {
-                    self.handleError(error, endPoint: APIEndpoint.discardEmailSubscription)
+                    self?.handleError(error, endPoint: APIEndpoint.discardEmailSubscription)
                 }
             }
-        receiveValue: { response in
+        receiveValue: { [weak self] response in
             PrintLogger.modelLog(response, type: .response, isInput: false)
             ToastManager.shared.showToast(message: response.message ?? "")
-            self.isDiscardSuccess = true
+            self?.isDiscardSuccess = true
         }
         .store(in: &self.subscriptions)
     }

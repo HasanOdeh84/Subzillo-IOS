@@ -21,17 +21,17 @@ class ResetPasswordViewModel: ObservableObject {
     
     func resetPassword(input:ResetPasswordRequest) {
 //        apiReference.postApi(endPoint: APIEndpoint.resetPassword, method: .POST,token: defaultAuthKey,body: input,showLoader: true, responseType: GeneralResponse.self)
-//            .sink { [unowned self] completion in
+//            .sink { [weak self] completion in
 //                if case let .failure(error) = completion {
-//                    self.handleError(error,endPoint: APIEndpoint.resetPassword)
+//                    self?.handleError(error,endPoint: APIEndpoint.resetPassword)
 //                }
 //            }
-//        receiveValue: { [unowned self] response in
+//        receiveValue: { [weak self] response in
 //            PrintLogger.modelLog(response, type: .response, isInput: false)
 //            ToastManager.shared.showToast(message: response.message ?? "")
-//            self.resetResponse = response
+//            self?.resetResponse = response
 //            DispatchQueue.main.async {
-////                router.navigate(to: .login)
+////                self?.router.navigate(to: .login)
 //            }
 //        }
 //        .store(in: &self.subscriptions)

@@ -30,7 +30,6 @@ class PricingPlansViewModel: ObservableObject {
     
     // MARK: - API Calls
     func listPricingPlans(type:Int) {
-        self.pricingPlans = []
         let request = PricingPlanRequest(userId : Constants.getUserId(),
                                          type   : type)
         self.apiReference.postApi(
@@ -47,6 +46,7 @@ class PricingPlansViewModel: ObservableObject {
             }
         } receiveValue: { response in
             PrintLogger.modelLog(response, type: .response, isInput: false)
+            self.pricingPlans = []
             if let plans = response.data {
                 self.pricingPlans = plans.plans ?? []
             }

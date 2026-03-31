@@ -19,15 +19,15 @@ class InviteFriendsViewModel: ObservableObject {
     
     func rewards(input:RewardsRequest) {
         apiReference.postApi(endPoint: APIEndpoint.userRewardsList, method: .POST,token: authKey,body: input,showLoader: true, responseType: RewardsResponse.self)
-            .sink { [unowned self] completion in
+            .sink { [weak self] completion in
                 if case let .failure(error) = completion {
-                    self.handleError(error,endPoint: APIEndpoint.userRewardsList)
+                    self?.handleError(error,endPoint: APIEndpoint.userRewardsList)
                 }
             }
-        receiveValue: { response in
+        receiveValue: { [weak self] response in
             PrintLogger.modelLog(response, type: .response, isInput: false)
 //            ToastManager.shared.showToast(message: response.message ?? "")
-            self.rewards = response.data?.rewards ?? []
+            self?.rewards = response.data?.rewards ?? []
         }
         .store(in: &self.subscriptions)
     }
@@ -35,15 +35,15 @@ class InviteFriendsViewModel: ObservableObject {
     func redeemReward(input:RedeemRewardRequest) {
         redeemSucess = false
         apiReference.postApi(endPoint: APIEndpoint.redeemReward, method: .POST,token: authKey,body: input,showLoader: true, responseType: GeneralResponse.self)
-            .sink { [unowned self] completion in
+            .sink { [weak self] completion in
                 if case let .failure(error) = completion {
-                    self.handleError(error,endPoint: APIEndpoint.redeemReward)
+                    self?.handleError(error,endPoint: APIEndpoint.redeemReward)
                 }
             }
-        receiveValue: { response in
+        receiveValue: { [weak self] response in
             PrintLogger.modelLog(response, type: .response, isInput: false)
             ToastManager.shared.showToast(message: response.message ?? "")
-            self.redeemSucess = true
+            self?.redeemSucess = true
         }
         .store(in: &self.subscriptions)
     }

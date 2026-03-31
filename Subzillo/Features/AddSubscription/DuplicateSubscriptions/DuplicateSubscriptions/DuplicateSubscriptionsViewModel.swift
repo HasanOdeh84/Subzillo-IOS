@@ -22,14 +22,14 @@ class DuplicateSubscriptionsViewModel: ObservableObject {
     
     func resolveDuplicateSubscription(input:ResolveDuplicateSubscriptionRequest) {
         apiReference.postApi(endPoint: APIEndpoint.resolveDuplicateSubscription, method: .POST,token: authKey,body: input,showLoader: true, responseType: ResolveDuplicateSubscriptionResponse.self)
-            .sink { [unowned self] completion in
+            .sink { [weak self] completion in
                 if case let .failure(error) = completion {
-                    self.handleError(error,endPoint: APIEndpoint.resolveDuplicateSubscription)
+                    self?.handleError(error,endPoint: APIEndpoint.resolveDuplicateSubscription)
                 }
             }
-        receiveValue: { response in
+        receiveValue: { [weak self] response in
             PrintLogger.modelLog(response, type: .response, isInput: false)
-            self.subscriptioIds = response.data
+            self?.subscriptioIds = response.data
         }
         .store(in: &self.subscriptions)
     }

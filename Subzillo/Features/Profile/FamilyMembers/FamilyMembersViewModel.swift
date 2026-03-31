@@ -28,15 +28,15 @@ class FamilyMembersViewModel: ObservableObject {
     func editFamilyMember(input:EditFamilyMemberRequest) {
         isEdit = false
         apiReference.postApi(endPoint: APIEndpoint.editFamilyMember, method: .POST,token: authKey,body: input,showLoader: true, responseType: GeneralResponse.self)
-            .sink { [unowned self] completion in
+            .sink { [weak self] completion in
                 if case let .failure(error) = completion {
-                    self.handleError(error,endPoint: APIEndpoint.editFamilyMember)
+                    self?.handleError(error,endPoint: APIEndpoint.editFamilyMember)
                 }
             }
-        receiveValue: { response in
+        receiveValue: { [weak self] response in
             PrintLogger.modelLog(response, type: .response, isInput: false)
             ToastManager.shared.showToast(message: response.message ?? "")
-            self.isEdit = true
+            self?.isEdit = true
         }
         .store(in: &self.subscriptions)
     }
@@ -44,15 +44,15 @@ class FamilyMembersViewModel: ObservableObject {
     func deleteFamilyMember(input:DeleteFamilyMemberRequest) {
         isDelete = false
         apiReference.postApi(endPoint: APIEndpoint.deleteFamilyMember, method: .POST,token: authKey,body: input,showLoader: true, responseType: GeneralResponse.self)
-            .sink { [unowned self] completion in
+            .sink { [weak self] completion in
                 if case let .failure(error) = completion {
-                    self.handleError(error,endPoint: APIEndpoint.deleteFamilyMember)
+                    self?.handleError(error,endPoint: APIEndpoint.deleteFamilyMember)
                 }
             }
-        receiveValue: { response in
+        receiveValue: { [weak self] response in
             PrintLogger.modelLog(response, type: .response, isInput: false)
             ToastManager.shared.showToast(message: response.message ?? "")
-            self.isDelete = true
+            self?.isDelete = true
         }
         .store(in: &self.subscriptions)
     }

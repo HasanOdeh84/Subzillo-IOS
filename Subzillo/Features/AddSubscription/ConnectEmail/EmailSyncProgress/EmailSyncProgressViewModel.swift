@@ -83,9 +83,9 @@ class EmailSyncProgressViewModel: ObservableObject {
     
     func emailSubscriptionsList(input: EmailSubscriptionsListRequest,showLoader:Bool = true) {
         apiReference.postApi(endPoint: APIEndpoint.emailSubscriptionsList, method: .POST,token: authKey,body: input,showLoader: showLoader, responseType: VoiceSubscriptionResponse.self)
-            .sink { [unowned self] completion in
+            .sink { [weak self] completion in
                 if case let .failure(error) = completion {
-                    self.handleError(error,endPoint: APIEndpoint.emailSubscriptionsList)
+                    self?.handleError(error,endPoint: APIEndpoint.emailSubscriptionsList)
 //                    self.showErrorPopup = true
                     ToastManager.shared.showToast(message: "No Subscriptions found", style: .error)
                     DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
@@ -93,7 +93,7 @@ class EmailSyncProgressViewModel: ObservableObject {
                     }
                 }
             }
-        receiveValue: { response in
+        receiveValue: { [weak self] response in
             PrintLogger.modelLog(response, type: .response, isInput: false)
             if response.data == nil || response.data?.subscriptions?.count == 0
             {
@@ -107,7 +107,7 @@ class EmailSyncProgressViewModel: ObservableObject {
                 NotificationCenter.default.post(name: .closeAllBottomSheets, object: nil)
                 Constants.saveDefaults(value: response.providerLogoBaseUrl, key: Constants.providerBaseUrl)
                 globalSubscriptionData = nil
-                self.router.navigateAndReplace(to: .extractedSubscriptions(subscriptions: response.data?.subscriptions ?? [], fromEmailSync: true, integrationId: input.integrationId))
+                self?.router.navigateAndReplace(to: .extractedSubscriptions(subscriptions: response.data?.subscriptions ?? [], fromEmailSync: true, integrationId: input.integrationId))
                 //                self.router.navigate(to: .subscriptionPreviewView(subscriptionsData: response.data?.subscriptions, content: "", isFromImage:false, isFromEmail: true, audioUrl: nil))
             }
         }

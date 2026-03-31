@@ -29,12 +29,13 @@ class LoginViewModel: ObservableObject {
     func login(input:checkLoginRequest, formattedPhNo: String) {
         showRestoreAccSheet = false
         apiReference.postApi(endPoint: APIEndpoint.checkLogin, method: .POST,token: defaultAuthKey,body: input,showLoader: true, responseType: LoginResponse.self)
-            .sink { [unowned self] completion in
+            .sink { [weak self] completion in
                 if case let .failure(error) = completion {
-                    self.handleError(error,endPoint: APIEndpoint.checkLogin)
+                    self?.handleError(error,endPoint: APIEndpoint.checkLogin)
                 }
             }
-        receiveValue: { [unowned self] response in
+        receiveValue: { [weak self] response in
+            guard let self = self else { return }
             PrintLogger.modelLog(response, type: .response, isInput: false)
             KeychainHelperApp.save(response.data?.accessToken, account: Constants.authKey)
             KeychainHelperApp.save(response.data?.refreshToken, account: Constants.refreshKey)
@@ -146,12 +147,13 @@ class LoginViewModel: ObservableObject {
     func socialLoginApi(input:SocialLoginRequest, fileData:[MultiPartFileInput]) {
         showRestoreAccSheet = false
         apiReference.postMultipartApi(endPoint: APIEndpoint.socialLogin, method: .POST,token: defaultAuthKey,body: MultipartInput(parameters: input, fileInput: fileData),showLoader: true, responseType: LoginResponse.self)
-            .sink { [unowned self] completion in
+            .sink { [weak self] completion in
                 if case let .failure(error) = completion {
-                    self.handleError(error,endPoint: APIEndpoint.socialLogin)
+                    self?.handleError(error,endPoint: APIEndpoint.socialLogin)
                 }
             }
-        receiveValue: { response in
+        receiveValue: { [weak self] response in
+            guard let self = self else { return }
             PrintLogger.modelLog(response, type: .response, isInput: false)
             KeychainHelperApp.save(response.data?.accessToken, account: Constants.authKey)
             KeychainHelperApp.save(response.data?.refreshToken, account: Constants.refreshKey)
@@ -165,10 +167,11 @@ class LoginViewModel: ObservableObject {
                                              socialLoginType        : input.authProvider,
                                              onboardingStatus       : response.data?.onboardingStatus ?? false)
             self.sessionManager.saveLoginData(data)
-            DispatchQueue.main.async { [self] in
+            DispatchQueue.main.async { [weak self] in
+                guard let self = self else { return }
                 if response.data?.deleteStatus ?? false{
-                    socialLoginFullName = input.fullName
-                    showRestoreAccSheet = true
+                    self.socialLoginFullName = input.fullName
+                    self.showRestoreAccSheet = true
                 }else{
                     if response.data?.isNewUser ?? false{
                         self.router.navigate(to: .signup(fromSocialLogin:true))
@@ -179,10 +182,10 @@ class LoginViewModel: ObservableObject {
                                 AppIntentRouter.shared.navigate(to: .onboarding)
                             }else{
                                 AppState.shared.login()
-                                router.navigate(to: .home)
+                                self.router.navigate(to: .home)
                             }
                         }else{
-                            router.navigate(to: .signup(fromSocialLogin:true))
+                            self.router.navigate(to: .signup(fromSocialLogin:true))
                         }
                     }
                 }
@@ -193,12 +196,13 @@ class LoginViewModel: ObservableObject {
     
     func restoreUser(input:RestoreUserRequest, fromLogin: Bool = true, email:String?, phoneNo:String?, formattedPhNo:String?, countryCode:String?) {
         apiReference.postApi(endPoint: APIEndpoint.restoreUser, method: .POST,token: defaultAuthKey,body: input,showLoader: true, responseType: RestoreUserResponse.self)
-            .sink { [unowned self] completion in
+            .sink { [weak self] completion in
                 if case let .failure(error) = completion {
-                    self.handleError(error,endPoint: APIEndpoint.restoreUser)
+                    self?.handleError(error,endPoint: APIEndpoint.restoreUser)
                 }
             }
-        receiveValue: { response in
+        receiveValue: { [weak self] response in
+            guard let self = self else { return }
             PrintLogger.modelLog(response, type: .response, isInput: false)
             ToastManager.shared.showToast(message: response.message ?? "")
             KeychainHelperApp.save(response.data?.accessToken, account: Constants.authKey)
@@ -228,17 +232,17 @@ class LoginViewModel: ObservableObject {
     
     func logout(input:LogoutRequest) {
         apiReference.postApi(endPoint: APIEndpoint.logout, method: .POST,token: authKey,body: input,showLoader: true, responseType: GeneralResponse.self)
-            .sink { [unowned self] completion in
+            .sink { [weak self] completion in
                 if case let .failure(error) = completion {
-                    self.handleError(error,endPoint: APIEndpoint.logout)
+                    self?.handleError(error,endPoint: APIEndpoint.logout)
                 }
             }
-        receiveValue: { response in
+        receiveValue: { [weak self] response in
             PrintLogger.modelLog(response, type: .response, isInput: false)
             ToastManager.shared.showToast(message: response.message ?? "")
             SocialLogins.shared.googleSignOut()
             AppState.shared.logout()
-            self.router.navigate(to: .login)
+            self?.router.navigate(to: .login)
         }
         .store(in: &self.subscriptions)
     }

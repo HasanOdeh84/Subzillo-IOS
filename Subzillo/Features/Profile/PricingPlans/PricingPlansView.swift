@@ -19,9 +19,10 @@ struct PricingPlanUI: Identifiable {
     let buttonTitle: String
     let isCurrent: Bool
     let isLoading: Bool
+    let downgradeText: String?
     let action: (() -> Void)?
     
-    init(title: String, price: String? = nil, priceSubtitle: String? = nil, features: [String], badgeText: String? = nil, badgeColor: Color? = nil, buttonTitle: String, isCurrent: Bool = false, isLoading: Bool = false, action: (() -> Void)? = nil) {
+    init(title: String, price: String? = nil, priceSubtitle: String? = nil, features: [String], badgeText: String? = nil, badgeColor: Color? = nil, buttonTitle: String, isCurrent: Bool = false, isLoading: Bool = false, downgradeText: String? = nil, action: (() -> Void)? = nil) {
         self.title = title
         self.price = price
         self.priceSubtitle = priceSubtitle
@@ -31,6 +32,7 @@ struct PricingPlanUI: Identifiable {
         self.buttonTitle = buttonTitle
         self.isCurrent = isCurrent
         self.isLoading = isLoading
+        self.downgradeText = downgradeText
         self.action = action
     }
 }
@@ -329,6 +331,7 @@ struct PricingPlansView: View {
         
         var buttonTitle         = ""
         let isCurrentPlan       = plan.isCurrentPlan ?? false
+        var downGradeText       = ""
         
         if isCurrentPlan {
             buttonTitle = "Current Plan"
@@ -340,7 +343,12 @@ struct PricingPlansView: View {
             if targetPlanRank > currentUserRank {
                 buttonTitle = "Upgrade"
             } else {
-                buttonTitle = "Downgrade"
+                if viewModel.pricingPlanResponse?.data?.downgradePlanType ?? 0 == plan.internalPlanType ?? 0{
+                    buttonTitle = ""
+                    downGradeText = "This plan will take effect at the end of your current billing period."
+                }else{
+                    buttonTitle = "Downgrade"
+                }
             }
         }
         
@@ -353,6 +361,7 @@ struct PricingPlansView: View {
             buttonTitle     : buttonTitle,
             isCurrent       : isCurrentPlan,
             isLoading       : isLoadingPrice,
+            downgradeText   : downGradeText,
             action          : {
                 self.loadingStatus = .loading
                 viewModel.runPrePaymentCheck { isSafe in
@@ -454,6 +463,14 @@ struct PricingPlanCard: View {
                                 .font(.appRegular(14))
                                 .foregroundColor(.neutralMain700)
                         }
+                    }
+                }
+                
+                if let text = plan.downgradeText{
+                    if text != ""{
+                        Text(text)
+                            .font(.appRegular(14))
+                            .foregroundColor(Color.grayLG)
                     }
                 }
                 

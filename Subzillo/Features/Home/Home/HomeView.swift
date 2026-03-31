@@ -48,7 +48,20 @@ struct HomeView: View {
     var body: some View {
         Group {
             if isHome == nil{
-                ProgressView()
+                ZStack {
+                    Color.black.opacity(0.001)
+                        .ignoresSafeArea()
+                        .opacity(1)
+                    
+//                    VStack(spacing: 12) {
+//                        LottieView(name: LoaderManager.shared.animationName, loopMode: .loop)
+//                            .frame(width: 100, height: 100)
+//                    }
+//                    .opacity(1)
+//                    .scaleEffect(1.0)
+                }
+//                .animation(.easeInOut(duration: 0.3), value: true)
+                .allowsHitTesting(true)
             }else if isHome == true{
                 VStack(spacing: 16){
                     // MARK: - Header

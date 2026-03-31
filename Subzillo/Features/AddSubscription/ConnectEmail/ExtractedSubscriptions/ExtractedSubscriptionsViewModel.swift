@@ -86,37 +86,39 @@ class ExtractedSubscriptionsViewModel: ObservableObject {
     func getEmailSubscriptionsList() {
         let input = EmailSubscriptionsListRequest(userId: Constants.getUserId(), integrationId: integrationId)
         apiReference.postApi(endPoint: APIEndpoint.emailSubscriptionsList, method: .POST, token: authKey, body: input, showLoader: true, responseType: VoiceSubscriptionResponse.self)
-            .sink { [unowned self] completion in
+            .sink { [weak self] completion in
                 if case let .failure(error) = completion {
-                    self.handleError(error, endPoint: APIEndpoint.emailSubscriptionsList)
+                    self?.handleError(error, endPoint: APIEndpoint.emailSubscriptionsList)
                 }
             }
-        receiveValue: { [self] response in
+        receiveValue: { [weak self] response in
+            guard let self = self else { return }
             PrintLogger.modelLog(response, type: .response, isInput: false)
             self.subscriptions = response.data?.subscriptions ?? []
-            checkIfListIsEmpty()
+            self.checkIfListIsEmpty()
         }
         .store(in: &self.subscriptionsCancellables)
     }
     
     func discardEmailSubscriptionApi(input: DiscardEmailSubscriptionRequest) {
         apiReference.postApi(endPoint: APIEndpoint.discardEmailSubscription, method: .POST, token: authKey, body: input, showLoader: true, responseType: GeneralResponse.self)
-            .sink { [unowned self] completion in
+            .sink { [weak self] completion in
                 if case let .failure(error) = completion {
-                    self.handleError(error, endPoint: APIEndpoint.discardEmailSubscription)
+                    self?.handleError(error, endPoint: APIEndpoint.discardEmailSubscription)
                 }
             }
-        receiveValue: { [self] response in
+        receiveValue: { [weak self] response in
+            guard let self = self else { return }
             PrintLogger.modelLog(response, type: .response, isInput: false)
             ToastManager.shared.showToast(message: response.message ?? "")
-            subscriptions.removeAll { sub in
+            self.subscriptions.removeAll { sub in
                 if let id = sub.id {
-                    return selectedIds.contains(id)
+                    return self.selectedIds.contains(id)
                 }
                 return false
             }
-            selectedIds.removeAll()
-            checkIfListIsEmptyDelete()
+            self.selectedIds.removeAll()
+            self.checkIfListIsEmptyDelete()
         }
         .store(in: &self.subscriptionsCancellables)
     }

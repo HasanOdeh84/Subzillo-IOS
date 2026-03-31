@@ -31,33 +31,33 @@ class SubscriptionsViewModel: ObservableObject {
         self.isLoading = true
         apiReference.postApi(endPoint: APIEndpoint.listSubscriptions, method: .POST,token: authKey,body: input,showLoader: showLoader, responseType: ListSubscriptionsResponse.self)
             .receive(on: DispatchQueue.main)
-            .sink { [unowned self] completion in
+            .sink { [weak self] completion in
                 if case let .failure(error) = completion {
-                    self.isLoading = false
-                    self.handleError(error,endPoint: APIEndpoint.listSubscriptions)
+                    self?.isLoading = false
+                    self?.handleError(error,endPoint: APIEndpoint.listSubscriptions)
                 }
             }
-        receiveValue: { response in
+        receiveValue: { [weak self] response in
             PrintLogger.modelLog(response, type: .response, isInput: false)
             if input.page == 0 {
                 SubscriptionDBManager.shared.deleteAllSubscription()
             }
-            self.isLoading = false
-            self.listSubsResponse = response.data
+            self?.isLoading = false
+            self?.listSubsResponse = response.data
         }
         .store(in: &self.subscriptions)
     }
     
     func getSubscriptionsByMonth(input: GetSubscriptionsByMonthRequest) {
         apiReference.postApi(endPoint: APIEndpoint.getSubscriptionsByMonth, method: .POST,token: authKey,body: input,showLoader: true, responseType: MonthlySubscriptionsResponse.self)
-            .sink { [unowned self] completion in
+            .sink { [weak self] completion in
                 if case let .failure(error) = completion {
-                    self.handleError(error,endPoint: APIEndpoint.getSubscriptionsByMonth)
+                    self?.handleError(error,endPoint: APIEndpoint.getSubscriptionsByMonth)
                 }
             }
-        receiveValue: { response in
+        receiveValue: { [weak self] response in
             PrintLogger.modelLog(response, type: .response, isInput: false)
-            self.getSubsByMonthResponse = response.data
+            self?.getSubsByMonthResponse = response.data
         }
         .store(in: &self.subscriptions)
     }
@@ -65,15 +65,15 @@ class SubscriptionsViewModel: ObservableObject {
     func deleteSubscription(input: DeleteSubscriptionRequest) {
         isDeletedSubscription = false
         apiReference.postApi(endPoint: APIEndpoint.deleteSubscription, method: .POST,token: authKey,body: input,showLoader: true, responseType: GeneralResponse.self)
-            .sink { [unowned self] completion in
+            .sink { [weak self] completion in
                 if case let .failure(error) = completion {
-                    isDeletedSubscription = false
-                    self.handleError(error,endPoint: APIEndpoint.deleteSubscription)
+                    self?.isDeletedSubscription = false
+                    self?.handleError(error,endPoint: APIEndpoint.deleteSubscription)
                 }
             }
-        receiveValue: { response in
+        receiveValue: { [weak self] response in
             PrintLogger.modelLog(response, type: .response, isInput: false)
-            self.isDeletedSubscription = true
+            self?.isDeletedSubscription = true
         }
         .store(in: &self.subscriptions)
     }
@@ -81,14 +81,14 @@ class SubscriptionsViewModel: ObservableObject {
     func analytics(input: AnalyticsRequest) {
 //        analyticsResponse = nil
         apiReference.postApi(endPoint: APIEndpoint.analytics, method: .POST,token: authKey,body: input,showLoader: true, responseType: AnalyticsResponse.self)
-        .sink { [unowned self] completion in
+        .sink { [weak self] completion in
             if case let .failure(error) = completion {
-                self.handleError(error,endPoint: APIEndpoint.analytics)
+                self?.handleError(error,endPoint: APIEndpoint.analytics)
             }
         }
-        receiveValue: { response in
+        receiveValue: { [weak self] response in
             PrintLogger.modelLog(response, type: .response, isInput: false)
-            self.analyticsResponse = response.data
+            self?.analyticsResponse = response.data
         }
         .store(in: &self.subscriptions)
     }

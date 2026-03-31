@@ -82,9 +82,21 @@ class AppDelegate: NSObject, ObservableObject, UIApplicationDelegate, UNUserNoti
         
         // Handle foreground refresh for Connected Emails
         let typeValue = userInfo["type"]
+        
+        var emailValue: String? = nil
+
+        if let data = userInfo["data"] as? [String: Any] {
+            emailValue = data["email"] as? String
+        }
+        
         let type = (typeValue as? Int) ?? Int(typeValue as? String ?? "")
         if type == 1 {
-            NotificationCenter.default.post(name: NSNotification.Name("RefreshConnectedEmails"), object: nil)
+//            NotificationCenter.default.post(name: NSNotification.Name("RefreshConnectedEmails"), object: nil)
+            NotificationCenter.default.post(
+                name    : NSNotification.Name("RefreshConnectedEmails"),
+                object  : nil,
+                userInfo: ["email": emailValue ?? ""]
+            )
         }
         
         completionHandler([.banner, .sound, .badge])
