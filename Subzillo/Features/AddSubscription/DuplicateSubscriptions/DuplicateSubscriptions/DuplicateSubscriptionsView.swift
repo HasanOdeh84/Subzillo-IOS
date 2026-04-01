@@ -191,10 +191,13 @@ struct DuplicateSubscriptionsView: View {
                 let newObject = ModifiedDuplicateDataInfo(originalData: data, selectedIndexs: selected, selectedData: selectedObjects)
                 updatedList.append(newObject)
                 duplicateSubsList.removeAll { $0.id == data.id }
+                // Copy source from oldSubscription to newSubscription items
+                let sourceValue = data.existingSubscriptions?.first?.source
                 var selectedObjectsNew = [SubscriptionInfo]()
                 for item in selectedObjects
                 {
                     var newitem = item
+                    newitem.source = sourceValue
                     if isFromAdd == true {
                         newitem.id = ""
                     }
@@ -211,10 +214,13 @@ struct DuplicateSubscriptionsView: View {
                 updatedList.append(newObject)
                 duplicateSubsList.removeAll { $0.id == data.id }
                 let selectedObjects = data.newSubscriptions ?? []
+                // Copy source from oldSubscription to newSubscription items
+                let sourceValue = data.existingSubscriptions?.first?.source
                 var selectedObjectsNew = [SubscriptionInfo]()
                 for item in selectedObjects
                 {
                     var newitem = item
+                    newitem.source = sourceValue
                     if isFromAdd == true {
                         newitem.id = ""
                     }

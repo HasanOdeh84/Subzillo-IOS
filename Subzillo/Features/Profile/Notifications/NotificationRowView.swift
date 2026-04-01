@@ -35,10 +35,6 @@ struct NotificationRowView: View {
                         .foregroundColor(.navyBlueCTA700)
                     
                     Spacer()
-                    
-//                    Text(notification.createdAt ?? "")
-//                        .font(.appRegular(12))
-//                        .foregroundColor(.neutral500)
                 }
                 
                 Text(LocalizedStringKey(notification.message ?? ""))
@@ -46,6 +42,13 @@ struct NotificationRowView: View {
                     .foregroundColor(.neutral500)
                 //                    .lineLimit(3)
                     .lineSpacing(2)
+                
+                HStack{
+                    Spacer()
+                    Text((notification.createdAt?.toLocalizedStringDate(inputFormat: "dd/MM/yyyy HH:mm", outputFormat: "dd/MM/yy - hh:mm a").lowercased() ?? (notification.createdAt ?? "")))
+                        .font(.appRegular(12))
+                        .foregroundColor(.neutral500)
+                }
             }
             Spacer()
         }

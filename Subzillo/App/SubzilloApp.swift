@@ -83,10 +83,12 @@ class AppDelegate: NSObject, ObservableObject, UIApplicationDelegate, UNUserNoti
         // Handle foreground refresh for Connected Emails
         let typeValue = userInfo["type"]
         
-        var emailValue: String? = nil
+        var emailValue: String?
+        var integrationIdValue: String?
 
         if let data = userInfo["data"] as? [String: Any] {
             emailValue = data["email"] as? String
+            integrationIdValue = data["integrationId"] as? String
         }
         
         let type = (typeValue as? Int) ?? Int(typeValue as? String ?? "")
@@ -95,7 +97,8 @@ class AppDelegate: NSObject, ObservableObject, UIApplicationDelegate, UNUserNoti
             NotificationCenter.default.post(
                 name    : NSNotification.Name("RefreshConnectedEmails"),
                 object  : nil,
-                userInfo: ["email": emailValue ?? ""]
+                userInfo: ["email": emailValue ?? "",
+                           "integrationId": integrationIdValue ?? ""]
             )
         }
         
@@ -120,6 +123,7 @@ class AppDelegate: NSObject, ObservableObject, UIApplicationDelegate, UNUserNoti
                 case 1:  return .connectedEmailsList(isIntegrations: false)
                 case 2:  return .subscriptionMatchView(fromList: true, fromPush: true, subscriptionId: subscriptionId)
                 case 3:  return .pricingPlans() //removed as now, we don't have this type
+                case 4:  return .inviteFriends()
                 default: return nil
                 }
             }()

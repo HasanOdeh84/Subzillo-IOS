@@ -312,17 +312,18 @@ struct ProfileView: View {
                     CustomBorderButton(title: "Logout") {
                         showDeletePopup = true
                     }
-                    
-                    HStack(spacing: 4) {
-                        Text(LocalizedStringKey("Version \(appVersion)"))
-                            .font(.footnote)
-                            .foregroundColor(.gray)
-                        
-                        Text(LocalizedStringKey("Build \(buildNumber)"))
-                            .font(.footnote)
-                            .foregroundColor(.gray)
-                    }
                     .padding(.bottom,90)
+                    
+//                    HStack(spacing: 4) {
+//                        Text(LocalizedStringKey("Version \(appVersion)"))
+//                            .font(.footnote)
+//                            .foregroundColor(.gray)
+//                        
+//                        Text(LocalizedStringKey("Build \(buildNumber)"))
+//                            .font(.footnote)
+//                            .foregroundColor(.gray)
+//                    }
+//
                 }
                 .navigationBarBackButtonHidden(true)
                 .background(MediaPickerHost().allowsHitTesting(false)) // host

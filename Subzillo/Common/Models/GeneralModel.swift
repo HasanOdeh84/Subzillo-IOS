@@ -42,6 +42,7 @@ public struct UserInfo: Codable, Hashable {
     var subscribedPlatformType      : Int? = 2// 1: Android, 2: iOS, 3: Web
     var referralCode                : String?
     var referralLink                : String?
+    var isoCountryCode              : String?
 }
 
 public struct UnreadNotificationCountRequest: Codable {

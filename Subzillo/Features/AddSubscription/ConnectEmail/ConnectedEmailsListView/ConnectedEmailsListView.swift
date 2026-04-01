@@ -34,7 +34,8 @@ struct ConnectedEmailsListView: View {
     @State private var isVisible            : Bool = false
     @State private var upgradeNowSheetHeight: CGFloat = .zero
     @State private var showPlatformAlert    : Bool = false
-    @State private var syncSuccessMail      : String?
+    @State private var mailFromPush         : String?
+    @State private var integrationIdFromPush: String?
     
     //MARK: - body
     var body: some View {
@@ -197,9 +198,11 @@ struct ConnectedEmailsListView: View {
             if isVisible {
                 listConnectedMailsApi()
                 if let email = notification.userInfo?["email"] as? String {
-                    syncSuccessMail = email
+                    mailFromPush = email
                 }
-//                syncSuccessMail = notification.userInfo?["email"] as? String
+                if let email = notification.userInfo?["integrationId"] as? String {
+                    integrationIdFromPush = email
+                }
                 showPlatformAlert = true
             }
         }
@@ -239,9 +242,10 @@ struct ConnectedEmailsListView: View {
         .sheet(isPresented: $showPlatformAlert) {
             SubscriptionAlertSheet(
                 onDelegate: {
-                    
+                    viewModel.emailSubscriptionsList(input: EmailSubscriptionsListRequest(userId: Constants.getUserId(),
+                                                                                          integrationId: integrationIdFromPush ?? ""))
                 }, title                : "Mail Sync Completed",
-                subTitle                : "Your mails for this \(syncSuccessMail ?? "") have been successfully synced. You’re all up to date.",
+                subTitle                : "Your mails for this \(mailFromPush ?? "") have been successfully synced. You’re all up to date.",
                 buttonTitle             : "Ok",
                 isBtn                   : false
             )

@@ -23,6 +23,7 @@ struct OnboardingView: View {
     private let spendingOptions                         = ["$50 - $100", "$100 - $200", "$200+"]
     @State private var selectedCurrency                 : Currency?
     @State private var selectedCountry                  : Country?
+    @State private var showCountrySheet                 = false
     @EnvironmentObject var commonApiVM                  : CommonAPIViewModel
     @StateObject private var onboardingVM               = OnboardingViewModel()
     
@@ -200,6 +201,28 @@ struct OnboardingView: View {
                 }else{
                     commonApiVM.getCurrencies()
                 }
+                
+                if commonApiVM.countriesResponse != nil {
+                    selectedCountry = commonApiVM.countriesResponse?.first(where: { $0.countryCode == Constants.shared.regionCode })
+                }else{
+                    commonApiVM.getCountries()
+                }
+            }
+            .onChange(of: commonApiVM.countriesResponse) { countries in
+                if selectedCountry == nil {
+                    selectedCountry = countries?.first(where: { $0.countryCode == Constants.shared.regionCode })
+                }
+            }
+            .sheet(isPresented: $showCountrySheet) {
+                CountriesBottomSheet(selectedCurrency   : $selectedCurrency,
+                                     selectedCountry    : $selectedCountry,
+                                     isCountry          : true,
+                                     currencyResponse   : commonApiVM.currencyResponse,
+                                     countryResponse    : commonApiVM.countriesResponse,
+                                     header             : "Select your Country",
+                                     placeholder        : "Search")
+                .presentationDetents([.large])
+                .presentationDragIndicator(.hidden)
             }
         }
     }
@@ -229,6 +252,63 @@ struct OnboardingView: View {
                     WrapButtonsView(options: spendingOptions,
                                     selectedIndex: $selectedSpending)
                 }
+                
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("Your country")
+                        .font(.appRegular(14))
+                        .foregroundColor(Color.neutralMain700)
+                    
+                    Button {
+                        if commonApiVM.countriesResponse != nil {
+                            showCountrySheet = true
+                        } else {
+                            commonApiVM.getCountries()
+                        }
+                    } label: {
+                        HStack(spacing: 10) {
+                            AsyncImage(url: URL(string: selectedCountry?.countryFlag ?? "")) { phase in
+                                switch phase {
+                                case .empty:
+                                    Rectangle()
+                                        .fill(Color.gray.opacity(0.5))
+                                        .frame(width: 24, height: 24)
+                                        .shimmer(true)
+                                case .success(let image):
+                                    image
+                                        .resizable()
+                                        .scaledToFill()
+                                        .frame(width: 24, height: 24)
+                                case .failure:
+                                    Rectangle()
+                                        .fill(Color.gray.opacity(0.5))
+                                        .frame(width: 24, height: 24)
+                                        .shimmer(true)
+                                @unknown default:
+                                    EmptyView()
+                                }
+                            }
+                            
+                            Text(selectedCountry?.countryName ?? "Select Country")
+                                .font(.appRegular(14))
+                                .foregroundColor(.black)
+                            
+                            Spacer()
+                            
+                            Image("dropDown_blackWhite")
+                                .frame(width: 20, height: 20)
+                                .foregroundColor(.black)
+                        }
+                        .padding(.horizontal, 16)
+                        .frame(height: 52)
+                        .background(.white)
+                        .cornerRadius(12)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 12)
+                                .stroke(Color.neutral2200, lineWidth: 1)
+                        )
+                    }
+                }
+                
                 PhoneNumberField(phoneNumber        : .constant(""),
                                  header             : "Your payment currency",
                                  placeholder        : selectedCurrency?.name,
@@ -248,7 +328,8 @@ struct OnboardingView: View {
                                             preferredCurrency       : selectedCurrency?.code ?? "",
                                             preferredCurrencySymbol : selectedCurrency?.symbol ?? "",
                                             noofSubscriptions       : (selectedSubscriptions ?? 0),
-                                            averageMonthlySpend     : (selectedSpending ?? 0))
+                                            averageMonthlySpend     : (selectedSpending ?? 0),
+                                            isoCountryCode          : selectedCountry?.countryCode ?? "")
         if let errorMessage = LoginSignupValidations().validateOnboarding(input: input) {
             ToastManager.shared.showToast(message: errorMessage,style: ToastStyle.error)
         } else {

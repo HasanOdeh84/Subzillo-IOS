@@ -74,51 +74,91 @@ struct HomeView: View {
                     
                     //MARK: Scroll view
                     ScrollView(showsIndicators: false){
-                        VStack(alignment: .leading,spacing: 18){
-                            HStack(spacing: 16){
-                                Image("info")
-                                Text("Your subscriptions at a glance")
-                                    .font(.appRegular(16))
-                                    .foregroundColor(Color.neutralMain700)
+                        // Glance Card
+                        VStack(alignment: .leading, spacing: 0) {
+                            VStack(alignment: .leading, spacing: 18) {
+                                HStack(spacing: 16) {
+                                    Image("info")
+                                    Text("Your subscriptions at a glance")
+                                        .font(.appRegular(16))
+                                        .foregroundColor(Color.neutralMain700)
+                                }
+                                
+                                DashedHorizontalDivider(dash: [2,2])
+                                
+                                HStack {
+                                    Spacer()
+                                    VStack(spacing: 8) {
+                                        Text(monthlySpend)
+                                            .font(.appSemiBold(28))
+                                            .foregroundStyle(Color.blue800)
+                                        Text("Monthly spend")
+                                            .font(.appRegular(14))
+                                            .foregroundStyle(Color.neutral500)
+                                    }
+                                    Spacer()
+                                    Divider()
+                                        .frame(width: 1)
+                                        .overlay(.neutralDisabled200)
+                                    Spacer()
+                                    VStack(spacing: 8) {
+                                        Text("\(activeSubs)")
+                                            .font(.appSemiBold(28))
+                                            .foregroundStyle(Color.blue800)
+                                        Text("Active Subscriptions")
+                                            .font(.appRegular(14))
+                                            .foregroundStyle(Color.neutral500)
+                                    }
+                                    Spacer()
+                                }
+                                .frame(alignment: .center)
                             }
+                            .padding(.vertical, 16)
+                            .padding(.horizontal, 16)
+                            .background(.whiteBlackBG)
                             
-                            DashedHorizontalDivider(dash: [2,2])
-                            
-                            HStack(){
-                                Spacer()
-                                VStack(spacing: 8){
-                                    Text(monthlySpend)
-                                        .font(.appSemiBold(28))
-                                        .foregroundStyle(Color.blue800)
-                                    Text("Monthly spend")
-                                        .font(.appRegular(14))
-                                        .foregroundStyle(Color.neutral500)
+                            // Bottom Gradient Bar
+                            HStack {
+                                VStack(alignment: .leading, spacing: 4) {
+                                    if commonApiVM.userInfoResponse?.planName ?? "" == "" {
+                                        Text("Current Plan : Free plan")
+                                            .font(.appSemiBold(14))
+                                            .foregroundColor(.white)
+                                            .multilineTextAlignment(.leading)
+                                    } else {
+                                        Text("Current Plan : \(commonApiVM.userInfoResponse?.planName ?? "Free")")
+                                            .font(.appSemiBold(14))
+                                            .foregroundColor(.white)
+                                            .multilineTextAlignment(.leading)
+                                    }
+                                    
+                                    if let limit = commonApiVM.userInfoResponse?.planSubscriptionLimit{
+                                        Text("Added \(commonApiVM.userInfoResponse?.usedSubscriptionCount ?? 0)/\(commonApiVM.userInfoResponse?.planSubscriptionLimit ?? 3) Subscriptions")
+                                            .font(.appRegular(12))
+                                            .foregroundColor(.white)
+                                            .multilineTextAlignment(.leading)
+                                    }else{
+                                        Text("Added \(commonApiVM.userInfoResponse?.usedSubscriptionCount ?? 0)/Unlimited Subscriptions")
+                                            .font(.appRegular(12))
+                                            .foregroundColor(.white)
+                                            .multilineTextAlignment(.leading)
+                                    }
                                 }
                                 Spacer()
-                                Divider()
-                                    .frame(width: 1)
-                                    .overlay(.neutralDisabled200)
-                                Spacer()
-                                VStack(spacing: 8){
-                                    Text("\(activeSubs)")
-                                        .font(.appSemiBold(28))
-                                        .foregroundStyle(Color.blue800)
-                                    Text("Active Subscriptions")
-                                        .font(.appRegular(14))
-                                        .foregroundStyle(Color.neutral500)
-                                }
-                                Spacer()
                             }
-                            .frame(alignment: .center)
-                            
+                            .padding(.horizontal, 16)
+                            .padding(.vertical, 10)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .background(
+                                LinearGradient(colors: [Color.linearGradient3, Color.linearGradient4, Color.blueMain700],
+                                               startPoint: .top,
+                                               endPoint: .bottom)
+                            )
                         }
-                        .padding(.vertical, 16)
-                        .padding(.horizontal, 16)
                         .overlay(
                             RoundedRectangle(cornerRadius: 12)
                                 .stroke(.neutral300Border, lineWidth: 1)
                         )
-                        .background(.whiteBlackBG)
                         .cornerRadius(12)
                         
                         //MARK: Top spending subscriptions

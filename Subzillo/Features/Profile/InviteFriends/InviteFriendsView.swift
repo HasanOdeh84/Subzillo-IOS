@@ -11,9 +11,10 @@ struct InviteFriendsView: View {
     
     // MARK: - Properties
     @Environment(\.dismiss) private var dismiss
-    @StateObject private var viewModel  = InviteFriendsViewModel()
-    @State private var referralLink     : String = ""
-    var uLink                           : String? = ""
+    @StateObject private var viewModel      = InviteFriendsViewModel()
+    @EnvironmentObject private var commonVM : CommonAPIViewModel
+    @State private var referralLink         : String = ""
+    var uLink                               : String? = ""
     
     // MARK: - Body
     var body: some View {
@@ -153,15 +154,23 @@ struct InviteFriendsView: View {
         .navigationBarBackButtonHidden(true)
         .onAppear {
             rewardsApi()
-            if let link = uLink, !link.isEmpty {
-                referralLink = link
-            } else {
-                referralLink = "https://subzillo.com"
-            }
+//            if let link = uLink, !link.isEmpty {
+//                referralLink = link
+//            } else {
+//                referralLink = "https://subzillo.com"
+//            }
+            commonVM.getUserInfo(input: getUserInfoRequest(userId: Constants.getUserId()))
         }
         .onChange(of: viewModel.redeemSucess) { _ in
             if viewModel.redeemSucess{
                 rewardsApi()
+            }
+        }
+        .onChange(of: commonVM.userInfoResponse) { _ in
+            if let url = commonVM.userInfoResponse?.referralLink{
+                referralLink = url
+            }else{
+                referralLink = "https://subzillo.com"
             }
         }
     }

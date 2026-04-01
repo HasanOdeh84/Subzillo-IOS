@@ -13,4 +13,5 @@ public struct UpdateOnboardingRequest: Codable {
     let preferredCurrencySymbol : String
     let noofSubscriptions       : Int
     let averageMonthlySpend     : Int
+    let isoCountryCode          : String
 }

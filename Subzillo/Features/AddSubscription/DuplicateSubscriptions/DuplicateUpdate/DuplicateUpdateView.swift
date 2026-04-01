@@ -175,6 +175,8 @@ struct DuplicateUpdateView: View {
             let existingItem = duplicateSubsList!.existingSubscriptions![existingSubIndex]
             let newObject = ModifiedDuplicateDataInfo(originalData: duplicateSubsList, selectedIndexs: [selectedIndex], selectedData: [newItem], selectedExistingData: existingItem)
             modifiedDuplicateDataInfo = newObject
+            // Copy source from existing subscription to new subscription
+            newItem.source = existingItem.source
             if isFromAdd == true {
                 newItem.id = ""
             }
@@ -192,6 +194,8 @@ struct DuplicateUpdateView: View {
         var newItem = duplicateSubsList!.newSubscriptions![selectedIndex]
         let newObject = ModifiedDuplicateDataInfo(originalData: duplicateSubsList, selectedIndexs: [selectedIndex], selectedData: [newItem], isKeepAll: true)
         modifiedDuplicateDataInfo = newObject
+        // Copy source from existing subscription to new subscription
+        newItem.source = duplicateSubsList?.existingSubscriptions?.first?.source
         if isFromAdd == true {
             newItem.id = ""
         }
