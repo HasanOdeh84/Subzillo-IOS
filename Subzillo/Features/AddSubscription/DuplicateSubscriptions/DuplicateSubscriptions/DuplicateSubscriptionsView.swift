@@ -12,537 +12,422 @@ var modifiedDuplicateDataInfo  : ModifiedDuplicateDataInfo?
 var duplicateDataCount         : Int?
 var isFromAdd                  : Bool?
 
+// MARK: - DuplicateSubscriptionsView
 struct DuplicateSubscriptionsView: View {
-    
-    //MARK: - Properties
+
+    // MARK: - Properties
     @Environment(\.dismiss) private var dismiss
-    @State private var originalDataList  = [DuplicateDataInfo]()
-    @State private var updatedList       = [ModifiedDuplicateDataInfo]()
-    @State var duplicateSubsList         : [DuplicateDataInfo]
-    @StateObject var dupSubscriptionVM   = DuplicateSubscriptionsViewModel()
-    @State var fromFamily                = false
-    @State var isFromEmail               : Bool = false
-    
-    //MARK: - body
+    @State var duplicateSubsList    : [DuplicateDataInfo]
+    @StateObject var dupSubscriptionVM = DuplicateSubscriptionsViewModel()
+    @State var fromFamily           : Bool = false
+    @State var isFromEmail          : Bool = false
+
+    /// Index of the duplicate we are currently resolving (0-based)
+    @State private var currentIndex : Int = 0
+    /// Which existing subscription page is visible in the pager
+    @State private var existingPage : Int = 0
+    /// Tracks whether an API call is in flight for the current card
+    @State private var isProcessing : Bool = false
+
+    // MARK: - Computed helpers
+    private var totalCount: Int   { duplicateSubsList.count }
+    private var currentItem: DuplicateDataInfo? {
+        guard currentIndex < totalCount else { return nil }
+        return duplicateSubsList[currentIndex]
+    }
+    private var existingList: [SubscriptionInfo] {
+        currentItem?.existingSubscriptions ?? []
+    }
+    private var newSub: SubscriptionInfo? {
+        currentItem?.newSubscriptions?.first
+    }
+
+    // MARK: - body
     var body: some View {
-        VStack(alignment: .leading,spacing: 0) {
-            // MARK: - Header
-            HStack(spacing: 8) {
-                HStack{
-                    Button(action: goBack) {
-                        HStack {
-                            Image("back_gray")
+        VStack(alignment: .leading, spacing: 0) {
+
+            // MARK: Header
+            headerView
+
+            if let item = currentItem {
+                ScrollView(showsIndicators: false) {
+                    VStack(spacing: 0) {
+
+                        // Progress label
+                        progressLabel
+                            .padding(.horizontal, 20)
+                            .padding(.top, 16)
+                            .padding(.bottom, 12)
+
+                        // New Subscription section
+                        sectionLabel("New Subscription", color: Color.linearGradient3Start)
+                            .padding(.horizontal, 20)
+                            .padding(.bottom, 8)
+
+                        if let sub = newSub {
+                            DupSubCard(sub: sub, isNew: true, statusText: nil)
+                                .padding(.horizontal, 20)
                         }
-                        .foregroundColor(.blue)
-                    }
-                    
-                    Text("Duplicate Found")
-                        .font(.appRegular(24))
-                        .foregroundColor(Color.neutralMain700)
-                    
-                    Spacer()
-                    
-                    Button(action: skipAll) {
-                        Text("Skip All")
-                            .font(.appBold(16))
-                            .foregroundColor(Color.neutralMain700)
-                            .multilineTextAlignment(.trailing)
+
+                        // VS badge
+                        vsBadge
+                            .padding(.vertical, 12)
+
+                        // Existing Subscription section
+                        sectionLabel("Existing Subscription", color: Color.blueMain700)
+                            .padding(.horizontal, 20)
+//                            .padding(.bottom, 4)
+
+                        if existingList.isEmpty {
+                            // No existing – shouldn't happen, but guard gracefully
+                            EmptyView()
+                        } else if existingList.count == 1 {
+                            DupSubCard(sub: existingList[0], isNew: false, statusText: existingList[0].status)
+                                .padding(.horizontal, 20)
+                        } else {
+                            // Paged existing subscriptions
+                            existingPager
+                        }
+
+                        Spacer(minLength: 16)
+                        
+                        actionButtons(for: item)
+                            .padding(.horizontal, 20)
+                            .padding(.bottom, 24)
+                            .padding(.top, 8)
                     }
                 }
-                .padding(.horizontal, 20)
-                .padding(.vertical, 16)
-            }
-            .background(Color.clear)
-            //            .background(Color.white.ignoresSafeArea(edges: .top))
-            //            .shadow(color: Color.dropShadowColor1, radius: 2, x: 0, y: 2)
-            
-            ScrollView(showsIndicators: false) {
-                VStack(spacing: 16) {
-                    ForEach(Array(duplicateSubsList.enumerated()), id: \.offset) { index, objc in
-                        rowView(for: objc, at: index)
-                            .frame(maxWidth: .infinity)
-                    }
-                }
-                .padding(.top, 16)
-                .padding(.horizontal, 16)
-                .background(.clear)
+
+                // MARK: - Action buttons (pinned at bottom)
+//                actionButtons(for: item)
+//                    .padding(.horizontal, 20)
+//                    .padding(.bottom, 24)
+//                    .padding(.top, 8)
+
+            } else {
+                // All duplicates handled – show nothing while navigation fires
+                Spacer()
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
         .navigationBarBackButtonHidden()
-        .background(.neutralBg100)
-        .onAppear{
-            //duplicateSubsList = duplicateSubsListSample
-            //originalDataList = duplicateSubsList
-            updateDetails()
+        .background(Color.neutralBg100)
+        .onChange(of: duplicateSubsList.count) { _ in
+            existingPage = 0
         }
         .onChange(of: dupSubscriptionVM.subscriptioIds) { _ in
-            
-            if duplicateSubsList.count == 0
-            {
-                //                if isFromAdd == true {
-                //                    AppIntentRouter.shared.navigate(to: .addSubscriptionsView)
-                //                }
-                //                else{
-                //                    AppIntentRouter.shared.navigate(to: .subscriptionsListView)
-                //                }
-                if fromFamily{
-                    //                    AppIntentRouter.shared.navigate(to: .familyMembersView)
-                    AppIntentRouter.shared.pop(count: 2)
-                }else{
-                    AppIntentRouter.shared.navigate(to: .subscriptionsListView())
-                }
-            }
-            // print(dupSubscriptionVM.subscriptioIds)
-            //AppIntentRouter.shared.navigate(to: .addSubscriptionsView)
-            //dismiss()
-        }
-        // .onChange(of: modifiedDuplicateDataInfo) { _ in updateDetails() }
-    }
-    
-    private func updateDetails()
-    {
-        if modifiedDuplicateDataInfo != nil
-        {
-            //print(modifiedDuplicateDataInfo!)
-            let ids = modifiedDuplicateDataInfo!.subscriptionIds ?? []
-            
-            if (modifiedDuplicateDataInfo!.isKeepAll ?? false) == true
-            {
-                if modifiedDuplicateDataInfo!.originalData?.newSubscriptions!.count == 1
-                {
-                    updatedList.append(modifiedDuplicateDataInfo!)
-                    duplicateSubsList.removeAll { $0.id == modifiedDuplicateDataInfo!.originalData?.id }
-                }
-                else{
-                    guard
-                        let modified = modifiedDuplicateDataInfo,
-                        var originalData = modified.originalData,
-                        var newItems = originalData.newSubscriptions,
-                        var oldItems = originalData.existingSubscriptions
-                    else { return }
-                    
-                    var newItem = modified.selectedData![0]
-                    
-                    newItems.removeAll { $0.id == newItem.id }
-                    if ids.count > 0 {
-                        newItem.id = ids[0]
-                    }
-                    oldItems.append(newItem)
-                    originalData.newSubscriptions = newItems
-                    originalData.existingSubscriptions = oldItems
-                    
-                    updatedList.append(modifiedDuplicateDataInfo!)
-                    
-                    if let updatedData = modifiedDuplicateDataInfo?.originalData,
-                       let index = duplicateSubsList.firstIndex(where: { $0.id == updatedData.id }) {
-                        duplicateSubsList[index] = originalData
-                    }
-                }
-            }
-            else{
-                if modifiedDuplicateDataInfo!.originalData?.newSubscriptions!.count == 1
-                {
-                    updatedList.append(modifiedDuplicateDataInfo!)
-                    duplicateSubsList.removeAll { $0.id == modifiedDuplicateDataInfo!.originalData?.id }
-                }
-                else{
-                    guard
-                        let modified = modifiedDuplicateDataInfo,
-                        var originalData = modified.originalData,
-                        var newItems = originalData.newSubscriptions,
-                        var oldItems = originalData.existingSubscriptions,
-                        let selected = modified.selectedExistingData
-                    else { return }
-                    
-                    let newItem = modified.selectedData![0]
-                    
-                    newItems.removeAll { $0.id == newItem.id }
-                    
-                    if let index = oldItems.firstIndex(where: { $0.id == selected.id }) {
-                        oldItems[index] = newItem
-                    }
-                    
-                    originalData.newSubscriptions = newItems
-                    originalData.existingSubscriptions = oldItems
-                    
-                    updatedList.append(modifiedDuplicateDataInfo!)
-                    
-                    if let updatedData = modifiedDuplicateDataInfo?.originalData,
-                       let index = duplicateSubsList.firstIndex(where: { $0.id == updatedData.id }) {
-                        duplicateSubsList[index] = originalData
-                    }
-                }
-            }
-            print(duplicateSubsList)
-            modifiedDuplicateDataInfo = nil
+            isProcessing = false
+            advanceOrFinish()
         }
     }
-    
-    
-    // MARK: - Extracted subview
+
+    // MARK: - Header
+    private var headerView: some View {
+        HStack {
+            Button(action: { dismiss() }) {
+                Image("back_gray")
+                    .frame(width: 24, height: 24)
+            }
+            Text("Possible Duplicated Found")
+                .font(.appRegular(22))
+                .foregroundColor(Color.neutralMain700)
+            Spacer()
+        }
+        .padding(.horizontal, 20)
+        .padding(.vertical, 16)
+    }
+
+    // MARK: - Progress label  "Checking New Subscription **1** of 5"
+    private var progressLabel: some View {
+        HStack(spacing: 0) {
+            Text("Checking New Subscription ")
+                .font(.appRegular(16))
+                .foregroundColor(Color.neutralMain700)
+            Text("\(currentIndex + 1)")
+                .font(.appSemiBold(16))
+                .foregroundColor(Color.navyBlueCTA700)
+            Text(" of ")
+                .font(.appRegular(16))
+                .foregroundColor(Color.neutralMain700)
+            Text("\(totalCount)")
+                .font(.appSemiBold(16))
+                .foregroundColor(Color.black)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+    }
+
+    // MARK: - Section label
+    private func sectionLabel(_ title: String, color: Color) -> some View {
+        Text(title)
+            .font(.appRegular(16))
+            .foregroundColor(color)
+            .frame(maxWidth: .infinity, alignment: .leading)
+    }
+
+    // MARK: - VS badge
+    private var vsBadge: some View {
+        ZStack {
+            Circle()
+                .strokeBorder(Color.navyBlueCTA700, lineWidth: 1)
+                .frame(width: 40, height: 40)
+            Text("VS")
+                .font(.appSemiBold(16))
+                .foregroundColor(Color.navyBlueCTA700)
+        }
+    }
+
+    // MARK: - Existing pager (TabView + page dots)
+    private var existingPager: some View {
+        VStack(spacing: 8) {
+            TabView(selection: $existingPage) {
+                ForEach(existingList.indices, id: \.self) { idx in
+                    DupSubCard(sub: existingList[idx], isNew: false, statusText: existingList[idx].status)
+                        .padding(.horizontal, 20)
+                        .tag(idx)
+                }
+            }
+            .tabViewStyle(.page(indexDisplayMode: .never))
+            .frame(height: 140)
+
+            // Page dots
+            HStack(spacing: 6) {
+                ForEach(existingList.indices, id: \.self) { idx in
+                    Capsule()
+                        .fill(idx == existingPage ? Color.blueMain700 : Color.neutral300Border)
+                        .frame(width: idx == existingPage ? 20 : 8, height: 8)
+                        .animation(.easeInOut(duration: 0.25), value: existingPage)
+                }
+            }
+        }
+    }
+
+    // MARK: - Action buttons
     @ViewBuilder
-    private func rowView(for objc: DuplicateDataInfo, at index: Int) -> some View {
-        DuplicateListItem(item: objc) { data, selected, type  in
-            if type == "save" {
-                let selectedObjects = selected.compactMap { index in
-                    data.newSubscriptions?[index]
+    private func actionButtons(for item: DuplicateDataInfo) -> some View {
+        VStack(spacing: 12) {
+            // 1. Save new subscription as existing (filled blue)
+            CustomButton(
+                title: "Save new subscription as existing",
+                height: 52, 
+                buttonImage: "settingsicon",
+                action: {
+                    print("Save as existing pressed")
+                    guard !isProcessing else { return }
+                    saveAsExisting(item: item)
                 }
-                let newObject = ModifiedDuplicateDataInfo(originalData: data, selectedIndexs: selected, selectedData: selectedObjects)
-                updatedList.append(newObject)
-                duplicateSubsList.removeAll { $0.id == data.id }
-                // Copy source from oldSubscription to newSubscription items
-                let sourceValue = data.existingSubscriptions?.first?.source
-                var selectedObjectsNew = [SubscriptionInfo]()
-                for item in selectedObjects
-                {
-                    var newitem = item
-                    newitem.source = sourceValue
-                    if isFromAdd == true {
-                        newitem.id = ""
-                    }
-                    selectedObjectsNew.append(newitem)
-                }
-                if selectedObjectsNew.isEmpty{
-                    
-                }else{
-                    self.makeApiCall(action: 2, existingSubscription: "", newSubscriptions: selectedObjectsNew)
-                }
-            }
-            else if type == "keep" {
-                let newObject = ModifiedDuplicateDataInfo(originalData: data, isKeepAll: true)
-                updatedList.append(newObject)
-                duplicateSubsList.removeAll { $0.id == data.id }
-                let selectedObjects = data.newSubscriptions ?? []
-                // Copy source from oldSubscription to newSubscription items
-                let sourceValue = data.existingSubscriptions?.first?.source
-                var selectedObjectsNew = [SubscriptionInfo]()
-                for item in selectedObjects
-                {
-                    var newitem = item
-                    newitem.source = sourceValue
-                    if isFromAdd == true {
-                        newitem.id = ""
-                    }
-                    selectedObjectsNew.append(newitem)
-                }
-                self.makeApiCall(action: 2, existingSubscription: "", newSubscriptions: selectedObjectsNew)
-            }
-            else if type == "update"
-            {
-                //print(data.serviceName)
-                duplicateDataCount = duplicateSubsList.count
-                AppIntentRouter.shared.navigate(to: .duplicateUpdateView(duplicateSubsList: data, selectedIndex: selected[0], fromFamily: fromFamily, isFromEmail: isFromEmail))
-            }
-            else if type == "gotoDetails"
-            {
-                let index = selected[0]
-                AppIntentRouter.shared.navigate(to: .duplicateSubDetailsView(subscriptionData: data.existingSubscriptions![index]))
-            }
-            else if type == "gotoNewDetails"
-            {
-                let index = selected[0]
-                AppIntentRouter.shared.navigate(to: .duplicateSubDetailsView(subscriptionData: data.newSubscriptions![index]))
+            )
+
+            // 2. Save as Separate Subscription (gradient-border)
+            GradientBorderButton(
+                title: "Save as Separate Subscription",
+                isBtn: true,
+                buttonImage: "keepIcon",
+                action: {
+                    guard !isProcessing else { return }
+                    saveAsSeparate(item: item)
+                },
+                backgroundColor: .whiteBlack,
+                buttonHeight: 52
+            )
+
+            // 3. Skip For Now (text link)
+            Button(action: skipForNow) {
+                Text("Skip For Now")
+                    .font(.appBold(16))
+                    .foregroundColor(Color.navyBlueCTA700)
+                    .frame(maxWidth: .infinity)
+                    .frame(height: 44)
             }
         }
     }
-    
-    //MARK: - Button actions
-    private func goBack() {
-        dismiss()
+
+    // MARK: - Button logic
+
+    /// action = 1, existingSubscription = selected existing's id  →  merge
+    private func saveAsExisting(item: DuplicateDataInfo) {
+        guard var newItem = item.newSubscriptions?.first else { return }
+        let selectedExisting = existingList.indices.contains(existingPage)
+            ? existingList[existingPage]
+            : existingList.first
+
+        guard let existing = selectedExisting, let existingId = existing.id else {
+            ToastManager.shared.showToast(message: "No existing subscription selected", style: .error)
+            return
+        }
+
+        newItem = enriched(newItem, from: existing)
+        if isFromAdd == true { newItem.id = "" }
+
+        isProcessing = true
+        makeApiCall(action: 1, existingSubscription: existingId, newSubscriptions: [newItem])
     }
-    
-    private func skipAll() {
-        //        if isFromAdd == true {
-        //            AppIntentRouter.shared.navigate(to: .addSubscriptionsView)
-        //        }
-        //        else{
-        //            AppIntentRouter.shared.navigate(to: .subscriptionsListView)
-        //        }
-        if fromFamily{
+
+    /// action = 2, existingSubscription = ""  →  keep as separate
+    private func saveAsSeparate(item: DuplicateDataInfo) {
+        guard var newItem = item.newSubscriptions?.first else { return }
+        let referenceOld = existingList.first
+        newItem = enriched(newItem, from: referenceOld)
+        if isFromAdd == true { newItem.id = "" }
+
+        isProcessing = true
+        makeApiCall(action: 2, existingSubscription: "", newSubscriptions: [newItem])
+    }
+
+    /// Skip with no API call — just move to next
+    private func skipForNow() {
+        advanceOrFinish()
+    }
+
+    /// Move to next duplicate, or navigate away when all done
+    private func advanceOrFinish() {
+        if currentIndex + 1 < totalCount {
+            withAnimation {
+                currentIndex += 1
+                existingPage = 0
+            }
+        } else {
+            navigateAway()
+        }
+    }
+
+    private func navigateAway() {
+        if fromFamily {
             AppIntentRouter.shared.pop(count: 2)
-            //            AppIntentRouter.shared.navigate(to: .familyMembersView)
-        }
-        else{
+        } else {
             AppIntentRouter.shared.navigate(to: .subscriptionsListView())
         }
     }
-    
-    //MARK: - apicall
-    func makeApiCall(action:Int, existingSubscription:String, newSubscriptions:[SubscriptionInfo])
-    {
-        let updatedSubscriptions = newSubscriptions.map { sub in
+
+    // MARK: - API call
+    private func makeApiCall(action: Int, existingSubscription: String, newSubscriptions: [SubscriptionInfo]) {
+        let updatedSubscriptions = newSubscriptions.map { sub -> SubscriptionInfo in
             var updatedSub = sub
             updatedSub.serviceLogo = sub.serviceLogo?.fileNameOnly
-            if isFromEmail{
+            if isFromEmail {
                 updatedSub.sourceReference = sub.sourceReference
             }
             return updatedSub
         }
-        let input = ResolveDuplicateSubscriptionRequest(userId: Constants.getUserId(),
-                                                        action: action,
-                                                        existingSubscription: existingSubscription,
-                                                        //                                                        newSubscriptions: newSubscriptions)
-                                                        newSubscriptions: updatedSubscriptions)
+        let input = ResolveDuplicateSubscriptionRequest(
+            userId              : Constants.getUserId(),
+            action              : action,
+            existingSubscription: existingSubscription,
+            newSubscriptions    : updatedSubscriptions
+        )
         dupSubscriptionVM.resolveDuplicateSubscription(input: input)
     }
-}
 
-struct DuplicateListItem: View {
-    
-    var item                              : DuplicateDataInfo!
-    @State private var selectedIndex      : [Int] = []
-    var onDelegate: ((_ data:DuplicateDataInfo, _ selected:[Int], _ type:String) -> Void)?
-    
-    var body: some View {
-        VStack(spacing: 0) {
-            HStack(spacing: 12) {
-                Text(item?.serviceName ?? "")
-                    .font(.appBold(16))
-                    .foregroundColor(.neutralMain700)
-                Spacer()
-                //                if (item.existingSubscriptions?.count ?? 0) > 0 {
-                //                    Button(action: keepAllBtnAction) {
-                Text("Keep All")
-                    .font(.appBold(16))
-                    .foregroundColor(.navyBlueCTA700)
-                    .onTapGesture {
-                        keepAllBtnAction()
-                    }
-                //                    }
-                //                }
-            }
-            .padding(.top, 10)
-            .padding(.bottom, 6)
-            .padding(.horizontal, 16)
-            
-            VStack(spacing: 10) {
-                ForEach(Array(item.newSubscriptions!.enumerated()), id: \.offset) { index, objc in
-                    newRowView(for: objc, at: index)
-                }
-                if let existing = item.existingSubscriptions, !existing.isEmpty {
-                    ForEach(Array(existing.enumerated()), id: \.offset) { index, objc in
-                        oldRowView(for: objc, at: index)
-                    }
-                }
-            }
-            .padding(.horizontal, 16)
-            
-            if item.existingSubscriptions?.count ?? 0 == 0 {
-                CustomButton(title: "Save", height: 49)//, action: saveAction)
-                    .frame(width: 124)
-                    .padding(.bottom, 15) // Increased padding for better spacing
-                    .onTapGesture {
-                        saveAction()
-                    }
-            } else {
-                Spacer()
-                    .frame(height: 16)
-            }
-        }
-        .overlay(
-            RoundedRectangle(cornerRadius: 16)
-                .stroke(Color.neutral300Border, lineWidth: 1)
-        )
-        .background(.whiteNeutralCardBG)
-        .cornerRadius(16)
-        .padding(.bottom, 16)
-    }
-    
-    
-    // MARK: - Extracted subview
-    @ViewBuilder
-    private func newRowView(for objc: SubscriptionInfo, at index: Int) -> some View {
-        let isNoColor = (item.existingSubscriptions?.isEmpty ?? true)
-        if isNoColor {
-            let isSelected = selectedIndex.contains(index) ? true : false
-            SubItem(item: objc, isNoColor:isNoColor, isNew:true, isSelected:isSelected) { data, type in
-                
-                if let index = item.newSubscriptions?.firstIndex(where: { $0.id == data.id }) {
-                    print("Found at index: \(index)")
-                    if type == "click" {
-                        onDelegate?(item, [index], "gotoNewDetails")
-                    }
-                    else  if type == "check" {
-                        selectedAction(at: index)
-                    }
-                }
-                
-            }
-            /*.onTapGesture {
-             selectedAction(at: index)
-             }*/
-        } else {
-            SubItem(item: objc, isNoColor:isNoColor, isNew:true) { data, type in
-                
-                if let index = item.newSubscriptions?.firstIndex(where: { $0.id == data.id }) {
-                    print("Found at index: \(index)")
-                    if type == "click" {
-                        onDelegate?(item, [index], "gotoNewDetails")
-                    }
-                    else  if type == "update" {
-                        onDelegate?(item, [index], "update")
-                    }
-                }
-            }
-        }
-    }
-    
-    private func oldRowView(for objc: SubscriptionInfo, at index: Int) -> some View {
-        let isNoColor = (item.existingSubscriptions?.isEmpty ?? true)
-        //        return SubItem(item: objc, isNoColor:isNoColor, isNew: false)
-        //            .contentShape(Rectangle())
-        //            .onTapGesture {
-        //                onDelegate?(item, [index], "gotoDetails")
-        //            }
-        return ZStack {
-            SubItem(item: objc, isNoColor: isNoColor, isNew: false)
-                .allowsHitTesting(false)
-        }
-        .contentShape(Rectangle())
-        .onTapGesture {
-            onDelegate?(item, [index], "gotoDetails")
-        }
-    }
-    
-    // MARK: - Button actions
-    private func selectedAction(at index: Int) {
-        if selectedIndex.contains(index)
-        {
-            selectedIndex.removeAll { $0 == index }
-        }
-        else{
-            selectedIndex.append(index)
-        }
-    }
-    
-    private func saveAction() {
-        if selectedIndex.count > 0{
-            onDelegate?(item, selectedIndex, "save")
-        }else{
-            ToastManager.shared.showToast(message: "At least one subscription is required",style: .error)
-        }
-    }
-    
-    private func keepAllBtnAction() {
-        onDelegate?(item, [], "keep")
+    /// Fills backend-only fields that the server populates only on existing subscriptions.
+    private func enriched(_ new: SubscriptionInfo, from old: SubscriptionInfo?) -> SubscriptionInfo {
+        var sub = new
+        sub.source            = new.source            ?? old?.source
+        sub.sourceReference   = new.sourceReference   ?? old?.sourceReference
+        sub.status            = new.status            ?? old?.status
+        sub.paymentMethodName = new.paymentMethodName ?? old?.paymentMethodName
+        sub.categoryName      = new.categoryName      ?? old?.categoryName
+        sub.cardNumber        = new.cardNumber        ?? old?.cardNumber
+        sub.cardName          = new.cardName          ?? old?.cardName
+        return sub
     }
 }
 
-struct SubItem: View {
-    var item            : SubscriptionInfo!
-    var isNoColor       : Bool = false
-    var isNew           : Bool = false
-    var isSelected      : Bool = false
-    var onDelegate: ((_ data:SubscriptionInfo, _ type:String) -> Void)?
-    
-    var fullTitle: String {
-        [item?.serviceName, item?.subscriptionType]
+// MARK: - DupSubCard
+/// Single subscription card shown in the duplicate resolution screen.
+struct DupSubCard: View {
+
+    var sub        : SubscriptionInfo
+    var isNew      : Bool
+    var statusText : String?   // e.g. "Active", "expired" — shown for existing subs
+
+    private var fullTitle: String {
+        [sub.subscriptionType, "\(sub.currencySymbol ?? Constants.shared.currencySymbol)\(sub.amount ?? 0.0)", sub.billingCycle]
             .compactMap { $0 }
             .filter { !$0.isEmpty }
-            .joined(separator: " ")
+            .joined(separator: " • ")
     }
-    
+
     var body: some View {
-        VStack(spacing: 0) {
-            //Button(action: clickBtnAction) {
-            HStack(alignment: .top, spacing: 6) {
-                if isNoColor == true
-                {
-                    // Button(action: checkBtnAction) {
-                    VStack(alignment: .leading, spacing: 9) {
-                        Image(isSelected == true ? "Checkmark" : "UnCheckmark")
-                            .frame(width: 24, height: 24)
-                            .padding(.top, 16)
-//                            .offset(x: 0, y: -5)
-                    }
-                    .onTapGesture {
-                        checkBtnAction()
-                    }
-                    // }
+        VStack(alignment: .leading, spacing: 0) {
+
+            // Row: logo + name + status badge
+            HStack(spacing: 10) {
+                AvatarView(
+                    serviceName : sub.serviceName ?? "",
+                    serviceLogo : sub.serviceLogo,
+                    size        : 40
+                )
+
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(sub.serviceName ?? "")
+                        .font(.appMedium(16))
+                        .foregroundColor(Color.neutralMain700)
+//                    Text(fullTitle)
+//                        .font(.appRegular(13))
+//                        .foregroundColor(Color.neutral500)
                 }
-                VStack(alignment: .leading, spacing: 9) {
-                    HStack(spacing: 10) {
-                        Text(fullTitle)
-                            .font(.appRegular(16))
-                            .foregroundColor(.neutralMain700)
-                            .multilineTextAlignment(.leading)
-                        Spacer()
-                        Text(isNew == true ? "New" : "Existing")
+
+                Spacer()
+
+                if !isNew, let status = statusText, !status.isEmpty {
+                    HStack(spacing: 4) {
+                        Text("Status :")
                             .font(.appRegular(12))
-                            .foregroundColor(.white)
-                            .padding(8)
-                            .background(isNew == true ? .linearGradient3 : .blueMain700)
-                            .frame(height: 24)
-                            .cornerRadius(4)
-                    }
-                    .padding(.bottom, -5)
-                    
-                    HStack(spacing: 10) {
-                        VStack(alignment: .leading, spacing: 9) {
-                            Text("Next charge: \(item.nextPaymentDate ?? "")")
-                                .font(.appRegular(12))
-                                .foregroundColor(.neutral500)
-                            Text(String(format: "%@%.2f • %@", item?.currencySymbol ?? "",item?.amount ?? 0.00,item?.billingCycle ?? ""))
-                                .font(.appRegular(16))
-                                .foregroundColor(.neutralMain700)
-                        }
-                        Spacer()
-                        if isNew == true && isNoColor == false
-                        {
-                            //Button(action: updateBtnAction) {
-                            Text("Update")
-                                .font(.appSemiBold(16))
-                                .foregroundColor(.white)
-                                .padding(.vertical, 10)
-                                .padding(.horizontal,16)
-                                .background(.navyBlueCTA700)
-                                .frame(height: 34)
-                                .cornerRadius(7)
-                                .onTapGesture {
-                                    updateBtnAction()
-                                }
-                            // }
-                        }
-                    }
-                    
-                    if item.status == "expired"{
-                        Text("We found an old expired subscription. Do you want to replace it or add a new subscription?")
-                            .foregroundStyle(Color.redBadge)
+                            .foregroundColor(Color.neutral500)
+                        Text(status.capitalized)
                             .font(.appRegular(12))
+                            .foregroundColor(status.lowercased() == "active" ? Color.black : Color.redBadge)
                     }
                 }
-                .padding(.vertical, 16)
             }
-            .onTapGesture {
-                clickBtnAction()
+            .padding(.horizontal, 16)
+            .padding(.top, 10)
+            
+            Text(fullTitle)
+                .font(.appMedium(14))
+                .foregroundColor(Color.neutralMain700)
+                .padding(.horizontal, 16)
+                .padding(.top, 5)
+
+            Divider()
+                .overlay(Color.neutral300Border)
+//                .padding(.horizontal, 16)
+                .padding(.top, 10)
+
+            // Next charge row
+            HStack(spacing: 6) {
+                Text("Next charge:")
+                    .font(.appRegular(12))
+                    .foregroundColor(Color.neutral500)
+
+                if isNew, let date = sub.nextPaymentDate, !date.isEmpty {
+                    Text(Constants.shared.formatDate(date))
+                        .font(.appRegular(12))
+                        .foregroundColor(Color.black)
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 4)
+                        .background(Color.orange1)
+                        .cornerRadius(4)
+                } else {
+//                    Text(sub.nextPaymentDate ?? "—")
+                    Text(Constants.shared.formatDate(sub.nextPaymentDate ?? "—"))
+                        .font(.appRegular(12))
+                        .foregroundColor(Color.neutral500)
+                }
             }
-            //}
+            .padding(.horizontal, 16)
+            .padding(.vertical, 10)
         }
-        .frame(minHeight: 108)
-        .padding(.horizontal, 16)
-        .background(.clear)
+        .background(Color.whiteNeutralCardBG)
+        .cornerRadius(12)
         .overlay(
-            RoundedRectangle(cornerRadius: 8)
+            RoundedRectangle(cornerRadius: 12)
                 .stroke(Color.neutral300Border, lineWidth: 1)
         )
-        .background(isNoColor == true ? .whiteBlack : .neutralBg100)
-        .cornerRadius(8)
-        .padding(.bottom, 10)
     }
-    
-    // MARK: - Button actions
-    private func updateBtnAction() {
-        print(item.serviceName ?? "")
-        onDelegate?(item, "update")
-        //AppIntentRouter.shared.navigate(to: .duplicateUpdateView)
-    }
-    
-    private func clickBtnAction() {
-        onDelegate?(item, "click")
-    }
-    
-    private func checkBtnAction() {
-        onDelegate?(item, "check")
-    }
+}
+
+// MARK: - Colour helper
+private extension Color {
+    /// Convenience: pull the first stop colour of linearGradient3 as a plain Color
+    static var linearGradient3Start: Color { Color.amethystmain700 }
 }

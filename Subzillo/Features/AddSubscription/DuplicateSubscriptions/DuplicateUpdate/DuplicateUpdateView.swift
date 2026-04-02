@@ -175,8 +175,8 @@ struct DuplicateUpdateView: View {
             let existingItem = duplicateSubsList!.existingSubscriptions![existingSubIndex]
             let newObject = ModifiedDuplicateDataInfo(originalData: duplicateSubsList, selectedIndexs: [selectedIndex], selectedData: [newItem], selectedExistingData: existingItem)
             modifiedDuplicateDataInfo = newObject
-            // Copy source from existing subscription to new subscription
-            newItem.source = existingItem.source
+            // Enrich new item with all backend-only fields from the selected existing subscription
+            newItem = enriched(newItem, from: existingItem)
             if isFromAdd == true {
                 newItem.id = ""
             }
@@ -194,8 +194,8 @@ struct DuplicateUpdateView: View {
         var newItem = duplicateSubsList!.newSubscriptions![selectedIndex]
         let newObject = ModifiedDuplicateDataInfo(originalData: duplicateSubsList, selectedIndexs: [selectedIndex], selectedData: [newItem], isKeepAll: true)
         modifiedDuplicateDataInfo = newObject
-        // Copy source from existing subscription to new subscription
-        newItem.source = duplicateSubsList?.existingSubscriptions?.first?.source
+        // Enrich new item with all backend-only fields from the first existing subscription
+        newItem = enriched(newItem, from: duplicateSubsList?.existingSubscriptions?.first)
         if isFromAdd == true {
             newItem.id = ""
         }
@@ -207,6 +207,20 @@ struct DuplicateUpdateView: View {
     //MARK: selectedAction
     private func selectedAction(at index: Int) {
         existingSubIndex = index
+    }
+    
+    /// Fills backend-only fields that the server populates only on existing (old) subscriptions.
+    /// Uses `??` so any value already present in `new` is never overwritten.
+    private func enriched(_ new: SubscriptionInfo, from old: SubscriptionInfo?) -> SubscriptionInfo {
+        var sub = new
+        sub.source              = new.source              ?? old?.source
+        sub.sourceReference     = new.sourceReference     ?? old?.sourceReference
+        sub.status              = new.status              ?? old?.status
+        sub.paymentMethodName   = new.paymentMethodName   ?? old?.paymentMethodName
+        sub.categoryName        = new.categoryName        ?? old?.categoryName
+        sub.cardNumber          = new.cardNumber          ?? old?.cardNumber
+        sub.cardName            = new.cardName            ?? old?.cardName
+        return sub
     }
 }
 

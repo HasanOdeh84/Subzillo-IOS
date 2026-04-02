@@ -72,21 +72,24 @@ struct ExtractedSubscriptionsView: View {
             .padding(.top, 20)
             
             // MARK: Toggle
-            PlanToggleView(selectedSegment : $selectedSegment,
-                           leftText        : "Active",
-                           rightText       : "Inactive")
-            .padding(.top, 20)
+//            PlanToggleView(selectedSegment : $selectedSegment,
+//                           leftText        : "Active",
+//                           rightText       : "Inactive")
+//            .padding(.top, 20)
             
             // MARK: - Subscriptions List
             ScrollView {
-                if filteredSubscriptions.count != 0{
+//                if filteredSubscriptions.count != 0{
+                if viewModel.subscriptions.count != 0{
                     VStack(spacing: 0) {
-                        ForEach(filteredSubscriptions, id: \.id) { sub in
+//                        ForEach(filteredSubscriptions, id: \.id) { sub in
+                        ForEach(viewModel.subscriptions, id: \.id) { sub in
                             SubscriptionRowEmail(subscription: sub, isSelected: viewModel.selectedIds.contains(sub.id ?? ""), onToggle: {
                                 viewModel.toggleSelection(for: sub.id ?? "")
                             })
                             
-                            if sub.id != filteredSubscriptions.last?.id {
+//                            if sub.id != filteredSubscriptions.last?.id {
+                            if sub.id != viewModel.subscriptions.last?.id {
                                 Divider()
                                     .background(Color.neutral300Border)
                             }
@@ -203,10 +206,10 @@ struct SubscriptionRowEmail: View {
                     .font(.appRegular(14))
                     .foregroundColor(Color.neutralMain700)
                 
-//                let status = Constants.shared.isSubscriptionExpired(nextPaymentDate: subscription.nextPaymentDate ?? "")
-//                Text(status ? "InActive" : "Active")
-//                    .font(.appBold(14))
-//                    .foregroundColor(status ? .disCardRed : .greenLG)
+                let status = Constants.shared.isSubscriptionExpired(nextPaymentDate: subscription.nextPaymentDate ?? "")
+                Text(status ? "InActive" : "Active")
+                    .font(.appBold(14))
+                    .foregroundColor(status ? .disCardRed : .greenLG)
             }
             
             Spacer()

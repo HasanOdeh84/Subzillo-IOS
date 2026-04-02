@@ -72,6 +72,7 @@ struct SubscriptionPreviewView: View {
     @State var fromEmailSync                    : Bool = false
     @State var isHighlight                      : HighlightType = .none
     @State var isInitialLimit                   = true
+    @State private var isAmountError            : Bool = false
     
     //MARK: - body
     var body: some View {
@@ -216,7 +217,7 @@ struct SubscriptionPreviewView: View {
                                 SubscriptionDetailsItem(title       : "Amount",
                                                         value       : "\(subscriptionData?.currencySymbol ?? Constants.shared.currencySymbol)\(subscriptionData?.amount ?? 0.0)",
                                                         confidence  : subscriptionData?.amountConfidence ?? 0.0,
-                                                        isHighlight : (isHighlight == .amount) ? true : false)
+                                                        isHighlight : (isHighlight == .amount || isAmountError) ? true : false)
                                 .onTapGesture {
                                     DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
                                         showAmountBottom = true
@@ -234,6 +235,19 @@ struct SubscriptionPreviewView: View {
                                         .presentationDragIndicator(.hidden)
                                         .presentationDetents([.height(400)])                                        }
                                 }
+                            }
+                            
+                            if isAmountError{
+                                HStack(spacing: 6){
+                                    Image("info")
+                                        .frame(width: 24, height: 24)
+                                    Text("Amount is not matching with the existing data. Are you sure you want to continue?")
+                                        .font(.appRegular(14))
+                                        .foregroundColor(Color.systemInfoBlue)
+                                    Spacer()
+                                }
+                                .padding(.leading, 5)
+                                .padding(.top, -8)
                             }
                             
                             HStack(spacing: 16) {
@@ -625,6 +639,7 @@ struct SubscriptionPreviewView: View {
             subscriptionsData?[currentSubscriptions-1] = globalSubscriptionData!
             subscriptionData = globalSubscriptionData!
             getSubDetails()
+            validateAmount()
         }
     }
     
@@ -712,6 +727,24 @@ struct SubscriptionPreviewView: View {
                 subscriptionData?.serviceLogo = logo
             }
         }
+        validateAmount()
+    }
+    
+    private func validateAmount() {
+        guard let enteredAmount = subscriptionData?.amount,
+              let plans = manualEntryVM.providerData?.providerSubscriptionPlansList,
+              !plans.isEmpty else {
+            isAmountError = false
+            return
+        }
+        
+        let enteredDouble = Double(enteredAmount)
+        let matched = plans.contains { plan in
+            guard let price = plan.price else { return false }
+            return abs(price - enteredDouble) < 0.01
+        }
+        
+        isAmountError = !matched
     }
     
     private func handleCurrencySelection() {

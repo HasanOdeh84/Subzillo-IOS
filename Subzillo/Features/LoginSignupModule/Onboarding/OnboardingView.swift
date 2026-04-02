@@ -220,7 +220,8 @@ struct OnboardingView: View {
                                      currencyResponse   : commonApiVM.currencyResponse,
                                      countryResponse    : commonApiVM.countriesResponse,
                                      header             : "Select your Country",
-                                     placeholder        : "Search")
+                                     placeholder        : "Search",
+                                     isDialCode          : false)
                 .presentationDetents([.large])
                 .presentationDragIndicator(.hidden)
             }

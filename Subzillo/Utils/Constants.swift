@@ -294,6 +294,21 @@ struct Constants{
         
         return today > expiry
     }
+    
+    func formatDate(_ input: String) -> String {
+        let inputFormatter = DateFormatter()
+        inputFormatter.dateFormat = "yyyy-MM-dd"
+        inputFormatter.locale = Locale(identifier: "en_US_POSIX")
+
+        guard let date = inputFormatter.date(from: input) else {
+            return input // fallback if parsing fails
+        }
+
+        let outputFormatter = DateFormatter()
+        outputFormatter.dateFormat = "MMMM dd, yyyy"
+
+        return outputFormatter.string(from: date)
+    }
 }
 
 //MARK: - Currency and country codes and flags

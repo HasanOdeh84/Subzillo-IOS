@@ -21,6 +21,7 @@ struct CountriesBottomSheet: View {
     var placeholder                         : String?
     @State private var searchText           = ""
     @FocusState private var isSearchFocused : Bool
+    var isDialCode                          : Bool = true
     var action                              : () -> Void = {}
     
     var filteredCurrencies: [Currency] {
@@ -94,10 +95,12 @@ struct CountriesBottomSheet: View {
                                             .cornerRadius(4)
                                             .clipped()
                                             .padding(.leading,16)
-                                        Text(country.dialCode ?? "")
-                                            .font(.appRegular(16))
-                                            .foregroundColor(.neutralMain700)
-                                            .padding(.horizontal, 14)
+                                        if isDialCode{
+                                            Text(country.dialCode ?? "")
+                                                .font(.appRegular(16))
+                                                .foregroundColor(.neutralMain700)
+                                                .padding(.horizontal, 14)
+                                        }
                                         Text(LocalizedStringKey(country.countryName ?? ""))
                                             .font(.appRegular(16))
                                             .foregroundColor(.neutralMain700)
