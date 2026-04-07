@@ -170,6 +170,7 @@ struct ConnectedEmailItemView: View {
             .background(Color.blueMain700)
             .cornerRadius(5)
             .onTapGesture {
+                Constants.saveDefaults(value: true, key: "isSyncing")
                 onSync()
             }
     }
@@ -197,6 +198,7 @@ struct ConnectedEmailItemView: View {
                     )
             )
             .onTapGesture {
+                Constants.saveDefaults(value: true, key: "isSyncing")
                 onView()
             }
     }

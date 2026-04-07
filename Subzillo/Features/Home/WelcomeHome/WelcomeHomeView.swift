@@ -216,11 +216,37 @@ struct WelcomeHomeView: View {
                     .frame(maxWidth: .infinity)
                     .padding(.top, 32)
                     
-                    Text("You are in the free plan")
-                        .font(.appRegular(18))
-                        .foregroundColor(Color.neutralMain700)
-                        .multilineTextAlignment(.center)
-                        .padding(.top, 32)
+//                    Text("You are in the free plan")
+//                        .font(.appRegular(18))
+//                        .foregroundColor(Color.neutralMain700)
+//                        .multilineTextAlignment(.center)
+//                        .padding(.top, 32)
+                    
+                    if commonApiVM.userInfoResponse?.planName ?? "" == "" {
+                        Text("You are in the free plan")
+                            .font(.appRegular(18))
+                            .foregroundColor(Color.neutralMain700)
+                            .multilineTextAlignment(.center)
+                            .padding(.top, 32)
+                    } else {
+                        Text("You are in the \(commonApiVM.userInfoResponse?.planName ?? "free") plan")
+                            .font(.appRegular(18))
+                            .foregroundColor(Color.neutralMain700)
+                            .multilineTextAlignment(.center)
+                            .padding(.top, 32)
+                    }
+                    
+                    if let limit = commonApiVM.userInfoResponse?.planSubscriptionLimit{
+                        Text("Added \(commonApiVM.userInfoResponse?.usedSubscriptionCount ?? 0)/\(commonApiVM.userInfoResponse?.planSubscriptionLimit ?? 3) Active Subscriptions")
+                            .font(.appRegular(14))
+                            .foregroundColor(Color.neutralMain700)
+                            .multilineTextAlignment(.leading)
+                    }else{
+                        Text("Added \(commonApiVM.userInfoResponse?.usedSubscriptionCount ?? 0)/Unlimited Active Subscriptions")
+                            .font(.appRegular(14))
+                            .foregroundColor(Color.neutralMain700)
+                            .multilineTextAlignment(.leading)
+                    }
                     
                     Button(action: upgradePlan) {
                         Text("Upgrade Today")

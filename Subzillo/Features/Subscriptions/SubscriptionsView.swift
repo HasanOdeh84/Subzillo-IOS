@@ -224,7 +224,9 @@ struct SubscriptionsView: View {
             } else if let segment = selectedSegment {
                 //MARK: Calender view
                 if segment == .second{
-                    if monthlySubscriptions.count != 0{
+                    if subscriptionsVM.isLoading && page == 0 {
+                        Spacer()
+                    } else if monthlySubscriptions.count != 0{
                         List {
                             ForEach(subscriptions, id: \.id) { subscription in
                                 let isOpen = openCalendarId == subscription.id
@@ -261,7 +263,9 @@ struct SubscriptionsView: View {
                         Spacer()
                     }
                 }  else if segment == .first{
-                    if subscriptionsList.count != 0{
+                    if subscriptionsVM.isLoading && page == 0 {
+                        Spacer()
+                    } else if subscriptionsList.count != 0{
                         //MARK: - subscriptions list view
 //                        ScrollViewReader { proxy in
 //                            List {

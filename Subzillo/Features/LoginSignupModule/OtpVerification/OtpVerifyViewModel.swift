@@ -53,7 +53,11 @@ class OtpVerifyViewModel: ObservableObject {
                 }else{
                     if sessionManager.loginData?.isSignupCompleted == true{
                         if !(sessionManager.loginData?.onboardingStatus ?? false) && sessionManager.loginData?.isSignupCompleted == true{
-                            AppIntentRouter.shared.navigate(to: .onboarding)
+                            if Constants.getUserDefaultsBooleanValue(for: "isSyncing"){
+                                Constants.saveDefaults(value: false, key: "isSyncing")
+                            }else{
+                                AppIntentRouter.shared.navigate(to: .onboarding)
+                            }
                         }else{
                             AppState.shared.login()
                             router.navigate(to: .home)

@@ -31,6 +31,9 @@ struct HomeView: View {
     @State private var showSaveSheet        = false
     @EnvironmentObject var commonApiVM      : CommonAPIViewModel
     @State var currentPlan                  : Int = 0
+    @StateObject var viewModel              = SubscriptionsViewModel()
+    @State var monthYear                    : String =  ""
+    @State var selectedFamilyMembers        : [String] = ["all"]
     
     private var currentSubscriptions: [SubscriptionListData] {
         showAll ? activeSubsList : Array(activeSubsList.prefix(1))
@@ -133,12 +136,12 @@ struct HomeView: View {
                                     }
                                     
                                     if let limit = commonApiVM.userInfoResponse?.planSubscriptionLimit{
-                                        Text("Added \(commonApiVM.userInfoResponse?.usedSubscriptionCount ?? 0)/\(commonApiVM.userInfoResponse?.planSubscriptionLimit ?? 3) Subscriptions")
+                                        Text("Added \(commonApiVM.userInfoResponse?.usedSubscriptionCount ?? 0)/\(limit) Active Subscriptions")
                                             .font(.appRegular(12))
                                             .foregroundColor(.white)
                                             .multilineTextAlignment(.leading)
                                     }else{
-                                        Text("Added \(commonApiVM.userInfoResponse?.usedSubscriptionCount ?? 0)/Unlimited Subscriptions")
+                                        Text("Added \(commonApiVM.userInfoResponse?.usedSubscriptionCount ?? 0)/Unlimited Active Subscriptions")
                                             .font(.appRegular(12))
                                             .foregroundColor(.white)
                                             .multilineTextAlignment(.leading)
@@ -166,6 +169,16 @@ struct HomeView: View {
                             TopSpendingSubscriptionsView(data: topCategoriesList)
                                 .padding(.top, 16)
                         }
+
+                        // Donut Chart (Top Spending)
+                        SubscriptionSummaryView(pieData         : viewModel.analyticsResponse?.pie ?? PieData(month: 0, year: 0, monthYear: "", totals: nil, totalAmount: 0.0, currency: "", currencySymbol: "", categories: []),
+                                                subscriptions   : viewModel.analyticsResponse?.pie?.categories ?? [],
+                                                currencySymbol  : viewModel.analyticsResponse?.currencySymbol ?? Constants.shared.currencySymbol,
+                                                monthYear       : $monthYear,
+                                                done: {
+                            analyticsApi()
+                        })
+                        .padding(.top, 16)
                         
                         //MARK: Year Overview
                         YearOverviewChartView(data              : homeVM.homeYearGraphResponse?.monthlySpend ?? [],
@@ -338,8 +351,10 @@ struct HomeView: View {
                 WelcomeHomeView(currentPlan: currentPlan)
             }
         }
+        .navigationBarBackButtonHidden(true)
         .onAppear{
-            if let fullName = SessionManager.shared.loginData?.fullName{
+            Constants.saveDefaults(value: true, key: "isSyncing")
+            if let fullName = commonApiVM.userInfoResponse?.fullName{
                 self.fullName = fullName
             }
             homeVM.home(input: HomeRequest(userId: Constants.getUserId()))
@@ -348,6 +363,10 @@ struct HomeView: View {
             homeYearlyGraphApi()
             commonApiVM.getUserInfo(input: getUserInfoRequest(userId: Constants.getUserId()))
 //            commonApiVM.unreadNotificationCount(input: UnreadNotificationCountRequest(userId: Constants.getUserId()))
+            let formatter = DateFormatter()
+            formatter.dateFormat = "yyyy-MM"
+            monthYear = formatter.string(from: now)
+            analyticsApi()
         }
         .onChange(of: homeVM.homeResponse){ _ in updateHomeResponse() }
         .onChange(of: homeVM.apiError) { _ in
@@ -429,6 +448,16 @@ struct HomeView: View {
     
     private func getUserDetailsResponse() {
         currentPlan = commonApiVM.userInfoResponse?.internalPlanType ?? 0
+        if let fullName = commonApiVM.userInfoResponse?.fullName{
+            self.fullName = fullName
+        }
+    }
+
+    func analyticsApi(){
+        viewModel.analytics(input: AnalyticsRequest(userId          : Constants.getUserId(),
+                                                    monthYear       : monthYear,
+                                                    year            : selectedYear,
+                                                    familyMembers   : selectedFamilyMembers))
     }
 }
 

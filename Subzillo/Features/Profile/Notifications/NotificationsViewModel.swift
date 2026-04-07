@@ -26,17 +26,20 @@ class NotificationsViewModel: ObservableObject {
     
     func notificationsListApi() {
         let input = NotificationsListRequest(userId: Constants.getUserId(), page: currentPage)
-        if currentPage == 0{
+        if currentPage == 0 {
             notificationsList.removeAll()
         }
+        self.isLoading = true
         apiReference.postApi(endPoint: APIEndpoint.notificationsList, method: .POST, token: authKey, body: input, showLoader: true, responseType: NotificationsListResponse.self)
             .sink { [weak self] completion in
+                self?.isLoading = false
                 if case let .failure(error) = completion {
                     self?.handleError(error, endPoint: APIEndpoint.notificationsList)
                 }
             }
         receiveValue: { [weak self] response in
             PrintLogger.modelLog(response, type: .response, isInput: false)
+            self?.isLoading = false
             self?.notificationData = response.data
             self?.notificationsList.append(contentsOf: response.data?.notifications ?? [])
             //            self.notificationsList.append(NotificationData(id: "1", title: "ok", message: "bye", readStatus: false, isSelected: false, createdAt: "12/23/34"))

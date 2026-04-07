@@ -42,7 +42,8 @@ struct SubscriptionPreviewView: View {
     @State var initials                         : String  = ""
     @State private var accumulatedDuplicates    : [DuplicateDataInfo] = []
     @State private var totalInitialCount             : Int = 0
-    @State private var processedSubscriptionsCount     : Int = 0
+    @State private var newlyAddedSubscriptionsCount  : Int = 0
+    @State private var lastSavedSubscription         : SubscriptionData? = nil
     @EnvironmentObject var commonApiVM          : CommonAPIViewModel
     @StateObject var subscriptionPreviewVM      = SubscriptionPreviewViewModel()
     var audioURL                                : URL? = nil
@@ -90,7 +91,7 @@ struct SubscriptionPreviewView: View {
                 
                 VStack(alignment: .leading, spacing: 2) {
                     // MARK: Title
-                    Text("Review entry \(processedSubscriptionsCount + currentSubscriptions) of \(totalInitialCount)")
+                    Text("Review entry \(currentSubscriptions) of \(totalInitialCount)")
                         .font(.appRegular(24))
                         .foregroundColor(Color.neutralMain700)
                         .padding(.top, 20)
@@ -602,15 +603,21 @@ struct SubscriptionPreviewView: View {
                 }
             }
             
-            // Remove current item and decide what to do next
-            if currentSubscriptions <= (subscriptionsData?.count ?? 0) {
-                subscriptionsData?.remove(at: currentSubscriptions - 1)
-                processedSubscriptionsCount += 1
-            }
-            numberOfSubscriptions = subscriptionsData?.count ?? 0
+            newlyAddedSubscriptionsCount += 1
+            lastSavedSubscription = subscriptionData
+            currentSubscriptions += 1
             
-            if numberOfSubscriptions == 0 || currentSubscriptions > numberOfSubscriptions {
+            if currentSubscriptions > numberOfSubscriptions {
                 playerManager.pausePlayback()
+                
+                if let lastSaved = lastSavedSubscription {
+                    subscriptionsData = [lastSaved]
+                    numberOfSubscriptions = 1
+                    totalInitialCount = 1
+                    currentSubscriptions = 1
+                    getSubDetails()
+                }
+                
                 if !accumulatedDuplicates.isEmpty {
                     isFromAdd = true
                     AppIntentRouter.shared.navigate(to: .duplicateSubscriptionsView(duplicateSubsList: accumulatedDuplicates, isFromEmail: isFromEmail))
@@ -619,8 +626,6 @@ struct SubscriptionPreviewView: View {
                 }
             } else {
                 getSubDetails()
-                // Refresh user info to get updated limit
-                commonApiVM.getUserInfo(input: getUserInfoRequest(userId: Constants.getUserId()))
             }
             subscriptionPreviewVM.isEntrySuccess = false
         }
@@ -777,7 +782,7 @@ struct SubscriptionPreviewView: View {
         {
             globalSubscriptionData = subscriptionData!
             playerManager.pausePlayback()
-            AppIntentRouter.shared.navigate(to: .manualEntry(isFromEdit: true, isFromEmail: isFromEmail))
+            AppIntentRouter.shared.navigate(to: .manualEntry(isFromEdit: true, isFromEmail: isFromEmail, isFromEmailExtracted: isFromEmail))
         }
     }
     
@@ -820,10 +825,11 @@ struct SubscriptionPreviewView: View {
                 isHighlight = type
             } else {
                 if Constants.FeatureConfig.isS4Enabled {
-                    if let remainingLimit = commonApiVM.userInfoResponse?.remainingSubscriptionLimit,
-                       remainingLimit <= 0 {
-                        showLimitExceedPopup = true
-                        return
+                    if let remainingLimit = commonApiVM.userInfoResponse?.remainingSubscriptionLimit {
+                        if (remainingLimit - newlyAddedSubscriptionsCount) <= 0 {
+                            showLimitExceedPopup = true
+                            return
+                        }
                     }
                 }
                 
@@ -908,14 +914,19 @@ struct SubscriptionPreviewView: View {
 //    }
     
     private func handleLocalDiscard() {
-        if currentSubscriptions <= (subscriptionsData?.count ?? 0) {
-            subscriptionsData?.remove(at: currentSubscriptions - 1)
-            processedSubscriptionsCount += 1
-        }
-        numberOfSubscriptions = subscriptionsData?.count ?? 0
+        currentSubscriptions += 1
         
-        if numberOfSubscriptions == 0 || currentSubscriptions > numberOfSubscriptions {
+        if currentSubscriptions > numberOfSubscriptions {
             playerManager.pausePlayback()
+            
+            if let lastSaved = lastSavedSubscription {
+                subscriptionsData = [lastSaved]
+                numberOfSubscriptions = 1
+                totalInitialCount = 1
+                currentSubscriptions = 1
+                getSubDetails()
+            }
+            
             if !accumulatedDuplicates.isEmpty {
                 isFromAdd = true
                 AppIntentRouter.shared.navigate(to: .duplicateSubscriptionsView(duplicateSubsList: accumulatedDuplicates, isFromEmail: isFromEmail))

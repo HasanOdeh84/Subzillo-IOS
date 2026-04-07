@@ -71,6 +71,8 @@ public struct SubscriptionData: Codable, Hashable {
     var title                       : String?
     var sourceReference             : String?
     var renewBtnStatus              : Bool?
+    var isExpiredLocally            : Bool?
+    var isRenewedLocally            : Bool?
     
     // New fields for recently found subscriptions
     var subject                     : String?

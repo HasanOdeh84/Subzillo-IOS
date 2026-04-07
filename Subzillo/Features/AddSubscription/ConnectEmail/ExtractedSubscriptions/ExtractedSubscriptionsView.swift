@@ -17,14 +17,15 @@ struct ExtractedSubscriptionsView: View {
     @State var fromEmailSyncScreen              : Bool = false
     var integrationId                           : String = ""
     @State private var selectedSegment          : Segment? = .first
+    @State private var showRenewSheet           = false
+    @State private var selectedSubscription     : SubscriptionData?
+    @EnvironmentObject var router               : AppIntentRouter
+    @State private var hasAppeared               : Bool = false
 
-//    init(subscriptions: [SubscriptionData], fromEmailSyncScreen:Bool = false) {
-//        _viewModel = StateObject(wrappedValue: ExtractedSubscriptionsViewModel(subscriptions: subscriptions))
-//        self.fromEmailSyncScreen = fromEmailSyncScreen
-//    }
-    
     private var filteredSubscriptions: [SubscriptionData] {
         viewModel.subscriptions.filter { sub in
+            if sub.isExpiredLocally == true { return false } // Don't show in active/inactive filter if manually marked as Expired? Wait, user said "update that subscription card with Expired tag without highlight the card and below text".
+            
             let isInactive = Constants.shared.isSubscriptionExpired(nextPaymentDate: sub.nextPaymentDate ?? "")
             if selectedSegment == .first {
                 return !isInactive // Active
@@ -71,25 +72,23 @@ struct ExtractedSubscriptionsView: View {
             }
             .padding(.top, 20)
             
-            // MARK: Toggle
-//            PlanToggleView(selectedSegment : $selectedSegment,
-//                           leftText        : "Active",
-//                           rightText       : "Inactive")
-//            .padding(.top, 20)
-            
             // MARK: - Subscriptions List
             ScrollView {
-//                if filteredSubscriptions.count != 0{
-                if viewModel.subscriptions.count != 0{
+                if viewModel.subscriptions.count != 0 {
                     VStack(spacing: 0) {
-//                        ForEach(filteredSubscriptions, id: \.id) { sub in
-                        ForEach(viewModel.subscriptions, id: \.id) { sub in
+                        ForEach(viewModel.subscriptions.indices, id: \.self) { index in
+                            let sub = viewModel.subscriptions[index]
                             SubscriptionRowEmail(subscription: sub, isSelected: viewModel.selectedIds.contains(sub.id ?? ""), onToggle: {
                                 viewModel.toggleSelection(for: sub.id ?? "")
+                            }, onTap: {
+                                let isInactive = Constants.shared.isSubscriptionExpired(nextPaymentDate: sub.nextPaymentDate ?? "") && (sub.isExpiredLocally != true)
+                                if isInactive {
+                                    selectedSubscription = sub
+                                    showRenewSheet = true
+                                }
                             })
                             
-//                            if sub.id != filteredSubscriptions.last?.id {
-                            if sub.id != viewModel.subscriptions.last?.id {
+                            if index != viewModel.subscriptions.count - 1 {
                                 Divider()
                                     .background(Color.neutral300Border)
                             }
@@ -103,8 +102,8 @@ struct ExtractedSubscriptionsView: View {
                     )
                     .padding(.top, 12)
                     .padding(.horizontal, 2)
-                }else{
-                    HStack{
+                } else {
+                    HStack {
                         Spacer()
                         Text("No data found")
                             .padding(30)
@@ -135,7 +134,10 @@ struct ExtractedSubscriptionsView: View {
                             )
                     }
                     
-                    Button(action: { viewModel.continueAction() }) {
+                    Button(action: {
+                        hasAppeared = false
+                        viewModel.continueAction()
+                    }) {
                         Text("Continue")
                             .font(.appBold(18))
                             .foregroundColor(.white)
@@ -173,14 +175,74 @@ struct ExtractedSubscriptionsView: View {
             .presentationDragIndicator(.hidden)
             .presentationDetents([.height(deleteSheetHeight)])
         }
-        .onAppear{
-            if fromEmailSyncScreen {
-                
-            } else {
-                self.viewModel.subscriptions = subscriptions
+        .sheet(isPresented: $showRenewSheet) {
+            RenewSubscriptionBottomSheet(
+                title   : "Renew subscription",
+                desc    : "This service is currently inactive. Please choose an action: renew or expire.",
+                btn1    : "Renew",
+                btn2    : "Expired",
+                btn3    : "No",
+                onRenew : {
+                    if let sub = selectedSubscription {
+                        //                        let nextDate = Constants.shared.getNextDateByFrequency(frequency: sub.billingCycle ?? "Monthly", baseDate: sub.nextPaymentDate?.toDate(format: "yyyy-MM-dd") ?? Date())
+                        
+//                        let formatter = DateFormatter()
+//                        formatter.dateFormat = "yyyy-MM-dd"
+//                        var chargeDate : String = ""
+//                        // Use the original yyyy-MM-dd string for parsing
+//                        if let baseDate = formatter.date(from: sub.nextPaymentDate ?? "") {
+//                            chargeDate = Constants.shared.getNextDateByFrequency(
+//                                frequency: sub.billingCycle ?? "Monthly",
+//                                baseDate: baseDate
+//                            )
+//                        } else {
+//                            chargeDate = Constants.shared.getNextDateByFrequency(
+//                                frequency: sub.billingCycle ?? "Monthly"
+//                            )
+//                        }
+                        
+                        var renewSub = sub
+//                        renewSub.nextPaymentDate = chargeDate
+                        
+                        globalSubscriptionData = renewSub
+                        router.navigate(to: .manualEntry(isRenew: true, subscriptionId: sub.id ?? "", isFromEmail: true, isFromEmailExtracted: true))
+                    }
+                },
+                onRenewWithChanges: {
+                    if let sub = selectedSubscription {
+                        if let index = viewModel.subscriptions.firstIndex(where: { $0.id == sub.id }) {
+                            viewModel.subscriptions[index].isExpiredLocally = true
+                            viewModel.subscriptions[index].isRenewedLocally = false
+                        }
+                    }
+                },
+                onNo: {
+                    showRenewSheet = false
+                }
+            )
+            .presentationDragIndicator(.hidden)
+            .presentationDetents([.height(350)])
+        }
+        .onAppear {
+            if !hasAppeared {
+                hasAppeared = true
+                if fromEmailSyncScreen {
+                    
+                } else {
+                    self.viewModel.subscriptions = subscriptions
+                }
+                self.viewModel.integrationId = integrationId
+                self.viewModel.getEmailSubscriptionsList()
             }
-            self.viewModel.integrationId = integrationId
-            self.viewModel.getEmailSubscriptionsList()
+        }
+        .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("SubscriptionRenewedLocally"))) { notification in
+            if let updatedSub = notification.userInfo?["subscription"] as? SubscriptionData {
+                if let index = viewModel.subscriptions.firstIndex(where: { $0.id == updatedSub.id }) {
+                    viewModel.subscriptions[index] = updatedSub
+                    viewModel.subscriptions[index].isRenewedLocally = true
+                    viewModel.subscriptions[index].isExpiredLocally = false
+                }
+            }
         }
     }
 }
@@ -190,40 +252,61 @@ struct SubscriptionRowEmail: View {
     let subscription    : SubscriptionData
     let isSelected      : Bool
     let onToggle        : () -> Void
+    let onTap           : () -> Void
     
     var body: some View {
-        HStack(spacing: 12) {
-            // Checkbox
-            Button(action: onToggle) {
-                Image(isSelected ? "Checkmark" : "UnCheckmark")
-                    .resizable()
-                    .frame(width: 24, height: 24)
-            }
-            
-            // Service Name and Status
-            HStack(spacing: 8) {
-                Text(subscription.serviceName ?? "Unknown")
+        let isInactive = Constants.shared.isSubscriptionExpired(nextPaymentDate: subscription.nextPaymentDate ?? "") && (subscription.isExpiredLocally != true)
+        VStack(alignment: .leading, spacing: 8) {
+            HStack(spacing: 12) {
+                // Checkbox
+                Button(action: onToggle) {
+                    Image(isSelected ? "Checkmark" : "UnCheckmark")
+                        .resizable()
+                        .frame(width: 24, height: 24)
+                }
+                
+                // Service Name and Status
+                HStack(spacing: 8) {
+                    Text(subscription.serviceName ?? "Unknown")
+                        .font(.appRegular(14))
+                        .foregroundColor(Color.neutralMain700)
+                    
+                    if subscription.isExpiredLocally == true {
+                        Text("Expired")
+                            .font(.appBold(14))
+                            .foregroundColor(.disCardRed)
+                    } else {
+                        Text(isInactive ? "" : "Active")
+                            .font(.appBold(14))
+                            .foregroundColor(isInactive ? .disCardRed : .greenLG)
+                    }
+                }
+                
+                Spacer()
+                
+                // Amount and Currency
+                Text("\(subscription.currencySymbol ?? Constants.shared.currencySymbol) \(String(format: "%.2f", subscription.amount ?? 0.0))")
                     .font(.appRegular(14))
                     .foregroundColor(Color.neutralMain700)
-                
-                let status = Constants.shared.isSubscriptionExpired(nextPaymentDate: subscription.nextPaymentDate ?? "")
-                Text(status ? "InActive" : "Active")
-                    .font(.appBold(14))
-                    .foregroundColor(status ? .disCardRed : .greenLG)
             }
             
-            Spacer()
-            
-            // Amount and Currency
-            Text("\(subscription.currencySymbol ?? Constants.shared.currencySymbol) \(String(format: "%.2f", subscription.amount ?? 0.0))")
-                .font(.appRegular(14))
-                .foregroundColor(Color.neutralMain700)
+            if isInactive {
+                Text("This service is currently inactive. Please choose an action: renew or expire.")
+                    .font(.appRegular(12))
+                    .foregroundColor(.disCardRed)
+                    .padding(.leading, 36)
+            }
         }
         .padding(.vertical, 16)
         .padding(.horizontal, 16)
+        .background(Color.white)
+        .overlay(
+            RoundedRectangle(cornerRadius: 12)
+                .stroke(isInactive ? Color.disCardRed : Color.clear, lineWidth: 1)
+        )
         .contentShape(Rectangle())
         .onTapGesture {
-            onToggle()
+            onTap()
         }
     }
 }

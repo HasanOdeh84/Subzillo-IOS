@@ -270,12 +270,12 @@ struct ProfileView: View {
                                 profileVM.navigate(to: NavigationRoute.myCards)
                             }
                         })
-                        Divider()
-                            .overlay(Color.border)
-                        ProfileItem(title: "Dark Mode", image: "darkMode", action:{
-                            Constants.FeatureConfig.performS4Action {
-                            }
-                        }, isDarkMode: true)
+//                        Divider()
+//                            .overlay(Color.border)
+//                        ProfileItem(title: "Dark Mode", image: "darkMode", action:{
+//                            Constants.FeatureConfig.performS4Action {
+//                            }
+//                        }, isDarkMode: true)
                         Divider()
                             .overlay(Color.border)
                         ProfileItem(title: "Integrations", image: "link", action:{

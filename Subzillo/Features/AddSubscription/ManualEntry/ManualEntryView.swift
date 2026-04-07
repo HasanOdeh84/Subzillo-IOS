@@ -101,6 +101,7 @@ struct ManualEntryView: View {
     @State var isCurrencyUpdate                 = false
     var isFromEmail                             : Bool = false
     var fromEmailSync                           : Bool = false
+    var isFromEmailExtracted                    : Bool = false
     
     //MARK: - body
     var body: some View {
@@ -164,8 +165,8 @@ struct ManualEntryView: View {
                             }
                         }
                     )
-                    .allowsHitTesting(!isRenew)
-                    .opacity(isRenew ? 0.6 : 1.0)
+                    .allowsHitTesting(isFromEmailExtracted || !isRenew)
+                    .opacity((isRenew && !isFromEmailExtracted) ? 0.6 : 1.0)
                     
                     //MARK: PlanType field
                     FieldSuggestionView1(
@@ -179,8 +180,8 @@ struct ManualEntryView: View {
                         activeField : $activeField,
                         action      : handlePlanTypeChange
                     )
-                    .allowsHitTesting(!isRenew)
-                    .opacity(isRenew ? 0.6 : 1.0)
+                    .allowsHitTesting(isFromEmailExtracted || !isRenew)
+                    .opacity((isRenew && !isFromEmailExtracted) ? 0.6 : 1.0)
                     
                     /*
                     Button(action: selectPlanType) {
@@ -310,8 +311,8 @@ struct ManualEntryView: View {
                     Button(action: selectCategory) {
                         FieldView(text: $category, textValue: selectedCategory?.name ?? category, title: "Category", image: "gridIcon", placeHolder: "Please select", isButton: true, isText: true)
                     }
-                    .allowsHitTesting(!isRenew)
-                    .opacity(isRenew ? 0.6 : 1.0)
+                    .allowsHitTesting(isFromEmailExtracted || !isRenew)
+                    .opacity((isRenew && !isFromEmailExtracted) ? 0.6 : 1.0)
                     .sheet(isPresented: $showCategorySheet) {
                         CategoriesBottomSheet(selectedCategory: $selectedCategory, categoryResponse:commonApiVM.categoriesResponse, header: "Select Category", placeholder: "Search")
                             .presentationDetents([.large])
@@ -357,7 +358,7 @@ struct ManualEntryView: View {
                     .onChange(of: selectedBilling) { billing in
                         guard let billing else { return }
                         
-                        if isFromEdit && isInitialPayment {
+                        if (isFromEdit || isRenew || isFromEmailExtracted) && isInitialPayment {
                             isInitialPayment = false
                             return
                         }
@@ -598,7 +599,7 @@ struct ManualEntryView: View {
             addSubscriptionVM.listUserCards(input: ListUserCardsRequest(userId: Constants.getUserId()))
             addSubscriptionVM.listFamilyMembers(input: ListFamilyMembersRequest(userId: Constants.getUserId()))
             updateCountryAndCurrency()
-            if isFromEdit{
+            if isFromEdit || isRenew || isFromEmailExtracted {
                 if !serviceName.isEmpty{
                     fetchProviderDataApi()
                 }
@@ -641,9 +642,10 @@ struct ManualEntryView: View {
     //MARK: - User defined methods
     
     func fetchProviderDataApi(){
-        addSubscriptionVM.fetchProviderData(input: FetchProviderDataRequest(userId          : Constants.getUserId(),
+        addSubscriptionVM.fetchProviderData(input       : FetchProviderDataRequest(userId   : Constants.getUserId(),
                                                                             serviceName     : serviceName.trimmed,
-                                                                            currencyCode    : selectedCurrency?.code ?? "" == "" ? Constants.shared.currencyCode : selectedCurrency?.code ?? ""))
+                                                                            currencyCode    : selectedCurrency?.code ?? "" == "" ? Constants.shared.currencyCode : selectedCurrency?.code ?? ""),
+                                            showLoader  : true)
     }
     
     func filteredPricePlans() -> [ProviderSubscriptionPlan] {
@@ -768,23 +770,23 @@ struct ManualEntryView: View {
         let pending = pendingUIAction
         pendingUIAction = nil
         
-        if isFromEdit && isInitialCategory{
+        if (isFromEdit || isRenew || isFromEmailExtracted) && isInitialCategory {
             isInitialCategory = false
-        }else{
-            if addSubscriptionVM.providerData?.categoryName ?? "" != "" && addSubscriptionVM.providerData?.categoryId ?? "" != ""{
-                if let categories = commonApiVM.categoriesResponse {
-                    selectedCategory = categories.first(where: { $0.id?.lowercased() == addSubscriptionVM.providerData?.categoryId ?? ""})
-                }
-            }
-            if isCurrency{
-                isCurrency = false
-            }else{
-                planType = ""
-                selectedPlanType = ""
-                amount = ""
-                selectedBilling = ""
-                chargeDate = ""
-            }
+        } else {
+             if addSubscriptionVM.providerData?.categoryName ?? "" != "" && addSubscriptionVM.providerData?.categoryId ?? "" != ""{
+                 if let categories = commonApiVM.categoriesResponse {
+                     selectedCategory = categories.first(where: { $0.id?.lowercased() == addSubscriptionVM.providerData?.categoryId ?? ""})
+                 }
+             }
+             if isCurrency{
+                 isCurrency = false
+             }else{
+                 planType = ""
+                 selectedPlanType = ""
+                 amount = ""
+                 selectedBilling = ""
+                 chargeDate = ""
+             }
         }
         
         if let pendingAction = pending {
@@ -990,7 +992,7 @@ struct ManualEntryView: View {
     }
     
     private func updatePaymentInfo() {
-        if isFromEdit == true
+        if isFromEdit || isRenew || isFromEmailExtracted
         {
             if globalSubscriptionData?.paymentMethodId ?? "" != "" {
                 if let paymentMethod1 = commonApiVM.paymentMethodResponse {
@@ -1005,7 +1007,7 @@ struct ManualEntryView: View {
     }
     
     private func updateCatInfo() {
-        if isFromEdit == true
+        if isFromEdit || isRenew || isFromEmailExtracted
         {
             //            if globalSubscriptionData?.categoryId ?? "" != "" {
             //                if let categories = commonApiVM.categoriesResponse {
@@ -1069,7 +1071,7 @@ struct ManualEntryView: View {
                     relationIndex = index
                 }
             }else{
-                if isFromEdit{
+                if isFromEdit || isRenew || isFromEmailExtracted {
                     if let index = relationsData.firstIndex(where: { $0.id == globalSubscriptionData?.subscriptionFor }) {
                         relationIndex = index
                     }
@@ -1097,7 +1099,7 @@ struct ManualEntryView: View {
                 )
             }
         }
-        if isFromEdit == true
+        if isFromEdit || isRenew || isFromEmailExtracted
         {
             let id = globalSubscriptionData?.paymentMethodDataId ?? ""
             if let index = cardsData.firstIndex(where: {
@@ -1200,7 +1202,7 @@ struct ManualEntryView: View {
         } else {
             fromSiri = false
         }
-        if isFromEdit {
+        if isFromEdit || isRenew || isFromEmailExtracted {
             selectedCurrency = resolveCurrency(
                 code: globalSubscriptionData?.currency,
                 symbol: globalSubscriptionData?.currencySymbol
@@ -1277,7 +1279,7 @@ struct ManualEntryView: View {
             selectedCurrency = Currency(id: 0, name: "", symbol: siriData["currencySymbol"] as? String ?? "", code: currency, flag: "")
             siriData = nil
         }
-        if isFromEdit == true
+        if isFromEdit || isRenew || isFromEmailExtracted
         {
             let renewalReminder = globalSubscriptionData?.renewalReminder ?? []
             for i in remindersData.indices {
@@ -1319,7 +1321,7 @@ struct ManualEntryView: View {
                 }
             }
             if billing != ""{
-                if isRenew {
+                if isRenew || isFromEmailExtracted {
                     let formatter = DateFormatter()
                     formatter.dateFormat = "yyyy-MM-dd"
                     // Use the original yyyy-MM-dd string for parsing
@@ -1511,7 +1513,25 @@ struct ManualEntryView: View {
         if let errorMessage = ManualEntryValidations.shared.manualEntry(input: input, category: selectedCategory?.name ?? "") {
             ToastManager.shared.showToast(message: errorMessage,style:ToastStyle.error)
         } else {
-            if isRenew {
+            if isFromEmailExtracted {
+                var updatedData = globalSubscriptionData ?? SubscriptionData()
+                updatedData.serviceName = serviceName.trimmed
+                updatedData.amount = Double(amount.trimmed) ?? 0.0
+                updatedData.currency = selectedCurrency?.code ?? ""
+                updatedData.currencySymbol = selectedCurrency?.symbol ?? ""
+                updatedData.subscriptionType = planType.trimmed
+                updatedData.nextPaymentDate = chargeDate.formattedDate(from: "dd/MM/yyyy", to: "yyyy-MM-dd")
+                updatedData.billingCycle = billingCycle
+                updatedData.categoryId = selectedCategory?.id ?? ""
+                updatedData.categoryName = selectedCategory?.name ?? ""
+                updatedData.paymentMethodId = selectedPayment?.id ?? ""
+                updatedData.paymentMethodName = selectedPayment?.name ?? ""
+                updatedData.notes = notes.trimmed
+                updatedData.isRenewedLocally = true
+                
+                NotificationCenter.default.post(name: NSNotification.Name("SubscriptionRenewedLocally"), object: nil, userInfo: ["subscription": updatedData])
+                self.dismiss()
+            } else if isRenew {
                 handleRenewalSave(billingCycle: billingCycle, paymentMethod: paymentMethod, paymentMethodDataId: paymentMethodDataId, paymentMethodDataName: paymentMethodDataName, category: category, subscriptionFor: subscriptionFor, renewalReminder: renewalReminder)
             } else if isFromListEdit {
                 addSubscriptionVM.editSubscription(input: editInput)

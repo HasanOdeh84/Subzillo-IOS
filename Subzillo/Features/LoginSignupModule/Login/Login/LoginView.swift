@@ -175,6 +175,7 @@ struct LoginView: View {
             .padding(.horizontal, 20)
             .navigationBarBackButtonHidden(true)
             .onAppear{
+                Constants.saveDefaults(value: false, key: "isSyncing")
 //                if commonApiVM.countryError != nil {
 //                    commonApiVM.getCountries()
 //                } else

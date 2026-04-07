@@ -47,12 +47,13 @@ class NetworkRequest {
         endPoint    : APIEndpoint,
         token       : String,
         showLoader  : Bool = false,
+        showErrorToast: Bool = true,
         extraParams : String? = nil,
         responseType: T.Type
     ) -> AnyPublisher<T, APIError> {
 //        // Retry any pending subscribePlan before firing this request
 //        if endPoint != .subscribePlan { PricingPlansViewModel.shared.retryIfNeeded() }
-        return self.getRequest(endPoint: endPoint, token: token, showLoader: showLoader,extraParams: extraParams, responseType: responseType)
+        return self.getRequest(endPoint: endPoint, token: token, showLoader: showLoader, showErrorToast: showErrorToast, extraParams: extraParams, responseType: responseType)
             .catch { error -> AnyPublisher<T, APIError> in
                 if case .unauthorized = error {
                     if endPoint == .regenerateAccessToken{
@@ -66,7 +67,7 @@ class NetworkRequest {
                     }else{
                         return self.regenerateAccessAPI()
                             .flatMap {
-                                return self.getRequest(endPoint: endPoint, token: authKey, showLoader: showLoader,extraParams: extraParams, responseType: responseType)
+                                return self.getRequest(endPoint: endPoint, token: authKey, showLoader: showLoader, showErrorToast: showErrorToast, extraParams: extraParams, responseType: responseType)
                             }
                             .eraseToAnyPublisher()
                     }
@@ -182,6 +183,7 @@ class NetworkRequest {
         endPoint    : APIEndpoint,
         token       : String,
         showLoader  : Bool = false,
+        showErrorToast: Bool = true,
         extraParams : String? = nil,
         responseType: T.Type
     ) -> Future<T, APIError> { //A Future is a Combine publisher that emits one value or one failure, then completes. Then the subscription automatically completes (no more emissions)
@@ -301,7 +303,9 @@ class NetworkRequest {
                     case let decodingError as DecodingError:
                         promise(.failure(.decodingError(decodingError)))
                     case let apiError as APIError:
-                        ToastManager.shared.showToast(message: apiError.localizedDescription,style: .error)
+                        if showErrorToast {
+                            ToastManager.shared.showToast(message: apiError.localizedDescription,style: .error)
+                        }
                         promise(.failure(apiError))
                     default:
                         promise(.failure(.unknown))

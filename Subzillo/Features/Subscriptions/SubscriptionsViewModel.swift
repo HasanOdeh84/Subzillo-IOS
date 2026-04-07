@@ -49,14 +49,17 @@ class SubscriptionsViewModel: ObservableObject {
     }
     
     func getSubscriptionsByMonth(input: GetSubscriptionsByMonthRequest) {
+        self.isLoading = true
         apiReference.postApi(endPoint: APIEndpoint.getSubscriptionsByMonth, method: .POST,token: authKey,body: input,showLoader: true, responseType: MonthlySubscriptionsResponse.self)
             .sink { [weak self] completion in
                 if case let .failure(error) = completion {
+                    self?.isLoading = false
                     self?.handleError(error,endPoint: APIEndpoint.getSubscriptionsByMonth)
                 }
             }
         receiveValue: { [weak self] response in
             PrintLogger.modelLog(response, type: .response, isInput: false)
+            self?.isLoading = false
             self?.getSubsByMonthResponse = response.data
         }
         .store(in: &self.subscriptions)

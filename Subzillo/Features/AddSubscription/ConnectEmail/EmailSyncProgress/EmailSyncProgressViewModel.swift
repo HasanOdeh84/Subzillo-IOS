@@ -26,7 +26,7 @@ class EmailSyncProgressViewModel: ObservableObject {
     }
     
     func startPolling(logId:String) {
-        self.fetchSyncProgress(logId:logId)
+//        self.fetchSyncProgress(logId:logId)
         // Poll every 3 seconds
         pollingCancellable = Timer.publish(every: 3, on: .main, in: .common)
             .autoconnect()
@@ -42,11 +42,10 @@ class EmailSyncProgressViewModel: ObservableObject {
     
     func fetchSyncProgress(logId:String) {
         let extraParams = "/\(logId)"
-        apiReference.getApi(endPoint: .syncStatus, token: authKey, showLoader: false, extraParams: extraParams, responseType: SyncStatusResponse.self)
+        apiReference.getApi(endPoint: .syncStatus, token: authKey, showLoader: false, showErrorToast: false, extraParams: extraParams, responseType: SyncStatusResponse.self)
             .sink { [weak self] completion in
                 if case let .failure(error) = completion {
                     self?.handleError(error, endPoint: .syncStatus)
-                    self?.stopPolling()
                 }
             } receiveValue: { [weak self] response in
                 PrintLogger.modelLog(response, type: .response, isInput: false)

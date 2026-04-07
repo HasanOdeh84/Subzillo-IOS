@@ -194,7 +194,9 @@ class ConnectedEmailsViewModel: ObservableObject {
     
     // MARK: - Inline Polling Logic
     func startInlinePolling(logId: String) {
-        self.fetchInlineSyncProgress(logId: logId)
+        self.inlineEmailsScanned = 0
+        self.inlineSubscriptionsFound = 0
+//        self.fetchInlineSyncProgress(logId: logId)
         pollingCancellable = Timer.publish(every: 3, on: .main, in: .common)
             .autoconnect()
             .sink { [weak self] _ in
@@ -209,12 +211,10 @@ class ConnectedEmailsViewModel: ObservableObject {
     
     func fetchInlineSyncProgress(logId: String) {
         let extraParams = "/\(logId)"
-        apiReference.getApi(endPoint: .syncStatus, token: authKey, showLoader: false, extraParams: extraParams, responseType: SyncStatusResponse.self)
+        apiReference.getApi(endPoint: .syncStatus, token: authKey, showLoader: false, showErrorToast: false, extraParams: extraParams, responseType: SyncStatusResponse.self)
             .sink { [weak self] completion in
                 if case let .failure(error) = completion {
                     self?.handleError(error, endPoint: .syncStatus)
-                    self?.stopInlinePolling()
-                    self?.isInlineSyncing = false
                 }
             } receiveValue: { [weak self] response in
                 PrintLogger.modelLog(response, type: .response, isInput: false)
@@ -228,24 +228,28 @@ class ConnectedEmailsViewModel: ObservableObject {
         self.inlineEmailsScanned = data.emailsAnalyzed ?? 0
         self.inlineSubscriptionsFound = data.subscriptionsFound ?? 0
         
-        if data.syncStatus == "completed" {
-            self.stopInlinePolling()
-            self.isInlineSyncing = false
-            self.inlineSyncingId = nil
-            self.listConnectedEmails(input: ListConnectedEmailsRequest(userId: Constants.getUserId()))
-            
-            if (data.subscriptionsFound ?? 0) > 0 {
-                emailSubscriptionsList(input: EmailSubscriptionsListRequest(userId: Constants.getUserId(), integrationId: data.integrationId ?? ""))
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+            if data.syncStatus == "completed" {
+                self.stopInlinePolling()
+                self.isInlineSyncing = false
+                self.inlineSyncingId = nil
+                self.listConnectedEmails(input: ListConnectedEmailsRequest(userId: Constants.getUserId()))
+                
+                //            if (data.subscriptionsFound ?? 0) > 0 {
+                //                DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                //                    self.emailSubscriptionsList(input: EmailSubscriptionsListRequest(userId: Constants.getUserId(), integrationId: data.integrationId ?? ""))
+                //                }
+                //            }
+            } else if data.syncStatus == "failed" {
+                // User requested to keep UI and polling even on failure
+                self.isInlineSyncing = true 
+                // We keep polling every 3 seconds as requested
+                // self.stopInlinePolling() // Commented out to continue polling if that's what's intended
+                // self.isInlineSyncing = false // Commented out to keep UI visible
+                // self.inlineSyncingId = nil // Commented out
+                ToastManager.shared.showToast(message: "Email Syncing failed", style: .error)
+                // self.listConnectedEmails(input: ListConnectedEmailsRequest(userId: Constants.getUserId()))
             }
-        } else if data.syncStatus == "failed" {
-            // User requested to keep UI and polling even on failure
-            self.isInlineSyncing = true 
-            // We keep polling every 3 seconds as requested
-            // self.stopInlinePolling() // Commented out to continue polling if that's what's intended
-            // self.isInlineSyncing = false // Commented out to keep UI visible
-            // self.inlineSyncingId = nil // Commented out
-            ToastManager.shared.showToast(message: "Email Syncing failed", style: .error)
-            // self.listConnectedEmails(input: ListConnectedEmailsRequest(userId: Constants.getUserId()))
         }
     }
     

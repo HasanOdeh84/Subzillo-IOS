@@ -179,7 +179,11 @@ class LoginViewModel: ObservableObject {
                         ToastManager.shared.showToast(message: response.message ?? "")
                         if response.data?.signupCompleted == true{
                             if !(response.data?.onboardingStatus ?? false) && response.data?.signupCompleted == true{
-                                AppIntentRouter.shared.navigate(to: .onboarding)
+                                if Constants.getUserDefaultsBooleanValue(for: "isSyncing"){
+                                    Constants.saveDefaults(value: false, key: "isSyncing")
+                                }else{
+                                    AppIntentRouter.shared.navigate(to: .onboarding)
+                                }
                             }else{
                                 AppState.shared.login()
                                 self.router.navigate(to: .home)

@@ -36,7 +36,9 @@ struct NotificationsView: View {
             .padding(.horizontal, 24)
             .padding(.bottom, 24)
             
-            if viewModel.notificationsList.count == 0{
+            if viewModel.isLoading && viewModel.notificationsList.isEmpty {
+                Spacer()
+            } else if viewModel.notificationsList.count == 0{
                 Spacer()
                 VStack(){
                     Image("noNotifications")

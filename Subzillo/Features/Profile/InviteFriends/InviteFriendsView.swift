@@ -179,7 +179,7 @@ struct InviteFriendsView: View {
     private func shareLink(_ link: String) {
         
         var username = ""
-        if let fullName = SessionManager.shared.loginData?.fullName{
+        if let fullName = commonVM.userInfoResponse?.fullName{
             username = fullName
         }
         

@@ -117,27 +117,24 @@ class AppDelegate: NSObject, ObservableObject, UIApplicationDelegate, UNUserNoti
         let typeValue = userInfo["type"]
         let type = (typeValue as? Int) ?? Int(typeValue as? String ?? "")
         
-        if let type = type {
-            let target: NavigationRoute? = {
-                switch type {
-                case 1:  return .connectedEmailsList(isIntegrations: false)
-                case 2:  return .subscriptionMatchView(fromList: true, fromPush: true, subscriptionId: subscriptionId)
-                case 3:  return .pricingPlans() //removed as now, we don't have this type
-                case 4:  return .inviteFriends()
-                default: return nil
-                }
-            }()
-            
-            if let targetRoute = target {
-                // Add a small delay to ensure the app is fully active and
-                // NavigationStack is ready for a structural change
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                    if !AppIntentRouter.shared.isAppWarm {
-                        AppIntentRouter.shared.pendingNotification = targetRoute
-                    } else {
-                        AppIntentRouter.shared.resetStackTo = [.home, targetRoute]
-                    }
-                }
+        let targetRoute: NavigationRoute = {
+            switch type {
+            case 1:  return .connectedEmailsList(isIntegrations: false)
+            case 2:  return .subscriptionMatchView(fromList: true, fromPush: true, subscriptionId: subscriptionId)
+            case 3:  return .pricingPlans() //removed as now, we don't have this type
+            case 4:  return .inviteFriends()
+            case 5:  return .home
+            default: return .notifications
+            }
+        }()
+        
+        // Add a small delay to ensure the app is fully active and
+        // NavigationStack is ready for a structural change
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+            if !AppIntentRouter.shared.isAppWarm {
+                AppIntentRouter.shared.pendingNotification = targetRoute
+            } else {
+                AppIntentRouter.shared.resetStackTo = [.home, targetRoute]
             }
         }
         completionHandler()
@@ -492,7 +489,11 @@ struct RootView: View {
             //                            }
             //                        }
         case .onboarding:
-            OnboardingView()
+            if Constants.getUserDefaultsBooleanValue(for: "isSyncing"){
+                
+            }else{
+                OnboardingView()
+            }
         case .verifyOtp(let fromLogin, let verifyMergeType):
             OtpVerifyView(fromLogin:fromLogin, verifyMergeType:verifyMergeType)
         case .termsAndPrivacy(isTerm: let isTerm):
@@ -501,8 +502,8 @@ struct RootView: View {
             SuccessView(isOtp:isOtp ?? false,isMobile:isMobile)
         case .welcome:
             WelcomeHomeView()
-        case .manualEntry(let isFromEdit, let isFromListEdit, let isRenew, let subscriptionId, let familyMemberId, let isFromEmail, let fromEmailSync):
-            ManualEntryView(isFromEdit: isFromEdit, isFromListEdit: isFromListEdit, isRenew: isRenew, subscriptionId: subscriptionId, familyMemberId: familyMemberId, isFromEmail: isFromEmail, fromEmailSync: fromEmailSync)
+        case .manualEntry(let isFromEdit, let isFromListEdit, let isRenew, let subscriptionId, let familyMemberId, let isFromEmail, let fromEmailSync, let isFromEmailExtracted):
+            ManualEntryView(isFromEdit: isFromEdit, isFromListEdit: isFromListEdit, isRenew: isRenew, subscriptionId: subscriptionId, familyMemberId: familyMemberId, isFromEmail: isFromEmail, fromEmailSync: fromEmailSync, isFromEmailExtracted: isFromEmailExtracted)
         case .voiceCommandView:
             VoiceCommandView()
         case .subscriptionPreviewView(let subscriptionsData, let content, let isFromImage, let isFromEmail, let audioUrl, let fromEmailSync):

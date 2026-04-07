@@ -10,11 +10,11 @@ import SwiftUI
 struct RenewSubscriptionBottomSheet: View {
     
     @Environment(\.dismiss) private var dismiss
-    @State var title                    : String = "Renew Subscription"
-    @State var desc                     : String = "Your plan is about to expire\nWould you like to renew with the current plan\ndetails, or modify it before renewing?"
-    @State var btn1                     : String = "Renew"
-    @State var btn2                     : String = "Renew with Changes"
-    @State var btn3                     : String = "No"
+    var title                           : String = "Renew Subscription"
+    var desc                            : String = "Your plan is about to expire\nWould you like to renew with the current plan\ndetails, or modify it before renewing?"
+    var btn1                            : String = "Renew"
+    var btn2                            : String = "Expired"
+    var btn3                            : String = "No"
     var onRenew                         : () -> Void
     var onRenewWithChanges              : () -> Void
     var onNo                            : (() -> Void)? = nil

@@ -134,9 +134,9 @@ class ManualEntryViewModel: ObservableObject {
         .store(in: &self.subscriptions)
     }
     
-    func fetchProviderData(input:FetchProviderDataRequest) {
+    func fetchProviderData(input:FetchProviderDataRequest, showLoader:Bool = false) {
 //        self.providerData = nil
-        apiReference.postApi(endPoint: APIEndpoint.fetchProviderData, method: .POST,token: authKey,body: input,showLoader: false, responseType: FetchProviderDataResponse.self)
+        apiReference.postApi(endPoint: APIEndpoint.fetchProviderData, method: .POST,token: authKey,body: input,showLoader: showLoader, responseType: FetchProviderDataResponse.self)
             .sink { [weak self] completion in
                 if case let .failure(error) = completion {
                     self?.handleError(error,endPoint: APIEndpoint.fetchProviderData)

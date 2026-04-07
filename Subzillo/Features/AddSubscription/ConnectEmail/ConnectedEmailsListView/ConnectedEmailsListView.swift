@@ -179,6 +179,7 @@ struct ConnectedEmailsListView: View {
         .background(Color.neutralBg100)
         //MARK: OnAppear
         .onAppear{
+            Constants.saveDefaults(value: true, key: "isSyncing")
             isVisible = true
             justAppeared = true
             listConnectedMailsApi()

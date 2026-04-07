@@ -14,14 +14,14 @@ class ConnectEmailViewModel: ObservableObject {
     private var subscriptions                       = Set<AnyCancellable>()
     var apiReference                                = NetworkRequest.shared
     private let router                              : AppIntentRouter
-    private let sessionManager                      : SessionManager
+//    private let sessionManager                      : SessionManager
     @Published var oauthUrlResponse                 : OauthUrlData?
     @Published var isSuccess                        : Bool = false
     @Published var isIcloudSuccess                  : Bool = false
     
-    init(router: AppIntentRouter = .shared,sessionManager: SessionManager = .shared){
+    init(router: AppIntentRouter = .shared){
         self.router = router
-        self.sessionManager = sessionManager
+//        self.sessionManager = sessionManager
     }
     
     func oauthUrl(input:OauthUrlRequest) {
