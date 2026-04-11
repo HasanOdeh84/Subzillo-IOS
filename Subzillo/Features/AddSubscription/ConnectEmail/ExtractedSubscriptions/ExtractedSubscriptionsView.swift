@@ -75,33 +75,34 @@ struct ExtractedSubscriptionsView: View {
             // MARK: - Subscriptions List
             ScrollView {
                 if viewModel.subscriptions.count != 0 {
-                    VStack(spacing: 0) {
+                    VStack(spacing: 16) {
                         ForEach(viewModel.subscriptions.indices, id: \.self) { index in
                             let sub = viewModel.subscriptions[index]
-                            SubscriptionRowEmail(subscription: sub, isSelected: viewModel.selectedIds.contains(sub.id ?? ""), onToggle: {
-                                viewModel.toggleSelection(for: sub.id ?? "")
-                            }, onTap: {
-                                let isInactive = Constants.shared.isSubscriptionExpired(nextPaymentDate: sub.nextPaymentDate ?? "") && (sub.isExpiredLocally != true)
-                                if isInactive {
-                                    selectedSubscription = sub
-                                    showRenewSheet = true
+                            HStack(spacing: 12) {
+                                // Checkbox OUTSIDE
+                                Button(action: {
+                                    viewModel.toggleSelection(for: sub.id ?? "")
+                                }) {
+                                    Image(viewModel.selectedIds.contains(sub.id ?? "") ? "Checkmark" : "UnCheckmark")
+                                        .resizable()
+                                        .frame(width: 24, height: 24)
                                 }
-                            })
-                            
-                            if index != viewModel.subscriptions.count - 1 {
-                                Divider()
-                                    .background(Color.neutral300Border)
+                                
+                                // Individual Card
+                                SubscriptionRowEmail(subscription: sub, isSelected: viewModel.selectedIds.contains(sub.id ?? ""), onToggle: {
+                                    viewModel.toggleSelection(for: sub.id ?? "")
+                                }, onTap: {
+                                    let isInactive = Constants.shared.isSubscriptionExpired(nextPaymentDate: sub.nextPaymentDate ?? "") && (sub.isExpiredLocally != true)
+                                    if isInactive {
+                                        selectedSubscription = sub
+                                        showRenewSheet = true
+                                    }
+                                })
                             }
+                            .padding(.horizontal, 2)
                         }
                     }
-                    .background(Color.white)
-                    .cornerRadius(12)
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 12)
-                            .stroke(Color.neutral300Border, lineWidth: 1)
-                    )
                     .padding(.top, 12)
-                    .padding(.horizontal, 2)
                 } else {
                     HStack {
                         Spacer()
@@ -181,31 +182,11 @@ struct ExtractedSubscriptionsView: View {
                 desc    : "This service is currently inactive. Please choose an action: renew or expire.",
                 btn1    : "Renew",
                 btn2    : "Expired",
-                btn3    : "No",
+                btn3    : "",
                 onRenew : {
                     if let sub = selectedSubscription {
-                        //                        let nextDate = Constants.shared.getNextDateByFrequency(frequency: sub.billingCycle ?? "Monthly", baseDate: sub.nextPaymentDate?.toDate(format: "yyyy-MM-dd") ?? Date())
-                        
-//                        let formatter = DateFormatter()
-//                        formatter.dateFormat = "yyyy-MM-dd"
-//                        var chargeDate : String = ""
-//                        // Use the original yyyy-MM-dd string for parsing
-//                        if let baseDate = formatter.date(from: sub.nextPaymentDate ?? "") {
-//                            chargeDate = Constants.shared.getNextDateByFrequency(
-//                                frequency: sub.billingCycle ?? "Monthly",
-//                                baseDate: baseDate
-//                            )
-//                        } else {
-//                            chargeDate = Constants.shared.getNextDateByFrequency(
-//                                frequency: sub.billingCycle ?? "Monthly"
-//                            )
-//                        }
-                        
                         var renewSub = sub
-//                        renewSub.nextPaymentDate = chargeDate
-                        
-                        globalSubscriptionData = renewSub
-                        router.navigate(to: .manualEntry(isRenew: true, subscriptionId: sub.id ?? "", isFromEmail: true, isFromEmailExtracted: true))
+                        router.navigate(to: .subscriptionPreviewView(subscriptionsData: [renewSub], content: "", isFromImage: false, isFromEmail: true, audioUrl: nil, fromEmailSync: true, isRenew: true))
                     }
                 },
                 onRenewWithChanges: {
@@ -217,11 +198,11 @@ struct ExtractedSubscriptionsView: View {
                     }
                 },
                 onNo: {
-                    showRenewSheet = false
+//                    showRenewSheet = false
                 }
             )
             .presentationDragIndicator(.hidden)
-            .presentationDetents([.height(350)])
+            .presentationDetents([.height(300)])
         }
         .onAppear {
             if !hasAppeared {
@@ -257,14 +238,6 @@ struct SubscriptionRowEmail: View {
     var body: some View {
         let isInactive = Constants.shared.isSubscriptionExpired(nextPaymentDate: subscription.nextPaymentDate ?? "") && (subscription.isExpiredLocally != true)
         VStack(alignment: .leading, spacing: 8) {
-            HStack(spacing: 12) {
-                // Checkbox
-                Button(action: onToggle) {
-                    Image(isSelected ? "Checkmark" : "UnCheckmark")
-                        .resizable()
-                        .frame(width: 24, height: 24)
-                }
-                
                 // Service Name and Status
                 HStack(spacing: 8) {
                     Text(subscription.serviceName ?? "Unknown")
@@ -280,29 +253,29 @@ struct SubscriptionRowEmail: View {
                             .font(.appBold(14))
                             .foregroundColor(isInactive ? .disCardRed : .greenLG)
                     }
+                    
+                    Spacer()
+                    
+                    // Amount and Currency
+                    Text("\(subscription.currencySymbol ?? Constants.shared.currencyCode) \(String(format: "%.2f", subscription.amount ?? 0.0))")
+                        .font(.appRegular(14))
+                        .foregroundColor(Color.neutralMain700)
                 }
-                
-                Spacer()
-                
-                // Amount and Currency
-                Text("\(subscription.currencySymbol ?? Constants.shared.currencySymbol) \(String(format: "%.2f", subscription.amount ?? 0.0))")
-                    .font(.appRegular(14))
-                    .foregroundColor(Color.neutralMain700)
-            }
             
             if isInactive {
                 Text("This service is currently inactive. Please choose an action: renew or expire.")
                     .font(.appRegular(12))
                     .foregroundColor(.disCardRed)
-                    .padding(.leading, 36)
+                    .padding(.leading, 0)
             }
         }
         .padding(.vertical, 16)
         .padding(.horizontal, 16)
         .background(Color.white)
+        .cornerRadius(12)
         .overlay(
             RoundedRectangle(cornerRadius: 12)
-                .stroke(isInactive ? Color.disCardRed : Color.clear, lineWidth: 1)
+                .stroke(isInactive ? Color.disCardRed : Color.neutral300Border, lineWidth: 1)
         )
         .contentShape(Rectangle())
         .onTapGesture {

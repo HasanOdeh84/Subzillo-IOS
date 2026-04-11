@@ -119,7 +119,7 @@ class AppDelegate: NSObject, ObservableObject, UIApplicationDelegate, UNUserNoti
         
         let targetRoute: NavigationRoute = {
             switch type {
-            case 1:  return .connectedEmailsList(isIntegrations: false)
+            case 1:  return .connectEmail
             case 2:  return .subscriptionMatchView(fromList: true, fromPush: true, subscriptionId: subscriptionId)
             case 3:  return .pricingPlans() //removed as now, we don't have this type
             case 4:  return .inviteFriends()
@@ -506,8 +506,8 @@ struct RootView: View {
             ManualEntryView(isFromEdit: isFromEdit, isFromListEdit: isFromListEdit, isRenew: isRenew, subscriptionId: subscriptionId, familyMemberId: familyMemberId, isFromEmail: isFromEmail, fromEmailSync: fromEmailSync, isFromEmailExtracted: isFromEmailExtracted)
         case .voiceCommandView:
             VoiceCommandView()
-        case .subscriptionPreviewView(let subscriptionsData, let content, let isFromImage, let isFromEmail, let audioUrl, let fromEmailSync):
-            SubscriptionPreviewView(isFromImage:isFromImage, isFromEmail: isFromEmail, subscriptionsData: subscriptionsData, content: content, audioURL: audioUrl, fromEmailSync: fromEmailSync)
+        case .subscriptionPreviewView(let subscriptionsData, let content, let isFromImage, let isFromEmail, let audioUrl, let fromEmailSync, let isRenew):
+            SubscriptionPreviewView(isFromImage:isFromImage, isFromEmail: isFromEmail, subscriptionsData: subscriptionsData, content: content, audioURL: audioUrl, fromEmailSync: fromEmailSync, isRenew: isRenew)
         case .subscriptionMatchView(let subscriptionData, let fromList, let fromPush, let subscriptionId):
             SubscriptionMatchView(subscriptionData: subscriptionData, subscriptionId: subscriptionId, fromList: fromList, fromPush: fromPush)
         case .pasteTextView:

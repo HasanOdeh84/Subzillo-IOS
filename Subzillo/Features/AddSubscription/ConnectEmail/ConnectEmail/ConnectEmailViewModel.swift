@@ -18,6 +18,8 @@ class ConnectEmailViewModel: ObservableObject {
     @Published var oauthUrlResponse                 : OauthUrlData?
     @Published var isSuccess                        : Bool = false
     @Published var isIcloudSuccess                  : Bool = false
+    @Published var isGmailSuccess                   : Bool = false
+    @Published var isManualICloudSuccess            : Bool = false
     
     init(router: AppIntentRouter = .shared){
         self.router = router
@@ -56,7 +58,8 @@ class ConnectEmailViewModel: ObservableObject {
         receiveValue: { [weak self] response in
             PrintLogger.modelLog(response, type: .response, isInput: false)
             ToastManager.shared.showToast(message: response.message ?? "")
-            self?.navigate(to: NavigationRoute.connectedEmailsList(isIntegrations: false))
+            self?.isGmailSuccess = true
+//            self?.navigate(to: NavigationRoute.connectedEmailsList(isIntegrations: false))
         }
         .store(in: &self.subscriptions)
     }
@@ -81,7 +84,7 @@ class ConnectEmailViewModel: ObservableObject {
             ToastManager.shared.showToast(message: type == 2 ? "Microsoft account connection failed" : "iCloud account connection failed", style: .error)
         }else if url.absoluteString.contains("oauth-success"){
             ToastManager.shared.showToast(message: type == 2 ? "Microsoft account connected successfully" : "iCloud account connected successfully")
-            navigate(to: .connectedEmailsList(isIntegrations: false))
+//            navigate(to: .connectedEmailsList(isIntegrations: false))
         }
     }
     
@@ -95,7 +98,8 @@ class ConnectEmailViewModel: ObservableObject {
         receiveValue: { [weak self] response in
             PrintLogger.modelLog(response, type: .response, isInput: false)
             ToastManager.shared.showToast(message: response.message ?? "")
-            AppIntentRouter.shared.navigateAndReplace(to: NavigationRoute.connectedEmailsList(isIntegrations: false))
+            self?.isManualICloudSuccess = true
+//            AppIntentRouter.shared.navigateAndReplace(to: NavigationRoute.connectedEmailsList(isIntegrations: false))
         }
         .store(in: &self.subscriptions)
     }

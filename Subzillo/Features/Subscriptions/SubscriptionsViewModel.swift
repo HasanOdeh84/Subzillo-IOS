@@ -134,7 +134,7 @@ struct SubscriptionRow: View {
                             .foregroundColor(.navyBlueCTA700)
                         
                         if subscriptionData.status == "expired"{
-                            Text("Expired")
+                            Text("Inactive")
                                 .font(.appBold(14))
                                 .foregroundColor(.disCardRed)
                                 .multilineTextAlignment(.leading)

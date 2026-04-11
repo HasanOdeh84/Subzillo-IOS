@@ -64,15 +64,17 @@ struct RenewSubscriptionBottomSheet: View {
                         buttonHeight    : 56
                     )
                     
-                    CustomBorderButton(
-                        title       : btn3,
-                        background  : Color.clear,
-                        action      : {
-                            dismiss()
-                            onNo?()
-                        }
-                    )
-                    .frame(height: 56)
+                    if btn3 != ""{
+                        CustomBorderButton(
+                            title       : btn3,
+                            background  : Color.clear,
+                            action      : {
+                                dismiss()
+                                onNo?()
+                            }
+                        )
+                        .frame(height: 56)
+                    }
                 }
                 .padding(.horizontal, 24)
                 .padding(.bottom, 15)

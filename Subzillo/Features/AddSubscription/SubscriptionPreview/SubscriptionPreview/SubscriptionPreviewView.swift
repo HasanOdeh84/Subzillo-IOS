@@ -71,6 +71,7 @@ struct SubscriptionPreviewView: View {
     @State private var limitExceedSheetHeight   : CGFloat = .zero
     @State var showLimitExceedPopup             : Bool = false
     @State var fromEmailSync                    : Bool = false
+    @State var isRenew                          : Bool = false
     @State var isHighlight                      : HighlightType = .none
     @State var isInitialLimit                   = true
     @State private var isAmountError            : Bool = false
@@ -610,19 +611,26 @@ struct SubscriptionPreviewView: View {
             if currentSubscriptions > numberOfSubscriptions {
                 playerManager.pausePlayback()
                 
-                if let lastSaved = lastSavedSubscription {
-                    subscriptionsData = [lastSaved]
-                    numberOfSubscriptions = 1
-                    totalInitialCount = 1
-                    currentSubscriptions = 1
-                    getSubDetails()
-                }
-                
-                if !accumulatedDuplicates.isEmpty {
-                    isFromAdd = true
-                    AppIntentRouter.shared.navigate(to: .duplicateSubscriptionsView(duplicateSubsList: accumulatedDuplicates, isFromEmail: isFromEmail))
+                if isRenew {
+                    if let saved = lastSavedSubscription {
+                        NotificationCenter.default.post(name: NSNotification.Name("SubscriptionRenewedLocally"), object: nil, userInfo: ["subscription": saved])
+                    }
+                    dismiss()
                 } else {
-                    AppIntentRouter.shared.navigate(to: .subscriptionsListView())
+                    if let lastSaved = lastSavedSubscription {
+                        subscriptionsData = [lastSaved]
+                        numberOfSubscriptions = 1
+                        totalInitialCount = 1
+                        currentSubscriptions = 1
+                        getSubDetails()
+                    }
+                    
+                    if !accumulatedDuplicates.isEmpty {
+                        isFromAdd = true
+                        AppIntentRouter.shared.navigate(to: .duplicateSubscriptionsView(duplicateSubsList: accumulatedDuplicates, isFromEmail: isFromEmail))
+                    } else {
+                        AppIntentRouter.shared.navigate(to: .subscriptionsListView())
+                    }
                 }
             } else {
                 getSubDetails()

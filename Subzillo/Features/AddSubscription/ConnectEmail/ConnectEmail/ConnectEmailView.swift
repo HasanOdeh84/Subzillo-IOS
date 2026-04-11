@@ -12,6 +12,19 @@ struct ConnectEmailView: View {
     //MARK: - Properties
     @Environment(\.dismiss) private var dismiss
     @StateObject var connectEmailVM     = ConnectEmailViewModel()
+    @StateObject private var connectedEmailsVM = ConnectedEmailsViewModel()
+    
+    @State private var activeEmailId        : String? = nil
+    @State private var isScrollDisabled     : Bool = false
+    @State var showDeletePopup              : Bool = false
+    @State var selectedEmail                : ListConnectedEmailsData?
+    @State private var isVisible            : Bool = false
+    @State private var justAppeared         : Bool = false
+    @State private var deleteSheetHeight    : CGFloat = .zero
+    @State private var upgradeNowSheetHeight: CGFloat = .zero
+    @State private var showPlatformAlert    : Bool = false
+    @State private var mailFromPush         : String?
+    @State private var integrationIdFromPush: String?
     
     //MARK: - body
     var body: some View {
@@ -64,37 +77,85 @@ struct ConnectEmailView: View {
                 )
                 .padding(5)
                 
-                // MARK: - Connected mails
-                VStack(spacing: 0) {
-                    HStack{
-                        Text("Connected mails")
-                            .font(.appSemiBold(16))
-                            .foregroundColor(.neutralMain700)
-                        
-                        Spacer()
-                        Image("arrow-right-01-round")
-                            .renderingMode(.template)
-                            .foregroundColor(.secondaryNavyBlue400)
-                            .frame(width: 24, height: 24)
+                // MARK: - Connected mails Header
+                VStack(alignment: .leading, spacing: 16) {
+                    Text("Connected mails")
+                        .font(.appSemiBold(16))
+                        .foregroundColor(.neutralMain700)
+                        //.padding(.top, 10)
+                    
+                    if connectedEmailsVM.connectedEmails.count != 0 {
+                        // MARK: - Search Bar
+                        HStack {
+                            Image("search")
+                                .resizable()
+                                .frame(width: 20, height: 20)
+                                .foregroundColor(.gray)
+                                .padding(.leading, 16)
+                            
+                            TextField(LocalizedStringKey("Search"), text: $connectedEmailsVM.searchText)
+                                .textFieldStyle(PlainTextFieldStyle())
+                                .padding(.trailing, 10)
+                                .foregroundColor(Color.neutralMain700)
+                        }
+                        .frame(height: 52)
+                        .background(Color.white)
+                        .cornerRadius(12)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 12)
+                                .stroke(Color.blue500, lineWidth: 1)
+                        )
+                        //.padding(.horizontal, 5)
                     }
-                    .padding(.vertical, 20)
-                    .padding(.leading, 16)
-                    .padding(.trailing, 16)
+
+                    if connectedEmailsVM.filteredEmails.count != 0 {
+                        // MARK: Email List
+                        LazyVStack(spacing: 16) {
+                            ForEach(connectedEmailsVM.filteredEmails) { email in
+                                SwipeableMailRow(email              : email,
+                                                 activeCardId       : $activeEmailId,
+                                                 isScrollDisabled   : $isScrollDisabled,
+                                                 isInlineSyncing    : connectedEmailsVM.isInlineSyncing && connectedEmailsVM.inlineSyncingId == email.id,
+                                                 emailsScanned      : connectedEmailsVM.inlineEmailsScanned,
+                                                 subscriptionsFound : connectedEmailsVM.inlineSubscriptionsFound,
+                                                 onDelete           : {
+                                    selectedEmail = email
+                                    showDeletePopup = true
+                                },              onSync    : {
+                                    connectedEmailsVM.syncEmail(email)
+                                },              onSyncing : {
+                                    connectedEmailsVM.syncingEmail(email)
+                                },              onView    : {
+                                    connectedEmailsVM.viewEmail(email)
+                                }, onDownloadLogs: {
+                                    connectedEmailsVM.downloadLogs(email)
+                                }, isIntegrations: false)
+                            }
+                        }
+                        .padding(.top, 5)
+                    } else {
+                        if connectedEmailsVM.searchText == "" {
+                            VStack(spacing: 16) {
+                                Image("noEmails")
+                                    .resizable()
+                                    .scaledToFit()
+                                    .frame(width: 100, height: 100)
+                                
+                                Text("No emails Added Yet")
+                                    .font(.appBold(16))
+                                    .foregroundColor(Color.neutral800)
+                                
+                                Text("Add a email to manage your subscriptions and payments easily.")
+                                    .font(.appRegular(16))
+                                    .foregroundColor(Color.grayText)
+                                    .multilineTextAlignment(.center)
+                                    .padding(.horizontal, 20)
+                            }
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 40)
+                        }
+                    }
                 }
-                .frame(alignment: .leading)
-                .frame(height: 56)
-                .contentShape(Rectangle())
-                .onTapGesture {
-//                    Constants.FeatureConfig.performS4Action {
-//                        AppIntentRouter.shared.navigate(to: NavigationRoute.connectedEmailsList())
-//                    }
-                    AppIntentRouter.shared.navigate(to: NavigationRoute.connectedEmailsList())
-                }
-                .cornerRadius(12)
-                .overlay(
-                    RoundedRectangle(cornerRadius: 12)
-                        .stroke(Color.neutral300Border, lineWidth: 1)
-                )
                 .padding(.vertical, 24)
                 .padding(.horizontal, 5)
                 
@@ -111,6 +172,88 @@ struct ConnectEmailView: View {
         }
         .navigationBarBackButtonHidden()
         .background(Color.neutralBg100)
+        //MARK: OnAppear
+        .onAppear {
+            Constants.saveDefaults(value: true, key: "isSyncing")
+            isVisible = true
+            justAppeared = true
+            listConnectedMailsApi()
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+                justAppeared = false
+            }
+        }
+        .onDisappear {
+            isVisible = false
+            connectedEmailsVM.stopInlinePolling()
+        }
+        .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("RefreshScreenData"))) { _ in
+            if isVisible && !justAppeared {
+                listConnectedMailsApi()
+            }
+        }
+        .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("RefreshConnectedEmails"))) { notification in
+            if isVisible {
+                listConnectedMailsApi()
+                if let email = notification.userInfo?["email"] as? String {
+                    mailFromPush = email
+                }
+                if let email = notification.userInfo?["integrationId"] as? String {
+                    integrationIdFromPush = email
+                }
+                showPlatformAlert = true
+            }
+        }
+        //MARK: Sheets
+        .sheet(isPresented: $connectedEmailsVM.showErrorPopup, onDismiss: {
+            listConnectedMailsApi()
+        }) {
+            UploadErrorImageSheet(
+                isImage     : false,
+                onDelegate  : {
+                },
+                onDismiss   : {
+                }
+            )
+            .presentationDragIndicator(.hidden)
+            .presentationDetents([.height(500)])
+        }
+        .sheet(isPresented: $showDeletePopup) {
+            InfoAlertSheet(
+                onDelegate: {
+                    deleteEmailAction()
+                }, title    : "Are you sure you want to delete the mail \(selectedEmail?.email ?? "")",
+                subTitle    : "",
+                imageName   : "del_red_big",
+                buttonIcon  : "deleteIcon",
+                buttonTitle : "Delete",
+                imageSize   : 70
+            )
+            .onPreferenceChange(InnerHeightPreferenceKey.self) { height in
+                if height > 0 {
+                    deleteSheetHeight = height
+                }
+            }
+            .presentationDragIndicator(.hidden)
+            .presentationDetents([.height(deleteSheetHeight)])
+        }
+        .sheet(isPresented: $showPlatformAlert) {
+            SubscriptionAlertSheet(
+                onDelegate: {
+                    connectedEmailsVM.emailSubscriptionsList(input: EmailSubscriptionsListRequest(userId: Constants.getUserId(),
+                                                                                          integrationId: integrationIdFromPush ?? ""))
+                }, title                : "Mail Sync Completed",
+                subTitle                : "Your mails for this \(mailFromPush ?? "") have been successfully synced. You’re all up to date.",
+                buttonTitle             : "Ok",
+                isBtn                   : false
+            )
+            .onPreferenceChange(InnerHeightPreferenceKey.self) { height in
+                if height > 0 {
+                    upgradeNowSheetHeight = height
+                }
+            }
+            .presentationDragIndicator(.hidden)
+            .presentationDetents([.height(upgradeNowSheetHeight)])
+        }
         //MARK: Onchange
         .onChange(of: connectEmailVM.isSuccess) { success in
             if success, let oauthUrlString = connectEmailVM.oauthUrlResponse?.authUrl, let url = URL(string: oauthUrlString) {
@@ -118,6 +261,7 @@ struct ConnectEmailView: View {
                 OAuthManager.shared.startOAuth(url: url, callbackScheme: callbackScheme) { callbackURL, error in
                     if let callbackURL = callbackURL {
                         connectEmailVM.handleOAuthCallback(url: callbackURL)
+                        listConnectedMailsApi()
                     } else if let error = error {
                         print("OAuth error: \(error.localizedDescription)")
                     }
@@ -131,6 +275,7 @@ struct ConnectEmailView: View {
                 OAuthManager.shared.startOAuth(url: url, callbackScheme: callbackScheme) { callbackURL, error in
                     if let callbackURL = callbackURL {
                         connectEmailVM.handleOAuthCallback(url: callbackURL, type: 3)
+                        listConnectedMailsApi()
                     } else if let error = error {
                         print("OAuth error: \(error.localizedDescription)")
                     }
@@ -138,11 +283,30 @@ struct ConnectEmailView: View {
                 }
             }
         }
+        .onChange(of: connectEmailVM.isGmailSuccess) { success in
+            if success {
+                listConnectedMailsApi()
+                connectEmailVM.isGmailSuccess = false
+            }
+        }
     }
     
     //MARK: - Button actions
     private func goBack() {
         dismiss()
+    }
+    
+    //MARK: - User defined methods
+    private func listConnectedMailsApi() {
+        connectedEmailsVM.listConnectedEmails(input: ListConnectedEmailsRequest(userId: Constants.getUserId()))
+    }
+    
+    private func deleteEmailAction() {
+        withAnimation {
+            if let email = selectedEmail {
+                connectedEmailsVM.deleteEmail(email)
+            }
+        }
     }
     
     private func gmailAction(){

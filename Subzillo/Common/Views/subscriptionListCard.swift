@@ -47,7 +47,7 @@ struct subscriptionListCard: View {
                             .font(.appRegular(14))
                             .foregroundColor(isActive ? .navyBlueCTA700White : .navyBlueCTA700)
                             .multilineTextAlignment(.leading)
-                        Text(subscriptionData.status == "expired" ? "Expired" : Constants.shared.dateConversion(subscriptionData.nextPaymentDate ?? ""))
+                        Text(subscriptionData.status == "expired" ? "Inactive" : Constants.shared.dateConversion(subscriptionData.nextPaymentDate ?? ""))
                             .font(subscriptionData.status == "expired" ? .appBold(14) : .appRegular(14))
                             .foregroundColor(subscriptionData.status == "expired" ? .disCardRed : (isActive ? .navyBlueCTA700White : .navyBlueCTA700))
                             .multilineTextAlignment(.leading)
@@ -115,7 +115,7 @@ struct subscriptionListCard: View {
         }
         nextPayment = Constants.shared.dateConversion(subscriptionData.nextPaymentDate ?? "")
         if subscriptionData.status == "expired"{
-            nextPayment = "Expired"
+            nextPayment = "Inactive"
             isExpired   = true
         }
         if isActive{
@@ -168,7 +168,7 @@ struct subscriptionListCardInFamilyMember: View {
                             .font(.appRegular(14))
                             .foregroundColor(isActive ? .navyBlueCTA700White : .navyBlueCTA700)
                             .multilineTextAlignment(.leading)
-                        Text(subscriptionData.status == "expired" ? "Expired" : Constants.shared.dateConversion(subscriptionData.nextPaymentDate ?? ""))
+                        Text(subscriptionData.status == "expired" ? "Inactive" : Constants.shared.dateConversion(subscriptionData.nextPaymentDate ?? ""))
                             .font(subscriptionData.status == "expired" ? .appBold(14) : .appRegular(14))
                             .foregroundColor(subscriptionData.status == "expired" ? .disCardRed : (isActive ? .navyBlueCTA700White : .navyBlueCTA700))
                             .multilineTextAlignment(.leading)
@@ -224,7 +224,7 @@ struct subscriptionListCardInFamilyMember: View {
         }
         nextPayment = Constants.shared.dateConversion(subscriptionData.nextPaymentDate ?? "")
         if subscriptionData.status == "expired"{
-            nextPayment = "Expired"
+            nextPayment = "Inactive"
             isExpired   = true
         }
         title       = "\(subscriptionData.serviceName ?? "") | \(subscriptionData.subscriptionType ?? "")"

@@ -27,7 +27,7 @@ enum NavigationRoute: Hashable{
     case notifications
     case manualEntry(isFromEdit:Bool = false, isFromListEdit: Bool = false, isRenew: Bool = false, subscriptionId:String = "", familyMemberId:String = "", isFromEmail: Bool = false, fromEmailSync:Bool = false, isFromEmailExtracted: Bool = false)
     case voiceCommandView
-    case subscriptionPreviewView(subscriptionsData:[SubscriptionData]?, content: String, isFromImage:Bool, isFromEmail: Bool = false, audioUrl:URL?, fromEmailSync:Bool = false)
+    case subscriptionPreviewView(subscriptionsData:[SubscriptionData]?, content: String, isFromImage:Bool, isFromEmail: Bool = false, audioUrl:URL?, fromEmailSync:Bool = false, isRenew: Bool = false)
     case subscriptionMatchView(subscriptionData:SubscriptionData = SubscriptionData(), fromList:Bool = false, fromPush:Bool = false, subscriptionId:String = "")
     case pasteTextView
     case duplicateSubscriptionsView(duplicateSubsList: [DuplicateDataInfo], fromFamily:Bool = false, isFromEmail: Bool = false)

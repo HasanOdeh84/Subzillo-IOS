@@ -131,6 +131,12 @@ struct ConnectICloudView: View {
         .padding(.horizontal, 24)
         .navigationBarBackButtonHidden(true)
         .background(Color.neutralBg100)
+        .onChange(of: connectEmailVM.isManualICloudSuccess) { success in
+            if success {
+                connectEmailVM.isManualICloudSuccess = false
+                dismiss()
+            }
+        }
     }
     
     // MARK: Action
