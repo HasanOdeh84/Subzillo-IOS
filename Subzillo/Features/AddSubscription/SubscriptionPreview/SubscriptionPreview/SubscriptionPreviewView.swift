@@ -257,50 +257,50 @@ struct SubscriptionPreviewView: View {
                                 //MARK: Next Charge Date
                                 SubscriptionDetailsItem(title: "Next Charge Date", value: (subscriptionData?.nextPaymentDate ?? "").formattedDate(), confidence: subscriptionData?.nextPaymentDateConfidence ?? 0.0,
                                                         isHighlight : (isHighlight == .nextCharge) ? true : false)
-                                    .onTapGesture {
-                                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                                            showNextChargeDateBottom = true
-                                        }
+                                .onTapGesture {
+                                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                                        showNextChargeDateBottom = true
                                     }
-                                    .sheet(isPresented: $showNextChargeDateBottom) {
-                                        ReviewExtractedDetailsView(onDelegate: {
-                                        },
-                                                                   detailType   : ReviewExtractedType.nextChargeDate,
-                                                                   confidence   : subscriptionData?.nextPaymentDateConfidence ?? 0.0,
-                                                                   extractedData: subscriptionData)
-                                        .id(ReviewExtractedType.nextChargeDate)
-                                        .presentationDragIndicator(.hidden)
-                                        .presentationDetents([.height(400)])
-                                    }
+                                }
+                                .sheet(isPresented: $showNextChargeDateBottom) {
+                                    ReviewExtractedDetailsView(onDelegate: {
+                                    },
+                                                               detailType   : ReviewExtractedType.nextChargeDate,
+                                                               confidence   : subscriptionData?.nextPaymentDateConfidence ?? 0.0,
+                                                               extractedData: subscriptionData)
+                                    .id(ReviewExtractedType.nextChargeDate)
+                                    .presentationDragIndicator(.hidden)
+                                    .presentationDetents([.height(400)])
+                                }
                                 
                                 //MARK: Currency
                                 if subscriptionData?.currency == nil || subscriptionData?.currency ?? "" == "" || subscriptionData?.currencyConfidence ?? 0.0 == 0.0{
                                     if subscriptionData?.currency ?? "" == ""{
                                         SubscriptionDetailsItem(title: "Currency", value: Constants.shared.currencyCode, confidence: subscriptionData?.currencyConfidence ?? 0.0, isAssumed: true,
                                                                 isHighlight : (isHighlight == .currency) ? true : false)
-                                            .onTapGesture {
-                                                DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                                                    showCurrencyBottom = true
-                                                }
-                                            }
-                                    }else{
-                                        SubscriptionDetailsItem(title: "Currency", value: subscriptionData?.currency ?? Constants.shared.currencyCode, confidence: subscriptionData?.currencyConfidence ?? 0.0, isAssumed: true,
-                                                                isHighlight : (isHighlight == .currency) ? true : false)
-                                            .onTapGesture {
-                                                DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                                                    showCurrencyBottom = true
-                                                }
-                                            }
-                                    }
-                                }
-                                else{
-                                    SubscriptionDetailsItem(title: "Currency", value: subscriptionData?.currency ?? "", confidence: subscriptionData?.currencyConfidence ?? 0.0,
-                                                            isHighlight : (isHighlight == .currency) ? true : false)
                                         .onTapGesture {
                                             DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
                                                 showCurrencyBottom = true
                                             }
                                         }
+                                    }else{
+                                        SubscriptionDetailsItem(title: "Currency", value: subscriptionData?.currency ?? Constants.shared.currencyCode, confidence: subscriptionData?.currencyConfidence ?? 0.0, isAssumed: true,
+                                                                isHighlight : (isHighlight == .currency) ? true : false)
+                                        .onTapGesture {
+                                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                                                showCurrencyBottom = true
+                                            }
+                                        }
+                                    }
+                                }
+                                else{
+                                    SubscriptionDetailsItem(title: "Currency", value: subscriptionData?.currency ?? "", confidence: subscriptionData?.currencyConfidence ?? 0.0,
+                                                            isHighlight : (isHighlight == .currency) ? true : false)
+                                    .onTapGesture {
+                                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                                            showCurrencyBottom = true
+                                        }
+                                    }
                                 }
                             }
                             
@@ -308,51 +308,51 @@ struct SubscriptionPreviewView: View {
                                 //MARK: Category
                                 SubscriptionDetailsItem(title: "Category", value: subscriptionData?.categoryName ?? "", confidence: subscriptionData?.categoryConfidence ?? 0.0,
                                                         isHighlight : (isHighlight == .category) ? true : false)
-                                    .onTapGesture {
-                                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                                            showCategoryBottom = true
-                                        }
+                                .onTapGesture {
+                                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                                        showCategoryBottom = true
                                     }
-                                    .sheet(isPresented: $showCategoryBottom) {
-                                        ReviewExtractedDetailsView(onDelegate: {
-                                        },
-                                                                   detailType   : ReviewExtractedType.category,
-                                                                   confidence   : subscriptionData?.categoryConfidence ?? 0.0,
-                                                                   extractedData: subscriptionData)
-                                        .id(ReviewExtractedType.category)
-                                        .presentationDragIndicator(.hidden)
-                                        .presentationDetents([.height(400)])
-                                    }
+                                }
+                                .sheet(isPresented: $showCategoryBottom) {
+                                    ReviewExtractedDetailsView(onDelegate: {
+                                    },
+                                                               detailType   : ReviewExtractedType.category,
+                                                               confidence   : subscriptionData?.categoryConfidence ?? 0.0,
+                                                               extractedData: subscriptionData)
+                                    .id(ReviewExtractedType.category)
+                                    .presentationDragIndicator(.hidden)
+                                    .presentationDetents([.height(400)])
+                                }
                                 
                                 //MARK: Plan Type
                                 SubscriptionDetailsItem(title: "Plan Type", value: subscriptionData?.subscriptionType ?? "", confidence: subscriptionData?.subscriptionTypeConfidence ?? 0.0,
                                                         isHighlight : (isHighlight == .planType) ? true : false)
-                                    .onTapGesture {
-                                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                                            showPlanTypeBottom = true
-                                        }
+                                .onTapGesture {
+                                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                                        showPlanTypeBottom = true
                                     }
+                                }
                             }
                             
                             //MARK: Billing Cycle
                             SubscriptionDetailsItem(title: "Billing Cycle", value: subscriptionData?.billingCycle ?? "", confidence: subscriptionData?.billingCycleConfidence ?? 0.0,
                                                     isHighlight : (isHighlight == .billing) ? true : false)
-                                .onTapGesture {
-                                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                                        showBillingCycleBottom = true
-                                    }
+                            .onTapGesture {
+                                DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                                    showBillingCycleBottom = true
                                 }
-                                .sheet(isPresented: $showBillingCycleBottom) {
-                                    ReviewExtractedDetailsView(onDelegate: {
-                                    },
-                                                               detailType           : ReviewExtractedType.billingCycle,
-                                                               confidence           : subscriptionData?.billingCycleConfidence ?? 0.0,
-                                                               extractedData        : subscriptionData,
-                                                               providerPlansList    : manualEntryVM.providerData?.providerSubscriptionPlansList)
-                                    .id(ReviewExtractedType.billingCycle)
-                                    .presentationDragIndicator(.hidden)
-                                    .presentationDetents([.height(400)])
-                                }
+                            }
+                            .sheet(isPresented: $showBillingCycleBottom) {
+                                ReviewExtractedDetailsView(onDelegate: {
+                                },
+                                                           detailType           : ReviewExtractedType.billingCycle,
+                                                           confidence           : subscriptionData?.billingCycleConfidence ?? 0.0,
+                                                           extractedData        : subscriptionData,
+                                                           providerPlansList    : manualEntryVM.providerData?.providerSubscriptionPlansList)
+                                .id(ReviewExtractedType.billingCycle)
+                                .presentationDragIndicator(.hidden)
+                                .presentationDetents([.height(400)])
+                            }
                         }
                     }
                     
@@ -383,7 +383,7 @@ struct SubscriptionPreviewView: View {
                                         .foregroundColor(.neutral500)
                                 }
                                 Spacer()
-                              
+                                
                                 ConfidenceBarView(
                                     text        : confidenceStr,
                                     color       : colorValue ?? .confidenceBlue.opacity(0.2),
@@ -443,12 +443,12 @@ struct SubscriptionPreviewView: View {
                                 .foregroundColor(Color.disCardRed)
                         }
                     }
-//                    .onChange(of: subscriptionPreviewVM.isDiscardSuccess) { newValue in
-//                        if newValue == true {
-//                            handleLocalDiscard()
-//                            subscriptionPreviewVM.isDiscardSuccess = false
-//                        }
-//                    }
+                    //                    .onChange(of: subscriptionPreviewVM.isDiscardSuccess) { newValue in
+                    //                        if newValue == true {
+                    //                            handleLocalDiscard()
+                    //                            subscriptionPreviewVM.isDiscardSuccess = false
+                    //                        }
+                    //                    }
                     .sheet(isPresented: $showDiscardPopup) {
                         InfoAlertSheet(
                             onDelegate: {
@@ -496,10 +496,10 @@ struct SubscriptionPreviewView: View {
             }
             if Constants.FeatureConfig.isS4Enabled {
                 commonApiVM.getUserInfo(input: getUserInfoRequest(userId: Constants.getUserId()))
-//                if let remainingLimit = commonApiVM.userInfoResponse?.remainingSubscriptionLimit,
-//                   remainingLimit < numberOfSubscriptions {
-//                    showLimitExceedPopup = true
-//                }
+                //                if let remainingLimit = commonApiVM.userInfoResponse?.remainingSubscriptionLimit,
+                //                   remainingLimit < numberOfSubscriptions {
+                //                    showLimitExceedPopup = true
+                //                }
             }
         }
         .onChange(of: globalSubscriptionData) { _ in updateSubDetails() }
@@ -578,6 +578,66 @@ struct SubscriptionPreviewView: View {
     
     //MARK: - User defined methods
     //MARK: addSubApiRespons
+    //    private func addSubApiResponseHandling() {
+    //        if subscriptionPreviewVM.isEntrySuccess == true {
+    //            if let responseData = subscriptionPreviewVM.addSubscriptionResponse {
+    //                // Extract duplicates from official response
+    //                let duplicates = responseData.duplicates ?? []
+    //                if !duplicates.isEmpty {
+    //                    var updatedDuplicates: [DuplicateDataInfo] = []
+    //                    for (index, item) in duplicates.enumerated() {
+    //                        var newSubs = item.newSubscription ?? []
+    //                        for i in 0..<newSubs.count {
+    //                            if (newSubs[i].id ?? "").isEmpty {
+    //                                newSubs[i].id = "\(i + 1)"
+    //                            }
+    //                        }
+    //                        let info = DuplicateDataInfo(
+    //                            id: String(accumulatedDuplicates.count + index + 1),
+    //                            serviceName: newSubs.first?.serviceName ?? "",
+    //                            newSubscriptions: newSubs,
+    //                            existingSubscriptions: item.oldSubscription
+    //                        )
+    //                        updatedDuplicates.append(info)
+    //                    }
+    //                    accumulatedDuplicates.append(contentsOf: updatedDuplicates)
+    //                }
+    //            }
+    //            
+    //            newlyAddedSubscriptionsCount += 1
+    //            lastSavedSubscription = subscriptionData
+    //            currentSubscriptions += 1
+    //            
+    //            if currentSubscriptions > numberOfSubscriptions {
+    //                playerManager.pausePlayback()
+    //                
+    //                if fromEmailSync || isRenew {
+    //                    dismiss()
+    //                } else {
+    //                    if let lastSaved = lastSavedSubscription {
+    //                        subscriptionsData = [lastSaved]
+    //                        numberOfSubscriptions = 1
+    //                        totalInitialCount = 1
+    //                        currentSubscriptions = 1
+    //                        getSubDetails()
+    //                    }
+    //                    
+    //                    if !accumulatedDuplicates.isEmpty {
+    //                        isFromAdd = true
+    //                        if fromEmailSync {
+    //                            dismiss()
+    //                        } else {
+    //                            AppIntentRouter.shared.navigate(to: .subscriptionsListView())
+    //                        }
+    //                    }
+    //                }
+    //            } else {
+    //                getSubDetails()
+    //            }
+    //            subscriptionPreviewVM.isEntrySuccess = false
+    //        }
+    //    }
+    
     private func addSubApiResponseHandling() {
         if subscriptionPreviewVM.isEntrySuccess == true {
             if let responseData = subscriptionPreviewVM.addSubscriptionResponse {
@@ -611,24 +671,25 @@ struct SubscriptionPreviewView: View {
             if currentSubscriptions > numberOfSubscriptions {
                 playerManager.pausePlayback()
                 
-                if isRenew {
-                    if let saved = lastSavedSubscription {
-                        NotificationCenter.default.post(name: NSNotification.Name("SubscriptionRenewedLocally"), object: nil, userInfo: ["subscription": saved])
-                    }
-                    dismiss()
-                } else {
-                    if let lastSaved = lastSavedSubscription {
-                        subscriptionsData = [lastSaved]
-                        numberOfSubscriptions = 1
-                        totalInitialCount = 1
-                        currentSubscriptions = 1
-                        getSubDetails()
-                    }
-                    
-                    if !accumulatedDuplicates.isEmpty {
-                        isFromAdd = true
+                if let lastSaved = lastSavedSubscription {
+                    subscriptionsData = [lastSaved]
+                    numberOfSubscriptions = 1
+                    totalInitialCount = 1
+                    currentSubscriptions = 1
+                    getSubDetails()
+                }
+                
+                if !accumulatedDuplicates.isEmpty {
+                    isFromAdd = true
+                    if isRenew || fromEmailSync{
+                        AppIntentRouter.shared.navigateAndReplace(to: .duplicateSubscriptionsView(duplicateSubsList: accumulatedDuplicates, isFromEmail: isFromEmail))
+                    }else{
                         AppIntentRouter.shared.navigate(to: .duplicateSubscriptionsView(duplicateSubsList: accumulatedDuplicates, isFromEmail: isFromEmail))
-                    } else {
+                    }
+                } else {
+                    if isRenew || fromEmailSync{
+                        dismiss()
+                    }else{
                         AppIntentRouter.shared.navigate(to: .subscriptionsListView())
                     }
                 }
@@ -675,9 +736,13 @@ struct SubscriptionPreviewView: View {
             }
             
             subscriptionData?.billingCycle = (subscriptionData?.billingCycle == "" || subscriptionData?.billingCycle == nil) ? "Monthly" : subscriptionData?.billingCycle //no need // march 20 , soniya asked to add this for safe side
-//            subscriptionData?.billingCycle = ""
-            let chargeDate = Constants.shared.getNextDateByFrequency(frequency: subscriptionData?.billingCycle ?? "").formattedDate(from: "dd/MM/yyyy", to: "yyyy-MM-dd")
-            if subscriptionData?.nextPaymentDate == nil || subscriptionData?.nextPaymentDate == ""{
+            //            subscriptionData?.billingCycle = ""
+            if isRenew {
+                let baseDate = Date()
+                let chargeDateFromToday = Constants.shared.getNextDateByFrequency(frequency: subscriptionData?.billingCycle ?? "", baseDate: baseDate).formattedDate(from: "dd/MM/yyyy", to: "yyyy-MM-dd")
+                subscriptionData?.nextPaymentDate = chargeDateFromToday
+            } else if subscriptionData?.nextPaymentDate == nil || subscriptionData?.nextPaymentDate == "" {
+                let chargeDate = Constants.shared.getNextDateByFrequency(frequency: subscriptionData?.billingCycle ?? "").formattedDate(from: "dd/MM/yyyy", to: "yyyy-MM-dd")
                 subscriptionData?.nextPaymentDate = chargeDate
             }
             let (confidenceStr1, colorValue1, fillRatio1) =
@@ -773,12 +838,12 @@ struct SubscriptionPreviewView: View {
     //MARK: - Button actions
     private func goBack() {
         playerManager.discardAll()
-//        if fromEmailSync{
-//            AppIntentRouter.shared.pop(count: 2)
-//        }
-//        else{
-            dismiss()
-//        }
+        //        if fromEmailSync{
+        //            AppIntentRouter.shared.pop(count: 2)
+        //        }
+        //        else{
+        dismiss()
+        //        }
     }
     
     private func showImage() {
@@ -790,7 +855,7 @@ struct SubscriptionPreviewView: View {
         {
             globalSubscriptionData = subscriptionData!
             playerManager.pausePlayback()
-            AppIntentRouter.shared.navigate(to: .manualEntry(isFromEdit: true, isFromEmail: isFromEmail, isFromEmailExtracted: isFromEmail))
+            AppIntentRouter.shared.navigate(to: .manualEntry(isFromEdit: true, isFromEmail: isFromEmail))
         }
     }
     
@@ -808,9 +873,9 @@ struct SubscriptionPreviewView: View {
     
     private func onNextAction() {
         playerManager.pausePlayback()
-//        if subscriptionData?.currencySymbol == nil{
-//            subscriptionData?.currencySymbol = Constants.shared.currencySymbol
-//        }
+        //        if subscriptionData?.currencySymbol == nil{
+        //            subscriptionData?.currencySymbol = Constants.shared.currencySymbol
+        //        }
         if let (errorMessage, type) = ManualEntryValidations.shared.updateManualEntry(input: subscriptionData!) {
             ToastManager.shared.showToast(message: errorMessage, style: ToastStyle.error)
             isHighlight = type
@@ -895,31 +960,31 @@ struct SubscriptionPreviewView: View {
         }
     }
     
-//    private func handleLocalDiscard() {
-//        if numberOfSubscriptions < 2
-//        {
-//            playerManager.pausePlayback()
-//            if !accumulatedDuplicates.isEmpty {
-//                isFromAdd = true
-//                AppIntentRouter.shared.navigate(to: .duplicateSubscriptionsView(duplicateSubsList: accumulatedDuplicates, isFromEmail: isFromEmail))
-//            } else {
-//                dismiss()
-//            }
-//        }
-//        else{
-//            subscriptionsData?.remove(at: currentSubscriptions-1)
-//            numberOfSubscriptions = subscriptionsData?.count ?? 0
-//            if currentSubscriptions <= 1
-//            {
-//                currentSubscriptions = 1
-//            }
-//            if currentSubscriptions >= numberOfSubscriptions
-//            {
-//                currentSubscriptions = numberOfSubscriptions
-//            }
-//            getSubDetails()
-//        }
-//    }
+    //    private func handleLocalDiscard() {
+    //        if numberOfSubscriptions < 2
+    //        {
+    //            playerManager.pausePlayback()
+    //            if !accumulatedDuplicates.isEmpty {
+    //                isFromAdd = true
+    //                AppIntentRouter.shared.navigate(to: .duplicateSubscriptionsView(duplicateSubsList: accumulatedDuplicates, isFromEmail: isFromEmail))
+    //            } else {
+    //                dismiss()
+    //            }
+    //        }
+    //        else{
+    //            subscriptionsData?.remove(at: currentSubscriptions-1)
+    //            numberOfSubscriptions = subscriptionsData?.count ?? 0
+    //            if currentSubscriptions <= 1
+    //            {
+    //                currentSubscriptions = 1
+    //            }
+    //            if currentSubscriptions >= numberOfSubscriptions
+    //            {
+    //                currentSubscriptions = numberOfSubscriptions
+    //            }
+    //            getSubDetails()
+    //        }
+    //    }
     
     private func handleLocalDiscard() {
         currentSubscriptions += 1
@@ -937,7 +1002,11 @@ struct SubscriptionPreviewView: View {
             
             if !accumulatedDuplicates.isEmpty {
                 isFromAdd = true
-                AppIntentRouter.shared.navigate(to: .duplicateSubscriptionsView(duplicateSubsList: accumulatedDuplicates, isFromEmail: isFromEmail))
+                if isRenew || fromEmailSync{
+                    AppIntentRouter.shared.navigateAndReplace(to: .duplicateSubscriptionsView(duplicateSubsList: accumulatedDuplicates, isFromEmail: isFromEmail))
+                }else{
+                    AppIntentRouter.shared.navigate(to: .duplicateSubscriptionsView(duplicateSubsList: accumulatedDuplicates, isFromEmail: isFromEmail))
+                }
             } else {
                 dismiss()
             }

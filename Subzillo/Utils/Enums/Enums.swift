@@ -25,7 +25,7 @@ enum NavigationRoute: Hashable{
     case smartAssistantAI
     case appearance
     case notifications
-    case manualEntry(isFromEdit:Bool = false, isFromListEdit: Bool = false, isRenew: Bool = false, subscriptionId:String = "", familyMemberId:String = "", isFromEmail: Bool = false, fromEmailSync:Bool = false, isFromEmailExtracted: Bool = false)
+    case manualEntry(isFromEdit:Bool = false, isFromListEdit: Bool = false, isRenew: Bool = false, subscriptionId:String = "", familyMemberId:String = "", isFromEmail: Bool = false, fromEmailSync:Bool = false)
     case voiceCommandView
     case subscriptionPreviewView(subscriptionsData:[SubscriptionData]?, content: String, isFromImage:Bool, isFromEmail: Bool = false, audioUrl:URL?, fromEmailSync:Bool = false, isRenew: Bool = false)
     case subscriptionMatchView(subscriptionData:SubscriptionData = SubscriptionData(), fromList:Bool = false, fromPush:Bool = false, subscriptionId:String = "")
@@ -41,7 +41,7 @@ enum NavigationRoute: Hashable{
     case connectedEmailsList(isIntegrations:Bool = false)
     case settings
     case contactUs
-//    case pricingPlans(fromPreview: Bool = false)
+    //    case pricingPlans(fromPreview: Bool = false)
     case pricingPlans(fromPreview: Bool = false, selectedTab: Segment = .first)
     case inviteFriends(uLink: String? = nil)
     case emailSyncProgress(logId: String)
@@ -52,7 +52,7 @@ enum NavigationRoute: Hashable{
 extension NavigationRoute {
     var subId: String? {
         switch self {
-        case .manualEntry(_, _, _, let id, _, _, _, _):
+        case .manualEntry(_, _, _, let id, _, _, _):
             return id
         case .subscriptionMatchView(_, _, _, let id):
             return id

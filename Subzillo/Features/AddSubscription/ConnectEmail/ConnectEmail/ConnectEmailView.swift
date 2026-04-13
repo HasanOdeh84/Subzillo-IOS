@@ -65,7 +65,7 @@ struct ConnectEmailView: View {
                     UploadItem(title: "Connect Outlook", subTitle: "Connect your Outlook account to access and manage your subscriptions.", image: "microsoft", imageColor: Color.systemInfo, action: outlookAction, isEmail: true)
                     Divider()
                         .overlay(Color.neutral300Border)
-//                    UploadItem(title: "Connect Yahoo", subTitle: "Integrate your Yahoo Mail account to organize and manage subscriptions.", image: "yahoo", imageColor: Color.systemInfo, action: yahooAction, isEmail: true)
+                    //                    UploadItem(title: "Connect Yahoo", subTitle: "Integrate your Yahoo Mail account to organize and manage subscriptions.", image: "yahoo", imageColor: Color.systemInfo, action: yahooAction, isEmail: true)
                     UploadItem(title: "Connect iCloud", subTitle: "Integrate your iCloud account to organize and manage subscriptions.", image: "iCloud", imageColor: Color.systemInfo, action: iCloudAction, isEmail: true)
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
@@ -82,7 +82,7 @@ struct ConnectEmailView: View {
                     Text("Connected mails")
                         .font(.appSemiBold(16))
                         .foregroundColor(.neutralMain700)
-                        //.padding(.top, 10)
+                    //.padding(.top, 10)
                     
                     if connectedEmailsVM.connectedEmails.count != 0 {
                         // MARK: - Search Bar
@@ -107,7 +107,7 @@ struct ConnectEmailView: View {
                         )
                         //.padding(.horizontal, 5)
                     }
-
+                    
                     if connectedEmailsVM.filteredEmails.count != 0 {
                         // MARK: Email List
                         LazyVStack(spacing: 16) {
@@ -160,11 +160,11 @@ struct ConnectEmailView: View {
                 .padding(.horizontal, 5)
                 
                 // MARK: - How It Works
-                GradienCustomeView(title    : "How it work?",
-                                   subTitle : "•  We never store full email content\n•  We cannot send emails or access personal messages",
-                                   isImage  : false)
-                .padding(.bottom, 24)
-                .padding(.horizontal, 5)
+                //                GradienCustomeView(title    : "How it work?",
+                //                                   subTitle : "•  We never store full email content\n•  We cannot send emails or access personal messages",
+                //                                   isImage  : false)
+                //                .padding(.bottom, 24)
+                //                .padding(.horizontal, 5)
                 Spacer()
             }
             .frame(maxWidth: .infinity)
@@ -240,7 +240,7 @@ struct ConnectEmailView: View {
             SubscriptionAlertSheet(
                 onDelegate: {
                     connectedEmailsVM.emailSubscriptionsList(input: EmailSubscriptionsListRequest(userId: Constants.getUserId(),
-                                                                                          integrationId: integrationIdFromPush ?? ""))
+                                                                                                  integrationId: integrationIdFromPush ?? ""))
                 }, title                : "Mail Sync Completed",
                 subTitle                : "Your mails for this \(mailFromPush ?? "") have been successfully synced. You’re all up to date.",
                 buttonTitle             : "Ok",
@@ -349,8 +349,6 @@ struct ConnectEmailView: View {
     
     private func iCloudAction() {
         Constants.FeatureConfig.performS4Action {
-//            connectEmailVM.oauthUrl(input: OauthUrlRequest(userId   : Constants.getUserId(),
-//                                                           type     : 3))
             connectEmailVM.navigate(to: .connectICloudView)
         }
     }

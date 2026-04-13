@@ -101,7 +101,6 @@ struct ManualEntryView: View {
     @State var isCurrencyUpdate                 = false
     var isFromEmail                             : Bool = false
     var fromEmailSync                           : Bool = false
-    var isFromEmailExtracted                    : Bool = false
     
     //MARK: - body
     var body: some View {
@@ -165,8 +164,8 @@ struct ManualEntryView: View {
                             }
                         }
                     )
-                    .allowsHitTesting(isFromEmailExtracted || !isRenew)
-                    .opacity((isRenew && !isFromEmailExtracted) ? 0.6 : 1.0)
+                    .allowsHitTesting(!isRenew)
+                    .opacity(isRenew ? 0.6 : 1.0)
                     
                     //MARK: PlanType field
                     FieldSuggestionView1(
@@ -180,53 +179,53 @@ struct ManualEntryView: View {
                         activeField : $activeField,
                         action      : handlePlanTypeChange
                     )
-                    .allowsHitTesting(isFromEmailExtracted || !isRenew)
-                    .opacity((isRenew && !isFromEmailExtracted) ? 0.6 : 1.0)
+                    .allowsHitTesting(!isRenew)
+                    .opacity(isRenew ? 0.6 : 1.0)
                     
                     /*
-                    Button(action: selectPlanType) {
-                        FieldView(text: $planType, textValue: selectedPlanType ?? "", title: "Plan Type", image: "gridicon2", placeHolder: "Please select", isButton: true, isText: true)
-                    }
-                    .sheet(isPresented: $showPlanTypeSheet) {
-                        PlanTypeBottomSheet(selectedPlanType    : $selectedPlanType,
-                                            planTypeResponse    : filteredPlanTypes(),
-                                            header              : "Select Plan Type",
-                                            placeholder         : "Search",
-                                            action              : {
-                            planLastActionText = selectedPlanType ?? ""
-                            planType = selectedPlanType ?? ""
-                            autoFillDetails(isAmount: false)
-                        })
-                        //                        .onAppear {
-                        //                            DispatchQueue.main.async {
-                        //                                sheetHeight = sheetHeight
-                        //                            }
-                        //                        }
-                        //                        .id(sheetID)
-                        //                        .overlay {
-                        //                            GeometryReader { geo in
-                        //                                Color.clear
-                        //                                    .preference(
-                        //                                        key: InnerHeightPreferenceKey.self,
-                        //                                        value: geo.size.height
-                        //                                    )
-                        //                            }
-                        //                        }
-                        //                        .onPreferenceChange(InnerHeightPreferenceKey.self) { height in
-                        //                            if height > 150 {
-                        //                                sheetHeight = height
-                        //                            }
-                        //                        }
-                        //                        .presentationDetents(
-                        //                            sheetHeight > UIScreen.main.bounds.height * 0.75
-                        //                                ? [.large]
-                        //                                : [.height(sheetHeight)]// .large]
-                        //                        )
-                        .presentationDetents([.medium, .large])
-                        .presentationDragIndicator(.hidden)
-                    }
-                    */
-                     
+                     Button(action: selectPlanType) {
+                     FieldView(text: $planType, textValue: selectedPlanType ?? "", title: "Plan Type", image: "gridicon2", placeHolder: "Please select", isButton: true, isText: true)
+                     }
+                     .sheet(isPresented: $showPlanTypeSheet) {
+                     PlanTypeBottomSheet(selectedPlanType    : $selectedPlanType,
+                     planTypeResponse    : filteredPlanTypes(),
+                     header              : "Select Plan Type",
+                     placeholder         : "Search",
+                     action              : {
+                     planLastActionText = selectedPlanType ?? ""
+                     planType = selectedPlanType ?? ""
+                     autoFillDetails(isAmount: false)
+                     })
+                     //                        .onAppear {
+                     //                            DispatchQueue.main.async {
+                     //                                sheetHeight = sheetHeight
+                     //                            }
+                     //                        }
+                     //                        .id(sheetID)
+                     //                        .overlay {
+                     //                            GeometryReader { geo in
+                     //                                Color.clear
+                     //                                    .preference(
+                     //                                        key: InnerHeightPreferenceKey.self,
+                     //                                        value: geo.size.height
+                     //                                    )
+                     //                            }
+                     //                        }
+                     //                        .onPreferenceChange(InnerHeightPreferenceKey.self) { height in
+                     //                            if height > 150 {
+                     //                                sheetHeight = height
+                     //                            }
+                     //                        }
+                     //                        .presentationDetents(
+                     //                            sheetHeight > UIScreen.main.bounds.height * 0.75
+                     //                                ? [.large]
+                     //                                : [.height(sheetHeight)]// .large]
+                     //                        )
+                     .presentationDetents([.medium, .large])
+                     .presentationDragIndicator(.hidden)
+                     }
+                     */
+                    
                     HStack(spacing: 24) {
                         //MARK: Amount field
                         VStack{
@@ -276,22 +275,6 @@ struct ManualEntryView: View {
                             }
                             Spacer()
                         }
-                        //                        .onChange(of: selectedCurrency) { newCurrency in
-                        //                            guard let currency = newCurrency else { return }
-                        //                            //                            if isCurrencyUpdateGlobalManual{
-                        //                            //                                isCurrencyUpdateGlobalManual = false
-                        //                            //                            }else{
-                        //                            //                                if serviceName != ""{
-                        //                            //                                    if isFromEdit && isInitial{
-                        //                            //                                        isInitial = false
-                        //                            //                                    }else{
-                        //                            //                                        isCurrency = true
-                        //                            //                                    }
-                        //                            //                                    fetchProviderDataApi()
-                        //                            //                                }
-                        //                            //                            }
-                        //                            handleCurrencySelection()
-                        //                        }
                     }
                     
                     if isAmountError{
@@ -311,8 +294,8 @@ struct ManualEntryView: View {
                     Button(action: selectCategory) {
                         FieldView(text: $category, textValue: selectedCategory?.name ?? category, title: "Category", image: "gridIcon", placeHolder: "Please select", isButton: true, isText: true)
                     }
-                    .allowsHitTesting(isFromEmailExtracted || !isRenew)
-                    .opacity((isRenew && !isFromEmailExtracted) ? 0.6 : 1.0)
+                    .allowsHitTesting(!isRenew)
+                    .opacity(isRenew ? 0.6 : 1.0)
                     .sheet(isPresented: $showCategorySheet) {
                         CategoriesBottomSheet(selectedCategory: $selectedCategory, categoryResponse:commonApiVM.categoriesResponse, header: "Select Category", placeholder: "Search")
                             .presentationDetents([.large])
@@ -358,7 +341,7 @@ struct ManualEntryView: View {
                     .onChange(of: selectedBilling) { billing in
                         guard let billing else { return }
                         
-                        if (isFromEdit || isRenew || isFromEmailExtracted) && isInitialPayment {
+                        if (isFromEdit || isRenew) && isInitialPayment {
                             isInitialPayment = false
                             return
                         }
@@ -599,7 +582,7 @@ struct ManualEntryView: View {
             addSubscriptionVM.listUserCards(input: ListUserCardsRequest(userId: Constants.getUserId()))
             addSubscriptionVM.listFamilyMembers(input: ListFamilyMembersRequest(userId: Constants.getUserId()))
             updateCountryAndCurrency()
-            if isFromEdit || isRenew || isFromEmailExtracted {
+            if isFromEdit || isRenew {
                 if !serviceName.isEmpty{
                     fetchProviderDataApi()
                 }
@@ -643,8 +626,8 @@ struct ManualEntryView: View {
     
     func fetchProviderDataApi(){
         addSubscriptionVM.fetchProviderData(input       : FetchProviderDataRequest(userId   : Constants.getUserId(),
-                                                                            serviceName     : serviceName.trimmed,
-                                                                            currencyCode    : selectedCurrency?.code ?? "" == "" ? Constants.shared.currencyCode : selectedCurrency?.code ?? ""),
+                                                                                   serviceName     : serviceName.trimmed,
+                                                                                   currencyCode    : selectedCurrency?.code ?? "" == "" ? Constants.shared.currencyCode : selectedCurrency?.code ?? ""),
                                             showLoader  : true)
     }
     
@@ -673,24 +656,24 @@ struct ManualEntryView: View {
         )
     }
     
-//    func filteredPlanTypes() -> [String] {
-//        guard
-//            let plans = addSubscriptionVM.providerData?.providerSubscriptionPlansList,
-//            !plans.isEmpty
-//        else {
-//            // Fallback when API returns no plans
-//            return ["Free", "Basic"]
-//        }
-//        
-//        let planNames = plans.compactMap { $0.planName }
-//        
-//        // If plan names are missing or empty, still return fallback
-//        guard !planNames.isEmpty else {
-//            return ["Free", "Basic"]
-//        }
-//        
-//        return Array(Set(planNames))
-//    }
+    //    func filteredPlanTypes() -> [String] {
+    //        guard
+    //            let plans = addSubscriptionVM.providerData?.providerSubscriptionPlansList,
+    //            !plans.isEmpty
+    //        else {
+    //            // Fallback when API returns no plans
+    //            return ["Free", "Basic"]
+    //        }
+    //
+    //        let planNames = plans.compactMap { $0.planName }
+    //
+    //        // If plan names are missing or empty, still return fallback
+    //        guard !planNames.isEmpty else {
+    //            return ["Free", "Basic"]
+    //        }
+    //
+    //        return Array(Set(planNames))
+    //    }
     
     func filteredPlanTypes() -> [PlanTypeItem] {
         guard
@@ -756,11 +739,6 @@ struct ManualEntryView: View {
             return
         }
         guard !serviceName.isEmpty else { return }
-        //        if isFromEdit && isInitial {
-        //            isInitial = false
-        //        } else {
-        ////            isCurrency = true
-        //        }
         isCurrency = true
         fetchProviderDataApi()
     }
@@ -770,23 +748,23 @@ struct ManualEntryView: View {
         let pending = pendingUIAction
         pendingUIAction = nil
         
-        if (isFromEdit || isRenew || isFromEmailExtracted) && isInitialCategory {
+        if (isFromEdit || isRenew) && isInitialCategory {
             isInitialCategory = false
         } else {
-             if addSubscriptionVM.providerData?.categoryName ?? "" != "" && addSubscriptionVM.providerData?.categoryId ?? "" != ""{
-                 if let categories = commonApiVM.categoriesResponse {
-                     selectedCategory = categories.first(where: { $0.id?.lowercased() == addSubscriptionVM.providerData?.categoryId ?? ""})
-                 }
-             }
-             if isCurrency{
-                 isCurrency = false
-             }else{
-                 planType = ""
-                 selectedPlanType = ""
-                 amount = ""
-                 selectedBilling = ""
-                 chargeDate = ""
-             }
+            if addSubscriptionVM.providerData?.categoryName ?? "" != "" && addSubscriptionVM.providerData?.categoryId ?? "" != ""{
+                if let categories = commonApiVM.categoriesResponse {
+                    selectedCategory = categories.first(where: { $0.id?.lowercased() == addSubscriptionVM.providerData?.categoryId ?? ""})
+                }
+            }
+            if isCurrency{
+                isCurrency = false
+            }else{
+                planType = ""
+                selectedPlanType = ""
+                amount = ""
+                selectedBilling = ""
+                chargeDate = ""
+            }
         }
         
         if let pendingAction = pending {
@@ -960,12 +938,6 @@ struct ManualEntryView: View {
                     AppIntentRouter.shared.navigate(to: .duplicateSubscriptionsView(duplicateSubsList: updatedDuplicates, fromFamily: familyMemberId == "" ? false : true, isFromEmail: isFromEmail))
                 }
                 else{
-                    //                if isAdd == true {
-                    //                    AppIntentRouter.shared.navigate(to: .addSubscriptionsView)
-                    //                }
-                    //                else{
-                    //                    AppIntentRouter.shared.navigate(to: .subscriptionsListView)
-                    //                }
                     if isFromListEdit{
                         goBack()
                     }else{
@@ -992,8 +964,7 @@ struct ManualEntryView: View {
     }
     
     private func updatePaymentInfo() {
-        if isFromEdit || isRenew || isFromEmailExtracted
-        {
+        if isFromEdit || isRenew {
             if globalSubscriptionData?.paymentMethodId ?? "" != "" {
                 if let paymentMethod1 = commonApiVM.paymentMethodResponse {
                     selectedPayment = paymentMethod1.first(where: { $0.id == globalSubscriptionData?.paymentMethodId ?? ""})
@@ -1007,8 +978,7 @@ struct ManualEntryView: View {
     }
     
     private func updateCatInfo() {
-        if isFromEdit || isRenew || isFromEmailExtracted
-        {
+        if isFromEdit || isRenew {
             //            if globalSubscriptionData?.categoryId ?? "" != "" {
             //                if let categories = commonApiVM.categoriesResponse {
             //                    selectedCategory = categories.first(where: { $0.id == globalSubscriptionData?.categoryId ?? ""})
@@ -1036,14 +1006,6 @@ struct ManualEntryView: View {
     
     func updateUserInfo()
     {
-        //        if commonApiVM.userInfoResponse?.tierName?.lowercased() == "family plan"
-        //        {
-        //            let familyMembersLimit = commonApiVM.userInfoResponse?.familyMembersLimit ?? 0
-        //            if familyMembersLimit > relationsData.count - 1
-        //            {
-        //                canAddMembers = true
-        //            }
-        //        }
         if addSubscriptionVM.listFamilyMembersResponse?.remainingFamilyMembersLimit ?? 0 > 0{
             canAddMembers = true
         }else{
@@ -1071,7 +1033,7 @@ struct ManualEntryView: View {
                     relationIndex = index
                 }
             }else{
-                if isFromEdit || isRenew || isFromEmailExtracted {
+                if isFromEdit || isRenew {
                     if let index = relationsData.firstIndex(where: { $0.id == globalSubscriptionData?.subscriptionFor }) {
                         relationIndex = index
                     }
@@ -1099,8 +1061,7 @@ struct ManualEntryView: View {
                 )
             }
         }
-        if isFromEdit || isRenew || isFromEmailExtracted
-        {
+        if isFromEdit || isRenew {
             let id = globalSubscriptionData?.paymentMethodDataId ?? ""
             if let index = cardsData.firstIndex(where: {
                 $0.id == id
@@ -1110,88 +1071,10 @@ struct ManualEntryView: View {
         }
     }
     
-    //    func updateCurrency(currencyCode:String, currencySymbol:String){
-    //        selectedCurrency = Currency(id      : nil,
-    //                                    name    : Constants.shared.currencyCode,
-    //                                    symbol  : Constants.shared.currencySymbol,
-    //                                    code    : Constants.shared.currencyCode,
-    //                                    flag    : Constants.shared.flag(from: Constants.shared.regionCode))
-    //        if let currencies = commonApiVM.currencyResponse {
-    //            selectedCurrency = currencies.first(where: { $0.code == currencyCode })
-    //            if selectedCurrency == nil && currencyCode != ""{
-    //                selectedCurrency = Currency(id      : nil,
-    //                                            name    : "",
-    //                                            symbol  : currencySymbol,
-    //                                            code    : currencyCode,
-    //                                            flag    : "")
-    //            }else{
-    //                selectedCurrency = Currency(id      : nil,
-    //                                            name    : Constants.shared.currencyCode,
-    //                                            symbol  : Constants.shared.currencySymbol,
-    //                                            code    : Constants.shared.currencyCode,
-    //                                            flag    : Constants.shared.flag(from: Constants.shared.regionCode))
-    //            }
-    //        }else{
-    //            commonApiVM.getCurrencies()
-    //        }
-    //        isCurrencyUpdateGlobalManual = true
-    //    }
-    
     func updateCurrency(currencyCode: String, currencySymbol: String) {
         selectedCurrency = resolveCurrency(code: currencyCode, symbol: currencySymbol)
         isCurrencyUpdateGlobalManual = true
     }
-    
-    //    func updateCountryAndCurrency() {
-    //        if !fromSiri{
-    //            selectedCurrency = Currency(id      : nil,
-    //                                        name    : Constants.shared.currencyCode,
-    //                                        symbol  : Constants.shared.currencySymbol,
-    //                                        code    : Constants.shared.currencyCode,
-    //                                        flag    : Constants.shared.flag(from: Constants.shared.regionCode))
-    //            if let currencies = commonApiVM.currencyResponse {
-    //                selectedCurrency = currencies.first(where: { $0.code == commonApiVM.userInfoResponse?.preferredCurrency })
-    //                if selectedCurrency == nil && commonApiVM.userInfoResponse?.preferredCurrency ?? "" != ""{
-    //                    selectedCurrency = Currency(id      : nil,
-    //                                                name    : "",
-    //                                                symbol  : commonApiVM.userInfoResponse?.preferredCurrencySymbol,
-    //                                                code    : commonApiVM.userInfoResponse?.preferredCurrency,
-    //                                                flag    : "")//Constants.shared.flag(from: Constants.shared.regionCode))
-    //                }else{
-    //                    selectedCurrency = Currency(id      : nil,
-    //                                                name    : Constants.shared.currencyCode,
-    //                                                symbol  : Constants.shared.currencySymbol,
-    //                                                code    : Constants.shared.currencyCode,
-    //                                                flag    : Constants.shared.flag(from: Constants.shared.regionCode))
-    //                }
-    //            }else{
-    //                commonApiVM.getCurrencies()
-    //            }
-    //        }else{
-    //            fromSiri = false
-    //        }
-    //        if isFromEdit == true
-    //        {
-    //            if let currencies = commonApiVM.currencyResponse {
-    //                selectedCurrency = currencies.first(where: { $0.code == globalSubscriptionData?.currency ?? ""})
-    //                if selectedCurrency == nil && globalSubscriptionData?.currency ?? "" != ""{
-    //                    selectedCurrency = Currency(id      : nil,
-    //                                                name    : "",
-    //                                                symbol  : globalSubscriptionData?.currencySymbol ?? "",
-    //                                                code    : globalSubscriptionData?.currency ?? "",
-    //                                                flag    : "")
-    //                }else{
-    //                    selectedCurrency = Currency(id      : nil,
-    //                                                name    : Constants.shared.currencyCode,
-    //                                                symbol  : Constants.shared.currencySymbol,
-    //                                                code    : Constants.shared.currencyCode,
-    //                                                flag    : Constants.shared.flag(from: Constants.shared.regionCode))
-    //                }
-    //            } else if let currencyCode = globalSubscriptionData?.currency {
-    //                selectedCurrency = Currency(id: nil, name: "", symbol: globalSubscriptionData?.currencySymbol ?? "", code: currencyCode, flag: "")
-    //            }
-    //        }
-    //    }
     
     func updateCountryAndCurrency() {
         if !fromSiri {
@@ -1202,7 +1085,7 @@ struct ManualEntryView: View {
         } else {
             fromSiri = false
         }
-        if isFromEdit || isRenew || isFromEmailExtracted {
+        if isFromEdit || isRenew {
             selectedCurrency = resolveCurrency(
                 code: globalSubscriptionData?.currency,
                 symbol: globalSubscriptionData?.currencySymbol
@@ -1279,8 +1162,7 @@ struct ManualEntryView: View {
             selectedCurrency = Currency(id: 0, name: "", symbol: siriData["currencySymbol"] as? String ?? "", code: currency, flag: "")
             siriData = nil
         }
-        if isFromEdit || isRenew || isFromEmailExtracted
-        {
+        if isFromEdit || isRenew{
             let renewalReminder = globalSubscriptionData?.renewalReminder ?? []
             for i in remindersData.indices {
                 remindersData[i].isSelected = renewalReminder.contains(remindersData[i].value ?? "")
@@ -1321,7 +1203,7 @@ struct ManualEntryView: View {
                 }
             }
             if billing != ""{
-                if isRenew || isFromEmailExtracted {
+                if isRenew {
                     let formatter = DateFormatter()
                     formatter.dateFormat = "yyyy-MM-dd"
                     // Use the original yyyy-MM-dd string for parsing
@@ -1513,25 +1395,7 @@ struct ManualEntryView: View {
         if let errorMessage = ManualEntryValidations.shared.manualEntry(input: input, category: selectedCategory?.name ?? "") {
             ToastManager.shared.showToast(message: errorMessage,style:ToastStyle.error)
         } else {
-            if isFromEmailExtracted {
-                var updatedData = globalSubscriptionData ?? SubscriptionData()
-                updatedData.serviceName = serviceName.trimmed
-                updatedData.amount = Double(amount.trimmed) ?? 0.0
-                updatedData.currency = selectedCurrency?.code ?? ""
-                updatedData.currencySymbol = selectedCurrency?.symbol ?? ""
-                updatedData.subscriptionType = planType.trimmed
-                updatedData.nextPaymentDate = chargeDate.formattedDate(from: "dd/MM/yyyy", to: "yyyy-MM-dd")
-                updatedData.billingCycle = billingCycle
-                updatedData.categoryId = selectedCategory?.id ?? ""
-                updatedData.categoryName = selectedCategory?.name ?? ""
-                updatedData.paymentMethodId = selectedPayment?.id ?? ""
-                updatedData.paymentMethodName = selectedPayment?.name ?? ""
-                updatedData.notes = notes.trimmed
-                updatedData.isRenewedLocally = true
-                
-                NotificationCenter.default.post(name: NSNotification.Name("SubscriptionRenewedLocally"), object: nil, userInfo: ["subscription": updatedData])
-                self.dismiss()
-            } else if isRenew {
+            if isRenew {
                 handleRenewalSave(billingCycle: billingCycle, paymentMethod: paymentMethod, paymentMethodDataId: paymentMethodDataId, paymentMethodDataName: paymentMethodDataName, category: category, subscriptionFor: subscriptionFor, renewalReminder: renewalReminder)
             } else if isFromListEdit {
                 addSubscriptionVM.editSubscription(input: editInput)
@@ -2127,7 +1991,7 @@ struct FieldSuggestionView1<Item: Identifiable>: View {
             .background(Color.whiteNeutralCardBG)
             .overlay(
                 RoundedRectangle(cornerRadius: 12)
-//                    .stroke(.neutral300Border, lineWidth: 1)
+                //                    .stroke(.neutral300Border, lineWidth: 1)
                     .stroke(borderColor ? .neutral300Border : .red, lineWidth: borderColor ? 1 : 2)
             )
             .cornerRadius(12)

@@ -25,8 +25,6 @@ class ExtractedSubscriptionsViewModel: ObservableObject {
     }
     
     init(router: AppIntentRouter = .shared) {
-//    init(subscriptions: [SubscriptionData], router: AppIntentRouter = .shared) {
-//        self.subscriptions = subscriptions
         self.router = router
     }
     
@@ -45,10 +43,6 @@ class ExtractedSubscriptionsViewModel: ObservableObject {
         discardEmailSubscriptionApi(input: DiscardEmailSubscriptionRequest(userId: Constants.getUserId(), subscriptionIds: deleteIds ?? []))
     }
     
-//    func skipAll() {
-//        router.navigate(to: .connectedEmailsList(isIntegrations: false))
-//    }
-    
     func continueAction() {
         let selectedSubs = subscriptions.filter { sub in
             if let id = sub.id {
@@ -58,7 +52,7 @@ class ExtractedSubscriptionsViewModel: ObservableObject {
         }
         
         router.navigate(to: .subscriptionPreviewView(
-//        router.navigateAndReplace(to: .subscriptionPreviewView(
+            //        router.navigateAndReplace(to: .subscriptionPreviewView(
             subscriptionsData   : selectedSubs,
             content             : "",
             isFromImage         : false,
@@ -66,21 +60,6 @@ class ExtractedSubscriptionsViewModel: ObservableObject {
             audioUrl            : nil,
             fromEmailSync       : true
         ))
-    }
-    
-    func checkIfListIsEmpty() {
-        if subscriptions.isEmpty {
-            ToastManager.shared.showToast(message: "No Subscriptions found", style: .error)
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                AppIntentRouter.shared.pop(count: 1)
-            }
-        }
-    }
-    
-    func checkIfListIsEmptyDelete() {
-        if subscriptions.isEmpty {
-            AppIntentRouter.shared.pop(count: 1)
-        }
     }
     
     func getEmailSubscriptionsList() {
@@ -95,7 +74,6 @@ class ExtractedSubscriptionsViewModel: ObservableObject {
             guard let self = self else { return }
             PrintLogger.modelLog(response, type: .response, isInput: false)
             self.subscriptions = response.data?.subscriptions ?? []
-            self.checkIfListIsEmpty()
         }
         .store(in: &self.subscriptionsCancellables)
     }
@@ -118,7 +96,6 @@ class ExtractedSubscriptionsViewModel: ObservableObject {
                 return false
             }
             self.selectedIds.removeAll()
-            self.checkIfListIsEmptyDelete()
         }
         .store(in: &self.subscriptionsCancellables)
     }

@@ -85,7 +85,7 @@ class AppDelegate: NSObject, ObservableObject, UIApplicationDelegate, UNUserNoti
         
         var emailValue: String?
         var integrationIdValue: String?
-
+        
         if let data = userInfo["data"] as? [String: Any] {
             emailValue = data["email"] as? String
             integrationIdValue = data["integrationId"] as? String
@@ -93,7 +93,7 @@ class AppDelegate: NSObject, ObservableObject, UIApplicationDelegate, UNUserNoti
         
         let type = (typeValue as? Int) ?? Int(typeValue as? String ?? "")
         if type == 1 {
-//            NotificationCenter.default.post(name: NSNotification.Name("RefreshConnectedEmails"), object: nil)
+            //            NotificationCenter.default.post(name: NSNotification.Name("RefreshConnectedEmails"), object: nil)
             NotificationCenter.default.post(
                 name    : NSNotification.Name("RefreshConnectedEmails"),
                 object  : nil,
@@ -502,8 +502,8 @@ struct RootView: View {
             SuccessView(isOtp:isOtp ?? false,isMobile:isMobile)
         case .welcome:
             WelcomeHomeView()
-        case .manualEntry(let isFromEdit, let isFromListEdit, let isRenew, let subscriptionId, let familyMemberId, let isFromEmail, let fromEmailSync, let isFromEmailExtracted):
-            ManualEntryView(isFromEdit: isFromEdit, isFromListEdit: isFromListEdit, isRenew: isRenew, subscriptionId: subscriptionId, familyMemberId: familyMemberId, isFromEmail: isFromEmail, fromEmailSync: fromEmailSync, isFromEmailExtracted: isFromEmailExtracted)
+        case .manualEntry(let isFromEdit, let isFromListEdit, let isRenew, let subscriptionId, let familyMemberId, let isFromEmail, let fromEmailSync):
+            ManualEntryView(isFromEdit: isFromEdit, isFromListEdit: isFromListEdit, isRenew: isRenew, subscriptionId: subscriptionId, familyMemberId: familyMemberId, isFromEmail: isFromEmail, fromEmailSync: fromEmailSync)
         case .voiceCommandView:
             VoiceCommandView()
         case .subscriptionPreviewView(let subscriptionsData, let content, let isFromImage, let isFromEmail, let audioUrl, let fromEmailSync, let isRenew):
@@ -534,8 +534,8 @@ struct RootView: View {
             SettingsView()
         case .contactUs:
             ContactUsView()
-//        case .pricingPlans(let fromPreview):
-//            PricingPlansView(fromPreview: fromPreview)
+            //        case .pricingPlans(let fromPreview):
+            //            PricingPlansView(fromPreview: fromPreview)
         case .pricingPlans(let fromPreview, let selectedTab):
             PricingPlansView(fromPreview: fromPreview, selectedTab: selectedTab)
         case .inviteFriends(let uLink):

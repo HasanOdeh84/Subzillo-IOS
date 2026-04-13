@@ -21,6 +21,7 @@ struct subscriptionListCard: View {
     var selectionMode       : Bool = false
     var onSelect            : () -> Void = {}
     var onLongPress         : () -> Void = {}
+    var onRenew             : (() -> Void)? = nil
     @State var isExpired    = false
     
     //MARK: - body
@@ -47,10 +48,21 @@ struct subscriptionListCard: View {
                             .font(.appRegular(14))
                             .foregroundColor(isActive ? .navyBlueCTA700White : .navyBlueCTA700)
                             .multilineTextAlignment(.leading)
-                        Text(subscriptionData.status == "expired" ? "Inactive" : Constants.shared.dateConversion(subscriptionData.nextPaymentDate ?? ""))
-                            .font(subscriptionData.status == "expired" ? .appBold(14) : .appRegular(14))
-                            .foregroundColor(subscriptionData.status == "expired" ? .disCardRed : (isActive ? .navyBlueCTA700White : .navyBlueCTA700))
-                            .multilineTextAlignment(.leading)
+                        if subscriptionData.status == "expired" && onRenew != nil {
+                            Button(action: { onRenew?() }) {
+                                Text("Renew")
+                                    .font(.appBold(14))
+                                    .foregroundColor(.disCardRed)
+                                    .underline()
+                                    .multilineTextAlignment(.leading)
+                            }
+                            .buttonStyle(PlainButtonStyle())
+                        } else {
+                            Text(subscriptionData.status == "expired" ? "Inactive" : Constants.shared.dateConversion(subscriptionData.nextPaymentDate ?? ""))
+                                .font(subscriptionData.status == "expired" ? .appBold(14) : .appRegular(14))
+                                .foregroundColor(subscriptionData.status == "expired" ? .disCardRed : (isActive ? .navyBlueCTA700White : .navyBlueCTA700))
+                                .multilineTextAlignment(.leading)
+                        }
                     }
                 }
                 

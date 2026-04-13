@@ -173,7 +173,7 @@ struct SubscriptionMatchView: View {
                             SubscriptionDetailsPlainItem(title: "Benefit From", value: subscriptionData?.subscriptionForName ?? "")
                             SubscriptionDetailsPlainItem(title: "Renewal Reminders", value: subscriptionData?.renewalReminderValue ?? "")
                         }
-                        SubscriptionDetailsPlainItem(title: "Status", value: fromList ? subscriptionData?.status : "Active".localized)
+                        SubscriptionDetailsPlainItem(title: "Status", value: fromList ? (subscriptionData?.status == "expired" ? "Inactive".localized : "Active".localized) : "Active".localized)
                         SubscriptionDetailsPlainItem(title: "Note", value: subscriptionData?.notes ?? "")
                     }
                     .padding(24)

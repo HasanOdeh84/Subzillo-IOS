@@ -293,6 +293,8 @@ struct DuplicateSubscriptionsView: View {
     private func navigateAway() {
         if fromFamily {
             AppIntentRouter.shared.pop(count: 2)
+        } else if isFromEmail {
+            dismiss()
         } else {
             AppIntentRouter.shared.navigate(to: .subscriptionsListView())
         }

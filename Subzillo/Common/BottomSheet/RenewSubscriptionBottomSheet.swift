@@ -11,9 +11,9 @@ struct RenewSubscriptionBottomSheet: View {
     
     @Environment(\.dismiss) private var dismiss
     var title                           : String = "Renew Subscription"
-    var desc                            : String = "Your plan is about to expire\nWould you like to renew with the current plan\ndetails, or modify it before renewing?"
+    var desc                            : String = "Your plan is about to expire\nWould you like to renew with the current plan details, or modify it before renewing?"
     var btn1                            : String = "Renew"
-    var btn2                            : String = "Expired"
+    var btn2                            : String = "Renew with changes"
     var btn3                            : String = "No"
     var onRenew                         : () -> Void
     var onRenewWithChanges              : () -> Void
@@ -52,17 +52,19 @@ struct RenewSubscriptionBottomSheet: View {
                         }
                     )
                     
-                    GradientBorderButton(
-                        title           : btn2,
-                        isBtn           : true,
-                        buttonImage     : "",
-                        action          : {
-                            dismiss()
-                            onRenewWithChanges()
-                        },
-                        backgroundColor : .whiteBlack,
-                        buttonHeight    : 56
-                    )
+                    if btn2 != ""{
+                        GradientBorderButton(
+                            title           : btn2,
+                            isBtn           : true,
+                            buttonImage     : "",
+                            action          : {
+                                dismiss()
+                                onRenewWithChanges()
+                            },
+                            backgroundColor : .whiteBlack,
+                            buttonHeight    : 56
+                        )
+                    }
                     
                     if btn3 != ""{
                         CustomBorderButton(
@@ -90,6 +92,8 @@ struct RenewSubscriptionBottomSheet: View {
                         }
                 }
             )
+            
+            //            Spacer()
         }
         .background(Color.whiteBlackBG)
         .cornerRadius(24, corners: [.topLeft, .topRight])
