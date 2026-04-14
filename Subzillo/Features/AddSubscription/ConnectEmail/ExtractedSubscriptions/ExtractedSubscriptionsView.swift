@@ -202,19 +202,25 @@ struct ExtractedSubscriptionsView: View {
             .presentationDetents([.height(deleteSheetHeight)])
         }
         .onAppear {
-            if !hasAppeared {
-                hasAppeared = true
-                if fromEmailSyncScreen {
-                    
-                } else {
-                    self.viewModel.subscriptions = subscriptions
-                }
-                self.viewModel.integrationId = integrationId
-                self.viewModel.getEmailSubscriptionsList()
-            } else {
-                // If re-appearing, refresh the list
-                self.viewModel.getEmailSubscriptionsList()
-            }
+//            if !hasAppeared {
+//                hasAppeared = true
+//                if fromEmailSyncScreen {
+//                    
+//                } else {
+//                    self.viewModel.subscriptions = subscriptions
+//                }
+//                self.viewModel.integrationId = integrationId
+//                self.viewModel.getEmailSubscriptionsList()
+//            } else {
+//                // If re-appearing, refresh the list
+//                self.viewModel.getEmailSubscriptionsList()
+//            }
+            self.viewModel.subscriptions = subscriptions
+            self.viewModel.integrationId = integrationId
+            self.viewModel.getEmailSubscriptionsList()
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .refreshExtractedSubs)) { _ in
+            self.viewModel.getEmailSubscriptionsList()
         }
     }
 }

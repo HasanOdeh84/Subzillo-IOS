@@ -294,6 +294,7 @@ struct DuplicateSubscriptionsView: View {
         if fromFamily {
             AppIntentRouter.shared.pop(count: 2)
         } else if isFromEmail {
+            NotificationCenter.default.post(name: .refreshExtractedSubs, object: nil)
             dismiss()
         } else {
             AppIntentRouter.shared.navigate(to: .subscriptionsListView())

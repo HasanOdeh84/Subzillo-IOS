@@ -484,10 +484,12 @@ struct SubscriptionPreviewView: View {
             }
             getSubDetails()
             if !isFromImage{
-                guard let url = audioURL else {
-                    return
+//                guard let url = audioURL else {
+//                    return
+//                }
+                if let url = audioURL{
+                    playerManager.setDuration(url: url)
                 }
-                playerManager.setDuration(url: url)
             }
             updateSubDetails()
             manualEntryVM.getServiceProvidersList()
@@ -577,67 +579,7 @@ struct SubscriptionPreviewView: View {
     }
     
     //MARK: - User defined methods
-    //MARK: addSubApiRespons
-    //    private func addSubApiResponseHandling() {
-    //        if subscriptionPreviewVM.isEntrySuccess == true {
-    //            if let responseData = subscriptionPreviewVM.addSubscriptionResponse {
-    //                // Extract duplicates from official response
-    //                let duplicates = responseData.duplicates ?? []
-    //                if !duplicates.isEmpty {
-    //                    var updatedDuplicates: [DuplicateDataInfo] = []
-    //                    for (index, item) in duplicates.enumerated() {
-    //                        var newSubs = item.newSubscription ?? []
-    //                        for i in 0..<newSubs.count {
-    //                            if (newSubs[i].id ?? "").isEmpty {
-    //                                newSubs[i].id = "\(i + 1)"
-    //                            }
-    //                        }
-    //                        let info = DuplicateDataInfo(
-    //                            id: String(accumulatedDuplicates.count + index + 1),
-    //                            serviceName: newSubs.first?.serviceName ?? "",
-    //                            newSubscriptions: newSubs,
-    //                            existingSubscriptions: item.oldSubscription
-    //                        )
-    //                        updatedDuplicates.append(info)
-    //                    }
-    //                    accumulatedDuplicates.append(contentsOf: updatedDuplicates)
-    //                }
-    //            }
-    //            
-    //            newlyAddedSubscriptionsCount += 1
-    //            lastSavedSubscription = subscriptionData
-    //            currentSubscriptions += 1
-    //            
-    //            if currentSubscriptions > numberOfSubscriptions {
-    //                playerManager.pausePlayback()
-    //                
-    //                if fromEmailSync || isRenew {
-    //                    dismiss()
-    //                } else {
-    //                    if let lastSaved = lastSavedSubscription {
-    //                        subscriptionsData = [lastSaved]
-    //                        numberOfSubscriptions = 1
-    //                        totalInitialCount = 1
-    //                        currentSubscriptions = 1
-    //                        getSubDetails()
-    //                    }
-    //                    
-    //                    if !accumulatedDuplicates.isEmpty {
-    //                        isFromAdd = true
-    //                        if fromEmailSync {
-    //                            dismiss()
-    //                        } else {
-    //                            AppIntentRouter.shared.navigate(to: .subscriptionsListView())
-    //                        }
-    //                    }
-    //                }
-    //            } else {
-    //                getSubDetails()
-    //            }
-    //            subscriptionPreviewVM.isEntrySuccess = false
-    //        }
-    //    }
-    
+    //MARK: addSubApiResponseHandling
     private func addSubApiResponseHandling() {
         if subscriptionPreviewVM.isEntrySuccess == true {
             if let responseData = subscriptionPreviewVM.addSubscriptionResponse {

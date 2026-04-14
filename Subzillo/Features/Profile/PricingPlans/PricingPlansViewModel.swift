@@ -17,6 +17,7 @@ class PricingPlansViewModel: ObservableObject {
     private let router                              : AppIntentRouter
     private let sessionManager                      : SessionManager
     @Published var isSubscribe                      : Bool = false
+    @Published var restoreSyncFailed                : Bool = false
     static let shared                               = PricingPlansViewModel()
     
     init(router: AppIntentRouter = .shared,sessionManager: SessionManager = .shared){
@@ -70,6 +71,29 @@ class PricingPlansViewModel: ObservableObject {
         .sink { completion in
             if case .failure(let error) = completion {
                 self.handleError(error, endPoint: .subscribePlan)
+            }
+        } receiveValue: { response in
+            PrintLogger.modelLog(response, type: .response, isInput: false)
+            self.isSubscribe = true
+        }
+        .store(in: &self.subscriptions)
+    }
+    
+    func subscribePlanAfterRestore(input: SubscribePlanRequest) {
+        print("[Restore] Plan ID: \(input.pricingPlanId), Transaction ID: \(input.transactionId)")
+        restoreSyncFailed = false
+        self.apiReference.postApi(
+            endPoint    : .subscribePlan,
+            method      : .POST,
+            token       : authKey,
+            body        : input,
+            showLoader  : true,
+            responseType: GeneralResponse.self
+        )
+        .sink { completion in
+            if case .failure(let error) = completion {
+                self.handleError(error, endPoint: .subscribePlan)
+                self.restoreSyncFailed = true
             }
         } receiveValue: { response in
             PrintLogger.modelLog(response, type: .response, isInput: false)

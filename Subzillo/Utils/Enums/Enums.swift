@@ -50,6 +50,11 @@ enum NavigationRoute: Hashable{
 }
 
 extension NavigationRoute {
+    var isConnectEmail: Bool {
+        if case .connectEmail = self { return true }
+        return false
+    }
+    
     var subId: String? {
         switch self {
         case .manualEntry(_, _, _, let id, _, _, _):

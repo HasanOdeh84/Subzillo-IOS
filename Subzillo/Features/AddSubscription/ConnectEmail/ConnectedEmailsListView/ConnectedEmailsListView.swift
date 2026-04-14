@@ -190,23 +190,23 @@ struct ConnectedEmailsListView: View {
         .onDisappear {
             isVisible = false
         }
-        .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("RefreshScreenData"))) { _ in
-            if isVisible && !justAppeared {
-                listConnectedMailsApi()
-            }
-        }
-        .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("RefreshConnectedEmails"))) { notification in
-            if isVisible {
-                listConnectedMailsApi()
-                if let email = notification.userInfo?["email"] as? String {
-                    mailFromPush = email
-                }
-                if let email = notification.userInfo?["integrationId"] as? String {
-                    integrationIdFromPush = email
-                }
-                showPlatformAlert = true
-            }
-        }
+//        .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("RefreshScreenData"))) { _ in
+//            if isVisible && !justAppeared {
+//                listConnectedMailsApi()
+//            }
+//        }
+//        .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("RefreshConnectedEmails"))) { notification in
+//            if isVisible {
+//                listConnectedMailsApi()
+//                if let email = notification.userInfo?["email"] as? String {
+//                    mailFromPush = email
+//                }
+//                if let email = notification.userInfo?["integrationId"] as? String {
+//                    integrationIdFromPush = email
+//                }
+//                showPlatformAlert = true
+//            }
+//        }
         //MARK: No subscriptions found sheet
         .sheet(isPresented: $viewModel.showErrorPopup, onDismiss: {
             viewModel.listConnectedEmails(input: ListConnectedEmailsRequest(userId: Constants.getUserId()))

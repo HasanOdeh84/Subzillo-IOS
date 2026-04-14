@@ -184,8 +184,15 @@ struct PricingPlansView: View {
             }
         }
         .onReceive(NotificationCenter.default.publisher(for: .IAPHelperPurchaseNotification)) { notification in
-//            self.loadingStatus = nil
             handlePurchaseNotification(notification)
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .IAPHelperRestoreNotification)) { notification in
+            handleRestoreNotification(notification)
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .IAPHelperNoRestorablePurchasesNotification)) { _ in
+            self.loadingStatus = nil
+            self.platformAlertMessage = "No active subscription was found associated with your Apple ID."
+            self.showPlatformAlert = true
         }
         .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("cancelbuying"))) { _ in
             self.loadingStatus = .failed
@@ -203,6 +210,14 @@ struct PricingPlansView: View {
                     dismiss()
                 }
                 planId = ""
+            }
+        }
+        .onChange(of: viewModel.restoreSyncFailed) { failed in
+            if failed {
+                self.loadingStatus = nil
+                self.platformAlertMessage = "We found your previous purchase, but could not sync it to your account. Please contact support or try again later."
+                self.showPlatformAlert = true
+                viewModel.restoreSyncFailed = false
             }
         }
         .sheet(isPresented: $showPlatformAlert) {
@@ -264,15 +279,61 @@ struct PricingPlansView: View {
         
         let transactionId = transaction.transactionIdentifier ?? transaction.original?.transactionIdentifier ?? ""
         
-        if let pId = self.planId, !pId.isEmpty {
-            if planId != ""{
-                self.loadingStatus = nil
-                subscribePlanAPI(planId: pId, transactionId: transactionId)
-            }else{
-                print("Error: planId is empty.")
+        guard let pId = self.planId, !pId.isEmpty else {
+            self.loadingStatus = nil
+            print("Auto-renewal or unmapped purchase ignored for \(transaction.payment.productIdentifier)")
+            return
+        }
+        self.loadingStatus = nil
+        subscribePlanAPI(planId: pId, transactionId: transactionId)
+    }
+    
+    private func handleRestoreNotification(_ notification: Notification) {
+        guard let transaction = notification.object as? SKPaymentTransaction else { return }
+        let productId = transaction.payment.productIdentifier
+        let transactionId = transaction.transactionIdentifier ?? transaction.original?.transactionIdentifier ?? ""
+        print("Restore completed: \(productId)")
+        
+        var targetPlanId = self.planId ?? ""
+        
+        if targetPlanId.isEmpty {
+            if let matchedPlan = viewModel.pricingPlans.first(where: { plan in
+                if let iosId = plan.iosProductId, iosId == productId {
+                    return true
+                }
+                
+                let name = plan.planName?.lowercased() ?? ""
+                let isSilver = name.contains("silver")
+                let isGold = name.contains("gold")
+                let isYearly = productId.lowercased().contains("yearly")
+                
+                if isSilver {
+                    let silverID = isYearly ? SubzilloProducts.silverYearly : SubzilloProducts.silverMonthly
+                    return productId == silverID
+                } else if isGold {
+                    let goldID = isYearly ? SubzilloProducts.goldYearly : SubzilloProducts.goldMonthly
+                    return productId == goldID
+                }
+                return false
+            }) {
+                targetPlanId = matchedPlan.id ?? ""
             }
+        }
+        
+        if !targetPlanId.isEmpty {
+            self.loadingStatus = nil
+            let request = SubscribePlanRequest(
+                userId        : Constants.getUserId(),
+                pricingPlanId : targetPlanId,
+                platform      : 2,
+                transactionId : transactionId
+            )
+            viewModel.subscribePlanAfterRestore(input: request)
         } else {
-            print("Error: No planId found to trigger subscribePlanAPI.")
+            self.loadingStatus = nil
+            //            self.platformAlertMessage = "Restore successful, but no matching plan was found in the system. Please contact support."
+            self.platformAlertMessage = "We found your previous purchase, but could not sync it to your account. Please contact support or try again later."
+            self.showPlatformAlert = true
         }
     }
     
@@ -375,7 +436,7 @@ struct PricingPlansView: View {
                     }
                     
                     let platform = viewModel.pricingPlanResponse?.data?.subscribedPlatformType ?? 2
-
+                    
                     if viewModel.pricingPlanResponse?.data?.currentInternalPlanType ?? 0 == 0 || platform == 2{
                         if let id = productID, let product = products.first(where: { $0.productIdentifier == id }) {
                             print("View: Purchase Button Tapped for \(product.productIdentifier)")
@@ -389,18 +450,18 @@ struct PricingPlansView: View {
                     if platform == 1 { // Android
                         platformAlertMessage = "Dear User,We noticed that you initially registered your account and subscribed through our Android application, and you are now trying to upgrade your plan via the iOS application.To avoid duplicate billing, please cancel your existing subscription on the Android application before proceeding with the upgrade here.You can find the “Cancel Subscription” option in play store.Thank you for your understanding and cooperation."
                         showPlatformAlert = true
-            //            AlertManager.shared.showAlert(title: "Subscription Notice", message: platformAlertMessage)
-            //            AlertManager.shared.showAlert(title: "Subscription Notice",
-            //                                          message: platformAlertMessage,
-            //                                          okText: "Continue",
-            //                                          cancelText: "Cancel",
-            //                                          isDestructive: true,
-            //                                          okAction: {
-            //                purchaseInternal(product: product, planId: planId)
-            //            })
+                        //            AlertManager.shared.showAlert(title: "Subscription Notice", message: platformAlertMessage)
+                        //            AlertManager.shared.showAlert(title: "Subscription Notice",
+                        //                                          message: platformAlertMessage,
+                        //                                          okText: "Continue",
+                        //                                          cancelText: "Cancel",
+                        //                                          isDestructive: true,
+                        //                                          okAction: {
+                        //                purchaseInternal(product: product, planId: planId)
+                        //            })
                     } else if platform == 3 { // Web
                         platformAlertMessage = "Dear User, We noticed that you initially registered your account and subscribed through our web application, and you are now trying to upgrade your plan via the iOS application. To avoid duplicate billing, please cancel your existing subscription on the web application before proceeding with the upgrade here. You can find the “Cancel Subscription” option under Account Settings on the web platform.Thank you for your understanding and cooperation."
-            //            AlertManager.shared.showAlert(title: "Subscription Notice", message: platformAlertMessage)
+                        //            AlertManager.shared.showAlert(title: "Subscription Notice", message: platformAlertMessage)
                         showPlatformAlert = true
                     }
                 }

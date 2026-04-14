@@ -7,15 +7,47 @@
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
-            uuid = "DA298FCB-FA0F-4B35-8813-C60B70667C0C"
+            uuid = "FBB28CF0-9044-4E46-BF22-2EC7D914F214"
             shouldBeEnabled = "Yes"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
-            filePath = "Subzillo/Features/AddSubscription/SubscriptionPreview/SubscriptionMatchView/SubscriptionMatchView.swift"
+            filePath = "Subzillo/Features/AddSubscription/ConnectEmail/ConnectedEmailsListView/ConnectedEmailsListView.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "176"
-            endingLineNumber = "176"
+            startingLineNumber = "244"
+            endingLineNumber = "244"
+            landmarkName = "body"
+            landmarkType = "24">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "D6AF4597-C87C-47FA-AC8B-E14647785E9E"
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "Subzillo/Features/AddSubscription/ConnectEmail/ConnectedEmailsListView/ConnectedEmailsListView.swift"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "207"
+            endingLineNumber = "207"
+            landmarkName = "body"
+            landmarkType = "24">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "48230EE2-C2F0-4487-9DDD-93AC09BD7D74"
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "Subzillo/Features/AddSubscription/ConnectEmail/ConnectEmail/ConnectEmailView.swift"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "186"
+            endingLineNumber = "186"
             landmarkName = "body"
             landmarkType = "24">
          </BreakpointContent>

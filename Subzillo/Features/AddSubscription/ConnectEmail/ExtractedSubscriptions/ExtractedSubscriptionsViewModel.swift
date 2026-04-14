@@ -72,6 +72,7 @@ class ExtractedSubscriptionsViewModel: ObservableObject {
             }
         receiveValue: { [weak self] response in
             guard let self = self else { return }
+            self.subscriptions.removeAll()
             PrintLogger.modelLog(response, type: .response, isInput: false)
             self.subscriptions = response.data?.subscriptions ?? []
         }

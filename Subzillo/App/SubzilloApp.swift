@@ -404,6 +404,9 @@ struct RootView: View {
             router.hasNavigatedFromSplash = true
             router.resetStackTo = nil
         }
+        .onChange(of: path) { newPath in
+            router.path = newPath // Direct sync with the NavigationStack's state
+        }
         .onChange(of: router.popCount) { count in
             if count > 0 {
                 if path.count >= count {
@@ -554,13 +557,15 @@ final class AppIntentRouter: ObservableObject {
     static let shared = AppIntentRouter()
     private init() {}
     
-    @Published var navigatingRoute    : NavigationRoute? = nil
-    @Published var replaceTopRoute    : NavigationRoute? = nil
-    @Published var popCount           : Int = 0
-    @Published var pendingNotification: NavigationRoute? = nil
-    @Published var resetStackTo       : [NavigationRoute]? = nil
-    @Published var isAppWarm          : Bool = false
-    @Published var hasNavigatedFromSplash: Bool = false
+    @Published var navigatingRoute          : NavigationRoute? = nil
+    @Published var replaceTopRoute          : NavigationRoute? = nil
+    @Published var popCount                 : Int = 0
+    @Published var pendingNotification      : NavigationRoute? = nil
+    @Published var resetStackTo             : [NavigationRoute]? = nil
+    @Published var isAppWarm                : Bool = false
+    @Published var hasNavigatedFromSplash   : Bool = false
+    @Published var path                     : [NavigationRoute] = [] // Keeps track of the active stack
+    var currentRoute                        : NavigationRoute? { path.last } // Helper to get the top-most screen
 }
 
 extension AppIntentRouter {

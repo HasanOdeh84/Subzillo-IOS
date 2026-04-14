@@ -192,13 +192,13 @@ struct ConnectEmailView: View {
             }
         }
         .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("RefreshConnectedEmails"))) { notification in
-            if isVisible {
+            if isVisible && AppIntentRouter.shared.currentRoute?.isConnectEmail == true {
                 listConnectedMailsApi()
                 if let email = notification.userInfo?["email"] as? String {
                     mailFromPush = email
                 }
-                if let email = notification.userInfo?["integrationId"] as? String {
-                    integrationIdFromPush = email
+                if let id = notification.userInfo?["integrationId"] as? String {
+                    integrationIdFromPush = id
                 }
                 showPlatformAlert = true
             }
