@@ -290,7 +290,7 @@ struct ReviewExtractedDetailsView: View {
                     }
                     .sheet(isPresented: $showBillingCycleSheet) {
                         BillingCycleBottomSheet(selectedBilling         : $selectedBilling,
-                                                billingCyclesResponse   : filteredBillingCycles(),
+//                                                billingCyclesResponse   : filteredBillingCycles(),
                                                 header                  : "Select Billing Cycle",
                                                 placeholder             : "Search",
                                                 onSelect: { billing in

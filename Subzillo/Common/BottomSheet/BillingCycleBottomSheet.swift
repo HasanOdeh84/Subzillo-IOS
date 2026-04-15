@@ -12,7 +12,8 @@ struct BillingCycleBottomSheet: View {
     //MARK: - Properties
     @Environment(\.dismiss) private var dismiss
     @Binding var selectedBilling            : String?
-    var billingCyclesResponse               : [String]?
+//    var billingCyclesResponse               : [String]?
+    var billingCycles                       = ["Daily", "Weekly", "Monthly", "Quarterly", "Biannually", "Yearly"]
     var header                              : String?
     var placeholder                         : String?
     @State private var searchText           = ""
@@ -29,11 +30,11 @@ struct BillingCycleBottomSheet: View {
     
     var filteredCategories: [String] {
         if searchText.isEmpty {
-            return billingCyclesResponse ?? []
+            return billingCycles
         }
-        return billingCyclesResponse?.filter {
+        return billingCycles.filter {
             $0.localizedCaseInsensitiveContains(searchText)
-        } ?? []
+        }
     }
     
     //MARK: - body
