@@ -2,6 +2,101 @@
 
 All notable changes to this project will be documented in this file.
 
+## [V1.3.17(70)] (Alpha&Beta-Stage) 
+
+### Delivered
+- Build shared with stage url with billing cycles changed to dynamic
+
+## [V1.3.16(69)] (Alpha-Stage) 
+
+### Delivered
+- Build shared with stage server with S4 client feedback points
+
+## [V1.3.15(68)] (Alpha-Stage) 
+
+### Delivered
+- Build shared with QA server with S4 client feedback points
+
+## [V1.3.14(67)] (Alpha-Stage) 
+
+### Delivered
+- Build shared with stage url with client feedback points
+
+## [V1.3.13(66)] (Beta-Stage) 
+
+### Delivered
+- Stage build shared to client with feedback points
+
+## [V1.3.12(65)] (Alpha-Stage) 
+
+### Delivered
+- Build shared with stage url with modifications for sync to onboarding redirection issue
+
+## [V1.3.9(63)] (Alpha-Stage) 
+
+### Delivered
+- Stage build shared with bug fixes
+
+## [V1.3.8(62)] (Alpha-Stage) 
+
+### Delivered
+- Build shared with stage url with bug fixes and modifications
+
+## [V1.3.7(61)] (Alpha-Stage) 
+
+### Delivered
+- Build shared with stage url with client feedback and issues
+
+## [V1.3.6(60)] (Alpha-Stage) 
+
+### Delivered
+- Build shared with stage url with client feedback points
+
+## [V1.3.5(59)] (Alpha-QA) 
+
+### Delivered
+- Build shared with QA url to tester with client feedback points
+
+## [V1.3.4(58)] (Alpha-Stage) 
+
+### Delivered
+- Build shared with stage url of client feedback points
+
+## [V1.3.2(56)] (Alpha-QA) 
+
+### Delivered
+- Build shared with QA url with client feedback points
+
+## [V1.3.1(55)] (Alpha-Stage) 
+
+### Delivered
+- Stage build shared to tester with Complete app features except new client feedback points.
+
+## [V1.3.0(54)] (Alpha-QA) 
+
+### Delivered
+- Build shared with QA url of S4 bug fixes
+
+## [V1.2.16(53)] (Alpha-Stage) 
+
+### Delivered
+- Build shared with stage url of complete S4 and S5 features and client feedback points
+
+## [V1.2.15(52)] (Alpha-Stage) 
+
+### Delivered
+- Stage build shared with pricing plans change for internal testing
+
+## [V1.2.14(51)] (Alpha-Stage) 
+
+### Delivered
+- Stage build shared with pricing plans change
+
+## [V1.2.13(50)] (Alpha-Stage)
+
+### Delivered
+- Stage build shared to tester with this pricing plans new changes
+
 ## [1.2.11(48)] (Alpha-Stage) - 2026-03-27
 
 ### Delivered
