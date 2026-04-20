@@ -56,6 +56,7 @@ struct ListConnectedEmailsData: Codable, Hashable, Identifiable {
     let type                : Int?          // 1 - Gmail, 2 - Microsoft, 3 - Yahoo
     let lastSyncDate        : String?
     let viewStatus          : Bool?
+    let isValid             : Bool?
     let syncStatus          : Int?
 //    let approaches          : EmailApproaches?
 }

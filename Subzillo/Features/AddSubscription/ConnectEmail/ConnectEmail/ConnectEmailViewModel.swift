@@ -20,6 +20,7 @@ class ConnectEmailViewModel: ObservableObject {
     @Published var isIcloudSuccess                  : Bool = false
     @Published var isGmailSuccess                   : Bool = false
     @Published var isManualICloudSuccess            : Bool = false
+    @Published var showReconnectSheet               : Bool = false
     
     init(router: AppIntentRouter = .shared){
         self.router = router
@@ -112,5 +113,8 @@ class ConnectEmailViewModel: ObservableObject {
     // MARK: - Handle errors
     func handleError(_ apiError: APIError, endPoint : APIEndpoint) {
         print("API Error : \(endPoint) - \(apiError.localizedDescription)")
+        if apiError == .reauthenticationRequired && endPoint == .oauthCallback {
+            self.showReconnectSheet = true
+        }
     }
 }

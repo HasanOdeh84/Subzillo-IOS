@@ -6,12 +6,13 @@ struct ConnectedEmailItemView: View {
     let onSyncing               : () -> Void
     let onView                  : () -> Void
     let onDownloadLogs          : () -> Void
+    let onReconnect             : () -> Void
     @State var provider         : EmailProvider = EmailProvider.gmail
     @State var isIntegrations   : Bool = false
     var isInlineSyncing         : Bool = false
     var emailsScanned           : Int = 0
     var subscriptionsFound      : Int = 0
-
+    
     var body: some View {
         VStack() {
             HStack(spacing: 12) {
@@ -20,22 +21,22 @@ struct ConnectedEmailItemView: View {
                     .resizable()
                     .scaledToFit()
                     .frame(width: 31, height: 31)
-
+                
                 VStack(alignment: .leading, spacing: 4) {
                     HStack {
                         Text(email.email ?? "")
                             .font(.appSemiBold(16))
                             .foregroundStyle(Color.underlineGray)
                         Spacer()
-//                        Image("download")
-//                            .frame(width: 30, height: 30)
-//                            .onTapGesture {
-//                                onDownloadLogs()
-//                            }
-//                            .padding(.trailing, -16)
+                        //                        Image("download")
+                        //                            .frame(width: 30, height: 30)
+                        //                            .onTapGesture {
+                        //                                onDownloadLogs()
+                        //                            }
+                        //                            .padding(.trailing, -16)
                     }
                     .tint(Color.underlineGray)
-
+                    
                     if email.lastSyncDate != "" {
                         if email.lastSyncDate != nil {
                             Text(email.lastSyncDate ?? "")
@@ -44,11 +45,11 @@ struct ConnectedEmailItemView: View {
                         }
                     }
                 }
-
+                
                 Spacer()
             }
             .opacity(isAllSyncing ? 0.6 : 1.0)
-
+            
             // Action Buttons
             if !isIntegrations {
                 HStack {
@@ -83,7 +84,7 @@ struct ConnectedEmailItemView: View {
                                 Spacer()
                                 ProgressView()
                                     .scaleEffect(1.5)
-//                                Spacer()
+                                //                                Spacer()
                             }
                         }
                     }
@@ -108,7 +109,7 @@ struct ConnectedEmailItemView: View {
             }
         }
     }
-
+    
     // MARK: - Helpers
     private var isAllSyncing: Bool {
         let statuses = [
@@ -116,16 +117,16 @@ struct ConnectedEmailItemView: View {
         ]
         return statuses.allSatisfy { $0 == 1 }
     }
-
+    
     // MARK: - Action Buttons
-
+    
     @ViewBuilder
     private var actionButtons: some View {
         HStack(spacing: 12) {
             approachButton()
         }
     }
-
+    
     @ViewBuilder
     private func approachButton() -> some View {
         let syncStatus = email.syncStatus ?? 0
@@ -152,14 +153,38 @@ struct ConnectedEmailItemView: View {
         } else if syncStatus == 0 && viewStatus{
             viewButton(title: "View")
         } else if syncStatus == 0 || (syncStatus == 2 && viewStatus == false){
-            HStack(spacing: 10){
+            HStack(spacing: 12){
+                if email.isValid == false && email.type == 1 {
+                    reconnectButton(title: "Reconnect")
+                }
                 syncButton(title: "Sync")
                 viewButton(title: "View")
             }
         }
     }
-
+    
     // MARK: - Reusable Button Builders
+    @ViewBuilder
+    private func reconnectButton(title: String) -> some View {
+        Text(title)
+            .font(.appSemiBold(14))
+            .foregroundColor(.redBadge)
+            .padding(.horizontal, 16)
+            .frame(height: 30)
+            .background(Color.white)
+            .cornerRadius(5)
+            .overlay(
+                RoundedRectangle(cornerRadius: 5)
+                    .stroke(
+                        Color.redBadge,
+                        lineWidth: 1
+                    )
+            )
+            .onTapGesture {
+                onReconnect()
+            }
+    }
+    
     @ViewBuilder
     private func syncButton(title: String) -> some View {
         Text(title)
@@ -174,7 +199,7 @@ struct ConnectedEmailItemView: View {
                 onSync()
             }
     }
-
+    
     @ViewBuilder
     private func viewButton(title: String) -> some View {
         Text(title)

@@ -20,6 +20,7 @@ public enum APIError: Error {
     case anyError
     case apiError(String)
     case insufficientQuota
+    case reauthenticationRequired
     
     var localizedDescription: String {
         switch self {
@@ -59,6 +60,8 @@ public enum APIError: Error {
             return "someone logged in else where"
         case .insufficientQuota:
             return "insufficient quota or quota exceeded"
+        case .reauthenticationRequired:
+            return "Gmail needs reconnection"
         }
     }
 }
@@ -80,7 +83,8 @@ extension APIError: Equatable {
              (.refreshTokenFailed, .refreshTokenFailed),
              (.responseError, .responseError),
              (.anyError, .anyError),
-             (.insufficientQuota, .insufficientQuota):
+             (.insufficientQuota, .insufficientQuota),
+             (.reauthenticationRequired, .reauthenticationRequired):
             return true
         case (.urlError(let lhsError), .urlError(let rhsError)):
             return lhsError == rhsError

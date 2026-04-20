@@ -15,6 +15,7 @@ struct SwipeableMailRow: View {
     let onSyncing                   : () -> Void
     let onView                      : () -> Void
     let onDownloadLogs              : () -> Void
+    let onReconnect                  : () -> Void
     @State private var offset       : CGFloat = 0
     @State private var isSwiped     : Bool = false
     let swipeThreshold: CGFloat     = -20
@@ -71,6 +72,7 @@ struct SwipeableMailRow: View {
                                    onSyncing        : onSyncing,
                                    onView           : onView,
                                    onDownloadLogs   : onDownloadLogs,
+                                   onReconnect      : onReconnect,
                                    isIntegrations   : isIntegrations,
                                    isInlineSyncing  : isInlineSyncing,
                                    emailsScanned    : emailsScanned,

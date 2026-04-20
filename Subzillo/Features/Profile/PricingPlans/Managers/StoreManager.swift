@@ -171,23 +171,35 @@ extension IAPHelper: SKPaymentTransactionObserver {
     public func paymentQueueRestoreCompletedTransactionsFinished(_ queue: SKPaymentQueue) {
         if restoredTransactions.isEmpty {
             NotificationCenter.default.post(name: .IAPHelperNoRestorablePurchasesNotification, object: nil)
-        } else {
-            // Group the collected transactions by product ID
-            let grouped = Dictionary(grouping: restoredTransactions, by: { $0.payment.productIdentifier })
-            
-            // For each group, find the transaction with the most recent date
-            let uniqueLatest = grouped.compactMap { (_, transactions) in
-                transactions.max(by: { ($0.transactionDate ?? Date.distantPast) < ($1.transactionDate ?? Date.distantPast) })
-            }
-            
-            print("Successfully filtered \(restoredTransactions.count) transactions down to \(uniqueLatest.count) active products.")
-            
-            for transaction in uniqueLatest {
-                let identifier = transaction.payment.productIdentifier
-                print("Delivering latest restored transaction for \(identifier)")
-                deliverRestoreNotificationFor(identifier: identifier, transaction: transaction)
+        }
+        else {
+            // Find the one SINGLE transaction with the most recent date across ALL products
+            if let latestTransaction = restoredTransactions.max(by: { ($0.transactionDate ?? Date.distantPast) < ($1.transactionDate ?? Date.distantPast) }) {
+                
+                let identifier = latestTransaction.payment.productIdentifier
+                print("The absolute latest transaction found is \(identifier)")
+                
+                // Only deliver the ONE latest plan
+                deliverRestoreNotificationFor(identifier: identifier, transaction: latestTransaction)
             }
         }
+//        else {
+//            // Group the collected transactions by product ID
+//            let grouped = Dictionary(grouping: restoredTransactions, by: { $0.payment.productIdentifier })
+//            
+//            // For each group, find the transaction with the most recent date
+//            let uniqueLatest = grouped.compactMap { (_, transactions) in
+//                transactions.max(by: { ($0.transactionDate ?? Date.distantPast) < ($1.transactionDate ?? Date.distantPast) })
+//            }
+//            
+//            print("Successfully filtered \(restoredTransactions.count) transactions down to \(uniqueLatest.count) active products.")
+//            
+//            for transaction in uniqueLatest {
+//                let identifier = transaction.payment.productIdentifier
+//                print("Delivering latest restored transaction for \(identifier)")
+//                deliverRestoreNotificationFor(identifier: identifier, transaction: transaction)
+//            }
+//        }
         restoredTransactions.removeAll()
     }
 }

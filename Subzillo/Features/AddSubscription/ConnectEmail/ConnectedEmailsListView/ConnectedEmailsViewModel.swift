@@ -118,6 +118,21 @@ class ConnectedEmailsViewModel: ObservableObject {
         .store(in: &self.subscriptions)
     }
     
+    func gmailOauthCallBack(input:GmailOauthCallBackRequest) {
+        apiReference.postApi(endPoint: APIEndpoint.oauthCallback, method: .POST,token: authKey,body: input,showLoader: true, responseType: GeneralResponse.self)
+            .sink { [weak self] completion in
+                if case let .failure(error) = completion {
+                    self?.handleError(error,endPoint: APIEndpoint.oauthCallback)
+                }
+            }
+        receiveValue: { [weak self] response in
+            PrintLogger.modelLog(response, type: .response, isInput: false)
+            ToastManager.shared.showToast(message: response.message ?? "")
+            self?.listConnectedEmails(input: ListConnectedEmailsRequest(userId: Constants.getUserId()))
+        }
+        .store(in: &self.subscriptions)
+    }
+    
     func downloadLogAPI(input: ExportGmailSyncLogsRequest,showLoader:Bool = true) {
         apiReference.postApiData(endPoint: APIEndpoint.exportGmailSyncLogs, method: .POST,token: authKey,body: input,showLoader: showLoader)
             .sink { [weak self] completion in
@@ -242,11 +257,15 @@ class ConnectedEmailsViewModel: ObservableObject {
                 //            }
             } else if data.syncStatus == "failed" {
                 // User requested to keep UI and polling even on failure
-                self.isInlineSyncing = true 
+//                self.isInlineSyncing = true 
                 // We keep polling every 3 seconds as requested
                 // self.stopInlinePolling() // Commented out to continue polling if that's what's intended
                 // self.isInlineSyncing = false // Commented out to keep UI visible
                 // self.inlineSyncingId = nil // Commented out
+                self.stopInlinePolling()
+                self.isInlineSyncing = false
+                self.inlineSyncingId = nil
+                self.listConnectedEmails(input: ListConnectedEmailsRequest(userId: Constants.getUserId()))
                 ToastManager.shared.showToast(message: "Email Syncing failed", style: .error)
                 // self.listConnectedEmails(input: ListConnectedEmailsRequest(userId: Constants.getUserId()))
             }

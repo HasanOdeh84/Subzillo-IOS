@@ -625,6 +625,12 @@ class NetworkRequest {
                         }else{
                             throw APIError.notFound
                         }
+                    case 499:
+                        if endPoint == .oauthCallback {
+                            throw APIError.reauthenticationRequired
+                        } else {
+                            return result.data
+                        }
                     default:
                         return result.data
                     }
@@ -651,7 +657,7 @@ class NetworkRequest {
 //                                }
 //                            }
 //                        }
-                        if fromSiri || endPoint == .fetchProviderData || fromVerifyOtpBottom || endPoint == .subscribePlan || endPoint == .addCard{
+                        if fromSiri || endPoint == .fetchProviderData || fromVerifyOtpBottom || endPoint == .subscribePlan || endPoint == .addCard || endPoint == .oauthCallback{
                             
                         }else{
                             ToastManager.shared.showToast(message: apiError.localizedDescription,style: .error)

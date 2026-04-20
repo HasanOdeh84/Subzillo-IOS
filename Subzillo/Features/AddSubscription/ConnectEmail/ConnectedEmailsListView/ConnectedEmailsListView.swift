@@ -144,6 +144,8 @@ struct ConnectedEmailsListView: View {
                                 viewModel.viewEmail(email)
                             }, onDownloadLogs: {
                                 viewModel.downloadLogs(email)
+                            }, onReconnect: {
+                                gmailAction()
                             }, isIntegrations: isIntegrations)
                         }
                     }
@@ -279,6 +281,20 @@ struct ConnectedEmailsListView: View {
             if let email = selectedEmail{
                 viewModel.deleteEmail(email)
             }
+        }
+    }
+    
+    private func gmailAction(){
+        guard let presentingVC = UIApplication.shared.rootViewController else {
+            return
+        }
+        SocialLogins.shared.gmailSignInOAuth(presentingVC: presentingVC) { serverAuthCode in
+            guard let code = serverAuthCode else {
+                print("❌ serverAuthCode is nil")
+                return
+            }
+            print("✅ serverAuthCode:", code)
+            viewModel.gmailOauthCallBack(input: GmailOauthCallBackRequest(userId: Constants.getUserId(), code: code, type: 1))
         }
     }
 }

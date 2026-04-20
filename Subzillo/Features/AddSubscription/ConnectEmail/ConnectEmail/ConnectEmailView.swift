@@ -25,6 +25,7 @@ struct ConnectEmailView: View {
     @State private var showPlatformAlert    : Bool = false
     @State private var mailFromPush         : String?
     @State private var integrationIdFromPush: String?
+    @State private var reconnectSheetHeight : CGFloat = .zero
     
     //MARK: - body
     var body: some View {
@@ -129,6 +130,8 @@ struct ConnectEmailView: View {
                                     connectedEmailsVM.viewEmail(email)
                                 }, onDownloadLogs: {
                                     connectedEmailsVM.downloadLogs(email)
+                                }, onReconnect: {
+                                    gmailAction()
                                 }, isIntegrations: false)
                             }
                         }
@@ -253,6 +256,26 @@ struct ConnectEmailView: View {
             }
             .presentationDragIndicator(.hidden)
             .presentationDetents([.height(upgradeNowSheetHeight)])
+        }
+        .sheet(isPresented: $connectEmailVM.showReconnectSheet, onDismiss: {
+            connectEmailVM.showReconnectSheet = false
+        }) {
+            InfoAlertSheet(
+                onDelegate: {
+                    gmailAction()
+                }, title: "Gmail needs reconnection",
+                subTitle: "Please reconnect your Gmail account to resume syncing.",
+                imageName: "info",
+                buttonTitle: "Reconnect",
+                isCancelButtonVisible: true
+            )
+            .onPreferenceChange(InnerHeightPreferenceKey.self) { height in
+                if height > 0 {
+                    reconnectSheetHeight = height
+                }
+            }
+            .presentationDragIndicator(.hidden)
+            .presentationDetents([.height(reconnectSheetHeight)])
         }
         //MARK: Onchange
         .onChange(of: connectEmailVM.isSuccess) { success in
