@@ -5,9 +5,9 @@
  */
 
 window.SubzilloAgent = {
-    
+
     // 1. Wait for page stability
-    isContentReady: function() {
+    isContentReady: function () {
         var body = document.body;
         if (!body) return false;
         var textLength = body.innerText.trim().length;
@@ -16,7 +16,7 @@ window.SubzilloAgent = {
     },
 
     // 2. Extract DOM Snapshot
-    extractSnapshot: function() {
+    extractSnapshot: function () {
         function getText(doc) {
             if (!doc) return '';
             let text = '';
@@ -29,7 +29,7 @@ window.SubzilloAgent = {
                     var style = window.getComputedStyle(node);
                     if (style.display === 'none' || style.visibility === 'hidden') return;
                     if (tag === 'IFRAME') {
-                        try { if (node.contentDocument) walk(node.contentDocument); } catch(e) {}
+                        try { if (node.contentDocument) walk(node.contentDocument); } catch (e) { }
                     } else {
                         for (var i = 0; i < node.childNodes.length; i++) walk(node.childNodes[i]);
                         if (node.shadowRoot) walk(node.shadowRoot);
@@ -48,27 +48,35 @@ window.SubzilloAgent = {
         function collect(root) {
             if (!root) return;
             var els = root.querySelectorAll('a, button, input, [role="button"], svg, i, [aria-label], [title], iframe, div, span');
-            for(var i=0; i<els.length; i++) {
+            for (var i = 0; i < els.length; i++) {
                 var el = els[i];
                 var tagName = el.tagName.toLowerCase();
                 if (tagName === 'iframe') {
                     var label = el.getAttribute('aria-label') || el.getAttribute('title') || 'Iframe';
-                    elements.push({ text: '[' + label + ']', href: '', selector: 'iframe' + (el.id ? '#'+el.id : '') });
-                    try { if (el.contentDocument) collect(el.contentDocument); } catch(e) {}
+                    elements.push({ text: '[' + label + ']', href: '', selector: 'iframe' + (el.id ? '#' + el.id : ''), priority: 0 });
+                    try { if (el.contentDocument) collect(el.contentDocument); } catch (e) { }
                     continue;
                 }
                 var rect = el.getBoundingClientRect();
-                if(rect.width === 0 || rect.height === 0) continue;
+                if (rect.width === 0 || rect.height === 0) continue;
                 var ariaLabel = el.getAttribute('aria-label');
                 var title = el.getAttribute('title');
                 var text = (el.innerText || el.value || ariaLabel || title || '').trim();
+
+                // PRIORITY BOOST: Login, Sign In, My Account, Menu
+                var priority = 0;
+                var lowText = text.toLowerCase();
+                if (lowText.includes('sign in') || lowText.includes('login') || lowText.includes('account') || lowText.includes('menu')) {
+                    priority = 10;
+                }
+
                 var isIcon = tagName === 'svg' || tagName === 'i' || (el.className && el.className.toString().includes('icon'));
                 var isInteractive = tagName === 'a' || tagName === 'button' || tagName === 'input' || el.getAttribute('role') === 'button' || el.onclick;
                 if (['div', 'span'].includes(tagName) && !isInteractive && !ariaLabel && !title) {
                     if (!text || text.length > 60) continue;
                     if (el.children.length > 0 && el.innerText === el.children[0].innerText) continue;
                 }
-                if(!isInteractive && !isIcon && !text) continue;
+                if (!isInteractive && !isIcon && !text) continue;
                 if (text.length > 50) text = text.substring(0, 50);
                 var selector = tagName;
                 if (el.id) selector += '#' + CSS.escape(el.id);
@@ -84,24 +92,28 @@ window.SubzilloAgent = {
                 if (selector.length > 200) selector = selector.substring(0, 200);
                 if (seen.has(selector + text)) continue;
                 seen.add(selector + text);
-                elements.push({ 
-                    text: text || ('['+tagName+']'), 
-                    href: el.href || '', 
+                elements.push({
+                    text: text || ('[' + tagName + ']'),
+                    href: el.href || '',
                     selector: selector,
                     x: Math.round(rect.left + rect.width / 2),
-                    y: Math.round(rect.top + rect.height / 2)
+                    y: Math.round(rect.top + rect.height / 2),
+                    priority: priority
                 });
             }
             var all = root.querySelectorAll('*');
-            for(var j=0; j<all.length; j++) { if(all[j].shadowRoot) collect(all[j].shadowRoot); }
+            for (var j = 0; j < all.length; j++) { if (all[j].shadowRoot) collect(all[j].shadowRoot); }
         }
 
         var pageText = getText(document);
         collect(document);
 
+        // Sort by priority (highest first) then original order
+        elements.sort((a, b) => b.priority - a.priority);
+
         return {
             text: pageText,
-            elements: elements.slice(0, 100),
+            elements: elements.slice(0, 150), // Increase limit for more visibility
             url: window.location.href,
             isLoggedIn: false,
             scrollY: window.scrollY
@@ -109,7 +121,7 @@ window.SubzilloAgent = {
     },
 
     // 3. Robust Clicking
-    click: function(selector, clickText) {
+    click: function (selector, clickText) {
         function find(root) {
             if (!root) return null;
             var lowText = (clickText || "").trim().toLowerCase();
@@ -119,25 +131,25 @@ window.SubzilloAgent = {
                 try {
                     var el = root.querySelector(selector);
                     if (el) return el;
-                } catch(e) {}
+                } catch (e) { }
             }
 
             // 2. Fuzzy Text Match
             if (lowText) {
                 var walker = document.createTreeWalker(root, NodeFilter.SHOW_ELEMENT, null, false);
-                while(walker.nextNode()) {
+                while (walker.nextNode()) {
                     var node = walker.currentNode;
                     var content = (node.innerText || "").trim().toLowerCase();
                     if (content.includes(lowText) && content.length < 100) return node;
                 }
             }
-            
+
             // 3. Deep Shadow Root Search
             var all = root.querySelectorAll('*');
-            for(var i=0; i<all.length; i++) {
-                if(all[i].shadowRoot) {
+            for (var i = 0; i < all.length; i++) {
+                if (all[i].shadowRoot) {
                     var found = find(all[i].shadowRoot);
-                    if(found) return found;
+                    if (found) return found;
                 }
             }
             return null;
@@ -154,10 +166,10 @@ window.SubzilloAgent = {
         }
 
         var el = find(document);
-        if(!el) return "FAIL";
-        
+        if (!el) return "FAIL";
+
         var target = findClickableParent(el) || el;
-        target.scrollIntoView({block: 'center', inline: 'center', behavior: 'instant'});
+        target.scrollIntoView({ block: 'center', inline: 'center', behavior: 'instant' });
 
         // THE WARP: If it's a link, bypass clicking and just navigate
         if (target.tagName?.toLowerCase() === 'a' && target.href) {
@@ -178,28 +190,28 @@ window.SubzilloAgent = {
         types.forEach(type => {
             try {
                 var ev;
-                if(type.startsWith('touch')) ev = new TouchEvent(type, {bubbles: true, cancelable: true, view: window, composed: true});
-                else if(type.startsWith('pointer')) ev = new PointerEvent(type, {bubbles: true, cancelable: true, view: window, composed: true, isPrimary: true, pointerId: 1});
-                else ev = new MouseEvent(type, {bubbles: true, cancelable: true, view: window, composed: true});
+                if (type.startsWith('touch')) ev = new TouchEvent(type, { bubbles: true, cancelable: true, view: window, composed: true });
+                else if (type.startsWith('pointer')) ev = new PointerEvent(type, { bubbles: true, cancelable: true, view: window, composed: true, isPrimary: true, pointerId: 1 });
+                else ev = new MouseEvent(type, { bubbles: true, cancelable: true, view: window, composed: true });
                 target.dispatchEvent(ev);
-            } catch(e) {}
+            } catch (e) { }
         });
-        
-        if (typeof target.click === 'function') target.click(); 
+
+        if (typeof target.click === 'function') target.click();
         return "OK";
     },
 
     // 4. Typing
-    type: function(selector, text) {
+    type: function (selector, text) {
         try {
             var el = document.querySelector(selector);
-            if(el) {
+            if (el) {
                 el.value = text;
                 el.dispatchEvent(new Event('input', { bubbles: true }));
                 el.dispatchEvent(new Event('change', { bubbles: true }));
                 return "OK";
             }
-        } catch(e) {}
+        } catch (e) { }
         return "FAIL";
     }
 };

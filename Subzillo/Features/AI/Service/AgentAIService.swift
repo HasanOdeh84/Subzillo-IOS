@@ -82,7 +82,9 @@ class AgentAIService {
             - Do NOT wait for or loop on "Skip" or "Next" buttons if the header icons are visible.
         22. THE SOCIAL LOGIN HANDOVER: If you see "Sign in with Google", "Apple", "Facebook", or any Social Auth button:
             - You are PROHIBITED from clicking them yourself. 
-            - You MUST return action=askUser with a message: "Social login detected. Please sign in with your provider and click reautomate."
+            - MARKETING_PAGE_LOOP: If you see marketing offers (e.g., "$67.99/mo", "Try it for $0", "Limited time offer"), you are NOT logged in or you are stuck on a sales page. 
+        - ACTION: Do NOT stay on a sales page. Click "Sign In" or "Log In". If you can't find it, navigate directly to the service's billing/settings URL.
+        - NEVER tell the user "I see plan details" if the text is clearly a marketing offer for new users.
         23. HUMAN-ONLY ZONES: If you see 2FA prompts, Payment Method entry, or specific "Complete your profile" onboarding (birthday, likes, preferences):
             - You are PROHIBITED from clicking or guessing. 
             - You MUST return action=askUser to let the user complete these secure/personal steps.
@@ -315,6 +317,15 @@ class AgentAIService {
         Respond with ONLY a valid JSON action block.
         """
     
+    func standardChat(prompt: String) async throws -> String? {
+        let sys = "You are Subzillo AI, a helpful assistant for subscription management. Help the user with their questions."
+        if activeProvider == .claude {
+            return try await callClaudeAPI(userContent: prompt, systemOverride: sys)
+        } else {
+            return try await callChatGPTAPI(userContent: prompt, systemOverride: sys)
+        }
+    }
+    
     func nextAction(
         task: AgentTask,
         currentURL: String,
@@ -476,20 +487,15 @@ class AgentAIService {
             You are a URL expert. Given a subscription service name, you MUST return the OFFICIAL and DIRECT login page URL.
             
             STRICT RULES:
-            1. The URL MUST lead directly to a login interface where the user can authenticate:
-               - Email/password fields OR
-               - OAuth buttons (Google, Apple, Facebook) OR any
-               - Mobile number / OTP login
-            
-            2. DO NOT return:
-               - Generic SSO or Account portals (e.g. accounts.google.com, appleid.apple.com) if the service has its own brand domain (e.g. youtube.com).
-               - Marketing landing pages that have no connection to the app.
-            
-            3. Prefer these paths in order:
-               - The main service homepage (e.g. youtube.com), as it will provide a login button or redirect automatically.
-               - /login or /signin on the brand's own domain.
-            
-            7. BRAND IDENTITY (CRITICAL): If the service is YouTube, Gmail, or Drive, you MUST return the service-specific domain (e.g. youtube.com, gmail.com) and NOT the generic Google Accounts URL.
+            1. The URL MUST lead directly to a login interface where the user can authenticate.
+            2. BRAND IDENTITY (CRITICAL):
+               - Claude -> https://claude.ai/login
+               - YouTube TV -> https://tv.youtube.com/
+               - YouTube Premium -> https://www.youtube.com/
+               - YouTube Music -> https://music.youtube.com/
+               - Gmail -> https://mail.google.com/
+            3. NEVER return help articles, support pages, or generic portals like accounts.google.com.
+            4. Prefer the root domain of the specific service (e.g. netflix.com, spotify.com).
             
             OUTPUT FORMAT (STRICT JSON ONLY):
             {

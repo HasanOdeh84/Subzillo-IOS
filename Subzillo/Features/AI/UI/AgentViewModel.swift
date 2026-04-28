@@ -16,6 +16,7 @@ class AgentViewModel: ObservableObject {
     
     @Published var displayMessage: String = ""
     @Published var isInitialLoading: Bool = false
+    @Published var isAgenticMode: Bool = true
     
     private var cancellables = Set<AnyCancellable>()
     
@@ -26,7 +27,7 @@ class AgentViewModel: ObservableObject {
         self.resolver = ServiceDetailsResolver()
         
         setupOrchestratorObservation()
-        addSystemMessage("Hello! I am the Subzillo Subscription Agent. Tell me which subscription you want me to find billing details for.")
+        addMessage(sender: .agent, text: "Hello! I am the Subzillo Subscription Agent. Tell me which subscription you want me to find billing details for.")
     }
     
     private func setupOrchestratorObservation() {
@@ -60,6 +61,10 @@ class AgentViewModel: ObservableObject {
                     self.currentStatus = message
                     self.updateDisplayMessage(message, isPrompt: true)
                     self.addSystemMessage("Action Required: \(message)")
+                case .initialLoadStarted:
+                    self.isInitialLoading = true
+                case .initialLoadFinished:
+                    self.isInitialLoading = false
                 }
             }
             .store(in: &cancellables)
@@ -75,6 +80,23 @@ class AgentViewModel: ObservableObject {
         
         addMessage(sender: .user, text: text)
         
+        if !isAgenticMode {
+            // Standard Chatbot Mode
+            Task {
+                do {
+                    let response = try await AgentAIService.shared.standardChat(prompt: text)
+                    await MainActor.run {
+                        self.addMessage(sender: .agent, text: response ?? "I'm sorry, I couldn't process that.")
+                    }
+                } catch {
+                    await MainActor.run {
+                        self.addMessage(sender: .agent, text: "Error: \(error.localizedDescription)", isError: true)
+                    }
+                }
+            }
+            return
+        }
+        
         if isAgentRunning {
             addSystemMessage("Agent is already working. Please wait.")
             return
@@ -89,9 +111,12 @@ class AgentViewModel: ObservableObject {
                     DispatchQueue.main.async { self.currentStatus = progress }
                 }
                 
+                print("🧠 Agent: Resolver returned ServiceName: [\(details.serviceName)], LoginURL: [\(details.loginUrl)]")
+                
                 if details.serviceName.isEmpty {
+                    print("⚠️ Agent: Service name is empty. Aborting.")
                     await MainActor.run {
-                        self.addSystemMessage("Could not identify the service.")
+                        self.addMessage(sender: .agent, text: "Could not identify the service.")
                         self.isAgentRunning = false
                         self.showBrowser = false
                     }
@@ -118,7 +143,16 @@ class AgentViewModel: ObservableObject {
                     loginURL: details.loginUrl
                 )
                 
-                await orchestrator.start(task: task)
+                print("🚀 Agent: Starting task for \(task.displayName) (Intent: \(task.intent), URL: \(task.loginURL))")
+                
+                // Prepare browser for the new task while keeping login sessions
+                await MainActor.run {
+                    self.browser.prepareForNewTask {
+                        Task {
+                            await self.orchestrator.start(task: task)
+                        }
+                    }
+                }
             } catch let error as AgentAIService.AgentAIError {
                 let errorMessage: String
                 switch error {
@@ -129,13 +163,13 @@ class AgentViewModel: ObservableObject {
                 }
                 
                 await MainActor.run {
-                    self.addMessage(sender: .system, text: errorMessage, isError: true)
+                    self.addMessage(sender: .agent, text: errorMessage, isError: true)
                     self.isAgentRunning = false
                     self.showBrowser = false
                 }
             } catch {
                 await MainActor.run {
-                    self.addMessage(sender: .system, text: "System Error: \(error.localizedDescription)", isError: true)
+                    self.addMessage(sender: .agent, text: "System Error: \(error.localizedDescription)", isError: true)
                     self.isAgentRunning = false
                     self.showBrowser = false
                 }

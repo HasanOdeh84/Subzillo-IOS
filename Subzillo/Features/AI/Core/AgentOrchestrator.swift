@@ -2,6 +2,8 @@ import Foundation
 import Combine
 
 enum AgentUpdate {
+    case initialLoadStarted
+    case initialLoadFinished
     case status(String)
     case completed(ExtractedFields)
     case failed(String)
@@ -39,13 +41,29 @@ class AgentOrchestrator: ObservableObject {
                 history.removeAll()
                 collectedFields = ExtractedFields(serviceName: task.displayName)
                 
+                _updates.send(.initialLoadStarted)
                 _updates.send(.status("Starting automation for \(task.displayName)..."))
                 
                 let targetUrl = !task.loginURL.isEmpty ? task.loginURL : ""
                 if !targetUrl.isEmpty {
-                    _updates.send(.status("Navigating to login page..."))
-                    browser.navigate(to: targetUrl)
-                    await browser.waitForLoad()
+                    let currentUrl = browser.currentURL.lowercased()
+                    
+                    // SMART NAVIGATION: If we are already on the service domain and NOT on a generic login/auth page, 
+                    // and we just logged in, don't force-navigate back to the login URL.
+                    let isAlreadyOnService = !currentUrl.isEmpty && currentUrl != "about:blank" && currentUrl.contains(task.rawServiceName)
+                    let isCurrentlyOnLogin = currentUrl.contains("login") || currentUrl.contains("signin") || currentUrl.contains("auth")
+                    
+                    if isAlreadyOnService && !isCurrentlyOnLogin {
+                        print("🚀 Agent: Already on service page [\(currentUrl)]. Skipping navigation to \(targetUrl)")
+                        _updates.send(.initialLoadFinished)
+                    } else {
+                        _updates.send(.status("Navigating to login page..."))
+                        browser.navigate(to: targetUrl)
+                        await browser.waitForLoad()
+                        _updates.send(.initialLoadFinished)
+                    }
+                } else {
+                    _updates.send(.initialLoadFinished)
                 }
                 
                 var lastStateHash: String? = nil
@@ -59,11 +77,13 @@ class AgentOrchestrator: ObservableObject {
                     await browser.waitForLoad()
                 
                 // Final UI Stability Delay for accurate snapshots
-                try? await Task.sleep(nanoseconds: 1_500_000_000) // 1.5 seconds
+                try? await Task.sleep(nanoseconds: 800_000_000) // 0.8 seconds (Reduced from 1.5s for responsiveness)
                 
                 let snapshot = await browser.extractPageSnapshot()
-                    // Improved Hash: Includes URL + Text Sample + Element Count + Scroll position to detect progress
-                    let currentStateHash = "\(browser.currentURL)_\(snapshot.text.prefix(500))_\(snapshot.elements.count)_\(snapshot.scrollY ?? 0)"
+                print("📸 Agent Snapshot: [\(snapshot.text.prefix(200))...] | URL: \(browser.currentURL) | Elements: \(snapshot.elements.count)")
+                
+                // Improved Hash: Includes URL + Text Sample + Element Count + Scroll position to detect progress
+                let currentStateHash = "\(browser.currentURL)_\(snapshot.text.prefix(500))_\(snapshot.elements.count)_\(snapshot.scrollY ?? 0)"
                     
                     if lastActionIsStateChanging {
                         lastActionFailed = (currentStateHash == lastStateHash)
@@ -85,6 +105,7 @@ class AgentOrchestrator: ObservableObject {
                     }
                     
                     let actionStr = "Action: \(action.action?.rawValue ?? "?") (Selector: \(action.selector ?? action.clickText ?? "?"))"
+                    print("🤖 Agent Chosen Action: \(actionStr)")
                     
                     let isStateChangingAction: [AgentActionType] = [.navigate, .click, .clickText, .type, .scroll]
                     if let type = action.action, isStateChangingAction.contains(type) {
@@ -93,11 +114,16 @@ class AgentOrchestrator: ObservableObject {
                         lastActionIsStateChanging = false
                     }
                     
-                    // Loop detection
-                    if lastActionIsStateChanging && actionStr == history.last {
-                        let repeats = history.suffix(3).filter { $0 == actionStr }.count
-                        if repeats >= 3 {
-                            _updates.send(.needsIntervention("Loop detected. Please perform action manually then resume."))
+                    // SMART LOOP DETECTION:
+                    // Only flag a loop if:
+                    // 1. The action is state-changing (click, type, navigate, scroll).
+                    // 2. The action is EXACTLY the same as the previous one.
+                    // 3. The page state (content/URL/scroll) hasn't changed since the last action.
+                    // 4. This has happened 5 times in a row.
+                    if lastActionIsStateChanging && lastActionFailed && actionStr == history.last {
+                        let repeats = history.suffix(5).filter { $0 == actionStr }.count
+                        if repeats >= 5 && steps > 3 {
+                            _updates.send(.needsIntervention("Loop detected. The page isn't responding as expected. Please perform the action manually then click Reautomate."))
                             await suspendAutomation()
                             history.removeAll()
                             continue
@@ -105,6 +131,7 @@ class AgentOrchestrator: ObservableObject {
                     }
                     
                     history.append(actionStr)
+                    _updates.send(.status("Executing: \(action.action?.rawValue ?? "action")..."))
                     
                     if try await executeAction(action, task: task, snapshot: snapshot, lastActionFailed: lastActionFailed) {
                         // Task finished normally through action execution (e.g. .done)
@@ -188,8 +215,17 @@ class AgentOrchestrator: ObservableObject {
     }
     
     func resume() {
-        resumeContinuation?.resume()
-        resumeContinuation = nil
+        print("⏯ Agent: Resuming automation. Forcing sync reload.")
+        history.removeAll()
+        
+        // CRITICAL: When resuming, force a reload to ensure the new login session is picked up
+        Task { @MainActor in
+            browser.webView.reload()
+            // Give it a moment to start reloading before releasing the orchestrator
+            try? await Task.sleep(nanoseconds: 500_000_000)
+            resumeContinuation?.resume()
+            resumeContinuation = nil
+        }
     }
     
     func stop() {

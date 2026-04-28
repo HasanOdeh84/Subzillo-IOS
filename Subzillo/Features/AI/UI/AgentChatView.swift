@@ -4,30 +4,45 @@ import WebKit
 struct AgentChatView: View {
     @StateObject var viewModel = AgentViewModel()
     @State private var inputText: String = ""
+    @State private var showPlusMenu: Bool = false
     
     var body: some View {
         VStack(spacing: 0) {
-            // Header: Aligned with Subzillo style
+            // Header: Smart Assistant (Matching Design)
             HStack {
-                Text("AI Agent")
+                Button {
+                    // Back action
+                } label: {
+                    Image(systemName: "chevron.left")
+                        .font(.title3)
+                        .foregroundColor(.navyBlueCTA700)
+                }
+                
+                Spacer()
+                
+                Text("Smart Assistant")
                     .font(.appBold(24))
                     .foregroundColor(.navyBlueCTA700)
                 
                 Spacer()
                 
-                Button {
-                    withAnimation { viewModel.showBrowser.toggle() }
-                } label: {
-                    Image("safari_icon") // Assuming this exists or using a standard icon
-                        .resizable()
-                        .frame(width: 24, height: 24)
+                HStack(spacing: 8) {
+                    Text("AGENTIC")
+                        .font(.appBold(12))
                         .foregroundColor(.navyBlueCTA700)
+                    
+                    Toggle("", isOn: $viewModel.isAgenticMode)
+                        .labelsHidden()
+                        .toggleStyle(SwitchToggleStyle(tint: .navyBlueCTA700))
+                        .scaleEffect(0.8)
                 }
             }
             .padding(.horizontal, 20)
-            .padding(.top, 50)
+            .padding(.top, 30)
             .padding(.bottom, 16)
             .background(Color.white)
+            
+            Divider()
             
             // Chat Messages
             ScrollViewReader { proxy in
@@ -47,32 +62,60 @@ struct AgentChatView: View {
                 }
             }
             
-            // Input Area: Aligned with App Inputs
-            VStack(spacing: 12) {
+            // Input Area: Matching Design
+            VStack(spacing: 0) {
+                if showPlusMenu {
+                    PlusMenuView()
+                        .transition(.move(edge: .bottom).combined(with: .opacity))
+                }
+                
                 HStack(spacing: 12) {
-                    TextField("Ask me something...", text: $inputText)
-                        .font(.appRegular(16))
-                        .padding()
-                        .background(Color.neutralBg100)
-                        .cornerRadius(12)
-                    
+                    // Gradient Plus Button
                     Button {
-                        viewModel.sendMessage(inputText)
-                        inputText = ""
+                        withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
+                            showPlusMenu.toggle()
+                        }
                     } label: {
-                        Image(systemName: "paperplane.fill")
+                        Image(systemName: showPlusMenu ? "xmark" : "plus")
                             .font(.title3)
-                            .foregroundColor(.white)
-                            .padding(12)
-                            .background(Color.navyBlueCTA700)
-                            .clipShape(Circle())
+                            .foregroundColor(.navyBlueCTA700)
+                            .frame(width: 54, height: 54)
+                            .background(Color.white)
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 16)
+                                    .stroke(
+                                        LinearGradient(colors: [Color(hex: "A719DD"), Color(hex: "623BD8"), Color(hex: "4489EB")], startPoint: .topLeading, endPoint: .bottomTrailing),
+                                        lineWidth: 1
+                                    )
+                            )
                     }
-                    .disabled(inputText.isEmpty || viewModel.isAgentRunning)
+                    
+                    // Text Input
+                    HStack {
+                        TextField(showPlusMenu ? "While typing" : "Ask me something...", text: $inputText)
+                            .font(.appRegular(16))
+                        
+                        Button {
+                            viewModel.sendMessage(inputText)
+                            inputText = ""
+                            showPlusMenu = false
+                        } label: {
+                            Image(systemName: "paperplane.fill")
+                                .font(.title3)
+                                .foregroundColor(.navyBlueCTA700)
+                        }
+                        .disabled(inputText.isEmpty || viewModel.isAgentRunning)
+                    }
+                    .padding(.horizontal, 16)
+                    .frame(height: 54)
+                    .background(Color.neutralBg100.opacity(0.5))
+                    .cornerRadius(20)
                 }
                 .padding(.horizontal, 20)
-                .padding(.bottom, 30)
+                .padding(.bottom, 34)
+                .padding(.top, 12)
+                .background(Color.white)
             }
-            .background(Color.white)
         }
         .navigationBarHidden(true)
         .sheet(isPresented: $viewModel.showBrowser, onDismiss: {
@@ -124,9 +167,13 @@ struct AgentBrowserView: View {
                 }
                 
                 if viewModel.isInitialLoading {
-                    ProgressView()
-                        .progressViewStyle(CircularProgressViewStyle(tint: .gray))
-                        .scaleEffect(1.5)
+                    ZStack {
+                        Color.white
+                        ProgressView()
+                            .progressViewStyle(CircularProgressViewStyle(tint: .gray))
+                            .scaleEffect(1.5)
+                    }
+                    .ignoresSafeArea()
                 }
             }
             .navigationBarTitleDisplayMode(.inline)
@@ -183,32 +230,68 @@ struct MessageBubble: View {
             VStack(alignment: message.sender == .user ? .trailing : .leading, spacing: 8) {
                 if message.sender == .system {
                     Text(message.text)
-                        .font(.appMedium(13))
+                        .font(.appMedium(12))
                         .foregroundColor(.secondary)
-                        .padding(14)
-                        .background(Color.neutralBg100.opacity(0.5))
-                        .cornerRadius(16)
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 16)
-                                .stroke(Color.neutral800.opacity(0.1), lineWidth: 1)
-                        )
-                        .frame(maxWidth: UIScreen.main.bounds.width * 0.75, alignment: .leading)
+                        .padding(.horizontal, 16)
+                        .padding(.vertical, 8)
+                        .background(Color.neutralBg100)
+                        .cornerRadius(12)
+                        .frame(maxWidth: .infinity, alignment: .center)
                 } else {
-                    Text(message.text)
-                        .padding(14)
-                        .font(.appRegular(15))
-                        .background(bubbleColor)
-                        .foregroundColor(textColor)
-                        .cornerRadius(16, corners: bubbleCorners)
-                        .overlay(
-                            RoundedCorner(radius: 16, corners: bubbleCorners)
-                                .stroke(message.sender == .user ? Color.clear : Color.neutral800.opacity(0.1), lineWidth: 1)
+                    HStack(alignment: .top, spacing: 10) {
+                        if message.sender == .agent {
+                            // Bot Icon
+                            Image("chatBotIcon")
+                                .resizable()
+                                .scaledToFit()
+                                .frame(width: 40, height: 40)
+                                .clipShape(Circle())
+                                .shadow(color: Color.black.opacity(0.1), radius: 4, x: 0, y: 2)
+                        }
+                        
+                        // Text Bubble and Data Card Combined
+                        VStack(alignment: .leading, spacing: 10) {
+                            Text(message.text)
+                                .font(.appRegular(15))
+                                .foregroundColor(message.sender == .user ? .navyBlueCTA700 : Color(hex: "364560"))
+                            
+                            // Data Card (Integrated inside bubble)
+                            if let fields = message.extractedFields, shouldShowCard(fields) {
+                                VStack(spacing: 8) {
+                                    DataRow(label: "Service", value: fields.serviceName ?? "Unknown", color: Color(hex: "4489EB"))
+                                    DataRow(label: "Price", value: fields.price ?? "N/A", color: Color(hex: "4489EB"))
+                                    DataRow(label: "Renewal", value: fields.billingCycle ?? "Monthly", color: Color(hex: "4489EB"))
+                                    DataRow(label: "Payment", value: fields.paymentMethod ?? "N/A", color: Color(hex: "4489EB"))
+                                }
+                            }
+                        }
+                        .padding(.leading, message.sender == .user ? 16 : 24)
+                        .padding(.trailing, message.sender == .user ? 24 : 16)
+                        .padding(.vertical, 12)
+                        .background(
+                            ChatBubbleShape(isUser: message.sender == .user)
+                                .fill(message.sender == .user ? Color(hex: "D9E6FA") : Color.white)
                         )
-                        .frame(maxWidth: UIScreen.main.bounds.width * 0.75, alignment: message.sender == .user ? .trailing : .leading)
-                }
-                
-                if let fields = message.extractedFields, shouldShowCard(fields) {
-                    ExtractedDataCard(fields: fields)
+                        .overlay(
+                            ChatBubbleShape(isUser: message.sender == .user)
+                                .stroke(
+                                    message.sender == .user ? AnyShapeStyle(Color.clear) : AnyShapeStyle(LinearGradient(colors: [Color(hex: "A719DD"), Color(hex: "623BD8"), Color(hex: "4489EB")], startPoint: .topLeading, endPoint: .bottomTrailing)),
+                                    lineWidth: 1
+                                )
+                        )
+                        
+                        if message.sender == .user {
+                            // User Avatar Placeholder
+                            Image("user_avatar_placeholder") // Or Circle with initial
+                                .resizable()
+                                .scaledToFill()
+                                .frame(width: 40, height: 40)
+                                .clipShape(Circle())
+                                .background(Circle().fill(Color.gray.opacity(0.2)))
+                                .shadow(color: Color.black.opacity(0.1), radius: 4, x: 0, y: 2)
+                        }
+                    }
+                    .frame(maxWidth: UIScreen.main.bounds.width * 0.85, alignment: message.sender == .user ? .trailing : .leading)
                 }
             }
             
@@ -228,25 +311,6 @@ struct MessageBubble: View {
         return hasPlan || hasPrice
     }
     
-    private var bubbleColor: Color {
-        switch message.sender {
-        case .user: return .navyBlueCTA700
-        case .agent: return message.isError ? Color.red.opacity(0.1) : .neutralBg100
-        case .system: return .clear
-        }
-    }
-    
-    private var textColor: Color {
-        message.sender == .user ? .white : .neutral800
-    }
-    
-    private var bubbleCorners: UIRectCorner {
-        switch message.sender {
-        case .user: return [.topLeft, .topRight, .bottomLeft]
-        case .agent: return [.topLeft, .topRight, .bottomRight]
-        case .system: return []
-        }
-    }
 }
 
 struct ExtractedDataCard: View {
@@ -261,37 +325,35 @@ struct ExtractedDataCard: View {
             Divider()
             
             VStack(spacing: 8) {
-                row(label: "Plan", value: fields.plan)
-                row(label: "Price", value: fields.price)
-                row(label: "Bill Date", value: fields.billingDate)
-            }
-        }
-        .padding(16)
-        .background(Color.white)
-        .cornerRadius(12)
-        .overlay(
-            RoundedRectangle(cornerRadius: 12)
-                .stroke(Color.neutral800.opacity(0.1), lineWidth: 1)
-        )
-        .shadow(color: Color.black.opacity(0.05), radius: 5, x: 0, y: 2)
-        .padding(.top, 8)
-    }
-    
-    @ViewBuilder
-    private func row(label: String, value: String?) -> some View {
-        if let value = value, !value.isEmpty, value.lowercased() != "n/a", value.lowercased() != "unknown" {
-            HStack {
-                Text(label)
-                    .font(.appRegular(13))
-                    .foregroundColor(.secondary)
-                Spacer()
-                Text(value)
-                    .font(.appMedium(13))
-                    .foregroundColor(.neutral800)
+                DataRow(label: "Plan", value: fields.plan, color: .navyBlueCTA700)
+                DataRow(label: "Price", value: fields.price, color: .navyBlueCTA700)
+                DataRow(label: "Bill Date", value: fields.billingDate, color: .navyBlueCTA700)
             }
         }
     }
 }
+
+struct DataRow: View {
+    let label: String
+    let value: String?
+    let color: Color
+    
+    var body: some View {
+        if let value = value, !value.isEmpty, value.lowercased() != "n/a", value.lowercased() != "unknown" {
+            HStack {
+                Text(label + ":")
+                    .font(.appRegular(14))
+                    .foregroundColor(.secondary)
+                Spacer()
+                Text(value)
+                    .font(.appMedium(14))
+                    .foregroundColor(color)
+            }
+        }
+    }
+}
+
+
 
 // MARK: - Popup WebView Representable
 struct AgentPopupWebViewRepresentable: UIViewRepresentable {
@@ -303,3 +365,104 @@ struct AgentPopupWebViewRepresentable: UIViewRepresentable {
     
     func updateUIView(_ uiView: WKWebView, context: Context) {}
 }
+
+// MARK: - Chat Bubble Shape
+struct ChatBubbleShape: Shape {
+    var isUser: Bool
+
+    func path(in rect: CGRect) -> Path {
+        let path = UIBezierPath()
+        let radius: CGFloat = 12
+        let tailSize: CGFloat = 8
+        let tailOffset: CGFloat = 14
+        
+        if isUser {
+            // Right tail
+            path.move(to: CGPoint(x: rect.minX + radius, y: rect.minY))
+            path.addLine(to: CGPoint(x: rect.maxX - tailSize - radius, y: rect.minY))
+            path.addArc(withCenter: CGPoint(x: rect.maxX - tailSize - radius, y: rect.minY + radius), radius: radius, startAngle: -.pi/2, endAngle: 0, clockwise: true)
+            
+            // Tail
+            path.addLine(to: CGPoint(x: rect.maxX - tailSize, y: rect.minY + tailOffset))
+            path.addLine(to: CGPoint(x: rect.maxX, y: rect.minY + tailOffset + (tailSize/2)))
+            path.addLine(to: CGPoint(x: rect.maxX - tailSize, y: rect.minY + tailOffset + tailSize))
+            
+            path.addLine(to: CGPoint(x: rect.maxX - tailSize, y: rect.maxY - radius))
+            path.addArc(withCenter: CGPoint(x: rect.maxX - tailSize - radius, y: rect.maxY - radius), radius: radius, startAngle: 0, endAngle: .pi/2, clockwise: true)
+            
+            path.addLine(to: CGPoint(x: rect.minX + radius, y: rect.maxY))
+            path.addArc(withCenter: CGPoint(x: rect.minX + radius, y: rect.maxY - radius), radius: radius, startAngle: .pi/2, endAngle: .pi, clockwise: true)
+            
+            path.addLine(to: CGPoint(x: rect.minX, y: rect.minY + radius))
+            path.addArc(withCenter: CGPoint(x: rect.minX + radius, y: rect.minY + radius), radius: radius, startAngle: .pi, endAngle: -.pi/2, clockwise: true)
+        } else {
+            // Left tail
+            path.move(to: CGPoint(x: rect.minX + tailSize + radius, y: rect.minY))
+            path.addLine(to: CGPoint(x: rect.maxX - radius, y: rect.minY))
+            path.addArc(withCenter: CGPoint(x: rect.maxX - radius, y: rect.minY + radius), radius: radius, startAngle: -.pi/2, endAngle: 0, clockwise: true)
+            
+            path.addLine(to: CGPoint(x: rect.maxX, y: rect.maxY - radius))
+            path.addArc(withCenter: CGPoint(x: rect.maxX - radius, y: rect.maxY - radius), radius: radius, startAngle: 0, endAngle: .pi/2, clockwise: true)
+            
+            path.addLine(to: CGPoint(x: rect.minX + tailSize + radius, y: rect.maxY))
+            path.addArc(withCenter: CGPoint(x: rect.minX + tailSize + radius, y: rect.maxY - radius), radius: radius, startAngle: .pi/2, endAngle: .pi, clockwise: true)
+            
+            // Tail
+            path.addLine(to: CGPoint(x: rect.minX + tailSize, y: rect.minY + tailOffset + tailSize))
+            path.addLine(to: CGPoint(x: rect.minX, y: rect.minY + tailOffset + (tailSize/2)))
+            path.addLine(to: CGPoint(x: rect.minX + tailSize, y: rect.minY + tailOffset))
+            
+            path.addLine(to: CGPoint(x: rect.minX + tailSize, y: rect.minY + radius))
+            path.addArc(withCenter: CGPoint(x: rect.minX + tailSize + radius, y: rect.minY + radius), radius: radius, startAngle: .pi, endAngle: -.pi/2, clockwise: true)
+        }
+        
+        return Path(path.cgPath)
+    }
+}
+
+// MARK: - Plus Menu View
+struct PlusMenuView: View {
+    var body: some View {
+        VStack(spacing: 20) {
+            // Handle
+            Capsule()
+                .fill(Color.gray.opacity(0.3))
+                .frame(width: 60, height: 4)
+                .padding(.top, 12)
+            
+            HStack(spacing: 60) {
+                PlusMenuButton(icon: "voiceBot")
+                PlusMenuButton(icon: "camerBot")
+            }
+            .padding(.bottom, 20)
+        }
+        .frame(maxWidth: .infinity)
+        .background(Color.white)
+        .cornerRadius(24) // Simplified, usually enough for bottom sheet style
+        .shadow(color: Color.black.opacity(0.05), radius: 10, y: -5)
+    }
+}
+
+struct PlusMenuButton: View {
+    let icon: String
+    
+    var body: some View {
+        Button {
+            // Action
+        } label: {
+               Image(icon) // Asset image
+                .font(.system(size: 32))
+                .foregroundColor(.navyBlueCTA700)
+                .frame(width: 80, height: 80)
+                .background(Color.white)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 16)
+                        .stroke(
+                            LinearGradient(colors: [Color(hex: "A719DD"), Color(hex: "623BD8"), Color(hex: "4489EB")], startPoint: .topLeading, endPoint: .bottomTrailing),
+                            lineWidth: 1
+                        )
+                )
+        }
+    }
+}
+
