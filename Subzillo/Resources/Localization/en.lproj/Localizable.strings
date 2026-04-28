@@ -1,0 +1,410 @@
+/* 
+  Localizable.strings
+  Subzillo
+
+  Created by Antigravity on 03/10/25.
+*/
+
+// MARK: - General
+"Cancel" = "Cancel";
+"Delete" = "Delete";
+"Done" = "Done";
+"Search" = "Search";
+"Save" = "Save";
+"Edit" = "Edit";
+"All" = "All";
+"Me" = "Me";
+"Retry" = "Retry";
+"Continue" = "Continue";
+
+// MARK: - Login & Registration
+"Login" = "Login";
+"Email" = "Email";
+"Password" = "Password";
+"Confirm Password" = "Confirm Password";
+"Full Name" = "Full Name";
+"Forgot Password?" = "Forgot Password?";
+"Dont have an account? " = "Don't have an account? ";
+"SignUp" = "Sign Up";
+"Or continue with" = "Or continue with";
+"Enter your email" = "Enter your email";
+"Enter your password" = "Enter your password";
+"Create your account" = "Create your account";
+"Enter your Full Name" = "Enter your Full Name";
+"Please enter your full name" = "Please enter your full name";
+"Please enter email address" = "Please enter email address";
+"Enter a valid email address" = "Enter a valid email address";
+"Email is required" = "Email is required";
+"Enter valid email" = "Enter valid email";
+"Password is required" = "Password is required";
+"Please enter password" = "Please enter password";
+"Please enter valid password" = "Please enter valid password";
+"Please enter confirm password" = "Please enter confirm password";
+"Password and confirm password should be same" = "Password and confirm password should be same";
+"Please enter username" = "Please enter username";
+"Username must be at least 3 characters" = "Username must be at least 3 characters";
+"Please enter the OTP" = "Please enter the OTP";
+"Please enter a 6-digit code" = "Please enter a 6-digit code";
+"Phone number is required" = "Phone number is required";
+"Please answer all questions" = "Please answer all questions";
+
+"Forgot Password?" = "Forgot Password?";
+"Enter your registered username to reset your password." = "Enter your registered username to reset your password.";
+"Enter your username" = "Enter your username";
+"Reset" = "Reset";
+"Reset Password" = "Reset Password";
+"Create New Password" = "Create New Password";
+
+"At least 8 characters" = "At least 8 characters";
+"One uppercase letter (e.g., Subzillo1)" = "One uppercase letter (e.g., Subzillo1)";
+"One number (e.g., Secure123)" = "One number (e.g., Secure123)";
+"One special character (e.g., Pa$$word!)" = "One special character (e.g., Pa$$word!)";
+"Phone number [Optional]" = "Phone number [Optional]";
+"Email [Optional]" = "Email [Optional]";
+"Finish Sign Up" = "Finish Sign Up";
+
+// MARK: - Home
+"Hi %@" = "Hi %@";
+"Your subscriptions at a glance" = "Your subscriptions at a glance";
+"Monthly spend" = "Monthly spend";
+"Active Subscriptions" = "Active Subscriptions";
+"Next renewal" = "Next renewal";
+"View More" = "View More";
+"Add new subscription" = "Add new subscription";
+
+// MARK: - Welcome
+"Welcome to" = "Welcome to";
+"Track all your subscriptions in one place" = "Track all your subscriptions in one place";
+"Add Subscription by AI Agent" = "Add Subscription by AI Agent";
+"Upload Image" = "Upload Image";
+"Connect Email" = "Connect Email";
+"Add by Voice" = "Add by Voice";
+"Manual Entry" = "Manual Entry";
+"No subscriptions yet" = "No subscriptions yet";
+"Add your first subscription to start tracking your recurring payments" = "Add your first subscription to start tracking your recurring payments";
+"You are in the free plan" = "You are in the free plan";
+"Upgrade Today" = "Upgrade Today";
+"Pro tip" = "Pro tip";
+"Start with your most expensive subscriptions first. Connect your email to automatically find more." = "Start with your most expensive subscriptions first. Connect your email to automatically find more.";
+
+// MARK: - Subscriptions
+"Your subscriptions" = "Your subscriptions";
+"List View" = "List View";
+"Calendar" = "Calendar";
+"Subscription Spend Analytics" = "Subscription Spend Analytics";
+"Top spending subscriptions" = "Top spending subscriptions";
+"Year Overview" = "Year Overview";
+"Expired" = "Expired";
+"Inactive" = "Inactive";
+"View Details" = "View Details";
+"Are you sure you want to delete the subscriptions?\nData will be permanently deleted" = "Are you sure you want to delete the subscriptions?\nData will be permanently deleted";
+
+// MARK: - Analytics
+"Active - " = "Active - ";
+"Inactive - " = "Inactive - ";
+"Subscriptions" = "Subscriptions";
+
+// MARK: - Months
+"Jan" = "Jan";
+"Feb" = "Feb";
+"Mar" = "Mar";
+"Apr" = "Apr";
+"May" = "May";
+"Jun" = "Jun";
+"Jul" = "Jul";
+"Aug" = "Aug";
+"Sep" = "Sep";
+"Oct" = "Oct";
+"Nov" = "Nov";
+"Dec" = "Dec";
+
+// MARK: - Social Login
+"Continue with Google" = "Continue with Google";
+"Continue with Apple" = "Continue with Apple";
+
+// MARK: - Categories
+"Streaming" = "Streaming";
+"Music" = "Music";
+"Cloud" = "Cloud";
+"Software" = "Software";
+"Gaming" = "Gaming";
+"Utilities" = "Utilities";
+"Finance" = "Finance";
+"Health" = "Health";
+"Others" = "Others";
+
+// MARK: - Connect Email
+"Auto-detect from email" = "Auto-detect from email";
+"Connect Gmail" = "Connect Gmail";
+"Link your Gmail account to sync and manage all email subscriptions." = "Link your Gmail account to sync and manage all email subscriptions.";
+"Connect Outlook" = "Connect Outlook";
+"Connect your Outlook account to access and manage your subscriptions." = "Connect your Outlook account to access and manage your subscriptions.";
+"Connected mails" = "Connected mails";
+"How it work?" = "How it work?";
+"We never store full email content" = "We never store full email content";
+"We cannot send emails or access personal messages" = "We cannot send emails or access personal messages";
+
+// MARK: - Add Subscriptions
+"Add subscription" = "Add subscription";
+"Choose how you'd like to add your subscription" = "Choose how you'd like to add your subscription";
+"Smart Assistant" = "Smart Assistant";
+"Let AI detect and add your subscriptions automatically" = "Let AI detect and add your subscriptions automatically";
+"Speak your subscription details to add them easily" = "Speak your subscription details to add them easily";
+"Link your inbox to fetch subscriptions from receipts" = "Link your inbox to fetch subscriptions from receipts";
+"Upload a Screenshot" = "Upload a Screenshot";
+"Upload a bill or receipt screenshot to detect details" = "Upload a bill or receipt screenshot to detect details";
+"Fill in your subscription details manually" = "Fill in your subscription details manually";
+
+// MARK: - Upload Screenshot
+"Profile Picture" = "Profile Picture";
+"Upload a Screenshot" = "Upload a Screenshot";
+"Take Photo" = "Take Photo";
+"Capture a new picture using your camera" = "Capture a new picture using your camera";
+"Choose from Gallery" = "Choose from Gallery";
+"Select an existing photo from your device" = "Select an existing photo from your device";
+"Take Screenshot" = "Take Screenshot";
+"Take Screenshot for subscriptions" = "Take Screenshot for subscriptions";
+"Privacy Notice" = "Privacy Notice";
+"We only parse the content you provide to detect subscription payments. No data is stored permanently." = "We only parse the content you provide to detect subscription payments. No data is stored permanently.";
+"Couldn't Read Image" = "Couldn't Read Image";
+"No Subscriptions Found" = "No Subscriptions Found";
+"We couldn't extract subscription details from this image. Try these tips:" = "We couldn't extract subscription details from this image. Try these tips:";
+"We scanned your recent emails but didn't find any subscription receipts." = "We scanned your recent emails but didn't find any subscription receipts.";
+"Ensure text is clear and well-lit" = "Ensure text is clear and well-lit";
+"Recurring payment receipts" = "Recurring payment receipts";
+"Crop to show only the relevant text" = "Crop to show only the relevant text";
+"Subscription confirmations" = "Subscription confirmations";
+"Make sure text is in English" = "Make sure text is in English";
+"Billing notifications" = "Billing notifications";
+"Add Manually Instead" = "Add Manually Instead";
+"You will be redirected to the subscription list in Appstore." = "You will be redirected to the subscription list in Appstore.";
+"Please follow these steps carefully:" = "Please follow these steps carefully:";
+"Take a screenshot of the required subscription." = "Take a screenshot of the required subscription.";
+"Come back to the “Upload Screenshot” screen." = "Come back to the “Upload Screenshot” screen.";
+"Click on Choose from Gallery." = "Click on Choose from Gallery.";
+"Select the screenshot you just captured." = "Select the screenshot you just captured.";
+
+// MARK: - Permissions
+"We need camera access to update profile photo" = "We need camera access to update profile photo";
+"We need gallery access to update profile photo" = "We need gallery access to update profile photo";
+"We need camera access to add subscriptions by take photo" = "We need camera access to add subscriptions by take photo";
+"We need gallery access to add subscriptions by image upload" = "We need gallery access to add subscriptions by image upload";
+"Tap Camera" = "Tap Camera";
+"Tap Photos" = "Tap Photos";
+
+// MARK: - Misc
+"Please enter email" = "Please enter email";
+"Please enter valid email" = "Please enter valid email";
+
+// MARK: - Manual Entry & Bottom Sheets
+"Edit Details" = "Edit Details";
+"Update your details" = "Update your details";
+"Add your subscription details manually." = "Add your subscription details manually.";
+"Required Information" = "Required Information";
+"Service Name" = "Service Name";
+"e.g. Netflix, Spotify, Adobe" = "e.g. Netflix, Spotify, Adobe";
+"Plan Type" = "Plan Type";
+"Select Plan Type" = "Select Plan Type";
+"Search" = "Search";
+"Amount" = "Amount";
+"0.00" = "0.00";
+"Currency" = "Currency";
+"This amount is not available for this service" = "This amount is not available for this service";
+"Category" = "Category";
+"Select Category" = "Select Category";
+"Billing Cycle" = "Billing Cycle";
+"Select billing cycle" = "Select billing cycle";
+"Select Billing Cycle" = "Select Billing Cycle";
+"Next Charge Date" = "Next Charge Date";
+"dd/mm/yyyy" = "dd/mm/yyyy";
+"Optional Details" = "Optional Details";
+"Payment Method" = "Payment Method";
+"Select Payment Method" = "Select Payment Method";
+"Which card is linked to this subscription?" = "Which card is linked to this subscription?";
+"Add New Card" = "Add New Card";
+"Who will benefit from this subscription?" = "Who will benefit from this subscription?";
+"Add New Member" = "Add New Member";
+"Renewal Reminders" = "Renewal Reminders";
+"Notes" = "Notes";
+"Add any additional notes about this subscription..." = "Add any additional notes about this subscription...";
+"Save Changes" = "Save Changes";
+"Save Subscription" = "Save Subscription";
+"No data found" = "No data found";
+"Add Family Member" = "Add Family Member";
+"Add a family member to manage and share plans together." = "Add a family member to manage and share plans together.";
+"Review Original Image" = "Review Original Image";
+"Renew Subscription" = "Renew Subscription";
+"Your plan is about to expire\nWould you like to renew with the current plan\ndetails, or modify it before renewing?" = "Your plan is about to expire\nWould you like to renew with the current plan\ndetails, or modify it before renewing?";
+"No" = "No";
+"Renew with Changes" = "Renew with Changes";
+"Subscription Details" = "Subscription Details";
+"Subscription Match Details" = "Subscription Match Details";
+"Price" = "Price";
+"Card Linked" = "Card Linked";
+"Benefit From" = "Benefit From";
+"Status" = "Status";
+"Active" = "Active";
+"Note" = "Note";
+"Edit" = "Edit";
+"Renew" = "Renew";
+
+// MARK: - Billing Cycles & Plans
+"Daily" = "Daily";
+"Every 24 hours" = "Every 24 hours";
+"Weekly" = "Weekly";
+"Every 7 Days" = "Every 7 Days";
+"Monthly" = "Monthly";
+"Every 30 Days" = "Every 30 Days";
+"Quarterly" = "Quarterly";
+"Every 90 Days" = "Every 90 Days";
+"Biannually" = "Biannually";
+"Every 180 Days" = "Every 180 Days";
+"Yearly" = "Yearly";
+"Every 360 Days" = "Every 360 Days";
+"3 days before renewal" = "3 days before renewal";
+"1 day before renewal" = "1 day before renewal";
+"On renewal day" = "On renewal day";
+"Free" = "Free";
+"Basic" = "Basic";
+
+// MARK: - Filter Sheet
+"Filter by Category" = "Filter by Category";
+"Include Expired subscriptions" = "Include Expired subscriptions";
+"Include family subscriptions" = "Include family subscriptions";
+"Filter by family member" = "Filter by family member";
+"Filter by month & year" = "Filter by month & year";
+"Sort by cost or renewal date" = "Sort by cost or renewal date";
+"Descending order by cost" = "Descending order by cost";
+"Ascending order by cost" = "Ascending order by cost";
+"Descending order by renewal date" = "Descending order by renewal date";
+"Ascending order by renewal date" = "Ascending order by renewal date";
+"Reset" = "Reset";
+"Apply" = "Apply";
+
+// MARK: - Voice Missing Details
+"Skip to continue" = "Skip to continue";
+"Missing Details" = "Missing Details";
+"**Note:** Please record missing details along with service name" = "**Note:** Please record missing details along with service name";
+"Discard" = "Discard";
+"Submit" = "Submit";
+"Stop" = "Stop";
+"We need microphone access to add subscriptions by voice" = "We need microphone access to add subscriptions by voice";
+"Tap Microphone" = "Tap Microphone";
+"Are you sure you want to discard the recording?" = "Are you sure you want to discard the recording?";
+
+// MARK: - OTP Verification
+"Verify OTP" = "Verify OTP";
+"We've sent a 6-digit code to" = "We've sent a 6-digit code to";
+"Verified successfully!" = "Verified successfully!";
+"OTP has been verified successfully. Your process is now complete." = "OTP has been verified successfully. Your process is now complete.";
+"Great!" = "Great!";
+"Didn't receive code?" = "Didn't receive code?";
+"Resend" = "Resend";
+"Verify" = "Verify";
+"Resend in %@" = "Resend in %@";
+
+// MARK: - Edit Account
+"Edit Account" = "Edit Account";
+"Update your account details below" = "Update your account details below";
+"Username" = "Username";
+"Enter your username" = "Enter your username";
+"First Name" = "First Name";
+"Enter your first name" = "Enter your first name";
+"Last Name" = "Last Name";
+"Enter your last name" = "Enter your last name";
+"Update" = "Update";
+"Username is required" = "Username is required";
+"First Name is required" = "First Name is required";
+"Last Name is required" = "Last Name is required";
+
+// MARK: - OTP Verification Additions
+"Verify Phone Number" = "Verify Phone Number";
+"Verify Email Address" = "Verify Email Address";
+"We send a code to your %@" = "We send a code to your %@";
+"Enter validation code" = "Enter validation code";
+"Resend code in" = "Resend code in";
+"Didn't receive the code?" = "Didn't receive the code?";
+"Resend Code" = "Resend Code";
+"Verify %@" = "Verify %@";
+
+// MARK: - Edit Account Additions
+"Edit Full Name" = "Edit Full Name";
+"Edit Email" = "Edit Email";
+"Edit Mobile Number" = "Edit Mobile Number";
+"Edit Currency" = "Edit Currency";
+"Enter your full name" = "Enter your full name";
+"name@example.com" = "name@example.com";
+"Mobile number" = "Mobile number";
+"000 000 000" = "000 000 000";
+"Your payment currency" = "Your payment currency";
+
+// MARK: - Add Family Member Additions
+"Family Nickname" = "Family Nickname";
+"Family Member phone number" = "Family Member phone number";
+"Color " = "Color ";
+"(To distinguish color family subscriptions)" = "(To distinguish color family subscriptions)";
+
+// MARK: - Add New Card Additions
+"Edit card" = "Edit card";
+"Add new card" = "Add new card";
+"Card Nickname" = "Card Nickname";
+"Card number" = "Card number";
+"Name of the card" = "Name of the card";
+"Nickname" = "Nickname";
+"Number Card" = "Number Card";
+"Name" = "Name";
+"Add card" = "Add card";
+"Card Nickname cannot exceed 15 characters" = "Card Nickname cannot exceed 15 characters";
+
+// MARK: - Home & Welcome Additions
+"Of your subscriptions is in %@ platforms" = "Of your subscriptions is in %@ platforms";
+"Show Less" = "Show Less";
+"Show More" = "Show More";
+"View analytics" = "View analytics";
+"You haven’t added any\nsubscriptions" = "You haven’t added any\nsubscriptions";
+"Upgrade to Access" = "Upgrade to Access";
+"mm/yyyy" = "mm/yyyy";
+
+// MARK: - General Additions
+
+
+// MARK: - Profile Additions
+"My Profile" = "My Profile";
+"Current Plan" = "Current Plan";
+"Free plan" = "Free plan";
+"Next renewal is %@" = "Next renewal is %@";
+"Upgrade today" = "Upgrade today";
+"Account Information" = "Account Information";
+"Mobile Number" = "Mobile Number";
+"Plans & Pricing" = "Plans & Pricing";
+"My Cards" = "My Cards";
+"Dark Mode" = "Dark Mode";
+"Integrations" = "Integrations";
+"Family Members" = "Family Members";
+"Logout" = "Logout";
+"Version %@" = "Version %@";
+"Build %@" = "Build %@";
+"Are you sure you want to logout?" = "Are you sure you want to logout?";
+"Ok" = "Ok";
+
+// MARK: - Invite Friends Additions
+"Your Rewards" = "Your Rewards";
+"Invite your friends" = "Invite your friends";
+"Share" = "Share";
+"Claim Your Reward" = "Claim Your Reward";
+"Add 2 more Subscriptions" = "Add 2 more Subscriptions";
+"Note : Reward will unlock after register of 3 members which you shared" = "Note : Reward will unlock after register of 3 members which you shared";
+"No referral link available" = "No referral link available";
+"in Ut laoreet porta at, nec facilisi" = "in Ut laoreet porta at, nec facilisi";
+
+// MARK: - Notifications Additions
+"Notifications" = "Notifications";
+"Mark all as read" = "Mark all as read";
+"No Notifications Yet" = "No Notifications Yet";
+"Unread notifications - %@" = "Unread notifications - %@";
+"Load more notifications" = "Load more notifications";
+"Are you sure you want to delete the notifications?\nData will be permanently deleted" = "Are you sure you want to delete the notifications?\nData will be permanently deleted";
+
+//Settings
+"Are you sure you want to delete account? \n Your account and all associated data will be permanently deleted.\n Your subscription remains active and must be cancelled from your App Store account settings. Deleting your account does not automatically cancel your subscription." = "Are you sure you want to delete account? \n Your account and all associated data will be permanently deleted.\n Your subscription remains active and must be cancelled from your App Store account settings. Deleting your account does not automatically cancel your subscription.";
+"Are you sure you want to delete account?" = "Are you sure you want to delete account?";

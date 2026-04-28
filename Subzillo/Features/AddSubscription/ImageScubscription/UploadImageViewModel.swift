@@ -1,0 +1,61 @@
+//
+//  UploadImageViewModel.swift
+//  Subzillo
+//
+//  Created by Ratna Kavya on 13/11/25.
+//
+
+import Foundation
+import Combine
+import SwiftUI
+
+class UploadImageViewModel: ObservableObject {
+    
+    private var subscriptions                   = Set<AnyCancellable>()
+    var apiReference                            = NetworkRequest.shared
+    private let router                          : AppIntentRouter
+    @Published var showErrorPopup               : Bool = false
+    @Published var hideLoader                   : Bool = false
+    
+    init(router: AppIntentRouter = .shared) {
+        self.router = router
+    }
+    
+    func imageSubscription(input:UpdateProfileImageRequest,fileData:[MultiPartFileInput], showLoader:Bool = false) {
+        apiReference.postMultipartApi(endPoint: APIEndpoint.imageSubscription, method: .POST,token: authKey,body: MultipartInput(parameters: input, fileInput: fileData),showLoader: showLoader, responseType: VoiceSubscriptionResponse.self)
+            .sink { [weak self] completion in
+                guard let self = self else { return }
+                if case let .failure(error) = completion {
+                    self.handleError(error,endPoint: APIEndpoint.imageSubscription)
+                    self.showErrorPopup = true
+                }
+                self.hideLoader = true
+            }
+        receiveValue: { [weak self] response in
+            guard let self = self else { return }
+            self.hideLoader = true
+            PrintLogger.modelLog(response, type: .response, isInput: false)
+            if response.data == nil || response.data?.subscriptions?.count == 0
+            {
+                self.showErrorPopup = true
+            }
+            else{
+                NotificationCenter.default.post(name: .closeAllBottomSheets, object: nil)
+                Constants.saveDefaults(value: response.providerLogoBaseUrl, key: Constants.providerBaseUrl)
+                globalSubscriptionData = nil // i have added because previous data is displaying instead of new one
+                self.router.navigate(to: .subscriptionPreviewView(subscriptionsData: response.data?.subscriptions, content: "", isFromImage:true, audioUrl: nil))
+            }
+            // self.router.navigate(to: .subscriptionPreviewView(subscriptionsData: response.data?.subscriptions, content: "", isFromImage:true))
+        }
+        .store(in: &self.subscriptions)
+    }
+    
+    func navigate(to route: NavigationRoute){
+        self.router.navigate(to: route)
+    }
+    
+    // MARK: - Handle errors
+    func handleError(_ apiError: APIError, endPoint : APIEndpoint) {
+        print("API Error : \(endPoint) - \(apiError.localizedDescription)")
+    }
+}

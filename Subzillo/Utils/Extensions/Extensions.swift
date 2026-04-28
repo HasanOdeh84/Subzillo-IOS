@@ -1,0 +1,136 @@
+//
+//  Extensions.swift
+//  SwiftUI_project_setup
+//
+//  Created by KSMACMINI-019 on 03/09/25.
+//
+
+import Foundation
+import SwiftUI
+extension Encodable {
+  func encodePrint() -> String? {
+    let encoder = JSONEncoder()
+    encoder.outputFormatting = .prettyPrinted
+    do {
+      let jsonData = try encoder.encode(self)
+      if let jsonString = String(data: jsonData, encoding: .utf8) {
+        return jsonString
+      }
+    } catch {
+      print("Error encoding JSON: \(error)")
+    }
+    return nil
+  }
+}
+
+// For String
+extension Optional where Wrapped == String {
+  var orEmpty: String {
+    return self ?? ""
+  }
+}
+
+extension String {
+    var trimmed: String {
+        self.trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+    func formattedDate(from inputFormat: String = "yyyy-MM-dd",
+                       to outputFormat: String = "MMM d, yyyy") -> String {
+        let inputFormatter = DateFormatter()
+        inputFormatter.dateFormat = inputFormat
+        guard let date = inputFormatter.date(from: self) else { return self }
+        
+        let outputFormatter = DateFormatter()
+        outputFormatter.dateFormat = outputFormat
+        return outputFormatter.string(from: date)
+    }
+
+    func toLocalizedStringDate(inputFormat: String = "yyyy-MM-dd'T'HH:mm:ss.SSSZ", 
+                               outputFormat: String = "dd/MM/yyyy h:mm a") -> String {
+        let formatter = DateFormatter()
+        formatter.dateFormat = inputFormat
+        formatter.timeZone = TimeZone(abbreviation: "UTC")
+        guard let date = formatter.date(from: self) else {
+            return self
+        }
+        formatter.timeZone = TimeZone.current
+        formatter.dateFormat = outputFormat
+        return formatter.string(from: date)
+    }
+    
+    func normalizedPhoneNumber() -> String {
+        return self.filter { $0.isNumber }
+    }
+}
+
+func formatTime(_ time: TimeInterval) -> String {
+    let minutes = Int(time) / 60
+    let seconds = Int(time) % 60
+    return String(format: "%02d:%02d", minutes, seconds)
+}
+
+// Array safe subscript to avoid index out of range
+extension Array {
+    subscript(safe index: Int) -> Element? {
+        return indices.contains(index) ? self[index] : nil
+    }
+}
+
+func getFileName(from value: String) -> String {
+    // Case 1: Already only filename
+    if !value.contains("/") {
+        return value
+    }
+
+    // Case 2: Full URL or path
+    if let url = URL(string: value) {
+        return url.lastPathComponent
+    }
+
+    return value
+}
+
+extension String {
+    var fileNameOnly: String {
+        return URL(string: self)?.lastPathComponent ?? self
+    }
+}
+
+// MARK: - Feature Visibility
+extension View {
+    /// Only shows the view if the current app phase is S4 or higher.
+    @ViewBuilder
+    func showOnlyInS4() -> some View {
+        if Constants.FeatureConfig.isS4Enabled {
+            self
+        }
+    }
+    
+    /// Hides the view if the current app phase is S3.
+    @ViewBuilder
+    func hideInS3() -> some View {
+        if !Constants.FeatureConfig.isS4Enabled {
+            EmptyView()
+        } else {
+            self
+        }
+    }
+
+    /// Only shows the view if the current app phase is S5.
+    @ViewBuilder
+    func showOnlyInS5() -> some View {
+        if Constants.FeatureConfig.isS5Enabled {
+            self
+        }
+    }
+
+    /// Hides the view if the current app phase is S3 or S4.
+    @ViewBuilder
+    func hideInS4() -> some View {
+        if !Constants.FeatureConfig.isS5Enabled {
+            EmptyView()
+        } else {
+            self
+        }
+    }
+}

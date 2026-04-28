@@ -1,0 +1,9 @@
+/* 
+  Localizable.strings
+  SwiftUI_project_setup
+
+  Created by KSMACMINI-019 on 09/09/25.
+  
+*/
+"test" = "Arabic";
+"test2" = "Arabic localization";

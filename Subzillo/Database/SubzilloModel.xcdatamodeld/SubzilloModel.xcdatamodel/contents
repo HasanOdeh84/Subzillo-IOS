@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<model type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="23605" systemVersion="24C101" minimumToolsVersion="Automatic" sourceLanguage="Swift" usedWithSwiftData="YES" userDefinedModelVersionIdentifier="">
+    <entity name="SubscriptionEntity" representedClassName="SubscriptionEntity" syncable="YES">
+        <attribute name="amount" optional="YES" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
+        <attribute name="billingCycle" optional="YES" attributeType="String"/>
+        <attribute name="cardName" optional="YES" attributeType="String"/>
+        <attribute name="cardNumber" optional="YES" attributeType="String"/>
+        <attribute name="category" optional="YES" attributeType="String"/>
+        <attribute name="categoryName" optional="YES" attributeType="String"/>
+        <attribute name="color" optional="YES" attributeType="String"/>
+        <attribute name="currency" optional="YES" attributeType="String"/>
+        <attribute name="currencySymbol" optional="YES" attributeType="String"/>
+        <attribute name="id" optional="YES" attributeType="String"/>
+        <attribute name="isSelected" optional="YES" attributeType="Boolean" usesScalarValueType="YES"/>
+        <attribute name="nextPaymentDate" optional="YES" attributeType="String"/>
+        <attribute name="nickName" optional="YES" attributeType="String"/>
+        <attribute name="notes" optional="YES" attributeType="String"/>
+        <attribute name="paymentMethod" optional="YES" attributeType="String"/>
+        <attribute name="paymentMethodDataId" optional="YES" attributeType="String"/>
+        <attribute name="paymentMethodDataName" optional="YES" attributeType="String"/>
+        <attribute name="paymentMethodName" optional="YES" attributeType="String"/>
+        <attribute name="renewalReminder" optional="YES" attributeType="Transformable"/>
+        <attribute name="renewBtnStatus" optional="YES" attributeType="Boolean" usesScalarValueType="YES"/>
+        <attribute name="serviceLogo" optional="YES" attributeType="String"/>
+        <attribute name="serviceName" optional="YES" attributeType="String"/>
+        <attribute name="status" optional="YES" attributeType="String"/>
+        <attribute name="subscriptionFor" optional="YES" attributeType="String"/>
+        <attribute name="subscriptionType" optional="YES" attributeType="String"/>
+        <attribute name="viewStatus" optional="YES" attributeType="Boolean" usesScalarValueType="YES"/>
+    </entity>
+</model>
