@@ -1,4 +1,6 @@
 import Foundation
+import UIKit
+import Combine
 
 class AgentAIService {
     static let shared = AgentAIService()
@@ -240,61 +242,61 @@ class AgentAIService {
           - Search for "Cancel", "Unsubscribe", "Stop Subscription", "Manage", "Plan details", "Account settings".
           - Prioritize clicking links that lead to subscription management or cancellation.
           - Keep navigating through intermediate pages (e.g., surveys, "Why are you leaving?") until you reach the FINAL confirmation button.
-
+        
         PHASE 2 — HANDOVER FOR FINAL CONFIRMATION:
           - ONCE YOU REACH THE VERY LAST PAGE (where the literal "Confirm Cancel" or "Cancel Subscription" button is visible):
           - → action=askUser with FIXED message: "Please click the final 'Cancel' or 'Confirm' button to stop your subscription. After that, click 'reautomate'."
           - CRITICAL RULE: The agent MUST NOT click the final cancellation button itself. It must stop and handover.
-
+        
         PHASE 3 — VERIFICATION:
           - After user resumes, check if you see "Cancelled", "Inactive", "Subscription stops on [Date]", or a confirmation message.
           - If cancelled -> action=done with message: "[Plan] plan is cancelled in [Service]"
           - If NOT cancelled -> action=done with message: "Plan is not cancelled: [Reason found on page]"
-
+        
         RULE 4 - CANCELLATION ONLY:
           - If the goal is CANCEL_SUBSCRIPTION, you are PROHIBITED from clicking "Close Account", "Delete Account", or "Cancel Account" unless it is the ONLY path visible to stop billing.
           - Permanent account closure is NOT what the user wants. Always prioritize "Cancel Plan", "Manage Subscription", "Plan Details", or "Downgrade".
-
+        
          RULE 5 - SHORT-CIRCUIT FREE ACCOUNTS (CANCEL_SUBSCRIPTION):
            - If the goal is CANCEL_SUBSCRIPTION and you detect "Free plan", "Free", or "No active plan":
              1. Attempt ONE deep-dive (click "Account", "Settings", or Profile icon) to ensure no hidden active subscription exists.
              2. If still on a "Free" or "No Active Pack" page after the check, you MUST use action=done immediately.
              3. Return status: "User is in free plan unable to cancel the subscription."
              4. Do NOT perform any further navigations or searches.
-
+        
          RULE 7 - HOTSTAR SPECIFICS (CANCEL_SUBSCRIPTION):
            - If you see "Mobile 1 Month" or "JIOIPL" / "Managed by Jio", the plan is managed by a third party and CANNOT be cancelled on the website.
            - If you reach the settings page and do NOT see a clear "Cancel" or "Unsubscribe" link, do NOT click "Payment Details" repeatedly — it leads back to the home page.
            - Instead, use action=done with status: "Your Hotstar plan is managed by a third party (e.g. Jio) and must be cancelled through their platform."
-
+        
          RULE 19 - HOTSTAR OVERLAY HANDLING:
            - If the CURRENT URL contains `#w-DialogWidget`, a dialog is blocking the page.
            - Your FIRST action MUST be to click the "Close" icon (`i.icon-close`, `button._close`) or navigate to the base URL `https://www.hotstar.com/in/settings` to clear the fragment.
-
+        
          RULE 20 - REDUNDANT NAVIGATION PREVENTION:
            - If the CURRENT URL already contains `/settings`, you are PROHIBITED from clicking "Manage Account" or "Settings". You are already there.
            - Instead, look specifically for "Cancel Subscription", "Change Plan", or "Payment Details" within the page text or scroll.
-
+        
          RULE 21 - HOTSTAR PREFER NAVIGATE:
            - On the Hotstar homepage, prefer `action=navigate` with `url: "https://www.hotstar.com/in/settings"` instead of clicking the "Manage Account" button. This avoids accidental clicks on "Download App" links that trigger native app intents.
-
+        
          RULE 14 - DIRECT NAVIGATION (AMAZON / PRIME):
            - If you are on an Amazon homepage (e.g., amazon.ae, amazon.com) and logged in, do NOT click through "Accounts & Lists".
            - Instead, use `action=navigate` with the direct URL: `[current_domain]/yourmembershipsandsubscriptions`.
            - This avoids complex hover menus and JavaScript loops.
-
+        
          RULE 15 - AMAZON / OTT "NO ACTIVE PLAN" INTELLIGENCE:
            - If you are on a "Memberships" or "Subscriptions" page and see only "Recommended for you", "Suggested Plans", or buttons like "Join Prime" / "Subscribe", you likely have NO active subscription.
            - DO NOT loop on this page. Check if any card is highlighted as "Current".
            - If no "Current" plan is found, use `action=done` with:
                - `data.plan`: "No active plan"
                - `data.status`: "You have no active [Service] subscription on this account. Only suggested plans are visible."
-
+        
          RULE 18 - SHAHID OTT SPECIFICS:
            - "اشترك الآن" (Subscribe Now) visible next to a profile name ALWAYS means NO active paid subscription.
            - "إدارة الحساب" (Manage Account) on Shahid often leads to personal info; if you see "اشترك لمتابعة المزيد" (Subscribe to follow more), you are on a FREE plan.
            - Use `action=done` immediately if these "empty" indicators are visible.
-
+        
          RULE 22 - AUTH REDIRECT PROTECTION:
            - If your previous action was a `navigate` to a target page, but the site redirected you back to a Login/Sign-in page (URL contains `login`, `signin`, `auth`), you are hitting an "Auth Wall".
            - DO NOT TRY THE SAME NAVIGATION AGAIN.
@@ -482,6 +484,38 @@ class AgentAIService {
         return try await callSimpleAI(system: sys, user: user, key: "displayName")
     }
     
+    func checkAgenticGate(prompt: String) async throws -> String {
+        let sys = """
+            You are a routing classifier for a chat assistant.
+            Decide whether the user's message requires live browsing/automation or can be answered directly.
+            
+            Return JSON only with:
+            {
+              "action": "browse" | "answer",
+              "confidence": 0.0-1.0,
+              "reason": "short reason"
+            }
+            
+            Choose "browse" ONLY if the user explicitly asks to:
+            visit/open a website, click, or navigate (ONLY if related to subscriptions/services)
+            search the web for subscription plans, prices, or cancellation steps
+            verify or check something online about a subscription service
+            get the latest/live/real-time info about a recurring service
+            get exact cancellation/unsubscribe steps for a specific provider (especially account/app/website flow)
+            
+            **RESTRICTION**: If the request is clearly UNRELATED to subscriptions, plans, or services (e.g., sports, cricket, weather, general world news, unrelated businesses), choose "answer" and state "out_of_scope" in the reason.
+            
+            Otherwise choose "answer".
+            
+            User message:
+            \(prompt)
+            """
+        
+        let user = "User message:\n\(prompt)"
+        let action = try await callSimpleAI(system: sys, user: user, key: "action")
+        return action?.lowercased() ?? "answer"
+    }
+    
     func resolveLoginUrl(serviceName: String) async throws -> String? {
         let sys = """
             You are a URL expert. Given a subscription service name, you MUST return the OFFICIAL and DIRECT login page URL.
@@ -541,7 +575,7 @@ class AgentAIService {
         while i < characters.count {
             if characters[i] == "{" {
                 var braceCount = 0
-                var start = i
+                let start = i
                 for j in i..<characters.count {
                     if characters[j] == "{" { braceCount += 1 }
                     else if characters[j] == "}" {
@@ -558,4 +592,318 @@ class AgentAIService {
         }
         return blocks
     }
+    // MARK: - Welcome API
+    
+    
+    func getWelcomeMessage() async throws -> WelcomeResponse {
+        return try await withCheckedThrowingContinuation { continuation in
+            var cancellable: AnyCancellable?
+            cancellable = NetworkRequest.shared.getApi(
+                endPoint: .welcome,
+                token: authKey,
+                showLoader: true,
+                responseType: WelcomeResponse.self,
+                isChat: true
+            )
+            .sink { completion in
+                if case let .failure(error) = completion {
+                    continuation.resume(throwing: error)
+                }
+                cancellable?.cancel()
+            } receiveValue: { response in
+                continuation.resume(returning: response)
+            }
+        }
+    }
+    
+    func createConversation(sessionId: String?) async throws -> ConversationResponse {
+        let requestBody = ConversationRequest(session_id: sessionId, title: "New chat")
+        return try await withCheckedThrowingContinuation { continuation in
+            var cancellable: AnyCancellable?
+            cancellable = NetworkRequest.shared.postApi(
+                endPoint: .conversations,
+                method: .POST,
+                token: authKey,
+                body: requestBody,
+                showLoader: false,
+                responseType: ConversationResponse.self,
+                isChat: true
+            )
+            .sink { completion in
+                if case let .failure(error) = completion {
+                    continuation.resume(throwing: error)
+                }
+                cancellable?.cancel()
+            } receiveValue: { response in
+                continuation.resume(returning: response)
+            }
+        }
+    }
+    
+    func sendChatMessage(text: String, conversationId: String) async throws -> ChatAutoResponse {
+        let requestBody = ChatAutoRequest(
+            input_type      : "text",
+            text            : text,
+            user_id         : Constants.getUserId(),
+            conversation_id : conversationId,
+            country_code    : Constants.getUserDefaultsValue(for: Constants.userCountryCode),
+            currency_code   : Constants.getUserDefaultsValue(for: Constants.userCurrencyCode),
+            ocr_text        : nil,
+            stream          : nil
+        )
+        return try await withCheckedThrowingContinuation { continuation in
+            var cancellable: AnyCancellable?
+            cancellable = NetworkRequest.shared.postApi(
+                endPoint    : .chatAuto,
+                method      : .POST,
+                token       : authKey,
+                body        : requestBody,
+                showLoader  : false,
+                responseType: ChatAutoResponse.self,
+                isChat      : true
+            )
+            .sink { completion in
+                if case let .failure(error) = completion {
+                    continuation.resume(throwing: error)
+                }
+                cancellable?.cancel()
+            } receiveValue: { response in
+                continuation.resume(returning: response)
+            }
+        }
+    }
+    
+    func sendChatImage(image: UIImage, conversationId: String) async throws -> ChatAutoResponse {
+        // Resize and compress iteratively to avoid 413 Payload Too Large error
+        var currentDimension: CGFloat = 800
+        var currentQuality: CGFloat = 0.5
+        var resizedImage = resizeImage(image: image, maxDimension: currentDimension)
+        var imageData = resizedImage.jpegData(compressionQuality: currentQuality)
+        
+        // Target size < 500KB. Reduce quality first, then dimension if needed.
+        while let data = imageData, data.count > 500 * 1024 {
+            if currentQuality > 0.2 {
+                currentQuality -= 0.1
+            } else if currentDimension > 400 {
+                currentDimension -= 100
+                resizedImage = resizeImage(image: image, maxDimension: currentDimension)
+                currentQuality = 0.5 // Reset quality for smaller dimension
+            } else {
+                break // Minimum limits reached
+            }
+            imageData = resizedImage.jpegData(compressionQuality: currentQuality)
+        }
+        
+        guard let finalData = imageData else {
+            throw APIError.unknown
+        }
+        
+        let requestBody = ChatImageRequest(
+            input_type      : "image",
+            user_id         : Constants.getUserId(),
+            conversation_id : conversationId,
+            country_code    : Constants.getUserDefaultsValue(for: Constants.userCountryCode),
+            currency_code   : Constants.getUserDefaultsValue(for: Constants.userCurrencyCode)
+        )
+        
+        let fileInput = MultiPartFileInput(
+            fieldName: "file",
+            fileName: "image.jpg",
+            mimeType: "image/jpeg",
+            fileData: finalData
+        )
+        
+        let multipartInput = MultipartInput(parameters: requestBody, fileInput: [fileInput])
+        
+        return try await withCheckedThrowingContinuation { continuation in
+            var cancellable: AnyCancellable?
+            cancellable = NetworkRequest.shared.multiPartRequest(
+                endPoint        : .chatAuto,
+                method          : .POST,
+                token           : authKey,
+                body            : multipartInput,
+                showLoader      : false,
+                isChat          : true,
+                responseType    : ChatAutoResponse.self
+            )
+            .sink { completion in
+                if case let .failure(error) = completion {
+                    continuation.resume(throwing: error)
+                }
+                cancellable?.cancel()
+            } receiveValue: { response in
+                continuation.resume(returning: response)
+            }
+        }
+    }
+    
+    private func resizeImage(image: UIImage, maxDimension: CGFloat) -> UIImage {
+        let size = image.size
+        let ratio = min(maxDimension / size.width, maxDimension / size.height)
+        if ratio >= 1.0 { return image }
+        
+        let newSize = CGSize(width: size.width * ratio, height: size.height * ratio)
+        let renderer = UIGraphicsImageRenderer(size: newSize)
+        return renderer.image { _ in
+            image.draw(in: CGRect(origin: .zero, size: newSize))
+        }
+    }
+    
+    func transcribeAudio(audioURL: URL, conversationId: String?) async throws -> TranscriptionResponse {
+        guard let audioData = try? Data(contentsOf: audioURL) else {
+            throw APIError.unknown
+        }
+        
+        let fileInput = MultiPartFileInput(
+            fieldName: "file",
+            fileName: "voice.m4a",
+            mimeType: "audio/mpeg",
+            fileData: audioData
+        )
+        
+        let requestBody = TranscribeRequest(user_id: Constants.getUserId(), conversation_id: conversationId)
+        let multipartInput = MultipartInput(parameters: requestBody, fileInput: [fileInput])
+        
+        return try await withCheckedThrowingContinuation { continuation in
+            var cancellable: AnyCancellable?
+            cancellable = NetworkRequest.shared.multiPartRequest(
+                endPoint: .transcribe,
+                method: .POST,
+                token: authKey,
+                body: multipartInput,
+                showLoader: true,
+                isChat: true,
+                responseType: TranscriptionResponse.self
+            )
+            .sink { completion in
+                if case let .failure(error) = completion {
+                    continuation.resume(throwing: error)
+                }
+                cancellable?.cancel()
+            } receiveValue: { response in
+                continuation.resume(returning: response)
+            }
+        }
+    }
+    
+    func clearPendingSession(sessionId: String) async throws -> ClearPendingResponse {
+        let requestBody = ClearPendingRequest(session_id: sessionId)
+        return try await withCheckedThrowingContinuation { continuation in
+            var cancellable: AnyCancellable?
+            cancellable = NetworkRequest.shared.postApi(
+                endPoint    : .clearPending,
+                method      : .POST,
+                token       : authKey,
+                body        : requestBody,
+                showLoader  : false,
+                responseType: ClearPendingResponse.self,
+                isChat      : true
+            )
+            .sink { completion in
+                if case let .failure(error) = completion {
+                    continuation.resume(throwing: error)
+                }
+                cancellable?.cancel()
+            } receiveValue: { response in
+                continuation.resume(returning: response)
+            }
+        }
+    }
+    
+    // MARK: - Agentic Context API
+    
+    func sendAgenticContext(requestBody: AgenticContextRequest) async throws -> AgenticContextResponse {
+        return try await withCheckedThrowingContinuation { continuation in
+            var cancellable: AnyCancellable?
+            cancellable = NetworkRequest.shared.postApi(
+                endPoint    : .agenticContext,
+                method      : .POST,
+                token       : authKey,
+                body        : requestBody,
+                showLoader  : false,
+                responseType: AgenticContextResponse.self,
+                isChat      : true
+            )
+            .sink { completion in
+                if case let .failure(error) = completion {
+                    continuation.resume(throwing: error)
+                }
+                cancellable?.cancel()
+            } receiveValue: { response in
+                continuation.resume(returning: response)
+            }
+        }
+    }
+    
+    // MARK: - Provider URL APIs
+    
+    func fetchProviderUrls(requestBody: FetchProviderUrlsRequest) async throws -> FetchProviderUrlsResponse {
+        return try await withCheckedThrowingContinuation { continuation in
+            var cancellable: AnyCancellable?
+            cancellable = NetworkRequest.shared.postApi(
+                endPoint: .fetchProviderUrls,
+                method: .POST,
+                token: authKey,
+                body: requestBody,
+                showLoader: false,
+                responseType: FetchProviderUrlsResponse.self,
+                isChat: false
+            )
+            .sink { completion in
+                if case let .failure(error) = completion {
+                    continuation.resume(throwing: error)
+                }
+                cancellable?.cancel()
+            } receiveValue: { response in
+                continuation.resume(returning: response)
+            }
+        }
+    }
+    
+    func addProviderUrls(requestBody: AddProviderUrlsRequest) async throws -> ProviderUrlsGenericResponse {
+        return try await withCheckedThrowingContinuation { continuation in
+            var cancellable: AnyCancellable?
+            cancellable = NetworkRequest.shared.postApi(
+                endPoint: .addProviderUrls,
+                method: .POST,
+                token: authKey,
+                body: requestBody,
+                showLoader: false,
+                responseType: ProviderUrlsGenericResponse.self,
+                isChat: false
+            )
+            .sink { completion in
+                if case let .failure(error) = completion {
+                    continuation.resume(throwing: error)
+                }
+                cancellable?.cancel()
+            } receiveValue: { response in
+                continuation.resume(returning: response)
+            }
+        }
+    }
+    
+    func updateProviderUrls(requestBody: UpdateProviderUrlsRequest) async throws -> ProviderUrlsGenericResponse {
+        return try await withCheckedThrowingContinuation { continuation in
+            var cancellable: AnyCancellable?
+            cancellable = NetworkRequest.shared.postApi(
+                endPoint: .updateProviderUrls,
+                method: .POST,
+                token: authKey,
+                body: requestBody,
+                showLoader: false,
+                responseType: ProviderUrlsGenericResponse.self,
+                isChat: false
+            )
+            .sink { completion in
+                if case let .failure(error) = completion {
+                    continuation.resume(throwing: error)
+                }
+                cancellable?.cancel()
+            } receiveValue: { response in
+                continuation.resume(returning: response)
+            }
+        }
+    }
 }
+

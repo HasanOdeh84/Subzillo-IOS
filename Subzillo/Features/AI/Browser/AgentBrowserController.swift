@@ -57,7 +57,7 @@ class AgentBrowserController: NSObject, ObservableObject, WKNavigationDelegate, 
         // 4. Spoof Plugins (Real browsers have them, WKWebView doesn't)
         // Safari on iOS usually has no plugins, but we can leave this or keep it empty
         Object.defineProperty(navigator, 'plugins', { get: () => [] });
-
+    
         // 5. Connection properties
         if (!navigator.connection) {
             Object.defineProperty(navigator, 'connection', {
@@ -105,10 +105,8 @@ class AgentBrowserController: NSObject, ObservableObject, WKNavigationDelegate, 
         
         self.webView = WKWebView(frame: .zero, configuration: config)
         
-        // USE AN IPAD SAFARI IDENTITY. 
-        // iPads are the 'Goldilocks' of User-Agents: they are mobile enough for Google, 
-        // but desktop enough for Figma/Claude to load their full engines without crashing.
-        self.webView.customUserAgent = "Mozilla/5.0 (iPad; CPU OS 17_4_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.4.1 Mobile/15E148 Safari/604.1"
+        // Modern Safari user agent — many sites block old or embedded webview UAs
+        self.webView.customUserAgent = "Mozilla/5.0 (iPhone; CPU iPhone OS 18_4 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.4 Mobile/15E148 Safari/604.1"
         
         super.init()
         
@@ -168,7 +166,7 @@ class AgentBrowserController: NSObject, ObservableObject, WKNavigationDelegate, 
     
     func webViewDidClose(_ webView: WKWebView) {
         if webView == popupWebView {
-            print("🪟 Agent: Popup closed via JS. Cleaning up.")
+            print("🪟 Agent: OAuth popup closed via window.close(). Syncing session...")
             
             // Clean up popup references
             webView.stopLoading()
@@ -177,18 +175,10 @@ class AgentBrowserController: NSObject, ObservableObject, WKNavigationDelegate, 
             self.popupWebView = nil
             
             // CRITICAL: Session Sync. 
-            // We wait 1.5s (up from 0.5s) to allow the site's own background redirection to finish.
-            // If we reload too early, we cancel the site's own login logic.
-            DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) { [weak self] in
-                guard let self = self else { return }
-                
-                // Only force a reload if the page hasn't moved on its own
-                if !self.webView.isLoading && (self.webView.url?.absoluteString.contains("login") == true || self.webView.url?.absoluteString.contains("auth") == true) {
-                    print("🪟 Agent: Main window stuck on login page. Forcing sync reload.")
-                    self.webView.reload()
-                } else {
-                    print("🪟 Agent: Main window is navigating or already on app page. Sync complete.")
-                }
+            // Reload the main webview immediately to pick up the new session from the shared cookie store.
+            if let current = self.webView.url, current.absoluteString != "about:blank" {
+                print("🪟 Agent: Reloading main window to pick up session.")
+                self.webView.load(URLRequest(url: current))
             }
         }
     }
@@ -229,26 +219,26 @@ class AgentBrowserController: NSObject, ObservableObject, WKNavigationDelegate, 
             return
         }
         
-        let urlString = url.absoluteString
+        let urlString = url.absoluteString.lowercased()
         let isPopup = (webView == popupWebView)
         print("🔗 Agent [\(isPopup ? "Popup" : "Main")]: Navigating to \(urlString)")
+        
+        // BLOCK App Store / External App handoffs (Matches Browser_Automation)
+        let blocklist = [
+            "itms-apps://", "apps.apple.com", "play.google.com",
+            "market://", "intent://", "app-store://", "hotstar-app://"
+        ]
+        
+        if blocklist.contains(where: { urlString.contains($0) }) {
+            print("🚫 Agent: BLOCKING external app/store redirect: \(url.absoluteString)")
+            decisionHandler(.cancel)
+            return
+        }
         
         // Special case: If the popup is trying to navigate back to the main site after login, 
         // we might want to "capture" that navigation into the main webview.
         if isPopup && (urlString.contains("runwayml.com") || urlString.contains("claude.ai")) && !urlString.contains("auth") {
-             print("🎯 Agent: Popup reached main site. Forcing main window update.")
-             // Sometimes closing the popup is enough, but let's be safe.
-        }
-        
-        // Handle custom schemes or intent-like behavior (mirroring Android logic)
-        if !urlString.hasPrefix("http") && !urlString.hasPrefix("https") && !urlString.hasPrefix("about:") {
-            print("📱 Agent: Custom Scheme Detected: \(urlString)")
-            // If it's a known product-specific protocol or needs external handling
-            if UIApplication.shared.canOpenURL(url) {
-                UIApplication.shared.open(url)
-                decisionHandler(.cancel)
-                return
-            }
+            print("🎯 Agent: Popup reached main site. Forcing main window update.")
         }
         
         decisionHandler(.allow)
@@ -361,7 +351,7 @@ class AgentBrowserController: NSObject, ObservableObject, WKNavigationDelegate, 
         let result = try? await topWebView.evaluateJavaScript(js)
         return (result as? String)?.contains("OK") ?? false
     }
-
+    
     private func ensureScripts(on target: WKWebView) async {
         _ = try? await target.evaluateJavaScript(agentScripts)
     }
@@ -384,7 +374,7 @@ class AgentBrowserController: NSObject, ObservableObject, WKNavigationDelegate, 
     func scroll(y: Int = 400) async {
         _ = try? await topWebView.evaluateJavaScript("window.scrollBy(0, \(y))")
     }
-
+    
     func prepareForNewTask(completion: @escaping () -> Void = {}) {
         self.isResetting = true
         // Close any lingering popups

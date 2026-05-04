@@ -55,7 +55,7 @@ class SerpDiscoveryService {
                 
                 // 2. Medium Positive (Account/Profile)
                 if lowUrl.contains("mypage") || lowUrl.contains("account") || 
-                   lowUrl.contains("membership") || lowUrl.contains("profile") {
+                    lowUrl.contains("membership") || lowUrl.contains("profile") {
                     score += 10
                 }
                 
@@ -67,8 +67,8 @@ class SerpDiscoveryService {
                 
                 // 4. Hard Negatives (Filtering noise)
                 if lowUrl.contains("help") || lowUrl.contains("support") || lowUrl.contains("faq") ||
-                   lowUrl.contains("blog") || lowUrl.contains("news") || lowUrl.contains("forum") ||
-                   lowUrl.contains("quora") || lowUrl.contains("reddit") {
+                    lowUrl.contains("blog") || lowUrl.contains("news") || lowUrl.contains("forum") ||
+                    lowUrl.contains("quora") || lowUrl.contains("reddit") {
                     score -= 40
                 }
                 

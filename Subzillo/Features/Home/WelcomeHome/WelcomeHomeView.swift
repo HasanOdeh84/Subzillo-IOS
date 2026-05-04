@@ -331,7 +331,7 @@ struct WelcomeHomeView: View {
     }
     private func goToSmartAssistant() {
         Constants.FeatureConfig.performS5Action {
-            AppIntentRouter.shared.navigate(to: .smartAssistantAI)
+            AppIntentRouter.shared.navigate(to: .AgentChatView)
         }
     }
     private func goToUploadImage() {

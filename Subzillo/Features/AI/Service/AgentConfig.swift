@@ -21,5 +21,6 @@ struct AgentConfig {
     static let maxTokens = 2048//1024
     
     /// SERP API Key for web discovery.
+//    static let serpAPIKey = "08cffbda24ca015fb442ec5855d7b62c815e6b95e8e92c6619dc7800fd17ac1a" // Add your key here
     static let serpAPIKey = "" // Add your key here
 }

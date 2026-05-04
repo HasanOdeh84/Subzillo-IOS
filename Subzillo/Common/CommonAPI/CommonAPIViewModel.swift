@@ -44,6 +44,9 @@ class CommonAPIViewModel: ObservableObject {
         receiveValue: { [weak self] response in
             PrintLogger.modelLog(response, type: .response, isInput: false)
             self?.userInfoResponse = response.data
+            Constants.saveDefaults(value: response.data?.countryCode ?? "", key: Constants.userCountryCode)
+            Constants.saveDefaults(value: response.data?.isoCountryCode ?? "", key: Constants.userIsoCountryCode)
+            Constants.saveDefaults(value: response.data?.preferredCurrency ?? "", key: Constants.userCurrencyCode)
         }
         .store(in: &self.subscriptions)
     }

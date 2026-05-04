@@ -9,7 +9,7 @@ class ServiceDetailsResolver {
         self.storage = storage
     }
     
-    func resolve(prompt: String, onProgress: (String) -> Void) async throws -> ServiceDetails {
+    func resolve(prompt: String, agentViewModel: AgentViewModel? = nil, onProgress: (String) -> Void) async throws -> ServiceDetails {
         onProgress("Resolving service name...")
         guard let serviceName = try await aiService.resolveServiceName(query: prompt) else {
             onProgress("Failed to resolve service name.")
@@ -19,7 +19,20 @@ class ServiceDetailsResolver {
         // 1. Check Memory/Cache
         if let cached = storage.getServiceDetails(for: serviceName) {
             onProgress("Found details in memory.")
+            print("Found details in memory.")
             return cached
+        }
+        
+        // 1.5 Check Backend via fetchProviderUrlsApi
+        if let vm = agentViewModel {
+            onProgress("Checking backend for \(serviceName)...")
+            if let fetched = await vm.fetchProviderUrlsApi(providerName: serviceName),
+               let loginUrl = fetched.loginUrl, !loginUrl.isEmpty {
+                onProgress("Found details for \(serviceName) in backend.")
+                let result = ServiceDetails(serviceName: serviceName, loginUrl: loginUrl, billingUrl: fetched.billingUrl ?? "", isFromBackend: true, id: fetched.id)
+                storage.saveServiceDetails(result)
+                return result
+            }
         }
         
         // 2. Search for the Service Domain

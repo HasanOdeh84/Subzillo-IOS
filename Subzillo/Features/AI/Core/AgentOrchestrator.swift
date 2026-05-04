@@ -75,15 +75,15 @@ class AgentOrchestrator: ObservableObject {
                     steps += 1
                     _updates.send(.status("Analyzing page... (Step \(steps))"))
                     await browser.waitForLoad()
-                
-                // Final UI Stability Delay for accurate snapshots
-                try? await Task.sleep(nanoseconds: 800_000_000) // 0.8 seconds (Reduced from 1.5s for responsiveness)
-                
-                let snapshot = await browser.extractPageSnapshot()
-                print("📸 Agent Snapshot: [\(snapshot.text.prefix(200))...] | URL: \(browser.currentURL) | Elements: \(snapshot.elements.count)")
-                
-                // Improved Hash: Includes URL + Text Sample + Element Count + Scroll position to detect progress
-                let currentStateHash = "\(browser.currentURL)_\(snapshot.text.prefix(500))_\(snapshot.elements.count)_\(snapshot.scrollY ?? 0)"
+                    
+                    // Final UI Stability Delay for accurate snapshots
+                    try? await Task.sleep(nanoseconds: 800_000_000) // 0.8 seconds (Reduced from 1.5s for responsiveness)
+                    
+                    let snapshot = await browser.extractPageSnapshot()
+                    print("📸 Agent Snapshot: [\(snapshot.text.prefix(200))...] | URL: \(browser.currentURL) | Elements: \(snapshot.elements.count)")
+                    
+                    // Improved Hash: Includes URL + Text Sample + Element Count + Scroll position to detect progress
+                    let currentStateHash = "\(browser.currentURL)_\(snapshot.text.prefix(500))_\(snapshot.elements.count)_\(snapshot.scrollY ?? 0)"
                     
                     if lastActionIsStateChanging {
                         lastActionFailed = (currentStateHash == lastStateHash)

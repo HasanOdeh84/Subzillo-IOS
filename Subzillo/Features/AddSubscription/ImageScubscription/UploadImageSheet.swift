@@ -25,7 +25,9 @@ struct UploadImageSheet: View {
     @StateObject var profileVM                  = ProfileViewModel()
     @State private var showLocalLoader          = false
     @State private var showPreview              = false
+    var isChatBot                               = false
     var onDelegate                              : (() -> Void)?
+    var onImageSelected                         : ((UIImage) -> Void)?
     @State var permissionBottomTitle            : String = ""
     
     //MARK: - body
@@ -66,7 +68,7 @@ struct UploadImageSheet: View {
                         //                    Divider()
                         //                        .overlay(Color.neutral300Border)
                         //                    UploadItem(title: "Paste Text", subTitle: "Copy and paste notification text", image: "text-creation", imageColor: Color.purple100, action: pastTextAction)
-                        if !fromProfile{
+                        if !fromProfile && !isChatBot{
                             Divider()
                                 .overlay(Color.neutral300Border)
                             UploadItem(title: "Take Screenshot",
@@ -75,7 +77,7 @@ struct UploadImageSheet: View {
                         }
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)
-                    .frame(height: fromProfile ? 160 : 240)
+                    .frame(height: fromProfile || isChatBot ? 160 : 240)
                     .cornerRadius(12)
                     .overlay(
                         RoundedRectangle(cornerRadius: 12)
@@ -109,8 +111,8 @@ struct UploadImageSheet: View {
             }
             .onChange(of: selectedImage) { image in
                 if let image = image {
-                    if isCamera {
-                        // Directly upload for camera, skip preview
+                    if isCamera || isChatBot {
+                        // Directly upload for camera or chatbot, skip preview
                         uploadImage()
                         selectedImage = nil // Reset so gallery can still work after
                     } else {
@@ -166,7 +168,8 @@ struct UploadImageSheet: View {
                 showPermissionAlert = false
             }
             .onAppear{
-                originalImage = nil
+                // Reset internal selectedImage when appearing
+                selectedImage = nil
 //                if fromProfile{
 //                    if isCamera{
 //                        permissionBottomTitle = "We need camera access to update profile photo"
@@ -243,13 +246,20 @@ struct UploadImageSheet: View {
         if let image = selectedImage,
            let imageData = image.jpegData(compressionQuality: 0.8) {
             
-            originalImage = image
+            onImageSelected?(image)
             isUploading = true
             // LoaderManager.shared.showLoader()
             showLocalLoader = true
             let timestamp = Int(Date().timeIntervalSince1970)
             let filename = "image_\(timestamp).jpg"
-            if fromProfile{
+            if isChatBot {
+                isUploading = false
+                showLocalLoader = false
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                    dismiss()
+                    onDelegate?()
+                }
+            } else if fromProfile{
                 profileVM.updateProfileImage(input: UpdateProfileImageRequest(userId: Constants.getUserId()), fileData: [MultiPartFileInput(
                     fieldName   : "profile",
                     fileName    : filename,

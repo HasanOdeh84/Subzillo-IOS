@@ -20,6 +20,7 @@ public enum APIError: Error {
     case anyError
     case apiError(String)
     case insufficientQuota
+    case payloadTooLarge
     
     var localizedDescription: String {
         switch self {
@@ -59,6 +60,8 @@ public enum APIError: Error {
             return "someone logged in else where"
         case .insufficientQuota:
             return "insufficient quota or quota exceeded"
+        case .payloadTooLarge:
+            return "File is too large to upload. Please try a smaller image."
         }
     }
 }
@@ -80,7 +83,8 @@ extension APIError: Equatable {
              (.refreshTokenFailed, .refreshTokenFailed),
              (.responseError, .responseError),
              (.anyError, .anyError),
-             (.insufficientQuota, .insufficientQuota):
+             (.insufficientQuota, .insufficientQuota),
+             (.payloadTooLarge, .payloadTooLarge):
             return true
         case (.urlError(let lhsError), .urlError(let rhsError)):
             return lhsError == rhsError

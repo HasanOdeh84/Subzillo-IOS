@@ -40,8 +40,8 @@ struct LearnedRoute: Codable {
     func promptHint() -> String {
         if steps.isEmpty { return "Known direct billing URL: \(billingURL)" }
         return "The user previously reached the billing page via these steps:\n" +
-                steps.map { "  - \($0)" }.joined(separator: "\n") +
-                "\nTry to mimic these steps if possible."
+        steps.map { "  - \($0)" }.joined(separator: "\n") +
+        "\nTry to mimic these steps if possible."
     }
 }
 
@@ -125,9 +125,11 @@ struct ChatMessage: Codable, Identifiable {
     var id: String = UUID().uuidString
     let sender: ChatSender
     let text: String
+    var imageData: Data? = nil
     var extractedFields: ExtractedFields? = nil
     var isError: Bool = false
     var isLoading: Bool = false
+    var suggestedReplies: [String] = []
 }
 
 struct ExtractedFields: Codable {
@@ -141,17 +143,17 @@ struct ExtractedFields: Codable {
     var status: String? = nil
     var agentMessage: String? = nil
     var extras: [String] = []
-
+    
     var hasMeaningfulData: Bool {
         return price != nil || billingDate != nil
     }
-
+    
     var hasAnyData: Bool {
         return plan != nil || price != nil || billingDate != nil ||
-                billingCycle != nil || currency != nil || paymentMethod != nil ||
-                status != nil || !extras.isEmpty
+        billingCycle != nil || currency != nil || paymentMethod != nil ||
+        status != nil || !extras.isEmpty
     }
-
+    
     mutating func merge(_ d: ExtractedData) {
         if let sn = d.serviceName, !sn.isEmpty { serviceName = sn }
         if let p = d.plan, !p.isEmpty { plan = p }
@@ -163,7 +165,7 @@ struct ExtractedFields: Codable {
         if let st = d.status, !st.isEmpty { status = st }
         if let r = d.raw, !r.isEmpty { extras.append(r) }
     }
-
+    
     func summary() -> String {
         var p: [String] = []
         if let plan = plan { p.append("plan=\(plan)") }
@@ -174,7 +176,81 @@ struct ExtractedFields: Codable {
 }
 
 struct ServiceDetails: Codable {
-    let serviceName: String
+    let serviceName     : String
+    let loginUrl        : String
+    let billingUrl      : String
+    var isFromBackend   : Bool = false
+    var id              : String? = nil
+}
+
+struct TranscriptionResponse: Codable {
+    let transcript  : String
+    let language    : String?
+    let provider    : String?
+}
+
+struct TranscribeRequest: Codable {
+    let user_id         : String
+    let conversation_id : String?
+}
+
+// MARK: - Agentic Context API Models
+
+struct AgenticContextMetadata: Codable {
+    let provider: String
+    let source  : String
+}
+
+struct AgenticContextRequest: Codable {
+    let conversation_id : String
+    let user_id         : String
+    let message         : String
+    let metadata        : AgenticContextMetadata
+}
+
+struct AgenticContextResponse: Codable {
+    let ok          : Bool
+    let session_id  : String
+    let stored      : Bool
+    let expires_at  : String
+}
+
+// MARK: - Provider URL Models
+
+struct ProviderUrlData: Codable {
+    let id: String?
+    let providerId: String?
+    let providerName: String?
+    let countryCode: String?
+    let loginUrl: String?
+    let billingUrl: String?
+}
+
+struct FetchProviderUrlsResponse: Codable {
+    let message: String?
+    let data: ProviderUrlData?
+}
+
+struct AddProviderUrlsRequest: Codable {
+    let providerId: String
+    let providerName: String
+    let countryCode: String
     let loginUrl: String
     let billingUrl: String
+}
+
+struct UpdateProviderUrlsRequest: Codable {
+    let providerUrlId: String
+    let loginUrl: String
+    let billingUrl: String
+}
+
+struct FetchProviderUrlsRequest: Codable {
+    let providerId: String
+    let providerName: String
+    let countryCode: String
+}
+
+struct ProviderUrlsGenericResponse: Codable {
+    let message: String?
 }

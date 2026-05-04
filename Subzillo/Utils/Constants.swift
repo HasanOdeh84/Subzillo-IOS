@@ -62,6 +62,9 @@ struct Constants{
     static let isLoggedIn                           = "isLoggedIn"
     static let isFirstLoggedIn                      = "isFirstLoggedIn"
     static let userId                               = "userId"
+    static let userIsoCountryCode                   = "userIsoCountryCode"
+    static let userCountryCode                      = "userCountryCode"
+    static let userCurrencyCode                     = "userCurrencyCode"
     static let referrerId                           = "referrerId"
     static let providerBaseUrl                      = "providerBaseUrl"
     static let username                             = "username"
@@ -88,9 +91,9 @@ struct Constants{
     
 //        static let webClientId                          = "955282043815-uither25lbuv22smj2tdhje513ilg5je.apps.googleusercontent.com" //soniya for dev
     
-//    static let webClientId                          = "955282043815-2bdqjsqk1ailb6dbvron7td1os6hipg6.apps.googleusercontent.com" //new soniya for QA
+    static let webClientId                          = "955282043815-2bdqjsqk1ailb6dbvron7td1os6hipg6.apps.googleusercontent.com" //new soniya for QA
     
-        static let webClientId                          = "955282043815-4rckggvbc5m8dtsrtdhecrjl25e0lbg6.apps.googleusercontent.com" //new soniya for staging
+//        static let webClientId                          = "955282043815-4rckggvbc5m8dtsrtdhecrjl25e0lbg6.apps.googleusercontent.com" //new soniya for staging
     
     //    static let appGroupID                           = "group.com.krify.Subzillo" //krify
     static let appGroupID                           = "group.com.subzillo.app" //client
