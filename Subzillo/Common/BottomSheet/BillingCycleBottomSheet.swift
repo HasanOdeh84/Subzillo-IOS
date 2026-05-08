@@ -12,27 +12,19 @@ struct BillingCycleBottomSheet: View {
     //MARK: - Properties
     @Environment(\.dismiss) private var dismiss
     @Binding var selectedBilling            : String?
-//    var billingCyclesResponse               : [String]?
+    var billingCyclesResponse               : [String]?
     var billingCycles                       = ["Daily", "Weekly", "Monthly", "Quarterly", "Biannually", "Yearly"]
     var header                              : String?
     var placeholder                         : String?
     @State private var searchText           = ""
     var onSelect: (String) -> Void
     
-    @State private var billingData = [
-        ManualDataInfo(id: "1", title: "Daily", subtitle: "Every 24 hours"),
-        ManualDataInfo(id: "2", title: "Weekly", subtitle: "Every 7 Days"),
-        ManualDataInfo(id: "3", title: "Monthly", subtitle: "Every 30 Days"),
-        ManualDataInfo(id: "4", title: "Quarterly", subtitle: "Every 90 Days"),
-        ManualDataInfo(id: "5", title: "Biannually", subtitle: "Every 180 Days"),
-        ManualDataInfo(id: "6", title: "Yearly", subtitle: "Every 360 Days")
-    ]
-    
     var filteredCategories: [String] {
+        let baseList = billingCyclesResponse ?? billingCycles
         if searchText.isEmpty {
-            return billingCycles
+            return baseList
         }
-        return billingCycles.filter {
+        return baseList.filter {
             $0.localizedCaseInsensitiveContains(searchText)
         }
     }

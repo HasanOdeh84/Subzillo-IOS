@@ -21,6 +21,7 @@ struct SubscriptionSummaryView: View {
     @State private var isDatePickerPresented    = false
     @State private var chargeDate               : String = "mm/yyyy"
     @Binding var monthYear                      : String
+    var isFromHome                              : Bool = false
     var done                                    : () -> Void
     
     private var visibleSubscriptions: [AnalyticsCategoryData] {
@@ -34,51 +35,53 @@ struct SubscriptionSummaryView: View {
     var body: some View {
         VStack(spacing: 0) {
             HStack {
-                Text("Top spending subscriptions")
+                Text("Monthly Spend Insights")
                     .font(.appRegular(16))
                     .foregroundColor(.neutralMain700)
                 
                 Spacer()
                 
-                HStack(spacing: 4) {
-                    Text(chargeDate)
-                        .font(.appRegular(16))
-                        .foregroundStyle(chargeDate == "mm/yyyy" ? Color.grayText : Color.grayLG)
-                    Image(systemName: "chevron.down")
-                        .font(.system(size: 12))
-                        .foregroundStyle(chargeDate == "mm/yyyy" ? Color.grayText : Color.grayLG)
-                }
-                .padding(.horizontal, 10)
-                .padding(.vertical, 6)
-                .overlay(
-                    RoundedRectangle(cornerRadius: 4)
-                        .stroke(.neutral300Border)
-                )
-                .onTapGesture {
-                    isDatePickerPresented = true
-                }
-                .sheet(isPresented: $isDatePickerPresented) {
-                    CustomCalenderSheet(
-                        isPresented   : $isDatePickerPresented,
-                        selectedMonth : $month,
-                        selectedYear  : $year,
-                        onDone: {
-                            let monthString = String(format: "%02d", month)
-                            self.chargeDate = "\(monthString)/\(year)"
-                            monthYear = "\(year)-\(monthString)"
-                            done()
-                        }
+                if !isFromHome {
+                    HStack(spacing: 4) {
+                        Text(chargeDate)
+                            .font(.appRegular(16))
+                            .foregroundStyle(chargeDate == "mm/yyyy" ? Color.grayText : Color.grayLG)
+                        Image(systemName: "chevron.down")
+                            .font(.system(size: 12))
+                            .foregroundStyle(chargeDate == "mm/yyyy" ? Color.grayText : Color.grayLG)
+                    }
+                    .padding(.horizontal, 10)
+                    .padding(.vertical, 6)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 4)
+                            .stroke(.neutral300Border)
                     )
-                    .presentationDetents([.height(300)])
-                    .presentationDragIndicator(.hidden)
-                }
-                .onAppear{
-                    let now = Date()
-                    let formatter = DateFormatter()
-                    formatter.dateFormat = "MM/yyyy"
-                    year    = Calendar.current.component(.year, from: now)
-                    month   = Calendar.current.component(.month, from: now)
-                    self.chargeDate = formatter.string(from: now)
+                    .onTapGesture {
+                        isDatePickerPresented = true
+                    }
+                    .sheet(isPresented: $isDatePickerPresented) {
+                        CustomCalenderSheet(
+                            isPresented   : $isDatePickerPresented,
+                            selectedMonth : $month,
+                            selectedYear  : $year,
+                            onDone: {
+                                let monthString = String(format: "%02d", month)
+                                self.chargeDate = "\(monthString)/\(year)"
+                                monthYear = "\(year)-\(monthString)"
+                                done()
+                            }
+                        )
+                        .presentationDetents([.height(300)])
+                        .presentationDragIndicator(.hidden)
+                    }
+                    .onAppear{
+                        let now = Date()
+                        let formatter = DateFormatter()
+                        formatter.dateFormat = "MM/yyyy"
+                        year    = Calendar.current.component(.year, from: now)
+                        month   = Calendar.current.component(.month, from: now)
+                        self.chargeDate = formatter.string(from: now)
+                    }
                 }
             }
             .padding(16)
@@ -89,7 +92,8 @@ struct SubscriptionSummaryView: View {
             // Chart
             DonutChartView(data             : subscriptions,
                            subsCount        : pieData.totals?.totalSubscriptions ?? 0,
-                           currencySymbol   : currencySymbol)
+                           currencySymbol   : currencySymbol,
+                           isHome           : isFromHome)
             .padding(.vertical, 24)
             .padding(.horizontal, 29)
             
@@ -98,12 +102,15 @@ struct SubscriptionSummaryView: View {
                     Text("Active - \(pieData.totals?.activeSubscriptions ?? 0)")
                         .font(.appBold(14))
                         .foregroundColor(Color.green)
-                    Text("|")
-                        .font(.appBold(14))
-                        .foregroundColor(.neutralMain700)
-                    Text("Inactive - \(pieData.totals?.inactiveSubscriptions ?? 0)")
-                        .font(.appBold(14))
-                        .foregroundColor(Color.red)
+                    
+                    if !isFromHome {
+                        Text("|")
+                            .font(.appBold(14))
+                            .foregroundColor(.neutralMain700)
+                        Text("Inactive - \(pieData.totals?.inactiveSubscriptions ?? 0)")
+                            .font(.appBold(14))
+                            .foregroundColor(Color.red)
+                    }
                     Spacer()
                 }
                 .padding(.horizontal, 24)
@@ -168,12 +175,14 @@ struct DonutChartView: View {
     var data                     : [AnalyticsCategoryData]
     var subsCount                : Int?
     var currencySymbol           : String
+    var isHome                   : Bool = false
     @State private var progresses: [CGFloat]
     
-    init(data: [AnalyticsCategoryData], subsCount:Int? , currencySymbol: String) {
+    init(data: [AnalyticsCategoryData], subsCount:Int? , currencySymbol: String, isHome: Bool) {
         self.data = data
         self.subsCount = subsCount
         self.currencySymbol = currencySymbol
+        self.isHome = isHome
         _progresses = State(initialValue: Array(repeating: 0, count: data.count))
     }
     
@@ -225,14 +234,19 @@ struct DonutChartView: View {
             }
             
             VStack(spacing: 4) {
-                Text("\(subsCount ?? 0)")
-                    .font(.appSemiBold(40))
-                    .foregroundColor(.navyBlueCTA700)
-                
-                Text("Subscriptions")
-                    .foregroundColor(.neutral500)
-                    .font(.appSemiBold(18))
-                
+                if isHome{
+                    Text("This Month")
+                        .foregroundColor(.neutral500)
+                        .font(.appSemiBold(18))
+                }else{
+                    Text("\(subsCount ?? 0)")
+                        .font(.appSemiBold(40))
+                        .foregroundColor(.navyBlueCTA700)
+                    
+                    Text("Subscriptions")
+                        .foregroundColor(.neutral500)
+                        .font(.appSemiBold(18))
+                }
                 Text("\(currencySymbol)\(String(format: "%.2f", totalAmount))")
                     .font(.appSemiBold(28))
                     .foregroundColor(.navyBlueCTA700)

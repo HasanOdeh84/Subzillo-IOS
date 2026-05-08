@@ -31,9 +31,39 @@ struct HomeView: View {
     @State private var showSaveSheet        = false
     @EnvironmentObject var commonApiVM      : CommonAPIViewModel
     @State var currentPlan                  : Int = 0
-    @StateObject var viewModel              = SubscriptionsViewModel()
     @State var monthYear                    : String =  ""
     @State var selectedFamilyMembers        : [String] = ["all"]
+    
+    private var homePieData: PieData {
+        let totals = TotalsData(
+            totalSubscriptions: homeVM.homeResponse?.activeSubscriptionCount,
+            activeSubscriptions: homeVM.homeResponse?.activeSubscriptionCount,
+            inactiveSubscriptions: 0
+        )
+        
+        return PieData(
+            month: nil,
+            year: nil,
+            monthYear: nil,
+            totals: totals,
+            totalAmount: homeVM.homeResponse?.monthlySpend,
+            currency: nil,
+            currencySymbol: homeVM.homeResponse?.monthlySpendCurrency,
+            categories: homeCategories
+        )
+    }
+
+    private var homeCategories: [AnalyticsCategoryData] {
+        homeVM.homeResponse?.topCategories?.map {
+            AnalyticsCategoryData(
+                categoryId: $0.categoryId,
+                categoryName: $0.categoryName,
+                categoryColor: $0.color,
+                totalAmount: $0.totalAmount,
+                count: $0.subscriptionCount
+            )
+        } ?? []
+    }
     
     private var currentSubscriptions: [SubscriptionListData] {
         showAll ? activeSubsList : Array(activeSubsList.prefix(1))
@@ -136,12 +166,12 @@ struct HomeView: View {
                                     }
                                     
                                     if let limit = commonApiVM.userInfoResponse?.planSubscriptionLimit{
-                                        Text("Added \(commonApiVM.userInfoResponse?.usedSubscriptionCount ?? 0)/\(limit) Active Subscriptions")
+                                        Text("Plan usage \(commonApiVM.userInfoResponse?.usedSubscriptionCount ?? 0)/\(limit) Subscriptions")
                                             .font(.appRegular(12))
                                             .foregroundColor(.white)
                                             .multilineTextAlignment(.leading)
                                     }else{
-                                        Text("Added \(commonApiVM.userInfoResponse?.usedSubscriptionCount ?? 0)/Unlimited Active Subscriptions")
+                                        Text("Plan usage \(commonApiVM.userInfoResponse?.usedSubscriptionCount ?? 0)/Unlimited Active Subscriptions")
                                             .font(.appRegular(12))
                                             .foregroundColor(.white)
                                             .multilineTextAlignment(.leading)
@@ -171,12 +201,13 @@ struct HomeView: View {
                         }
 
                         // Donut Chart (Top Spending)
-                        SubscriptionSummaryView(pieData         : viewModel.analyticsResponse?.pie ?? PieData(month: 0, year: 0, monthYear: "", totals: nil, totalAmount: 0.0, currency: "", currencySymbol: "", categories: []),
-                                                subscriptions   : viewModel.analyticsResponse?.pie?.categories ?? [],
-                                                currencySymbol  : viewModel.analyticsResponse?.currencySymbol ?? Constants.shared.currencySymbol,
+                        SubscriptionSummaryView(pieData         : homePieData,
+                                                subscriptions   : homeCategories,
+                                                currencySymbol  : homeVM.homeResponse?.monthlySpendCurrency ?? Constants.shared.currencySymbol,
                                                 monthYear       : $monthYear,
+                                                isFromHome      : true,
                                                 done: {
-                            analyticsApi()
+                            homeVM.home(input: HomeRequest(userId: Constants.getUserId()))
                         })
                         .padding(.top, 16)
                         
@@ -366,7 +397,6 @@ struct HomeView: View {
             let formatter = DateFormatter()
             formatter.dateFormat = "yyyy-MM"
             monthYear = formatter.string(from: now)
-            analyticsApi()
         }
         .onChange(of: homeVM.homeResponse){ _ in updateHomeResponse() }
         .onChange(of: homeVM.apiError) { _ in
@@ -436,7 +466,7 @@ struct HomeView: View {
         subscriptionsList   = homeResponse?.subscriptionList ?? []
         topCategoriesList   = homeResponse?.topCategories ?? []
         if let response = homeVM.homeResponse {
-            isHome = (response.topCategories?.count == 0 || response.topCategories == nil) ? false : true
+            isHome = (response.totalSubscriptionCount == 0 || response.totalSubscriptionCount == nil) ? false : true
         } else if homeVM.apiError != nil {
             isHome = false
         }
@@ -451,13 +481,6 @@ struct HomeView: View {
         if let fullName = commonApiVM.userInfoResponse?.fullName{
             self.fullName = fullName
         }
-    }
-
-    func analyticsApi(){
-        viewModel.analytics(input: AnalyticsRequest(userId          : Constants.getUserId(),
-                                                    monthYear       : monthYear,
-                                                    year            : selectedYear,
-                                                    familyMembers   : selectedFamilyMembers))
     }
 }
 
@@ -702,10 +725,11 @@ struct TopSpendingSubscriptionsView: View {
             VStack(spacing: 16) {
                 ForEach(data.prefix(3)) { item in
                     SpendingRowView(
-                        title       : item.categoryName ?? "",
-                        amount      : item.totalAmount ?? 0.0,
-                        percentage  : item.percentage ?? 0.0,
-                        color       : item.color ?? ""
+                        title          : item.categoryName ?? "",
+                        amount         : item.totalAmount ?? 0.0,
+                        percentage     : item.percentage ?? 0.0,
+                        color          : item.color ?? "",
+                        currencySymbol : item.currencySymbol ?? "$"
                     )
                 }
             }
@@ -739,11 +763,12 @@ struct TopSpendingSubscriptionsView: View {
 //MARK: - SpendingRowView
 struct SpendingRowView: View {
     
-    let title       : String
-    let amount      : Double
-    let percentage  : Double
-    let color       : String
-    var progress    : CGFloat {
+    let title          : String
+    let amount         : Double
+    let percentage     : Double
+    let color          : String
+    let currencySymbol : String
+    var progress       : CGFloat {
         CGFloat(percentage / 100)
     }
     
@@ -765,7 +790,7 @@ struct SpendingRowView: View {
             }
             .frame(height: 10)
             .padding(.trailing, 7)
-            Text(String(format: "$%.2f", amount))
+            Text(String(format: "%@%.2f", currencySymbol, amount))
                 .font(.appBold(14))
                 .foregroundColor(.neutralMain700)
                 .frame(alignment: .trailing)
@@ -778,8 +803,8 @@ struct SpendingRowView: View {
 //
 //    @State private var selected             : MonthlySpendData?
 //    @State private var clearSelectionTask   : Task<Void, Never>?
-//    let visibleMonths                       : [String] = ["Jan", "Apr", "Jun", "Aug", "Oct", "Dec"]
-//    let fakeMonths                          = ["Jan", "Apr", "Jun", "Aug", "Oct", "Dec"]
+//    let visibleMonths                       : [String] = ["Jan", "Mar", "May", "Jul", "Sep", "Nov"]
+//    let fakeMonths                          = ["Jan", "Mar", "May", "Jul", "Sep", "Nov"]
 //    let data                                : [MonthlySpendData]
 //    var currencySymbol                      : String
 //    @State var openYearSheet                = false
@@ -1031,8 +1056,8 @@ struct YearOverviewChartView: View {
     
     @State private var selected             : MonthlySpendData?
     @State private var clearSelectionTask   : Task<Void, Never>?
-    let visibleMonths                       : [String] = ["Jan", "Apr", "Jun", "Aug", "Oct", "Dec"]
-    let fakeMonths                          = ["Jan", "Apr", "Jun", "Aug", "Oct", "Dec"]
+    let visibleMonths                       : [String] = ["Jan", "Mar", "May", "Jul", "Sep", "Nov"]
+    let fakeMonths                          = ["Jan", "Mar", "May", "Jul", "Sep", "Nov"]
     let data                                : [MonthlySpendData]
     var currencySymbol                      : String
     @State var openYearSheet                = false
@@ -1176,7 +1201,7 @@ struct YearOverviewChartView: View {
                     }
                 }
                 .chartYScale(domain: 0...(yAxisValues.last ?? 5))
-                //                .chartXScale(domain: -0.5...11.5)  //Widened domain to ensure Dec label is visible
+                .chartXScale(domain: -0.3...11.3)
                 .chartYAxis {
                     AxisMarks(position: .leading, values: yAxisValues) { value in
                         
@@ -1199,9 +1224,10 @@ struct YearOverviewChartView: View {
                         AxisValueLabel(anchor: .trailing) { // Anchor trailing to place labels left of the line
                             if let y = value.as(Double.self) {
                                 Text("\(Int(y))")
-                                    .font(.appRegular(16))
+                                    .font(.appRegular(11))
                                     .foregroundStyle(Color.neutralMain700)
                                     .padding(.trailing, 5)
+                                    .fixedSize()
                             }
                         }
                     }
@@ -1234,17 +1260,18 @@ struct YearOverviewChartView: View {
                             .foregroundStyle(Color.dashClr)
                     }
                     
-//                    // 2. Month Labels perfectly aligned with the graph points
-//                    AxisMarks(values: [0, 3, 5, 7, 9, 11]) { value in
-//                        AxisValueLabel {
-//                            if let index = value.as(Int.self) {
-//                                let months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
-//                                Text(LocalizedStringKey(months[index]))
-//                                    .font(.appRegular(16))
-//                                    .foregroundColor(Color.neutralMain700)
-//                            }
-//                        }
-//                    }                    
+                    // 2. Month Labels perfectly aligned with the graph points
+                    AxisMarks(values: [0, 2, 4, 6, 8, 10]) { value in
+                        AxisValueLabel(anchor: .top) {
+                            if let index = value.as(Int.self) {
+                                let months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+                                Text(LocalizedStringKey(months[index]))
+                                    .font(.appRegular(11))
+                                    .foregroundColor(Color.neutralMain700)
+                                    .fixedSize()
+                            }
+                        }
+                    }                    
                 }
                 .frame(height: 220)
                 .chartOverlay { proxy in
@@ -1317,21 +1344,9 @@ struct YearOverviewChartView: View {
                         }
                     }
                 }
-                .padding(.leading, 35)
-                .padding(.trailing, 35)
+                .padding(.leading, 45)
+                .padding(.trailing, 10)
             }
-            
-            HStack(spacing: 0) {
-                ForEach(fakeMonths, id: \.self) { month in
-                    Text(LocalizedStringKey(month))
-                        .font(.appRegular(16))
-                        .foregroundColor(Color.neutralMain700)
-                        .frame(maxWidth: .infinity)
-                }
-            }
-            .padding(.top, 15)
-            .padding(.leading, 50)
-            .padding(.trailing, 20)
             
             HStack{
                 Spacer()

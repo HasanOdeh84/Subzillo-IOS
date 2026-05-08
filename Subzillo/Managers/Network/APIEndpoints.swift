@@ -9,7 +9,7 @@ enum urlType:Int{
     case prod   = 3
 }
 
-let Environment = urlType.qa
+let Environment = urlType.stage
 var baseurl: String {
     switch Environment {
     case .dev:
@@ -21,6 +21,9 @@ var baseurl: String {
     case .prod:
         return ""
     }
+}
+var chatBaseUrl: String {
+    return "https://staging-chat.subzillo.com"
 }
 
 //com.subzillo.app
@@ -98,14 +101,28 @@ enum APIEndpoint: String {
     case redeemReward                   = "/redeemReward"
     case checkInAppTransaction          = "/checkInAppTransaction"
 
-    //new api's
     case deleteAccount                  = "/deleteAccount"
+    case restoreIosPurchase             = "/restoreIosPurchase"
 
     //common api's
     case getCategories                  = "/getCategories"
     case getPaymentMethods              = "/getPaymentMethods"
     case getCurrencies                  = "/getCurrencies"
     case getCountryCodes                = "/getCountryCodes"
+    
+    // ChatBot API
+    case welcome                        = "/welcome"
+    case conversations                  = "/conversations"
+    case chatAuto                       = "/api/node/auto"
+    case transcribe                     = "/api/transcribe"
+    case clearPending                   = "/session/clear_pending"
+    
+    // Agent API
+    case agenticContext                  = "/api/agentic/context"
+    case addProviderUrls                 = "/addProviderUrls"
+    case updateProviderUrls              = "/updateProviderUrls"
+    case fetchProviderUrls               = "/fetchProviderUrls"
+    
 }
 
 var authKey: String {

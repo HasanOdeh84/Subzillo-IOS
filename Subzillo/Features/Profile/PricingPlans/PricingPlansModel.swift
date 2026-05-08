@@ -44,6 +44,12 @@ struct SubscribePlanRequest: Codable {
     let transactionId       : String
 }
 
+struct RestoreIosPurchaseRequest: Encodable {
+    let userId: String
+    let transactionId: String
+    let originalTransactionId: String
+}
+
 struct CheckTransactionRequest: Codable {
     let originalTransactionId: String
 }

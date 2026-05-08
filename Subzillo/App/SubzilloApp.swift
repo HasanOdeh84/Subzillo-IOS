@@ -549,6 +549,8 @@ struct RootView: View {
             ExtractedSubscriptionsView(subscriptions: subscriptions, fromEmailSyncScreen: fromEmailSync, integrationId: integrationId)
         case .connectICloudView:
             ConnectICloudView()
+        case .AgentChatView:
+            AgentChatView()
         }
     }
 }

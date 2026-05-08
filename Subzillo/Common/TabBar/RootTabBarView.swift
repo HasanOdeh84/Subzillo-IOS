@@ -105,7 +105,8 @@ struct CurvedTabBar: View {
                 
                 TabBarItem(label: "Smart AI", iconName: selectedTab == .smartAI ? "smartAI-tabSelected" : "smartAI-tab", action: {
                     Constants.FeatureConfig.performS5Action {
-                        AppIntentRouter.shared.navigate(to: .smartAssistantAI)
+//                        AppIntentRouter.shared.navigate(to: .smartAssistantAI)
+                        AppIntentRouter.shared.navigate(to: .AgentChatView)
 //                        selectedTab = .smartAI
                     }
                 }, selectedTab: $selectedTab, tab: .smartAI)

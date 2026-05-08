@@ -4,12 +4,21 @@ import SwiftUI
 import Combine
 import UIKit
 
+extension AnyCancellable {
+    func store(in lock: NSLock, into collection: inout Set<AnyCancellable>) {
+        lock.lock()
+        defer { lock.unlock() }
+        collection.insert(self)
+    }
+}
+
 class NetworkRequest {
     
     // MARK: - Properties
     static let shared                       = NetworkRequest()
     private let urlSession                  = URLSession.shared
     private var subscriptions               = Set<AnyCancellable>()
+    private let lock                        = NSLock()
     
     private let jsonDecoder: JSONDecoder = {
         let jsonDecoder = JSONDecoder()
@@ -17,8 +26,9 @@ class NetworkRequest {
     }()
     
     // MARK: - Create Endpoint
-    private func createURL(with endpoint: String) -> URL? {
-        guard let urlComponents = URLComponents(string: "\(baseurl)\(endpoint)")
+    private func createURL(with endpoint: String, isChat: Bool = false) -> URL? {
+        let baseUrlToUse = isChat ? chatBaseUrl : baseurl
+        guard let urlComponents = URLComponents(string: "\(baseUrlToUse)\(endpoint)")
         else { return nil }
         return urlComponents.url
     }
@@ -39,7 +49,7 @@ class NetworkRequest {
                 KeychainHelperApp.save(refreshData.data?.refreshToken, account: Constants.refreshKey)
                 promise(.success(()))
             }
-            .store(in: &self.subscriptions)
+            .store(in: self.lock, into: &self.subscriptions)
         }
     }
     
@@ -49,11 +59,12 @@ class NetworkRequest {
         showLoader  : Bool = false,
         showErrorToast: Bool = true,
         extraParams : String? = nil,
-        responseType: T.Type
+        responseType: T.Type,
+        isChat      : Bool = false
     ) -> AnyPublisher<T, APIError> {
 //        // Retry any pending subscribePlan before firing this request
 //        if endPoint != .subscribePlan { PricingPlansViewModel.shared.retryIfNeeded() }
-        return self.getRequest(endPoint: endPoint, token: token, showLoader: showLoader, showErrorToast: showErrorToast, extraParams: extraParams, responseType: responseType)
+        return self.getRequest(endPoint: endPoint, token: token, showLoader: showLoader, showErrorToast: showErrorToast, extraParams: extraParams, responseType: responseType, isChat: isChat)
             .catch { error -> AnyPublisher<T, APIError> in
                 if case .unauthorized = error {
                     if endPoint == .regenerateAccessToken{
@@ -67,7 +78,7 @@ class NetworkRequest {
                     }else{
                         return self.regenerateAccessAPI()
                             .flatMap {
-                                return self.getRequest(endPoint: endPoint, token: authKey, showLoader: showLoader, showErrorToast: showErrorToast, extraParams: extraParams, responseType: responseType)
+                                return self.getRequest(endPoint: endPoint, token: authKey, showLoader: showLoader, showErrorToast: showErrorToast, extraParams: extraParams, responseType: responseType, isChat: isChat)
                             }
                             .eraseToAnyPublisher()
                     }
@@ -118,9 +129,10 @@ class NetworkRequest {
         showLoader  : Bool = false,
         responseType: T.Type,
         fromSiri    : Bool = false,
-        fromVerifyOtpBottom    : Bool = false
+        fromVerifyOtpBottom    : Bool = false,
+        isChat      : Bool = false
     ) -> AnyPublisher<T, APIError> {
-        return self.postRequest(endPoint: endPoint, method: method,token: token,body: body,showLoader: showLoader, responseType: responseType,fromSiri: fromSiri, fromVerifyOtpBottom: fromVerifyOtpBottom)
+        return self.postRequest(endPoint: endPoint, method: method,token: token,body: body,showLoader: showLoader, responseType: responseType, fromSiri: fromSiri, fromVerifyOtpBottom: fromVerifyOtpBottom, isChat: isChat)
             .catch { error -> AnyPublisher<T, APIError> in
                 if case .unauthorized = error {
                     if endPoint == .regenerateAccessToken{
@@ -134,7 +146,7 @@ class NetworkRequest {
                     }else{
                         return self.regenerateAccessAPI()
                             .flatMap {
-                                return self.postRequest(endPoint: endPoint, method: method,token: authKey,body: body,showLoader: showLoader, responseType: responseType)
+                                return self.postRequest(endPoint: endPoint, method: method,token: authKey,body: body,showLoader: showLoader, responseType: responseType, isChat: isChat)
                             }
                             .eraseToAnyPublisher()
                     }
@@ -185,7 +197,8 @@ class NetworkRequest {
         showLoader  : Bool = false,
         showErrorToast: Bool = true,
         extraParams : String? = nil,
-        responseType: T.Type
+        responseType: T.Type,
+        isChat      : Bool = false
     ) -> Future<T, APIError> { //A Future is a Combine publisher that emits one value or one failure, then completes. Then the subscription automatically completes (no more emissions)
         return Future<T, APIError> { [self] promise in
             
@@ -203,7 +216,9 @@ class NetworkRequest {
             }
             
             if showLoader{
-                LoaderManager.shared.showLoader()
+                DispatchQueue.main.async {
+                    LoaderManager.shared.showLoader()
+                }
                 // Retry any pending subscribePlan before firing this request
                 if endPoint != .subscribePlan {
                     if Constants.FeatureConfig.isS4Enabled {
@@ -214,7 +229,7 @@ class NetworkRequest {
             if extraParams != nil || extraParams != ""{
                 finalEndpoint = endPoint.rawValue + (extraParams ?? "")
             }
-            guard let url = self.createURL(with: finalEndpoint)
+            guard let url = self.createURL(with: finalEndpoint, isChat: isChat)
             else {
                 return promise(.failure(.badRequest))
             }
@@ -245,6 +260,8 @@ class NetworkRequest {
                         }
                     case 401:
                         throw APIError.unauthorized
+                    case 413:
+                        throw APIError.payloadTooLarge
                     case 500:
                         if let error = self.extractAPIError(from: result.data, endPoint: endPoint) {
                             throw error
@@ -296,7 +313,9 @@ class NetworkRequest {
                 .receive(on: RunLoop.main)
             .sink { completion in
                 if case let .failure(error) = completion {
-                    LoaderManager.shared.hideLoader()
+                    DispatchQueue.main.async {
+                        LoaderManager.shared.hideLoader()
+                    }
                     switch error {
                     case let urlError as URLError:
                         promise(.failure(.urlError(urlError)))
@@ -314,11 +333,13 @@ class NetworkRequest {
             }
             receiveValue: {
                 if showLoader {
-                    LoaderManager.shared.hideLoader()
+                    DispatchQueue.main.async {
+                        LoaderManager.shared.hideLoader()
+                    }
                 }
                 promise(.success($0))
             }
-            .store(in: &self.subscriptions)
+            .store(in: self.lock, into: &self.subscriptions)
         }
     }
     
@@ -327,7 +348,8 @@ class NetworkRequest {
         method      : HTTPMethod,
         token       : String,
         body        : U?,
-        showLoader  : Bool = false
+        showLoader  : Bool = false,
+        isChat      : Bool = false
     ) -> Future<Data, APIError> {
         return Future<Data, APIError> { [self] promise in
             
@@ -358,7 +380,9 @@ class NetworkRequest {
             }
             
             if showLoader{
-                LoaderManager.shared.showLoader()
+                DispatchQueue.main.async {
+                    LoaderManager.shared.showLoader()
+                }
                 // Retry any pending subscribePlan before firing this request
                 if endPoint != .subscribePlan {
                     if Constants.FeatureConfig.isS4Enabled {
@@ -366,7 +390,7 @@ class NetworkRequest {
                 }
             }
             
-            guard let url = self.createURL(with: endPoint.rawValue)
+            guard let url = self.createURL(with: endPoint.rawValue, isChat: isChat)
             else {
                 return promise(.failure(.badRequest))
             }
@@ -405,6 +429,8 @@ class NetworkRequest {
                         }
                     case 401:
                         throw APIError.unauthorized
+                    case 413:
+                        throw APIError.payloadTooLarge
                     case 500:
                         if let error = self.extractAPIError(from: result.data, endPoint: endPoint) {
                             throw error
@@ -455,7 +481,9 @@ class NetworkRequest {
             .sink { completion in
                 if case let .failure(error) = completion {
                     if showLoader {
-                        LoaderManager.shared.hideLoader()
+                        DispatchQueue.main.async {
+                            LoaderManager.shared.hideLoader()
+                        }
                     }
                     switch error {
                     case let urlError as URLError:
@@ -470,11 +498,13 @@ class NetworkRequest {
             }
             receiveValue: {
                 if showLoader {
-                    LoaderManager.shared.hideLoader()
+                    DispatchQueue.main.async {
+                        LoaderManager.shared.hideLoader()
+                    }
                 }
                 promise(.success($0))
             }
-            .store(in: &self.subscriptions)
+            .store(in: self.lock, into: &self.subscriptions)
         }
     }
 
@@ -487,7 +517,8 @@ class NetworkRequest {
         showLoader  : Bool = false,
         responseType: T.Type,
         fromSiri    : Bool = false,
-        fromVerifyOtpBottom: Bool = false
+        fromVerifyOtpBottom: Bool = false,
+        isChat      : Bool = false
     ) -> Future<T, APIError> {
         return Future<T, APIError> { [self] promise in
             
@@ -526,7 +557,9 @@ class NetworkRequest {
             }
             
             if showLoader{
-                LoaderManager.shared.showLoader()
+                DispatchQueue.main.async {
+                    LoaderManager.shared.showLoader()
+                }
                 // Retry any pending subscribePlan before firing this request
                 if endPoint != .subscribePlan {
                     if Constants.FeatureConfig.isS4Enabled {
@@ -534,7 +567,7 @@ class NetworkRequest {
                 }
             }
             
-            guard let url = self.createURL(with: endPoint.rawValue)
+            guard let url = self.createURL(with: endPoint.rawValue, isChat: isChat)
             else {
                 return promise(.failure(.badRequest))
             }
@@ -583,6 +616,8 @@ class NetworkRequest {
                         }
                     case 401:
                         throw APIError.unauthorized
+                    case 413:
+                        throw APIError.payloadTooLarge
                     case 500:
                         if let error = self.extractAPIError(from: result.data, endPoint: endPoint) {
                             throw error
@@ -640,7 +675,9 @@ class NetworkRequest {
             .sink { completion in
                 if case let .failure(error) = completion {
                     if showLoader {
-                        LoaderManager.shared.hideLoader()
+                        DispatchQueue.main.async {
+                            LoaderManager.shared.hideLoader()
+                        }
                     }
                     switch error {
                     case let urlError as URLError:
@@ -648,15 +685,6 @@ class NetworkRequest {
                     case let decodingError as DecodingError:
                         promise(.failure(.decodingError(decodingError)))
                     case let apiError as APIError:
-//                        if !fromSiri{
-//                            if endPoint != .fetchProviderData{
-//                                if !fromVerifyOtpBottom{
-//                                    if endPoint != .subscribePlan{
-//                                        ToastManager.shared.showToast(message: apiError.localizedDescription,style: .error)
-//                                    }
-//                                }
-//                            }
-//                        }
                         if fromSiri || endPoint == .fetchProviderData || fromVerifyOtpBottom || endPoint == .subscribePlan || endPoint == .addCard || endPoint == .oauthCallback{
                             
                         }else{
@@ -670,11 +698,13 @@ class NetworkRequest {
             }
             receiveValue: {
                 if showLoader {
-                    LoaderManager.shared.hideLoader()
+                    DispatchQueue.main.async {
+                        LoaderManager.shared.hideLoader()
+                    }
                 }
                 promise(.success($0))
             }
-            .store(in: &self.subscriptions)
+            .store(in: self.lock, into: &self.subscriptions)
         }
     }
     
@@ -685,6 +715,7 @@ class NetworkRequest {
         token       : String,
         body        : MultipartInput<U>?,
         showLoader  : Bool = false,
+        isChat      : Bool = false,
         responseType: T.Type
     ) -> Future<T, APIError> {
         return Future<T, APIError> { [self] promise in
@@ -705,7 +736,9 @@ class NetworkRequest {
             }
             
             if showLoader{
-                LoaderManager.shared.showLoader()
+                DispatchQueue.main.async {
+                    LoaderManager.shared.showLoader()
+                }
                 // Retry any pending subscribePlan before firing this request
                 if endPoint != .subscribePlan {
                     if Constants.FeatureConfig.isS4Enabled {
@@ -713,7 +746,7 @@ class NetworkRequest {
                 }
             }
             
-            guard let url = self.createURL(with: endPoint.rawValue)
+            guard let url = self.createURL(with: endPoint.rawValue, isChat: isChat)
             else {
                 return promise(.failure(.badRequest))
             }
@@ -756,6 +789,8 @@ class NetworkRequest {
                         }
                     case 401:
                         throw APIError.unauthorized
+                    case 413:
+                        throw APIError.payloadTooLarge
                     case 500:
                         if let error = self.extractAPIError(from: result.data, endPoint: endPoint) {
                             throw error
@@ -807,7 +842,9 @@ class NetworkRequest {
                 .sink { completion in
                     if case let .failure(error) = completion {
                         if showLoader {
-                            LoaderManager.shared.hideLoader()
+                            DispatchQueue.main.async {
+                                LoaderManager.shared.hideLoader()
+                            }
                         }
                         switch error {
                         case let urlError as URLError:
@@ -827,11 +864,13 @@ class NetworkRequest {
                 }
             receiveValue: {
                 if showLoader {
-                    LoaderManager.shared.hideLoader()
+                    DispatchQueue.main.async {
+                        LoaderManager.shared.hideLoader()
+                    }
                 }
                 promise(.success($0))
             }
-            .store(in: &self.subscriptions)
+            .store(in: self.lock, into: &self.subscriptions)
         }
     }
     

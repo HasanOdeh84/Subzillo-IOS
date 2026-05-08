@@ -212,13 +212,11 @@ struct SettingsView: View {
 //                        )
                     }
                     
-                    //MARK: Support & Legal Section
-//                    SettingsSection(title: "Privacy & Data") { //antigravity changed to suport & legal
-                    SettingsSection(title: "Support & Legal") {
+                    //MARK: Privacy & Data Section
+                    SettingsSection(title: "Privacy & Data") {
                         
                         SettingsRow(
-//                            title: "Privacy & Data" //antigravity changed to suport & legal
-                            title: "Support & Legal"
+                            title: "Privacy & Data"
                         )
                         
                         Divider().overlay(Color.neutral300Border)

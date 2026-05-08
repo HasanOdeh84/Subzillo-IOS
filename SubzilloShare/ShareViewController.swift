@@ -148,7 +148,8 @@ import MobileCoreServices
 class ShareViewController: SLComposeServiceViewController {
     
     private let appURLScheme = "subzillo://share"
-    private let appGroupIdentifier = "group.com.krify.Subzillo" 
+//    private let appGroupIdentifier = "group.com.krify.Subzillo"
+    private let appGroupIdentifier = "group.com.subzillo.app"
 
     override func isContentValid() -> Bool {
         return true

@@ -113,12 +113,13 @@ struct ConnectEmailView: View {
                         // MARK: Email List
                         LazyVStack(spacing: 16) {
                             ForEach(connectedEmailsVM.filteredEmails) { email in
+                                let progress = connectedEmailsVM.activeSyncs[email.id ?? ""]
                                 SwipeableMailRow(email              : email,
                                                  activeCardId       : $activeEmailId,
                                                  isScrollDisabled   : $isScrollDisabled,
-                                                 isInlineSyncing    : connectedEmailsVM.isInlineSyncing && connectedEmailsVM.inlineSyncingId == email.id,
-                                                 emailsScanned      : connectedEmailsVM.inlineEmailsScanned,
-                                                 subscriptionsFound : connectedEmailsVM.inlineSubscriptionsFound,
+                                                 isInlineSyncing    : progress != nil,
+                                                 emailsScanned      : progress?.emailsScanned ?? 0,
+                                                 subscriptionsFound : progress?.subscriptionsFound ?? 0,
                                                  onDelete           : {
                                     selectedEmail = email
                                     showDeletePopup = true

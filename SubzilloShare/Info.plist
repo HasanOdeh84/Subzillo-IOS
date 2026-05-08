@@ -7,15 +7,15 @@
 		<key>NSExtensionAttributes</key>
 		<dict>
 			<key>NSExtensionActivationRule</key>
-            <string>SUBQUERY (
+			<string>SUBQUERY (
                     extensionItems,
                     $extensionItem,
                     SUBQUERY (
                         $extensionItem.attachments,
                         $attachment,
                         ANY $attachment.registeredTypeIdentifiers UTI-CONFORMS-TO "public.image"
-                    ).@count >= 1
-                ).@count > 0</string>
+                    ).@count &gt;= 1
+                ).@count &gt; 0</string>
 		</dict>
 		<key>NSExtensionMainStoryboard</key>
 		<string>MainInterface</string>

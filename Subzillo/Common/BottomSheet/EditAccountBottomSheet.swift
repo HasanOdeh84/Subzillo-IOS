@@ -30,6 +30,11 @@ struct EditAccountBottomSheet: View {
     @State private var activeField              : FieldType?
     @State private var showVerifyOtpSheet       = false
     @StateObject var profileVM                  = ProfileViewModel()
+    @State private var originalName             : String = ""
+    @State private var originalEmail            : String = ""
+    @State private var originalMobile           : String = ""
+    @State private var originalCountryCode      : String = ""
+    @State private var originalCurrency         : String = ""
     let action                                  : (String, String, String, String, Int, String, String) -> Void
     
     //MARK: - body
@@ -73,6 +78,32 @@ struct EditAccountBottomSheet: View {
             GradientBorderButton(title          : buttonTitle ?? "",
                                  isBtn          : true,
                                  buttonImage    : buttonIcon ?? "") {
+                
+                var noChanges = false
+                var noChangeErrorMessage = ""
+                
+                switch accountType {
+                case .name:
+                    break
+                case .email:
+                    if !email.trimmed.isEmpty && email.trimmed == originalEmail.trimmed {
+                        noChanges = true
+                        noChangeErrorMessage = "Email already exists"
+                    }
+                case .mobile:
+                    if !mobile.trimmed.isEmpty && mobile.trimmed == originalMobile.trimmed && (selectedCountry?.dialCode ?? "") == originalCountryCode {
+                        noChanges = true
+                        noChangeErrorMessage = "Phone number already exists"
+                    }
+                case .currency:
+                    break
+                }
+                
+                if noChanges {
+                    toastManager.showToast(message: noChangeErrorMessage.localized, style: .error)
+                    return
+                }
+                
                 let input = UpdateProfileRequest(userId         : Constants.getUserId(),
                                                  type           : accountType.rawValue,
                                                  fullName       : name,
@@ -138,12 +169,24 @@ struct EditAccountBottomSheet: View {
         switch accountType {
         case .name:
             title = "Edit Full Name"
+            originalName = name
         case .email:
             title = "Edit Email"
+            originalEmail = email
         case .mobile:
             title = "Edit Mobile Number"
+            if let countries = commonApiVM.countriesResponse {
+                let userCode = commonApiVM.userInfoResponse?.countryCode ?? ""
+                selectedCountry = countries.first(where: {
+                    let dial = $0.dialCode ?? ""
+                    return dial == userCode || dial == "+\(userCode)" || "+\(dial)" == userCode
+                })
+            }
+            originalMobile = mobile
+            originalCountryCode = selectedCountry?.dialCode ?? ""
         case .currency:
             title = "Edit Currency"
+            originalCurrency = currency
         }
         if currency != ""{
             if let currencies = commonApiVM.currencyResponse {

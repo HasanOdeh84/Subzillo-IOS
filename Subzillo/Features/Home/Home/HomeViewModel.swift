@@ -30,12 +30,11 @@ class HomeViewModel: ObservableObject {
                     self?.handleError(error,endPoint: APIEndpoint.home)
                     self?.apiError = error
                 }
+            } receiveValue: { [weak self] response in
+                PrintLogger.modelLog(response, type: .response, isInput: false)
+                self?.homeResponse = response.data
             }
-        receiveValue: { [weak self] response in
-            PrintLogger.modelLog(response, type: .response, isInput: false)
-            self?.homeResponse = response.data
-        }
-        .store(in: &self.subscriptions)
+            .store(in: &self.subscriptions)
     }
     
     func homeYearlyGraph(input: HomeYearlyGraphRequest) {
@@ -45,12 +44,11 @@ class HomeViewModel: ObservableObject {
                 if case let .failure(error) = completion {
                     self?.handleError(error,endPoint: APIEndpoint.homeYearlyGraph)
                 }
+            } receiveValue: { [weak self] response in
+                PrintLogger.modelLog(response, type: .response, isInput: false)
+                self?.homeYearGraphResponse = response.data
             }
-        receiveValue: { [weak self] response in
-            PrintLogger.modelLog(response, type: .response, isInput: false)
-            self?.homeYearGraphResponse = response.data
-        }
-        .store(in: &self.subscriptions)
+            .store(in: &self.subscriptions)
     }
     
     func navigate(to route: NavigationRoute){

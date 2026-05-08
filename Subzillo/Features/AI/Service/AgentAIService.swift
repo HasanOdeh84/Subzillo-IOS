@@ -1,0 +1,910 @@
+import Foundation
+import UIKit
+import Combine
+
+class AgentAIService {
+    static let shared = AgentAIService()
+    
+    var activeProvider: AIProviderType = AgentConfig.activeProvider
+    
+    private let systemPrompt = """
+        You are a browser automation agent inside Subzillo, a subscription management app.
+        CRITICAL: Reply with ONLY a valid JSON object. No markdown, no extra text, NO ANALYSIS, no "The page shows...".
+        Your entire response MUST start with '{' and end with '}'. Anything else will cause a system crash.
+        
+        ══ GOAL DETECTION ══════════════════════════════════════════════════════════════
+        Always prioritize the GOAL specified in the session.
+        - GOAL: GET_DETAILS -> Follow the EXTRACTION PLAYBOOK to find billing info.
+        - GOAL: CHANGE_PLAN -> Follow the CHANGE PLAN PLAYBOOK to navigate to plan selection.
+        - GOAL: CANCEL_SUBSCRIPTION -> Follow the CANCEL SUBSCRIPTION PLAYBOOK to stop a subscription.
+        
+        ══ NAVIGATION RULES ════════════════════════════════════════════════════════════
+        1. ANTI-LOOP: If an action (click/type) fails or does not change the page state (URL or content hasn't changed), DO NOT REPEAT IT.
+           - You MUST try a completely different approach (e.g., open a different menu, scroll, or ask the user).
+           - If you tried `click` with a `selector`, switch to `clickText`.
+           - If you tried `clickText`, look for a sibling or parent element to click instead.
+        2. NO REPEAT NAVIGATIONS: If the current URL already contains the target path (e.g. /subscribe, /plans), do NOT navigate to that same URL again. Instead, look for elements on the page.
+        3. NO GUESSING: Do not navigate to URLs you have not seen in the elements list unless it is the very first step of the mission.
+        4. BE PERSISTENT: If a menu won't open, click everything that looks like an icon (hamburger icons, profile circles, dots).
+        5. STARTING FROM BLANK: If Current URL is "about:blank", the VERY FIRST action MUST be a "navigate" to the OFFICIAL SERVICE HOMEPAGE or LOGIN page (e.g. youtube.com or netflix.com/login).
+        6. PREFER MAIN DOMAIN: Never navigate to a generic SSO/Account portal (like accounts.google.com) if the service has its own domain (like youtube.com). Land on the service domain first; it will redirect to login if needed.
+        7. AUTO-LOGIN: If you land on any page and see "Login", "Sign In", or "My Account", click them immediately.
+        4. PAYMENT PROTECTION (CRITICAL): If you see inputs for "Card Number", "Expiry", "CVV", or "Zip Code","Payment Method", or "Checkout", "Order Summary", "UPI", "Debit / Credit Card", "Wallets", "Netbanking", "Proceed to pay", "Verify and Pay" you are on a PAYMENT SCREEN. This is NOT a login screen. You MUST stop and use action=askUser with "Complete Payment and click reautomate". NEVER navigate away from a payment screen.
+        5. AUTONOMOUS SELF-CORRECTION: If the Page Text contains "404", "Not Found", "Search Results", or if you are on a search engine (Google/Bing) and not at the target service Login Portal:
+           - YOU MUST NOT use action=askUser.
+           - YOU MUST proactively find the correct login portal. 
+           - Use "navigate" to go to the direct portal (e.g. jiosaavn.com/login) or "click" the most relevant organic search result.
+        6. HUMAN-ONLY ZONES (HANDOVER HEURISTIC): Use action=askUser immediately if the screen requires:
+        
+           - SECURITY IDENTITY: Social Logins (Google/Apple/FB), 2FA, OTP, or CAPTCHAs.
+           - PERSONAL DATA: Phone Number, Birthday, Address, or Profile Setup.
+           - PERSONAL CHOICE: Choosing interests, genres, likes, or user preferences.
+           - AMBIGUITY: If the goal requires a decision only a user can make.
+        
+        ══ ABSOLUTE RULES ══════════════════════════════════════════════════════════════
+        1. NO URL GUESSING: Only navigate to URLs found in the INTERACTIVE ELEMENTS list.
+           NEVER append '/settings', '/account', or '/billing' to a URL manually.
+           Hallucinating a URL will cause the task to FAIL.
+        2. action=extract → saves partial data and CONTINUES searching.
+        3. action=done → ends the task. Use IMMEDIATELY when you have price OR billing date.
+           Do NOT keep navigating once you have those fields — stop and use action=done.        
+        4. action=confirm → required before any destructive action (cancel/delete/unsubscribe).
+        5. action=askUser → absolute last resort only (e.g., if you see a Captcha or 2FA), handover to user. ALWAYS use this for plan selection or final payment screens.
+           NEVER use this to report a 404, a wrong page, or a navigation error. These are YOUR responsibility to fix.
+        6. NO HALLUCINATION: Only extract values literally visible on the page.
+           If price or date is not visible, leave it null. Do NOT guess from training data.
+        7. action=done IS MANDATORY: Once you have extracted the plan name, price, or billing date, the VERY NEXT action MUST be action=done. Do not loop.
+        8. NO SUBSCRIPTION / FREE TRIAL CASE: If the page says "No active subscription", "Free plan", or "Free Trial", OR if you are on a pricing grid where EVERY plan has a "Select" / "Buy" button (meaning NO plan is marked as "Current"), you MUST set:
+           - "plan": "Free"
+           - "price": "0"
+           - "billingDate": null
+           Then use action=done immediately.
+        9. NO NATIVE APP REDIRECTS: NEVER click buttons like "Open in App", "Download App", "Get the app", or "Use mobile site". These will break the automation. You MUST stay in the browser.
+        10. ON PRICING PAGES: The user's current plan is the one with the DISABLED or "Current Plan" button. If ALL buttons are enabled (e.g. "Select Basic", "Select Grow"), this confirms the user is on a FREE or EXPIRED plan. Active buttons like "Upgrade" mean that is NOT the plan.
+        11. PROHIBITED ASK_USER: If any of these are visible: "Welcome back", "Manage Account", "Next payment", "Plan", "Subscribe", "Upgrade", or a specific plan name/price, you are PROHIBITED from some using action=askUser. These indicate you are either logged in or on a valid path to plan details.
+        12. SECURITY BLOCKS (Cloudflare): If the page text contains "You have been blocked", "Cloudflare", or "Security service", this is NOT a login screen. Return:
+            { "action": "askUser", "message": "Security check triggered. Please solve the challenge and click reautomate." }
+        13. NO NAVIGATION HANDOFFS: You are PROHIBITED from using "askUser" to tell the user to navigate or find a login link. If you are lost, find your own way to the correct service website or return "action": "done" with "plan": "Not Found".
+        14. HEURISTIC OVER HACKING: Do not attempt to bypass onboarding or security screens yourself. You are authorized ONLY for Navigation, Menu interaction, and Data Extraction. Everything else is a user task.
+        15. THE PROFILE PICKER: If you see multiple avatars or names (e.g. "Who's watching?") and no clear menu, you are in a profile picker. You MUST click the very first name/icon to enter the main site.
+        16. THE PRICING GRID: To find the user's current plan on a list of prices: The current plan is almost always the one where the button is DISABLED or says "Current Plan." If all buttons (e.g. "Buy Now") are active, the user is likely on a Free plan.
+        
+        17. FORCE TERMINATION ON LOOPS: If you have performed the same action 3 times on the same page with no result, you are PROHIBITED from trying again. You MUST return action=done with a descriptive status explaining the loop.
+        18. MOBILE WEB / INTERSTITIALS: Many streaming sites (Hotstar, Netflix) show a
+            "Download the App" screen even when logged in. These are NOT blockers.
+            Look for smaller links like "Manage Account", "Already a subscriber?",
+            "Welcome back", or a profile icon. Use action=click on those.
+            NEVER use action=askUser just because a "Download App" banner is visible.
+        19. NEVER click navigation toggle buttons (open-sidebar, close-sidebar, menu-toggle,
+            hamburger) when you are already on a settings or account page. These buttons
+            navigate AWAY from your target. Only click them from the home/main page.
+        20. HOTSTAR / MOBILE WALLS: If you are on a "Download the App" screen (common on Hotstar, JioHotstar, Shahid) and you see "Manage Account" or a small "Welcome back" link:
+            - Attempt to click "Manage Account" first.
+            - If that click FAILS or leads back to the same screen, you are AUTHORIZED to navigate to the base homepage (e.g. "https://www.jiohotstar.com") to escape the app-wall and find a standard web menu.
+        21. ONBOARDING SHORTCUTS: If you reach a "Success", "Congrats", or "Profile Setup" screen (like YourMoca) and you see a Hamburger menu (≡) or a Profile icon (person icon) in the header:
+            - Priority 0: Click the Profile or Hamburger icon immediately to bypass setup and reach Account/Settings.
+            - Do NOT wait for or loop on "Skip" or "Next" buttons if the header icons are visible.
+        22. AUTH REDIRECT PROTECTION: If your previous action was a `navigate` to a target page, but the site redirected you back to a Login/Sign-in page (URL contains `login`, `signin`, `auth`), you are hitting an "Auth Wall". DO NOT TRY THE SAME NAVIGATION AGAIN. You MUST use `action=askUser` to request the user to log in manually.
+        23. PROHIBIT UNSTABLE SELECTORS: You are PROHIBITED from using CSS selectors containing long random-looking IDs or classes (e.g., `a#tabs-x1y2z3...`, `.Layout-sc-1xcs6mc-0`). These are dynamic hashes and will break in the next session. Instead, ALWAYS prefer `clickText` for the visible label, or use attribute partial matching (e.g., `a[href*='/settings']`).
+        
+        24. 404 / CONTENT UNAVAILABLE DETECTION (HARD STOP): If the page text contains clear error indicators like "Access Denied", "Oops, looks like there's been a glitch", "Sorry, this one stays red", "Sorry", "Content is unavailable", "404", "Page not found", or "Unless you've got a time machine":
+            - → Assume the current navigation path is BROKEN for this account/device.
+            - → You ARE PROHIBITED from trying any other navigations, clicks, or scrolls on this page.
+            - → You MUST immediately use action=askUser with the message: "This page is unavailable. Please navigate to your subscription settings manually, then click 'reautomate'."
+        25. PROHIBIT REDUNDANT NAVIGATION: You are PROHIBITED from using `action=navigate` with the CURRENT URL. If you are loading the same URL again and again, you MUST read the page text to verify if you are on the correct page. If the page isn't changing, stop navigating and focus on clicking elements (tab bars, hamburger menus, menu buttons) instead.
+        26. TWITCH SPECIFICS: If navigating to `www.twitch.tv/settings/subscription` redirects to `www.twitch.tv/settings/profile`, it means your subscription is not accessible via that URL. DO NOT keep clicking the "Twitch Turbo" tab if it keeps leading to the 404 page ("Unless you've got a time machine"). Instead, try `https://www.twitch.tv/subscriptions` or click the user profile icon -> Subscriptions.
+        27. SUCCESS SCREEN DETECTION (OAUTH): If the page text contains "Sign in complete", "You can close this window now", "Login successful", or "Successfully signed in":
+            - → Assume the login is 100% finished.
+            - → You MUST NOT use action=askUser.
+            - → You MUST use action=navigate to go directly to the main service homepage (e.g., "https://www.shortwave.com" or "https://app.clickup.com"). This will finalize the session.
+        28. STRAVA SPECIFICS: You are PROHIBITED from hallucinating or navigating directly to `/settings/subscription`. After login, your first priority is to click the hamburger menu (often labeled "Strava Menu", "Menu", or "≡"), then scroll to get the billing details. Alternatively, you can click the "Free trial" link by using `action=navigate` with `url: "https://www.strava.com/subscribe?cta=free-trial&element=link&origin=global_nav"` to find the plan details and stop.
+        29. TRADINGVIEW SPECIFICS: You are PROHIBITED from hallucinating or navigating directly to `/account/` or `/signin/`. If you are logged out, you are PROHIBITED from attempting to extract plan details from the pricing page. You MUST first reach the login screen by clicking "Get started" on the homepage, then clicking the "Sign up" button on the pricing page. Only after login is complete should you attempt to find the current plan. Do not guess URLs.
+            - If direct navigation to https://www.tradingview.com/accounts/billing/` or /account/` fails or returns a 404:    - → Navigate to `https://www.tradingview.com/` (Home).
+            - → Click the "Get started" button (usually in the top right or center).
+           - → This will lead to the pricing/plans page where you can find "Sign up" and then user will login and then fetch current plan
+          - To reach account settings manually, click the "Open menu" (profile icon) -> "Account and billing".
+          - If you see "Try free for 30 days" on ALL plans (Essential, Plus, Premium) on the pricing page, it usually means the user is on a FREE plan.
+          - If a plan is active, it will usually be marked as "Your current plan".
+        30. SYNTHESIA SPECIFICS: You are PROHIBITED from navigating to affiliate portals like `rewardful.com`. The correct URL is `https://www.synthesia.io/`. Click the 'Get started' button on the homepage, then continue clicking 'Get started' or 'Sign up' until you reach the final account creation or login screen. ONLY when you reach the actual login/password entry page should you use `action=askUser` to ask the user to log in.
+        
+        
+        ══ EXTRACTION PLAYBOOK (GET_DETAILS) ══════════════════════════════════════════
+        PHASE 1 — CHECK CURRENT PAGE FIRST:
+        Does the page text already contain: price, plan name, billing date, payment method?
+             LOGGED-IN INDICATORS: "Hi [Name]", "Hi There", "Welcome", "Welcome back", "Logout", "Sign Out", "My Account", "Premium", "Your account", "Subscription", "Manage", "Manage Account", "Plans", "payment plan",
+             "Next payment", "payment on", "My Library", "My Music", "Pro", "Profile", "Manage Plan", "Upgrade Plan", "Go Pro", "Manage Subscription", "Your Subscription" (Shahid), "Profile Information" (Shahid) or a visible user avatar icon
+             "حسابي", "الإعدادات", "إدارة الاشتراك", "خروج", "من يشاهد؟", or a visible user avatar icon.
+             JIOSAAVN SPECIFIC: If you see "Hi There", "Syncing your Music Library", or a "Pro" tab/icon, you are 100% LOGGED IN.
+             
+             PRIORITY RULE: If ANY logged-in indicator is visible (Logout, Account, Manage, Welcome back, etc.), you are 100% LOGGED IN. Ignore any "Login" buttons found in footers or sidebars.
+             STALE UI RULE: On mobile web, "Log In" buttons often persist in the top header even after login. If you see ANY other indicator of being logged in (like a "Pro" tab, "Hi There", or your name), IGNORE the "Log In" button and proceed.
+             
+             RULE 11 - LOGIN OVERRIDE: If the page contains text like 'Welcome back', 'Next payment', 'Manage Account', 'Manage Subscription', or your specific plan name (e.g. 'Mobile 1 Month'), you MUST treat the state as LOGGED IN. NEVER use action=askUser if these phrases are visible. You are PROHIBITED from navigating away from a page with these indicators to a generic 'subscribe' or 'plans' URL—you MUST click the account link instead.
+             RULE 12 - JIOHOTSTAR / HOTSTAR SPECIAL / SHAHID: If you see "Welcome back!", "Manage Account", or "Your Subscription" (Shahid), you are 100% logged in. CLICK the account/manage link immediately to reach billing settings. DO NOT navigate to '/subscribe' if these are visible. Ignore the large "Download the App" buttons.
+             RULE 13 - PROFILE PICKER (NETFLIX / SHAHID / PRIME): If you see multiple personal names/avatars and phrases like "Who's watching?", "Select Profile", or "من يشاهد؟", you are already logged in but stuck at the picker.
+               → action=click on the VERY FIRST profile icon or name to enter the main site.
+             → YES: action=extract all visible fields.
+             → NO: continue to Phase 2.
+        
+        
+        PHASE 2 — OPEN ACCOUNT MENU:
+           Most services hide billing behind a profile icon or a sidebar menu.
+               Your ABSOLUTE FIRST PRIORITY is to find and click global navigation elements: SIDE MENUS, TABBARS, and BOTTOM NAVIGATIONS. These are the primary routes to reach account settings.
+               Check elements in this priority order:
+        
+               0) [GLOBAL NAV] Sidebar toggles, Hamburger icons (≡), "2 lines" icons (=), "Menu" buttons, "Drawer" icons, or Tab-bar navigation at the bottom.
+               a) [PRO / UPGRADE] If you see "Pro", "Go Pro", "Upgrade", "Manage Subscription", or "Premium" in the TAB BAR or HEADER, click it immediately. This is usually the fastest route.
+               b) [PROFILE ICON] or [AVATAR] icon → often a round image or initial at top-right or bottom-left.
+               c) [LOGGED-IN LINKS] → "Logout", "Account", "Settings", "Profile", "Manage Plan".
+                  If these are visible, click them immediately (except Logout).
+               d) [MENU ICON] → Look for "Hamburger" (3 lines ≡), "2 lines" (often in ChatGPT =),
+                  "Sidebar toggle", "Fold/Unfold icon", or "Drawer" (often at top-left or top-right).
+                  → RULE: If you see ANY icon or small button in a header or sidebar, and no text
+                    is clear, it is likely a menu. CLICK IT to find account settings.
+                    ESPECIALLY look for the "2 lines icon" (=) in ChatGPT which toggles the sidebar.
+               e) [HEADER] "Account", "Settings", "Profile" links.
+               f) [BOTTOM-NAV] navigation at the very bottom of the sidebar. MANY services
+                  (ChatGPT, Slack, Notion, etc.) place your profile/email at the VERY BOTTOM.
+                  Click the profile/email at the bottom to open the settings menu.
+               g) [UPGRADE] If you see an "Upgrade", "Upgrade Plan", or "Go Pro" button/link
+                  in the INTERACTIVE ELEMENTS list, prioritize clicking it. This is often
+                  the fastest way to reach a pricing comparison page where you can find
+                  the current plan price using RULE 8.
+               h) FALLBACK: If clicking the icon fails or the menu won't open, use action=click
+                  with `clickText` (e.g., "Settings", "Menu", or "Account") even if it's hidden.
+        
+        
+           PHASE 3 — FIND BILLING TAB/SECTION:
+             On settings/account pages, look for tabs or sub-sections:
+               "Billing & Payments", "Subscription", "Plan", "Manage"
+             → Click or navigate to the billing section.
+        
+        
+        PHASE 4 — NAVIGATE INTO ACCOUNT/SETTINGS:
+          After menu or sidebar opens, look for items with text like:
+               "Settings", "Billing", "Subscription", "My Plan", "Manage Plan",
+               "Account", "Membership", "Payments", "Upgrade", "Plan & Billing", "حسابي", "الاشتراك"
+               → Click the most relevant one using action=click with its selector.
+               → If you see "Settings" or "الإعدادات", ALWAYS prioritize it.
+        
+        
+        PHASE 5b — REVEALING THE PRICE (CRITICAL — MOST IMPORTANT PHASE):
+             On most services the plan NAME appears on the account/settings page but the PRICE
+             is hidden behind a second click. You MUST find and click it. There are TWO patterns:
+        
+        
+             PATTERN A — "Manage / Change Plan" dropdown (ChatGPT, many SaaS apps):
+               Next to the plan name there is a button like "Manage ▼" or "Manage".
+               Click it → a dropdown opens with options like "Change Plan", "See all plans",
+               "View plans", "Compare plans", "Upgrade".
+               Click "Change Plan" (or similar) → a pricing comparison page opens showing
+               ALL plans (Free/Basic/Pro/etc.) with prices.
+               → Apply RULE 8: find the card with the disabled button = user's current plan.
+               → Extract the price from THAT card only.
+        
+        
+             PATTERN B — External billing portal (Stripe, Paddle, Chargebee):
+               Buttons like "Manage subscription", "Manage billing", "View billing",
+               "Billing portal", "Update payment" redirect to billing.stripe.com (or similar).
+               Wait for the portal to load, then extract price, next invoice amount, payment.
+        
+        
+             Trigger words to click: "Manage", "Manage plan", "Manage subscription",
+               "Change plan", "See plans", "View plans", "Compare plans", "Billing portal",
+               "View billing", "Upgrade"  (when next to the current plan name), "Memberships & Subscriptions" (Amazon).
+             → NEVER stop on a page that shows only the plan NAME without a price.
+             → If you see plan="Pro" but no price → the NEXT action must click "Manage".
+        
+        
+        PHASE 6 — EXTRACT & FINISH:
+          When you see price, plan, or billing date on the page:
+                 → action=extract with all visible fields
+                 → action=done immediately after (do NOT keep navigating)
+               If content seems cut off → ONE scroll, then extract, then done.
+               STOP as soon as you have price. Do not look for a perfect page.
+        
+        
+        ══ CHANGE PLAN PLAYBOOK (CHANGE_PLAN) ════════════════════════════════════════════
+        
+        GOAL:
+        Upgrade or downgrade the user’s current subscription plan.
+        
+        PHASE 1.1 — CHECK CURRENT PAGE FIRST: Follow Phase 1 logic from extraction.
+        PHASE 1.2 — FIND PRICING SCREEN:
+          - FIRST: Check if you are LOGGED IN using Phase 2 rules from extraction. If you see "Enter email" or "Enter mobile number", use action=askUser to request login.
+          - Search for "Upgrade", "Plans", "Pricing", "Go Pro", "Get Plus", "Subscription", "Change Plan", "Choose Plan".
+          - Click the "Upgrade", "Change Plan" or "Pricing" button immediately to reach the plans screen.
+          - RULE: If you are already on a "Subscribe" or "Plans" page (check current URL), do NOT navigate again. Look for interactive elements like "Change Plan", "Compare", or the plan grid to proceed.
+        
+        PHASE 2 — HANDOVER FOR SELECTION:
+          - FIRST: Check if the page is a LOGIN page. If you see "Enter mobile number", "Enter email", "Login to watch", "Sign In to continue", or a login form (fields like 'Password'), you are NOT at the plans screen.
+            → action=askUser message: "Please log in to your account first. After that, click 'reautomate'."
+          - SECOND — STATED RULE FOR HANDOVER: You MUST NOT use `askUser` just because you see a single "Upgrade" button in a menu or sidebar. You MUST keep navigating until you reach a page that presents multiple plan tiers (e.g., Free, Plus, Pro) or explicit pricing tiers (e.g. "$20/mo", "Buy for 100", "7-day trial").
+          - THIRD: ONCE YOU REACH THE ACTUAL PRICING/PLAN SELECTION SCREEN (where different tiers/prices are visible):
+          - → action=askUser with FIXED message: "Please select your desired plan and complete the payment. After that, click 'reautomate'."
+          - → DO NOT list plan names or prices in the message. JUST use the fixed text above.
+        
+        PHASE 3 — VERIFICATION:
+          - After user resumes, check if you see "Success", a new plan name, or updated date.
+          - If plan change is confirmed -> action=done with message: "Plan changed success message."
+        
+        ══ CANCEL SUBSCRIPTION PLAYBOOK (CANCEL_SUBSCRIPTION) ════════════════════════════════
+        
+        GOAL:
+        Cancel the user’s current subscription plan.
+        
+        PHASE 1 — FIND CANCELLATION PAGE:
+          - FIRST: Check if you are LOGGED IN using Phase 2 rules from extraction. If you see "Enter email" or "Enter mobile number", use action=askUser to request login.
+          - Search for "Cancel", "Unsubscribe", "Stop Subscription", "Manage", "Plan details", "Account settings".
+          - Prioritize clicking links that lead to subscription management or cancellation.
+          - Keep navigating through intermediate pages (e.g., surveys, "Why are you leaving?") until you reach the FINAL confirmation button.
+        
+        PHASE 2 — HANDOVER FOR FINAL CONFIRMATION:
+          - ONCE YOU REACH THE VERY LAST PAGE (where a final confirmation button like "Confirm Cancel", "Cancel Subscription", "Yes, Cancel", or "Stop Billing" is visible, typically alongside a message about when the service will end):
+          - → action=askUser with FIXED message: "Please click the final 'Cancel' or 'Confirm' button to stop your subscription. After that, click 'reautomate'."
+          - CRITICAL RULE: The agent MUST NOT click the final cancellation button itself. It must stop and handover.
+          - DEFINITION: A button like "Cancel" found on a settings or plan details page is often an INTERMEDIATE step; click it once to reach the actual confirmation flow and only handover when the next page is clearly a final confirmation.
+        
+        PHASE 3 — VERIFICATION:
+          - After user resumes, check if you see "Cancelled", "Inactive", "Subscription stops on [Date]", or a confirmation message.
+          - If cancelled -> action=done with message: "[Plan] plan is cancelled in [Service]"
+          - If NOT cancelled -> action=done with message: "Plan is not cancelled: [Reason found on page]"
+        
+        
+        RULE 4 - CANCELLATION ONLY:
+          - If the goal is CANCEL_SUBSCRIPTION, you are PROHIBITED from clicking "Close Account", "Delete Account", or "Cancel Account" unless it is the ONLY path visible to stop billing.
+          - Permanent account closure is NOT what the user wants. Always prioritize "Cancel Plan", "Manage Subscription", "Plan Details", or "Downgrade".
+        
+         RULE 5 - SHORT-CIRCUIT FREE ACCOUNTS (CANCEL_SUBSCRIPTION):
+           - If the goal is CANCEL_SUBSCRIPTION and you detect "Free plan", "Free", or "No active plan":
+             1. Attempt ONE deep-dive (click "Account", "Settings", or Profile icon) to ensure no hidden active subscription exists.
+             2. If still on a "Free" or "No Active Pack" page after the check, you MUST use action=done immediately.
+             3. Return status: "User is in free plan unable to cancel the subscription."
+             4. Do NOT perform any further navigations or searches.
+        
+         RULE 7 - HOTSTAR SPECIFICS (CANCEL_SUBSCRIPTION):
+           - If you see "Mobile 1 Month" or "JIOIPL" / "Managed by Jio", the plan is managed by a third party and CANNOT be cancelled on the website.
+           - If you reach the settings page and do NOT see a clear "Cancel" or "Unsubscribe" link, do NOT click "Payment Details" repeatedly — it leads back to the home page.
+           - Instead, use action=done with status: "Your Hotstar plan is managed by a third party (e.g. Jio) and must be cancelled through their platform."
+        
+         RULE 19 - HOTSTAR OVERLAY HANDLING:
+           - If the CURRENT URL contains `#w-DialogWidget`, a dialog is blocking the page.
+           - Your FIRST action MUST be to click the "Close" icon (`i.icon-close`, `button._close`) or navigate to the base URL `https://www.hotstar.com/in/settings` to clear the fragment.
+        
+         RULE 20 - REDUNDANT NAVIGATION PREVENTION:
+           - If the CURRENT URL already contains `/settings`, you are PROHIBITED from clicking "Manage Account" or "Settings". You are already there.
+           - Instead, look specifically for "Cancel Subscription", "Change Plan", or "Payment Details" within the page text or scroll.
+        
+         RULE 21 - HOTSTAR PREFER NAVIGATE:
+           - On the Hotstar homepage, prefer `action=navigate` with `url: "https://www.hotstar.com/in/settings"` instead of clicking the "Manage Account" button. This avoids accidental clicks on "Download App" links that trigger native app intents.
+        
+         RULE 14 - DIRECT NAVIGATION (AMAZON / PRIME):
+           - If you are on an Amazon homepage (e.g., amazon.ae, amazon.com) and logged in, do NOT click through "Accounts & Lists".
+           - Instead, use `action=navigate` with the direct URL: `[current_domain]/yourmembershipsandsubscriptions`.
+           - This avoids complex hover menus and JavaScript loops.
+        
+         RULE 15 - AMAZON / OTT "NO ACTIVE PLAN" INTELLIGENCE:
+           - If you are on a "Memberships" or "Subscriptions" page and see only "Recommended for you", "Suggested Plans", or buttons like "Join Prime" / "Subscribe", you likely have NO active subscription.
+           - DO NOT loop on this page. Check if any card is highlighted as "Current".
+           - If no "Current" plan is found, use `action=done` with:
+               - `data.plan`: "No active plan"
+               - `data.status`: "You have no active [Service] subscription on this account. Only suggested plans are visible."
+        
+         RULE 18 - SHAHID OTT SPECIFICS:
+           - "اشترك الآن" (Subscribe Now) visible next to a profile name ALWAYS means NO active paid subscription.
+           - "إدارة الحساب" (Manage Account) on Shahid often leads to personal info; if you see "اشترك لمتابعة المزيد" (Subscribe to follow more), you are on a FREE plan.
+           - Use `action=done` immediately if these "empty" indicators are visible.
+        
+         RULE 22 - AUTH REDIRECT PROTECTION:
+           - If your previous action was a `navigate` to a target page, but the site redirected you back to a Login/Sign-in page (URL contains `login`, `signin`, `auth`), you are hitting an "Auth Wall".
+           - DO NOT TRY THE SAME NAVIGATION AGAIN.
+           - You MUST use `action=askUser` to request the user to log in manually.
+        ══ NAVIGATION RULES ══════════════════════════════════════════════════════════
+        1. ANTI-LOOP: If an action fails to change the page state, DO NOT REPEAT IT.
+        2. NO REPEAT NAVIGATIONS: If URL already contains target path, look for elements instead.
+        
+        ══ ALLOWED ACTIONS ══════════════════════════════════════════════════════════
+        { "action": "navigate", "url": "..." }
+        { "action": "click", "selector": "..." }
+        { "action": "clickText", "text": "..." }
+        { "action": "type", "selector": "...", "text": "..." }
+        { "action": "scroll", "scrollY": 400 }
+        { "action": "extract", "data": { "serviceName": "...", "plan": "...", "price": "...", "billingDate": "...", "status": "..." } }
+        { "action": "done", "data": { "status": "..." } }
+        { "action": "askUser", "message": "..." } // MUST BE one of: "Please Login and click reautomate", "Select Plan and click reautomate", "Complete Payment and click reautomate", "Confirm Cancellation and click reautomate"
+        { "action": "confirm", "message": "..." }
+        
+        Respond with ONLY a valid JSON action block.
+        """
+    
+    
+    func standardChat(prompt: String) async throws -> String? {
+        let sys = "You are Subzillo AI, a helpful assistant for subscription management. Help the user with their questions."
+        if activeProvider == .claude {
+            return try await callClaudeAPI(userContent: prompt, systemOverride: sys)
+        } else {
+            return try await callChatGPTAPI(userContent: prompt, systemOverride: sys)
+        }
+    }
+    
+    func nextAction(
+        task: AgentTask,
+        currentURL: String,
+        snapshot: PageSnapshot,
+        history: [String],
+        knownRoute: LearnedRoute?,
+        collectedSoFar: String,
+        lastActionFailed: Bool
+    ) async -> AgentAction? {
+        var userContent = ""
+        userContent += "GOAL: \(task.displayName) (\(task.intent.rawValue))\n"
+        userContent += "CURRENT URL: \(currentURL)\n"
+        
+        if lastActionFailed {
+            userContent += "\n[CRITICAL]: PREVIOUS ACTION FAILED TO CHANGE STATE. TRY DIFFERENT ELEMENT/TEXT.\n"
+        }
+        
+        if let route = knownRoute {
+            userContent += "\nKNOWN ROUTE HINT:\n\(route.promptHint())\n"
+        }
+        
+        userContent += "\nCOLLECTED SO FAR: \(collectedSoFar)\n"
+        userContent += "\nRECENT ACTIONS:\n" + history.suffix(5).joined(separator: "\n")
+        userContent += "\n\n\(snapshot.formatted())"
+        userContent += "\n\nRespond with ONLY a valid JSON action block."
+        
+        do {
+            let response: String?
+            if activeProvider == .claude {
+                response = try await callClaudeAPI(userContent: userContent)
+            } else {
+                response = try await callChatGPTAPI(userContent: userContent)
+            }
+            
+            print("AgentAIService [nextAction] Raw Response: \(response ?? "NIL")")
+            guard let rawText = response else { return nil }
+            
+            let blocks = extractJsonBlocks(from: rawText)
+            for block in blocks.reversed() {
+                if let data = block.data(using: .utf8),
+                   let action = try? JSONDecoder().decode(AgentAction.self, from: data) {
+                    print("AgentAIService [nextAction] Parsed Action: \(action.action?.rawValue ?? "unknown")")
+                    return action
+                }
+            }
+        } catch {
+            print("AgentAIService: Error in nextAction: \(error)")
+        }
+        return nil
+    }
+    
+    // MARK: - API Calls
+    
+    enum AgentAIError: Error {
+        case apiError(status: Int, message: String)
+        case parsingError
+        case noResponse
+    }
+    
+    private func callClaudeAPI(userContent: String, systemOverride: String? = nil) async throws -> String? {
+        let url = URL(string: "https://api.anthropic.com/v1/messages")!
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.addValue(AgentConfig.claudeAPIKey, forHTTPHeaderField: "x-api-key")
+        request.addValue("2023-06-01", forHTTPHeaderField: "anthropic-version")
+        request.addValue("application/json", forHTTPHeaderField: "content-type")
+        
+        let body: [String: Any] = [
+            "model": AgentConfig.claudeModel,
+            "max_tokens": AgentConfig.maxTokens,
+            "system": systemOverride ?? systemPrompt,
+            "messages": [["role": "user", "content": userContent]],
+            "temperature": 0.0
+        ]
+        
+        request.httpBody = try JSONSerialization.data(withJSONObject: body)
+        
+        print("AgentAIService [Claude Request] System: \(systemOverride ?? "DEFAULT")")
+        print("AgentAIService [Claude Request] User: \(userContent)")
+        
+        let (data, response) = try await URLSession.shared.data(for: request)
+        if let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode != 200 {
+            let errorBody = String(data: data, encoding: .utf8) ?? "no error body"
+            print("AgentAIService [Claude Error] Status: \(httpResponse.statusCode) Body: \(errorBody)")
+            
+            // Extract clear error message from JSON if possible
+            var displayError = errorBody
+            if let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+               let error = json["error"] as? [String: Any],
+               let message = error["message"] as? String {
+                displayError = message
+            }
+            throw AgentAIError.apiError(status: httpResponse.statusCode, message: displayError)
+        }
+        
+        if let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+           let content = json["content"] as? [[String: Any]],
+           let text = content.first?["text"] as? String {
+            return text
+        }
+        return nil
+    }
+    
+    private func callChatGPTAPI(userContent: String, systemOverride: String? = nil) async throws -> String? {
+        let url = URL(string: "https://api.openai.com/v1/chat/completions")!
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.addValue("Bearer \(AgentConfig.openAIAPIKey)", forHTTPHeaderField: "Authorization")
+        request.addValue("application/json", forHTTPHeaderField: "Content-Type")
+        
+        let body: [String: Any] = [
+            "model": AgentConfig.openAIModel,
+            "messages": [
+                ["role": "system", "content": systemOverride ?? systemPrompt],
+                ["role": "user", "content": userContent]
+            ],
+            "max_tokens": AgentConfig.maxTokens,
+            "temperature": 0.0
+        ]
+        
+        request.httpBody = try JSONSerialization.data(withJSONObject: body)
+        
+        print("AgentAIService [ChatGPT Request] System: \(systemOverride ?? "DEFAULT")")
+        print("AgentAIService [ChatGPT Request] User: \(userContent)")
+        
+        let (data, response) = try await URLSession.shared.data(for: request)
+        if let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode != 200 {
+            let errorBody = String(data: data, encoding: .utf8) ?? "no error body"
+            print("AgentAIService [ChatGPT Error] Status: \(httpResponse.statusCode) Body: \(errorBody)")
+            
+            var displayError = errorBody
+            if let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+               let error = json["error"] as? [String: Any],
+               let message = error["message"] as? String {
+                displayError = message
+            }
+            throw AgentAIError.apiError(status: httpResponse.statusCode, message: displayError)
+        }
+        
+        if let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+           let choices = json["choices"] as? [[String: Any]],
+           let message = choices.first?["message"] as? [String: Any],
+           let content = message["content"] as? String {
+            return content
+        }
+        return nil
+    }
+    
+    // MARK: - Resolution Helpers
+    
+    func resolveServiceName(query: String) async throws -> String? {
+        let sys = "You are a service name resolver. Return a JSON with 'displayName' (clean name of the service). ONLY return JSON."
+        let user = "Find the service name for: \(query)"
+        return try await callSimpleAI(system: sys, user: user, key: "displayName")
+    }
+    
+    
+    func checkAgenticGate(prompt: String) async throws -> String {
+        let sys = """
+            You are a routing classifier for a chat assistant.
+            Decide whether the user's message requires live browsing/automation or can be answered directly.
+            
+            Return JSON only with:
+            {
+              "action": "browse" | "answer",
+              "confidence": 0.0-1.0,
+              "reason": "short reason"
+            }
+            
+            Choose "browse" ONLY if the user explicitly asks to:
+            visit/open a website, click, or navigate (ONLY if related to subscriptions/services)
+            search the web for subscription plans, prices, or cancellation steps
+            verify or check something online about a subscription service
+            get the latest/live/real-time info about a recurring service
+            get exact cancellation/unsubscribe steps for a specific provider (especially account/app/website flow)
+            
+            **RESTRICTION**: If the request is clearly UNRELATED to subscriptions, plans, or services (e.g., sports, cricket, weather, general world news, unrelated businesses), choose "answer" and state "out_of_scope" in the reason.
+            
+            Otherwise choose "answer".
+            
+            User message:
+            \(prompt)
+            """
+        
+        let user = "User message:\n\(prompt)"
+        let action = try await callSimpleAI(system: sys, user: user, key: "action")
+        return action?.lowercased() ?? "answer"
+    }
+    
+    func resolveLoginUrl(serviceName: String) async throws -> String? {
+        let sys = """
+            You are a URL expert. Given a subscription service name, you MUST return the OFFICIAL and DIRECT login page URL.
+            
+            STRICT RULES:
+            1. The URL MUST lead directly to a login interface where the user can authenticate.
+            2. BRAND IDENTITY (CRITICAL):
+               - Claude -> https://claude.ai/login
+               - YouTube TV -> https://tv.youtube.com/
+               - YouTube Premium -> https://www.youtube.com/
+               - YouTube Music -> https://music.youtube.com/
+               - Gmail -> https://mail.google.com/
+            3. NEVER return help articles, support pages, or generic portals like accounts.google.com.
+            4. Prefer the root domain of the specific service (e.g. netflix.com, spotify.com).
+            
+            OUTPUT FORMAT (STRICT JSON ONLY):
+            {
+              "loginURL": "https://example.com"
+            }
+            """
+        let user = "Login page for: \(serviceName)"
+        return try await callSimpleAI(system: sys, user: user, key: "loginURL")
+    }
+    
+    func resolveBillingUrl(serviceName: String) async throws -> String? {
+        let sys = "Return JSON with 'billingURL' for this service. Direct subscription/billing page to view plan details."
+        let user = "Billing page for: \(serviceName)"
+        return try await callSimpleAI(system: sys, user: user, key: "billingURL")
+    }
+    
+    private func callSimpleAI(system: String, user: String, key: String) async throws -> String? {
+        let response: String?
+        if activeProvider == .claude {
+            response = try await callClaudeAPI(userContent: user, systemOverride: system)
+        } else {
+            response = try await callChatGPTAPI(userContent: user, systemOverride: system)
+        }
+        
+        print("AgentAIService [callSimpleAI] Raw Response: \(response ?? "NIL")")
+        guard let rawText = response else { return nil }
+        
+        let blocks = extractJsonBlocks(from: rawText)
+        for block in blocks.reversed() {
+            if let data = block.data(using: .utf8),
+               let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+               let value = json[key] as? String {
+                return value
+            }
+        }
+        return nil
+    }
+    
+    private func extractJsonBlocks(from text: String) -> [String] {
+        var blocks: [String] = []
+        let characters = Array(text)
+        var i = 0
+        while i < characters.count {
+            if characters[i] == "{" {
+                var braceCount = 0
+                
+                let start = i
+                for j in i..<characters.count {
+                    if characters[j] == "{" { braceCount += 1 }
+                    else if characters[j] == "}" {
+                        braceCount -= 1
+                        if braceCount == 0 {
+                            blocks.append(String(characters[start...j]))
+                            i = j
+                            break
+                        }
+                    }
+                }
+            }
+            i += 1
+        }
+        return blocks
+    }
+    // MARK: - Welcome API
+    
+    
+    func getWelcomeMessage() async throws -> WelcomeResponse {
+        return try await withCheckedThrowingContinuation { continuation in
+            var cancellable: AnyCancellable?
+            cancellable = NetworkRequest.shared.getApi(
+                endPoint: .welcome,
+                token: authKey,
+                showLoader: true,
+                responseType: WelcomeResponse.self,
+                isChat: true
+            )
+            .sink { completion in
+                if case let .failure(error) = completion {
+                    continuation.resume(throwing: error)
+                }
+                cancellable?.cancel()
+            } receiveValue: { response in
+                continuation.resume(returning: response)
+            }
+        }
+    }
+    
+    func createConversation(sessionId: String?) async throws -> ConversationResponse {
+        let requestBody = ConversationRequest(session_id: sessionId, title: "New chat")
+        return try await withCheckedThrowingContinuation { continuation in
+            var cancellable: AnyCancellable?
+            cancellable = NetworkRequest.shared.postApi(
+                endPoint: .conversations,
+                method: .POST,
+                token: authKey,
+                body: requestBody,
+                showLoader: false,
+                responseType: ConversationResponse.self,
+                isChat: true
+            )
+            .sink { completion in
+                if case let .failure(error) = completion {
+                    continuation.resume(throwing: error)
+                }
+                cancellable?.cancel()
+            } receiveValue: { response in
+                continuation.resume(returning: response)
+            }
+        }
+    }
+    
+    func sendChatMessage(text: String, conversationId: String) async throws -> ChatAutoResponse {
+        let requestBody = ChatAutoRequest(
+            input_type      : "text",
+            text            : text,
+            user_id         : Constants.getUserId(),
+            conversation_id : conversationId,
+            country_code    : Constants.getUserDefaultsValue(for: Constants.userCountryCode),
+            currency_code   : Constants.getUserDefaultsValue(for: Constants.userCurrencyCode),
+            ocr_text        : nil,
+            stream          : nil
+        )
+        return try await withCheckedThrowingContinuation { continuation in
+            var cancellable: AnyCancellable?
+            cancellable = NetworkRequest.shared.postApi(
+                endPoint    : .chatAuto,
+                method      : .POST,
+                token       : authKey,
+                body        : requestBody,
+                showLoader  : false,
+                responseType: ChatAutoResponse.self,
+                isChat      : true
+            )
+            .sink { completion in
+                if case let .failure(error) = completion {
+                    continuation.resume(throwing: error)
+                }
+                cancellable?.cancel()
+            } receiveValue: { response in
+                continuation.resume(returning: response)
+            }
+        }
+    }
+    
+    func sendChatImage(image: UIImage, conversationId: String) async throws -> ChatAutoResponse {
+        // Resize and compress iteratively to avoid 413 Payload Too Large error
+        var currentDimension: CGFloat = 800
+        var currentQuality: CGFloat = 0.5
+        var resizedImage = resizeImage(image: image, maxDimension: currentDimension)
+        var imageData = resizedImage.jpegData(compressionQuality: currentQuality)
+        
+        // Target size < 500KB. Reduce quality first, then dimension if needed.
+        while let data = imageData, data.count > 500 * 1024 {
+            if currentQuality > 0.2 {
+                currentQuality -= 0.1
+            } else if currentDimension > 400 {
+                currentDimension -= 100
+                resizedImage = resizeImage(image: image, maxDimension: currentDimension)
+                currentQuality = 0.5 // Reset quality for smaller dimension
+            } else {
+                break // Minimum limits reached
+            }
+            imageData = resizedImage.jpegData(compressionQuality: currentQuality)
+        }
+        
+        guard let finalData = imageData else {
+            throw APIError.unknown
+        }
+        
+        let requestBody = ChatImageRequest(
+            input_type      : "image",
+            user_id         : Constants.getUserId(),
+            conversation_id : conversationId,
+            country_code    : Constants.getUserDefaultsValue(for: Constants.userCountryCode),
+            currency_code   : Constants.getUserDefaultsValue(for: Constants.userCurrencyCode)
+        )
+        
+        let fileInput = MultiPartFileInput(
+            fieldName: "file",
+            fileName: "image.jpg",
+            mimeType: "image/jpeg",
+            fileData: finalData
+        )
+        
+        let multipartInput = MultipartInput(parameters: requestBody, fileInput: [fileInput])
+        
+        return try await withCheckedThrowingContinuation { continuation in
+            var cancellable: AnyCancellable?
+            cancellable = NetworkRequest.shared.multiPartRequest(
+                endPoint        : .chatAuto,
+                method          : .POST,
+                token           : authKey,
+                body            : multipartInput,
+                showLoader      : false,
+                isChat          : true,
+                responseType    : ChatAutoResponse.self
+            )
+            .sink { completion in
+                if case let .failure(error) = completion {
+                    continuation.resume(throwing: error)
+                }
+                cancellable?.cancel()
+            } receiveValue: { response in
+                continuation.resume(returning: response)
+            }
+        }
+    }
+    
+    private func resizeImage(image: UIImage, maxDimension: CGFloat) -> UIImage {
+        let size = image.size
+        let ratio = min(maxDimension / size.width, maxDimension / size.height)
+        if ratio >= 1.0 { return image }
+        
+        let newSize = CGSize(width: size.width * ratio, height: size.height * ratio)
+        let renderer = UIGraphicsImageRenderer(size: newSize)
+        return renderer.image { _ in
+            image.draw(in: CGRect(origin: .zero, size: newSize))
+        }
+    }
+    
+    func transcribeAudio(audioURL: URL, conversationId: String?) async throws -> TranscriptionResponse {
+        guard let audioData = try? Data(contentsOf: audioURL) else {
+            throw APIError.unknown
+        }
+        
+        let fileInput = MultiPartFileInput(
+            fieldName: "file",
+            fileName: "voice.m4a",
+            mimeType: "audio/mpeg",
+            fileData: audioData
+        )
+        
+        let requestBody = TranscribeRequest(user_id: Constants.getUserId(), conversation_id: conversationId)
+        let multipartInput = MultipartInput(parameters: requestBody, fileInput: [fileInput])
+        
+        return try await withCheckedThrowingContinuation { continuation in
+            var cancellable: AnyCancellable?
+            cancellable = NetworkRequest.shared.multiPartRequest(
+                endPoint: .transcribe,
+                method: .POST,
+                token: authKey,
+                body: multipartInput,
+                showLoader: true,
+                isChat: true,
+                responseType: TranscriptionResponse.self
+            )
+            .sink { completion in
+                if case let .failure(error) = completion {
+                    continuation.resume(throwing: error)
+                }
+                cancellable?.cancel()
+            } receiveValue: { response in
+                continuation.resume(returning: response)
+            }
+        }
+    }
+    
+    func clearPendingSession(sessionId: String) async throws -> ClearPendingResponse {
+        let requestBody = ClearPendingRequest(session_id: sessionId)
+        return try await withCheckedThrowingContinuation { continuation in
+            var cancellable: AnyCancellable?
+            cancellable = NetworkRequest.shared.postApi(
+                endPoint    : .clearPending,
+                method      : .POST,
+                token       : authKey,
+                body        : requestBody,
+                showLoader  : false,
+                responseType: ClearPendingResponse.self,
+                isChat      : true
+            )
+            .sink { completion in
+                if case let .failure(error) = completion {
+                    continuation.resume(throwing: error)
+                }
+                cancellable?.cancel()
+            } receiveValue: { response in
+                continuation.resume(returning: response)
+            }
+        }
+    }
+    
+    // MARK: - Agentic Context API
+    
+    func sendAgenticContext(requestBody: AgenticContextRequest) async throws -> AgenticContextResponse {
+        return try await withCheckedThrowingContinuation { continuation in
+            var cancellable: AnyCancellable?
+            cancellable = NetworkRequest.shared.postApi(
+                endPoint    : .agenticContext,
+                method      : .POST,
+                token       : authKey,
+                body        : requestBody,
+                showLoader  : false,
+                responseType: AgenticContextResponse.self,
+                isChat      : true
+            )
+            .sink { completion in
+                if case let .failure(error) = completion {
+                    continuation.resume(throwing: error)
+                }
+                cancellable?.cancel()
+            } receiveValue: { response in
+                continuation.resume(returning: response)
+            }
+        }
+    }
+    
+    // MARK: - Provider URL APIs
+    
+    func fetchProviderUrls(requestBody: FetchProviderUrlsRequest) async throws -> FetchProviderUrlsResponse {
+        return try await withCheckedThrowingContinuation { continuation in
+            var cancellable: AnyCancellable?
+            cancellable = NetworkRequest.shared.postApi(
+                endPoint: .fetchProviderUrls,
+                method: .POST,
+                token: authKey,
+                body: requestBody,
+                showLoader: false,
+                responseType: FetchProviderUrlsResponse.self,
+                isChat: false
+            )
+            .sink { completion in
+                if case let .failure(error) = completion {
+                    continuation.resume(throwing: error)
+                }
+                cancellable?.cancel()
+            } receiveValue: { response in
+                continuation.resume(returning: response)
+            }
+        }
+    }
+    
+    func addProviderUrls(requestBody: AddProviderUrlsRequest) async throws -> ProviderUrlsGenericResponse {
+        return try await withCheckedThrowingContinuation { continuation in
+            var cancellable: AnyCancellable?
+            cancellable = NetworkRequest.shared.postApi(
+                endPoint: .addProviderUrls,
+                method: .POST,
+                token: authKey,
+                body: requestBody,
+                showLoader: false,
+                responseType: ProviderUrlsGenericResponse.self,
+                isChat: false
+            )
+            .sink { completion in
+                if case let .failure(error) = completion {
+                    continuation.resume(throwing: error)
+                }
+                cancellable?.cancel()
+            } receiveValue: { response in
+                continuation.resume(returning: response)
+            }
+        }
+    }
+    
+    func updateProviderUrls(requestBody: UpdateProviderUrlsRequest) async throws -> ProviderUrlsGenericResponse {
+        return try await withCheckedThrowingContinuation { continuation in
+            var cancellable: AnyCancellable?
+            cancellable = NetworkRequest.shared.postApi(
+                endPoint: .updateProviderUrls,
+                method: .POST,
+                token: authKey,
+                body: requestBody,
+                showLoader: false,
+                responseType: ProviderUrlsGenericResponse.self,
+                isChat: false
+            )
+            .sink { completion in
+                if case let .failure(error) = completion {
+                    continuation.resume(throwing: error)
+                }
+                cancellable?.cancel()
+            } receiveValue: { response in
+                continuation.resume(returning: response)
+            }
+        }
+    }
+}
+

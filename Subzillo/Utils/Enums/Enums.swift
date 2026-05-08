@@ -47,6 +47,7 @@ enum NavigationRoute: Hashable{
     case emailSyncProgress(logId: String)
     case extractedSubscriptions(subscriptions: [SubscriptionData], fromEmailSync: Bool, integrationId: String)
     case connectICloudView
+    case AgentChatView
 }
 
 extension NavigationRoute {

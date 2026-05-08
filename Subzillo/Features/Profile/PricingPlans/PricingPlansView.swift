@@ -53,6 +53,9 @@ struct PricingPlansView: View {
     var fromPreview                             : Bool = false
     @State private var products: [SKProduct]    = []
     @State var planId                           : String?
+    @State private var processedTransactionIds  : Set<String> = []
+    @State private var lastProcessedProductId   : String = ""
+    @State private var lastProcessedDate        : Date = .distantPast
     @State private var loadingStatus            : PricingPlanProcessingType? = nil
     var selectedTab                             : Segment = .first
     
@@ -237,6 +240,7 @@ struct PricingPlansView: View {
             .presentationDragIndicator(.hidden)
             .presentationDetents([.height(platformSheetHeight)])
         }
+        .withToast()
     }
     
     //MARK: - User defined methods
@@ -275,66 +279,108 @@ struct PricingPlansView: View {
     
     private func handlePurchaseNotification(_ notification: Notification) {
         guard let transaction = notification.object as? SKPaymentTransaction else { return }
-        print("Purchase completed: \(transaction.payment.productIdentifier)")
+        let productId = transaction.payment.productIdentifier
         
-        let transactionId = transaction.transactionIdentifier ?? transaction.original?.transactionIdentifier ?? ""
+        let transactionId = transaction.transactionIdentifier ?? ""
+        let originalId = transaction.original?.transactionIdentifier ?? transactionId
         
-        guard let pId = self.planId, !pId.isEmpty else {
-            self.loadingStatus = nil
-            print("Auto-renewal or unmapped purchase ignored for \(transaction.payment.productIdentifier)")
+        // 1. De-duplicate by Transaction ID
+        guard !transactionId.isEmpty, !processedTransactionIds.contains(transactionId) else {
             return
         }
+        
+        // 2. Burst protection: Skip if we just processed the SAME product in the last 3 seconds
+        if lastProcessedProductId == productId && Date().timeIntervalSince(lastProcessedDate) < 3.0 {
+            print("[De-duplicate] Skipping burst notification for \(productId)")
+            // Still finish the transaction to clear the queue
+            return
+        }
+        
+        guard let pId = findPlanIdFor(productId: productId) else {
+            self.loadingStatus = nil
+            print("Auto-renewal or unmapped purchase ignored for \(productId)")
+            return
+        }
+        
+        print("Purchase completed: \(productId) (ID: \(transactionId))")
+        
+        processedTransactionIds.insert(transactionId)
+        lastProcessedProductId = productId
+        lastProcessedDate = Date()
+        
         self.loadingStatus = nil
         subscribePlanAPI(planId: pId, transactionId: transactionId)
+        
+        // Reset planId after successful mapping
+        if self.planId == pId {
+            self.planId = ""
+        }
     }
     
     private func handleRestoreNotification(_ notification: Notification) {
         guard let transaction = notification.object as? SKPaymentTransaction else { return }
         let productId = transaction.payment.productIdentifier
-        let transactionId = transaction.transactionIdentifier ?? transaction.original?.transactionIdentifier ?? ""
-        print("Restore completed: \(productId)")
         
-        var targetPlanId = self.planId ?? ""
-        
-        if targetPlanId.isEmpty {
-            if let matchedPlan = viewModel.pricingPlans.first(where: { plan in
-                if let iosId = plan.iosProductId, iosId == productId {
-                    return true
-                }
-                
-                let name = plan.planName?.lowercased() ?? ""
-                let isSilver = name.contains("silver")
-                let isGold = name.contains("gold")
-                let isYearly = productId.lowercased().contains("yearly")
-                
-                if isSilver {
-                    let silverID = isYearly ? SubzilloProducts.silverYearly : SubzilloProducts.silverMonthly
-                    return productId == silverID
-                } else if isGold {
-                    let goldID = isYearly ? SubzilloProducts.goldYearly : SubzilloProducts.goldMonthly
-                    return productId == goldID
-                }
-                return false
-            }) {
-                targetPlanId = matchedPlan.id ?? ""
-            }
+        let transactionId = transaction.transactionIdentifier ?? ""
+        let originalTransactionId = transaction.original?.transactionIdentifier ?? transactionId
+
+        // 1. De-duplicate by Transaction ID
+        guard !transactionId.isEmpty, !processedTransactionIds.contains(transactionId) else {
+            return
         }
         
-        if !targetPlanId.isEmpty {
-            self.loadingStatus = nil
-            let request = SubscribePlanRequest(
-                userId        : Constants.getUserId(),
-                pricingPlanId : targetPlanId,
-                platform      : 2,
-                transactionId : transactionId
-            )
-            viewModel.subscribePlanAfterRestore(input: request)
-        } else {
-            self.loadingStatus = nil
-            //            self.platformAlertMessage = "Restore successful, but no matching plan was found in the system. Please contact support."
-            self.platformAlertMessage = "We found your previous purchase, but could not sync it to your account. Please contact support or try again later."
-            self.showPlatformAlert = true
+        // 2. Burst protection (restores usually only deliver the latest one now, but safety first)
+        if lastProcessedProductId == productId && Date().timeIntervalSince(lastProcessedDate) < 2.0 {
+            print("[De-duplicate] Skipping burst restore for \(productId)")
+            return
         }
+        
+        guard let pId = findPlanIdFor(productId: productId) else {
+            self.loadingStatus = nil
+            return
+        }
+        
+        print("Restore processed: \(productId) (Orig: \(originalTransactionId))")
+        
+        processedTransactionIds.insert(transactionId)
+        lastProcessedProductId = productId
+        lastProcessedDate = Date()
+        self.loadingStatus = nil
+        
+        let request = RestoreIosPurchaseRequest(
+            userId: Constants.getUserId(),
+            transactionId: transactionId,
+            originalTransactionId: originalTransactionId
+        )
+        viewModel.restoreIosPurchase(input: request)
+    }
+    
+    private func findPlanIdFor(productId: String) -> String? {
+        // 1. Try to match by iosProductId in the pricingPlans list
+        if let matchedPlan = viewModel.pricingPlans.first(where: { $0.iosProductId == productId }) {
+            return matchedPlan.id
+        }
+        
+        // 2. Fallback to name-based matching for Silver/Gold
+        let isYearly = productId.lowercased().contains("yearly")
+        let isSilver = productId == (isYearly ? SubzilloProducts.silverYearly : SubzilloProducts.silverMonthly)
+        let isGold = productId == (isYearly ? SubzilloProducts.goldYearly : SubzilloProducts.goldMonthly)
+        
+        if let matchedPlan = viewModel.pricingPlans.first(where: { plan in
+            let name = plan.planName?.lowercased() ?? ""
+            if isSilver && name.contains("silver") { return true }
+            if isGold && name.contains("gold") { return true }
+            return false
+        }) {
+            return matchedPlan.id
+        }
+        
+        // 3. Last resort: use the planId set by the button tap
+        if let tappedPlanId = self.planId, !tappedPlanId.isEmpty {
+             return tappedPlanId
+        }
+        
+        return nil
     }
     
     private func getUIPlan(from plan: PricingPlan) -> PricingPlanUI {

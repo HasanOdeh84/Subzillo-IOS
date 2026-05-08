@@ -176,11 +176,18 @@ struct LoginView: View {
             .navigationBarBackButtonHidden(true)
             .onAppear{
                 Constants.saveDefaults(value: false, key: "isSyncing")
-//                if commonApiVM.countryError != nil {
-//                    commonApiVM.getCountries()
-//                } else
-                if let data = commonApiVM.countriesResponse {
-                    selectedCountry = data.first(where: { $0.countryCode == Constants.shared.regionCode })
+                if let countries = commonApiVM.countriesResponse {
+                    if let savedData = SessionManager.shared.loginData {
+                        if let savedDialCode = savedData.countryCode,
+                           let matched = countries.first(where: { $0.dialCode == savedDialCode }) {
+                            selectedCountry = matched
+                        } else {
+                            selectedCountry = countries.first(where: { $0.countryCode == Constants.shared.regionCode })
+                        }
+                        phoneNumber = savedData.phoneNumber ?? ""
+                    } else if selectedCountry == nil {
+                        selectedCountry = countries.first(where: { $0.countryCode == Constants.shared.regionCode })
+                    }
                 }
             }
             .onChange(of: segmentSelected) { value in
@@ -198,7 +205,7 @@ struct LoginView: View {
                         let ph = PhoneNumberFormatterService(regionCode: selectedCountry?.countryCode ?? "").formattedNumber(digits: phoneNumber)
                         loginVM.restoreUser(input           : RestoreUserRequest(userId    : Constants.getUserId(),
                                                                                  deviceId  : appDelegate.deviceToken ?? "",
-                                                                                 loginType : isLoginClicked ? (segmentSelected == .first ? loginCheckType.mobile : loginCheckType.email).rawValue : loginType.rawValue),
+                                                                                 loginType : isLoginClicked ? (segmentSelected == .first ? loginCheckType.mobile : loginCheckType.email).rawValue : loginCheckType.email.rawValue),
                                             fromLogin       : isLoginClicked,
                                             email           : email.trimmed,
                                             phoneNo         : phone,

@@ -21,6 +21,7 @@ public enum APIError: Error {
     case apiError(String)
     case insufficientQuota
     case reauthenticationRequired
+    case payloadTooLarge
     
     var localizedDescription: String {
         switch self {
@@ -62,6 +63,8 @@ public enum APIError: Error {
             return "insufficient quota or quota exceeded"
         case .reauthenticationRequired:
             return "Gmail needs reconnection"
+        case .payloadTooLarge:
+            return "File is too large to upload. Please try a smaller image."
         }
     }
 }
@@ -84,7 +87,8 @@ extension APIError: Equatable {
              (.responseError, .responseError),
              (.anyError, .anyError),
              (.insufficientQuota, .insufficientQuota),
-             (.reauthenticationRequired, .reauthenticationRequired):
+             (.reauthenticationRequired, .reauthenticationRequired),
+             (.payloadTooLarge, .payloadTooLarge):
             return true
         case (.urlError(let lhsError), .urlError(let rhsError)):
             return lhsError == rhsError

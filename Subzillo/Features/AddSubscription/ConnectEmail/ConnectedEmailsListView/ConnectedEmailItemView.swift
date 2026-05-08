@@ -1,6 +1,7 @@
 import SwiftUI
 
 struct ConnectedEmailItemView: View {
+    @State private var isExpanded: Bool = false
     let email                   : ListConnectedEmailsData
     let onSync                  : () -> Void
     let onSyncing               : () -> Void
@@ -23,32 +24,24 @@ struct ConnectedEmailItemView: View {
                     .frame(width: 31, height: 31)
                 
                 VStack(alignment: .leading, spacing: 4) {
-                    HStack {
-                        Text(email.email ?? "")
-                            .font(.appSemiBold(16))
-                            .foregroundStyle(Color.underlineGray)
-                        Spacer()
-                        //                        Image("download")
-                        //                            .frame(width: 30, height: 30)
-                        //                            .onTapGesture {
-                        //                                onDownloadLogs()
-                        //                            }
-                        //                            .padding(.trailing, -16)
-                    }
-                    .tint(Color.underlineGray)
+                    Text(email.email ?? "")
+                        .font(.appSemiBold(16))
+                        .foregroundStyle(Color.underlineGray)
                     
-                    if email.lastSyncDate != "" {
-                        if email.lastSyncDate != nil {
-                            Text(email.lastSyncDate ?? "")
-                                .font(.appRegular(14))
-                                .foregroundStyle(Color.underlineGray)
-                        }
+                    if let lastSync = email.lastSyncDate, !lastSync.isEmpty {
+                        Text(lastSync)
+                            .font(.appRegular(14))
+                            .foregroundStyle(Color.underlineGray)
                     }
                 }
                 
                 Spacer()
+                
+                Image(systemName: isExpanded ? "chevron.up" : "chevron.down")
+                    .foregroundColor(.neutral500)
+                    .font(.system(size: 14, weight: .semibold))
             }
-            .opacity(isAllSyncing ? 0.6 : 1.0)
+//            .opacity(isAllSyncing ? 0.6 : 1.0)
             
             // Action Buttons
             if !isIntegrations {
@@ -57,34 +50,43 @@ struct ConnectedEmailItemView: View {
                     VStack(alignment: .trailing, spacing: 8) {
                         actionButtons
                         
-                        if isInlineSyncing {
-                            
+                        if isExpanded {
                             Divider()
                                 .padding(.vertical, 10)
                             
-                            HStack(spacing: 20) {
-                                VStack(alignment: .leading, spacing: 8) {
-                                    Text("Emails Scanned")
+                            if isInlineSyncing {
+                                HStack(spacing: 20) {
+                                    VStack(alignment: .leading, spacing: 8) {
+                                        Text("Emails Scanned")
+                                            .font(.appRegular(14))
+                                            .foregroundColor(Color.neutral500)
+                                        
+                                        Text("\(emailsScanned)")
+                                            .font(.appBold(16))
+                                            .foregroundColor(Color.navyBlueCTA700)
+                                    }
+                                    VStack(alignment: .leading, spacing: 8) {
+                                        Text("Subscription Found")
+                                            .font(.appRegular(14))
+                                            .foregroundColor(Color.neutral500)
+                                        
+                                        Text("\(subscriptionsFound)")
+                                            .font(.appBold(16))
+                                            .foregroundColor(Color.navyBlueCTA700)
+                                    }
+                                    Spacer()
+                                    ProgressView()
+                                        .scaleEffect(1.5)
+                                }
+                            } else {
+                                HStack {
+                                    Spacer()
+                                    Text("No sync in progress")
                                         .font(.appRegular(14))
                                         .foregroundColor(Color.neutral500)
-                                    
-                                    Text("\(emailsScanned)")
-                                        .font(.appBold(16))
-                                        .foregroundColor(Color.navyBlueCTA700)
+                                    Spacer()
                                 }
-                                VStack(alignment: .leading, spacing: 8) {
-                                    Text("Subscription Found")
-                                        .font(.appRegular(14))
-                                        .foregroundColor(Color.neutral500)
-                                    
-                                    Text("\(subscriptionsFound)")
-                                        .font(.appBold(16))
-                                        .foregroundColor(Color.navyBlueCTA700)
-                                }
-                                Spacer()
-                                ProgressView()
-                                    .scaleEffect(1.5)
-                                //                                Spacer()
+                                .padding(.bottom, 5)
                             }
                         }
                     }
@@ -94,6 +96,12 @@ struct ConnectedEmailItemView: View {
         .padding(.horizontal, 16)
         .padding(.vertical, 14)
         .background(Color.white)
+        .contentShape(Rectangle())
+        .onTapGesture {
+            withAnimation {
+                isExpanded.toggle()
+            }
+        }
         .cornerRadius(12)
         .overlay(
             RoundedRectangle(cornerRadius: 12)
@@ -133,32 +141,33 @@ struct ConnectedEmailItemView: View {
         let viewStatus = email.viewStatus ?? false
         if syncStatus == 1 {
             HStack(spacing: 10){
-                Text("Syncing...")
-                    .font(.appSemiBold(14))
-                    .foregroundColor(Color.blueMain700)
-                    .padding(.horizontal, 24)
-                    .frame(height: 30)
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 5)
-                            .stroke(Color.blueMain700, lineWidth: 1)
-                    )
-                    .opacity(0.6)
-                    .onTapGesture {
-                        onSyncing()
-                    }
-                viewButton(title: "View")
+                Button(action: { onSyncing() }) {
+                    Text("Syncing...")
+                        .font(.appSemiBold(14))
+                        .foregroundColor(Color.blueMain700)
+                        .padding(.horizontal, 24)
+                        .frame(height: 30)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 5)
+                                .stroke(Color.blueMain700, lineWidth: 1)
+                        )
+                }
+                .buttonStyle(PlainButtonStyle())
+                .opacity(0.6)
+                
+                viewButton()
             }
         } else if syncStatus == 2 && viewStatus {
-            viewButton(title: "View")
+            viewButton()
         } else if syncStatus == 0 && viewStatus{
-            viewButton(title: "View")
+            viewButton()
         } else if syncStatus == 0 || (syncStatus == 2 && viewStatus == false){
             HStack(spacing: 12){
                 if email.isValid == false && email.type == 1 {
                     reconnectButton(title: "Reconnect")
                 }
                 syncButton(title: "Sync")
-                viewButton(title: "View")
+                viewButton()
             }
         }
     }
@@ -166,65 +175,76 @@ struct ConnectedEmailItemView: View {
     // MARK: - Reusable Button Builders
     @ViewBuilder
     private func reconnectButton(title: String) -> some View {
-        Text(title)
-            .font(.appSemiBold(14))
-            .foregroundColor(.redBadge)
-            .padding(.horizontal, 16)
-            .frame(height: 30)
-            .background(Color.white)
-            .cornerRadius(5)
-            .overlay(
-                RoundedRectangle(cornerRadius: 5)
-                    .stroke(
-                        Color.redBadge,
-                        lineWidth: 1
-                    )
-            )
-            .onTapGesture {
-                onReconnect()
-            }
+        Button(action: { onReconnect() }) {
+            Text(title)
+                .font(.appSemiBold(14))
+                .foregroundColor(.redBadge)
+                .padding(.horizontal, 16)
+                .frame(height: 30)
+                .background(Color.white)
+                .cornerRadius(5)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 5)
+                        .stroke(
+                            Color.redBadge,
+                            lineWidth: 1
+                        )
+                )
+        }
+        .buttonStyle(PlainButtonStyle())
     }
     
     @ViewBuilder
     private func syncButton(title: String) -> some View {
-        Text(title)
-            .font(.appSemiBold(14))
-            .foregroundColor(.white)
-            .padding(.horizontal, 24)
-            .frame(height: 30)
-            .background(Color.blueMain700)
-            .cornerRadius(5)
-            .onTapGesture {
-                Constants.saveDefaults(value: true, key: "isSyncing")
-                onSync()
-            }
+        Button(action: {
+            Constants.saveDefaults(value: true, key: "isSyncing")
+            onSync()
+        }) {
+            Text(title)
+                .font(.appSemiBold(14))
+                .foregroundColor(.white)
+                .padding(.horizontal, 24)
+                .frame(height: 30)
+                .background(Color.blueMain700)
+                .cornerRadius(5)
+        }
+        .buttonStyle(PlainButtonStyle())
     }
     
     @ViewBuilder
-    private func viewButton(title: String) -> some View {
-        Text(title)
-            .font(.appSemiBold(14))
-            .foregroundStyle(LinearGradient(
-                gradient: Gradient(colors: [Color.linearGradient3, Color.linearGradient4, Color.blueMain700]),
-                startPoint: .top,
-                endPoint: .bottom
-            ))
-            .padding(.horizontal, 24)
-            .frame(height: 30)
-            .overlay(
-                RoundedRectangle(cornerRadius: 5)
-                    .stroke(
-                        LinearGradient(
-                            gradient: Gradient(colors: [Color.linearGradient3, Color.linearGradient4, Color.blueMain700]),
-                            startPoint: .top,
-                            endPoint: .bottom
-                        ),
-                        lineWidth: 1
-                    )
-            )
-            .onTapGesture {
-                Constants.saveDefaults(value: true, key: "isSyncing")
+    private func viewButton() -> some View {
+        let isSyncingStatus = email.syncStatus == 1
+        let title = isSyncingStatus ? "View Progress" : "View Results"
+        
+        Button(action: {
+            Constants.saveDefaults(value: true, key: "isSyncing")
+            if isSyncingStatus {
+                onSyncing()
+            } else {
                 onView()
             }
+        }) {
+            Text(title)
+                .font(.appSemiBold(14))
+                .foregroundStyle(LinearGradient(
+                    gradient: Gradient(colors: [Color.linearGradient3, Color.linearGradient4, Color.blueMain700]),
+                    startPoint: .top,
+                    endPoint: .bottom
+                ))
+                .padding(.horizontal, 24)
+                .frame(height: 30)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 5)
+                        .stroke(
+                            LinearGradient(
+                                gradient: Gradient(colors: [Color.linearGradient3, Color.linearGradient4, Color.blueMain700]),
+                                startPoint: .top,
+                                endPoint: .bottom
+                            ),
+                            lineWidth: 1
+                        )
+                )
+        }
+        .buttonStyle(PlainButtonStyle())
     }
 }

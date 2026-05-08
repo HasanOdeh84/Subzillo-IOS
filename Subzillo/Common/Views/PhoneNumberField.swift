@@ -21,7 +21,7 @@ struct PhoneNumberField: View {
     @Binding var selectedCountry            : Country?
     @EnvironmentObject var commonApiVM      : CommonAPIViewModel
     @State var isCountry                    : Bool
-    @State var verifyData                   : LoginSignupVerifyData?
+    @State var verifyData                   : LoginSignupVerifyData? = nil
     @State var fromSingup                   = false
     @State var fromPreview                  = false
     @State var fromSocailLogin              = false
@@ -156,7 +156,12 @@ struct PhoneNumberField: View {
                 if !isCountry{
                     TextField(LocalizedStringKey(placeholder ?? ""), text: Binding(
                         get: { selectedCurrency?.name ?? "" },
-                        set: { selectedCurrency?.name = $0 }
+                        set: { newValue in
+                            if var currency = selectedCurrency {
+                                currency.name = newValue
+                                selectedCurrency = currency
+                            }
+                        }
                     ))
                     .padding(.horizontal, 16)
                     .frame(height: 52)
@@ -201,7 +206,7 @@ struct PhoneNumberField: View {
                     .stroke(Color.neutral2200, lineWidth: 1)
             )
             .onAppear(perform:
-                        updateCountryAndCurrency
+                        self.updateCountryAndCurrency
             )
             .onChange(of: commonApiVM.countriesResponse) { _ in
                 updateCountryAndCurrency()
@@ -249,7 +254,7 @@ struct PhoneNumberField: View {
                         selectedCountry = countries.first(where: { $0.countryCode == Constants.shared.regionCode })
                     }
                 }else{
-                    if let countries = commonApiVM.countriesResponse {
+                    if let countries = commonApiVM.countriesResponse, !countryCode.isEmpty {
                         selectedCountry = countries.first(where: { $0.dialCode == countryCode })
                     }
                 }
@@ -288,7 +293,9 @@ struct PhoneNumberField: View {
         }
         if !fromSingup{
             if !fromFamily{
-                phoneNumber = ""
+                if let prev = previousCountry, prev.dialCode != selectedCountry?.dialCode {
+                    phoneNumber = ""
+                }
             }
         }
         if fromFamily{

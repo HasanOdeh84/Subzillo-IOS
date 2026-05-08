@@ -18,6 +18,7 @@
 
 import SwiftUI
 import UIKit
+import SDWebImageSwiftUI
 
 var isCurrencyUpdateGlobalManual                = false
 
@@ -308,7 +309,7 @@ struct ManualEntryView: View {
                     }
                     .sheet(isPresented: $showBillingCycleSheet) {
                         BillingCycleBottomSheet(selectedBilling         : $selectedBilling,
-//                                                billingCyclesResponse   : filteredBillingCycles(),
+                                                billingCyclesResponse   : allBillingCycles(),
                                                 header                  : "Select Billing Cycle",
                                                 placeholder             : "Search",
                                                 onSelect: { billing in
@@ -707,14 +708,7 @@ struct ManualEntryView: View {
             return ["Monthly", "Yearly"]
         }
         
-        let filteredPlans: [ProviderSubscriptionPlan]
-        if let selected = selectedPlanType, !selected.isEmpty {
-            filteredPlans = plans.filter { ($0.planName ?? "").caseInsensitiveCompare(selected) == .orderedSame }
-        } else {
-            filteredPlans = plans
-        }
-        
-        let billingCycleNames = filteredPlans.compactMap { $0.billingCycle }
+        let billingCycleNames = plans.compactMap { $0.billingCycle }
         
         // If plan names are missing or empty, still return fallback
         guard !billingCycleNames.isEmpty else {
@@ -722,6 +716,25 @@ struct ManualEntryView: View {
         }
         
         return Array(Set(billingCycleNames))
+    }
+    
+    func allBillingCycles() -> [String] {
+        var cycles = ["Daily", "Weekly", "Monthly", "Quarterly", "Biannually", "Yearly"]
+        let apiCycles = filteredBillingCycles()
+        
+        for cycle in apiCycles {
+            if !cycles.contains(where: { $0.caseInsensitiveCompare(cycle) == .orderedSame }) {
+                cycles.append(cycle)
+            }
+        }
+        
+        if let selected = selectedBilling, !selected.isEmpty {
+            if !cycles.contains(where: { $0.caseInsensitiveCompare(selected) == .orderedSame }) {
+                cycles.append(selected)
+            }
+        }
+        
+        return cycles
     }
     
     func handlePlanTypeChange() {
@@ -764,6 +777,8 @@ struct ManualEntryView: View {
                 amount = ""
                 selectedBilling = ""
                 chargeDate = ""
+                isAmountError = false
+                isPlanTypeError = false
             }
         }
         
@@ -801,6 +816,8 @@ struct ManualEntryView: View {
         category = ""
         addSubscriptionVM.providerData = nil
         serviceLastActionText = ""
+        isAmountError = false
+        isPlanTypeError = false
     }
     
     func updateAmount(billing:String){
@@ -811,7 +828,8 @@ struct ManualEntryView: View {
             return
         }
         
-        if let matchedPlan = plans.first(where: { plan in
+        // Try to find a plan that matches both the selected plan type AND the new billing cycle
+        var matchedPlan = plans.first(where: { plan in
             let cycleMatch = (plan.billingCycle ?? "")
                 .trimmingCharacters(in: .whitespacesAndNewlines)
                 .caseInsensitiveCompare(
@@ -822,11 +840,32 @@ struct ManualEntryView: View {
                 return cycleMatch && (plan.planName ?? "").caseInsensitiveCompare(selected) == .orderedSame
             }
             return cycleMatch
-        }) {
-            amount = String(format: "%.2f", matchedPlan.price ?? 0)
+        })
+        
+        // If not found with the current plan type, find ANY plan that matches the billing cycle
+        if matchedPlan == nil {
+            matchedPlan = plans.first(where: { plan in
+                (plan.billingCycle ?? "")
+                    .trimmingCharacters(in: .whitespacesAndNewlines)
+                    .caseInsensitiveCompare(
+                        billing.trimmingCharacters(in: .whitespacesAndNewlines)
+                    ) == .orderedSame
+            })
+            
+            if let matched = matchedPlan {
+                // Update plan type and selectedPlanType to reflect the plan that matches this cycle
+                planType = matched.planName ?? ""
+                selectedPlanType = matched.planName ?? ""
+                planLastActionText = planType
+            }
+        }
+        
+        if let matched = matchedPlan {
+            amount = String(format: "%.2f", matched.price ?? 0)
             amountLastActionText = amount
-            updateCurrency(currencyCode     : matchedPlan.currencyCode ?? Constants.shared.currencyCode,
-                           currencySymbol   : matchedPlan.currencySymbol ?? Constants.shared.currencySymbol)
+            isAmountError = false
+            updateCurrency(currencyCode     : matched.currencyCode ?? Constants.shared.currencyCode,
+                           currencySymbol   : matched.currencySymbol ?? Constants.shared.currencySymbol)
         }
     }
     
@@ -887,12 +926,15 @@ struct ManualEntryView: View {
                     amountLastActionText = amount
                 }
                 selectedBilling = matchedPlan.billingCycle ?? ""
+                selectedPlanType = matchedPlan.planName ?? ""
                 isPlanTypeError = false
+                isAmountError = false
                 updateCurrency(currencyCode     : matchedPlan.currencyCode ?? Constants.shared.currencyCode,
                                currencySymbol   : matchedPlan.currencySymbol ?? Constants.shared.currencySymbol)
             } else {
                 if planType == "Free" || planType == "Basic"{
                     selectedBilling = "Monthly"
+                    isAmountError = false
                 }
                 if planType == "Free"{
                     amount = "0.0"

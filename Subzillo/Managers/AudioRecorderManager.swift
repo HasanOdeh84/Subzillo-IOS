@@ -21,6 +21,8 @@ class AudioRecorderManager: NSObject, ObservableObject, AVAudioPlayerDelegate {
     var audioRecorder                   : AVAudioRecorder!
     var audioPlayer                     : AVAudioPlayer?
     var timer                           : Timer?
+    @Published var audioPower           : Float = 0.1
+    private var meterTimer              : Timer?
     
 //    var audioURL                = FileManager.default.temporaryDirectory.appendingPathComponent("recording.m4a")
     var audioURL: URL?
@@ -81,9 +83,10 @@ class AudioRecorderManager: NSObject, ObservableObject, AVAudioPlayerDelegate {
                 isRecording = false
                 return
             }
-            audioRecorder?.record()
+            audioRecorder?.isMeteringEnabled = true
             isRecording = true
             startRecordTimer()
+            startMeterTimer()
             print("🎙 Recording started")
         } catch {
             print("⚠️ Failed to start recording: \(error.localizedDescription)")
@@ -102,6 +105,7 @@ class AudioRecorderManager: NSObject, ObservableObject, AVAudioPlayerDelegate {
         audioRecorder = nil
         isRecording = false
         stopRecordTimer()
+        stopMeterTimer()
 //        recordTime = 0
         if let url = audioURL{
             hasRecording = FileManager.default.fileExists(atPath: url.path)
@@ -165,6 +169,23 @@ class AudioRecorderManager: NSObject, ObservableObject, AVAudioPlayerDelegate {
     private func stopRecordTimer() {
         recordTimer?.invalidate()
         recordTimer = nil
+    }
+    
+    private func startMeterTimer() {
+        meterTimer?.invalidate()
+        meterTimer = Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true) { [weak self] _ in
+            guard let self = self, let recorder = self.audioRecorder, recorder.isRecording else { return }
+            recorder.updateMeters()
+            let power = recorder.averagePower(forChannel: 0)
+            let normalized = max(0.1, min(1.0, CGFloat(power + 50) / 50.0))
+            self.audioPower = Float(normalized)
+        }
+    }
+    
+    private func stopMeterTimer() {
+        meterTimer?.invalidate()
+        meterTimer = nil
+        audioPower = 0.1
     }
     
     // MARK: Playback

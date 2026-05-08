@@ -111,28 +111,13 @@ struct ConnectedEmailsListView: View {
                 ScrollView(showsIndicators: false) {
                     LazyVStack(spacing: 16) {
                         ForEach(viewModel.filteredEmails) { email in
-//                                                    SwipeableEmailRow(
-//                                                        email           : email,
-//                                                        activeEmailId   : $activeEmailId,
-//                                                        isScrollDisabled: $isScrollDisabled,
-//                                                        onDelete: {
-//                                                            withAnimation {
-//                                                                viewModel.deleteEmail(email)
-//                                                            }
-//                                                        },
-//                                                        onSync: {
-//                                                            viewModel.syncEmail(email)
-//                                                        },
-//                                                        onView: {
-//                                                            viewModel.viewEmail(email)
-//                                                        }
-//                                                    )
+                            let progress = viewModel.activeSyncs[email.id ?? ""]
                             SwipeableMailRow(email              : email,
                                              activeCardId       : $activeEmailId,
                                              isScrollDisabled   : $isScrollDisabled,
-                                             isInlineSyncing    : viewModel.isInlineSyncing && viewModel.inlineSyncingId == email.id,
-                                             emailsScanned      : viewModel.inlineEmailsScanned,
-                                             subscriptionsFound : viewModel.inlineSubscriptionsFound,
+                                             isInlineSyncing    : progress != nil,
+                                             emailsScanned      : progress?.emailsScanned ?? 0,
+                                             subscriptionsFound : progress?.subscriptionsFound ?? 0,
                                              onDelete           : {
                                 selectedEmail = email
                                 showDeletePopup = true
@@ -191,6 +176,7 @@ struct ConnectedEmailsListView: View {
         }
         .onDisappear {
             isVisible = false
+            viewModel.stopInlinePolling()
         }
 //        .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("RefreshScreenData"))) { _ in
 //            if isVisible && !justAppeared {

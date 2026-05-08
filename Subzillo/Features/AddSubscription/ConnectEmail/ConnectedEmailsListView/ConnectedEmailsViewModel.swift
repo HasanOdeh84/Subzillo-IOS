@@ -3,6 +3,13 @@ import SwiftUI
 import Combine
 import SDWebImageSwiftUI
 
+// Inline Sync Progress Model
+struct InlineSyncProgress {
+    var logId: String
+    var emailsScanned: Int
+    var subscriptionsFound: Int
+}
+
 class ConnectedEmailsViewModel: ObservableObject {
     
     private var subscriptions                           = Set<AnyCancellable>()
@@ -13,10 +20,7 @@ class ConnectedEmailsViewModel: ObservableObject {
     @Published var showErrorPopup                       : Bool = false
     
     // Inline Sync Progress Properties
-    @Published var isInlineSyncing                      : Bool = false
-    @Published var inlineSyncingId                      : String? = nil
-    @Published var inlineEmailsScanned                  : Int = 0
-    @Published var inlineSubscriptionsFound             : Int = 0
+    @Published var activeSyncs                          : [String: InlineSyncProgress] = [:] // Key: integrationId
     private var pollingCancellable                      : AnyCancellable?
     
     var filteredEmails: [ListConnectedEmailsData] {
@@ -44,13 +48,9 @@ class ConnectedEmailsViewModel: ObservableObject {
             self.connectedEmails = response.data ?? []
             
             // Persistence: Check if an inline sync should be active
-            if self.connectedEmails.count == 1, let email = self.connectedEmails.first {
+            for email in self.connectedEmails {
                 if email.syncStatus == 1 {
-                    self.isInlineSyncing = true
-                    self.inlineSyncingId = email.id
-                    if self.pollingCancellable == nil {
-                        self.startInlinePolling(logId: email.syncLogId ?? "")
-                    }
+                    self.startInlinePolling(logId: email.syncLogId ?? "", integrationId: email.id ?? "")
                 }
             }
         }
@@ -81,14 +81,7 @@ class ConnectedEmailsViewModel: ObservableObject {
             guard let self = self else { return }
             PrintLogger.modelLog(response, type: .response, isInput: false)
             self.listConnectedEmails(input: ListConnectedEmailsRequest(userId: Constants.getUserId()))
-            
-            if self.connectedEmails.count == 1 {
-                self.isInlineSyncing = true
-                self.inlineSyncingId = input.integrationId
-                self.startInlinePolling(logId: response.data?.logId ?? "")
-            } else {
-                self.navigate(to: .emailSyncProgress(logId: response.data?.logId ?? ""))
-            }
+            self.startInlinePolling(logId: response.data?.logId ?? "", integrationId: input.integrationId)
         }
         .store(in: &self.subscriptions)
     }
@@ -208,15 +201,25 @@ class ConnectedEmailsViewModel: ObservableObject {
     }
     
     // MARK: - Inline Polling Logic
-    func startInlinePolling(logId: String) {
-        self.inlineEmailsScanned = 0
-        self.inlineSubscriptionsFound = 0
-//        self.fetchInlineSyncProgress(logId: logId)
-        pollingCancellable = Timer.publish(every: 3, on: .main, in: .common)
-            .autoconnect()
-            .sink { [weak self] _ in
-                self?.fetchInlineSyncProgress(logId: logId)
-            }
+    func startInlinePolling(logId: String, integrationId: String) {
+        // Add or update the sync progress for this specific integration
+        if activeSyncs[integrationId] == nil {
+            activeSyncs[integrationId] = InlineSyncProgress(logId: logId, emailsScanned: 0, subscriptionsFound: 0)
+        }
+        
+        if pollingCancellable == nil {
+            pollingCancellable = Timer.publish(every: 3, on: .main, in: .common)
+                .autoconnect()
+                .sink { [weak self] _ in
+                    self?.pollAllActiveSyncs()
+                }
+        }
+    }
+    
+    private func pollAllActiveSyncs() {
+        for (integrationId, progress) in activeSyncs {
+            fetchInlineSyncProgress(logId: progress.logId, integrationId: integrationId)
+        }
     }
     
     func stopInlinePolling() {
@@ -224,7 +227,7 @@ class ConnectedEmailsViewModel: ObservableObject {
         pollingCancellable = nil
     }
     
-    func fetchInlineSyncProgress(logId: String) {
+    func fetchInlineSyncProgress(logId: String, integrationId: String) {
         let extraParams = "/\(logId)"
         apiReference.getApi(endPoint: .syncStatus, token: authKey, showLoader: false, showErrorToast: false, extraParams: extraParams, responseType: SyncStatusResponse.self)
             .sink { [weak self] completion in
@@ -233,41 +236,35 @@ class ConnectedEmailsViewModel: ObservableObject {
                 }
             } receiveValue: { [weak self] response in
                 PrintLogger.modelLog(response, type: .response, isInput: false)
-                self?.handleInlineSyncResponse(response)
+                self?.handleInlineSyncResponse(response, integrationId: integrationId)
             }
             .store(in: &subscriptions)
     }
     
-    private func handleInlineSyncResponse(_ response: SyncStatusResponse) {
+    private func handleInlineSyncResponse(_ response: SyncStatusResponse, integrationId: String) {
         guard let data = response.data else { return }
-        self.inlineEmailsScanned = data.emailsAnalyzed ?? 0
-        self.inlineSubscriptionsFound = data.subscriptionsFound ?? 0
+        
+        // Update the progress in the dictionary
+        if var progress = activeSyncs[integrationId] {
+            progress.emailsScanned = data.emailsAnalyzed ?? 0
+            progress.subscriptionsFound = data.subscriptionsFound ?? 0
+            activeSyncs[integrationId] = progress
+        }
         
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
             if data.syncStatus == "completed" {
-                self.stopInlinePolling()
-                self.isInlineSyncing = false
-                self.inlineSyncingId = nil
+                self.activeSyncs.removeValue(forKey: integrationId)
+                if self.activeSyncs.isEmpty {
+                    self.stopInlinePolling()
+                }
                 self.listConnectedEmails(input: ListConnectedEmailsRequest(userId: Constants.getUserId()))
-                
-                //            if (data.subscriptionsFound ?? 0) > 0 {
-                //                DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-                //                    self.emailSubscriptionsList(input: EmailSubscriptionsListRequest(userId: Constants.getUserId(), integrationId: data.integrationId ?? ""))
-                //                }
-                //            }
             } else if data.syncStatus == "failed" {
-                // User requested to keep UI and polling even on failure
-//                self.isInlineSyncing = true 
-                // We keep polling every 3 seconds as requested
-                // self.stopInlinePolling() // Commented out to continue polling if that's what's intended
-                // self.isInlineSyncing = false // Commented out to keep UI visible
-                // self.inlineSyncingId = nil // Commented out
-                self.stopInlinePolling()
-                self.isInlineSyncing = false
-                self.inlineSyncingId = nil
+                self.activeSyncs.removeValue(forKey: integrationId)
+                if self.activeSyncs.isEmpty {
+                    self.stopInlinePolling()
+                }
                 self.listConnectedEmails(input: ListConnectedEmailsRequest(userId: Constants.getUserId()))
                 ToastManager.shared.showToast(message: "Email Syncing failed", style: .error)
-                // self.listConnectedEmails(input: ListConnectedEmailsRequest(userId: Constants.getUserId()))
             }
         }
     }

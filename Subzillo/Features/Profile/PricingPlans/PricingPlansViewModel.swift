@@ -74,6 +74,9 @@ class PricingPlansViewModel: ObservableObject {
             }
         } receiveValue: { response in
             PrintLogger.modelLog(response, type: .response, isInput: false)
+            if let message = response.message, !message.isEmpty {
+                ToastManager.shared.showToast(message: message)
+            }
             self.isSubscribe = true
         }
         .store(in: &self.subscriptions)
@@ -97,6 +100,35 @@ class PricingPlansViewModel: ObservableObject {
             }
         } receiveValue: { response in
             PrintLogger.modelLog(response, type: .response, isInput: false)
+            if let message = response.message, !message.isEmpty {
+                ToastManager.shared.showToast(message: message)
+            }
+            self.isSubscribe = true
+        }
+        .store(in: &self.subscriptions)
+    }
+
+    func restoreIosPurchase(input: RestoreIosPurchaseRequest) {
+        print("[Restore] Original Transaction ID: \(input.originalTransactionId)")
+        restoreSyncFailed = false
+        self.apiReference.postApi(
+            endPoint    : .restoreIosPurchase,
+            method      : .POST,
+            token       : authKey,
+            body        : input,
+            showLoader  : true,
+            responseType: GeneralResponse.self
+        )
+        .sink { completion in
+            if case .failure(let error) = completion {
+                self.handleError(error, endPoint: .restoreIosPurchase)
+                self.restoreSyncFailed = true
+            }
+        } receiveValue: { response in
+            PrintLogger.modelLog(response, type: .response, isInput: false)
+            if let message = response.message, !message.isEmpty {
+                ToastManager.shared.showToast(message: message)
+            }
             self.isSubscribe = true
         }
         .store(in: &self.subscriptions)

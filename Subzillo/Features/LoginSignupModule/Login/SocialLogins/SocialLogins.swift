@@ -169,9 +169,21 @@ class SocialLogins:NSObject, ObservableObject{
             }
             let accessToken = result.accessToken
             let account = result.account
+            let claims = self.decodeJWTPart(result.idToken ?? "")
+
+            // ✅ Real Microsoft user identifier
+            let socialId =
+                claims?["oid"] as? String ??
+                claims?["sub"] as? String ??
+                ""
+
+            print("Microsoft User ID:", socialId)
+            let normalizedId = socialId
+                .replacingOccurrences(of: "00000000-0000-0000-", with: "")
+                .replacingOccurrences(of: "-", with: "")
             let email = account.username
             self.account = account
-            let model = SocialLoginModel(id             : accessToken,
+            let model = SocialLoginModel(id             : normalizedId,
                                          loginType      : .microsoft,
                                          fullName       : nil,
                                          emailAddress   : email)
@@ -180,7 +192,33 @@ class SocialLogins:NSObject, ObservableObject{
             completion(model)
         }
     }
-    
+    func decodeJWTPart(_ value: String) -> [String: Any]? {
+
+        let segments = value.components(separatedBy: ".")
+
+        guard segments.count > 1 else { return nil }
+
+        var base64 = segments[1]
+
+        let requiredLength = 4 * ((base64.count + 3) / 4)
+        let paddingLength = requiredLength - base64.count
+
+        if paddingLength > 0 {
+            base64 += String(repeating: "=", count: paddingLength)
+        }
+
+        base64 = base64
+            .replacingOccurrences(of: "-", with: "+")
+            .replacingOccurrences(of: "_", with: "/")
+
+        guard let data = Data(base64Encoded: base64),
+              let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any]
+        else {
+            return nil
+        }
+
+        return json
+    }
     func gmailSignInOAuth(
         presentingVC: UIViewController,
         completion: @escaping (String?) -> Void

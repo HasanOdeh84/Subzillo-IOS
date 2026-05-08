@@ -62,6 +62,9 @@ struct Constants{
     static let isLoggedIn                           = "isLoggedIn"
     static let isFirstLoggedIn                      = "isFirstLoggedIn"
     static let userId                               = "userId"
+    static let userIsoCountryCode                   = "userIsoCountryCode"
+    static let userCountryCode                      = "userCountryCode"
+    static let userCurrencyCode                     = "userCurrencyCode"
     static let referrerId                           = "referrerId"
     static let providerBaseUrl                      = "providerBaseUrl"
     static let username                             = "username"
@@ -88,9 +91,9 @@ struct Constants{
     
 //        static let webClientId                          = "955282043815-uither25lbuv22smj2tdhje513ilg5je.apps.googleusercontent.com" //soniya for dev
     
-    static let webClientId                          = "955282043815-2bdqjsqk1ailb6dbvron7td1os6hipg6.apps.googleusercontent.com" //new soniya for QA
+//    static let webClientId                          = "955282043815-2bdqjsqk1ailb6dbvron7td1os6hipg6.apps.googleusercontent.com" //new soniya for QA
     
-//        static let webClientId                          = "955282043815-4rckggvbc5m8dtsrtdhecrjl25e0lbg6.apps.googleusercontent.com" //new soniya for staging
+        static let webClientId                          = "955282043815-4rckggvbc5m8dtsrtdhecrjl25e0lbg6.apps.googleusercontent.com" //new soniya for staging
     
     //    static let appGroupID                           = "group.com.krify.Subzillo" //krify
     static let appGroupID                           = "group.com.subzillo.app" //client
@@ -250,34 +253,44 @@ struct Constants{
     ) -> String {
         
         let calendar = Calendar.current
-        let nextDate: Date
+        var nextDate: Date?
         
-        switch frequency {
-        case "Daily":
-            nextDate = calendar.date(byAdding: .day, value: 1, to: baseDate) ?? baseDate
-            
-        case "Weekly":
-            nextDate = calendar.date(byAdding: .weekOfYear, value: 1, to: baseDate) ?? baseDate
-            
-        case "Monthly":
-            nextDate = calendar.date(byAdding: .month, value: 1, to: baseDate) ?? baseDate
-            
-        case "Quarterly":
-            nextDate = calendar.date(byAdding: .month, value: 3, to: baseDate) ?? baseDate
-            
-        case "Biannually":
-            nextDate = calendar.date(byAdding: .month, value: 6, to: baseDate) ?? baseDate
-            
-        case "Yearly":
-            nextDate = calendar.date(byAdding: .year, value: 1, to: baseDate) ?? baseDate
-            
+        let lowerFrequency = frequency.lowercased().trimmingCharacters(in: .whitespacesAndNewlines)
+        
+        switch lowerFrequency {
+        case "daily":
+            nextDate = calendar.date(byAdding: .day, value: 1, to: baseDate)
+        case "weekly":
+            nextDate = calendar.date(byAdding: .weekOfYear, value: 1, to: baseDate)
+        case "monthly":
+            nextDate = calendar.date(byAdding: .month, value: 1, to: baseDate)
+        case "quarterly":
+            nextDate = calendar.date(byAdding: .month, value: 3, to: baseDate)
+        case "biannually":
+            nextDate = calendar.date(byAdding: .month, value: 6, to: baseDate)
+        case "yearly":
+            nextDate = calendar.date(byAdding: .year, value: 1, to: baseDate)
         default:
-            nextDate = baseDate
+            // Custom parsing for formats like "3 Months", "1 Year", etc.
+            let components = lowerFrequency.split(separator: " ").map { String($0) }
+            if components.count >= 2, let value = Int(components[0]) {
+                let unit = components[1]
+                if unit.contains("day") {
+                    nextDate = calendar.date(byAdding: .day, value: value, to: baseDate)
+                } else if unit.contains("week") {
+                    nextDate = calendar.date(byAdding: .weekOfYear, value: value, to: baseDate)
+                } else if unit.contains("month") {
+                    nextDate = calendar.date(byAdding: .month, value: value, to: baseDate)
+                } else if unit.contains("year") {
+                    nextDate = calendar.date(byAdding: .year, value: value, to: baseDate)
+                }
+            }
         }
         
+        let resultDate = nextDate ?? baseDate
         let formatter = DateFormatter()
         formatter.dateFormat = "dd/MM/yyyy"
-        return formatter.string(from: nextDate)
+        return formatter.string(from: resultDate)
     }
     
     func isSubscriptionExpired(nextPaymentDate: String) -> Bool {

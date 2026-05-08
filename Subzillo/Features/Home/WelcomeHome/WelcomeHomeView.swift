@@ -237,12 +237,12 @@ struct WelcomeHomeView: View {
                     }
                     
                     if let limit = commonApiVM.userInfoResponse?.planSubscriptionLimit{
-                        Text("Added \(commonApiVM.userInfoResponse?.usedSubscriptionCount ?? 0)/\(commonApiVM.userInfoResponse?.planSubscriptionLimit ?? 3) Active Subscriptions")
+                        Text("Plan usage \(commonApiVM.userInfoResponse?.usedSubscriptionCount ?? 0)/\(commonApiVM.userInfoResponse?.planSubscriptionLimit ?? 3) Active Subscriptions")
                             .font(.appRegular(14))
                             .foregroundColor(Color.neutralMain700)
                             .multilineTextAlignment(.leading)
                     }else{
-                        Text("Added \(commonApiVM.userInfoResponse?.usedSubscriptionCount ?? 0)/Unlimited Active Subscriptions")
+                        Text("Plan usage \(commonApiVM.userInfoResponse?.usedSubscriptionCount ?? 0)/Unlimited Active Subscriptions")
                             .font(.appRegular(14))
                             .foregroundColor(Color.neutralMain700)
                             .multilineTextAlignment(.leading)
@@ -331,7 +331,7 @@ struct WelcomeHomeView: View {
     }
     private func goToSmartAssistant() {
         Constants.FeatureConfig.performS5Action {
-            AppIntentRouter.shared.navigate(to: .smartAssistantAI)
+            AppIntentRouter.shared.navigate(to: .AgentChatView)
         }
     }
     private func goToUploadImage() {

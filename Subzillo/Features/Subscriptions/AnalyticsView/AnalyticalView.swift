@@ -103,6 +103,7 @@ struct AnalyticalView: View {
                                         subscriptions   : viewModel.analyticsResponse?.pie?.categories ?? [],
                                         currencySymbol  : viewModel.analyticsResponse?.currencySymbol ?? Constants.shared.currencySymbol,
                                         monthYear       : $monthYear,
+                                        isFromHome      : false,
                                         done: {
                     analyticsApi()
                 })

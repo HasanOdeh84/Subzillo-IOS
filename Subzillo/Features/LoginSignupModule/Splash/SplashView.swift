@@ -48,9 +48,9 @@ struct SplashView: View {
             if appState.isLoggedIn {
             }
 
-            DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
+//            DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
                 navigateToNextScreen()
-            }
+//            }
         }
     }
     

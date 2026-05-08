@@ -90,6 +90,7 @@ extension Color {
 //    static let blueG                    = Color(hex: "#5CC1F1")
 //    static let purpleG                  = Color(hex: "#8A38F5")
 //    static let grayP                    = Color(hex: "#6A6A6A")
+//    static let primaryBlue200           = Color(hex: "#D5E5FC")
     
     static let neutral_2_500            = Color("appNeutral2_500")
     static let neutral_2_200            = Color("appNeutral2_200")
