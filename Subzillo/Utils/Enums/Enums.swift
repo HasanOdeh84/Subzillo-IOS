@@ -13,6 +13,7 @@ enum Tab {
 
 enum NavigationRoute: Hashable{
     case login
+    case splash
     case termsAndPrivacy(isTerm:Bool?)
     case verifyOtp(fromLogin: Bool,verifyMergeType:Int = 1)
     case SuccessView(isOtp:Bool?,isMobile:Bool = true)

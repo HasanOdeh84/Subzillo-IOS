@@ -27,7 +27,7 @@ struct ConnectICloudView: View {
                 HStack(spacing: 8) {
                     // MARK: - back
                     Button(action: {
-                        dismiss()
+                        AppIntentRouter.shared.pop()
                     }) {
                         HStack {
                             Image("back_gray")
@@ -134,7 +134,7 @@ struct ConnectICloudView: View {
         .onChange(of: connectEmailVM.isManualICloudSuccess) { success in
             if success {
                 connectEmailVM.isManualICloudSuccess = false
-                dismiss()
+                AppIntentRouter.shared.pop()
             }
         }
     }

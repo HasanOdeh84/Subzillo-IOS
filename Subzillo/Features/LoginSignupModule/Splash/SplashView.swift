@@ -8,67 +8,110 @@
 import SwiftUI
 
 struct SplashView: View {
-    @State private var animateBubbles   = false
-    @State var isActive                 : Bool = false
+    
+    //MARK: - Properties
     @StateObject var appState           = AppState.shared
     @EnvironmentObject var router       : AppIntentRouter
-    @StateObject private var pricingVM  = PricingPlansViewModel.shared
-
+    @EnvironmentObject var themeManager : ThemeManager
+    @State private var progress         : CGFloat = 0.0
+    @State private var statusText       : String = "Initializing..."
+    private let statusMessages          = [
+        "Initializing...",
+        "Loading...",
+        "Setting up...",
+        "Building Subzi Ai",
+        "Ready..."
+    ]
+    
+    //MARK: - Body
     var body: some View {
-        ZStack {
-            Group {
-                Color(.white)
-            }
-            .ignoresSafeArea()
+        VStack {
+            Spacer()
             
-            VStack {
-                Spacer()
+            LottieView(name: "splash_animation", loopMode: .loop)
+                .frame(width: 300, height: 300)
+            
+            Spacer()
+            
+            VStack(spacing: 12) {
+                GeometryReader { geo in
+                    ZStack(alignment: .leading) {
+                        Capsule()
+                            .fill(Color.grayCBD5E1)
+                            .frame(height: 4)
+                        
+                        Capsule()
+                            .fill(
+                                LinearGradient(
+                                    colors: [Color.brandFromDarkA719DD, Color.brandToDark4489EB],
+                                    startPoint: .leading,
+                                    endPoint: .trailing
+                                )
+                            )
+                            .frame(width: geo.size.width * progress, height: 4)
+                    }
+                }
+                .frame(height: 4)
                 
-                Image("logo_svg")
-                    .resizable()
-                    .scaledToFit()
-                    .frame(height: 150)
-                    .padding(.horizontal,70)
-                    .foregroundStyle(LinearGradient(colors: [.blue, .purple], startPoint: .topLeading, endPoint: .bottomTrailing))
-                    .padding(.bottom,50)
-                
-                Text("One place for\n all your subscriptions")
-                    .multilineTextAlignment(.center)
-                    .font(.appRegular(24))
-                    .foregroundColor(Color.blueMain700)
-                    .padding(.bottom,60)
-                
-                LottieView(name: "splash_bubble",isAspectFit: false)
-                    .frame(height: 242)
-                    .frame(maxWidth: .infinity)
+                HStack {
+                    Text(statusText)
+                        .font(.jetBrainsMedium(11))
+                        .foregroundColor(Color.textFaintDark7A7698)
+                    
+                    Spacer()
+                    
+                    Text("\(Int(progress * 100))%")
+                        .font(.jetBrainsMedium(11))
+                        .foregroundColor(Color.textFaintDark7A7698)
+                }
             }
-            .ignoresSafeArea(edges: .horizontal)
+            .padding(.horizontal, 40)
+            .padding(.bottom, 50)
         }
+        .applyAppBackground()
         .onAppear {
-            if appState.isLoggedIn {
+            startSplashSequence()
+        }
+    }
+    
+    private func startSplashSequence() {
+        withAnimation(.linear(duration: 3.0)) {
+            progress = 1.0
+        }
+        let initialMessages = Array(statusMessages.prefix(4))
+        for (index, message) in initialMessages.enumerated() {
+            let delay = Double(index) * 0.675
+            DispatchQueue.main.asyncAfter(deadline: .now() + delay) {
+                withAnimation(.easeInOut) {
+                    statusText = message
+                }
             }
-
-//            DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
-                navigateToNextScreen()
-//            }
+        }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 2.7) {
+            withAnimation(.easeInOut) {
+                statusText = "Ready..."
+            }
+        }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 3.6) {
+            navigateToNextScreen()
         }
     }
     
     private func navigateToNextScreen() {
-        // If a notification already triggered a navigation, 
+        // If a notification already triggered a navigation,
         // don't perform the default splash navigation.
         if router.hasNavigatedFromSplash {
             return
         }
         if appState.isLoggedIn {
             if let target = router.pendingNotification {
-                router.resetStackTo = [.home, target]
+                router.resetStack(to: [.home, target])
                 router.pendingNotification = nil
             } else {
-                router.navigatingRoute = .home
+                router.resetStack(to: [.home])
             }
         } else {
-            router.navigatingRoute = .login
+            router.resetStack(to: [.onboarding])
         }
     }
 }
@@ -76,19 +119,3 @@ struct SplashView: View {
 #Preview {
     SplashView()
 }
-
-// MARK: - Bubble View
-struct BubbleView: View {
-    let size: CGFloat
-    private let color: Color = [Color.blue.opacity(0.7),
-                                Color.purple.opacity(0.7),
-                                Color.black.opacity(0.8)].randomElement()!
-    
-    var body: some View {
-        Circle()
-            .fill(color)
-            .frame(width: size, height: size)
-    }
-}
-
-

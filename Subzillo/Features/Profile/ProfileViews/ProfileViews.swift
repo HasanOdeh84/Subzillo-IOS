@@ -99,9 +99,9 @@ struct ProfileHeader: View {
         .frame(height: 32)
         .onAppear{
             if Constants.FeatureConfig.isS4Enabled {
-//                if commonApiVM.unreadCountResponse == nil{
-//                    commonApiVM.unreadNotificationCount(input: UnreadNotificationCountRequest(userId: Constants.getUserId()))
-//                }
+                //                if commonApiVM.unreadCountResponse == nil{
+                //                    commonApiVM.unreadNotificationCount(input: UnreadNotificationCountRequest(userId: Constants.getUserId()))
+                //                }
                 commonApiVM.unreadNotificationCount(input: UnreadNotificationCountRequest(userId: Constants.getUserId()))
             }
         }
@@ -109,12 +109,12 @@ struct ProfileHeader: View {
 }
 
 //struct GradientBgBtn: View {
-//    
+//
 //    //MARK: - Properties
 //    var title           : String = "Add Subscription by AI Agent"
 //    var image           : String = "robotic"
 //    var action          : () -> Void
-//    
+//
 //    var body: some View {
 //        Button(action: action) {
 //            HStack(spacing: 5) {
@@ -145,34 +145,32 @@ struct GradientBgBtn: View {
     var title   : LocalizedStringKey = "Add Subscription by AI Agent"
     var image   : String = "robotic"
     var action  : () -> Void
+    @EnvironmentObject var themeManager : ThemeManager
     
     var body: some View {
         Button(action: action) {
             ZStack {
                 HStack {
-//                    Image(image)
-//                        .frame(width: 20, height: 20)
-//                        .padding(.leading, 24)
+                    //                    Image(image)
+                    //                        .frame(width: 20, height: 20)
+                    //                        .padding(.leading, 24)
                     HStack{
                         Text(title)
                             .font(.appSemiBold(18))
                             .foregroundColor(.white)
                             .padding(.horizontal, 18)
-//                        Spacer()
+                        //                        Spacer()
                     }
                 }
             }
             .padding(.vertical, 16)
             .frame(maxWidth: .infinity)
             .background(
-                LinearGradient(
-                    colors: [Color.linearGradient2, Color.linearGradient1],
-                    startPoint: .leading,
-                    endPoint: .trailing
-                )
+                themeManager.gradient(style: .horizontal)
             )
             .cornerRadius(8)
         }
+        .buttonStyle(InteractiveButtonStyle())
     }
 }
 
@@ -226,7 +224,7 @@ struct ProfileItem: View {
     var isDarkMode                      = false
     @State private var isEnabled        = false
     @EnvironmentObject var themeManager: ThemeManager
-
+    
     var body: some View {
         Button(action: action) {
             HStack(spacing: 16) {
@@ -247,14 +245,14 @@ struct ProfileItem: View {
                 VStack(alignment: .leading, spacing: 0) {
                     Text(title)
                         .font(.appRegular(16))
-                        .foregroundColor(.neutralMain700)                }
+                    .foregroundColor(.neutralMain700)                }
                 .frame(maxWidth: .infinity, alignment: .leading)
                 
                 if isDarkMode{
                     Toggle("", isOn: Binding(
-                        get: { themeManager.isDarkMode },
+                        get: { themeManager.currentAppearance == .dark },
                         set: { newValue in
-//                            themeManager.applyUserTheme(newValue)
+                            themeManager.setAppearance(newValue ? .dark : .light)
                         }
                     ))
                 }else{

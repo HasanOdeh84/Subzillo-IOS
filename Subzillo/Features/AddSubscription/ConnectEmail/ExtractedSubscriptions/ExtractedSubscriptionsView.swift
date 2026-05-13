@@ -41,7 +41,7 @@ struct ExtractedSubscriptionsView: View {
             // MARK: - Header
             HStack(spacing: 8) {
                 Button(action: {
-                    dismiss()
+                    AppIntentRouter.shared.pop()
                 }) {
                     Image("back_gray")
                 }
@@ -64,7 +64,7 @@ struct ExtractedSubscriptionsView: View {
                     Spacer()
                     
                     Button(action: {
-                        dismiss()
+                        AppIntentRouter.shared.pop()
                     }) {
                         Text("Skip all")
                             .font(.appBold(16))

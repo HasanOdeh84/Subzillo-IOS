@@ -298,7 +298,7 @@ struct VoiceCommandView: View {
     //MARK: - Back action
     private func goBack() {
         audioManager.discardAll()
-        dismiss()
+        AppIntentRouter.shared.pop()
     }
     
     //MARK: - Submit action

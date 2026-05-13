@@ -1274,7 +1274,7 @@ struct ManualEntryView: View {
         if fromEmailSync{
             AppIntentRouter.shared.pop(count: 2)
         }else{
-            dismiss()
+            AppIntentRouter.shared.pop()
         }
     }
     

@@ -9,7 +9,9 @@ import SwiftUI
 
 struct OnboardingPage {
     let lottie      : String
+    let subtitle    : String
     let title       : String
+    let styledPart  : String?
     let description : String
 }
 
@@ -26,206 +28,182 @@ struct OnboardingView: View {
     @State private var showCountrySheet                 = false
     @EnvironmentObject var commonApiVM                  : CommonAPIViewModel
     @StateObject private var onboardingVM               = OnboardingViewModel()
-    
-    // controls the SwiftUI offset animation
-    @State private var animateIn    = false
-    // delay and distance
-    var appearDelay: Double         = 0.12
-    var moveDistance: CGFloat       = 280
+    @State private var animateIn                        = false
+    var appearDelay: Double                             = 0.12
+    var moveDistance: CGFloat                           = 280
+    @EnvironmentObject var router                       : AppIntentRouter
     
     let pages: [OnboardingPage] = [
         OnboardingPage(
-            lottie: "onboarding",
-            title: "Manage your and your family's subscriptions in one place",
-            description: ""
+            lottie      : "onboarding",
+            subtitle    : "SUBZILLO • AI FINANCE",
+            title       : "Your subscriptions,\n finally under control.",
+            styledPart  : "finally",
+            description : "An AI copilot that tracks, analyzes and cancels the ones you don't need."
         ),
         OnboardingPage(
-            lottie: "onboarding",
-            title: "Add Subscriptions Using Voice Commands",
-            description: ""
+            lottie      : "onboarding",
+            subtitle    : "SUBZILLO • AI VOICE",
+            title       : "Just say it.\n We'll add it.",
+            styledPart  : "",
+            description : "Talk to Subzillo like a friend. Our AI parses the price, the provider, the renewal date."
         ),
         OnboardingPage(
-            lottie: "onboarding2",
-            title: "Add Subscription by email integration",
-            description: ""
+            lottie      : "onboarding2",
+            subtitle    : "SUBZILLO • AI SCAN",
+            title       : "Scan your inbox.\n Zero typing.",
+            styledPart  : "Zero typing.",
+            description : "Connect Gmail or Outlook. We'll detect recurring charges in seconds — securely and read-only."
         ),
         OnboardingPage(
-            lottie: "onboarding3",
-            title: "Add Subscription by AI Assistant",
-            description: ""
-        ),
-        OnboardingPage(
-            lottie: "onboarding",
-            title: "Manage your and your family's subscriptions in one place",
-            description: ""
+            lottie      : "onboarding3",
+            subtitle    : "SUBZILLO • AI AGENT",
+            title       : "Meet your\n money agent.",
+            styledPart  : "money agent.",
+            description : "Ask anything. Cancel subs, pause, compare plans — all from a chat."
         )
     ]
     
     //MARK: - Body
     var body: some View {
-        ZStack{
-            Group {
-                Color(.neutralBg100)
+        VStack {
+            // Top Navigation Bar
+            HStack {
+                if currentPage > 0 {
+                    Button {
+                        withAnimation { currentPage -= 1 }
+                    } label: {
+                        Image("backGray")
+                            .frame(width: 20, height: 20)
+                    }
+                }
+                
+                Spacer()
+                
+                Button {
+                    router.navigate(to: .login)
+                } label: {
+                    Text("Skip")
+                        .font(.geistSemiBold(14))
+                        .foregroundColor(Color.textDim60637AA8A4C0)
+                }
             }
-            .ignoresSafeArea()
-            VStack {
-                HStack(spacing: 10) {
-                    Text("\(currentPage+1)/\(pages.count)")
-                        .font(.appRegular(18))
-                        .foregroundColor(.neutral500)
-                    Spacer()
-                    if currentPage != 4{
-                        Button {
-                            //                        onboardingVM.navigate(to: .home)
-                            currentPage = 4
-                        } label: {
-                            HStack(spacing: 4) {
-                                Text("Skip Onboarding")
-                                    .foregroundColor(Color.navyBlueCTA700)
-                                    .font(.appRegular(14))
-                                Image(systemName: "arrow.right")
-                                    .foregroundColor(Color.blueMain700)
-                                    .frame(width: 20, height: 20)
-                            }
-                        }
+            .padding(.horizontal, 24)
+            .padding(.top, 20)
+            
+            TabView(selection: $currentPage) {
+                ForEach(0..<pages.count, id: \.self) { index in
+                    VStack(spacing: 0) {
+                        Spacer(minLength: 20)
+                        
+                        // Lottie Animation
+                        LottieView(name: pages[index].lottie, loopMode: .loop)
+                            .frame(height: 280)
+                            .padding(.bottom, 40)
+                        
+                        // Subtitle
+                        Text(pages[index].subtitle)
+                            .font(.jetBrainsMedium(11))
+                            .kerning(2.0)
+                            .foregroundColor(Color.brandMidDark7C5CFF)
+                            .padding(.bottom, 16)
+                        
+                        // Title with Styled Part
+                        titleView(for: pages[index])
+                            .multilineTextAlignment(.center)
+                            .padding(.horizontal, 40)
+                            .padding(.bottom, 20)
+                        
+                        // Description
+                        Text(pages[index].description)
+                            .font(.appRegular(16))
+                            .lineSpacing(4)
+                            .foregroundColor(Color.textDim60637AA8A4C0)
+                            .multilineTextAlignment(.center)
+                            .padding(.horizontal, 40)
+                        
+                        Spacer()
                     }
+                    .tag(index)
                 }
-                .padding(.vertical, 32)
-                
-                TabView(selection: $currentPage) {
-                    ForEach(0..<pages.count, id: \.self) { index in
-                        VStack {
-                            if currentPage == pages.count - 1{
-                                tellUsAbtYourselfView()
-                            }else{
-                                ScrollView{
-                                    if currentPage == 0{
-                                        Image(pages[index].lottie)
-                                            .resizable()
-                                            .scaledToFit()
-                                            .frame(height: 190)
-                                    }else{
-                                        if currentPage == 3{
-                                            LottieView(name: pages[index].lottie)
-                                                .frame(height: 190)
-                                                .frame(maxWidth: .infinity)
-                                                .offset(y: animateIn ? 0 : moveDistance)
-                                                .opacity(animateIn ? 1 : 0)
-                                                .id(currentPage)
-                                                .onAppear {
-                                                    if currentPage == index {
-                                                        withAnimation(.interpolatingSpring(stiffness: 220, damping: 22).delay(appearDelay)) {
-                                                            animateIn = true
-                                                        }
-                                                    }
-                                                }
-                                                .onChange(of: currentPage) { newValue in
-                                                    if newValue == index {
-                                                        animateIn = false
-                                                        withAnimation(.interpolatingSpring(stiffness: 220, damping: 22).delay(appearDelay)) {
-                                                            animateIn = true
-                                                        }
-                                                    }
-                                                }
-                                                .onDisappear {
-                                                    if currentPage != 3{
-                                                        // Reset when leaving page
-                                                        animateIn = false
-                                                    }
-                                                }
-                                        }else{
-                                            LottieView(name: pages[index].lottie)
-                                                .frame(height: 190)
-                                                .frame(maxWidth: .infinity)
-                                        }
-                                    }
-                                    
-                                    Text(LocalizedStringKey(pages[index].title))
-                                        .font(.appRegular(28))
-                                        .multilineTextAlignment(.center)
-                                        .padding(.horizontal)
-                                        .padding(.top,64)
-                                        .foregroundColor(.neutralMain700)
-                                    
-                                    Text(LocalizedStringKey(pages[index].description))
-                                        .font(.appRegular(18))
-                                        .foregroundColor(.neutral500)
-                                        .multilineTextAlignment(.center)
-                                        .padding(.horizontal)
-                                        .padding(.top,32)
-                                        .padding(.bottom,40)
-                                    
-                                    Spacer()
-                                }
-                            }
-                        }
-                        .tag(index)
-                    }
+            }
+            .tabViewStyle(PageTabViewStyle(indexDisplayMode: .never))
+            
+            // Custom Page Control
+            HStack(spacing: 8) {
+                ForEach(0..<pages.count, id: \.self) { index in
+                    Capsule()
+                        .fill(index == currentPage ? LinearGradient.primaryTextGradient : LinearGradient(
+                            colors: [Color.grayCBD5E1475569],
+                            startPoint: .leading,
+                            endPoint: .trailing
+                        ))
+                        .frame(width: index == currentPage ? 24 : 8, height: 8)
+                        .animation(.spring(), value: currentPage)
                 }
-                .animation(.none, value: currentPage)
-                .tabViewStyle(PageTabViewStyle(indexDisplayMode: .never)) // hide default dots
-                
-                // Custom page indicator
-                HStack(spacing: 13) {
-                    ForEach(0..<pages.count, id: \.self) { index in
-                        if index == currentPage{
-                            Capsule()
-                                .fill(Color.blueMain700)
-                                .frame(width: 32, height: 8)
-                        }else{
-                            Circle()
-                                .fill(Color.neutral400)
-                                .frame(width: 8, height: 8)
-                        }
-                    }
-                }
-                .padding(.bottom, 23)
-                
-                GradientBorderButton(title: currentPage == pages.count - 1 ?
-                                     "Lets Go!" : "Next") {
-                    if currentPage == pages.count - 1{
-                        updateOnboardingApi()
-                    }else{
+            }
+            .padding(.bottom, 28)
+            
+            //Button
+            GradientBgButton(
+                title       : currentPage == 0 ? "Get started" : "Continue",
+                isSolid     : true,
+                showChevron : true
+            ) {
+                if currentPage == pages.count - 1 {
+                    router.navigate(to: .login)
+                } else {
+                    withAnimation {
                         currentPage += 1
                     }
                 }
-                                     .background(Color.clear)
-                                     .padding(.bottom,48)
             }
             .padding(.horizontal, 20)
-            .navigationBarBackButtonHidden(true)
-            .onAppear{
-                //                AppState.shared.login()
-                if commonApiVM.currencyResponse != nil {
-                    selectedCurrency = commonApiVM.currencyResponse?.first(where: { $0.code == Constants.shared.currencyCode })
-                }else{
-                    commonApiVM.getCurrencies()
+            .padding(.bottom, 50)
+        }
+        .applyAppBackground()
+        .navigationBarBackButtonHidden(true)
+    }
+    
+    private func titleView(for page: OnboardingPage) -> some View {
+        let lines = page.title.components(separatedBy: "\n")
+        
+        return VStack(spacing: 0) {
+            ForEach(lines, id: \.self) { line in
+                let styledPart = page.styledPart ?? ""
+                if !styledPart.isEmpty && line.contains(styledPart) {
+                    let parts = line.components(separatedBy: styledPart)
+                    HStack(spacing: 0) {
+                        Text(parts.first ?? "")
+                        
+                        Text(styledPart)
+                            .font(.appRegular(34))
+                            .italic()
+                            .overlay(
+                                LinearGradient(
+                                    colors: [Color.brandGlowDarkA719DD, Color.brandToDark4489EB],
+                                    startPoint: .leading,
+                                    endPoint: .trailing
+                                )
+                            )
+                            .mask(
+                                Text(styledPart)
+                                    .font(.appRegular(34))
+                                    .italic()
+                            )
+                        
+                        Text(parts.last ?? "")
+                    }
+                    .font(.geistSemiBold(34))
+                    .foregroundColor(Color.textPrimary0E101AF4F1FB)
+                } else {
+                    Text(line)
+                        .font(.geistSemiBold(34))
+                        .foregroundColor(Color.textPrimary0E101AF4F1FB)
                 }
-                
-                if commonApiVM.countriesResponse != nil {
-                    selectedCountry = commonApiVM.countriesResponse?.first(where: { $0.countryCode == Constants.shared.regionCode })
-                }else{
-                    commonApiVM.getCountries()
-                }
-            }
-            .onChange(of: commonApiVM.countriesResponse) { countries in
-                if selectedCountry == nil {
-                    selectedCountry = countries?.first(where: { $0.countryCode == Constants.shared.regionCode })
-                }
-            }
-            .sheet(isPresented: $showCountrySheet) {
-                CountriesBottomSheet(selectedCurrency   : $selectedCurrency,
-                                     selectedCountry    : $selectedCountry,
-                                     isCountry          : true,
-                                     currencyResponse   : commonApiVM.currencyResponse,
-                                     countryResponse    : commonApiVM.countriesResponse,
-                                     header             : "Select your Country",
-                                     placeholder        : "Search",
-                                     isDialCode          : false)
-                .presentationDetents([.large])
-                .presentationDragIndicator(.hidden)
             }
         }
+        .multilineTextAlignment(.center)
     }
     
     //MARK: - User defined methods
@@ -324,19 +302,19 @@ struct OnboardingView: View {
     }
     
     //MARK: - Update onboarding API
-    func updateOnboardingApi(){
-        let input = UpdateOnboardingRequest(userId                  : Constants.getUserId(),
-                                            preferredCurrency       : selectedCurrency?.code ?? "",
-                                            preferredCurrencySymbol : selectedCurrency?.symbol ?? "",
-                                            noofSubscriptions       : (selectedSubscriptions ?? 0),
-                                            averageMonthlySpend     : (selectedSpending ?? 0),
-                                            isoCountryCode          : selectedCountry?.countryCode ?? "")
-        if let errorMessage = LoginSignupValidations().validateOnboarding(input: input) {
-            ToastManager.shared.showToast(message: errorMessage,style: ToastStyle.error)
-        } else {
-            onboardingVM.updateOnboarding(input: input)
-        }
-    }
+    //    func updateOnboardingApi(){
+    //        let input = UpdateOnboardingRequest(userId                  : Constants.getUserId(),
+    //                                            preferredCurrency       : selectedCurrency?.code ?? "",
+    //                                            preferredCurrencySymbol : selectedCurrency?.symbol ?? "",
+    //                                            noofSubscriptions       : (selectedSubscriptions ?? 0),
+    //                                            averageMonthlySpend     : (selectedSpending ?? 0),
+    //                                            isoCountryCode          : selectedCountry?.countryCode ?? "")
+    //        if let errorMessage = LoginSignupValidations().validateOnboarding(input: input) {
+    //            ToastManager.shared.showToast(message: errorMessage,style: ToastStyle.error)
+    //        } else {
+    //            onboardingVM.updateOnboarding(input: input)
+    //        }
+    //    }
 }
 
 struct OnboardingView_Previews: PreviewProvider {
@@ -348,7 +326,7 @@ struct OnboardingView_Previews: PreviewProvider {
 //struct WrapButtonsView: View {
 //    let options: [String]
 //    @Binding var selected: String?
-//    
+//
 //    var body: some View {
 //        LazyVGrid(columns: [GridItem(.adaptive(minimum: 100), spacing: 8)], spacing: 8) {
 //            ForEach(options, id: \.self) { option in
@@ -480,7 +458,7 @@ extension View {
 //                .cornerRadius(cornerRadius) // Clip the background to the corners        }
 //    }
 //}
-//    
+//
 struct ContentView: View {
     let cornerRadius: CGFloat = 20
     let shadowColor = Color.gray.opacity(0.45)

@@ -90,6 +90,10 @@ extension View {
             }
         }
     }
+    
+    func gradientText() -> some View {
+        modifier(GradientText())
+    }
 }
 
 struct DoneButtonToolbar: ViewModifier {
@@ -144,5 +148,22 @@ func instructionRow(number: String, text: String) -> some View {
             .foregroundColor(.white)
             .multilineTextAlignment(.leading)
             .fixedSize(horizontal: false, vertical: true)
+    }
+}
+
+struct GradientText: ViewModifier {
+    func body(content: Content) -> some View {
+        content
+            .overlay(
+                LinearGradient(
+                    colors: [
+                        Color.brandGlowDarkA719DD,
+                        Color.brandToDark4489EB
+                    ],
+                    startPoint: .leading,
+                    endPoint: .trailing
+                )
+            )
+            .mask(content)
     }
 }

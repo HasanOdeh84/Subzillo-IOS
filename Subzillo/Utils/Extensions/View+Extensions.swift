@@ -28,60 +28,66 @@ extension View {
     func hideKeyboard() {
         UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
     }
-}
-
-struct SheetHeightKey: PreferenceKey {
-    static var defaultValue: CGFloat = 0
-    static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) {
-        value = nextValue()
+    
+    /// Applies the global "Fade + Slide Up" transition
+    func applyGlobalTransition() -> some View {
+        self.transition(.fadeAndSlideUp)
+    }
+    
+    /// Applies the brand dynamic background (glow circles) to the view.
+    func applyAppBackground() -> some View {
+        self.modifier(AppBackgroundModifier())
+    }
+    
+    /// Applies a staggered entrance animation (Fade + Slide Up) to an individual element.
+    /// - Parameter index: The position in the sequence (used for delay).
+    func animateEntrance(index: Int = 0) -> some View {
+        modifier(EntranceAnimationModifier(index: index))
     }
 }
 
-struct SheetContentView: View {
-    var body: some View {
-        VStack(spacing: 16) {
-            Text("Title")
-                .font(.headline)
-                .padding()
-
-            ForEach(0..<5) { _ in
-                Text("Dynamic content")
-                    .padding()
-            }
-            Spacer()
+struct AppBackgroundModifier: ViewModifier {
+    func body(content: Content) -> some View {
+        ZStack {
+            DynamicBackgroundView()
+            content
         }
-        .padding()
-        .background(
-            GeometryReader { geo in
-                Color.clear
-                    .preference(key: SheetHeightKey.self,
-                                value: geo.size.height)
+    }
+}
+
+// MARK: - Global Transitions
+
+struct EntranceAnimationModifier: ViewModifier {
+    let index: Int
+    @State private var isVisible = false
+    
+    func body(content: Content) -> some View {
+        content
+            .opacity(isVisible ? 1 : 0)
+            .offset(y: isVisible ? 0 : 20)
+            .onAppear {
+                withAnimation(.customScreenAnimation.delay(Double(index) * 0.08)) {
+                    isVisible = true
+                }
             }
+    }
+}
+
+extension AnyTransition {
+    static var fadeAndSlideUp: AnyTransition {
+        .asymmetric(
+            insertion: .opacity
+                .combined(with: .offset(y: 5))
+                .animation(.customScreenAnimation),
+            removal: .opacity
+                .animation(.easeOut(duration: 0.2))
         )
     }
 }
 
-struct ContentView1: View {
-    @State private var showSheet = false
-    @State private var sheetHeight: CGFloat = .zero
-
-    var body: some View {
-        Button("Open sheet") {
-            showSheet = true
-        }
-        .sheet(isPresented: $showSheet) {
-            SheetContentView()
-            .padding()
-            .overlay {
-                GeometryReader { geometry in
-                    Color.clear.preference(key: InnerHeightPreferenceKey.self, value: geometry.size.height)
-                }
-            }
-            .onPreferenceChange(InnerHeightPreferenceKey.self) { newHeight in
-                sheetHeight = newHeight
-            }
-            .presentationDetents([.height(sheetHeight)])
-        }
+extension Animation {
+    static var customScreenAnimation: Animation {
+        .timingCurve(0.2, 0.9, 0.3, 1.0, duration: 0.3)
     }
 }
 
@@ -90,4 +96,54 @@ struct InnerHeightPreferenceKey: PreferenceKey {
     static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) {
         value = nextValue()
     }
+}
+
+// MARK: - Interactive Button Style
+struct InteractiveButtonStyle: ButtonStyle {
+    @State private var isForcedPressed = false
+    func makeBody(configuration: Configuration) -> some View {
+        let isPressed = configuration.isPressed || isForcedPressed
+        configuration.label
+            .scaleEffect(isPressed ? 0.88 : 1.0)
+            .animation(
+                isPressed ?
+                    .interactiveSpring(response: 0.15, dampingFraction: 0.8) :
+                        .spring(response: 0.35, dampingFraction: 0.6),
+                value: isPressed
+            )
+            .onChange(of: configuration.isPressed) { newValue in
+                if newValue {
+                    isForcedPressed = true
+                    UIImpactFeedbackGenerator(style: .medium).impactOccurred()
+                } else {
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
+                        isForcedPressed = false
+                    }
+                }
+            }
+    }
+}
+
+//extension ShapeStyle where Self == LinearGradient {
+//    static var primaryTextGradient: LinearGradient {
+//        LinearGradient(
+//            colors: [
+//                Color.brandGlowDarkA719DD,
+//                Color.brandToDark4489EB
+//            ],
+//            startPoint: .leading,
+//            endPoint: .trailing
+//        )
+//    }
+//}
+
+extension LinearGradient {
+    static let primaryTextGradient = LinearGradient(
+        colors: [
+            Color.brandGlowDarkA719DD,
+            Color.brandToDark4489EB
+        ],
+        startPoint: .leading,
+        endPoint: .trailing
+    )
 }

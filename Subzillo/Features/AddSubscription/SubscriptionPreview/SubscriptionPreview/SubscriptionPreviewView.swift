@@ -630,7 +630,7 @@ struct SubscriptionPreviewView: View {
                     }
                 } else {
                     if isRenew || fromEmailSync{
-                        dismiss()
+                        AppIntentRouter.shared.pop()
                     }else{
                         AppIntentRouter.shared.navigate(to: .subscriptionsListView())
                     }
@@ -780,12 +780,7 @@ struct SubscriptionPreviewView: View {
     //MARK: - Button actions
     private func goBack() {
         playerManager.discardAll()
-        //        if fromEmailSync{
-        //            AppIntentRouter.shared.pop(count: 2)
-        //        }
-        //        else{
-        dismiss()
-        //        }
+        AppIntentRouter.shared.pop()
     }
     
     private func showImage() {
@@ -950,7 +945,7 @@ struct SubscriptionPreviewView: View {
                     AppIntentRouter.shared.navigate(to: .duplicateSubscriptionsView(duplicateSubsList: accumulatedDuplicates, isFromEmail: isFromEmail))
                 }
             } else {
-                dismiss()
+                AppIntentRouter.shared.pop()
             }
         } else {
             getSubDetails()

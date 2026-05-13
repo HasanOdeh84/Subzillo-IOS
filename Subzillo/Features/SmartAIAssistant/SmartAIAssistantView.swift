@@ -49,7 +49,7 @@ struct SmartAIAssistantView: View {
             VStack {
                 HStack {
                     Button(action: {
-                        dismiss()
+                        AppIntentRouter.shared.pop()
                     }) {
                         Image("back_gray")
                             .frame(width: 30, height: 30)

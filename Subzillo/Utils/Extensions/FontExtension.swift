@@ -8,7 +8,7 @@
 import SwiftUI
 
 extension Font {
-    // MARK: - Inter Fonts
+    // MARK: - Roboto Fonts
     static func appThin(_ size: CGFloat) -> Font {
         .custom("Roboto-Thin", size: size)
     }
@@ -62,5 +62,84 @@ extension Font {
     }
     static func appBlackItalic(_ size: CGFloat) -> Font {
         .custom("Roboto-BlackItalic", size: size)
+    }
+
+    // MARK: - Geist Fonts
+    static func geistThin(_ size: CGFloat) -> Font {
+        .custom("Geist-Thin", size: size)
+    }
+    static func geistExtraLight(_ size: CGFloat) -> Font {
+        .custom("Geist-ExtraLight", size: size)
+    }
+    static func geistLight(_ size: CGFloat) -> Font {
+        .custom("Geist-Light", size: size)
+    }
+    static func geistRegular(_ size: CGFloat) -> Font {
+        .custom("Geist-Regular", size: size)
+    }
+    static func geistMedium(_ size: CGFloat) -> Font {
+        .custom("Geist-Medium", size: size)
+    }
+    static func geistSemiBold(_ size: CGFloat) -> Font {
+        .custom("Geist-SemiBold", size: size)
+    }
+    static func geistBold(_ size: CGFloat) -> Font {
+        .custom("Geist-Bold", size: size)
+    }
+    static func geistExtraBold(_ size: CGFloat) -> Font {
+        .custom("Geist-ExtraBold", size: size)
+    }
+    static func geistBlack(_ size: CGFloat) -> Font {
+        .custom("Geist-Black", size: size)
+    }
+
+    // MARK: - JetBrains Mono Fonts
+    static func jetBrainsThin(_ size: CGFloat) -> Font {
+        .custom("JetBrainsMono-Thin", size: size)
+    }
+    static func jetBrainsThinItalic(_ size: CGFloat) -> Font {
+        .custom("JetBrainsMono-ThinItalic", size: size)
+    }
+    static func jetBrainsExtraLight(_ size: CGFloat) -> Font {
+        .custom("JetBrainsMono-ExtraLight", size: size)
+    }
+    static func jetBrainsExtraLightItalic(_ size: CGFloat) -> Font {
+        .custom("JetBrainsMono-ExtraLightItalic", size: size)
+    }
+    static func jetBrainsLight(_ size: CGFloat) -> Font {
+        .custom("JetBrainsMono-Light", size: size)
+    }
+    static func jetBrainsLightItalic(_ size: CGFloat) -> Font {
+        .custom("JetBrainsMono-LightItalic", size: size)
+    }
+    static func jetBrainsRegular(_ size: CGFloat) -> Font {
+        .custom("JetBrainsMono-Regular", size: size)
+    }
+    static func jetBrainsItalic(_ size: CGFloat) -> Font {
+        .custom("JetBrainsMono-Italic", size: size)
+    }
+    static func jetBrainsMedium(_ size: CGFloat) -> Font {
+        .custom("JetBrainsMono-Medium", size: size)
+    }
+    static func jetBrainsMediumItalic(_ size: CGFloat) -> Font {
+        .custom("JetBrainsMono-MediumItalic", size: size)
+    }
+    static func jetBrainsSemiBold(_ size: CGFloat) -> Font {
+        .custom("JetBrainsMono-SemiBold", size: size)
+    }
+    static func jetBrainsSemiBoldItalic(_ size: CGFloat) -> Font {
+        .custom("JetBrainsMono-SemiBoldItalic", size: size)
+    }
+    static func jetBrainsBold(_ size: CGFloat) -> Font {
+        .custom("JetBrainsMono-Bold", size: size)
+    }
+    static func jetBrainsBoldItalic(_ size: CGFloat) -> Font {
+        .custom("JetBrainsMono-BoldItalic", size: size)
+    }
+    static func jetBrainsExtraBold(_ size: CGFloat) -> Font {
+        .custom("JetBrainsMono-ExtraBold", size: size)
+    }
+    static func jetBrainsExtraBoldItalic(_ size: CGFloat) -> Font {
+        .custom("JetBrainsMono-ExtraBoldItalic", size: size)
     }
 }

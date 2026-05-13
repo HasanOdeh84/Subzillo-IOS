@@ -380,6 +380,7 @@ struct HomeView: View {
             else{
 //                WelcomeHomeView()
                 WelcomeHomeView(currentPlan: currentPlan)
+                    .applyGlobalTransition()
             }
         }
         .navigationBarBackButtonHidden(true)
@@ -401,7 +402,9 @@ struct HomeView: View {
         .onChange(of: homeVM.homeResponse){ _ in updateHomeResponse() }
         .onChange(of: homeVM.apiError) { _ in
             if homeVM.apiError != nil {
-                isHome = false 
+                withAnimation(.customScreenAnimation) {
+                    isHome = false 
+                }
             }
         }
         .onChange(of: commonApiVM.userInfoResponse){ _ in getUserDetailsResponse() }
@@ -458,6 +461,7 @@ struct HomeView: View {
         tabSelected = .addSubscription
     }
     
+
     private func updateHomeResponse() {
         homeResponse        = homeVM.homeResponse
         monthlySpend        = "\(homeResponse?.monthlySpendCurrency ?? "")\(homeResponse?.monthlySpend ?? 0.0)"
@@ -465,13 +469,16 @@ struct HomeView: View {
         activeSubsList      = homeResponse?.expiringSoon ?? []
         subscriptionsList   = homeResponse?.subscriptionList ?? []
         topCategoriesList   = homeResponse?.topCategories ?? []
-        if let response = homeVM.homeResponse {
-            isHome = (response.totalSubscriptionCount == 0 || response.totalSubscriptionCount == nil) ? false : true
-        } else if homeVM.apiError != nil {
-            isHome = false
+        
+        withAnimation(.customScreenAnimation) {
+            if let response = homeVM.homeResponse {
+                isHome = (response.totalSubscriptionCount == 0 || response.totalSubscriptionCount == nil) ? false : true
+            } else if homeVM.apiError != nil {
+                isHome = false
+            }
         }
     }
-    
+
     func homeYearlyGraphApi(){
         homeVM.homeYearlyGraph(input: HomeYearlyGraphRequest(userId: Constants.getUserId(), year: selectedYear))
     }

@@ -67,7 +67,7 @@ struct PricingPlansView: View {
                 HStack(spacing: 8) {
                     // MARK: back
                     Button(action: {
-                        dismiss()
+                        AppIntentRouter.shared.pop()
                     }) {
                         HStack {
                             Image("back_gray")
@@ -210,7 +210,7 @@ struct PricingPlansView: View {
             if value{
                 viewModel.listPricingPlans(type: selectedSegment == .first ? 1 : 2)
                 if fromPreview{
-                    dismiss()
+                    AppIntentRouter.shared.pop()
                 }
                 planId = ""
             }

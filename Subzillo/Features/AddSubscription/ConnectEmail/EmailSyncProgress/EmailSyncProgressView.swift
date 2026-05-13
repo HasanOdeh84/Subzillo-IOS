@@ -21,7 +21,7 @@ struct EmailSyncProgressView: View {
             HStack(spacing: 8) {
                 Button(action: {
                     viewModel.goBack()
-                    dismiss()
+                    AppIntentRouter.shared.pop()
                 })
                 {
                     Image("back_gray")
@@ -116,7 +116,7 @@ struct EmailSyncProgressView: View {
         }
         .sheet(isPresented: $viewModel.showErrorPopup, onDismiss: {
             if !isNavigatingToManualEntry {
-                dismiss()
+                AppIntentRouter.shared.pop()
             }
             isNavigatingToManualEntry = false
         }) {

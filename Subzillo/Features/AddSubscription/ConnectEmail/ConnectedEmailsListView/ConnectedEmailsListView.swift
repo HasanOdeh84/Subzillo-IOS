@@ -255,7 +255,7 @@ struct ConnectedEmailsListView: View {
     
     //MARK: - Button actions
     private func goBack() {
-        dismiss()
+        AppIntentRouter.shared.pop()
     }
     
     private func onAddAction() {

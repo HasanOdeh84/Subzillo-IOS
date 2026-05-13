@@ -85,7 +85,8 @@ struct AddSubscriptionIntent: AppIntent {
                 let success =  await VoiceCommandViewModel.shared.textSubscription(input: input, fromSiri: true)
                 if success {
                 } else {
-                    AppIntentRouter.shared.navigatingRoute = .manualEntry(isFromEdit: false)
+                    AppIntentRouter.shared.navigate(to: .manualEntry(isFromEdit: false))
+//                    AppIntentRouter.shared.navigatingRoute = .manualEntry(isFromEdit: false)
                 }
             }
         }

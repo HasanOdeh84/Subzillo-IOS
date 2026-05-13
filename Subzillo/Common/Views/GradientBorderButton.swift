@@ -86,3 +86,67 @@ struct SignInBorderButton: View {
     }
 }
 
+struct GradientBgButton: View {
+    var title           : String
+    var isSolid         : Bool = false
+    var showChevron     : Bool = false
+    var action          : () -> Void
+    var backgroundColor : Color = .clear
+    var buttonHeight    : CGFloat = 56
+    
+    var body: some View {
+        Button(action: action) {
+            HStack(spacing: 8) {
+                Spacer()
+                
+                Text(LocalizedStringKey(title))
+                    .font(.geistBold(18))
+                
+                if showChevron {
+                    Image(systemName: "chevron.right")
+                        .font(.system(size: 14, weight: .bold))
+                }
+                
+                Spacer()
+            }
+            .foregroundColor(isSolid ? .white : Color.navyBlueCTA700)
+            .frame(maxWidth: .infinity, minHeight: buttonHeight)
+            .background(
+                Group {
+                    if isSolid {
+                        LinearGradient(
+                            colors: [Color.brandFromDarkA719DD, Color.brandMidDark7C5CFF ,Color.brandToDark4489EB],
+                            startPoint: .leading,
+                            endPoint: .trailing
+                        )
+                    } else {
+                        backgroundColor
+                    }
+                }
+            )
+            .overlay(
+                Group {
+                    if !isSolid {
+                        RoundedRectangle(cornerRadius: buttonHeight / 2)
+                            .stroke(
+                                LinearGradient(
+                                    gradient: Gradient(colors: [Color.gradientPurple, Color.gradientBlue]),
+                                    startPoint: .top,
+                                    endPoint: .bottom
+                                ),
+                                lineWidth: 2
+                            )
+                    }
+                }
+            )
+            .cornerRadius(buttonHeight / 2)
+            .shadow(
+                color: isSolid ? Color.brandMidDark7C5CFF.opacity(0.55) : .clear,
+                radius: 10,
+                x: 0,
+                y: 4
+            )
+            .contentShape(RoundedRectangle(cornerRadius: buttonHeight / 2))
+        }
+    }
+}

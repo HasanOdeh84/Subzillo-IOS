@@ -124,7 +124,7 @@ struct DuplicateSubscriptionsView: View {
     // MARK: - Header
     private var headerView: some View {
         HStack {
-            Button(action: { dismiss() }) {
+            Button(action: { AppIntentRouter.shared.pop() }) {
                 Image("back_gray")
                     .frame(width: 24, height: 24)
             }
@@ -295,7 +295,7 @@ struct DuplicateSubscriptionsView: View {
             AppIntentRouter.shared.pop(count: 2)
         } else if isFromEmail {
             NotificationCenter.default.post(name: .refreshExtractedSubs, object: nil)
-            dismiss()
+            AppIntentRouter.shared.pop()
         } else {
             AppIntentRouter.shared.navigate(to: .subscriptionsListView())
         }

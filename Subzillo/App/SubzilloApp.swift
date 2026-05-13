@@ -134,7 +134,7 @@ class AppDelegate: NSObject, ObservableObject, UIApplicationDelegate, UNUserNoti
             if !AppIntentRouter.shared.isAppWarm {
                 AppIntentRouter.shared.pendingNotification = targetRoute
             } else {
-                AppIntentRouter.shared.resetStackTo = [.home, targetRoute]
+                AppIntentRouter.shared.resetStack(to: [.home, targetRoute])
             }
         }
         completionHandler()
@@ -245,57 +245,12 @@ struct SubzilloApp: App {
                 .environmentObject(sharedViewModel)
                 .environmentObject(sessionManager)
                 .environment(\.managedObjectContext, persistenceController.container.viewContext)
-            //                .preferredColorScheme(
-            //                    themeManager.userChangedTheme
-            //                    ? (themeManager.isDarkMode ? .dark : .light)
-            //                    : nil // nil = follow system theme
-            //                )
-                .withLoader()
-                .withAlert()
-                .withToast()
-                .withBottomToast()
-                .onAppear {
-                    sharedViewModel.getCurrencies()
-                    sharedViewModel.getCountries()
-                    if Constants.FeatureConfig.isS4Enabled {
-                        sharedViewModel.getAppVersionInfo()
-                    }
-                }
-                .onOpenURL { url in
-                    print("SubzilloApp: onOpenURL received: \(url.absoluteString)")
-                    ULink.shared.handleIncomingURL(url)
-                    if url.scheme == "subzillo" && url.host == "share" {
-                        if AppState.shared.isLoggedIn {
-                            SharedImageManager.shared.checkSharedImage()
-                            if SharedImageManager.shared.sharedImage != nil {
-                                NotificationCenter.default.post(name: .closeAllBottomSheets, object: nil)
-                                AppIntentRouter.shared.navigate(to: .addSubscriptionsView)
-                            }
-                        }
-                    }
-                }
-                .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("DeviceTokenUpdated"))) { _ in
-                    print("🔔 Received DeviceTokenUpdated notification")
-                    checkAndUpdateDeviceToken()
-                }
+                .buttonStyle(InteractiveButtonStyle())
         }
-        .onChange(of: scenePhase) { phase in
-            switch phase {
-            case .active:
-                //                print("✅ App is in Foreground (Active)")
-                appDelegate.requestAuthorization()
+        .onChange(of: scenePhase) { newPhase in
+            if newPhase == .active {
                 checkAndUpdateDeviceToken()
-                if Constants.FeatureConfig.isS4Enabled {
-                    sharedViewModel.getAppVersionInfo()
-                }
-            case .inactive:
-                print("⚠️ App is Inactive (e.g., transitioning)")
-            case .background:
-                print("🌙 App is in Background")
             }
-        }
-        .onChange(of: appDelegate.deviceToken) { _ in
-            checkAndUpdateDeviceToken()
         }
     }
     
@@ -324,9 +279,9 @@ struct SubzilloApp: App {
     }
 }
 
+
 struct RootView: View {
     @StateObject var appState       = AppState.shared
-    @State private var path         : [NavigationRoute] = []
     @EnvironmentObject var router   : AppIntentRouter
     @StateObject var sheetManager   = SheetManager.shared
     @EnvironmentObject var themeManager: ThemeManager
@@ -334,88 +289,38 @@ struct RootView: View {
     @State private var upgradeNowSheetHeight    : CGFloat = .zero
     
     var body: some View {
-        NavigationStack(path: $path) {
-            Group {
-                SplashView()
+        ZStack(alignment: .bottom) {
+//            // Global Dynamic Gradient Background
+//            DynamicBackgroundView()
+            
+            ZStack {
+                if let currentRoute = router.path.last {
+                    // Main Content Swap (Full Screen)
+                    destinationView(for: currentRoute)
+                        .id(currentRoute) // Forces a fresh animation on every screen change
+                        .applyGlobalTransition()
+                } else {
+                    // Initial Splash View
+                    SplashView()
+                        .applyGlobalTransition()
+                }
             }
-            .navigationDestination(for: NavigationRoute.self) { screen in
-                destinationView(for: screen)
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            
+            if showTabBar {
+                CurvedTabBar(
+                    selectedTab: $router.selectedTab,
+                    selectedSegment: $router.selectedSegment
+                )
+                .transition(.move(edge: .bottom).combined(with: .opacity))
             }
         }
+        .ignoresSafeArea(edges: .bottom)
+        .animation(.customScreenAnimation, value: router.path)
+        .animation(.customScreenAnimation, value: showTabBar)
         .environmentObject(appState)
         .onAppear {
             router.isAppWarm = true
-        }
-        .onChange(of: router.navigatingRoute) { new in
-            //            guard let new = new else { return }
-            //            let alreadyOnTarget = path.last?.isSameRoute(as: new) ?? false
-            //            if new == .home {
-            //                path = [.home]
-            //            } else if alreadyOnTarget {
-            //                NotificationCenter.default.post(
-            //                    name    : NSNotification.Name("RefreshScreenData"),
-            //                    object  : nil,
-            //                    userInfo: ["subscriptionId": new.subId ?? ""]
-            //                )
-            //            } else {
-            //                path.append(new)
-            //            }
-            //            router.hasNavigatedFromSplash = true
-            guard let new = new else { return }
-            path.append(new)
-            router.navigatingRoute = nil
-        }
-        .onChange(of: router.replaceTopRoute) { new in
-            guard let new = new else { return }
-            if !path.isEmpty {
-                path.removeLast()
-            }
-            path.append(new)
-            router.replaceTopRoute = nil
-        }
-        .onChange(of: router.resetStackTo) { newStack in
-            guard let newStack = newStack else { return }
-            let currentTop = path.last
-            let targetTop = newStack.last
-            let alreadyOnTarget = currentTop != nil && targetTop != nil && currentTop!.isSameRoute(as: targetTop!)
-            if alreadyOnTarget {
-                // Determine if the underlying stack structure (the 'Back' path) is actually different.
-                let isStackDifferent = path.count != newStack.count ||
-                (path.first != nil && newStack.first != nil && !path.first!.isSameRoute(as: newStack.first!))
-                if isStackDifferent {
-                    // Update the path to correct the Back button flow.
-                    // Use a transaction to disable the "swipe" animation since the top screen is functionally same.
-                    var transaction = Transaction()
-                    transaction.disablesAnimations = true
-                    withTransaction(transaction) {
-                        path = newStack
-                    }
-                } else {
-                    // If the path is identical, we must post a notification to refresh the existing view.
-                    NotificationCenter.default.post(
-                        name    : NSNotification.Name("RefreshScreenData"),
-                        object  : nil,
-                        userInfo: ["subscriptionId": targetTop?.subId ?? ""]
-                    )
-                }
-            } else {
-                path = newStack
-            }
-            router.hasNavigatedFromSplash = true
-            router.resetStackTo = nil
-        }
-        .onChange(of: path) { newPath in
-            router.path = newPath // Direct sync with the NavigationStack's state
-        }
-        .onChange(of: router.popCount) { count in
-            if count > 0 {
-                if path.count >= count {
-                    path.removeLast(count)
-                } else {
-                    path.removeLast(path.count)
-                }
-                router.popCount = 0
-            }
         }
         .sheet(isPresented: $sheetManager.isOfflineSheetVisible) {
             OfflineSheet()
@@ -457,13 +362,16 @@ struct RootView: View {
             .presentationDragIndicator(.hidden)
             .presentationDetents([.height(upgradeNowSheetHeight)])
         }
-        .preferredColorScheme(
-            themeManager.userChangedTheme
-            ? (themeManager.isDarkMode ? .dark : .light)
-            : nil
-        )
-        .onChange(of: systemScheme) { newScheme in
-            themeManager.applySystemTheme(newScheme == .dark)
+        .preferredColorScheme(themeManager.currentAppearance.colorScheme)
+    }
+    
+    private var showTabBar: Bool {
+        guard let current = router.path.last else { return false }
+        switch current {
+        case .splash, .login, .signup, .onboarding, .welcome, .verifyOtp, .SuccessView, .termsAndPrivacy:
+            return false
+        default:
+            return true
         }
     }
     
@@ -486,11 +394,6 @@ struct RootView: View {
             RegistrationView(fromSocialLogin: fromSocialLogin)
         case .login:
             LoginView()
-            //                        .onAppear {
-            //                            if !path.isEmpty {
-            //                                path.removeLast(path.count) // reset stack on login view
-            //                            }
-            //                        }
         case .onboarding:
             if Constants.getUserDefaultsBooleanValue(for: "isSyncing"){
                 
@@ -537,8 +440,6 @@ struct RootView: View {
             SettingsView()
         case .contactUs:
             ContactUsView()
-            //        case .pricingPlans(let fromPreview):
-            //            PricingPlansView(fromPreview: fromPreview)
         case .pricingPlans(let fromPreview, let selectedTab):
             PricingPlansView(fromPreview: fromPreview, selectedTab: selectedTab)
         case .inviteFriends(let uLink):
@@ -551,6 +452,8 @@ struct RootView: View {
             ConnectICloudView()
         case .AgentChatView:
             AgentChatView()
+        case .splash:
+            SplashView()
         }
     }
 }
@@ -559,27 +462,45 @@ final class AppIntentRouter: ObservableObject {
     static let shared = AppIntentRouter()
     private init() {}
     
-    @Published var navigatingRoute          : NavigationRoute? = nil
-    @Published var replaceTopRoute          : NavigationRoute? = nil
-    @Published var popCount                 : Int = 0
+    @Published var selectedTab              : Tab = .home
+    @Published var selectedSegment          : Segment? = .first
     @Published var pendingNotification      : NavigationRoute? = nil
-    @Published var resetStackTo             : [NavigationRoute]? = nil
     @Published var isAppWarm                : Bool = false
     @Published var hasNavigatedFromSplash   : Bool = false
-    @Published var path                     : [NavigationRoute] = [] // Keeps track of the active stack
-    var currentRoute                        : NavigationRoute? { path.last } // Helper to get the top-most screen
+    @Published var path                     : [NavigationRoute] = [] // Single Source of Truth
+    var currentRoute                        : NavigationRoute? { path.last }
 }
 
 extension AppIntentRouter {
     func navigate(to route: NavigationRoute) {
-        navigatingRoute = route
+        withAnimation(.customScreenAnimation) {
+            path.append(route)
+        }
     }
     
     func navigateAndReplace(to route: NavigationRoute) {
-        replaceTopRoute = route
+        withAnimation(.customScreenAnimation) {
+            if !path.isEmpty {
+                path.removeLast()
+            }
+            path.append(route)
+        }
     }
     
     func pop(count: Int = 1) {
-        popCount = count
+        withAnimation(.customScreenAnimation) {
+            if path.count >= count {
+                path.removeLast(count)
+            } else {
+                path.removeAll()
+            }
+        }
+    }
+    
+    func resetStack(to newStack: [NavigationRoute]) {
+        withAnimation(.customScreenAnimation) {
+            path = newStack
+            hasNavigatedFromSplash = true
+        }
     }
 }

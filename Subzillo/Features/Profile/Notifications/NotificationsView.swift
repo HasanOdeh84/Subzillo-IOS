@@ -26,7 +26,7 @@ struct NotificationsView: View {
                 title: "Notifications",
                 trailingTitle: (viewModel.notificationsList.count == 0 || viewModel.notificationData?.totalCount == 0 || viewModel.notificationData?.totalCount == nil) ? nil : (selectionMode ? nil : "Mark all as read"),
                 onBack: {
-                    dismiss()
+                    AppIntentRouter.shared.pop()
                 },
                 onTrailingAction: {
                     viewModel.markAllAsRead()
@@ -109,7 +109,7 @@ struct NotificationsView: View {
                     } deleteAction: {
                         showDeletePopup = true
                     }
-                    .padding(.bottom, 40)
+                    .padding(.bottom, 100)
                     .padding(.horizontal, 24)
                     
                 } else {
@@ -117,7 +117,7 @@ struct NotificationsView: View {
                         viewModel.loadMore()
                     }
                     .padding(.horizontal, 24)
-                    .padding(.bottom, 40)
+                    .padding(.bottom, 100)
                     .opacity(viewModel.isAllLoaded ? 0.5 : 1)
                     .disabled(viewModel.isAllLoaded)
                 }

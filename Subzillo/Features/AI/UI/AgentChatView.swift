@@ -24,6 +24,8 @@ struct AgentChatView: View {
             messagesScrollView
             inputAreaView
         }
+        .padding(.top, AppIntentRouter.shared.path.count > 1 ? 0 : 50)
+        .padding(.bottom, 90)
         .navigationBarHidden(true)
         .sheet(isPresented: $showImagePicker) {
             ChatImagePicker(selectedImage: $selectedImage, sourceType: imagePickerSource)
@@ -64,11 +66,13 @@ struct AgentChatView: View {
     
     private var headerView: some View {
         HStack {
-            Button {
-                viewModel.clearPendingSession()
-                dismiss()
-            } label: {
-                Image("back_gray")
+            if AppIntentRouter.shared.path.count > 1 {
+                Button {
+                    viewModel.clearPendingSession()
+                    AppIntentRouter.shared.pop()
+                } label: {
+                    Image("back_gray")
+                }
             }
             
             Text("Smart Assistant")
@@ -116,26 +120,11 @@ struct AgentChatView: View {
                 .padding(.vertical, 16)
             }
             .background(Color.neutralBg100)
-            //            .onChange(of: viewModel.messages.count) { _ in
-            //                if let last = viewModel.messages.last {
-            //                    withAnimation {
-            //                        proxy.scrollTo(last.id, anchor: .bottom)
-            //                    }
-            //                }
-            //            }
-            //            .onChange(of: viewModel.isThinking) { thinking in
-            //                if thinking {
-            //                    withAnimation {
-            //                        proxy.scrollTo("thinking", anchor: .bottom)
-            //                    }
-            //                }
-            //            }
             .onChange(of: viewModel.messages.count) { _ in
                 withAnimation {
                     proxy.scrollTo(bottomAnchor, anchor: .bottom)
                 }
             }
-            
             .onChange(of: viewModel.isThinking) { thinking in
                 if thinking {
                     withAnimation {

@@ -29,7 +29,7 @@ struct SettingsView: View {
         VStack(spacing: 0) {
             //MARK: Header
             SettingsHeader(title: "Settings", onBack: {
-                dismiss()
+                AppIntentRouter.shared.pop()
             }, onNotification: {
                 settingsVM.navigate(to: .notifications)
             })
@@ -342,7 +342,7 @@ struct SettingsView: View {
         }
         .sheet(isPresented: $showPermissionPopup) {
             PermissionSheet(onDelegate: {
-                //dismiss()
+                //AppIntentRouter.shared.pop()
             }, title: "We need notification access to recieve notifications",
                             type            : "notifications",
                             value           : "Tap Notifications",

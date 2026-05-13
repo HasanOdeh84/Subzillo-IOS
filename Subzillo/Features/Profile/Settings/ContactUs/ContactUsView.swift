@@ -18,7 +18,7 @@ struct ContactUsView: View {
             // MARK: Header
             HStack {
                 Button(action: {
-                    dismiss()
+                    AppIntentRouter.shared.pop()
                 }) {
                     Image("back_gray")
                         .frame(width: 24,height: 24)

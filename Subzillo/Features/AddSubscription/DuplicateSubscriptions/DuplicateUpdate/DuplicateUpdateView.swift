@@ -111,7 +111,7 @@ struct DuplicateUpdateView: View {
                 }
             }
             else{
-                dismiss()
+                AppIntentRouter.shared.pop()
             }
         }
     }
@@ -160,7 +160,7 @@ struct DuplicateUpdateView: View {
     //MARK: - Button actions
     //MARK: goBack
     private func goBack() {
-        dismiss()
+        AppIntentRouter.shared.pop()
     }
     
     //MARK: goToDetials

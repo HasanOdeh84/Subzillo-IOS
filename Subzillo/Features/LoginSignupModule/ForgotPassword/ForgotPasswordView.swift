@@ -18,7 +18,7 @@ struct ForgotPasswordView: View {
     var body: some View {
         VStack(alignment: .leading,spacing: 24) {
             Button(action: {
-                dismiss()  // Go back
+                AppIntentRouter.shared.pop()  // Go back
             }) {
                 HStack {
                     Image("back")

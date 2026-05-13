@@ -317,7 +317,7 @@ struct ConnectEmailView: View {
     
     //MARK: - Button actions
     private func goBack() {
-        dismiss()
+        AppIntentRouter.shared.pop()
     }
     
     //MARK: - User defined methods

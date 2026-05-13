@@ -10,55 +10,45 @@ import SwiftUI
 struct RootTabBar: View {
     
     //MARK: - Properties
-    @State var selectedTab                      : Tab = .home
-    @State var selectedSegment                  : Segment? = .first
+    @EnvironmentObject var router: AppIntentRouter
+    var selectedTab     : Tab? = nil
+    var selectedSegment : Segment? = nil
     
     //MARK: - Body
     var body: some View {
         ZStack(alignment: .bottom) {
             Group {
                 Color(.neutralBg100)
-                switch selectedTab {
+                switch router.selectedTab {
                 case .home:
-                    HomeView(tabSelected:$selectedTab)
+                    HomeView(tabSelected:$router.selectedTab)
                 case .subscriptions:
-                    SubscriptionsView(selectedTab: selectedSegment)
+                    SubscriptionsView(selectedTab: router.selectedSegment)
                 case .addSubscription:
                     AddSubscriptionsView()
                 case .smartAI:
-                    SmartAIAssistantView()
+                    AgentChatView()
                 case .profile:
                     ProfileView()
                 }
             }
+            .applyGlobalTransition()
+            .id(router.selectedTab)
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .ignoresSafeArea()
             
-            CurvedTabBar(selectedTab        : $selectedTab,
-                         selectedSegment    : $selectedSegment)
-                .padding(.bottom,UIDevice.isFullScreeniPhone ? 20 : 0)
-            //                .padding(.bottom, 20)
+            Color.clear
         }
         .ignoresSafeArea(edges: .bottom)
         .navigationBarBackButtonHidden(true)
-    }
-    
-    //Local push for testing
-    func scheduleTestPush(type: String, extra: [String: Any] = [:]) {
-        let content = UNMutableNotificationContent()
-        content.title = "Test Push"
-        content.body = "Triggered for \(type)"
-        
-        // 👇 add payload data to userInfo
-        let userInfo: [String: Any] = ["type": type]
-        //        extra.forEach { userInfo[$0] = $1 }
-        content.userInfo = userInfo
-        
-        // trigger after 5 sec
-        let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 5, repeats: false)
-        let request = UNNotificationRequest(identifier: UUID().uuidString, content: content, trigger: trigger)
-        
-        UNUserNotificationCenter.current().add(request)
+        .onAppear {
+            if let tab = selectedTab {
+                router.selectedTab = tab
+            }
+            if let segment = selectedSegment {
+                router.selectedSegment = segment
+            }
+        }
     }
 }
 
@@ -68,22 +58,32 @@ struct RootTabBar: View {
 
 //MARK: - Curved tab bar
 struct CurvedTabBar: View {
+    @EnvironmentObject var router: AppIntentRouter
     @Binding var selectedTab : Tab
     @Binding var selectedSegment: Segment?
     var body: some View {
         GeometryReader { proxy in
             HStack(alignment: .bottom) {
-                TabBarItem(label: "Home", iconName: selectedTab == .home ? "home-tabSelected" : "home-tab", action: {
-                    selectedTab = .home
-                }, selectedTab: $selectedTab, tab: .home)
-                TabBarItem(label: "My Subs", iconName: selectedTab == .subscriptions ? "mySubs-tabSelected" : "mySubs-tab", action: {
-                    selectedSegment = .first
-                    selectedTab = .subscriptions
-                }, selectedTab: $selectedTab, tab: .subscriptions)
+                TabBarItem(label: "Home", iconName: router.selectedTab == .home ? "home-tabSelected" : "home-tab", action: {
+                    withAnimation(.customScreenAnimation) {
+                        router.selectedTab = .home
+                        router.path = [.home]
+                    }
+                }, selectedTab: $router.selectedTab, tab: .home)
+                TabBarItem(label: "My Subs", iconName: router.selectedTab == .subscriptions ? "mySubs-tabSelected" : "mySubs-tab", action: {
+                    withAnimation(.customScreenAnimation) {
+                        router.selectedSegment = .first
+                        router.selectedTab = .subscriptions
+                        router.path = [.home]
+                    }
+                }, selectedTab: $router.selectedTab, tab: .subscriptions)
                 
                 VStack {
                     Button {
-                        selectedTab = .addSubscription
+                        withAnimation(.customScreenAnimation) {
+                            router.selectedTab = .addSubscription
+                            router.path = [.home]
+                        }
                     } label: {
                         ZStack {
                             Circle()
@@ -103,16 +103,20 @@ struct CurvedTabBar: View {
                 .padding(.top, 14)
                 .frame(height: 86)
                 
-                TabBarItem(label: "Smart AI", iconName: selectedTab == .smartAI ? "smartAI-tabSelected" : "smartAI-tab", action: {
+                TabBarItem(label: "Smart AI", iconName: router.selectedTab == .smartAI ? "smartAI-tabSelected" : "smartAI-tab", action: {
                     Constants.FeatureConfig.performS5Action {
-//                        AppIntentRouter.shared.navigate(to: .smartAssistantAI)
-                        AppIntentRouter.shared.navigate(to: .AgentChatView)
-//                        selectedTab = .smartAI
+                        withAnimation(.customScreenAnimation) {
+                            router.selectedTab = .smartAI
+                            router.path = [.home]
+                        }
                     }
-                }, selectedTab: $selectedTab, tab: .smartAI)
-                TabBarItem(label: "My Profile", iconName: selectedTab == .profile ? "profile-tabSelected" : "profile-tab", action: {
-                    selectedTab = .profile
-                }, selectedTab: $selectedTab, tab: .profile)
+                }, selectedTab: $router.selectedTab, tab: .smartAI)
+                TabBarItem(label: "My Profile", iconName: router.selectedTab == .profile ? "profile-tabSelected" : "profile-tab", action: {
+                    withAnimation(.customScreenAnimation) {
+                        router.selectedTab = .profile
+                        router.path = [.home]
+                    }
+                }, selectedTab: $router.selectedTab, tab: .profile)
             }
             .font(.footnote)
             .padding(.horizontal, 10)

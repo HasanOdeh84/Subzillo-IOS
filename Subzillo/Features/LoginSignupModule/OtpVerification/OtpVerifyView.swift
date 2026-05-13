@@ -146,7 +146,7 @@ struct OtpVerifyView: View {
                                                          fullName           : SessionManager.shared.loginData?.fullName,
                                                          socialLogin        : verifyData?.socialLogin ?? false)
                         SessionManager.shared.saveLoginData(data)
-                        dismiss()
+                        AppIntentRouter.shared.pop()
                     }
                     .padding(.top,24)
                     .padding(.bottom,30)

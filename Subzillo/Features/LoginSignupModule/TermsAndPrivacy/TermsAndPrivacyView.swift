@@ -24,7 +24,7 @@ struct TermsAndPrivacyView: View {
             VStack{
                 ProfileHeaderView(
                     title           : isTerm ? "Terms of service" : "Privacy Policy",
-                    onBack          : { dismiss() }
+                    onBack          : { AppIntentRouter.shared.pop() }
                 )
                 .padding(.bottom,24)
                 ScrollView(){

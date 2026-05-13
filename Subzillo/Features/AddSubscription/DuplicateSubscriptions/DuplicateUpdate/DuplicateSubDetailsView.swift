@@ -163,7 +163,7 @@ struct DuplicateSubDetailsView: View {
     
     //MARK: - Button actions
     private func goBack() {
-        dismiss()
+        AppIntentRouter.shared.pop()
     }
 }
 

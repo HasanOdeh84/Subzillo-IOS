@@ -322,7 +322,7 @@ struct SubscriptionMatchView: View {
                 if subscriptionsVM.isDeletedSubscription == true {
                     SubscriptionDBManager.shared.deleteSubscription(id: subscriptionData?.id ?? "")
                 }
-                dismiss()
+                AppIntentRouter.shared.pop()
             }
             .sheet(isPresented: $showDeletePopup) {
                 InfoAlertSheet(
@@ -522,7 +522,7 @@ struct SubscriptionMatchView: View {
     
     //MARK: - Button actions
     private func goBack() {
-        dismiss()
+        AppIntentRouter.shared.pop()
     }
     
     func onEdit(isRenew: Bool = false) {

@@ -20,7 +20,7 @@ struct ResetPasswordView: View {
     var body: some View {
         HStack{
             Button(action: {
-                dismiss()  // Go back
+                AppIntentRouter.shared.pop()
             }) {
                 HStack {
                     Image("back")

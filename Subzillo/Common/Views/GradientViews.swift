@@ -197,3 +197,59 @@ struct NormalOptionView: View {
         }
     }
 }
+
+struct DynamicBackgroundView: View {
+    @EnvironmentObject var themeManager: ThemeManager
+    @Environment(\.colorScheme) var colorScheme
+    
+    var body: some View {
+        Group {
+            if colorScheme == .dark {
+                ZStack {
+                    Color.bgPrimaryDark0A0612
+                        .ignoresSafeArea()
+                    
+                    ZStack {
+                        Image(topImageName)
+                            .resizable()
+                            .scaledToFit()
+                            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+                        
+                        Image(bottomImageName)
+                            .resizable()
+                            .scaledToFit()
+                            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottomTrailing)
+                    }
+                    .ignoresSafeArea()
+                }
+            } else {
+                Color.bgPrimaryLightF7F7F9
+                    .ignoresSafeArea()
+            }
+        }
+        .animation(.customScreenAnimation, value: themeManager.currentAccent)
+        .animation(.customScreenAnimation, value: colorScheme)
+    }
+    
+    private var topImageName: String {
+        switch themeManager.currentAccent {
+        case .violet:
+            return "topCircle"
+        case .sunset:
+            return "topCircle"
+        case .aurora:
+            return "topCircle"
+        }
+    }
+    
+    private var bottomImageName: String {
+        switch themeManager.currentAccent {
+        case .violet:
+            return "bottomCircle"
+        case .sunset:
+            return "bottomCircle"
+        case .aurora:
+            return "bottomCircle"
+        }
+    }
+}

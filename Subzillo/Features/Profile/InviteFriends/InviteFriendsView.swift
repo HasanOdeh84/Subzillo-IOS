@@ -23,7 +23,7 @@ struct InviteFriendsView: View {
             HStack(alignment: .center, spacing: 8) {
                 // MARK: - back
                 Button(action: {
-                    dismiss()
+                    AppIntentRouter.shared.pop()
                 }) {
                     HStack {
                         Image("back_gray")
@@ -268,8 +268,7 @@ struct RewardItemView: View {
                                 .cornerRadius(7)
                         }
                     }
-                }
-                else {
+                } else {
                     HStack(spacing: 4) {
                         Image("lock_gray")
                             .resizable()
@@ -293,5 +292,3 @@ struct RewardItemView: View {
         .frame(maxWidth: .infinity)
     }
 }
-
-
