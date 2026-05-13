@@ -22,100 +22,68 @@ struct RoundedCorner: Shape {
 }
 
 struct SegmentView: View {
-  
-  @Binding var selectedSegment    : Segment?
-  var leftImage                   : String
-  var rightImage                  : String
-  var leftText                    : String
-  var rightText                   : String
-  
-  var body: some View {
-    HStack(spacing: 0) {
-      
-      // MARK: - List View Button
-      Button {
-        selectedSegment = .first
-      } label: {
-        HStack(spacing: 5) {
-          Image(leftImage)
-            .renderingMode(.template)
-            .resizable()
-            .frame(width: 17, height: 17)
-            .foregroundColor(selectedSegment == .first ? .neutralDisabled200 : .navyBlueCTA700)
-          
-          Text(LocalizedStringKey(leftText))
-            .font(.appSemiBold(14))
-            .foregroundColor(selectedSegment == .first ? Color.white : .navyBlueCTA700)
-        }
-        .frame(maxWidth: .infinity, minHeight: 40)
-        .background(
-          Group {
-            if selectedSegment == .first {
-              Color.navyBlueCTA700
-                .clipShape(RoundedCorner(radius: 8, corners: [.topLeft, .bottomLeft]))
-            } else {
-              Color.clear
+    
+    @Binding var selectedSegment: Segment?
+    var leftImage: String
+    var rightImage: String
+    var leftText: String
+    var rightText: String
+    
+    @EnvironmentObject var themeManager: ThemeManager
+    
+    private let cornerRadius: CGFloat = 12
+    
+    var body: some View {
+        HStack(spacing: 0) {
+            // MARK: - First Segment Button
+            Button {
+                withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
+                    selectedSegment = .first
+                }
+            } label: {
+                segmentLabel(text: leftText, image: leftImage, isSelected: selectedSegment == .first, corners: [.topLeft, .bottomLeft])
             }
-          }
-        )
-        .overlay(
-          // keep the stroke visually inside by padding the shape inward
-          RoundedCorner(radius: 8, corners: [.topLeft, .bottomLeft])
-            .stroke(
-              LinearGradient(
-                gradient: Gradient(colors: [Color.gradientPurple, Color.gradientBlue]),
-                startPoint: .top,
-                endPoint: .bottom
-              ),
-              lineWidth: 2
-            )
-            .padding(1)                  // <- keeps stroke inside bounds
-            .opacity(selectedSegment == .first ? 0 : 1) // <- hide border when selected (without changing layout)
-        )
-      }
-      
-      // MARK: - Calendar View Button
-      Button {
-        selectedSegment = .second
-      } label: {
-        HStack(spacing: 5) {
-          Image(rightImage)
-            .renderingMode(.template)
-            .resizable()
-            .frame(width: 17, height: 17)
-            .foregroundColor(selectedSegment == .second ? .neutralDisabled200 : .navyBlueCTA700)
-          
-          Text(LocalizedStringKey(rightText))
-            .font(.appSemiBold(14))
-            .foregroundColor(selectedSegment == .second ? Color.white : .navyBlueCTA700)
-        }
-        .frame(maxWidth: .infinity, minHeight: 40)
-        .background(
-          Group {
-            if selectedSegment == .second {
-              Color.navyBlueCTA700
-                .clipShape(RoundedCorner(radius: 8, corners: [.topRight, .bottomRight]))
-            } else {
-              Color.clear
+            
+            // MARK: - Second Segment Button
+            Button {
+                withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
+                    selectedSegment = .second
+                }
+            } label: {
+                segmentLabel(text: rightText, image: rightImage, isSelected: selectedSegment == .second, corners: [.topRight, .bottomRight])
             }
-          }
-        )
+        }
+        .frame(height: 48)
         .overlay(
-          // keep the stroke visually inside by padding the shape inward
-          RoundedCorner(radius: 8, corners: [.topRight, .bottomRight])
-            .stroke(
-              LinearGradient(
-                gradient: Gradient(colors: [Color.gradientPurple, Color.gradientBlue]),
-                startPoint: .top,
-                endPoint: .bottom
-              ),
-              lineWidth: 2
-            )
-            .padding(1)                  // <- keeps stroke inside bounds
-            .opacity(selectedSegment == .second ? 0 : 1) // <- hide border when selected (without changing layout)
+            RoundedRectangle(cornerRadius: cornerRadius)
+                .stroke(themeManager.accentTextColor, lineWidth: 1)
         )
-      }
+//        .clipShape(RoundedRectangle(cornerRadius: cornerRadius))
     }
-    .frame(height: 40)
-  }
+    
+    @ViewBuilder
+    private func segmentLabel(text: String, image: String, isSelected: Bool, corners: UIRectCorner) -> some View {
+        HStack(spacing: 8) {
+            Image(image)
+                .renderingMode(.template)
+                .resizable()
+                .aspectRatio(contentMode: .fit)
+                .frame(width: 18, height: 18)
+            
+            Text(LocalizedStringKey(text))
+                .font(.appSemiBold(15))
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .foregroundColor(isSelected ? .white : themeManager.accentTextColor)
+        .background(
+            Group {
+                if isSelected {
+                    themeManager.accentGradient
+                        .clipShape(RoundedCorner(radius: cornerRadius, corners: corners))
+                } else {
+                    Color.clear
+                }
+            }
+        )
+    }
 }

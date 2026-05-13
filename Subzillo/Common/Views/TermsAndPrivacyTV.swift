@@ -11,9 +11,10 @@ struct TermsAndPrivacyText: View {
     var onTapTerms      : (() -> Void)?
     var onTapPrivacy    : (() -> Void)?
     var bottomPadding   : CGFloat = 18
+    @EnvironmentObject var themeManager : ThemeManager
     
     var body: some View {
-        Text(getAttriText())
+        Text(getAttriText(themeManager: themeManager))
             .font(.appRegular(14))
             .padding(.horizontal, 20)
 //            .padding(.bottom, bottomPadding)
@@ -29,7 +30,7 @@ struct TermsAndPrivacyText: View {
     }
 }
 
-private func getAttriText() -> AttributedString {
+@MainActor private func getAttriText(themeManager: ThemeManager) -> AttributedString {
     var attriString = AttributedString(
         localized: "By continuing, you agree to our Terms of Service and Privacy Policy"
     )
@@ -38,13 +39,13 @@ private func getAttriText() -> AttributedString {
     if let privacyRange = attriString.range(of: "Privacy Policy") {
         attriString[privacyRange].link = URL(string: "app://privacy")
         attriString[privacyRange].underlineStyle = .single
-        attriString[privacyRange].foregroundColor = .underlineGray
+        attriString[privacyRange].foregroundColor = themeManager.accentTextColor
     }
     
     if let termsRange = attriString.range(of: "Terms of Service") {
         attriString[termsRange].link = URL(string: "app://terms")
         attriString[termsRange].underlineStyle = .single
-        attriString[termsRange].foregroundColor = .underlineGray
+        attriString[termsRange].foregroundColor = themeManager.accentTextColor
     }
     
     return attriString

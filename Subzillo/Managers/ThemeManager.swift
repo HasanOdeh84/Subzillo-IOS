@@ -47,13 +47,25 @@ final class ThemeManager: ObservableObject {
         
         var colors: [Color] {
             switch self {
-            case .violet: return [.accentVioletStart, .accentVioletMid, .accentVioletEnd]
-            case .sunset: return [.accentSunsetStart, .accentSunsetMid, .accentSunsetEnd]
-            case .aurora: return [.accentAuroraStart, .accentAuroraMid, .accentAuroraEnd]
+            case .violet: return [.brandFromDarkA719DD, .brandMidDark7C5CFF, .brandToDark4489EB]
+            case .sunset: return [.sunsetFromF35BB3, .sunsetMidCB61FA, .sunsetTo764CFF]
+            case .aurora: return [.auroraFrom13D8B0, .auroraMid5598EA, .auroraTo9A28DF]
             }
         }
         
         var primaryColor: Color { colors[0] }
+        
+        var textColor: Color {
+            switch self {
+            case .violet: return Color.brandMidDark7C5CFF
+            case .sunset: return Color.brandFromDarkA719DD
+            case .aurora: return Color.brandToDark4489EB
+            }
+        }
+        
+        var shadowColor: Color {
+            textColor.opacity(0.55)
+        }
     }
     
     // MARK: - Published Properties
@@ -117,5 +129,13 @@ final class ThemeManager: ObservableObject {
     
     var accentColor: Color {
         currentAccent.primaryColor
+    }
+    
+    var accentTextColor: Color {
+        currentAccent.textColor
+    }
+    
+    var accentShadowColor: Color {
+        currentAccent.shadowColor
     }
 }

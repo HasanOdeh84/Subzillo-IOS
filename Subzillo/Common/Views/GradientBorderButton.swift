@@ -53,36 +53,67 @@ struct GradientBorderButton: View {
 struct SignInBorderButton: View {
     var title           : String
     var buttonImage     : String?
-    var backgroundColor : Color = .clear
-    var buttonHeight    : CGFloat = 44
+    var buttonHeight    : CGFloat = 52
     var action          : () -> Void
+    
+    @Environment(\.colorScheme) var colorScheme
+    
+    private var isApple: Bool {
+        title.contains("Apple")
+    }
+    
+    private var backgroundColor: Color {
+        if isApple {
+            return colorScheme == .dark ? .white : .black
+        } else {
+            return colorScheme == .dark ? Color.clear : .white
+        }
+    }
+    
+    private var foregroundColor: Color {
+        if isApple {
+            return colorScheme == .dark ? .black : .white
+        } else {
+            return colorScheme == .dark ? .white : .black
+        }
+    }
+    
+    private var borderColor: Color {
+        if isApple {
+            return .clear
+        } else {
+            return colorScheme == .dark ? Color.white.opacity(0.15) : Color.black.opacity(0.1)
+        }
+    }
     
     var body: some View {
         Button(action: action) {
             ZStack {
                 Text(LocalizedStringKey(title))
                     .font(.system(size: 16, weight: .semibold))
-                    .foregroundColor(Color.whiteBlackBGnoPic)
+                    .foregroundColor(foregroundColor)
+                
                 HStack {
                     Image(buttonImage ?? "")
-                        .frame(height: buttonHeight)
-                    //                        .resizable()
-                    //                        .scaledToFit()
-                    //                        .frame(width: 20, height: 20)
-                        .padding(.leading, 16)
+                        .renderingMode(isApple ? .template : .original)
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 20, height: 20)
+                        .foregroundColor(foregroundColor)
+                        .padding(.leading, 24)
                     
                     Spacer()
                 }
             }
             .frame(maxWidth: .infinity, minHeight: buttonHeight)
+            .background(backgroundColor)
+            .overlay(
+                RoundedRectangle(cornerRadius: 12)
+                    .stroke(isApple ? .clear : borderColor, lineWidth: 1)
+            )
+            .cornerRadius(12)
         }
-        .background(backgroundColor)
-        .overlay(
-            RoundedRectangle(cornerRadius: 8)
-                .stroke(Color.continueBtnBorder, lineWidth: 2)
-        )
-        .cornerRadius(8)
-        .contentShape(RoundedRectangle(cornerRadius: 8))
+        .buttonStyle(InteractiveButtonStyle())
     }
 }
 
@@ -93,6 +124,7 @@ struct GradientBgButton: View {
     var action          : () -> Void
     var backgroundColor : Color = .clear
     var buttonHeight    : CGFloat = 56
+    @EnvironmentObject var themeManager   : ThemeManager
     
     var body: some View {
         Button(action: action) {
@@ -114,11 +146,7 @@ struct GradientBgButton: View {
             .background(
                 Group {
                     if isSolid {
-                        LinearGradient(
-                            colors: [Color.brandFromDarkA719DD, Color.brandMidDark7C5CFF ,Color.brandToDark4489EB],
-                            startPoint: .leading,
-                            endPoint: .trailing
-                        )
+                        themeManager.accentGradient
                     } else {
                         backgroundColor
                     }
@@ -140,12 +168,13 @@ struct GradientBgButton: View {
                 }
             )
             .cornerRadius(buttonHeight / 2)
-            .shadow(
-                color: isSolid ? Color.brandMidDark7C5CFF.opacity(0.55) : .clear,
-                radius: 10,
-                x: 0,
-                y: 4
-            )
+            .shadow(color: isSolid ? themeManager.accentShadowColor : .clear, radius: 10, x: 0, y: 4)
+            //            .shadow(
+            //                color: isSolid ? Color.brandMidDark7C5CFF.opacity(0.55) : .clear,
+            //                radius: 10,
+            //                x: 0,
+            //                y: 4
+            //            )
             .contentShape(RoundedRectangle(cornerRadius: buttonHeight / 2))
         }
     }

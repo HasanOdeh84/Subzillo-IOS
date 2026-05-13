@@ -94,6 +94,18 @@ extension View {
     func gradientText() -> some View {
         modifier(GradientText())
     }
+    
+    // Helper to apply the current theme gradient to any text
+    func applyAccentGradient(theme: ThemeManager, style: ThemeManager.GradientStyle? = nil) -> some View {
+        let gradient = style != nil ? theme.gradient(style: style!) : theme.accentGradient
+        return self.overlay(gradient).mask(self)
+    }
+    
+    // Helper to apply the current theme gradient as a background
+    func applyAccentBackground(theme: ThemeManager, cornerRadius: CGFloat = 0) -> some View {
+        self.background(theme.accentGradient)
+            .cornerRadius(cornerRadius)
+    }
 }
 
 struct DoneButtonToolbar: ViewModifier {

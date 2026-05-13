@@ -96,19 +96,6 @@ extension Color {
     static let neutral_2_200            = Color("appNeutral2_200")
     static let appBg                    = Color("AppBackground")
     static let black_white              = Color("appBlack_white")
-
-    // MARK: - Accent Colors
-    static let accentVioletStart        = Color(hex: "#C133D5")
-    static let accentVioletMid          = Color(hex: "#8B19D1")
-    static let accentVioletEnd          = Color(hex: "#5A12A6")
-    
-    static let accentSunsetStart        = Color(hex: "#FF8C42")
-    static let accentSunsetMid          = Color(hex: "#FF3C5F")
-    static let accentSunsetEnd          = Color(hex: "#D11D44")
-    
-    static let accentAuroraStart        = Color(hex: "#29D8B1")
-    static let accentAuroraMid          = Color(hex: "#3282B8")
-    static let accentAuroraEnd          = Color(hex: "#1B4F72")
     
     init(hex: String, alpha: CGFloat = 1.0) {
         let hexString: String = hex.trimmingCharacters(in: CharacterSet.whitespacesAndNewlines)

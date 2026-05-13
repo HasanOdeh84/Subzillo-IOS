@@ -17,6 +17,7 @@ struct CustomButton: View {
     var buttonImage : String = ""
     var isShare     : Bool = false
     var action      : () -> Void = {}
+    @EnvironmentObject var themeManager: ThemeManager
     
     var body: some View {
         Button(action: action) {
@@ -51,7 +52,7 @@ struct CustomButton: View {
                     endPoint: .bottom
                 )
             )
-            : AnyView(background)
+            : AnyView(themeManager.accentGradient)
         )
         .cornerRadius(cornerRadius)
     }

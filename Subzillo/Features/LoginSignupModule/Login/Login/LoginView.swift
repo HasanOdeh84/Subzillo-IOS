@@ -67,23 +67,22 @@ struct LoginView: View {
                             rightImage      : "email",
                             leftText        : "Phone Number",
                             rightText       : "Email")
+                .padding(.top, 10)
                 
-                VStack(spacing: 16){
-                    if segmentSelected == .first{
+                VStack(spacing: 24) {
+                    if segmentSelected == .first {
                         PhoneNumberField(phoneNumber        : $phoneNumber,
                                          header             : "Enter your phone number",
-                                         placeholder        : "000 000 000",
+                                         placeholder        : "00 000 0000",
                                          selectedCurrency   : $selectedCurrency,
                                          selectedCountry    : $selectedCountry,
                                          isCountry          : true)
-                        .addDoneButton{
-                            
-                        }
-                    }else{
-                        ReusableTextField(placeholder   : "name@example.com",
+                        .addDoneButton { }
+                    } else {
+                        ReusableTextField(placeholder   : "you@mail.com",
                                           text          : $email,
                                           isEmail       : true,
-                                          header        : "Enter your email address")
+                                          header        : "Enter your email")
                     }
                     
                     CustomButton(title: "Log In"){
@@ -91,70 +90,51 @@ struct LoginView: View {
                         loginApi()
                     }
                 }
-                .padding(.vertical, 15)
+                .padding(.vertical, 32)
                 .padding(.horizontal, 24)
-                .overlay(
-                    RoundedRectangle(cornerRadius: 16)
-                        .stroke(.neutral300Border, lineWidth: 1)
-                )
                 .background(Color.whiteNeutralCardBG)
-                .cornerRadius(16)
+                .cornerRadius(24)
+                .shadow(color: Color.black.opacity(0.06), radius: 15, x: 0, y: 10)
                 
-                HStack{
+                HStack(spacing: 12) {
                     Rectangle()
-                        .fill(Color.lineGray)
+                        .fill(Color.lineGray.opacity(0.5))
                         .frame(height: 1)
                     Text("Or")
                         .font(.appRegular(14))
-                        .foregroundStyle(.neutral2500)
+                        .foregroundColor(.neutral2500)
                     Rectangle()
-                        .fill(Color.lineGray)
+                        .fill(Color.lineGray.opacity(0.5))
                         .frame(height: 1)
                 }
+                .padding(.vertical, 8)
                 
                 // Social logins
-                VStack(spacing: 8) {
-                    /*
-                     AppleSignInButtonView {
-                     loginVM.socialLogin(loginType: .apple,deviceId: appDelegate.deviceToken ?? "")
-                     }
-                     
-                     GradientBorderButton(title: "Continue with Google",isBtn:true, buttonImage: "google") {
-                     loginVM.socialLogin(loginType: .google,deviceId: appDelegate.deviceToken ?? "")
-                     }
-                     .background(.whiteBlackBG)
-                     
-                     GradientBorderButton(title: "Continue with Microsoft",isBtn:true, buttonImage: "microsoft") {
-                     loginVM.socialLogin(loginType: .microsoft,deviceId: appDelegate.deviceToken ?? "")
-                     }
-                     .background(.whiteBlackBG)
-                     */
-                    
-                    SignInBorderButton(title: "Continue with Apple", buttonImage: "apple_withoutPadding"){
+                VStack(spacing: 12) {
+                    SignInBorderButton(title: "Continue with Apple", 
+                                     buttonImage: "apple_withoutPadding") {
                         isLoginClicked = false
                         createNewAcc = false
                         loginType = .apple
-                        loginVM.socialLogin(loginType: .apple,deviceId: appDelegate.deviceToken ?? "", createNewAcc: createNewAcc)
+                        loginVM.socialLogin(loginType: .apple, deviceId: appDelegate.deviceToken ?? "", createNewAcc: createNewAcc)
                     }
-                    .background(.whiteBlack)
                     
-                    SignInBorderButton(title: "Continue with Google", buttonImage: "google"){
+                    SignInBorderButton(title: "Continue with Google", 
+                                     buttonImage: "google") {
                         isLoginClicked = false
                         createNewAcc = false
                         loginType = .google
-                        loginVM.socialLogin(loginType: .google,deviceId: appDelegate.deviceToken ?? "", createNewAcc: createNewAcc)
+                        loginVM.socialLogin(loginType: .google, deviceId: appDelegate.deviceToken ?? "", createNewAcc: createNewAcc)
                     }
-                    .background(.whiteBlack)
                     
-                    SignInBorderButton(title: "Continue with Microsoft", buttonImage: "microsoft"){
+                    SignInBorderButton(title: "Continue with Microsoft", 
+                                     buttonImage: "microsoft") {
                         isLoginClicked = false
                         createNewAcc = false
                         loginType = .microsoft
-                        loginVM.socialLogin(loginType: .microsoft,deviceId: appDelegate.deviceToken ?? "", createNewAcc: createNewAcc)
+                        loginVM.socialLogin(loginType: .microsoft, deviceId: appDelegate.deviceToken ?? "", createNewAcc: createNewAcc)
                     }
-                    .background(.whiteBlack)
                 }
-                .padding(.top, 10)
                 
                 TermsAndPrivacyText(
                     onTapTerms: {
@@ -168,8 +148,8 @@ struct LoginView: View {
                         }
                     }
                 )
-                .padding(.top,6)
-                .padding(.bottom,20)
+                .padding(.top, 12)
+                .padding(.bottom, 30)
                 Spacer()
             }
             .padding(.horizontal, 20)

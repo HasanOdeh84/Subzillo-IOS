@@ -41,13 +41,14 @@ struct SplashView: View {
                             .frame(height: 4)
                         
                         Capsule()
-                            .fill(
-                                LinearGradient(
-                                    colors: [Color.brandFromDarkA719DD, Color.brandToDark4489EB],
-                                    startPoint: .leading,
-                                    endPoint: .trailing
-                                )
-                            )
+//                            .fill(
+//                                LinearGradient(
+//                                    colors: [Color.brandFromDarkA719DD, Color.brandToDark4489EB],
+//                                    startPoint: .leading,
+//                                    endPoint: .trailing
+//                                )
+//                            )
+                            .fill(themeManager.accentGradient)
                             .frame(width: geo.size.width * progress, height: 4)
                     }
                 }
