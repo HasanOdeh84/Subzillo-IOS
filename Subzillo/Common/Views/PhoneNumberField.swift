@@ -29,47 +29,82 @@ struct PhoneNumberField: View {
     @State var countryCode                  = ""
     @State var flag                         = ""
     @State private var previousCountry: Country?
+    @Environment(\.colorScheme) private var systemScheme
+    @EnvironmentObject var themeManager     : ThemeManager
+    
+    // Inline selection states
+    @State private var isExpanded = false
+    @State private var searchText = ""
+    
+    var filteredCountries: [Country] {
+        if searchText.isEmpty {
+            return commonApiVM.countriesResponse ?? []
+        }
+        return commonApiVM.countriesResponse?.filter {
+            $0.countryCode?.localizedCaseInsensitiveContains(searchText) ?? false ||
+            $0.countryName?.localizedCaseInsensitiveContains(searchText) ?? false
+        } ?? []
+    }
+    
+    var filteredCurrencies: [Currency] {
+        if searchText.isEmpty {
+            return commonApiVM.currencyResponse ?? []
+        }
+        return commonApiVM.currencyResponse?.filter {
+            $0.code?.localizedCaseInsensitiveContains(searchText) ?? false ||
+            $0.name?.localizedCaseInsensitiveContains(searchText) ?? false
+        } ?? []
+    }
     
     @StateObject private var formatterService = PhoneNumberFormatterService(regionCode: Constants.shared.regionCode)
     
     //MARK: - body
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text(LocalizedStringKey(header ?? ""))
-                .font(.appRegular(14))
-                .foregroundColor(Color.neutralMain700)
+            if header != ""{
+                Text(LocalizedStringKey(header ?? ""))
+                    .font(.appRegular(14))
+                    .foregroundColor(Color.textDim60637AA8A4C0)
+            }
             
-            HStack(spacing: 0) {
-                Button {
-                    if isCountry{
-                        if commonApiVM.countriesResponse != nil {
-                            showCurrencySheet = true
-                        }else{
-                            commonApiVM.getCountries()
+            VStack(spacing: 4) {
+                HStack(spacing: 0) {
+                    Button {
+                        withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) {
+                            isExpanded.toggle()
                         }
-                    }else{
-                        if commonApiVM.currencyResponse != nil {
-                            showCurrencySheet = true
-                        }else{
-                            commonApiVM.getCurrencies()
-                        }
-                    }
-                } label: {
-                    HStack(spacing: 4) {
-                        if isCountry{
-                            if selectedCountry?.countryFlag ?? "" == ""{
-                                Text(flag)
-                                    .frame(width: 24, height: 24)
-                            }else{
-                                //                                WebImage(url: URL(string: isCountry ? flag : selectedCurrency?.flag ?? ""))
-                                //                                    .resizable()
-                                //                                    .indicator(.activity)
-                                //                                    .transition(.fade(duration: 0.5))
-                                //                                    .scaledToFit()
-                                //                                //                            .frame(width: 24, height: 18)
-                                //                                    .frame(width: 24, height: 24)
-                                //                                    .cornerRadius(5)
-                                AsyncImage(url: URL(string: flag)) { phase in
+                    } label: {
+                        HStack(spacing: 4) {
+                            if isCountry{
+                                if selectedCountry?.countryFlag ?? "" == ""{
+                                    Text(flag)
+                                        .frame(width: 24, height: 24)
+                                }else{
+                                    AsyncImage(url: URL(string: flag)) { phase in
+                                        switch phase {
+                                        case .empty:
+                                            Rectangle()
+                                                .fill(Color.gray.opacity(0.5))
+                                                .frame(width: 24, height: 24)
+                                                .shimmer(true)
+                                        case .success(let image):
+                                            image
+                                                .resizable()
+                                                .scaledToFill()
+                                                .frame(width: 24, height: 24)
+                                        case .failure:
+                                            Rectangle()
+                                                .fill(Color.gray.opacity(0.5))
+                                                .frame(width: 24, height: 24)
+                                                .shimmer(true)
+                                        @unknown default:
+                                            EmptyView()
+                                        }
+                                    }
+                                }
+                            }else
+                            {
+                                AsyncImage(url: URL(string: selectedCurrency?.flag ?? "")) { phase in
                                     switch phase {
                                     case .empty:
                                         Rectangle()
@@ -79,9 +114,8 @@ struct PhoneNumberField: View {
                                     case .success(let image):
                                         image
                                             .resizable()
-                                            .scaledToFill()
+                                            .scaledToFit()
                                             .frame(width: 24, height: 24)
-                                        //                                            .clipShape(RoundedRectangle(cornerRadius: 10))
                                     case .failure:
                                         Rectangle()
                                             .fill(Color.gray.opacity(0.5))
@@ -92,119 +126,97 @@ struct PhoneNumberField: View {
                                     }
                                 }
                             }
-                        }else
-                        {
-                            AsyncImage(url: URL(string: selectedCurrency?.flag ?? "")) { phase in
-                                switch phase {
-                                case .empty:
-                                    Rectangle()
-                                        .fill(Color.gray.opacity(0.5))
-                                        .frame(width: 24, height: 24)
-                                        .shimmer(true)
-                                case .success(let image):
-                                    image
-                                        .resizable()
-                                        .scaledToFit()
-                                        .frame(width: 24, height: 24)
-                                    //                                        .clipShape(RoundedRectangle(cornerRadius: 10))
-                                case .failure:
-                                    Rectangle()
-                                        .fill(Color.gray.opacity(0.5))
-                                        .frame(width: 24, height: 24)
-                                        .shimmer(true)
-                                @unknown default:
-                                    EmptyView()
+                            Image("dropDown_blackWhite")
+                                .frame(width: 20, height: 20)
+                                .rotationEffect(.degrees(isExpanded ? 180 : 0))
+                            
+                            if isCountry{
+                                Text(countryCode)
+                                    .font(.appRegular(14))
+                                    .foregroundStyle(Color.textPrimary0E101AF4F1FB)
+                            }else{
+                                Text(selectedCurrency?.code ?? "")
+                                    .font(.appRegular(14))
+                                    .foregroundStyle(Color.textPrimary0E101AF4F1FB)
+                            }
+                        }
+                        .padding(.horizontal, 20)
+                    }
+                    
+                    Divider()
+                        .frame(height: 52)
+                        .foregroundColor(.cardBorderE2E8F0E2E8F0)
+                    
+                    if !isCountry{
+                        TextField(LocalizedStringKey(placeholder ?? ""), text: Binding(
+                            get: { selectedCurrency?.name ?? "" },
+                            set: { newValue in
+                                if var currency = selectedCurrency {
+                                    currency.name = newValue
+                                    selectedCurrency = currency
                                 }
                             }
-                            //                            WebImage(url: URL(string: selectedCurrency?.flag ?? ""))
-                            //                                .resizable()
-                            //                                .indicator(.activity)
-                            //                                .transition(.fade(duration: 0.5))
-                            //                                .scaledToFit()
-                            //                                .frame(width: 24, height: 24)
-                            //                                .cornerRadius(5)
-                        }
-                        Image("dropDown_blackWhite")
-                            .frame(width: 20, height: 20)
-                            .foregroundColor(.black)
-                        if isCountry{
-                            //                            if countryCode == ""{
-                            //                                Text("+\(NBPhoneNumberUtil.sharedInstance().getCountryCode(forRegion: Constants.shared.regionCode))")
-                            //                                    .font(.appRegular(14))
-                            //                                    .foregroundColor(.neutral2500)
-                            //                            }else{
-                            //                                Text(isCountry ? countryCode : selectedCurrency?.code ?? "")
-                            //                                    .font(.appRegular(14))
-                            //                                    .foregroundColor(.neutral2500)
-                            //                            }
-                            Text(countryCode)
-                                .font(.appRegular(14))
-                                .foregroundColor(.neutral2500)
-                        }else{
-                            Text(selectedCurrency?.code ?? "")
-                                .font(.appRegular(14))
-                                .foregroundColor(.neutral2500)
-                        }
+                        ))
+                        .padding(.horizontal, 16)
+                        .frame(height: 52)
+                        .foregroundStyle(Color.textPrimary0E101AF4F1FB)
+                        .font(.geistMedium(14))
+                        .disabled(true)
+                    }else{
+                        PhoneNumberTextField(
+                            digits          : $phoneNumber,
+                            formatterService: formatterService
+                        )
+                        .padding(.horizontal, 16)
+                        .frame(height: 52)
+                        .foregroundStyle(Color.textPrimary0E101AF4F1FB)
+                        .font(.geistMedium(14))
+                        .disabled(false)
                     }
-                    .padding(.horizontal, 20)
                 }
+                .frame(height: 56)
+                .background(Color.cardBgLoginFFFFFFFFFFFF)
+                .cornerRadius(14)
+                .overlay(selectionFieldBorderView)
+//                .overlay(
+//                    RoundedRectangle(cornerRadius: 14)
+//                        .stroke(isExpanded ? themeManager.accentGradient : LinearGradient(colors: [Color.cardBorderE2E8F0E2E8F0], startPoint: .leading, endPoint: .trailing), lineWidth: 1)
+//                )
                 
-                Divider()
-                    .frame(height: 52)
-                    .foregroundColor(.neutral100)
-                
-                if !isCountry{
-                    TextField(LocalizedStringKey(placeholder ?? ""), text: Binding(
-                        get: { selectedCurrency?.name ?? "" },
-                        set: { newValue in
-                            if var currency = selectedCurrency {
-                                currency.name = newValue
-                                selectedCurrency = currency
-                            }
-                        }
-                    ))
-                    .padding(.horizontal, 16)
-                    .frame(height: 52)
-                    .background(.whiteBlackBG)
-                    //                    .foregroundColor(.neutral_2_500)
-                    .foregroundStyle(Color.whiteBlackBGnoPic)
-                    .font(.appRegular(14))
-                    .disabled(true)
-                }else{
-                    //                    TextField(LocalizedStringKey(placeholder ?? ""), text: $phoneNumber)
-                    //                        .keyboardType(.numberPad)
-                    //                        .padding(.horizontal, 16)
-                    //                        .frame(height: 52)
-                    //                        .background(.whiteBlackBG)
-                    //                        .foregroundStyle(Color.whiteBlackBGnoPic)
-                    //                        .font(.appRegular(14))
-                    //                        .disabled(false)
-                    //                        .onChange(of: phoneNumber) { newValue in
-                    //                            // Allow only digits (0–9)
-                    //                            let filtered = newValue.filter { $0.isNumber }
-                    //                            if filtered != newValue {
-                    //                                phoneNumber = filtered
-                    //                            }
-                    //                        }
-                    PhoneNumberTextField(
-                        digits          : $phoneNumber,
-                        formatterService: formatterService
-                    )
-                    .padding(.horizontal, 16)
-                    .frame(height: 52)
-                    .background(.whiteBlackBG)
-                    .foregroundStyle(Color.whiteBlackBGnoPic)
-                    .font(.appRegular(14))
-                    .disabled(false)
+                if isExpanded {
+                    if isCountry {
+                        InlineSelectionView(
+                            title: "",
+                            items: filteredCountries,
+                            selectedItem: $selectedCountry,
+                            isExpanded: $isExpanded,
+                            searchText: $searchText,
+                            placeholder: "Search Country...",
+                            labelProvider: { $0.countryName ?? "" },
+                            flagProvider: { $0.countryFlag ?? "" },
+                            detailProvider: nil,
+                            secondaryDetailProvider: { $0.dialCode ?? "" },
+                            showSelectionField: false
+                        )
+                        .transition(.move(edge: .top).combined(with: .opacity))
+                    } else {
+                        InlineSelectionView(
+                            title: "",
+                            items: filteredCurrencies,
+                            selectedItem: $selectedCurrency,
+                            isExpanded: $isExpanded,
+                            searchText: $searchText,
+                            placeholder: "Search Currency...",
+                            labelProvider: { $0.name ?? "" },
+                            flagProvider: { $0.flag ?? "" },
+                            detailProvider: { $0.code ?? "" },
+                            secondaryDetailProvider: { $0.symbol ?? "" },
+                            showSelectionField: false
+                        )
+                        .transition(.move(edge: .top).combined(with: .opacity))
+                    }
                 }
             }
-            .frame(height: 52)
-            .background(.neutralBg100)
-            .cornerRadius(12)
-            .overlay(
-                RoundedRectangle(cornerRadius: 12)
-                    .stroke(Color.neutral2200, lineWidth: 1)
-            )
             .onAppear(perform:
                         self.updateCountryAndCurrency
             )
@@ -216,17 +228,17 @@ struct PhoneNumberField: View {
             }
             .onChange(of: selectedCountry) { _ in countryChange() }
         }
-        .sheet(isPresented: $showCurrencySheet) {
-            CountriesBottomSheet(selectedCurrency   : $selectedCurrency,
-                                 selectedCountry    : $selectedCountry,
-                                 isCountry          : isCountry,
-                                 currencyResponse   : commonApiVM.currencyResponse,
-                                 countryResponse    : commonApiVM.countriesResponse,
-                                 header             : isCountry ? "Select your Country" : "Your payment currency",
-                                 placeholder        : isCountry ? "Search" : "Search")
-            .presentationDetents([.large])
-            .presentationDragIndicator(.hidden)
-        }
+//        .sheet(isPresented: $showCurrencySheet) {
+//            CountriesBottomSheet(selectedCurrency   : $selectedCurrency,
+//                                 selectedCountry    : $selectedCountry,
+//                                 isCountry          : isCountry,
+//                                 currencyResponse   : commonApiVM.currencyResponse,
+//                                 countryResponse    : commonApiVM.countriesResponse,
+//                                 header             : isCountry ? "Select your Country" : "Your payment currency",
+//                                 placeholder        : isCountry ? "Search" : "Search")
+//            .presentationDetents([.large])
+//            .presentationDragIndicator(.hidden)
+//        }
         .onReceive(NotificationCenter.default.publisher(for: .closeAllBottomSheets)) { _ in
             showCurrencySheet = false
         }
@@ -265,11 +277,6 @@ struct PhoneNumberField: View {
                 }
             }
         }
-        /* selectedCountry = Country(id: 0, countryName: "", countryCode: "US", dialCode: "", countryFlag: Constants.shared.flag(from: "US"))
-         if let countries = commonApiVM.countriesResponse {
-         selectedCountry = countries.first(where: { $0.countryCode == "US" })
-         }
-         phoneNumber = "2015550123"*/
         countryCode         = selectedCountry?.dialCode ?? ""
         flag                = selectedCountry?.countryFlag ?? ""
         if isCountry{
@@ -305,5 +312,15 @@ struct PhoneNumberField: View {
             previousCountry = selectedCountry
         }
         formatterService.updateRegion(selectedCountry?.countryCode ?? "")
+    }
+    
+    @ViewBuilder
+    private var selectionFieldBorderView: some View {
+        if isExpanded{
+            themeManager.selectionFieldBorder
+        }else{
+            RoundedRectangle(cornerRadius: 14)
+                .stroke(themeManager.textPrimaryLight8_white8, lineWidth: 1)
+        }
     }
 }

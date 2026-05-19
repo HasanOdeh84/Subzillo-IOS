@@ -14,6 +14,9 @@ struct WelcomeHomeView: View {
     @State private var isUploading      = false
     @EnvironmentObject var commonApiVM  : CommonAPIViewModel
     var currentPlan                     : Int = 0
+    @State var fullName                 = ""
+    @State private var animateGlow      = false
+    @EnvironmentObject var themeManager : ThemeManager
     
     //MARK: - Body
     var body: some View {
@@ -21,299 +24,304 @@ struct WelcomeHomeView: View {
             //            DynamicBackgroundView()
             
             VStack(alignment: .leading,spacing: 0) {
+                HeaderViewWithProfile(title: "Welcome, \(fullName)", username: fullName, action: {
+                    goToNotifications()
+                }, actionProfile: {
+                    goToProfile()
+                })
+                .padding(.top, 60)
+                .padding(.bottom, 10)
+                .frame(alignment: .leading)
+                
                 ScrollView(showsIndicators: false) {
-                    
                     VStack(spacing: 4) {
                         
                         ZStack {
-                            Text("Welcome to")
-                                .font(.appRegular(24))
-                                .foregroundColor(Color.neutralMain700)
-                                .multilineTextAlignment(.center)
-                                .padding(.top, 70)
-                                .padding(.bottom, 34)
-                            
-                            //                        HStack {
-                            //                            Spacer()
-                            //                            ZStack(alignment: .topTrailing) {
-                            //                                Button(action: goToNotifications) {
-                            //                                    Image("notification-03")
-                            //                                        .frame(width: 32, height: 32)
-                            //                                }
-                            //
-                            //                                if let count = commonApiVM.unreadCountResponse?.unreadCount{
-                            //                                    Text("\(count)")
-                            //                                        .font(.appBold(11))
-                            //                                        .foregroundColor(Color.white)
-                            //                                        .frame(width: 16, height: 16)
-                            //                                        .background(Color.redBadge)
-                            //                                        .cornerRadius(4)
-                            //                                        .offset(x: 0, y: -5)
-                            //                                }
-                            //                            }
-                            //                        }
-                                .offset(x: 0, y: 10)
-                        }
-                        
-                        Image("logo_svg")
-                            .resizable()
-                            .scaledToFit()
-                            .frame(width: 143,height: 99)
-                        
-                        Text("Track all your subscriptions in one place")
-                            .font(.appRegular(18))
-                            .foregroundColor(Color.neutral500)
-                            .multilineTextAlignment(.center)
-                        
-                        VStack(spacing: 0) {
-                            VStack(spacing: 12) {
-                                Spacer()
-                                Button(action: goToSmartAssistant) {
-                                    HStack(spacing: 5) {
-                                        Image("robotic")
-                                            .frame(width: 20, height: 20)
-                                        Text("Add Subscription by AI Agent")
-                                            .font(.appSemiBold(16))
-                                            .foregroundColor(.white)
-                                    }
-                                    .padding()
-                                    .frame(maxWidth: .infinity, alignment: .center)
-                                    .background(
-                                        LinearGradient(
-                                            colors: [Color.linearGradient3, Color.linearGradient4, Color.navyBlueCTA700],
-                                            startPoint: .leading,
-                                            endPoint: .trailing
-                                        )
+                            // Background
+                            RoundedRectangle(cornerRadius: 28)
+                                .fill(
+                                    RadialGradient(
+                                        gradient: Gradient(colors: [
+                                            themeManager.accentTextColor.opacity(0.16),
+                                            Color("Surface_FFFFFF_0A0612")
+                                        ]),
+                                        center: .top,
+                                        startRadius: 10,
+                                        endRadius: 350
                                     )
-                                    .cornerRadius(8)
-                                }
-                                //                            .padding(.horizontal, 16)
-                                //                      .padding(.top, 24)
+                                )
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 28)
+                                        .stroke(
+                                            Color("TextPrimary_ 0E101A_F4F1FB").opacity(0.14),
+                                            lineWidth: 1
+                                        )
+                                )
+                            
+                            VStack(spacing: 0) {
                                 
-                                VStack(spacing: 8) {
+                                // Icon Section
+                                ZStack {
                                     
-                                    HStack(spacing: 8) {
-                                        Button(action: goToUploadImage) {
-                                            HStack(spacing: 5) {
-                                                Image("image-upload")
-                                                    .resizable()
-                                                    .frame(width: 20, height: 20)
-                                                Text("Upload Image")
-                                                    .font(.appSemiBold(16))
-                                                    .foregroundColor(.neutralMain700)
-                                            }
-                                            .frame(maxWidth: .infinity, minHeight: 48)
-                                            .overlay(
-                                                RoundedRectangle(cornerRadius: 8)
-                                                    .stroke(Color.gradientPurple, lineWidth: 1)
+                                    // Glow
+                                    Circle()
+                                        .fill(
+                                            RadialGradient(
+                                                gradient: Gradient(colors: [
+                                                    themeManager.accentTextColor
+                                                        .opacity(0.55),
+                                                    .clear
+                                                ]),
+                                                center: .center,
+                                                startRadius: 10,
+                                                endRadius: 50
                                             )
-                                            .background(Color.whiteNeutralCardBG)
-                                            .innerBorder(
-                                                cornerRadius: 8,
-                                                color: Color.innerShadow.opacity(0.6)
-                                            )
-                                        }
-                                        
-                                        Button(action: goToConnectEmail) {
-                                            HStack(spacing: 5) {
-                                                Image("mail-at-sign-01")
-                                                    .resizable()
-                                                    .frame(width: 20, height: 20)
-                                                Text("Connect Email")
-                                                    .font(.appSemiBold(16))
-                                                    .foregroundColor(.neutralMain700)
-                                            }
-                                            .frame(maxWidth: .infinity, minHeight: 48)
-                                            .overlay(
-                                                RoundedRectangle(cornerRadius: 8)
-                                                    .stroke(Color.gradientBlue, lineWidth: 1)
-                                            )
-                                            .background(Color.whiteNeutralCardBG)
-                                            .innerBorder(
-                                                cornerRadius: 8,
-                                                color: Color.innerShadow.opacity(0.6)
-                                            )
-                                        }
-                                    }
-                                    .frame(maxWidth: .infinity)
+                                        )
+                                        .frame(width: 92, height: 92)
+                                        .blur(radius: 14)
+                                        .scaleEffect(animateGlow ? 1.05 : 0.92)
+                                        .opacity(animateGlow ? 1 : 0.75)
+                                        .animation(
+                                            .easeInOut(duration: 4)
+                                            .repeatForever(autoreverses: true),
+                                            value: animateGlow
+                                        )
                                     
+                                    // Gradient Icon Box
+                                    RoundedRectangle(cornerRadius: 18)
+                                        .fill(
+                                            themeManager.accentGradient
+                                        )
+                                        .frame(width: 64, height: 64)
+                                        .shadow(
+                                            color: themeManager.accentTextColor
+                                                .opacity(0.55),
+                                            radius: 15,
+                                            y: 8
+                                        )
+                                        .overlay(
+                                            RoundedRectangle(cornerRadius: 18)
+                                                .stroke(Color("BGPrimary_ F7F7F9_0A0612").opacity(0.3), lineWidth: 1)
+                                        )
                                     
-                                    HStack(spacing: 8) {
-                                        Button(action: goToAddByVoice) {
-                                            HStack(spacing: 5) {
-                                                Image("mic-01-2")
-                                                    .resizable()
-                                                    .frame(width: 20, height: 20)
-                                                Text("Add by Voice")
-                                                    .font(.appSemiBold(16))
-                                                    .foregroundColor(.neutralMain700)
-                                            }
-                                            .frame(maxWidth: .infinity, minHeight: 48)
-                                            .overlay(
-                                                RoundedRectangle(cornerRadius: 8)
-                                                    .stroke(Color.secondaryPurple300, lineWidth: 1)
-                                            )
-                                            .background(Color.whiteNeutralCardBG)
-                                            .innerBorder(
-                                                cornerRadius: 8,
-                                                color: Color.innerShadow.opacity(0.6)
-                                            )
-                                        }
-                                        
-                                        Button(action: goToManualEntry) {
-                                            HStack(spacing: 5) {
-                                                Image("keyboard")
-                                                    .resizable()
-                                                    .frame(width: 20, height: 20)
-                                                Text("Manual Entry")
-                                                    .font(.appSemiBold(16))
-                                                    .foregroundColor(.neutralMain700)
-                                            }
-                                            .frame(maxWidth: .infinity, minHeight: 48)
-                                            .overlay(
-                                                RoundedRectangle(cornerRadius: 8)
-                                                    .stroke(Color.secondaryPurple600, lineWidth: 1)
-                                            )
-                                            .background(Color.whiteNeutralCardBG)
-                                            .innerBorder(
-                                                cornerRadius: 8,
-                                                color: Color.innerShadow.opacity(0.6)
-                                            )
-                                        }
-                                    }
-                                    .frame(maxWidth: .infinity)
+                                    Image("sparkles")
+                                        .frame(width: 26, height: 26)
                                 }
+                                .padding(.bottom, 20)
+                                
+                                // Small Title
+                                Text("LET'S GET STARTED")
+                                    .font(.jetBrainsRegular(10))
+                                    .tracking(2)
+                                    .foregroundColor(
+                                        themeManager.accentTextColor
+                                    )
+                                    .padding(.bottom, 10)
+                                
+                                // Main Title
+                                titleView(title: "Your dashboard is ready.", styledPart: "ready")
+                                    .padding(.bottom, 8)
+                                
+                                // Description
+                                Text("How would you like to add your subscriptions?")
+                                    .font(.geistRegular(13))
+                                    .foregroundColor(
+                                        Color("TextPrimary_ 0E101A_F4F1FB")
+                                            .opacity(0.6)
+                                    )
+                                    .multilineTextAlignment(.center)
+                                    .lineSpacing(3)
+                                    .frame(maxWidth: 240)
                             }
-                            .frame(maxWidth: .infinity, alignment: .center)
-                            .padding(.horizontal, 16)
-                            .padding(.top, 0)
-                            .padding(.bottom, 12)
-                            .background(
-                                Color.whiteNeutralCardBG
-                                    .cornerRadius(16)
-                            )
-                            .overlay(
-                                RoundedRectangle(cornerRadius: 16)
-                                    .stroke(Color.neutral300Border, lineWidth: 1)
-                                    .cornerRadius(16)
-                            )
-                            Image("box")
-                                .resizable()
-                                .scaledToFill()
-                                .frame(width: 91,height: 80)
-                                .padding(.top, 32)
-                            
-                            Text("No subscriptions yet")
-                                .font(.appRegular(18))
-                                .foregroundColor(Color.neutralMain700)
-                                .multilineTextAlignment(.center)
-                                .padding(.top, 24)
-                            
-                            Text("Add your first subscription to start tracking your recurring payments")
-                                .font(.appRegular(16))
-                                .foregroundColor(Color.neutral500)
-                                .multilineTextAlignment(.center)
-                                .padding(.horizontal, 30)
-                                .padding(.top, 8)
-                            
+                            .padding(.horizontal, 24)
+                            .padding(.vertical, 28)
                         }
-                        .frame(height: 411)
-                        .frame(maxWidth: .infinity)
-                        .padding(.top, 32)
-                        
-                        //                    Text("You are in the free plan")
-                        //                        .font(.appRegular(18))
-                        //                        .foregroundColor(Color.neutralMain700)
-                        //                        .multilineTextAlignment(.center)
-                        //                        .padding(.top, 32)
-                        
-                        if commonApiVM.userInfoResponse?.planName ?? "" == "" {
-                            Text("You are in the free plan")
-                                .font(.appRegular(18))
-                                .foregroundColor(Color.neutralMain700)
-                                .multilineTextAlignment(.center)
-                                .padding(.top, 32)
-                        } else {
-                            Text("You are in the \(commonApiVM.userInfoResponse?.planName ?? "free") plan")
-                                .font(.appRegular(18))
-                                .foregroundColor(Color.neutralMain700)
-                                .multilineTextAlignment(.center)
-                                .padding(.top, 32)
-                        }
-                        
-                        if let limit = commonApiVM.userInfoResponse?.planSubscriptionLimit{
-                            Text("Plan usage \(commonApiVM.userInfoResponse?.usedSubscriptionCount ?? 0)/\(commonApiVM.userInfoResponse?.planSubscriptionLimit ?? 3) Active Subscriptions")
-                                .font(.appRegular(14))
-                                .foregroundColor(Color.neutralMain700)
-                                .multilineTextAlignment(.leading)
-                        }else{
-                            Text("Plan usage \(commonApiVM.userInfoResponse?.usedSubscriptionCount ?? 0)/Unlimited Active Subscriptions")
-                                .font(.appRegular(14))
-                                .foregroundColor(Color.neutralMain700)
-                                .multilineTextAlignment(.leading)
-                        }
-                        
-                        Button(action: upgradePlan) {
-                            Text("Upgrade Today")
-                                .font(.appSemiBold(18))
-                                .foregroundColor(Color.secondaryPurple700)
-                                .multilineTextAlignment(.center)
-                        }
-                        .frame(height: 56)
-                        .frame(maxWidth: .infinity)
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 8)
-                                .stroke(Color.secondaryPurple400, lineWidth: 1)
-                        )
-                        .cornerRadius(8)
                         .padding(.top, 8)
-                        
-                        VStack(alignment: .leading, spacing: 0) {
-                            HStack(spacing: 10) {
-                                Image("idea-01")
-                                    .resizable()
-                                    .frame(width: 24, height: 24)
-                                Text("Pro tip")
-                                    .font(.appRegular(16))
-                                    .foregroundColor(.blueMain700)
-                            }
-                            .frame(maxWidth: .infinity, minHeight: 24, alignment: .leading)
-                            .padding(.leading, 17)
-                            
-                            Text("Start with your most expensive subscriptions first. Connect your email to automatically find more.")
-                                .font(.appRegular(14))
-                                .foregroundColor(.neutralMain700)
-                                .padding(.leading, 50)
-                                .padding(.trailing,17)
+                        .onAppear {
+                            animateGlow = true
                         }
-                        .frame(height: 115)
+                        
+                        
+                        
+                        VStack(spacing: 10) {
+                            
+                            // MARK: - Scan Email Button
+                            
+                            Button {
+                                self.goToConnectEmail()
+                            } label: {
+                                
+                                HStack(spacing: 14) {
+                                    
+                                    // Icon
+                                    ZStack {
+                                        RoundedRectangle(cornerRadius: 12)
+                                            .fill(Color.white.opacity(0.18))
+                                        
+                                        Image("EmailBox")
+                                            .frame(width: 40, height: 40)
+                                    }
+                                    .frame(width: 40, height: 40)
+                                    
+                                    // Text
+                                    VStack(alignment: .leading, spacing: 2) {
+                                        
+                                        Text("Scan my email")
+                                            .font(.geistSemiBold(14))
+                                            .foregroundColor(.white)
+                                        
+                                        Text("AI finds all your subs in ~30s")
+                                            .font(.geistRegular(12))
+                                            .foregroundColor(.white.opacity(0.75))
+                                    }
+                                    
+                                    Spacer(minLength: 0)
+                                    
+                                    // FASTEST Tag
+                                    Text("FASTEST")
+                                        .font(.geistMedium(9))
+                                        .foregroundColor(.white)
+                                        .padding(.horizontal, 7)
+                                        .padding(.vertical, 3)
+                                        .background(Color.white.opacity(0.2))
+                                        .clipShape(Capsule())
+                                    
+                                    // Arrow
+                                    Image("rightArrow")
+                                        .frame(width: 16, height: 16)
+                                }
+                                .padding(.horizontal, 16)
+                                .padding(.vertical, 15)
+                                .background(
+                                    themeManager.accentGradient
+                                )
+                                .clipShape(RoundedRectangle(cornerRadius: 18))
+                                .shadow(
+                                    color: themeManager.accentShadowColor,
+                                    radius: 3,//12
+                                    x: 0,
+                                    y: 4//8
+                                )
+                            }
+                            
+                            
+                            // MARK: - Apple
+                            
+                            SubscriptionRowButton(
+                                icon: "apple_withoutPadding",
+                                title: "Import Apple subscriptions",
+                                subtitle: "Pull from your App Store account", action: goToAddEntry
+                            )
+                            
+                            
+                            // MARK: - Google
+                            
+//                            SubscriptionRowButton(
+//                                icon: "",
+//                                title: "Import Google subscriptions",
+//                                subtitle: "Pull from your Google Play account", action: goToAddEntry
+//                            )
+                            
+                            
+                            // MARK: - Manual
+                            
+                            SubscriptionRowButton(
+                                icon: "AddIcon",
+                                title: "Add manually",
+                                subtitle: "Type it or say it · takes 15s", action: goToManualEntry
+                            )
+                        }
+                        .padding(.top, 16)
+                        
+                        VStack {
+                            
+                            Button {
+                                goToAddEntry()
+                            } label: {
+                                
+                                Text("I'll do it later →")
+                                    .font(
+                                        .jetBrainsRegular(12)
+                                    )
+                                    .foregroundColor(
+                                        themeManager.black_white
+                                            .opacity(0.6)
+                                    )
+                            }
+                        }
                         .frame(maxWidth: .infinity)
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 12)
-                                .stroke(Color.neutral300Border, lineWidth: 1)
-                        )
-                        .background(Color.whiteNeutralCardBG)
-                        .cornerRadius(12)
-                        .padding(.top, 24)
-                        .padding(.bottom, 24)
+                        .padding(.top, 30)
+                        .padding(.bottom, 50)
                     }
                 }
                 .frame(maxWidth: .infinity)
                 .padding(.horizontal, 20)
                 .padding(.bottom, 86)
+                .padding(.top, 22)
             }
         }
         .applyAppBackground()
         .navigationBarBackButtonHidden(true)
-        .sheet(isPresented: $showUploadPopup) {
-            UploadImageSheet(isUploading: $isUploading)
-                .presentationDragIndicator(.hidden)
-                .presentationDetents([.height(550)])
-                .interactiveDismissDisabled(isUploading)
+        .onAppear{
+            if let fullName = commonApiVM.userInfoResponse?.fullName{
+                self.fullName = fullName
+            }
         }
-        .onReceive(NotificationCenter.default.publisher(for: .closeAllBottomSheets)) { _ in
-            showUploadPopup = false
+        .onChange(of: commonApiVM.userInfoResponse){ _ in getUserDetailsResponse() }
+    }
+    
+    private func getUserDetailsResponse() {
+        if let fullName = commonApiVM.userInfoResponse?.fullName{
+            self.fullName = fullName
         }
+    }
+    
+    @ViewBuilder
+    private func titleView(title: String, styledPart: String) -> some View {
+        if !styledPart.isEmpty && title.contains(styledPart) {
+            buildLine(line: title, styledPart: styledPart, isMask: false)
+                .multilineTextAlignment(.center)
+                .overlay(
+                    themeManager.accentGradient
+                        .mask(
+                            buildLine(line: title, styledPart: styledPart, isMask: true)
+                                .multilineTextAlignment(.center)
+                        )
+                )
+                .foregroundColor(.clear)
+        } else {
+            Text(title)
+                .font(.geistSemiBold(26))
+                .foregroundColor(Color("TextPrimary_ 0E101A_F4F1FB"))
+                .multilineTextAlignment(.center)
+        }
+    }
+    
+    private func buildLine(line: String, styledPart: String, isMask: Bool) -> Text {
+        let parts = line.components(separatedBy: styledPart)
+        var result = Text("")
+        for (index, part) in parts.enumerated() {
+            result = result + Text(part)
+                .font(.geistSemiBold(26))
+                .foregroundColor(isMask ? .clear : Color("TextPrimary_ 0E101A_F4F1FB"))
+            
+            if index < parts.count - 1 {
+                if #available(iOS 17.0, *) {
+                    result = result + Text(styledPart)
+                        .font(.jetBrainsSemiBoldItalic(26))
+                        .italic()
+                        .foregroundStyle(
+                            themeManager.accentGradient
+                        )
+                } else {
+                    result = result + Text(styledPart)
+                        .font(.jetBrainsSemiBoldItalic(26))
+                        .italic()
+                        .foregroundColor(isMask ? .black : .clear)
+                }
+            }
+        }
+        return result
     }
     
     //MARK: - Button actions
@@ -322,35 +330,91 @@ struct WelcomeHomeView: View {
             AppIntentRouter.shared.navigate(to: .notifications)
         }
     }
-    private func upgradePlan() {
-        Constants.FeatureConfig.performS4Action {
-            if Constants.FeatureConfig.featurePhase == .all{
-                if currentPlan == 3 {
-                    AppIntentRouter.shared.navigate(to: .pricingPlans(selectedTab: .second))
-                }else{
-                    AppIntentRouter.shared.navigate(to: .pricingPlans())
-                }
-            }else{
-                ToastManager.shared.showToast(message: "Coming soon in S4", style: .info)
-            }
-        }
-    }
-    private func goToSmartAssistant() {
-        Constants.FeatureConfig.performS5Action {
-            AppIntentRouter.shared.navigate(to: .AgentChatView)
-        }
-    }
-    private func goToUploadImage() {
-        showUploadPopup = true
-    }
     private func goToConnectEmail() {
         AppIntentRouter.shared.navigate(to: .connectEmail)
     }
-    private func goToAddByVoice() {
-        AppIntentRouter.shared.navigate(to: .voiceCommandView)
-    }
     private func goToManualEntry() {
         AppIntentRouter.shared.navigate(to: .manualEntry(isFromEdit: false))
+    }
+    private func goToAddEntry() {
+        AppIntentRouter.shared.navigate(to: .addSubscriptionsView)
+    }
+    private func goToProfile() {
+        AppIntentRouter.shared.navigate(to: .profileTab)
+    }
+}
+
+// MARK: - Reusable Row
+
+struct SubscriptionRowButton: View {
+    
+    let icon            : String
+    let title           : String
+    let subtitle        : String
+    var action          : () -> Void
+    @EnvironmentObject var themeManager : ThemeManager
+    @Environment(\.colorScheme) var colorScheme
+    var body: some View {
+        
+        Button (action: action) {
+            
+            HStack(spacing: 14) {
+                
+                // Icon Box
+                ZStack {
+                    RoundedRectangle(cornerRadius: 12)
+                        .fill(themeManager.white_white4)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 12)
+                                .stroke(
+                                    Color("TextPrimary_ 0E101A_F4F1FB").opacity(0.08),
+                                    lineWidth: 1
+                                )
+                        )
+                    if icon != "" {
+                        Image(icon)
+                            .frame(width: 16, height: 16)
+                    }
+                }
+                .frame(width: 40, height: 40)
+                
+                // Text
+                VStack(alignment: .leading, spacing: 2) {
+                    
+                    Text(title)
+                        .font(.geistSemiBold(14))
+                        .foregroundColor(Color("TextPrimary_ 0E101A_F4F1FB"))
+                    
+                    Text(subtitle)
+                        .font(.geistRegular(12))
+                        .foregroundColor(Color("TextPrimary_ 0E101A_F4F1FB").opacity(0.6))
+                }
+                
+                Spacer(minLength: 0)
+                
+                // Arrow
+                if colorScheme == .dark
+                {
+                    Image("rightArrow")
+                        .frame(width: 16, height: 16)
+                }
+                else{
+                    Image("rightArrow1")
+                        .frame(width: 16, height: 16)
+                }
+            }
+            .padding(.horizontal, 16)
+            .padding(.vertical, 15)
+            .background(themeManager.white_white4)
+            .overlay(
+                RoundedRectangle(cornerRadius: 18)
+                    .stroke(
+                        Color("TextPrimary_ 0E101A_F4F1FB").opacity(0.08),
+                        lineWidth: 1
+                    )
+            )
+            .clipShape(RoundedRectangle(cornerRadius: 18))
+        }
     }
 }
 

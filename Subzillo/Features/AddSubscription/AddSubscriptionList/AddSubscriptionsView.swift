@@ -10,26 +10,27 @@ import SwiftUI
 struct AddSubscriptionsView: View {
     
     //MARK: Properties
-    @State var showUploadPopup                 : Bool = false
-    @State private var isUploading             = false
+    @State var showUploadPopup                  : Bool = false
+    @State private var isUploading              = false
     @StateObject private var sharedImageManager = SharedImageManager.shared
     @StateObject private var uploadImageVM      = UploadImageViewModel()
     @StateObject var commonVM                   = CommonAPIViewModel()
+    @EnvironmentObject var themeManager         : ThemeManager
     
     //MARK: Body
     var body: some View {
         VStack(alignment: .leading,spacing: 0) {
             
             //MARK: Header
-            HeaderView(title        : "Add subscription",
+           /* HeaderView(title        : "Add subscription",
                        subTitle     : "Choose how you'd like to add your subscription",
                        titleFont    : 24) {
                 goToNotifications()
             }
                        .padding(.top, 50)
-                       .frame(alignment: .leading)
+                       .frame(alignment: .leading)*/
             
-            ScrollView(showsIndicators: false) {
+            /*ScrollView(showsIndicators: false) {
                 NormalOptionView(title: "Smart Assistant", subTitle: "Let AI detect and add your subscriptions automatically", buttonImage: "SmartAssistntIcon", titleColor: Color.blueMain700, action: clickOnSmartAssistant)
                     .innerBorder(cornerRadius: 8)
                     .padding(.bottom, 16)
@@ -50,17 +51,96 @@ struct AddSubscriptionsView: View {
                     .innerBorder(cornerRadius: 8)
                     .padding(.bottom,90)
                 
-                //                GradientBorderView(title: "Upload Bank Notification", subTitle: "Add subscriptions from your bank messages or alerts", buttonImage: "uploadBankIcon", action: clickOnUploasBankNotification, titleColor: Color.purple500)
-                //                    .padding(.bottom, 16)
-                //
-//                                GradienCustomeView(title: "Upload Bank Notification", subTitle: "Try voice recording for the fastest way to add multiple subscriptions at once.")
-//                                    .padding(.bottom,90)
             }
             .frame(maxWidth: .infinity)
-            .padding(.top, 24)
+            .padding(.top, 24)*/
+            
+            Text("Add subscription")
+                .font(.geistSemiBold(16))
+                .foregroundColor(
+                    Color("TextPrimary_ 0E101A_F4F1FB")
+                )
+                .frame(maxWidth: .infinity, alignment: .center)
+                .padding(.top, 40)
+            
+            ScrollView(showsIndicators: false) {
+                
+                VStack(alignment: .leading, spacing: 0) {
+                    
+                        
+                    Text("How should we")
+                        .font(.geistSemiBold(28))
+                        .foregroundColor(
+                            Color("TextPrimary_ 0E101A_F4F1FB")
+                        )
+                        
+                    Text("add it?")
+                        .font(.jetBrainsSemiBoldItalic(28))
+                        .italic()
+                        .foregroundStyle(
+                            themeManager.accentGradient
+                        )
+                    
+                    
+                    Text("Pick your favorite way — you can mix them.")
+                        .font(.geistRegular(14))
+                        .foregroundColor(Color("TextPrimary_ 0E101A_F4F1FB").opacity(0.6))
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(.top, 24)
+                
+                VStack(spacing: 10) {
+                    
+                    NormalOptionView(
+                        title: "Smart Assistant",
+                        subTitle: "Chat with Subzi to add anything",
+                        buttonImage: "sparkles",
+                        titleColor: .white,
+                        isHighlighted: true,
+                        action: clickOnSmartAssistant
+                    )
+                    
+                    NormalOptionView(
+                        title: "Add by Voice",
+                        subTitle: "Say it, we handle the rest",
+                        buttonImage: "AddVoiceIcon",
+                        titleColor: themeManager.selectedAccent.senColor,
+                        action: clickOnAddByVoice
+                    )
+                    
+                    NormalOptionView(
+                        title: "Connect Email",
+                        subTitle: "Scan Gmail/Outlook receipts",
+                        buttonImage: "connectEmailIcon",
+                        titleColor: themeManager.selectedAccent.senColor,
+                        action: clickOnConnectEmail
+                    )
+                    
+                    NormalOptionView(
+                        title: "Upload Screenshot",
+                        subTitle: "Photo of a bank notification",
+                        buttonImage: "uploadScreenshotIcon",
+                        titleColor: themeManager.selectedAccent.senColor,
+                        action: clickOnUploadScreenshot
+                    )
+                    
+                    NormalOptionView(
+                        title: "Manual Entry",
+                        subTitle: "Type the details yourself",
+                        buttonImage: "ManuvalEntryIcon",
+                        titleColor: themeManager.selectedAccent.senColor,
+                        action: clickOnManuvalEntry
+                    )
+                }
+                .frame(maxWidth: .infinity)
+                .padding(.top, 24)
+                .padding(.horizontal, 4)
+                .padding(.bottom, 200)
+            }
         }
-        .background(Color.neutralBg100)
         .padding(20)
+        .applyAppBackground()
+        
         .sheet(isPresented: $showUploadPopup) {
             UploadImageSheet(isUploading: $isUploading)
                 .presentationDragIndicator(.hidden)

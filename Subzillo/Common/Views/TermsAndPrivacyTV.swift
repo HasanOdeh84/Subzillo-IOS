@@ -15,9 +15,9 @@ struct TermsAndPrivacyText: View {
     
     var body: some View {
         Text(getAttriText(themeManager: themeManager))
-            .font(.appRegular(14))
+            .font(.geistRegular(11))
             .padding(.horizontal, 20)
-//            .padding(.bottom, bottomPadding)
+            .lineSpacing(16 * 0.3)
             .multilineTextAlignment(.center)
             .environment(\.openURL, OpenURLAction { url in
                 if url.absoluteString.contains("privacy") {
@@ -34,7 +34,7 @@ struct TermsAndPrivacyText: View {
     var attriString = AttributedString(
         localized: "By continuing, you agree to our Terms of Service and Privacy Policy"
     )
-    attriString.foregroundColor = .gray
+    attriString.foregroundColor = themeManager.textPrimaryLight6_dark62
     
     if let privacyRange = attriString.range(of: "Privacy Policy") {
         attriString[privacyRange].link = URL(string: "app://privacy")

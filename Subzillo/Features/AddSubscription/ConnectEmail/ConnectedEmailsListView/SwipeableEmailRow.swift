@@ -30,7 +30,7 @@ struct SwipeableMailRow: View {
                 VStack(spacing: 8){
                     Image("del_white")
                     Text("Delete")
-                        .font(.appSemiBold(14))
+                        .font(.geistSemiBold(14))
                         .foregroundColor(.white)
                 }
                 .padding(.leading, 5)

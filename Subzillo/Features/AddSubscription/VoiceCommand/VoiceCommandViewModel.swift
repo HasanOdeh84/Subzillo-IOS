@@ -17,6 +17,7 @@ class VoiceCommandViewModel: NSObject, ObservableObject, AVAudioPlayerDelegate, 
     var apiReference                            = NetworkRequest.shared
     private let router                          : AppIntentRouter
     @Published var showErrorPopup               : Bool = false
+    @Published var isLoading                    : Bool = false
     
     //Missing details
     @Published var storedSubscriptions              : [SubscriptionData] = []
@@ -35,8 +36,10 @@ class VoiceCommandViewModel: NSObject, ObservableObject, AVAudioPlayerDelegate, 
         if let url = audioUrl{
             print("audio url is \(url)")
         }
-        apiReference.postMultipartApi(endPoint: APIEndpoint.voiceSubscription, method: .POST,token: authKey,body: MultipartInput(parameters: input, fileInput: fileData),showLoader: true, responseType: VoiceSubscriptionResponse.self)
+        self.isLoading = true
+        apiReference.postMultipartApi(endPoint: APIEndpoint.voiceSubscription, method: .POST,token: authKey,body: MultipartInput(parameters: input, fileInput: fileData),showLoader: false, responseType: VoiceSubscriptionResponse.self)
             .sink { [weak self] completion in
+                self?.isLoading = false
                 if case let .failure(error) = completion {
                     self?.handleError(error,endPoint: APIEndpoint.voiceSubscription)
                     self?.showErrorPopup = true
@@ -44,6 +47,7 @@ class VoiceCommandViewModel: NSObject, ObservableObject, AVAudioPlayerDelegate, 
             }
         receiveValue: { [weak self] response in
             guard let self = self else { return }
+            self.isLoading = false
             PrintLogger.modelLog(response, type: .response, isInput: false)
             //            if response.data?.subscriptions?.count == 0
             //            {

@@ -146,7 +146,7 @@ struct GradienCustomeView: View {
 }
 
 //MARK: - NormalOptionView
-struct NormalOptionView: View {
+/*struct NormalOptionView: View {
     
     var title       : LocalizedStringKey
     var subTitle    : LocalizedStringKey
@@ -194,6 +194,134 @@ struct NormalOptionView: View {
             )
             .background(Color.whiteBlack)
             .cornerRadius(8)
+        }
+    }
+}*/
+struct NormalOptionView: View {
+    
+    var title                               : LocalizedStringKey
+    var subTitle                            : LocalizedStringKey
+    var buttonImage                         : String
+    var titleColor                          : Color
+    var isHighlighted                       : Bool = false
+    var action                              : () -> Void
+    @EnvironmentObject var themeManager     : ThemeManager
+    @Environment(\.colorScheme) var colorScheme
+    
+    var body: some View {
+        
+        Button(action: action) {
+            
+            HStack(spacing: 14) {
+                
+                // MARK: - Icon Container
+                
+                ZStack {
+                    
+                    RoundedRectangle(cornerRadius: 14)
+                        .fill(
+                            isHighlighted ?
+                            LinearGradient(
+                                colors: themeManager.selectedAccent.colors,
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            )
+                            :
+                            LinearGradient(
+                                colors: [
+                                    themeManager.white_white4,
+                                    themeManager.white_white4
+                                ],
+                                startPoint: .top,
+                                endPoint: .bottom
+                            )
+                        )
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 14)
+                                .stroke(
+                                    isHighlighted ?
+                                    Color.clear :
+                                    themeManager.black_white.opacity(0.08),
+                                    lineWidth: 1
+                                )
+                        )
+                    
+                    Image(buttonImage)
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 22, height: 22)
+                        .foregroundColor(
+                            isHighlighted ? themeManager.white_white4 : themeManager.selectedAccent.senColor
+                        )
+                }
+                .frame(width: 46, height: 46)
+                .shadow(
+                    color: isHighlighted ?
+                    themeManager.selectedAccent.senColor.opacity(0.35) :
+                    .clear,
+                    radius: 12,
+                    x: 0,
+                    y: 6
+                )
+                
+                // MARK: - Text
+                
+                VStack(alignment: .leading, spacing: 2) {
+                    
+                    Text(title)
+                        .font(.geistSemiBold(15))
+                        .foregroundColor(Color("TextPrimary_ 0E101A_F4F1FB"))
+                    
+                    Text(subTitle)
+                        .font(.geistRegular(12))
+                        .foregroundColor(Color("TextPrimary_ 0E101A_F4F1FB").opacity(0.6))
+                        .multilineTextAlignment(.leading)
+                }
+                
+                Spacer()
+                
+                // MARK: - Arrow
+                
+                if colorScheme == .dark
+                {
+                    Image("backGrayright1")
+                        .frame(width: 16, height: 16)
+                }
+                else{
+                    Image("rightArrow1")
+                        .frame(width: 16, height: 16)
+                }
+            }
+            .padding(16)
+            .background(
+                RoundedRectangle(cornerRadius: 20)
+                    .fill(
+                        isHighlighted ?
+                        LinearGradient(
+                            colors: [
+                                themeManager.selectedAccent.primaryColor.opacity(0.13),
+                                themeManager.selectedAccent.lastColor.opacity(0.13)
+                            ],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        )
+                        :
+                        LinearGradient(
+                            colors: [themeManager.white_white4],
+                            startPoint: .top,
+                            endPoint: .bottom
+                        )
+                    )
+            )
+            .overlay(
+                RoundedRectangle(cornerRadius: 20)
+                    .stroke(
+                        isHighlighted ?
+                        themeManager.selectedAccent.senColor.opacity(0.33) :
+                        Color("TextPrimary_ 0E101A_F4F1FB").opacity(0.08),
+                        lineWidth: 1
+                    )
+            )
         }
     }
 }

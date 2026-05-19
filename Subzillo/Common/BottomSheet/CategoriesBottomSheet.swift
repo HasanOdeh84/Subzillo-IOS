@@ -75,7 +75,6 @@ struct CategoriesBottomSheet: View {
                                 .frame(maxWidth: .infinity, minHeight: 56)
                                 .contentShape(Rectangle())
                             }
-                            .buttonStyle(.plain) // remove SwiftUI’s default button padding
                             
                             if category != filteredCategories.last {
                                 Rectangle()

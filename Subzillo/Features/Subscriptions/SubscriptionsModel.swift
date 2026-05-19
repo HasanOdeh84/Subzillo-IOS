@@ -33,6 +33,10 @@ public struct ListSubscriptionsResponseData: Codable, Hashable{
     let totalPages          : Int?
     let totalCount          : Int?
     let subscriptions       : [SubscriptionListData]?
+    let totalSubscriptions          : Int?
+    let currentMonthSpendingAmount          : Float?
+    var currentMonthSpendingCurrency        : String?
+    var currentMonthSpendingCurrencySymbol        : String?
 }
 
 struct GetSubscriptionsByMonthRequest: Codable{
@@ -78,6 +82,7 @@ struct SubscriptionInfoo: Identifiable {
     var relations               : [RelationsInfo]?
     var isOpen                  : Bool?
     var status                  : String?
+    var serviceName             : String?
 }
 struct PlanInfo: Codable {
     var id                      : String
@@ -156,4 +161,9 @@ struct AnalyticsMonthData: Codable, Hashable, Identifiable {
     enum CodingKeys: String, CodingKey {
         case month, totalAmount
     }
+}
+struct CalendarHighlight {
+    
+    let day: Int
+    let dots: Int
 }

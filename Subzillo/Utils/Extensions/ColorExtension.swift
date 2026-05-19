@@ -148,4 +148,10 @@ extension Color {
         guard hex.count == 7 else { return .gray }
         return Color(hex: hex)
     }
+    
+    static func dynamic(light: Color, dark: Color) -> Color {
+        return Color(UIColor { traitCollection in
+            return traitCollection.userInterfaceStyle == .dark ? UIColor(dark) : UIColor(light)
+        })
+    }
 }

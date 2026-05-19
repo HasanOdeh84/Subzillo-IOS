@@ -54,17 +54,19 @@ final class ThemeManager: ObservableObject {
         }
         
         var primaryColor: Color { colors[0] }
+        var lastColor: Color { colors[2] }
+        var senColor: Color { colors[1] }
         
-        var textColor: Color {
+        var textThemeColor: Color {
             switch self {
             case .violet: return Color.brandMidDark7C5CFF
-            case .sunset: return Color.brandFromDarkA719DD
+            case .sunset: return Color.sunsetMidCB61FA
             case .aurora: return Color.brandToDark4489EB
             }
         }
         
         var shadowColor: Color {
-            textColor.opacity(0.55)
+            senColor.opacity(0.55)
         }
     }
     
@@ -77,6 +79,7 @@ final class ThemeManager: ObservableObject {
     @Published var currentAppearance: AppearanceMode = .auto
     @Published var currentAccent: AppAccent = .violet
     @Published var currentGradientStyle: GradientStyle = .diagonal
+    @Environment(\.colorScheme) var colorScheme
     
     init() {
         // Initialize from storage
@@ -132,10 +135,106 @@ final class ThemeManager: ObservableObject {
     }
     
     var accentTextColor: Color {
-        currentAccent.textColor
+        currentAccent.senColor
+    }
+    
+    var accentLastColor: Color {
+        currentAccent.lastColor
+    }
+    
+    var accentThemeColor: Color {
+        currentAccent.textThemeColor
     }
     
     var accentShadowColor: Color {
         currentAccent.shadowColor
     }
+    
+    var textPrimaryLight8_white8: Color {
+        .dynamic(
+            light: Color.textPrimaryLight0E101A.opacity(0.08),
+            dark: Color.surfaceLightFFFFFF.opacity(0.08)
+        )
+    }
+    
+    var textPrimaryLight6_dark62: Color {
+        .dynamic(
+            light: Color.textPrimaryLight0E101A.opacity(0.6),
+            dark: Color.textPrimaryDarkF4F1FB.opacity(0.62)
+        )
+    }
+    
+    var black5_white6: Color {
+        .dynamic(
+            light: Color.black.opacity(0.05),
+            dark: Color.white.opacity(0.06)
+        )
+    }
+    
+    var black_white: Color {
+        .dynamic(
+            light: Color.black,
+            dark: Color.white
+        )
+    }
+    
+    var white_white4: Color {
+        .dynamic(
+            light: Color.white,
+            dark: Color.white.opacity(0.04)
+        )
+    }
+    
+    var textPrimaryLight14_white14: Color {
+        .dynamic(
+            light: Color.textPrimaryLight0E101A.opacity(0.14),
+            dark: Color.white.opacity(0.14)
+        )
+    }
+    
+    var selectionFieldBorder: some View {
+        return ZStack {
+            // Soft outer glow/border
+            RoundedRectangle(cornerRadius: 14)
+                .stroke(
+                    accentShadowColor,
+                    lineWidth: 3
+                )
+                .padding(-2)
+            // Main sharp border
+            RoundedRectangle(cornerRadius: 12)
+                .stroke(
+                    accentTextColor,
+                    lineWidth: 1.5
+                )
+        }
+    }
 }
+
+/*
+
+TExt primary light - 0E101A - rgb(14, 16, 26)
+TExt primary dark - F4F1FB - rgb(244, 241, 251)
+ 
+ 
+ title - textprimary - bold 28 geist
+ desc - textPrimaryLight6_dark62- geist reg 14
+ 
+ field title - textPrimaryLight6_dark62 - jet brains 11 reg
+ placeholder - textprimary
+ 
+ field border - textPrimaryLight8_white8
+ field bg - white_white4
+ 
+ terms - textPrimaryLight6_dark62 -geist reg 11
+ 
+ 1px solid rgb(124, 92, 255) - brandMidDark7C5CFF
+ rgba(124, 92, 255, 0.12) 0px 0px 0px 4px
+ 
+ 1.5px solid rgb(124, 92, 255)
+ rgba(124, 92, 255, 0.55) 0px 0px 0px 3px
+ 
+ 1.5px solid rgb(124, 92, 255)
+ rgba(124, 92, 255, 0.55) 0px 0px 0px 3px
+*/
+

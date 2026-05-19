@@ -31,4 +31,54 @@ extension String {
             return nil
         }
     }
+    
+    func daysDifferenceFromToday(
+        format: String = "d/M/yyyy"
+    ) -> Int? {
+        
+        let formatter = DateFormatter()
+        formatter.dateFormat = format
+        formatter.locale = Locale(identifier: "en_US_POSIX")
+        
+        guard let targetDate = formatter.date(from: self) else {
+            return nil
+        }
+        
+        let calendar = Calendar.current
+        
+        let today = calendar.startOfDay(for: Date())
+        let target = calendar.startOfDay(for: targetDate)
+        
+        return calendar.dateComponents(
+            [.day],
+            from: today,
+            to: target
+        ).day
+    }
+    var billingCycleShortForm: String {
+        
+        switch self.lowercased() {
+            
+        case "daily":
+            return "da"
+            
+        case "weekly":
+            return "we"
+            
+        case "monthly":
+            return "mo"
+            
+        case "quarterly":
+            return "qu"
+            
+        case "biannually":
+            return "bi"
+            
+        case "yearly":
+            return "ye"
+            
+        default:
+            return ""
+        }
+    }
 }

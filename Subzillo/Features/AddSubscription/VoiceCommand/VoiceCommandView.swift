@@ -18,197 +18,152 @@ struct VoiceCommandView: View {
     @State private var isPlaying            = false
     @State var showMissingDetailsPopup      : Bool = false
     @State private var deleteSheetHeight    : CGFloat = .zero
+    @EnvironmentObject var themeManager     : ThemeManager
     
     //MARK: - body
     var body: some View {
-        VStack(alignment: .leading,spacing: 0) {
+        VStack(alignment: .leading, spacing: 0) {
             
             // MARK: - Header
-            HStack(alignment: .top, spacing: 8) {
-                // MARK: - back
-                Button(action: goBack) {
-                    Image("back_gray")
+            HStack {
+                CircleBackButton(action: goBack)
+                
+                Spacer()
+                
+                // Timer
+                if audioManager.isRecording{
+                    HStack(spacing: 6) {
+                        Circle()
+                            .fill(.dangerE43C5CFF5A7A)
+                            .frame(width: 8, height: 8)
+                        //                            .opacity(audioManager.isRecording ? 1.0 : 0.0)
+                            .shadow(color: .dangerE43C5CFF5A7A.opacity(0.3), radius: 5, x: 0, y: 0)
+                        
+                        Text(audioManager.isRecording ? "REC \(formatTime(Int(audioManager.recordTime)))" : "0:00")
+                            .font(.jetBrainsBold(11))
+                            .foregroundColor(.dangerE43C5CFF5A7A)
+                            .tracking(2)
+                    }
+                    .padding(.trailing, 40)
                 }
                 
-                VStack(alignment: .leading, spacing: 2) {
-                    // MARK: - Title
-                    Text("Add by Voice")
-                        .font(.appRegular(24))
-                        .foregroundColor(Color.neutralMain700)
-                    
-                    // MARK: - SubTitle
-                    Text("Add your subscriptions using simple voice commands")
-                        .font(.appRegular(18))
-                        .foregroundColor(Color.neutral500)
-                }
                 Spacer()
             }
-            .padding(.horizontal)
+            .padding(.horizontal, 20)
             .padding(.top, 15)
             
-            ScrollView {
+            if voiceCommandVM.isLoading {
+                ValidatingLoaderView()
+            } else {
+                Spacer()
                 
-                // MARK: - How It Works
-                GradienCustomeView(title    : "How it work?",
-                                   subTitle : "Tap the button below to start recording your subscription details, submit when you finish.")
-                .padding(.horizontal, 20)
-                .padding(.top, 24)
-                .padding(.bottom, 24)
-                
-                // MARK: - Start Button
-                
-                //             Show player only if recording exists
-                if audioManager.hasRecording && !audioManager.isRecording{
-                    VStack{
-                        
-                        // Optional: slider for seeking
-                        //                                                Slider(value: Binding(
-                        //                                                    get: { audioManager.currentTime },
-                        //                                                    set: { newValue in
-                        //                                                        audioManager.audioPlayer?.currentTime = newValue
-                        //                                                        audioManager.currentTime = newValue
-                        //                                                    }
-                        //                                                ), in: 0...audioManager.duration)
-                        //                                                .tint(Color.navyBlueCTA700)
-                        
-                        LottieViewPlayPause(name: "soundWave",isAspectFit: false, play: $isPlaying)
-                            .frame(height: 176)
-                            .frame(maxWidth: .infinity)
-                        
-                        VStack(alignment: .trailing) {
-                            
-                            // Your custom slider
-                            GradientThumbSlider(
-                                value: Binding(
-                                    get: { audioManager.currentTime },
-                                    set: { newValue in
-                                        audioManager.audioPlayer?.currentTime = newValue
-                                        audioManager.currentTime = newValue
-                                    }
-                                ),
-                                range: 0...audioManager.duration,
-                                thumbImage: "sliderThumb"
+                // MARK: - Mic Button
+                ZStack {
+                    ForEach(0..<3, id: \.self) { index in
+                        Circle()
+                            .stroke(
+                                themeManager.accentTextColor.opacity(0.50),
+                                lineWidth: 1
                             )
-                            .frame(height: 40)
-                            
-                            // Playback progress
-                            Text("\(formatTime(Int(audioManager.currentTime))) / \(formatTime(Int(audioManager.duration)))")
-                                .font(.appRegular(14))
-                                .foregroundStyle(Color.whiteBlackBGnoPic)
-                                .frame(alignment: .trailing)
-                                .padding(.top, -22)
-                        }
-                        
-                        // Play/Pause button
-                        Button(action: {
-                            isPlaying.toggle()
-                            if audioManager.isPlaying {
-                                audioManager.pausePlayback()
-                            } else {
-                                audioManager.playLatestRecording()
-                            }
-                        }) {
-                            Image(audioManager.isPlaying ? "Pause" : "Play")
-                                .frame(width: 72,height: 72)
-                                .frame(alignment: .center)
-                        }
-                        
-                        Spacer()
+                            .scaleEffect(1)
+                            .opacity(0.8)
+                            .frame(width: 180, height: 180)
+                            .modifier(
+                                SuccessRingAnimation(delay: Double(index) * 0.4)
+                            )
                     }
-                    .padding(.horizontal, 20)
-                }else{
+                    
                     ZStack {
                         Circle()
                             .fill(
-                                LinearGradient(colors: [Color.linearGradient3,
-                                                        Color.linearGradient4,
-                                                        Color.navyBlueCTA700],
-                                               startPoint: .top,
-                                               endPoint: .bottom)
+                                themeManager.gradient(style: .diagonal)
                             )
-                            .frame(width: 120, height: 120)
+                            .frame(width: 140, height: 140)
+                            .shadow(
+                                color: themeManager.accentTextColor.opacity(0.70),
+                                radius: 20,
+                                x: 0,
+                                y: 10
+                            )
                         
-                        Image(audioManager.isRecording ? "Recording" : "mic-01")
-                            .font(.system(size: 63))
-                            .foregroundColor(.white)
+                        Image("voice_new")
+                            .frame(width: 42, height: 42)
                     }
-                    .frame(width: 137, height: 137)
-                    .background(
-                        RoundedRectangle(cornerRadius: 137/2)
-                            .fill(Color.white)
-                    )
-                    .cornerRadius(137/2)
-                    .shadow(color: Color.dropShadow, radius: 2, x: 0, y: 2)
-                    .frame(maxWidth: .infinity, alignment: .center)
-                    .onTapGesture {
-                        if !audioManager.isRecording{
-                            audioManager.startRecording()
-                        } //audioManager.isRecording ? audioManager.stopRecording() : audioManager.startRecording()
+                }
+                .frame(maxWidth: .infinity, alignment: .center)
+                
+                Spacer()
+                
+                // MARK: - Listening and Waveform
+                if audioManager.isRecording {
+                    HStack{
+                        Spacer()
+                        VStack(spacing: 16) {
+                            Text("Listening...")
+                                .font(.geistSemiBold(26))
+                                .foregroundColor(Color.textPrimary0E101AF4F1FB)
+                            
+                            PlaybackWaveformView(isPlaying: audioManager.isRecording)
+                                .frame(height: 80)
+                                .padding(.top, 10)
+                        }
+                        .transition(.opacity)
+                        Spacer()
                     }
                 }
                 
-                if !audioManager.hasRecording || audioManager.isRecording {
-                    Text("\(formatTime(Int(audioManager.recordTime)))")
-                        .font(.appSemiBold(28))
-                        .foregroundColor(Color.navyBlueCTA700)
-                        .frame(maxWidth: .infinity, alignment: .center)
-                        .padding(.horizontal, 20)
-                        .padding(.top, 16)
-                        .padding(.bottom, 24)
-                }
+                Spacer()
                 
-                if audioManager.hasRecording && !audioManager.isRecording{
-                    CustomButton(
-                        title       : "Submit",
-                        background  : .navyBlueCTA700,
-                        textColor   : .neutralDisabled200White,
-                        action: {
-                            if let url = audioManager.audioURL{
+                // MARK: - Bottom Buttons
+                if audioManager.isRecording {
+                    HStack(spacing: 16) {
+                        // Cancel Button
+                        CustomBorderButton(
+                            title       : "Cancel",
+                            background  : Color.clear,
+                            action      : {
+                                audioManager.stopRecording()
+                                audioManager.discardAll()
+                                voiceCommandVM.resetVoiceFlow()
+                            }
+                        )
+                        
+                        // Stop & validate Button
+                        GradientBgButton(
+                            title       : "Stop & validate",
+                            isSolid     : true,
+                            showChevron : false
+                        ) {
+                            audioManager.stopRecording()
+                            if let url = audioManager.audioURL {
                                 submitAction(url: url)
                             }
                         }
-                    )
-                    .padding(.horizontal, 20)
-                    .padding(.vertical, 24)
-                }else{
-                    CustomButton(
-                        title       : "Stop",
-                        //                        background  : audioManager.isRecording ? .systemError : Color.neutralDisabled200,
-                        //                        textColor   : audioManager.isRecording ? .disCardRed : Color.neutral500,
-                        background  : .systemError,
-                        textColor   : .disCardRed,
-                        action      : stopBtn
-                    )
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 8)
-                            .stroke(
-                                Color("redColor"),
-                                lineWidth: 1
-                            )
-                    )
-                    .padding(.horizontal, 20)
-                    .padding(.vertical, 24)
-                    .opacity(!audioManager.isRecording ? 0.5 : 1.0)
-                    .disabled(!audioManager.isRecording)
-                }
-                
-                // MARK: - Reset Button
-                GradientBorderButton(title: "Discard",isBtn:true, buttonImage: "discardIcon", action:{
-                    audioManager.pausePlayback()
-                    voiceCommandVM.resetVoiceFlow()
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                        showDiscardPopup = true
                     }
-                })
-                .opacity(audioManager.hasRecording && !audioManager.isRecording ? 1.0 : 0.5)
-                .disabled(audioManager.hasRecording && !audioManager.isRecording ? false : true)
-                .padding(.horizontal, 20)
-                
-                Spacer()
+                    .padding(.horizontal, 20)
+                    .padding(.bottom, 120)
+                } else {
+                    VStack(spacing: 32){
+                        Text("Tap the Start button to begin recording")
+                            .font(.geistBold(16))
+                            .foregroundColor(.textPrimary0E101AF4F1FB)
+                        
+                        // Initial Start Button
+                        GradientBgButton(
+                            title       : "Start",
+                            isSolid     : true,
+                            showChevron : false
+                        ) {
+                            audioManager.startRecording()
+                        }
+                        .padding(.horizontal, 20)
+                        .padding(.bottom, 120)
+                    }
+                }
             }
         }
         .padding(.top, 10)
-        .background(Color.neutralBg100)
+        .applyAppBackground()
         .onAppear {
             audioManager.discardAll()
             showMissingDetailsPopup = true
@@ -305,7 +260,7 @@ struct VoiceCommandView: View {
     private func submitAction(url:URL) {
         audioManager.pausePlayback()
         let voiceData = try! Data(contentsOf: url)
-//        let voiceData:Data = try! Data(contentsOf: audioManager.audioURL)
+        //        let voiceData:Data = try! Data(contentsOf: audioManager.audioURL)
         voiceCommandVM.voiceSubscription(input: VoiceSubscriptionRequest(userId: Constants.getUserId()), fileData: [MultiPartFileInput(
             fieldName   : "audio",
             fileName    : "recording.m4a",
@@ -345,7 +300,7 @@ struct VoiceCommandView: View {
 }
 
 #Preview {
-    VoiceCommandView()
+    //    VoiceCommandView()
 }
 
 //MARK: - GradientThumbSlider
@@ -454,3 +409,187 @@ struct GradientThumb: View {
     }
 }
 
+//MARK: - PlaybackWaveformView
+
+//struct PlaybackWaveformView: View {
+//
+//    var isPlaying: Bool
+//
+//    @EnvironmentObject var themeManager: ThemeManager
+//
+//    var body: some View {
+//
+//        HStack(alignment: .center, spacing: 4) {
+//
+//            ForEach(0..<35, id: \.self) { index in
+//                WaveBar(
+//                    delay: Double(index) * 0.05,
+//                    isPlaying: isPlaying
+//                )
+//            }
+//        }
+//        .frame(height: 100)
+//    }
+//}
+//
+//struct WaveBar: View {
+//
+//    let delay: Double
+//    let isPlaying: Bool
+//
+//    @State private var height: CGFloat = 12
+//
+//    @EnvironmentObject var themeManager: ThemeManager
+//
+//    var body: some View {
+//
+//        Capsule()
+//            .fill(
+//                themeManager.gradient(style: .vertical)
+//            )
+//            .frame(width: 4, height: height)
+//            .shadow(
+//                color: themeManager.accentLastColor.opacity(0.55),
+//                radius: 3,
+//                x: 0,
+//                y: 0
+//            )
+//            .onAppear {
+//                animateWave()
+//            }
+//            .onChange(of: isPlaying) { _ in
+//                animateWave()
+//            }
+//    }
+//
+//    private func animateWave() {
+//
+//        guard isPlaying else {
+//
+//            withAnimation(.easeOut(duration: 0.2)) {
+//                height = 12
+//            }
+//
+//            return
+//        }
+//
+//        withAnimation(
+//            .easeInOut(duration: 0.5)
+//            .repeatForever(autoreverses: true)
+//            .delay(delay)
+//        ) {
+//            height = CGFloat.random(in: 14...100)
+//        }
+//    }
+//}
+
+struct PlaybackWaveformView: View {
+    
+    var isPlaying: Bool
+    @EnvironmentObject var themeManager: ThemeManager
+    
+    var body: some View {
+        HStack(alignment: .center, spacing: 4) {
+            ForEach(0..<35, id: \.self) { _ in
+                RandomWaveBar(isPlaying: isPlaying)
+            }
+        }
+        .frame(height: 100)
+    }
+}
+
+struct RandomWaveBar: View {
+    
+    var isPlaying               : Bool
+    @State private var height   : CGFloat = CGFloat.random(in: 14...100)
+    @EnvironmentObject var themeManager : ThemeManager
+    let timer = Timer.publish(
+        every: Double.random(in: 0.25...0.45),
+        on: .main,
+        in: .common
+    ).autoconnect()
+    
+    var body: some View {
+        Capsule()
+            .fill(
+                themeManager.gradient(style: .vertical)
+            )
+            .frame(width: 4, height: height)
+            .shadow(
+                color: themeManager.accentLastColor.opacity(0.55),
+                radius: 3,
+                x: 0,
+                y: 0
+            )
+            .onReceive(timer) { _ in
+                withAnimation(
+                    .easeInOut(
+                        duration: Double.random(in: 0.35...0.6)
+                    )
+                ) {
+                    height = CGFloat.random(in: 14...100)
+                    //                    height = isPlaying
+                    //                    ? CGFloat.random(in: 14...100)
+                    //                    : 12
+                }
+            }
+            .onAppear {
+                guard isPlaying else { return }
+                withAnimation(
+                    .easeInOut(
+                        duration: Double.random(in: 0.35...0.6)
+                    )
+                ) {
+                    height = CGFloat.random(in: 14...100)
+                }
+            }
+    }
+}
+
+// MARK: - ValidatingLoaderView
+struct ValidatingLoaderView: View {
+    @State private var dotScales: [CGFloat] = [0.5, 0.5, 0.5]
+    @State private var dotOpacities: [Double] = [0.5, 0.5, 0.5]
+    @EnvironmentObject var themeManager : ThemeManager
+    
+    var body: some View {
+        VStack(spacing: 24) {
+            HStack(spacing: 8) {
+                ForEach(0..<3, id: \.self) { index in
+                    Circle()
+                        .fill(themeManager.accentTextColor)
+                        .frame(width: 16, height: 16)
+                        .scaleEffect(dotScales[index])
+                        .opacity(dotOpacities[index])
+                }
+            }
+            .onAppear {
+                animateDots()
+            }
+            
+            VStack(spacing: 8) {
+                Text("Validating...")
+                    .font(.geistBold(18))
+                    .foregroundColor(.textPrimary0E101AF4F1FB)
+                
+                Text("matching against 500+ providers")
+                    .font(.jetBrainsSemiBold(12))
+                    .foregroundColor(themeManager.textPrimaryLight6_dark62)
+            }
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+    }
+    
+    private func animateDots() {
+        for index in 0..<3 {
+            withAnimation(
+                .easeInOut(duration: 0.6)
+                .repeatForever(autoreverses: true)
+                .delay(Double(index) * 0.2)
+            ) {
+                dotScales[index] = 1.2
+                dotOpacities[index] = 1.0
+            }
+        }
+    }
+}

@@ -273,10 +273,11 @@ struct ProfileView: View {
                         
                         Divider()
                             .overlay(Color.border)
-                        ProfileItem(title: "Dark Mode", image: "darkMode", action:{
+                        ProfileItem(title: "Appearance", image: "darkMode", action:{
                             Constants.FeatureConfig.performS4Action {
+                                profileVM.navigate(to: .appearance)
                             }
-                        }, isDarkMode: true)
+                        }, isDarkMode: false)
                         
                         Divider()
                             .overlay(Color.border)

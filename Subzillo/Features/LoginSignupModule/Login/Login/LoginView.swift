@@ -26,53 +26,55 @@ struct LoginView: View {
     @State private var restoreAccSheetHeight    : CGFloat = .zero
     @State var createNewAcc                     = false
     @State var isLoginClicked                   = true
+    @Environment(\.colorScheme) var systemScheme
+    @EnvironmentObject var themeManager         : ThemeManager
     
     //MARK: - Body
     var body: some View {
         ScrollView {
-            VStack(spacing: 24) {
-                Text("Welcome to")
-                    .font(.appRegular(24))
-                    .foregroundColor(Color.neutralMain700)
-                    .multilineTextAlignment(.center)
-                    .padding(.top, 60)
-                
-                Image("logo_svg")
-                    .resizable()
-                    .scaledToFit()
-                    .frame(width: 128,height: 88)
-                
-                //                VStack(spacing: 4) {
-                //                    Text("You're not logged in")
-                //                        .font(.appRegular(24))
-                //                        .foregroundColor(.neutralMain700)
-                //                        .multilineTextAlignment(.center)
-                //                    Text("Sign in to your Subzillo account")
-                //                        .font(.appRegular(16))
-                //                        .foregroundColor(Color.neutralMain700)
-                //                        .multilineTextAlignment(.center)
-                //                }
-                
-                //                HStack(){
-                //                    Text("Login your account using your preferred method")
-                //                        .font(.appRegular(16))
-                //                        .foregroundColor(Color.neutralMain700)
-                //                        .padding(.bottom, -17)
-                //                        .multilineTextAlignment(.leading)
-                //                    Spacer()
-                //                }
+            VStack{
+                // Logo and Header
+                VStack(alignment: .leading) {
+                    // Logo with Glow
+                    ZStack {
+                        Circle()
+                            .fill(themeManager.accentColor.opacity(0.3))
+                            .frame(width: 80, height: 80)
+                            .blur(radius: 20)
+                        
+                        Image("logo_new")
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 100, height: 60)
+                    }
+                    .padding(.top, 70)
+                    .padding(.leading, -20)
+                    .padding(.bottom, -10)
+                    
+                    VStack(alignment: .leading, spacing: 6) {
+                        Text("Welcome back")
+                            .font(.geistBold(32))
+                            .foregroundColor(.textPrimary0E101AF4F1FB)
+                        
+                        Text("Sign in to continue")
+                            .font(.geistRegular(16))
+                            .foregroundColor(themeManager.textPrimaryLight6_dark62)
+                    }
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
                 
                 SegmentView(selectedSegment : $segmentSelected,
-                            leftImage       : "call",
-                            rightImage      : "email",
-                            leftText        : "Phone Number",
+                            leftImage       : "phone_new",
+                            rightImage      : "email_new",
+                            leftText        : "Phone",
                             rightText       : "Email")
-                .padding(.top, 10)
+                .padding(.top, 30)
+                .padding(.bottom, 16)
                 
-                VStack(spacing: 24) {
+                VStack {
                     if segmentSelected == .first {
                         PhoneNumberField(phoneNumber        : $phoneNumber,
-                                         header             : "Enter your phone number",
+                                         header             : "",
                                          placeholder        : "00 000 0000",
                                          selectedCurrency   : $selectedCurrency,
                                          selectedCountry    : $selectedCountry,
@@ -82,53 +84,47 @@ struct LoginView: View {
                         ReusableTextField(placeholder   : "you@mail.com",
                                           text          : $email,
                                           isEmail       : true,
-                                          header        : "Enter your email")
+                                          header        : "")
                     }
                     
-                    CustomButton(title: "Log In"){
+                    CustomButton(title: "Log in") {
                         isLoginClicked = true
                         loginApi()
                     }
+                    .padding(.top, 12)
                 }
-                .padding(.vertical, 32)
-                .padding(.horizontal, 24)
-                .background(Color.whiteNeutralCardBG)
-                .cornerRadius(24)
-                .shadow(color: Color.black.opacity(0.06), radius: 15, x: 0, y: 10)
                 
                 HStack(spacing: 12) {
                     Rectangle()
-                        .fill(Color.lineGray.opacity(0.5))
+                        .fill(themeManager.textPrimaryLight8_white8)
                         .frame(height: 1)
-                    Text("Or")
-                        .font(.appRegular(14))
-                        .foregroundColor(.neutral2500)
+                    Text("or")
+                        .font(.geistMedium(14))
+                        .foregroundColor(.textPrimary0E101AF4F1FB.opacity(0.62))
                     Rectangle()
-                        .fill(Color.lineGray.opacity(0.5))
+                        .fill(themeManager.textPrimaryLight8_white8)
                         .frame(height: 1)
                 }
-                .padding(.vertical, 8)
+                .padding(.top, 28)
+                .padding(.bottom, 20)
                 
-                // Social logins
-                VStack(spacing: 12) {
-                    SignInBorderButton(title: "Continue with Apple", 
-                                     buttonImage: "apple_withoutPadding") {
+                // Social logins - Horizontal Row
+                HStack(spacing: 20) {
+                    SocialSquareButton(image: "apple_withoutPadding") {
                         isLoginClicked = false
                         createNewAcc = false
                         loginType = .apple
                         loginVM.socialLogin(loginType: .apple, deviceId: appDelegate.deviceToken ?? "", createNewAcc: createNewAcc)
                     }
                     
-                    SignInBorderButton(title: "Continue with Google", 
-                                     buttonImage: "google") {
+                    SocialSquareButton(image: "google") {
                         isLoginClicked = false
                         createNewAcc = false
                         loginType = .google
                         loginVM.socialLogin(loginType: .google, deviceId: appDelegate.deviceToken ?? "", createNewAcc: createNewAcc)
                     }
                     
-                    SignInBorderButton(title: "Continue with Microsoft", 
-                                     buttonImage: "microsoft") {
+                    SocialSquareButton(image: "microsoft") {
                         isLoginClicked = false
                         createNewAcc = false
                         loginType = .microsoft
@@ -148,11 +144,11 @@ struct LoginView: View {
                         }
                     }
                 )
-                .padding(.top, 12)
-                .padding(.bottom, 30)
+                .padding(.top, 36)
+                .padding(.bottom, 40)
                 Spacer()
             }
-            .padding(.horizontal, 20)
+            .padding(.horizontal, 28)
             .navigationBarBackButtonHidden(true)
             .onAppear{
                 Constants.saveDefaults(value: false, key: "isSyncing")
@@ -164,7 +160,7 @@ struct LoginView: View {
                         } else {
                             selectedCountry = countries.first(where: { $0.countryCode == Constants.shared.regionCode })
                         }
-                        phoneNumber = savedData.phoneNumber ?? ""
+//                        phoneNumber = savedData.phoneNumber ?? ""
                     } else if selectedCountry == nil {
                         selectedCountry = countries.first(where: { $0.countryCode == Constants.shared.regionCode })
                     }
@@ -197,9 +193,6 @@ struct LoginView: View {
                         if isLoginClicked{
                             loginApi()
                         }else{
-//                            loginVM.socialLogin(loginType   : loginType,
-//                                                deviceId    : appDelegate.deviceToken ?? "",
-//                                                createNewAcc: createNewAcc)
                             loginVM.socialLogin_createAcc(loginType     : loginType,
                                                           deviceId      : appDelegate.deviceToken ?? "",
                                                           createNewAcc  : createNewAcc)
@@ -229,7 +222,7 @@ struct LoginView: View {
         }
         .keyboardAdaptive()
         .dismissKeyboardOnBackgroundTap()
-        .background(.neutralBg100)
+        .applyAppBackground()
         .ignoresSafeArea()
     }
     
@@ -258,6 +251,34 @@ struct LoginView: View {
 
 #Preview {
     LoginView()
+}
+
+//MARK: - Social login buttons
+struct SocialSquareButton: View {
+    var image: String
+    var action: () -> Void
+    
+    @Environment(\.colorScheme) var colorScheme
+    
+    var body: some View {
+        Button(action: action) {
+            ZStack {
+                Image(image)
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 24, height: 24)
+            }
+            .frame(width: 60, height: 60)
+//            .background(colorScheme == .dark ? Color.surfaceLightFFFFFF.opacity(0.2) : Color.surfaceLightFFFFFF)
+            .background(Color.cardBgLoginFFFFFFFFFFFF)
+            .cornerRadius(16)
+            .overlay(
+                RoundedRectangle(cornerRadius: 16)
+                    .stroke(Color.cardBorderE2E8F0E2E8F0, lineWidth: 1)
+            )
+        }
+        .buttonStyle(InteractiveButtonStyle())
+    }
 }
 
 //MARK: - Apple signin button

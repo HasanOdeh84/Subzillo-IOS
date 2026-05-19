@@ -8,83 +8,107 @@
 import SwiftUI
 
 struct CustomButton: View {
+
     let title       : String
     var background  : Color = .navyBlueCTA700
-    var textColor   : Color = .neutralDisabled200White
+    var textColor   : Color = .white
     var width       : CGFloat = 160
     var height      : CGFloat = 56
     var cornerRadius: CGFloat = 8
     var buttonImage : String = ""
     var isShare     : Bool = false
+    var isHidden    : Bool = false
     var action      : () -> Void = {}
     @EnvironmentObject var themeManager: ThemeManager
     
     var body: some View {
         Button(action: action) {
-            if buttonImage != "" {
-                HStack {
-                    Image(buttonImage)
-                        .frame(width: 20, height: 20)
+            Group {
+                if buttonImage != "" {
+                    HStack(spacing: 8) {
+                        Image(buttonImage)
+                            .frame(width: 20, height: 20)
+
+                        Text(LocalizedStringKey(title))
+                            .multilineTextAlignment(.center)
+                            .foregroundColor(textColor)
+                            .font(.appSemiBold(18))
+                    }
+                } else {
                     Text(LocalizedStringKey(title))
                         .multilineTextAlignment(.center)
                         .foregroundColor(textColor)
                         .font(.appSemiBold(18))
                 }
-                .frame(maxWidth: .infinity, minHeight: height)
-            } else {
-                Text(LocalizedStringKey(title))
-                    .multilineTextAlignment(.center)
-                    .foregroundColor(textColor)
-                    .font(.appSemiBold(18))
-                    .frame(maxWidth: .infinity, minHeight: height)
             }
-        }
-        .frame(maxWidth: .infinity, minHeight: height)
-//        .background(isShare ? LinearGradient(colors: [Color.linearGradient3, Color.linearGradient4, Color.blueMain700],
-//                                             startPoint: .top,
-//                                             endPoint: .bottom) : background)
-        .background(
-            isShare
-            ? AnyView(
-                LinearGradient(
-                    colors: [Color.linearGradient3, Color.linearGradient4, Color.blueMain700],
-                    startPoint: .top,
-                    endPoint: .bottom
+            .frame(maxWidth: .infinity, minHeight: height)
+            .background {
+                 if isShare {
+                    LinearGradient(
+                        colors: [
+                            Color.linearGradient3,
+                            Color.linearGradient4,
+                            Color.blueMain700
+                        ],
+                        startPoint: .top,
+                        endPoint: .bottom
+                    )
+                }
+                else if isHidden == true
+                {
+                    background
+                }
+                else {
+                    themeManager.accentGradient
+                }
+            }
+           /* .background(
+                isShare
+                ? AnyView(
+                    LinearGradient(
+                        colors: [Color.linearGradient3, Color.linearGradient4, Color.blueMain700],
+                        startPoint: .top,
+                        endPoint: .bottom
+                    )
                 )
-            )
-            : AnyView(themeManager.accentGradient)
-        )
-        .cornerRadius(cornerRadius)
+                //: AnyView(background)
+                : AnyView(themeManager.accentGradient)
+            )*/
+            
+            .cornerRadius(12)
+            .shadow(color: themeManager.accentShadowColor, radius: 15, x: 0, y: 10)
+        }
+        .buttonStyle(InteractiveButtonStyle())
     }
 }
 
 struct CustomBorderButton: View {
     let title       : String
     var background  : Color = .neutralBg100
-    var textColor   : Color = .disCardRed
-    var height      : CGFloat = 56
+    var textColor   : Color = .textPrimary0E101AF4F1FB
+    var height      : CGFloat = 48
     var cornerRadius: CGFloat = 8
     var action      : () -> Void = {}
+    @EnvironmentObject var themeManager : ThemeManager
     
     var body: some View {
-        VStack(spacing: 0) {
-            Button(action: {
-                action()
-            }) {
-                Text(LocalizedStringKey(title))
-                    .multilineTextAlignment(.center)
-                    .foregroundColor(textColor)
-                    .font(.appSemiBold(18))
-                    .frame(maxWidth: .infinity, minHeight: height)
-            }
+        Button(action: {
+            action()
+        }) {
+            Text(LocalizedStringKey(title))
+                .multilineTextAlignment(.center)
+                .foregroundColor(textColor)
+                .font(.appSemiBold(15))
+                .frame(maxWidth: .infinity, minHeight: height)
+                .background(.clear)
+                .overlay(
+                    RoundedRectangle(cornerRadius: height / 2)
+                        .stroke(themeManager.textPrimaryLight14_white14, lineWidth: 2)
+                )
+                .cornerRadius(height / 2)
+                .contentShape(RoundedRectangle(cornerRadius: height / 2))
         }
-        .overlay(
-            RoundedRectangle(cornerRadius: cornerRadius)
-                .stroke(Color.neutral300Border, lineWidth: 2)
-        )
-        .frame(maxWidth: .infinity, minHeight: height)
-        .background(background)
-        .cornerRadius(cornerRadius)
+        .buttonStyle(InteractiveButtonStyle())
     }
 }
 

@@ -45,7 +45,7 @@ class SocialLogins:NSObject, ObservableObject{
                 redirectUri : "msauth.com.subzillo.app://auth",
                 authority   : authority
             )
-            
+            MSALGlobalConfig.brokerAvailability = .none
             application1 = try MSALPublicClientApplication(configuration: config1)
         } catch {
             print("MSAL init error: \(error)")

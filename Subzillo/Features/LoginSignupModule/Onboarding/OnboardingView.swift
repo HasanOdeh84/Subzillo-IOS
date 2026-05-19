@@ -33,42 +33,75 @@ struct OnboardingView: View {
     var moveDistance: CGFloat                           = 280
     @EnvironmentObject var router                       : AppIntentRouter
     @EnvironmentObject var themeManager                 : ThemeManager
+    @Environment(\.colorScheme) private var systemScheme
+    
+    // Inline selection states
+    @State private var isCountryExpanded    = false
+    @State private var isCurrencyExpanded   = false
+    @State private var countrySearchText    = ""
+    @State private var currencySearchText   = ""
+    
+    var filteredCountries: [Country] {
+        if countrySearchText.isEmpty {
+            return commonApiVM.countriesResponse ?? []
+        }
+        return commonApiVM.countriesResponse?.filter {
+            $0.countryCode?.localizedCaseInsensitiveContains(countrySearchText) ?? false ||
+            $0.countryName?.localizedCaseInsensitiveContains(countrySearchText) ?? false
+        } ?? []
+    }
+    
+    var filteredCurrencies: [Currency] {
+        if currencySearchText.isEmpty {
+            return commonApiVM.currencyResponse ?? []
+        }
+        return commonApiVM.currencyResponse?.filter {
+            $0.code?.localizedCaseInsensitiveContains(currencySearchText) ?? false ||
+            $0.name?.localizedCaseInsensitiveContains(currencySearchText) ?? false
+        } ?? []
+    }
     
     let pages: [OnboardingPage] = [
         OnboardingPage(
-            lottie      : "onboarding",
+            lottie      : "onboarding1_new",
             subtitle    : "SUBZILLO • AI FINANCE",
             title       : "Your subscriptions,\nfinally under control.",
             styledPart  : "finally",
             description : "An AI copilot that tracks, analyzes and cancels the ones you don't need."
         ),
         OnboardingPage(
-            lottie      : "onboarding",
+            lottie      : "onboarding2_new",
             subtitle    : "",
             title       : "Just say it.\nWe'll add it.",
             styledPart  : "",
             description : "Talk to Subzillo like a friend. Our AI parses the price, the provider, the renewal date."
         ),
         OnboardingPage(
-            lottie      : "onboarding2",
+            lottie      : "onboarding3_new",
             subtitle    : "",
             title       : "Scan your inbox.\nZero typing.",
             styledPart  : "Zero typing.",
             description : "Connect Gmail or Outlook. We'll detect recurring charges in seconds — securely and read-only."
         ),
         OnboardingPage(
-            lottie      : "onboarding3",
+            lottie      : "onboarding4_new",
             subtitle    : "",
             title       : "Meet your\nmoney agent.",
             styledPart  : "money agent.",
             description : "Ask anything. Cancel subs, pause, compare plans — all from a chat."
+        ),
+        OnboardingPage(
+            lottie      : "onboarding5_new",
+            subtitle    : "",
+            title       : "Meet \nmoney agent.",
+            styledPart  : "money .",
+            description : "Ask . Cancel subs, pause, compare plans — all from a chat."
         )
     ]
     
     //MARK: - Body
     var body: some View {
         VStack {
-            // Top Navigation Bar
             HStack {
                 if currentPage > 0 {
                     Button {
@@ -81,9 +114,12 @@ struct OnboardingView: View {
                 
                 Spacer()
                 
-                if currentPage < pages.count {
+                if currentPage != 4 {
                     Button {
-                        router.navigate(to: .login)
+                        currentPage = 4
+//                        withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
+//                            
+//                        }
                     } label: {
                         Text("Skip")
                             .font(.geistSemiBold(14))
@@ -94,100 +130,176 @@ struct OnboardingView: View {
             .padding(.horizontal, 24)
             .padding(.top, 20)
             
-            if currentPage < pages.count {
-                // Onboarding Pages
-                TabView(selection: $currentPage) {
-                    ForEach(0..<pages.count, id: \.self) { index in
-                        GeometryReader { geometry in
-                            ScrollView(.vertical, showsIndicators: false) {
-                                VStack(spacing: 0) {
-                                    Spacer(minLength: 20)
-                                    
-                                    // Lottie Animation
-                                    LottieView(name: pages[index].lottie, loopMode: .loop)
-                                        .frame(height: 280)
-                                        .padding(.bottom, 20)
-                                    
-                                    // Subtitle
-                                    Text(pages[index].subtitle)
-                                        .font(.jetBrainsMedium(11))
-                                        .kerning(2.0)
-                                        .foregroundColor(themeManager.accentTextColor)
-                                        .padding(.bottom, 16)
-                                    
-                                    // Title with Styled Part
-                                    titleView(for: pages[index])
-                                        .multilineTextAlignment(.center)
-                                        .padding(.horizontal, 40)
-                                        .padding(.bottom, 20)
-                                    
-                                    // Description
-                                    Text(pages[index].description)
-                                        .font(.appRegular(16))
-                                        .lineSpacing(4)
-                                        .foregroundColor(Color.textDim60637AA8A4C0)
-                                        .multilineTextAlignment(.center)
-                                        .padding(.horizontal, 40)
-                                    
-                                    Spacer()
+            TabView(selection: $currentPage) {
+                ForEach(0..<pages.count, id: \.self) { index in
+                    VStack {
+                        if currentPage == pages.count - 1{
+                            tellUsAbtYourselfView()
+                        }else{
+                            GeometryReader { geometry in
+                                ScrollView(.vertical, showsIndicators: false) {
+                                    VStack(spacing: 0) {
+                                        Spacer(minLength: 20)
+                                        
+                                        //                                    // Lottie Animation
+                                        //                                    LottieView(name: pages[index].lottie, loopMode: .loop)
+                                        Image(pages[index].lottie)
+                                            .frame(height: 280)
+                                            .padding(.bottom, 20)
+                                        
+                                        // Subtitle
+                                        Text(pages[index].subtitle)
+                                            .font(.jetBrainsMedium(11))
+                                            .kerning(2.0)
+                                            .foregroundColor(themeManager.accentTextColor)
+                                            .padding(.bottom, 16)
+                                        
+                                        // Title with Styled Part
+                                        titleView(for: pages[index])
+                                            .multilineTextAlignment(.center)
+                                            .padding(.horizontal, 40)
+                                            .padding(.bottom, 20)
+                                        
+                                        // Description
+                                        Text(pages[index].description)
+                                            .font(.geistMedium(16))
+                                            .lineSpacing(4)
+                                            .foregroundColor(Color.textDim60637AA8A4C0)
+                                            .multilineTextAlignment(.center)
+                                            .padding(.horizontal, 40)
+                                        
+                                        Spacer()
+                                    }
+                                    .frame(minWidth: geometry.size.width)
+                                    .frame(minHeight: geometry.size.height)
                                 }
-                                .frame(minWidth: geometry.size.width)
-                                .frame(minHeight: geometry.size.height)
                             }
                         }
-                        .tag(index)
                     }
+                    .tag(index)
                 }
-                .tabViewStyle(PageTabViewStyle(indexDisplayMode: .never))
-                
-                // Custom Page Control
-                HStack(spacing: 8) {
-                    ForEach(0..<pages.count, id: \.self) { index in
-                        Capsule()
-                            .fill(index <= currentPage ? themeManager.accentGradient : LinearGradient(
-                                colors: [Color.grayCBD5E1475569],
-                                startPoint: .leading,
-                                endPoint: .trailing
-                            ))
-                            .frame(width: index == currentPage ? 24 : 8, height: 8)
-                            .animation(.spring(), value: currentPage)
-                    }
+            }
+            .animation(.none, value: currentPage)
+            .tabViewStyle(PageTabViewStyle(indexDisplayMode: .never)) // hide default dots
+
+            
+//            if currentPage != 4 {
+//                // Onboarding Pages
+//                TabView(selection: Binding(
+//                    get: { min(currentPage, pages.count - 1) },
+//                    set: { currentPage = $0 }
+//                )) {
+//                    ForEach(0..<pages.count, id: \.self) { index in
+//                        GeometryReader { geometry in
+//                            ScrollView(.vertical, showsIndicators: false) {
+//                                VStack(spacing: 0) {
+//                                    Spacer(minLength: 20)
+//                                    
+//                                    //                                    // Lottie Animation
+//                                    //                                    LottieView(name: pages[index].lottie, loopMode: .loop)
+//                                    Image(pages[index].lottie)
+//                                        .frame(height: 280)
+//                                        .padding(.bottom, 20)
+//                                    
+//                                    // Subtitle
+//                                    Text(pages[index].subtitle)
+//                                        .font(.jetBrainsMedium(11))
+//                                        .kerning(2.0)
+//                                        .foregroundColor(themeManager.accentTextColor)
+//                                        .padding(.bottom, 16)
+//                                    
+//                                    // Title with Styled Part
+//                                    titleView(for: pages[index])
+//                                        .multilineTextAlignment(.center)
+//                                        .padding(.horizontal, 40)
+//                                        .padding(.bottom, 20)
+//                                    
+//                                    // Description
+//                                    Text(pages[index].description)
+//                                        .font(.geistMedium(16))
+//                                        .lineSpacing(4)
+//                                        .foregroundColor(Color.textDim60637AA8A4C0)
+//                                        .multilineTextAlignment(.center)
+//                                        .padding(.horizontal, 40)
+//                                    
+//                                    Spacer()
+//                                }
+//                                .frame(minWidth: geometry.size.width)
+//                                .frame(minHeight: geometry.size.height)
+//                            }
+//                        }
+//                        .tag(index)
+//                    }
+//                }
+//                .tabViewStyle(PageTabViewStyle(indexDisplayMode: .never))
+//            } else {
+//                tellUsAbtYourselfView()
+//            }
+            
+            // Custom Page Control
+            HStack(spacing: 8) {
+                ForEach(0...pages.count - 1, id: \.self) { index in
+                    Capsule()
+                        .fill(index <= currentPage ? themeManager.accentGradient : LinearGradient(
+                            colors: [Color.grayCBD5E1475569],
+                            startPoint: .leading,
+                            endPoint: .trailing
+                        ))
+                        .frame(width: index == currentPage ? 24 : 8, height: 8)
+                        .animation(.spring(), value: currentPage)
                 }
-                .padding(.bottom, 28)
-                
-                //Button
-                GradientBgButton(
-                    title       : currentPage == 0 ? "Get started" : "Continue",
-                    isSolid     : true,
-                    showChevron : true
-                ) {
+            }
+            .padding(.vertical, 28)
+            
+            // Action Button
+            GradientBgButton(
+                title       : currentPage != 4 ? (currentPage == 0 ? "Get started" : "Continue") : "Start tracking",
+                isSolid     : true,
+                showChevron : true
+            ) {
+                if currentPage != 4 {
                     withAnimation {
                         currentPage += 1
                     }
+                } else {
+                    updateOnboardingApi()
                 }
-                .padding(.horizontal, 20)
-                .padding(.bottom, 50)
-            } else {
-                // Setup View (5th Step)
-                tellUsAbtYourselfView()
-                    .transition(.move(edge: .trailing).combined(with: .opacity))
-                
-                GradientBgButton(
-                    title       : "Start tracking",
-                    isSolid     : true,
-                    showChevron : true
-                ) {
-                    // Final API Call and navigation
-                    // updateOnboardingApi()
-                    AppState.shared.login()
-                    router.navigate(to: .home)
-                }
-                .padding(.horizontal, 20)
-                .padding(.bottom, 50)
             }
+            .padding(.horizontal, 20)
+            .padding(.bottom, 50)
         }
         .applyAppBackground()
         .navigationBarBackButtonHidden(true)
+        .onAppear{
+            if commonApiVM.currencyResponse != nil {
+                selectedCurrency = commonApiVM.currencyResponse?.first(where: { $0.code == Constants.shared.currencyCode })
+            }else{
+                commonApiVM.getCurrencies()
+            }
+            
+            if commonApiVM.countriesResponse != nil {
+                selectedCountry = commonApiVM.countriesResponse?.first(where: { $0.countryCode == Constants.shared.regionCode })
+            }else{
+                commonApiVM.getCountries()
+            }
+        }
+        .onChange(of: commonApiVM.countriesResponse) { countries in
+            if selectedCountry == nil {
+                selectedCountry = countries?.first(where: { $0.countryCode == Constants.shared.regionCode })
+            }
+        }
+        //        .sheet(isPresented: $showCountrySheet) {
+        //            CountriesBottomSheet(selectedCurrency   : $selectedCurrency,
+        //                                 selectedCountry    : $selectedCountry,
+        //                                 isCountry          : true,
+        //                                 currencyResponse   : commonApiVM.currencyResponse,
+        //                                 countryResponse    : commonApiVM.countriesResponse,
+        //                                 header             : "Select your Country",
+        //                                 placeholder        : "Search",
+        //                                 isDialCode          : false)
+        //            .presentationDetents([.large])
+        //            .presentationDragIndicator(.hidden)
+        //        }
     }
     
     @ViewBuilder
@@ -236,169 +348,111 @@ struct OnboardingView: View {
     //MARK: - User defined methods
     //MARK: Tell us about yourself view
     func tellUsAbtYourselfView() -> some View {
-        ScrollView(showsIndicators: false) {
-            VStack(alignment: .leading, spacing: 32) {
-                VStack(alignment: .leading, spacing: 8) {
-                    Text("One last thing.")
-                        .font(.geistSemiBold(34))
-                        .foregroundColor(Color.textPrimary0E101AF4F1FB)
+        ScrollViewReader { proxy in
+            ScrollView(showsIndicators: false) {
+                VStack(alignment: .leading, spacing: 38) {
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("One last thing.")
+                            .font(.geistSemiBold(33))
+                            .foregroundColor(Color.textPrimary0E101AF4F1FB)
+                        
+                        Text("Helps us tune your dashboard.")
+                            .font(.geistMedium(18))
+                            .foregroundColor(Color.textDim60637AA8A4C0)
+                    }
+                    .padding(.top, 20)
+                    .padding(.horizontal, 4)
                     
-                    Text("Helps us tune your dashboard.")
-                        .font(.appRegular(16))
-                        .foregroundColor(Color.textDim60637AA8A4C0)
-                }
-                .padding(.top, 20)
-                .padding(.horizontal, 4)
-                
-                VStack(alignment: .leading, spacing: 16) {
-                    Text("HOW MANY SUBS?")
-                        .font(.jetBrainsMedium(11))
-                        .kerning(2.0)
-                        .foregroundColor(Color.textDim60637AA8A4C0)
-                        .padding(.horizontal, 4)
+                    VStack(alignment: .leading, spacing: 14) {
+                        Text("HOW MANY SUBS?")
+                            .font(.jetBrainsMedium(14))
+                            .kerning(2.0)
+                            .foregroundColor(Color.textDim60637AA8A4C0)
+                            .padding(.horizontal, 4)
+                        
+                        WrapButtonsView(options: subscriptionOptions,
+                                        selectedIndex: $selectedSubscriptions)
+                    }
                     
-                    WrapButtonsView(options: subscriptionOptions,
-                                    selectedIndex: $selectedSubscriptions)
-                }
-                
-                VStack(alignment: .leading, spacing: 16) {
-                    Text("WHAT KIND?")
-                        .font(.jetBrainsMedium(11))
-                        .kerning(2.0)
-                        .foregroundColor(Color.textDim60637AA8A4C0)
-                        .padding(.horizontal, 4)
+                    VStack(alignment: .leading, spacing: 14) {
+                        Text("HOW MUCH YOU SPEND ON SUBSCRIPTIONS MONTHLY?")
+                            .font(.jetBrainsMedium(14))
+                        //                        .kerning(2.0)
+                            .foregroundColor(Color.textDim60637AA8A4C0)
+                            .padding(.horizontal, 4)
+                        
+                        WrapButtonsView(options: spendingOptions,
+                                        selectedIndex: $selectedSpending)
+                    }
                     
-                    WrapButtonsView(options: spendingOptions,
-                                    selectedIndex: $selectedSpending)
-                }
-                
-                VStack(alignment: .leading, spacing: 16) {
-                    Text("YOUR COUNTRY")
-                        .font(.jetBrainsMedium(11))
-                        .kerning(2.0)
-                        .foregroundColor(Color.textDim60637AA8A4C0)
-                        .padding(.horizontal, 4)
-                    
-                    Button {
-                        if commonApiVM.countriesResponse != nil {
-                            showCountrySheet = true
-                        } else {
-                            commonApiVM.getCountries()
-                        }
-                    } label: {
-                        HStack(spacing: 12) {
-                            ZStack {
-                                Circle()
-                                    .fill(Color.gray.opacity(0.1))
-                                    .frame(width: 40, height: 40)
-                                
-                                if let flag = selectedCountry?.countryFlag {
-                                    AsyncImage(url: URL(string: flag)) { image in
-                                        image.resizable()
-                                    } placeholder: {
-                                        ProgressView()
-                                    }
-                                    .frame(width: 24, height: 24)
-                                    .clipShape(Circle())
-                                } else {
-                                    Text("AE")
-                                        .font(.appBold(12))
-                                        .foregroundColor(Color.textPrimary0E101AF4F1FB)
+                    InlineSelectionView(
+                        title: "YOUR COUNTRY",
+                        items: filteredCountries,
+                        selectedItem: $selectedCountry,
+                        isExpanded: $isCountryExpanded,
+                        searchText: $countrySearchText,
+                        placeholder: "Search Country...",
+                        labelProvider: { $0.countryName ?? "" },
+                        flagProvider: { $0.countryFlag ?? "" },
+                        detailProvider: nil,
+                        secondaryDetailProvider: nil
+                    )
+                    .id("countrySelection")
+                    .onChange(of: isCountryExpanded) { expanded in
+                        if expanded {
+                            withAnimation { isCurrencyExpanded = false }
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
+                                withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
+                                    proxy.scrollTo("countrySelection", anchor: .bottom)
                                 }
                             }
-                            
-                            Text(selectedCountry?.countryName ?? "UAE Dirham")
-                                .font(.appSemiBold(16))
-                                .foregroundColor(Color.textPrimary0E101AF4F1FB)
-                            
-                            Spacer()
-                            
-                            Image(systemName: "chevron.down")
-                                .font(.system(size: 14, weight: .bold))
-                                .foregroundColor(Color.textDim60637AA8A4C0)
                         }
-                        .padding(.horizontal, 16)
-                        .frame(height: 64)
-                        .background(Color.whiteNeutralCardBG)
-                        .cornerRadius(16)
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 16)
-                                .stroke(Color.white.opacity(0.1), lineWidth: 1)
-                        )
                     }
-                }
-                
-                VStack(alignment: .leading, spacing: 16) {
-                    Text("YOUR CURRENCY")
-                        .font(.jetBrainsMedium(11))
-                        .kerning(2.0)
-                        .foregroundColor(Color.textDim60637AA8A4C0)
-                        .padding(.horizontal, 4)
                     
-                    Button {
-                        // Currency selection action
-                    } label: {
-                        HStack(spacing: 12) {
-                            ZStack {
-                                Circle()
-                                    .fill(Color.gray.opacity(0.1))
-                                    .frame(width: 40, height: 40)
-                                
-                                Text(selectedCountry?.countryCode ?? "AE")
-                                    .font(.appBold(12))
-                                    .foregroundColor(Color.textPrimary0E101AF4F1FB)
+                    InlineSelectionView(
+                        title: "YOUR CURRENCY",
+                        items: filteredCurrencies,
+                        selectedItem: $selectedCurrency,
+                        isExpanded: $isCurrencyExpanded,
+                        searchText: $currencySearchText,
+                        placeholder: "Search Currency...",
+                        labelProvider: { $0.name ?? "" },
+                        flagProvider: { $0.flag ?? "" },
+                        detailProvider: { $0.code ?? "" },
+                        secondaryDetailProvider: { $0.symbol ?? "" }
+                    )
+                    .id("currencySelection")
+                    .onChange(of: isCurrencyExpanded) { expanded in
+                        if expanded {
+                            withAnimation { isCountryExpanded = false }
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
+                                withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
+                                    proxy.scrollTo("currencySelection", anchor: .bottom)
+                                }
                             }
-                            
-                            VStack(alignment: .leading, spacing: 2) {
-                                Text(selectedCountry?.countryName ?? "UAE Dirham")
-                                    .font(.appSemiBold(16))
-                                    .foregroundColor(Color.textPrimary0E101AF4F1FB)
-                                Text(selectedCurrency?.code ?? "AED")
-                                    .font(.appRegular(12))
-                                    .foregroundColor(Color.textDim60637AA8A4C0)
-                            }
-                            
-                            Spacer()
-                            
-                            Text(selectedCurrency?.symbol ?? "د.إ")
-                                .font(.appBold(20))
-                                .foregroundColor(themeManager.accentTextColor)
-                                .padding(.trailing, 8)
-                            
-                            Image(systemName: "chevron.down")
-                                .font(.system(size: 14, weight: .bold))
-                                .foregroundColor(Color.textDim60637AA8A4C0)
                         }
-                        .padding(.horizontal, 16)
-                        .frame(height: 72)
-                        .background(Color.whiteNeutralCardBG)
-                        .cornerRadius(16)
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 16)
-                                .stroke(Color.white.opacity(0.1), lineWidth: 1)
-                        )
                     }
                 }
+                .padding(.horizontal, 25)
+                .padding(.bottom, 20)
             }
-            .padding(.horizontal, 16)
-            .padding(.bottom, 20)
         }
     }
     
     //MARK: - Update onboarding API
-    //    func updateOnboardingApi(){
-    //        let input = UpdateOnboardingRequest(userId                  : Constants.getUserId(),
-    //                                            preferredCurrency       : selectedCurrency?.code ?? "",
-    //                                            preferredCurrencySymbol : selectedCurrency?.symbol ?? "",
-    //                                            noofSubscriptions       : (selectedSubscriptions ?? 0),
-    //                                            averageMonthlySpend     : (selectedSpending ?? 0),
-    //                                            isoCountryCode          : selectedCountry?.countryCode ?? "")
-    //        if let errorMessage = LoginSignupValidations().validateOnboarding(input: input) {
-    //            ToastManager.shared.showToast(message: errorMessage,style: ToastStyle.error)
-    //        } else {
-    //            onboardingVM.updateOnboarding(input: input)
-    //        }
-    //    }
+    func updateOnboardingApi(){
+        let input = UpdateOnboardingRequest(userId                  : Constants.getUserId(),
+                                            preferredCurrency       : selectedCurrency?.code ?? "",
+                                            preferredCurrencySymbol : selectedCurrency?.symbol ?? "",
+                                            noofSubscriptions       : (selectedSubscriptions ?? 0),
+                                            averageMonthlySpend     : (selectedSpending ?? 0),
+                                            isoCountryCode          : selectedCountry?.countryCode ?? "")
+        if let errorMessage = LoginSignupValidations().validateOnboarding(input: input) {
+            ToastManager.shared.showToast(message: errorMessage,style: ToastStyle.error)
+        } else {
+            onboardingVM.updateOnboarding(input: input)
+        }
+    }
 }
 
 struct OnboardingView_Previews: PreviewProvider {
@@ -423,25 +477,25 @@ struct WrapButtonsView: View {
                     }
                 } label: {
                     Text(LocalizedStringKey(option))
-                        .font(.appSemiBold(15))
+                        .font(.geistSemiBold(15))
                         .padding(.horizontal, 20)
                         .padding(.vertical, 12)
-                        .foregroundColor(isSelected ? .white : Color.textPrimary0E101AF4F1FB)
+                        .foregroundColor(isSelected ? .surfaceLightFFFFFF : Color.textPrimary0E101AF4F1FB)
                         .background(
                             Group {
                                 if isSelected {
                                     themeManager.accentGradient
                                 } else {
-                                    Color.whiteNeutralCardBG
+                                    Color.cardBgFFFFFF1A1030
                                 }
                             }
                         )
                         .cornerRadius(12)
-                        .shadow(color: isSelected ? themeManager.accentShadowColor : Color.black.opacity(0.05), 
+                        .shadow(color: isSelected ? themeManager.accentShadowColor : Color.clear,
                                 radius: isSelected ? 8 : 4, x: 0, y: isSelected ? 4 : 2)
                         .overlay(
                             RoundedRectangle(cornerRadius: 12)
-                                .stroke(isSelected ? Color.white.opacity(0.2) : Color.white.opacity(0.1), lineWidth: 1)
+                                .stroke(isSelected ? Color.clear : Color.cardBorderE2E8F0E2E8F0, lineWidth: 1)
                         )
                 }
             }
@@ -595,7 +649,8 @@ struct FlowLayout: Layout {
             let subviewSize = subview.sizeThatFits(proposal)
             
             // Check if the current chip exceeds the container width
-            if currentX + subviewSize.width > containerWidth {
+//            if currentX + subviewSize.width > containerWidth {
+            if currentX + subviewSize.width > bounds.maxX {
                 // Wrap to the next line
                 currentX = bounds.minX
                 currentY += lineHeight + verticalSpacing // Use consistent spacing

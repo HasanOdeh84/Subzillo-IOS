@@ -32,212 +32,197 @@ struct OtpVerifyView: View {
     @State var changeNumberEmail            : String = "number"
     @State var buttonText                   : String = "Phone Number"
     @State var verifyMergeType              : Int = 1
+    @EnvironmentObject var themeManager     : ThemeManager
+    @Environment(\.colorScheme) var colorScheme
     
     //MARK: - Body
     var body: some View {
-        ZStack{
-            Group {
-                Color(.neutralBg100)
+        ZStack {
+            VStack(spacing: 0) {
+                headerView
+                contentView
             }
-            .ignoresSafeArea()
+        }
+        .keyboardAdaptive()
+        .applyAppBackground()
+        .navigationBarBackButtonHidden(true)
+        .onAppear {
+            startTimer()
+            focusedField = 0
+            if let data = SessionManager.shared.loginData {
+                verifyData = data
+                updateVerifyText()
+            }
+        }
+        .onChange(of: otpVerifyVM.resendOtpResponse) { newValue in
+            if newValue {
+                otpFields = Array(repeating: "", count: 6)
+                startTimer()
+                otpVerifyVM.resendOtpResponse = false
+            }
+        }
+        .onChange(of: otpVerifyVM.otpVerified) { verified in
+            if verified {
+                if let data = SessionManager.shared.loginData {
+                    verifyData = data
+                }
+                updateVerifyText()
+                otpFields = Array(repeating: "", count: 6)
+                startTimer()
+            }
+        }
+    }
+    
+    @ViewBuilder
+    private var headerView: some View {
+        HStack {
+            CircleBackButton {
+                AppIntentRouter.shared.pop()
+            }
+            Spacer()
+        }
+        .padding(.leading, 40)
+        .padding(.top, 20)
+        .padding(.bottom, 10)
+    }
+    
+    @ViewBuilder
+    private var contentView: some View {
+        VStack {
+            Spacer()
             
-            ScrollView{
-                VStack() {
-                    Text("Welcome to")
-                        .font(.appRegular(24))
-                        .foregroundColor(Color.neutralMain700)
-                        .multilineTextAlignment(.center)
-                    
-                    Image("logo_svg")
-                        .resizable()
-                        .scaledToFit()
-                        .frame(width: 128,height: 88)
-                        .padding(.vertical,24)
-                    
-                    VStack(spacing: 4) {
-                        Text(verifyText)
-                            .font(.appRegular(24))
-                            .foregroundColor(Color.gray)
-                            .multilineTextAlignment(.center)
-                        Text("We send a code to your \(sendCodeText)")
-                            .font(.appRegular(16))
-                            .foregroundColor(Color.gray)
-                            .multilineTextAlignment(.center)
-                    }
-                    
-                    Text("Enter validation code")
-                        .font(.appRegular(14))
-                        .foregroundColor(Color.neutralMain700)
-                        .multilineTextAlignment(.center)
-                        .padding(.top,24)
-                        .padding(.bottom,4)
-                    
-                    //                    HStack(spacing: 16) {
-                    HStack(spacing: UIScreen.main.bounds.width * 0.03) {
-                        ForEach(0..<6, id: \.self) { index in
-                            OTPTextField(text: $otpFields[index], focusedField: _focusedField, isPasting: self.$isPasting, index: index, onBackspace: {index in
-                                if index > 0 {
-                                    focusedField = index - 1
-                                }
-                            }, onPaste: pasteOTP)
-                            .onAppear {
-                                // Focus the first field on appear is handled by parent, 
-                                // this block was redundant and was creating unused wrappers.
-                            }
-                        }
-                    }
-                    .frame(maxWidth: .infinity)
-                    .padding(.horizontal)
-                    
-                    HStack(){
-                        Spacer()
-                        CustomButton(title: "Verify \(buttonText)") {
-                            verifyOtp()
-                        }
-                        Spacer()
-                    }
-                    .padding(.vertical,24)
-                    
-                    ZStack{
-                        VStack{
-                            Text("00:\(String(format: "%02d", timer))")
-                                .font(.appRegular(28))
-                                .foregroundColor(.blueMain700)
-                        }
-                        .frame(width: 166, height: 66)
-                        .cornerRadius(12)
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 12)
-                                .stroke(Color.neutral2200, lineWidth: 1)
-                        )
-                        VStack{
-                            Text("Resend code in")
-                                .font(.appRegular(14))
-                                .foregroundColor(Color.neutral500)
-                                .multilineTextAlignment(.center)
-                                .padding(.horizontal,8)
-                                .padding(.vertical,3)
-                                .background(.whiteNeutralCardBG)
-                        }
-                        .padding(.top,-44)
-                    }
-                    
-                    Text("Didn't receive the code?")
-                        .font(.appRegular(16))
-                        .foregroundColor(Color.neutralMain700)
-                        .multilineTextAlignment(.center)
-                        .padding(.vertical,24)
-                    
-                    underlineText(text: "Resend Code", image: "resend") {
-                        otpVerifyVM.resendOtp(input: ResendOtpRequest(userId        : Constants.getUserId(),
-                                                                      verifyType    : verifyData?.verifyType))
-                    }
-                    .disabled(timer == 0 ? false : true)
-                    .opacity(timer == 0 ? 1.0 : 0.6)
-                    
-                    underlineText(text: "Change \(changeNumberEmail)", image: "phone") {
-                        let data = LoginSignupVerifyData(verifyType         : verifyData?.verifyType == 2 ? 1 : 2,
-                                                         email              : SessionManager.shared.loginData?.email,
-                                                         phoneNumber        : SessionManager.shared.loginData?.phoneNumber,
-                                                         countryCode        : SessionManager.shared.loginData?.countryCode,
-                                                         userId             : SessionManager.shared.loginData?.userId ?? "",
-                                                         isNewUser          : SessionManager.shared.loginData?.isNewUser ?? false,
-                                                         isSignupCompleted  : SessionManager.shared.loginData?.isSignupCompleted ?? false,
-                                                         fullName           : SessionManager.shared.loginData?.fullName,
-                                                         socialLogin        : verifyData?.socialLogin ?? false)
-                        SessionManager.shared.saveLoginData(data)
-                        AppIntentRouter.shared.pop()
-                    }
-                    .padding(.top,24)
-                    .padding(.bottom,30)
-                    
-                    TermsAndPrivacyText(
-                        onTapTerms: {
-                            Constants.FeatureConfig.performS4Action {
-                                otpVerifyVM.navigate(to: NavigationRoute.termsAndPrivacy(isTerm: true))
-                            }
-                        },
-                        onTapPrivacy: {
-                            Constants.FeatureConfig.performS4Action {
-                                otpVerifyVM.navigate(to: NavigationRoute.termsAndPrivacy(isTerm: false))
-                            }
-                        }
-                    )
-                    
-                    Spacer()
-                }
-                .padding(20)
-                .onAppear {
-                    startTimer()
-                    focusedField = 0
-                    if let data = SessionManager.shared.loginData {
-                        verifyData = data
-                        if fromLogin{
-                            if verifyData?.verifyType == 1{
-                                verifyText = "Verify Phone Number"
-                                sendCodeText = "phone number"
-                                changeNumberEmail = "number"
-                                buttonText = "Phone Number"
-                            }else{
-                                verifyText = "Verify Email Address"
-                                sendCodeText = "email"
-                                changeNumberEmail = "email"
-                                buttonText = "Email"
-                            }
-                        }else{
-                            //                            if verifyData?.verifyType == 1{
-                            //                                verifyText = "Verify Email Address"
-                            //                                sendCodeText = "email"
-                            //                                changeNumberEmail = "email"
-                            //                                buttonText = "Email"
-                            //                            }else{
-                            //                                verifyText = "Verify Phone Number"
-                            //                                sendCodeText = "phone number"
-                            //                                changeNumberEmail = "number"
-                            //                                buttonText = "Phone Number"
-                            //                            }
-                            if verifyData?.verifyType == 1{
-                                verifyText = "Verify Phone Number"
-                                sendCodeText = "phone number"
-                                changeNumberEmail = "number"
-                                buttonText = "Phone Number"
-                            }else{
-                                verifyText = "Verify Email Address"
-                                sendCodeText = "email"
-                                changeNumberEmail = "email"
-                                buttonText = "Email"
-                            }
-                        }
-                    }
-                }
-                .onChange(of: otpVerifyVM.resendOtpResponse) { newValue in
-                    if newValue {
-                        otpFields = Array(repeating: "", count: 6)
-                        startTimer()
-                        otpVerifyVM.resendOtpResponse = false
-                    }
-                }
-                .onChange(of: otpVerifyVM.otpVerified) { verified in
-                    if verified {
-                        if let data = SessionManager.shared.loginData {
-                            verifyData = data
-                        }
-                        verifyText          = "Verify Phone Number"
-                        sendCodeText        = "phone number"
-                        changeNumberEmail   = "number"
-                        buttonText          = "Phone Number"
-                        otpFields = Array(repeating: "", count: 6)
-                        startTimer()
-                    }
-                }
-                .navigationBarBackButtonHidden(true)
-                //                .sheet(isPresented: $showNumberSheet) {
-                //                    BottomSheetView(header:"Change mobile number",selectedCurrency: $selectedCurrency, phoneNumber: $phoneNumber)
-                //                        .presentationDragIndicator(.hidden)
-                //                    //                        .presentationDetents([.medium])
-                //                        .presentationDetents([.height(320)])
-                //                }
+            VStack(spacing: 24) {
+                cardHeader
+                    .padding(.top, 24)
+                otpFieldsSection
+                timerSection
+                actionButtons
             }
+            .background(cardBackground)
+            .padding(.horizontal, 40) // Spacing from screen edges
+            //            .padding(.bottom, 120)    // Padding for keyboard clearance
+            
+            Spacer()
+        }
+    }
+    
+    @ViewBuilder
+    private var cardHeader: some View {
+        HStack(alignment: .center, spacing: 16) {
+            ZStack {
+                RoundedRectangle(cornerRadius: 14)
+                    .fill(themeManager.accentTextColor.opacity(0.133))
+                    .frame(width: 44, height: 44)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 14)
+                            .stroke(
+                                themeManager.accentColor.opacity(0.267),
+                                lineWidth: 1
+                            )
+                    )
+                
+                Image(verifyData?.verifyType == 2 ? "email_purple" : "phone_purple")
+                    .renderingMode(.template)
+                    .frame(width: 20, height: 20)
+                    .foregroundColor(themeManager.accentTextColor)
+            }
+            
+            VStack(alignment: .leading, spacing: 4) {
+                Text(verifyText)
+                    .font(.geistBold(18))
+                    .foregroundColor(.textPrimary0E101AF4F1FB)
+                
+                HStack(spacing: 4) {
+                    Text("Code sent to")
+                        .font(.geistRegular(12))
+                        .foregroundColor(themeManager.textPrimaryLight6_dark62)
+                    Text(verifyData?.verifyType == 2 ? (verifyData?.email ?? "") : (verifyData?.phoneNumber ?? ""))
+                        .font(.geistSemiBold(12))
+                        .foregroundColor(.textPrimary0E101AF4F1FB)
+                }
+            }
+            Spacer()
+        }
+        .padding(.horizontal, 20)
+    }
+    
+    @ViewBuilder
+    private var otpFieldsSection: some View {
+        HStack(spacing: 10) { // Slightly tighter spacing to fit margins
+            ForEach(0..<6, id: \.self) { index in
+                OTPTextField(text: $otpFields[index], focusedField: _focusedField, isPasting: self.$isPasting, index: index, onBackspace: { index in
+                    if index > 0 {
+                        focusedField = index - 1
+                    }
+                }, onPaste: pasteOTP)
+            }
+        }
+        .padding(.horizontal, 20)
+    }
+    
+    @ViewBuilder
+    private var timerSection: some View {
+        if timer > 0 {
+            HStack(spacing: 4) {
+                Text("Resend in")
+                    .font(.geistRegular(13))
+                    .foregroundColor(themeManager.textPrimaryLight6_dark62)
+                Text("00:\(String(format: "%02d", timer))")
+                    .font(.geistBold(14))
+                    .foregroundColor(.textPrimary0E101AF4F1FB)
+            }
+        } else {
+            Button {
+                otpVerifyVM.resendOtp(input: ResendOtpRequest(userId: Constants.getUserId(), verifyType: verifyData?.verifyType))
+            } label: {
+                Text("Resend code")
+                    .font(.geistSemiBold(13))
+                    .foregroundStyle(themeManager.accentGradient)
+            }
+        }
+    }
+    
+    @ViewBuilder
+    private var actionButtons: some View {
+        let isOtpComplete = otpFields.joined().count == 6
+        
+        Button {
+            verifyOtp()
+        } label: {
+            HStack {
+                Text("Verify")
+                Image(systemName: "arrow.right")
+            }
+            .font(.geistBold(15))
+            .foregroundColor(isOtpComplete ? .white : themeManager.textPrimaryLight6_dark62)
+            .frame(maxWidth: .infinity)
+            .frame(height: 52)
+            .background(isOtpComplete ? AnyView(themeManager.accentGradient) :  colorScheme == .light ? AnyView(Color.black.opacity(0.07)) : AnyView(Color.white.opacity(0.08)))
+            .cornerRadius(16)
+            .shadow(color: isOtpComplete ? themeManager.accentShadowColor : .clear, radius: 12, x: 0, y: 8)
+        }
+        .disabled(!isOtpComplete)
+        .padding(.horizontal, 20)
+        .padding(.bottom, 32)
+    }
+    
+    @ViewBuilder
+    private var cardBackground: some View {
+        RoundedRectangle(cornerRadius: 28)
+            .fill(colorScheme == .dark ? Color.grayBg0E0820.opacity(0.94) : Color.surfaceLightFFFFFF.opacity(0.97))
+            .overlay(
+                RoundedRectangle(cornerRadius: 28)
+                    .stroke(Color.textPrimary0E101AF4F1FB.opacity(0.14), lineWidth: 1)
+            )
+    }
+    
+    private func updateVerifyText() {
+        if verifyData?.verifyType == 1 {
+            verifyText = "Verify your phone"
+            sendCodeText = "phone number"
+        } else {
+            verifyText = "Verify your email"
+            sendCodeText = "email"
         }
     }
     
@@ -317,6 +302,9 @@ struct OTPTextField: View {
     var onBackspace: (_ index: Int) -> Void
     var onPaste: (String) -> Void
     
+    @Environment(\.colorScheme) var colorScheme
+    @EnvironmentObject var themeManager: ThemeManager
+    
     var body: some View {
         UITextFieldWrapper(text: $text, onBackspace: {
             DispatchQueue.main.async {
@@ -328,12 +316,29 @@ struct OTPTextField: View {
             focusedField = nil // dismiss keyboard
         })
         //        .frame(width: 63, height: 62)
-        .frame(width: UIScreen.main.bounds.width * 0.12, height: UIScreen.main.bounds.width * 0.12)
-        .background(Color.whiteBlackBG)
+        .frame(width: UIScreen.main.bounds.width * 0.12, height: UIScreen.main.bounds.width * 0.14)
+        .background(colorScheme == .dark ? Color.white.opacity(0.04) : Color.offWhiteF9F9FB)
         .cornerRadius(12)
         .overlay(
-            RoundedRectangle(cornerRadius: 12)
-                .stroke(Color.neutral2200, lineWidth: 1)
+            ZStack {
+                // Soft outer glow/border
+                if focusedField == index {
+                    RoundedRectangle(cornerRadius: 14)
+                        .stroke(
+                            themeManager.accentTextColor.opacity(0.25),
+                            lineWidth: 4
+                        )
+                        .padding(-2)
+                }
+                // Main sharp border
+                RoundedRectangle(cornerRadius: 12)
+                    .stroke(
+                        focusedField == index
+                        ? themeManager.accentTextColor
+                        : Color.textPrimary0E101AF4F1FB.opacity(0.12),
+                        lineWidth: focusedField == index ? 1.5 : 1
+                    )
+            }
         )
         .multilineTextAlignment(.center)
         .keyboardType(.numberPad)

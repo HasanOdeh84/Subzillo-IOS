@@ -73,7 +73,7 @@ class RegistrationViewModel: ObservableObject {
                             router.navigate(to: .verifyOtp(fromLogin: false))
                         }
                         else{
-                            router.navigate(to: .SuccessView(isOtp: false))
+                            router.navigate(to: .onboarding)
                         }
                     }else if response.data?.emailOtpVerifiedStatus == false && response.data?.mobileOtpVerifiedStatus == true{
                         if input.email != appleEmail{
@@ -95,7 +95,7 @@ class RegistrationViewModel: ObservableObject {
                             router.navigate(to: .verifyOtp(fromLogin: false))
                         }
                         else{
-                            router.navigate(to: .SuccessView(isOtp: false))
+                            router.navigate(to: .onboarding)
                         }
                     }else if response.data?.emailOtpVerifiedStatus == true && response.data?.mobileOtpVerifiedStatus == false{
                         let verifyType = 1
@@ -112,7 +112,7 @@ class RegistrationViewModel: ObservableObject {
                         router.navigate(to: .verifyOtp(fromLogin: false))
                     }
                     else{
-                        router.navigate(to: .SuccessView(isOtp: false))
+                        router.navigate(to: .onboarding)
                     }
                 }else if fromSocialLogin && (verifyData?.socialLoginType == loginType.google || verifyData?.socialLoginType == loginType.microsoft){
                     if input.phoneNumber != ""{
@@ -129,7 +129,7 @@ class RegistrationViewModel: ObservableObject {
                         router.navigate(to: .verifyOtp(fromLogin: false))
                     }
                     else{
-                        router.navigate(to: .SuccessView(isOtp: false))
+                        router.navigate(to: .onboarding)
                     }
                 }
                 else{
@@ -146,7 +146,7 @@ class RegistrationViewModel: ObservableObject {
                         self.sessionManager.saveLoginData(data)
                         router.navigate(to: .verifyOtp(fromLogin: false))
                     }else{
-                        router.navigate(to: .SuccessView(isOtp: false))
+                        router.navigate(to: .onboarding)
                     }
                 }
             }

@@ -109,7 +109,6 @@ struct CountriesBottomSheet: View {
                                     .frame(maxWidth: .infinity, minHeight: 56)
                                     .contentShape(Rectangle())
                                 }
-                                .buttonStyle(.plain) // remove SwiftUI’s default button padding
                                 
                                 if country != filteredCountries.last {
                                     Rectangle()
@@ -169,7 +168,6 @@ struct CountriesBottomSheet: View {
                                     .frame(maxWidth: .infinity, minHeight: 56)
                                     .contentShape(Rectangle())
                                 }
-                                .buttonStyle(.plain)
                                 
                                 if currency != filteredCurrencies.last {
                                     Rectangle()

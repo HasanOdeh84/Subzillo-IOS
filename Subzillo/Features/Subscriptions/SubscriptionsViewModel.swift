@@ -562,3 +562,106 @@ struct CancelDeleteView: View {
         .frame(height: 44)
     }
 }
+struct UpcomingSubscriptionRow: View {
+    
+    var subscriptionData: SubscriptionListData
+    @EnvironmentObject var themeManager: ThemeManager
+    
+    var body: some View {
+        
+        HStack(spacing: 12) {
+            // MARK: - Date Box
+            VStack(spacing: 2) {
+                
+                Text(getMonthAndDay(from: subscriptionData.nextPaymentDate ?? "").month.uppercased())
+                    .font(.jetBrainsMedium(9))
+                    .foregroundColor(
+                        Color.gradientPurple
+                    )
+                    .tracking(1)
+                
+                Text(getMonthAndDay(from: subscriptionData.nextPaymentDate ?? "").day)
+                    .font(.geistSemiBold(14))
+                    .foregroundColor(
+                        Color.textPrimary0E101AF4F1FB
+                    )
+                    .lineLimit(1)
+            }
+            .frame(width: 44, height: 44)
+            .background(
+                themeManager.accentGradient.opacity(0.13)
+            )
+            .overlay(
+                RoundedRectangle(cornerRadius: 12)
+                    .stroke(
+                        themeManager.selectedAccent.primaryColor.opacity(0.2),
+                        lineWidth: 1
+                    )
+            )
+            .clipShape(
+                RoundedRectangle(cornerRadius: 12)
+            )
+            
+            // MARK: -  Icon
+            AvatarView(serviceName: subscriptionData.serviceName ?? "", serviceLogo: subscriptionData.serviceLogo ?? "", size: 32)
+            
+            // MARK: - Content
+            VStack(alignment: .leading, spacing: 2) {
+                
+                Text(subscriptionData.serviceName ?? "")
+                    .font(.geistSemiBold(13))
+                    .foregroundColor(
+                        Color.textPrimary0E101AF4F1FB
+                    )
+                    .lineLimit(1)
+                
+                Text("in \(Constants.shared.dateConversion(subscriptionData.nextPaymentDate ?? "").daysDifferenceFromToday() ?? 0)d")
+                    .font(.jetBrainsRegular(10))
+                    .foregroundColor(
+                        Color.black.opacity(0.6)
+                    )
+                    .lineLimit(1)
+            }
+            
+            Spacer(minLength: 8)
+            
+            // MARK: - Amount
+            Text("\(subscriptionData.currencySymbol ?? "")\(String(describing: subscriptionData.amount ?? 0.0))")
+                .font(.geistSemiBold(14))
+                .foregroundColor(
+                    Color.textPrimary0E101AF4F1FB
+                )
+                .lineLimit(1)
+        }
+        .padding(12)
+        .background(Color.white)
+        .overlay(
+            RoundedRectangle(cornerRadius: 14)
+                .stroke(
+                    Color.black.opacity(0.08),
+                    lineWidth: 1
+                )
+        )
+        .clipShape(
+            RoundedRectangle(cornerRadius: 14)
+        )
+    }
+}
+func getMonthAndDay(from dateString: String) -> (month: String, day: String) {
+    
+    let formatter = DateFormatter()
+    formatter.dateFormat = "yyyy-MM-dd"
+    
+    guard let date = formatter.date(from: dateString) else {
+        return ("", "")
+    }
+    
+    let monthFormatter = DateFormatter()
+    monthFormatter.dateFormat = "MMM"
+    
+    let month = monthFormatter.string(from: date)
+    
+    let day = Calendar.current.component(.day, from: date)
+    
+    return (month, "\(day)")
+}

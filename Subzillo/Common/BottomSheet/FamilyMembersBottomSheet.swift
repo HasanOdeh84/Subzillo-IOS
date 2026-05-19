@@ -81,7 +81,6 @@ struct FamilyMembersBottomSheet: View {
                                     .frame(maxWidth: .infinity, minHeight: 56)
                                     .contentShape(Rectangle())
                                 }
-                                .buttonStyle(.plain)
                                 
                                 if member.id != filteredMembers.last?.id {
                                     Rectangle()

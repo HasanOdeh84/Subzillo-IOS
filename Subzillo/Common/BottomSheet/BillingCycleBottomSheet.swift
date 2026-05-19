@@ -111,7 +111,6 @@ struct BillingCycleBottomSheet: View {
                             .frame(maxWidth: .infinity, minHeight: 56)
                             .contentShape(Rectangle())
                         }
-                        .buttonStyle(.plain)
 
                         if billing != filteredCategories.last {
                             Rectangle()

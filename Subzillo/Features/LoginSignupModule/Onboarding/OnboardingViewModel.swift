@@ -31,7 +31,7 @@ class OnboardingViewModel: ObservableObject {
             PrintLogger.modelLog(response, type: .response, isInput: false)
             ToastManager.shared.showToast(message: response.message ?? "")
             AppState.shared.login()
-            self?.router.navigate(to: .home)
+            self?.router.navigate(to: .onboardingSuccess)
         }
         .store(in: &self.subscriptions)
     }

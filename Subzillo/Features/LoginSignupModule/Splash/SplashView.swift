@@ -28,7 +28,9 @@ struct SplashView: View {
         VStack {
             Spacer()
             
-            LottieView(name: "splash_animation", loopMode: .loop)
+//            LottieView(name: "splash_animation", loopMode: .loop)
+//                .frame(width: 300, height: 300)
+            Image("splash_new")
                 .frame(width: 300, height: 300)
             
             Spacer()
@@ -41,13 +43,6 @@ struct SplashView: View {
                             .frame(height: 4)
                         
                         Capsule()
-//                            .fill(
-//                                LinearGradient(
-//                                    colors: [Color.brandFromDarkA719DD, Color.brandToDark4489EB],
-//                                    startPoint: .leading,
-//                                    endPoint: .trailing
-//                                )
-//                            )
                             .fill(themeManager.accentGradient)
                             .frame(width: geo.size.width * progress, height: 4)
                     }
@@ -76,9 +71,26 @@ struct SplashView: View {
     }
     
     private func startSplashSequence() {
-        withAnimation(.linear(duration: 3.0)) {
-            progress = 1.0
+        progress = 0.0
+        
+        let totalSteps = 100
+        let duration: Double = 3.0
+        let stepDuration = duration / Double(totalSteps)
+        
+        var currentStep = 0
+        Timer.scheduledTimer(withTimeInterval: stepDuration, repeats: true) { timer in
+            currentStep += 1
+            let targetProgress = CGFloat(currentStep) / CGFloat(totalSteps)
+            
+            withAnimation(.linear(duration: stepDuration)) {
+                self.progress = targetProgress
+            }
+            
+            if currentStep >= totalSteps {
+                timer.invalidate()
+            }
         }
+        
         let initialMessages = Array(statusMessages.prefix(4))
         for (index, message) in initialMessages.enumerated() {
             let delay = Double(index) * 0.675
@@ -101,6 +113,8 @@ struct SplashView: View {
     private func navigateToNextScreen() {
         // If a notification already triggered a navigation,
         // don't perform the default splash navigation.
+        
+        
         if router.hasNavigatedFromSplash {
             return
         }
@@ -112,7 +126,7 @@ struct SplashView: View {
                 router.resetStack(to: [.home])
             }
         } else {
-            router.resetStack(to: [.onboarding])
+            router.resetStack(to: [.login])
         }
     }
 }

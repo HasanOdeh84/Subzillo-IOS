@@ -14,9 +14,9 @@ enum EmailProvider: Int {
     
     var iconName: String {
         switch self {
-        case .gmail: return "google2"
-        case .microsoft: return "micorsoft2"
-        case .yahoo: return "iCloud_2"
+        case .gmail: return "google_new"
+        case .microsoft: return "microsoft_new"
+        case .yahoo: return "iCloud_new"
         }
     }
 }

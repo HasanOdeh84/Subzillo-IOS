@@ -49,7 +49,7 @@ class OtpVerifyViewModel: ObservableObject {
                 otpVerified = true
             }else{
                 if sessionManager.loginData?.isNewUser == true && fromLogin{
-                    router.navigate(to: .SuccessView(isOtp: true,isMobile: input.verifyType == 1 ? true : false))
+                    router.navigate(to: .signup())
                 }else{
                     if sessionManager.loginData?.isSignupCompleted == true{
                         if !(sessionManager.loginData?.onboardingStatus ?? false) && sessionManager.loginData?.isSignupCompleted == true{
@@ -70,7 +70,7 @@ class OtpVerifyViewModel: ObservableObject {
                         if fromLogin{
                             router.navigate(to: .signup())
                         }else{
-                            router.navigate(to: .SuccessView(isOtp: false))
+                            router.navigate(to: .onboarding)
                         }
                     }
                     

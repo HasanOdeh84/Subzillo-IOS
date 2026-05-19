@@ -24,72 +24,125 @@ struct RegistrationView: View {
     @State var isEmailDisabled                          = false
     @State var isNameDisabled                           = false
     @State var appleEmail                               = ""
+    @Environment(\.dismiss) var dismiss
+    @EnvironmentObject var themeManager                 : ThemeManager
     
     //MARK: - body
-    var body: some View{
-        ZStack{
-            Group {
-                Color(.neutralBg100)
-            }
-            .ignoresSafeArea()
-            
-            ScrollView{
-                VStack(spacing: 24) {
-                    Text("Welcome to")
-                        .font(.appRegular(24))
-                        .foregroundColor(Color.neutralMain700)
-                        .multilineTextAlignment(.center)
-                        .padding(.top, 40)
+    var body: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: 24) {
+                // Header section
+                VStack(alignment: .leading, spacing: 24) {
+                    // Back Button
+                    CircleBackButton {
+                        AppIntentRouter.shared.pop()
+                    }
                     
-                    Image("logo_svg")
-                        .resizable()
-                        .scaledToFit()
-                        .frame(width: 128,height: 88)
-                        .padding(.vertical,24)
+                    // Logo with Glow
+                    ZStack {
+                        Circle()
+                            .fill(themeManager.accentColor.opacity(0.3))
+                            .frame(width: 80, height: 80)
+                            .blur(radius: 20)
+                        
+                        Image("logo_new")
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 50, height: 80)
+                    }
+                    .padding(.leading, -20)
+                    .padding(.bottom, -15)
                     
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text("Create your account")
+                            .font(.geistBold(26))
+                            .foregroundColor(.textPrimary0E101AF4F1FB)
+                        
+                        Text("Sign in to subzillo account")
+                            .font(.geistRegular(14))
+                            .foregroundColor(themeManager.textPrimaryLight6_dark62)
+                    }
+                    .padding(.top, -2)
+                }
+                .padding(.top, 70)
+                
+                // Form Fields
+                VStack(spacing: 14) {
                     Group {
-                        if fromSocialLogin{
-                            PhoneNumberField(phoneNumber        : $phoneNumber,
-                                             header             : email == "" ? "Phone number" : "Phone number [Optional]",
-                                             placeholder        : "000 000 000",
-                                             selectedCurrency   : $selectedCurrency,
-                                             selectedCountry    : $selectedCountry,
-                                             isCountry          : true,
-                                             fromSingup         : true,
-                                             fromSocailLogin    : fromSocialLogin)
-                            .addDoneButton{
+                        if fromSocialLogin {
+                            RegistrationFieldSection(header: email == "" ? "ENTER YOUR PHONE NUMBER" : "ENTER YOUR PHONE NUMBER [OPTIONAL]") {
+                                PhoneNumberField(phoneNumber: $phoneNumber,
+                                                 header: "",
+                                                 placeholder: "00 000 0000",
+                                                 selectedCurrency: $selectedCurrency,
+                                                 selectedCountry: $selectedCountry,
+                                                 isCountry: true,
+                                                 fromSingup: true,
+                                                 fromSocailLogin: fromSocialLogin)
+                                .addDoneButton{}
                             }
-                            ReusableTextField(placeholder: "Enter your full name", text: $fullName,header:"Full Name")
-                                .disabled(isNameDisabled)
-                            ReusableTextField(placeholder: "name@example.com", text: $email, isEmail: true,header: "Email")
-                                .disabled(isEmailDisabled)
-                        }else{
-                            PhoneNumberField(phoneNumber        : $phoneNumber,
-                                             header             : verifyData?.verifyType == 1 ? "Phone number" : "Phone number [Optional]",
-                                             placeholder        : "000 000 000",
-                                             selectedCurrency   : $selectedCurrency,
-                                             selectedCountry    : $selectedCountry,
-                                             isCountry          : true,
-                                             fromSingup         : true,
-                                             fromSocailLogin    : fromSocialLogin)
-                            .opacity(verifyData?.verifyType == 1 ? 0.5 : 1.0)
-                            .disabled(verifyData?.verifyType == 1 ? true : false)
-                            .if(verifyData?.verifyType != 1) { view in
-                                view.addDoneButton{}
+                            
+                            RegistrationFieldSection(header: "FULL NAME", icon: "person_new") {
+                                TextField("", text: $fullName, prompt: Text("Enter your full name").foregroundColor(themeManager.textPrimaryLight6_dark62))
+                                    .font(.geistMedium(14))
+                                    .foregroundColor(.textPrimary0E101AF4F1FB)
+                                    .disabled(isNameDisabled)
                             }
-                            ReusableTextField(placeholder: "Enter your full name", text: $fullName,header:"Full Name")
-                                .if(verifyData?.verifyType == 1) { view in
+                            
+                            RegistrationFieldSection(header: "EMAIL", icon: "email_login") {
+                                TextField("", text: $email, prompt: Text(verbatim: "name@example.com").foregroundColor(themeManager.textPrimaryLight6_dark62))
+                                    .font(.geistMedium(14))
+                                    .foregroundColor(.textPrimary0E101AF4F1FB)
+                                    .keyboardType(.emailAddress)
+                                    .autocapitalization(.none)
+                                    .disabled(isEmailDisabled)
+                            }
+                        } else {
+                            RegistrationFieldSection(header: verifyData?.verifyType == 1 ? "ENTER YOUR PHONE NUMBER" : "ENTER YOUR PHONE NUMBER [OPTIONAL]") {
+                                PhoneNumberField(phoneNumber        : $phoneNumber,
+                                                 header             : "",
+                                                 placeholder        : "00 000 0000",
+                                                 selectedCurrency   : $selectedCurrency,
+                                                 selectedCountry    : $selectedCountry,
+                                                 isCountry          : true,
+                                                 fromSingup         : true,
+                                                 fromSocailLogin    : fromSocialLogin)
+                                .opacity(verifyData?.verifyType == 1 ? 0.5 : 1.0)
+                                .disabled(verifyData?.verifyType == 1)
+                                .if(verifyData?.verifyType != 1) { view in
                                     view.addDoneButton{}
                                 }
-                            ReusableTextField(placeholder: "name@example.com", text: $email, isEmail: true,header: verifyData?.verifyType == 1 ? "Email [Optional]" : "Email")
-                                .opacity(verifyData?.verifyType == 2 ? 0.5 : 1.0)
-                                .disabled(verifyData?.verifyType == 2 ? true : false)
+                            }
+                            
+                            RegistrationFieldSection(header: "FULL NAME", icon: "person_new") {
+                                TextField("", text: $fullName, prompt: Text("Enter your full name").foregroundColor(themeManager.textPrimaryLight6_dark62))
+                                    .font(.geistMedium(14))
+                                    .foregroundColor(.textPrimary0E101AF4F1FB)
+                                    .if(verifyData?.verifyType == 1) { view in
+                                        view.addDoneButton{}
+                                    }
+                            }
+                            
+                            RegistrationFieldSection(header: verifyData?.verifyType == 1 ? "EMAIL [OPTIONAL]" : "EMAIL", icon: "email_login") {
+                                TextField("", text: $email, prompt: Text(verbatim: "name@example.com").foregroundColor(themeManager.textPrimaryLight6_dark62))
+                                    .font(.geistMedium(14))
+                                    .foregroundColor(.textPrimary0E101AF4F1FB)
+                                    .keyboardType(.emailAddress)
+                                    .autocapitalization(.none)
+                                    .opacity(verifyData?.verifyType == 2 ? 0.5 : 1.0)
+                                    .disabled(verifyData?.verifyType == 2)
+                            }
                         }
                     }
                     
-                    CustomButton(title: "Finish Sign Up") {
+                    GradientBgButton(
+                        title       : "Create account",
+                        isSolid     : true,
+                        showChevron : true
+                    ) {
                         signupApi()
                     }
+                    .padding(.top, 12)
                     
                     TermsAndPrivacyText(
                         onTapTerms: {
@@ -101,46 +154,46 @@ struct RegistrationView: View {
                             Constants.FeatureConfig.performS4Action {
                                 registerVM.navigate(to: .termsAndPrivacy(isTerm: false))
                             }
-                        },
-                        bottomPadding: 28
+                        }
                     )
-                    Spacer()
-                }
-                //                .addDoneButtonToKeyboard()
-                .padding(20)
-                .navigationBarBackButtonHidden(true)
-                .onAppear{
-                    if let data = SessionManager.shared.loginData{
-                        verifyData = data
-                        if verifyData?.verifyType == 1{
-                            phoneNumber = verifyData?.formattedPhNo ?? ""//verifyData?.phoneNumber ?? ""
-                        }else{
-                            email       = verifyData?.email ?? ""
-                        }
-                        if fromSocialLogin{
-                            isEmailDisabled = email == "" ? false : true
-                            if verifyData?.email?.contains("@privaterelay.appleid.com") == true{
-                                appleEmail  = verifyData?.email ?? ""
-                                email       = ""
-                                isEmailDisabled = false
-                            }else{
-                                email       = verifyData?.email ?? ""
-                                isEmailDisabled = email == "" ? false : true
-                            }
-                            fullName        = verifyData?.fullName ?? ""
-                            isNameDisabled = fullName == "" ? false : true
-                        }
-                    }
+                    .padding(.top, 12)
                 }
             }
-            .keyboardAdaptive()
-            .ignoresSafeArea()
+            .padding(.horizontal, 24)
+            .padding(.bottom, 30)
+        }
+        .applyAppBackground()
+        .navigationBarBackButtonHidden(true)
+        .keyboardAdaptive()
+        .ignoresSafeArea()
+        .onAppear {
+            if let data = SessionManager.shared.loginData {
+                verifyData = data
+                if verifyData?.verifyType == 1 {
+                    phoneNumber = verifyData?.formattedPhNo ?? ""
+                } else {
+                    email = verifyData?.email ?? ""
+                }
+                if fromSocialLogin {
+                    isEmailDisabled = email == "" ? false : true
+                    if verifyData?.email?.contains("@privaterelay.appleid.com") == true {
+                        appleEmail = verifyData?.email ?? ""
+                        email = ""
+                        isEmailDisabled = false
+                    } else {
+                        email = verifyData?.email ?? ""
+                        isEmailDisabled = email == "" ? false : true
+                    }
+                    fullName = verifyData?.fullName ?? ""
+                    isNameDisabled = fullName == "" ? false : true
+                }
+            }
         }
     }
     
     //MARK: - Methods
     //MARK: - Signup API
-    func signupApi(){
+    func signupApi() {
         let phone = phoneNumber.normalizedPhoneNumber()
         let countryCode = phoneNumber.trimmed == "" ? "" : (verifyData?.verifyType == 1 ? verifyData?.countryCode ?? "" : selectedCountry?.dialCode ?? "")
         var input = RegisterRequest(userId              : verifyData?.userId ?? "",
@@ -148,17 +201,63 @@ struct RegistrationView: View {
                                     email               : verifyData?.verifyType == 1 ? email.trimmed : verifyData?.email ?? "",
                                     countryCode         : countryCode,
                                     phoneNumber         : verifyData?.verifyType == 1 ? verifyData?.phoneNumber ?? "" : phone.trimmed)
-        if fromSocialLogin{
+        if fromSocialLogin {
             input = RegisterRequest(userId              : verifyData?.userId ?? "",
                                     fullName            : fullName.trimmed,
                                     email               : email.trimmed,
                                     countryCode         : phoneNumber.trimmed == "" ? "" : selectedCountry?.dialCode ?? "",
                                     phoneNumber         : phone.trimmed)
         }
-        if let errorMessage = LoginSignupValidations().validateSignup(input: input,isSocialLogin: fromSocialLogin) {
+        if let errorMessage = LoginSignupValidations().validateSignup(input: input, isSocialLogin: fromSocialLogin) {
             ToastManager.shared.showToast(message: errorMessage.localized, style: ToastStyle.error)
         } else {
-            registerVM.register(input: input, verifyType: verifyData?.verifyType ?? 0,fromSocialLogin:fromSocialLogin,appleEmail: appleEmail, verifyData: verifyData)
+            registerVM.register(input: input, verifyType: verifyData?.verifyType ?? 0, fromSocialLogin: fromSocialLogin, appleEmail: appleEmail, verifyData: verifyData)
+        }
+    }
+}
+
+struct RegistrationFieldSection<Content: View>: View {
+    let header: String
+    var icon: String? = nil
+    let content: Content
+    
+    @EnvironmentObject var themeManager: ThemeManager
+    
+    init(header: String, icon: String? = nil, @ViewBuilder content: () -> Content) {
+        self.header = header
+        self.icon = icon
+        self.content = content()
+    }
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text(LocalizedStringKey(header))
+                .font(.jetBrainsMedium(11))
+                .foregroundColor(themeManager.textPrimaryLight6_dark62)
+                .tracking(1.2)
+            
+            HStack(spacing: 12) {
+                if let icon = icon {
+                    Image(icon)
+//                        .renderingMode(.template)
+//                        .foregroundColor(.textPrimary0E101AF4F1FB.opacity(0.6))
+                        .frame(width: 20, height: 20)
+                }
+                
+                content
+            }
+            .padding(.horizontal, icon != nil ? 16 : 0)
+            .frame(height: 56)
+            .background(icon != nil ? Color.cardBgLoginFFFFFFFFFFFF : Color.clear)
+            .cornerRadius(12)
+            .overlay(
+                Group {
+                    if icon != nil {
+                        RoundedRectangle(cornerRadius: 12)
+                            .stroke(Color.cardBorderE2E8F0E2E8F0, lineWidth: 1)
+                    }
+                }
+            )
         }
     }
 }
@@ -188,7 +287,3 @@ struct CheckboxToggleStyle: ToggleStyle {
         }
     }
 }
-
-//#Preview {
-//    RegistrationView()
-//}

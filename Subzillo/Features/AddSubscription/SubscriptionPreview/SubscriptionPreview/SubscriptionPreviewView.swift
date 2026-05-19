@@ -172,8 +172,9 @@ struct SubscriptionPreviewView: View {
                                 Text("Edit")
                                     .font(.appBold(18))
                                     .foregroundColor(.underlineGray)
+                                    .frame(width: 40, alignment: .trailing)
                             }
-                            .frame(width: 40, alignment: .trailing)
+                            
                         }
                         .frame(height: 28)
                         
@@ -366,8 +367,9 @@ struct SubscriptionPreviewView: View {
                                 Text("View")
                                     .font(.appBold(18))
                                     .foregroundColor(Color.buttonsText)
+                                    .frame(width: 40, alignment: .trailing)
                             }
-                            .frame(width: 40, alignment: .trailing)
+                            
                         }
                         .frame(height: 28)
                         

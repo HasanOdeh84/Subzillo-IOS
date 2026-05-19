@@ -564,7 +564,7 @@ struct ManualEntryView: View {
                     }
                     CustomButton(title: isFromEdit == true ? "Save Changes" : "Save Subscription", action: saveAction)
                         .padding(.horizontal, 0)
-                        .padding(.bottom, 20)
+                        .padding(.bottom, 120)
                 }
             }
             .padding(.horizontal, 15)
@@ -2277,7 +2277,6 @@ struct ListView: View {
                     isSubTitlePresent: true
                 )
             }
-            .buttonStyle(.plain)
         }
         if type == .relations {
             SubscriptionItem(title: objc.title ?? "", subtitle: objc.subtitle ?? "", isSelected: index == selectedIndex ? true : false)
@@ -2291,7 +2290,6 @@ struct ListView: View {
             } label: {
                 ReminderItem(title: objc.title ?? "", isSelected: objc.isSelected ?? false)
             }
-            .buttonStyle(.plain)
         }
     }
     

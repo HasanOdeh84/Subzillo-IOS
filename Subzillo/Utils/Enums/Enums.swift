@@ -12,6 +12,7 @@ enum Tab {
 }
 
 enum NavigationRoute: Hashable{
+    case onboardingSuccess
     case login
     case splash
     case termsAndPrivacy(isTerm:Bool?)
@@ -49,6 +50,7 @@ enum NavigationRoute: Hashable{
     case extractedSubscriptions(subscriptions: [SubscriptionData], fromEmailSync: Bool, integrationId: String)
     case connectICloudView
     case AgentChatView
+    case profileTab
 }
 
 extension NavigationRoute {

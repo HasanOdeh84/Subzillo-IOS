@@ -19,19 +19,26 @@ struct ConnectedEmailItemView: View {
             HStack(spacing: 12) {
                 // Provider Icon
                 Image(provider.iconName)
-                    .resizable()
-                    .scaledToFit()
-                    .frame(width: 31, height: 31)
+                    .frame(width: 40, height: 40)
+                    .background(Color(hex: "#FCE8E6"))
+                    .clipShape(
+                        RoundedRectangle(cornerRadius: 10)
+                    )
                 
-                VStack(alignment: .leading, spacing: 4) {
+                
+                VStack(alignment: .leading, spacing: 2) {
                     Text(email.email ?? "")
-                        .font(.appSemiBold(16))
-                        .foregroundStyle(Color.underlineGray)
+                        .font(.geistBold(14))
+                        .foregroundColor(
+                            Color("TextPrimary_ 0E101A_F4F1FB")
+                        )
                     
                     if let lastSync = email.lastSyncDate, !lastSync.isEmpty {
                         Text(lastSync)
-                            .font(.appRegular(14))
-                            .foregroundStyle(Color.underlineGray)
+                            .font(.custom("JetBrainsMono-Regular", size: 11))
+                            .foregroundColor(
+                                Color("TextPrimary_ 0E101A_F4F1FB").opacity(0.6)
+                            )
                     }
                 }
                 
@@ -58,21 +65,21 @@ struct ConnectedEmailItemView: View {
                                 HStack(spacing: 20) {
                                     VStack(alignment: .leading, spacing: 8) {
                                         Text("Emails Scanned")
-                                            .font(.appRegular(14))
-                                            .foregroundColor(Color.neutral500)
+                                            .font(.geistRegular(14))
+                                            .foregroundColor(Color("TextPrimary_ 0E101A_F4F1FB"))
                                         
                                         Text("\(emailsScanned)")
-                                            .font(.appBold(16))
-                                            .foregroundColor(Color.navyBlueCTA700)
+                                            .font(.geistBold(16))
+                                            .foregroundColor(Color("TextPrimary_ 0E101A_F4F1FB"))
                                     }
                                     VStack(alignment: .leading, spacing: 8) {
                                         Text("Subscription Found")
-                                            .font(.appRegular(14))
-                                            .foregroundColor(Color.neutral500)
+                                            .font(.geistRegular(14))
+                                            .foregroundColor(Color("TextPrimary_ 0E101A_F4F1FB"))
                                         
                                         Text("\(subscriptionsFound)")
-                                            .font(.appBold(16))
-                                            .foregroundColor(Color.navyBlueCTA700)
+                                            .font(.geistBold(16))
+                                            .foregroundColor(Color("TextPrimary_ 0E101A_F4F1FB"))
                                     }
                                     Spacer()
                                     ProgressView()
@@ -82,8 +89,8 @@ struct ConnectedEmailItemView: View {
                                 HStack {
                                     Spacer()
                                     Text("No sync in progress")
-                                        .font(.appRegular(14))
-                                        .foregroundColor(Color.neutral500)
+                                        .font(.geistRegular(14))
+                                        .foregroundColor(Color("TextPrimary_ 0E101A_F4F1FB"))
                                     Spacer()
                                 }
                                 .padding(.bottom, 5)
@@ -143,13 +150,21 @@ struct ConnectedEmailItemView: View {
             HStack(spacing: 10){
                 Button(action: { onSyncing() }) {
                     Text("Syncing...")
-                        .font(.appSemiBold(14))
-                        .foregroundColor(Color.blueMain700)
-                        .padding(.horizontal, 24)
-                        .frame(height: 30)
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 5)
-                                .stroke(Color.blueMain700, lineWidth: 1)
+                        .font(.geistSemiBold(13))
+                        .foregroundColor(.white)
+                        .frame(maxWidth: .infinity)
+                        .frame(height: 38)
+                        .background(
+                            themeManager.accentGradient
+                        )
+                        .clipShape(
+                            RoundedRectangle(cornerRadius: 10)
+                        )
+                        .shadow(
+                            color: themeManager.selectedAccent.senColor.opacity(0.35),
+                            radius: 10,
+                            x: 0,
+                            y: 4
                         )
                 }
                 .buttonStyle(PlainButtonStyle())
@@ -193,20 +208,31 @@ struct ConnectedEmailItemView: View {
         }
         .buttonStyle(PlainButtonStyle())
     }
-    
+    @EnvironmentObject var themeManager: ThemeManager
     @ViewBuilder
     private func syncButton(title: String) -> some View {
         Button(action: {
             Constants.saveDefaults(value: true, key: "isSyncing")
             onSync()
         }) {
+            
             Text(title)
-                .font(.appSemiBold(14))
+                .font(.geistSemiBold(13))
                 .foregroundColor(.white)
-                .padding(.horizontal, 24)
-                .frame(height: 30)
-                .background(Color.blueMain700)
-                .cornerRadius(5)
+                .frame(maxWidth: .infinity)
+                .frame(height: 38)
+                .background(
+                    themeManager.accentGradient
+                )
+                .clipShape(
+                    RoundedRectangle(cornerRadius: 10)
+                )
+                .shadow(
+                    color: themeManager.selectedAccent.senColor.opacity(0.35),
+                    radius: 10,
+                    x: 0,
+                    y: 4
+                )
         }
         .buttonStyle(PlainButtonStyle())
     }
@@ -214,7 +240,7 @@ struct ConnectedEmailItemView: View {
     @ViewBuilder
     private func viewButton() -> some View {
         let isSyncingStatus = email.syncStatus == 1
-        let title = isSyncingStatus ? "View Progress" : "View Results"
+        let title = isSyncingStatus ? "View" : "View"
         
         Button(action: {
             Constants.saveDefaults(value: true, key: "isSyncing")
@@ -225,23 +251,18 @@ struct ConnectedEmailItemView: View {
             }
         }) {
             Text(title)
-                .font(.appSemiBold(14))
-                .foregroundStyle(LinearGradient(
-                    gradient: Gradient(colors: [Color.linearGradient3, Color.linearGradient4, Color.blueMain700]),
-                    startPoint: .top,
-                    endPoint: .bottom
-                ))
-                .padding(.horizontal, 24)
-                .frame(height: 30)
+                .font(.geistSemiBold(13))
+                .foregroundColor(
+                    themeManager.selectedAccent.senColor
+                )
+                .frame(maxWidth: .infinity)
+                .frame(height: 38)
+                .background(Color.clear)
                 .overlay(
-                    RoundedRectangle(cornerRadius: 5)
+                    RoundedRectangle(cornerRadius: 10)
                         .stroke(
-                            LinearGradient(
-                                gradient: Gradient(colors: [Color.linearGradient3, Color.linearGradient4, Color.blueMain700]),
-                                startPoint: .top,
-                                endPoint: .bottom
-                            ),
-                            lineWidth: 1
+                            themeManager.selectedAccent.senColor,
+                            lineWidth: 1.5
                         )
                 )
         }

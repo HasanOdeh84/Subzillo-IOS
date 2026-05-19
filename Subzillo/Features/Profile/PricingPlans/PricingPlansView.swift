@@ -590,6 +590,7 @@ struct PricingPlanCard: View {
                                  background : plan.isCurrent ? Color.neutralDisabled200 : Color.primaryBlue800,
                                  textColor  : plan.isCurrent ? Color.neutral500 : Color.white,
                                  height     : 48,
+                                 isHidden   : plan.isCurrent ? true : false,
                                  action: {
                         plan.action?()
                     })

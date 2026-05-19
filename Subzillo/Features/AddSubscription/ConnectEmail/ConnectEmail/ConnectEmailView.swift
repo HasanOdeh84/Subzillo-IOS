@@ -38,75 +38,310 @@ struct ConnectEmailView: View {
                     HStack {
                         Image("back_gray")
                     }
-                    .foregroundColor(.blue)
+                    .frame(width: 38, height: 38)
+                    .background(
+                        Circle()
+                            .fill(Color("Surface_FFFFFF_0A0612"))
+                    )
+                    .overlay(
+                        Circle()
+                            .stroke(
+                                Color.black.opacity(0.08),
+                                lineWidth: 1
+                            )
+                    )
                 }
                 
-                VStack(alignment: .leading, spacing: 2) {
-                    // MARK: - Title
+                VStack(alignment: .leading, spacing: 1) {
                     Text("Connect Email")
-                        .font(.appRegular(24))
-                        .foregroundColor(Color.neutralMain700)
-                        .padding(.top, 20)
+                        .font(.geistBold(22))
+                        .foregroundColor(
+                            Color("TextPrimary_ 0E101A_F4F1FB")
+                        )
                     
-                    // MARK: - SubTitle
                     Text("Auto-detect from email")
-                        .font(.appRegular(18))
-                        .foregroundColor(Color.neutral500)
+                        .font(.geistRegular(13))
+                        .foregroundColor(
+                            Color("TextPrimary_ 0E101A_F4F1FB").opacity(0.6)
+                        )
                 }
                 Spacer()
             }
             .padding(.horizontal)
             .padding(.top, 0)
-            
-            ScrollView(showsIndicators: false) {
-                VStack(spacing: 0) {
-                    UploadItem(title: "Connect Gmail", subTitle: "Link your Gmail account to sync and manage all email subscriptions.", image: "google", imageColor: Color.systemInfo, action: gmailAction, isEmail: true)
-                    Divider()
-                        .overlay(Color.neutral300Border)
-                    UploadItem(title: "Connect Outlook", subTitle: "Connect your Outlook account to access and manage your subscriptions.", image: "microsoft", imageColor: Color.systemInfo, action: outlookAction, isEmail: true)
-                    Divider()
-                        .overlay(Color.neutral300Border)
-                    //                    UploadItem(title: "Connect Yahoo", subTitle: "Integrate your Yahoo Mail account to organize and manage subscriptions.", image: "yahoo", imageColor: Color.systemInfo, action: yahooAction, isEmail: true)
-                    UploadItem(title: "Connect iCloud", subTitle: "Integrate your iCloud account to organize and manage subscriptions.", image: "iCloud", imageColor: Color.systemInfo, action: iCloudAction, isEmail: true)
+           /* ScrollView(showsIndicators: false) {
+                
+                VStack(alignment: .leading, spacing: 0) {
+                    
+                    
+                    
+                    
+                    // MARK: - Header
+                    
+                    Text("Connected mails")
+                        .font(.geistBold(17))
+                        .foregroundColor(
+                            Color("TextPrimary_ 0E101A_F4F1FB")
+                        )
+                        .padding(.bottom, 12)
+                    
+                    
+                    // MARK: - Search
+                    
+                    if connectedEmailsVM.connectedEmails.count != 0 {
+                        
+                        HStack(spacing: 10) {
+                            
+                            Image(systemName: "magnifyingglass")
+                                .font(.system(size: 16, weight: .medium))
+                                .foregroundColor(
+                                    Color("TextPrimary_ 0E101A_F4F1FB").opacity(0.6)
+                                )
+                            
+                            TextField(
+                                LocalizedStringKey("Search"),
+                                text: $connectedEmailsVM.searchText
+                            )
+                            .font(.geistRegular(15))
+                            .foregroundColor(
+                                Color("TextPrimary_ 0E101A_F4F1FB")
+                            )
+                        }
+                        .padding(.horizontal, 14)
+                        .frame(height: 48)
+                        .background(Color.whiteBlack)
+                        .clipShape(RoundedRectangle(cornerRadius: 14))
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 14)
+                                .stroke(Color.black.opacity(0.08), lineWidth: 1.5)
+                        )
+                        .padding(.bottom, 14)
+                    }
+                    
+                    
+                    // MARK: - Connected Emails
+                    
+                    if connectedEmailsVM.filteredEmails.count != 0 {
+                        
+                        LazyVStack(spacing: 10) {
+                            
+                            ForEach(connectedEmailsVM.filteredEmails) { email in
+                                
+                                VStack(spacing: 0) {
+                                    
+                                    // Top Content
+                                    
+                                    HStack(spacing: 12) {
+                                        
+                                        Image("google")
+                                            .frame(width: 40, height: 40)
+                                            .background(Color(hex: "#FCE8E6"))
+                                            .clipShape(
+                                                RoundedRectangle(cornerRadius: 10)
+                                            )
+                                        
+                                        VStack(alignment: .leading, spacing: 2) {
+                                            
+                                            Text(email.email ?? "")
+                                                .font(.geistBold(14))
+                                                .foregroundColor(
+                                                    Color("TextPrimary_ 0E101A_F4F1FB")
+                                                )
+                                            
+                                            Text("24/04/2026")
+                                                .font(.custom("JetBrainsMono-Regular", size: 11))
+                                                .foregroundColor(
+                                                    Color("TextPrimary_ 0E101A_F4F1FB").opacity(0.6)
+                                                )
+                                        }
+                                        
+                                        Spacer()
+                                    }
+                                    .padding(.bottom, 12)
+                                    
+                                    
+                                    // Buttons
+                                    
+                                    HStack(spacing: 10) {
+                                        
+                                        Button {
+                                            connectedEmailsVM.syncEmail(email)
+                                        } label: {
+                                            
+                                            Text("Sync")
+                                                .font(.geistSemiBold(13))
+                                                .foregroundColor(.white)
+                                                .frame(maxWidth: .infinity)
+                                                .frame(height: 38)
+                                                .background(
+                                                    LinearGradient(
+                                                        colors: [
+                                                            Color(hex: "#A719DD"),
+                                                            Color(hex: "#7C5CFF"),
+                                                            Color(hex: "#4489EB")
+                                                        ],
+                                                        startPoint: .topLeading,
+                                                        endPoint: .bottomTrailing
+                                                    )
+                                                )
+                                                .clipShape(
+                                                    RoundedRectangle(cornerRadius: 10)
+                                                )
+                                                .shadow(
+                                                    color: Color(hex: "#7C5CFF").opacity(0.35),
+                                                    radius: 10,
+                                                    x: 0,
+                                                    y: 4
+                                                )
+                                        }
+                                        
+                                        Button {
+                                            connectedEmailsVM.viewEmail(email)
+                                        } label: {
+                                            
+                                            Text("View")
+                                                .font(.geistSemiBold(13))
+                                                .foregroundColor(
+                                                    Color(hex: "#7C5CFF")
+                                                )
+                                                .frame(maxWidth: .infinity)
+                                                .frame(height: 38)
+                                                .background(Color.clear)
+                                                .overlay(
+                                                    RoundedRectangle(cornerRadius: 10)
+                                                        .stroke(
+                                                            Color(hex: "#7C5CFF"),
+                                                            lineWidth: 1.5
+                                                        )
+                                                )
+                                        }
+                                    }
+                                }
+                                .padding(16)
+                                .background(Color.whiteBlack)
+                                .clipShape(RoundedRectangle(cornerRadius: 16))
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 16)
+                                        .stroke(
+                                            Color.black.opacity(0.08),
+                                            lineWidth: 1
+                                        )
+                                )
+                            }
+                        }
+                        
+                    } else {
+                        
+                        VStack(spacing: 16) {
+                            
+                            Image("noEmails")
+                                .resizable()
+                                .scaledToFit()
+                                .frame(width: 100, height: 100)
+                            
+                            Text("No emails Added Yet")
+                                .font(.geistBold(16))
+                                .foregroundColor(
+                                    Color("TextPrimary_ 0E101A_F4F1FB")
+                                )
+                            
+                            Text("Add a email to manage your subscriptions and payments easily.")
+                                .font(.geistRegular(16))
+                                .foregroundColor(
+                                    Color("TextPrimary_ 0E101A_F4F1FB").opacity(0.6)
+                                )
+                                .multilineTextAlignment(.center)
+                                .padding(.horizontal, 20)
+                        }
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 40)
+                    }
+                    
+                    Spacer(minLength: 100)
                 }
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .frame(height: 240) //160)//
-                .cornerRadius(12)
+                .padding(.horizontal, 20)
+                .padding(.top, 20)
+            }*/
+            ScrollView(showsIndicators: false) {
+                // MARK: - Email Providers
+                
+                VStack(spacing: 0) {
+                    
+                    UploadItemNew(
+                        title: "Connect Gmail",
+                        subTitle: "Link your Gmail account to sync and manage subscriptions automatically.",
+                        image: "google_new",
+                        backgroundColor: Color(hex: "#FCE8E6"),
+                        action: gmailAction
+                    )
+                    
+                    Divider()
+                        .overlay(Color.black.opacity(0.08))
+                    
+                    UploadItemNew(
+                        title: "Connect Outlook",
+                        subTitle: "Connect your Outlook account to access and organize your subscriptions.",
+                        image: "microsoft_new",
+                        backgroundColor: Color(hex: "#E3F2FD"),
+                        action: outlookAction
+                    )
+                    
+                    Divider()
+                        .overlay(Color.black.opacity(0.08))
+                    
+                    UploadItemNew(
+                        title: "Connect iCloud",
+                        subTitle: "Integrate your iCloud account to organize and track your subscriptions.",
+                        image: "iCloud_new",
+                        backgroundColor: Color(hex: "#E3F2FD"),
+                        action: iCloudAction
+                    )
+                }
+                .background(Color.whiteBlack)
+                .clipShape(RoundedRectangle(cornerRadius: 18))
                 .overlay(
-                    RoundedRectangle(cornerRadius: 12)
-                        .stroke(Color.neutral300Border, lineWidth: 1)
+                    RoundedRectangle(cornerRadius: 18)
+                        .stroke(Color.black.opacity(0.08), lineWidth: 1)
                 )
-                .padding(5)
                 
                 // MARK: - Connected mails Header
-                VStack(alignment: .leading, spacing: 16) {
+                VStack(alignment: .leading, spacing: 12) {
                     Text("Connected mails")
-                        .font(.appSemiBold(16))
-                        .foregroundColor(.neutralMain700)
-                    //.padding(.top, 10)
+                        .font(.geistBold(17))
+                        .foregroundColor(
+                            Color("TextPrimary_ 0E101A_F4F1FB")
+                        )
+                    
                     
                     if connectedEmailsVM.connectedEmails.count != 0 {
                         // MARK: - Search Bar
-                        HStack {
-                            Image("search")
-                                .resizable()
-                                .frame(width: 20, height: 20)
-                                .foregroundColor(.gray)
-                                .padding(.leading, 16)
+                        HStack(spacing: 10) {
                             
-                            TextField(LocalizedStringKey("Search"), text: $connectedEmailsVM.searchText)
-                                .textFieldStyle(PlainTextFieldStyle())
-                                .padding(.trailing, 10)
-                                .foregroundColor(Color.neutralMain700)
+                            Image(systemName: "magnifyingglass")
+                                .font(.system(size: 16, weight: .medium))
+                                .foregroundColor(
+                                    Color("TextPrimary_ 0E101A_F4F1FB").opacity(0.6)
+                                )
+                            
+                            TextField(
+                                LocalizedStringKey("Search"),
+                                text: $connectedEmailsVM.searchText
+                            )
+                            .textFieldStyle(PlainTextFieldStyle())
+                            .font(.geistRegular(15))
+                            .foregroundColor(
+                                Color("TextPrimary_ 0E101A_F4F1FB")
+                            )
                         }
-                        .frame(height: 52)
-                        .background(Color.white)
-                        .cornerRadius(12)
+                        .padding(.horizontal, 14)
+                        .frame(height: 48)
+                        .background(Color.whiteBlack)
+                        .clipShape(RoundedRectangle(cornerRadius: 14))
                         .overlay(
-                            RoundedRectangle(cornerRadius: 12)
-                                .stroke(Color.blue500, lineWidth: 1)
+                            RoundedRectangle(cornerRadius: 14)
+                                .stroke(Color.black.opacity(0.08), lineWidth: 1.5)
                         )
-                        //.padding(.horizontal, 5)
+                        .padding(.bottom, 14)
                     }
                     
                     if connectedEmailsVM.filteredEmails.count != 0 {
@@ -140,18 +375,23 @@ struct ConnectEmailView: View {
                     } else {
                         if connectedEmailsVM.searchText == "" {
                             VStack(spacing: 16) {
+                                
                                 Image("noEmails")
                                     .resizable()
                                     .scaledToFit()
                                     .frame(width: 100, height: 100)
                                 
                                 Text("No emails Added Yet")
-                                    .font(.appBold(16))
-                                    .foregroundColor(Color.neutral800)
+                                    .font(.geistBold(16))
+                                    .foregroundColor(
+                                        Color("TextPrimary_ 0E101A_F4F1FB")
+                                    )
                                 
                                 Text("Add a email to manage your subscriptions and payments easily.")
-                                    .font(.appRegular(16))
-                                    .foregroundColor(Color.grayText)
+                                    .font(.geistRegular(16))
+                                    .foregroundColor(
+                                        Color("TextPrimary_ 0E101A_F4F1FB").opacity(0.6)
+                                    )
                                     .multilineTextAlignment(.center)
                                     .padding(.horizontal, 20)
                             }
@@ -162,17 +402,10 @@ struct ConnectEmailView: View {
                 }
                 .padding(.vertical, 24)
                 .padding(.horizontal, 5)
-                
-                // MARK: - How It Works
-                //                GradienCustomeView(title    : "How it work?",
-                //                                   subTitle : "•  We never store full email content\n•  We cannot send emails or access personal messages",
-                //                                   isImage  : false)
-                //                .padding(.bottom, 24)
-                //                .padding(.horizontal, 5)
                 Spacer()
             }
             .frame(maxWidth: .infinity)
-            .padding(15)
+            .padding(20)
         }
         .navigationBarBackButtonHidden()
         .background(Color.neutralBg100)

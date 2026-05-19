@@ -22,12 +22,12 @@ struct GradientBorderButton: View {
                         Image(buttonImage ?? "")
                             .frame(width: 20, height: 20)
                         Text(LocalizedStringKey(title))
-                            .font(.appSemiBold(18))
+                            .font(.geistBold(15))
                             .foregroundColor(Color.navyBlueCTA700)
                     }
                 } else {
                     Text(LocalizedStringKey(title))
-                        .font(.appSemiBold(18))
+                        .font(.geistBold(15))
                         .foregroundColor(Color.navyBlueCTA700)
                 }
             }
@@ -66,7 +66,7 @@ struct SignInBorderButton: View {
         if isApple {
             return colorScheme == .dark ? .white : .black
         } else {
-            return colorScheme == .dark ? Color.clear : .white
+            return colorScheme == .dark ? Color.surfaceLightFFFFFF.opacity(0.2) : .surfaceLightFFFFFF
         }
     }
     
@@ -74,7 +74,7 @@ struct SignInBorderButton: View {
         if isApple {
             return colorScheme == .dark ? .black : .white
         } else {
-            return colorScheme == .dark ? .white : .black
+            return Color.textPrimary0E101AF4F1FB
         }
     }
     
@@ -82,7 +82,7 @@ struct SignInBorderButton: View {
         if isApple {
             return .clear
         } else {
-            return colorScheme == .dark ? Color.white.opacity(0.15) : Color.black.opacity(0.1)
+            return Color.cardBorderE2E8F0E2E8F0
         }
     }
     
@@ -132,7 +132,7 @@ struct GradientBgButton: View {
                 Spacer()
                 
                 Text(LocalizedStringKey(title))
-                    .font(.geistBold(18))
+                    .font(.geistBold(15))
                 
                 if showChevron {
                     Image(systemName: "chevron.right")
@@ -179,3 +179,4 @@ struct GradientBgButton: View {
         }
     }
 }
+

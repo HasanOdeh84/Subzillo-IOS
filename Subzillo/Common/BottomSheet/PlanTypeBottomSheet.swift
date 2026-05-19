@@ -112,7 +112,6 @@ struct PlanTypeBottomSheet: View {
                                 .frame(maxWidth: .infinity, minHeight: 56)
                                 .contentShape(Rectangle())
                             }
-                            .buttonStyle(.plain)
                             
                             if planType != filteredPlanTypes.last {
                                 Rectangle()

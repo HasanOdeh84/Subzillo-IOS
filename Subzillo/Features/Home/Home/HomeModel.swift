@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import SwiftUI
 
 struct ActiveSubscription: Decodable, Encodable, Hashable, Identifiable{
     var id = UUID()
@@ -51,13 +52,84 @@ public struct HomeResponse: Codable {
 }
 
 public struct HomeResponseData: Codable, Hashable{
-    let monthlySpend          : Double?
-    let monthlySpendCurrency  : String?
-    var activeSubscriptionCount     : Int? = nil
-    var totalSubscriptionCount      : Int? = nil
-    let subscriptionList      : [SubscriptionListData]?
-    let topCategories         : [TopCategoriesData]?
-    let expiringSoon          : [SubscriptionListData]?
+    var totalSubscriptionCount  : Int? = nil
+    var whereItGoes             : whereItGoes?
+    var nextRenewals            : [nextRenewals]?
+    var preferredCurrency       : String? = ""
+    var stats                   : statsObjc?
+    var preferredCurrencySymbol : String? = ""
+    var spendProjection         : spendProjection?
+    var monthlyOverview         : monthlyOverview?
+    var topSpenders             : [topSpenders]?
+}
+struct whereItGoes: Codable, Hashable{
+    var currency                : String? = ""
+    var currencySymbol          : String? = ""
+    var totalAmount             : Float? = nil
+    var categories              : [categoriesObjc]?
+}
+struct categoriesObjc: Codable, Hashable{
+    var color                   : String? = ""
+    var categoryId              : String? = ""
+    var totalAmount             : Float? = nil
+    var amountPercentage        : Double? = nil
+    var subscriptionCount       : Int? = nil
+    var currency                : String? = ""
+    var currencySymbol          : String? = ""
+    var categoryName            : String? = ""
+}
+struct nextRenewals: Codable, Hashable{
+    var id                      : String? = ""
+    var serviceName             : String? = ""
+    var serviceLogo             : String? = ""
+    var amount                  : Float? = nil
+    var currency                : String? = ""
+    var currencySymbol          : String? = ""
+    var nextPaymentDate         : String? = ""
+    var planName                : String? = ""
+    var billingCycle            : String? = ""
+    var billingCycleShortLabel  : String? = ""
+    var daysUntil               : Int? = nil
+}
+struct statsObjc: Codable, Hashable{
+    //var cheapest                : String? = ""
+    var activeSubscriptions     : Int? = nil
+    var yearlySpend             : Float? = nil
+    var currency                : String? = ""
+    var currencySymbol          : String? = ""
+}
+struct spendProjection: Codable, Hashable{
+    var peakMonth               : String? = ""
+    var projectedAnnualSpend    : Int? = nil
+    var peakAmount              : Float? = nil
+    var currency                : String? = ""
+    var currencySymbol          : String? = ""
+    var months                  : [monthObjc]?
+}
+struct monthObjc: Codable, Hashable{
+    var month                   : String? = ""
+    var year                    : Int? = nil
+    var amount                  : Double? = nil
+}
+struct monthlyOverview: Codable, Hashable{
+    var deltaDirection          : String? = ""
+    var benchmarkAmount         : Float? = nil
+    var amount                  : Float? = nil
+    var currency                : String? = ""
+    var currencySymbol          : String? = ""
+    var deltaAmount             : Float? = nil
+    var benchmarkRange          : String? = ""
+    var status                  : String? = ""
+}
+struct topSpenders: Codable, Hashable{
+    var id                      : String? = ""
+    var progressPercentage      : Float? = nil
+    var amount                  : Float? = nil
+    var currency                : String? = ""
+    var currencySymbol          : String? = ""
+    var planName                : String? = ""
+    var serviceName             : String? = ""
+    var serviceLogo             : String? = ""
 }
 
 struct HomeYearlyGraphRequest: Codable{
@@ -126,4 +198,23 @@ public struct TopCategoriesData: Codable, Hashable, Identifiable {
     let subscriptionCount       : Int?
     let percentage              : Double?
     let totalAmount             : Double?
+}
+
+struct CategoryItem: Identifiable {
+    let id                      = UUID()
+    let name                    : String
+    let amount                  : Float
+    let amountStr               : String
+    let color                   : String
+}
+
+// MARK: - Model
+
+struct SubscriptionItemNew {
+    let id : String
+    let name: String
+    let amountStr: String
+    let amount: Float
+    let progress: Float
+    let serviceLogo: String
 }

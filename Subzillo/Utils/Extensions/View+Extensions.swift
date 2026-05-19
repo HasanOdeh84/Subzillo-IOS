@@ -99,31 +99,95 @@ struct InnerHeightPreferenceKey: PreferenceKey {
 }
 
 // MARK: - Interactive Button Style
-struct InteractiveButtonStyle: ButtonStyle {
-    @State private var isForcedPressed = false
+/*struct InteractiveButtonStyle: ButtonStyle {
+
     func makeBody(configuration: Configuration) -> some View {
-        let isPressed = configuration.isPressed || isForcedPressed
+
         configuration.label
-            .scaleEffect(isPressed ? 0.88 : 1.0)
+            .scaleEffect(configuration.isPressed ? 0.92 : 1.0)
             .animation(
-                isPressed ?
-                    .interactiveSpring(response: 0.15, dampingFraction: 0.8) :
-                        .spring(response: 0.35, dampingFraction: 0.6),
+                configuration.isPressed
+                ? .interactiveSpring(response: 0.15,
+                                     dampingFraction: 0.8)
+                : .spring(response: 0.35,
+                          dampingFraction: 0.6),
+                value: configuration.isPressed
+            )
+            .onChange(of: configuration.isPressed) { pressed in
+                if pressed {
+                    UIImpactFeedbackGenerator(style: .medium)
+                        .impactOccurred()
+                }
+            }
+    }
+}*/
+struct InteractiveButtonStyle: ButtonStyle {
+
+    func makeBody(configuration: Configuration) -> some View {
+
+        AnimatedButton(configuration: configuration)
+    }
+}
+private struct AnimatedButton: View {
+
+    let configuration: ButtonStyle.Configuration
+
+    @State private var isPressed = false
+
+    var body: some View {
+
+        configuration.label
+            .scaleEffect(isPressed ? 0.92 : 1.0)
+            .animation(
+                .interactiveSpring(
+                    response: 0.2,
+                    dampingFraction: 0.7
+                ),
                 value: isPressed
             )
-            .onChange(of: configuration.isPressed) { newValue in
-                if newValue {
-                    isForcedPressed = true
-                    UIImpactFeedbackGenerator(style: .medium).impactOccurred()
+            .onChange(of: configuration.isPressed) { pressed in
+
+                if pressed {
+
+                    isPressed = true
+
+                    UIImpactFeedbackGenerator(style: .medium)
+                        .impactOccurred()
+
                 } else {
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
-                        isForcedPressed = false
+
+                    DispatchQueue.main.asyncAfter(
+                        deadline: .now() + 0.08
+                    ) {
+
+                        isPressed = false
                     }
                 }
             }
     }
 }
+/*
+struct InteractiveButtonStyle: ButtonStyle {
 
+    func makeBody(configuration: Configuration) -> some View {
+
+        configuration.label
+            .scaleEffect(configuration.isPressed ? 0.92 : 1.0)
+            .animation(
+                .spring(response: 0.22, dampingFraction: 0.7),
+                value: configuration.isPressed
+            )
+            .simultaneousGesture(
+                DragGesture(minimumDistance: 0)
+                    .onChanged { _ in
+                        if !configuration.isPressed {
+                            UIImpactFeedbackGenerator(style: .medium)
+                                .impactOccurred()
+                        }
+                    }
+            )
+    }
+}*/
 //extension ShapeStyle where Self == LinearGradient {
 //    static var primaryTextGradient: LinearGradient {
 //        LinearGradient(
@@ -146,4 +210,32 @@ extension LinearGradient {
         startPoint: .leading,
         endPoint: .trailing
     )
+    
+    static let brandFromDark0133_brandToDark0133 = LinearGradient(
+        colors: [
+            .brandFromDarkA719DD.opacity(0.133),
+            .brandToDark4489EB.opacity(0.133)
+        ],
+        startPoint: .leading,
+        endPoint: .trailing
+    )
+    
+    static let sunsetFrom0133_sunsetTo0133 = LinearGradient(
+        colors: [
+            .sunsetFromF35BB3.opacity(0.133),
+            .sunsetTo764CFF.opacity(0.133)
+        ],
+        startPoint: .leading,
+        endPoint: .trailing
+    )
+    
+    static let auroraFrom0133_auroraTo0133 = LinearGradient(
+        colors: [
+            .auroraFrom13D8B0.opacity(0.133),
+            .auroraTo9A28DF.opacity(0.133)
+        ],
+        startPoint: .leading,
+        endPoint: .trailing
+    )
 }
+

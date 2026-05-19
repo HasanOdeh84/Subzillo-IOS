@@ -34,36 +34,38 @@ struct HomeView: View {
     @State var monthYear                    : String =  ""
     @State var selectedFamilyMembers        : [String] = ["all"]
     
-    private var homePieData: PieData {
-        let totals = TotalsData(
-            totalSubscriptions: homeVM.homeResponse?.activeSubscriptionCount,
-            activeSubscriptions: homeVM.homeResponse?.activeSubscriptionCount,
-            inactiveSubscriptions: 0
-        )
-        
-        return PieData(
-            month: nil,
-            year: nil,
-            monthYear: nil,
-            totals: totals,
-            totalAmount: homeVM.homeResponse?.monthlySpend,
-            currency: nil,
-            currencySymbol: homeVM.homeResponse?.monthlySpendCurrency,
-            categories: homeCategories
-        )
-    }
-
-    private var homeCategories: [AnalyticsCategoryData] {
-        homeVM.homeResponse?.topCategories?.map {
-            AnalyticsCategoryData(
-                categoryId: $0.categoryId,
-                categoryName: $0.categoryName,
-                categoryColor: $0.color,
-                totalAmount: $0.totalAmount,
-                count: $0.subscriptionCount
-            )
-        } ?? []
-    }
+    @EnvironmentObject var themeManager     : ThemeManager
+    @State private var animate = false
+    @Environment(\.colorScheme) var colorScheme
+    
+    //MARK: - New Properties
+    @State private var isOnTrack            : Bool = false
+    @State var msCurrency                   = "$"
+    @State var msAmmount                    = "120"
+    @State var msAmmountD                   = ".95"
+    @State var msDeltaValue                 = "↓ $8.20 vs last month"
+    @State var pnsAmount                    = "$1522"
+    @State var pnsDeltaValue                = "↑ $13 peak in Dec"
+    @State var cuentmonth                   = "APR"
+    @State var months = [
+        ("APR", 42.0),
+        ("MAY", 47.0),
+        ("JUN", 52.0),
+        ("JUL", 49.0),
+        ("AUG", 39.0),
+        ("SEP", 55.0),
+        ("OCT", 57.0),
+        ("NOV", 58.0),
+        ("DEC", 70.0),
+        ("JAN", 64.0),
+        ("FEB", 60.0),
+        ("MAR", 62.0)
+    ]
+    @State var wigAmount                   = "$121"
+    @State var items: [CategoryItem]       = []
+    @State var subscriptions: [SubscriptionItemNew] = []
+    @State var upcomingFirstItem: UpcomingCharge?
+    @State var upcomingItems: [UpcomingCharge] = []
     
     private var currentSubscriptions: [SubscriptionListData] {
         showAll ? activeSubsList : Array(activeSubsList.prefix(1))
@@ -85,306 +87,697 @@ struct HomeView: View {
                     Color.black.opacity(0.001)
                         .ignoresSafeArea()
                         .opacity(1)
-                    
-//                    VStack(spacing: 12) {
-//                        LottieView(name: LoaderManager.shared.animationName, loopMode: .loop)
-//                            .frame(width: 100, height: 100)
-//                    }
-//                    .opacity(1)
-//                    .scaleEffect(1.0)
                 }
-//                .animation(.easeInOut(duration: 0.3), value: true)
                 .allowsHitTesting(true)
             }else if isHome == true{
-                VStack(spacing: 16){
+                VStack(spacing: 0){
                     // MARK: - Header
-                    HeaderView(title: "Hi \(fullName)") {
+                    HeaderViewWithProfile(title: "Overview", username: fullName, action: {
                         goToNotifications()
-                    }
-                    .padding(.top, 50)
-                    .padding(.bottom, -8)
+                    }, actionProfile: {
+                        goToProfile()
+                    })
+                    .padding(.top, 60)
+                    .padding(.bottom, 10)
                     .frame(alignment: .leading)
                     
                     //MARK: Scroll view
                     ScrollView(showsIndicators: false){
-                        // Glance Card
-                        VStack(alignment: .leading, spacing: 0) {
-                            VStack(alignment: .leading, spacing: 18) {
-                                HStack(spacing: 16) {
-                                    Image("info")
-                                    Text("Your subscriptions at a glance")
-                                        .font(.appRegular(16))
-                                        .foregroundColor(Color.neutralMain700)
-                                }
-                                
-                                DashedHorizontalDivider(dash: [2,2])
-                                
-                                HStack {
-                                    Spacer()
-                                    VStack(spacing: 8) {
-                                        Text(monthlySpend)
-                                            .font(.appSemiBold(28))
-                                            .foregroundStyle(Color.blue800)
-                                        Text("Monthly spend")
-                                            .font(.appRegular(14))
-                                            .foregroundStyle(Color.neutral500)
-                                    }
-                                    Spacer()
-                                    Divider()
-                                        .frame(width: 1)
-                                        .overlay(.neutralDisabled200)
-                                    Spacer()
-                                    VStack(spacing: 8) {
-                                        Text("\(activeSubs)")
-                                            .font(.appSemiBold(28))
-                                            .foregroundStyle(Color.blue800)
-                                        Text("Active Subscriptions")
-                                            .font(.appRegular(14))
-                                            .foregroundStyle(Color.neutral500)
-                                    }
-                                    Spacer()
-                                }
-                                .frame(alignment: .center)
-                            }
-                            .padding(.vertical, 16)
-                            .padding(.horizontal, 16)
-                            .background(.whiteBlackBG)
+                        
+                        // MARK: - Monthly spend
+                        VStack(spacing: 0) {
                             
-                            // Bottom Gradient Bar
-                            HStack {
-                                VStack(alignment: .leading, spacing: 4) {
-                                    if commonApiVM.userInfoResponse?.planName ?? "" == "" {
-                                        Text("Current Plan : Free plan")
-                                            .font(.appSemiBold(14))
-                                            .foregroundColor(.white)
-                                            .multilineTextAlignment(.leading)
-                                    } else {
-                                        Text("Current Plan : \(commonApiVM.userInfoResponse?.planName ?? "Free")")
-                                            .font(.appSemiBold(14))
-                                            .foregroundColor(.white)
-                                            .multilineTextAlignment(.leading)
+                            VStack(spacing: 0) {
+                                
+                                // MARK: - Top Section
+                                
+                                HStack(alignment: .top) {
+                                    
+                                    VStack(alignment: .leading, spacing: 0) {
+                                        
+                                        Text("MONTHLY SPEND")
+                                            .font(.jetBrainsRegular(10))
+                                            .tracking(1.5)
+                                            .foregroundColor(
+                                                Color("TextPrimary_ 0E101A_F4F1FB")
+                                                    .opacity(0.6)
+                                            )
+                                        
+                                        // Price
+                                        HStack(alignment: .firstTextBaseline, spacing: 4) {
+                                            
+                                            Text(msCurrency)
+                                                .font(.geistMedium(18))
+                                                .foregroundColor(
+                                                    Color("TextPrimary_ 0E101A_F4F1FB")
+                                                        .opacity(0.6)
+                                                )
+                                            
+                                            if colorScheme == .dark
+                                            {
+                                                Text(msAmmount)
+                                                    .font(.geistSemiBold(46))
+                                                    .tracking(-2)
+                                                    .foregroundStyle(themeManager.accentGradient)
+                                            }
+                                            else{
+                                                Text(msAmmount)
+                                                    .font(.geistSemiBold(46))
+                                                    .tracking(-2)
+                                                    .foregroundColor(Color("TextPrimary_ 0E101A_F4F1FB"))
+                                            }
+                                            
+                                            
+                                            
+                                            Text(msAmmountD)
+                                                .font(.geistMedium(22))
+                                                .tracking(-0.5)
+                                                .foregroundColor(
+                                                    Color("TextPrimary_ 0E101A_F4F1FB")
+                                                        .opacity(0.6)
+                                                )
+                                        }
+                                        .padding(.top, 6)
+                                        
+                                        
+                                        // Comparison
+                                        Text(msDeltaValue)
+                                            .font(.jetBrainsRegular(11))
+                                            .foregroundColor(Color("Success_0EA870_5CE4A8"))
+                                            .padding(.top, 4)
                                     }
                                     
-                                    if let limit = commonApiVM.userInfoResponse?.planSubscriptionLimit{
-                                        Text("Plan usage \(commonApiVM.userInfoResponse?.usedSubscriptionCount ?? 0)/\(limit) Subscriptions")
-                                            .font(.appRegular(12))
-                                            .foregroundColor(.white)
-                                            .multilineTextAlignment(.leading)
-                                    }else{
-                                        Text("Plan usage \(commonApiVM.userInfoResponse?.usedSubscriptionCount ?? 0)/Unlimited Active Subscriptions")
-                                            .font(.appRegular(12))
-                                            .foregroundColor(.white)
-                                            .multilineTextAlignment(.leading)
+                                    Spacer(minLength: 12)
+                                    
+                                    if isOnTrack == true {
+                                        // Status Pill
+                                        Text("ON TRACK")
+                                            .font(.jetBrainsMedium(10))
+                                            .tracking(1)
+                                            .foregroundColor(Color("Success_0EA870_5CE4A8"))
+                                            .padding(.horizontal, 10)
+                                            .padding(.vertical, 6)
+                                            .background(
+                                                Color("Success_Dark_5CE4A8")
+                                                    .opacity(0.12)
+                                            )
+                                            .overlay(
+                                                Capsule()
+                                                    .stroke(
+                                                        Color("Success_0EA870_5CE4A8")
+                                                            .opacity(0.2),
+                                                        lineWidth: 1
+                                                    )
+                                            )
+                                            .clipShape(Capsule())
                                     }
                                 }
-                                Spacer()
+                                
+                                
+                                // MARK: - Bottom Stats
+                                
+                                HStack(spacing: 10) {
+                                    
+                                    StatCardNew(
+                                        title: "ACTIVE",
+                                        value: "\(homeResponse?.stats?.activeSubscriptions ?? 0)",
+                                        suffix: "subs"
+                                    )
+                                    
+                                    StatCardNew(
+                                        title: "YEARLY",
+                                        value: "\(homeResponse?.stats?.currencySymbol ?? "")\(homeResponse?.stats?.yearlySpend ?? 0)"
+                                    )
+                                    
+                                    CheapestStatCard()
+                                }
+                                .padding(.top, 20)
                             }
-                            .padding(.horizontal, 16)
-                            .padding(.vertical, 10)
-                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .padding(20)
                             .background(
-                                LinearGradient(colors: [Color.linearGradient3, Color.linearGradient4, Color.blueMain700],
-                                               startPoint: .top,
-                                               endPoint: .bottom)
+                                colorScheme == .dark
+                                ? AnyShapeStyle(themeManager.accentGradient.opacity(0.13))
+                                : AnyShapeStyle(themeManager.white_white4)
+                            )
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 24)
+                                    .stroke(
+                                        Color("TextPrimary_ 0E101A_F4F1FB")
+                                            .opacity(0.08),
+                                        lineWidth: 1
+                                    )
+                            )
+                            .clipShape(RoundedRectangle(cornerRadius: 24))
+                            .shadow(
+                                color: Color("TextPrimary_ 0E101A_F4F1FB")
+                                    .opacity(0.04),
+                                radius: 8,
+                                y: 4
                             )
                         }
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 12)
-                                .stroke(.neutral300Border, lineWidth: 1)
-                        )
-                        .cornerRadius(12)
                         
-                        //MARK: Top spending subscriptions
-                        if topCategoriesList.count != 0{
-                            TopSpendingSubscriptionsView(data: topCategoriesList)
-                                .padding(.top, 16)
-                        }
-
-                        // Donut Chart (Top Spending)
-                        SubscriptionSummaryView(pieData         : homePieData,
-                                                subscriptions   : homeCategories,
-                                                currencySymbol  : homeVM.homeResponse?.monthlySpendCurrency ?? Constants.shared.currencySymbol,
-                                                monthYear       : $monthYear,
-                                                isFromHome      : true,
-                                                done: {
-                            homeVM.home(input: HomeRequest(userId: Constants.getUserId()))
-                        })
-                        .padding(.top, 16)
-                        
-                        //MARK: Year Overview
-                        YearOverviewChartView(data              : homeVM.homeYearGraphResponse?.monthlySpend ?? [],
-                                              currencySymbol    : homeVM.homeYearGraphResponse?.userCurrencySymbol ?? "",
-                                              onDone            : { year in
-                            selectedYear = year
-                            homeYearlyGraphApi()
-                        })
-                        .padding(.top, 16)
-                        .padding(.bottom, activeSubsList.count == 0 ? 90 : 15)
-                        
-                        
-                        //MARK: Save cards
-//                        GradientBorderView(title: savePercent, subTitle: saveExpiry, buttonImage: "percent-square",nextBtnImage: "arrow_blue", action: clickOnSave, titleColor: Color.blue800,minHeight: 75,titleFont: 18,subTitleFont: 14)
-//                            .padding(.bottom, 16)
-//                            .padding(.top,15)
-//                        
-//                        GradientBorderView(title: youSaved, subTitle: youSavedExpiry, buttonImage: "checkmark-badge",nextBtnImage: "arrow_blue", action: clickOnYouSaved, titleColor: Color.blue800,minHeight: 75,titleFont: 18,subTitleFont: 14)
-//                            .padding(.bottom, activeSubsList.count == 0 ? 90 : 12)
-                        
-                        //                            //MARK: Add / view subscriptions
-                        //                            HStack(spacing:16){
-                        //                                Button(action: {
-                        //                                    goToAddSubscriptions()
-                        //                                }) {
-                        //                                    VStack(spacing:10){
-                        //                                        Image("plus-sign-circle")
-                        //                                        Text("Add new subscription")
-                        //                                            .font(.appRegular(14))
-                        //                                            .foregroundStyle(Color.blueMain700White)
-                        //                                    }
-                        //                                    .frame(maxWidth: .infinity)
-                        //                                    .frame(height: 100)
-                        //                                }
-                        //                                .padding(.vertical, 8)
-                        //                                .padding(.horizontal, 8)
-                        //                                .overlay(
-                        //                                    RoundedRectangle(cornerRadius: 8)
-                        //                                        .stroke(.neutral300Border, lineWidth: 1)
-                        //                                )
-                        //                                .background(.whiteBlackBG)
-                        //                                .cornerRadius(8)
-                        //
-                        //                                Button(action: {
-                        //                                    goToSubscriptions()
-                        //                                }) {
-                        //                                    VStack(spacing:10){
-                        //                                        Image("subs")
-                        //                                        Text("View all subscriptions")
-                        //                                            .font(.appRegular(14))
-                        //                                            .foregroundStyle(Color.amethystmain700)
-                        //                                    }
-                        //                                    .frame(maxWidth: .infinity)
-                        //                                    .frame(height: 100)
-                        //                                }
-                        //                                .padding(.vertical, 8)
-                        //                                .padding(.horizontal, 8)
-                        //                                .overlay(
-                        //                                    RoundedRectangle(cornerRadius: 8)
-                        //                                        .stroke(.neutral300Border, lineWidth: 1)
-                        //                                )
-                        //                                .background(.whiteBlackBG)
-                        //                                .cornerRadius(8)
-                        //                            }
-                        //                            .frame(maxWidth: .infinity)
-                        //                            .frame(height: 100)
-                        //                            .padding(.vertical,16)
-                        
-                        //MARK: Subscriptions list
-                        /*if subscriptionsList.count != 0{
-                         HStack(spacing: 8) {
-                         Text("Your subscriptions")
-                         .font(.appRegular(16))
-                         .foregroundColor(.neutralMain700)
-                         Spacer()
-                         Button(action: goToSubscriptions) {
-                         HStack{
-                         Text("View all")
-                         .font(.appRegular(14))
-                         .foregroundColor(.navyBlueCTA700White)
-                         Image("arrow_blue")
-                         .frame(width: 24,height: 24, alignment: .trailing)
-                         }
-                         }
-                         //                        .frame(width: 40, alignment: .trailing)
-                         }
-                         }
-                         
-                         //MARK: - Your subscriptions list
-                         VStack(spacing: 14) {
-                         ForEach(subscriptionsList) { sub in
-                         subscriptionListCard(subscriptionData: sub)
-                         }
-                         }
-                         */
-                        
-                        if activeSubsList.count != 0{
-                            VStack(alignment: .leading, spacing: 16){
-                                Text("Next renewal")
-                                    .font(.appRegular(16))
-                                    .foregroundColor(Color.graphText)
+                        //MARK: - 12-Month outlook
+                        VStack(spacing: 0) {
+                            HStack(alignment: .firstTextBaseline) {
                                 
-                                //MARK: - Active subscriptions list
-                                if showAll{
-                                    ScrollView {
-                                        VStack(spacing: 14) {
-                                            ForEach(currentSubscriptions) { sub in
-                                                subscriptionListCard(subscriptionData: sub,isActive:true)
+                                Text("12-MONTH OUTLOOK")
+                                    .font(.jetBrainsRegular(11))
+                                    .tracking(1.5)
+                                    .foregroundColor(
+                                        Color("TextPrimary_ 0E101A_F4F1FB")
+                                            .opacity(0.6)
+                                    )
+                                
+                                Spacer()
+                                
+                                Text("projected")
+                                    .font(.jetBrainsRegular(10))
+                                    .tracking(0.5)
+                                    .foregroundColor(
+                                        Color("TextPrimary_ 0E101A_F4F1FB")
+                                            .opacity(0.36)
+                                    )
+                            }
+                            .padding(.top, 22)
+                            .padding(.bottom, 10)
+                            
+                            VStack(spacing: 0) {
+                                
+                                // MARK: - Header
+                                
+                                HStack(alignment: .bottom) {
+                                    
+                                    VStack(alignment: .leading, spacing: 0) {
+                                        
+                                        Text("Projected annual spend")
+                                            .font(.geistRegular(11))
+                                            .foregroundColor(
+                                                Color("TextPrimary_ 0E101A_F4F1FB")
+                                                    .opacity(0.6)
+                                            )
+                                        
+                                        Text(pnsAmount)
+                                            .font(.geistSemiBold(24))
+                                            .tracking(-0.8)
+                                            .foregroundColor(Color("TextPrimary_ 0E101A_F4F1FB"))
+                                            .padding(.top, 2)
+                                    }
+                                    
+                                    Spacer()
+                                    
+                                    VStack(alignment: .trailing, spacing: 2) {
+                                        
+                                        Text(pnsDeltaValue)
+                                            .font(.jetBrainsRegular(10))
+                                            .foregroundColor(Color(hex: "#E0A218"))
+                                        
+                                        Text("vs now")
+                                            .font(.jetBrainsRegular(10))
+                                            .foregroundColor(
+                                                Color("TextPrimary_ 0E101A_F4F1FB")
+                                                    .opacity(0.36)
+                                            )
+                                    }
+                                }
+                                .padding(.bottom, 18)
+                                
+                                
+                                // MARK: - Chart
+                                
+                                Chart {
+                                    
+                                    
+                                    
+                                    
+                                    // MARK: - Bars
+                                    
+                                    ForEach(Array(months.enumerated()), id: \.offset) { index, item in
+                                        
+                                        let activeGradient = themeManager.accentGradient
+                                        
+                                        let inactiveColor = themeManager.white_white4.opacity(0.7)
+                                        
+                                        let barStyle: AnyShapeStyle = index == 0
+                                        ? AnyShapeStyle(activeGradient)
+                                        : AnyShapeStyle(inactiveColor)
+                                        
+                                        BarMark(
+                                            x: .value("Month", item.0),
+                                            y: .value("Spend", item.1)
+                                        )
+                                        .foregroundStyle(barStyle)
+                                        .cornerRadius(3)
+                                        .opacity(0.9)
+                                    }
+                                    
+                                    ForEach(Array(months.enumerated()), id: \.offset) { index, item in
+                                        
+                                        // Area
+                                        AreaMark(
+                                            x: .value("Month", item.0),
+                                            y: .value("Spend", item.1)
+                                        )
+                                        .foregroundStyle(
+                                            LinearGradient(
+                                                colors: [
+                                                    themeManager.accentTextColor.opacity(0.15),
+                                                    themeManager.accentTextColor.opacity(0)
+                                                ],
+                                                startPoint: .top,
+                                                endPoint: .bottom
+                                            )
+                                        )
+                                    }
+                                    
+                                    // MARK: - Line
+                                    
+                                    ForEach(Array(months.enumerated()), id: \.offset) { index, item in
+                                        
+                                        LineMark(
+                                            x: .value("Month", item.0),
+                                            y: .value("Spend", item.1)
+                                        )
+                                        .foregroundStyle(themeManager.accentTextColor)
+                                        .lineStyle(
+                                            StrokeStyle(
+                                                lineWidth: 1.8,
+                                                lineCap: .round,
+                                                lineJoin: .round
+                                            )
+                                        )
+                                    }
+                                    
+                                    
+                                    // MARK: - Highlight Point
+                                    
+                                    PointMark(
+                                        x: .value("Month", months[0].0),
+                                        y: .value("Spend", months[0].1)
+                                    )
+                                    .foregroundStyle(.white)
+                                    .symbolSize(90)
+                                    
+                                    PointMark(
+                                        x: .value("Month", months[0].0),
+                                        y: .value("Spend", months[0].1)
+                                    )
+                                    .foregroundStyle(themeManager.accentTextColor)
+                                    .symbolSize(40)
+                                }
+                                .chartYAxis(.hidden)
+                                .chartXAxis {
+                                    
+                                    AxisMarks(values: months.map { $0.0 }) { value in
+                                        
+                                        AxisValueLabel {
+                                            
+                                            if let month = value.as(String.self) {
+                                                
+                                                Text(month)
+                                                    .font(
+                                                        month == cuentmonth
+                                                        ? .jetBrainsSemiBold(8)
+                                                        : .jetBrainsRegular(8)
+                                                    )
+                                                    .tracking(0.5)
+                                                    .foregroundColor(
+                                                        month == cuentmonth
+                                                        ? themeManager.accentTextColor
+                                                        : Color("TextPrimary_ 0E101A_F4F1FB")
+                                                            .opacity(0.36)
+                                                    )
                                             }
                                         }
+                                        
+                                        AxisGridLine(stroke: StrokeStyle(lineWidth: 0))
+                                        AxisTick(stroke: StrokeStyle(lineWidth: 0))
                                     }
-                                    .frame(height: calculatedHeight)
-                                    .animation(.easeInOut, value: showAll)
-                                }else{
-                                    if let first = activeSubsList.first {
-                                        subscriptionListCard(subscriptionData: first,isActive:true)
+                                }
+                                .frame(height: 120)
+                                
+                                Rectangle()
+                                    .fill(
+                                        Color("TextPrimary_ 0E101A_F4F1FB")
+                                            .opacity(0.08)
+                                    )
+                                    .frame(height: 1)
+                                    .offset(x: 0, y: -14)
+                                
+                                
+                            }
+                            .padding(20)
+                            .background(themeManager.white_white4)
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 24)
+                                    .stroke(
+                                        Color("TextPrimary_ 0E101A_F4F1FB")
+                                            .opacity(0.08),
+                                        lineWidth: 1
+                                    )
+                            )
+                            .clipShape(RoundedRectangle(cornerRadius: 24))
+                            .shadow(
+                                color: Color("TextPrimary_ 0E101A_F4F1FB")
+                                    .opacity(0.04),
+                                radius: 8,
+                                y: 4
+                            )
+                        }
+                        
+                        //MARK: - Where it goes
+                        VStack(spacing: 0) {
+                            HStack(alignment: .firstTextBaseline) {
+                                
+                                Text("WHERE IT GOES")
+                                    .font(.jetBrainsRegular(11))
+                                    .tracking(1.5)
+                                    .foregroundColor(
+                                        Color("TextPrimary_ 0E101A_F4F1FB")
+                                            .opacity(0.6)
+                                    )
+                                
+                                Spacer()
+                                
+                            }
+                            .padding(.top, 22)
+                            .padding(.bottom, 10)
+                            
+                            
+                            
+                            HStack(spacing: 18) {
+                                
+                                // MARK: - Donut Chart
+                                
+                                ZStack {
+                                    
+                                    DonutChartViewNew(items: items)
+                                    
+                                    
+                                    // Center Content
+                                    
+                                    VStack(spacing: 2) {
+                                        
+                                        Text("TOTAL")
+                                            .font(.jetBrainsRegular(9))
+                                            .tracking(1)
+                                            .foregroundColor(
+                                                Color("TextPrimary_ 0E101A_F4F1FB")
+                                                    .opacity(0.6)
+                                            )
+                                        
+                                        Text(wigAmount)
+                                            .font(.geistSemiBold(22))
+                                            .tracking(-0.6)
+                                            .foregroundColor(Color("TextPrimary_ 0E101A_F4F1FB"))
+                                        
+                                        Text("/mo")
+                                            .font(.geistRegular(10))
+                                            .foregroundColor(
+                                                Color("TextPrimary_ 0E101A_F4F1FB")
+                                                    .opacity(0.36)
+                                            )
+                                    }
+                                }
+                                .frame(width: 136, height: 136)
+                                
+                                
+                                // MARK: - Legend
+                                
+                                VStack(spacing: 8) {
+                                    
+                                    ForEach(items) { item in
+                                        
+                                        HStack(spacing: 8) {
+                                            
+                                            RoundedRectangle(cornerRadius: 2)
+                                                .fill(Color(hex: item.color))
+                                                .frame(width: 8, height: 8)
+                                            
+                                            Text(item.name)
+                                                .font(.geistRegular(12))
+                                                .foregroundColor(Color("TextPrimary_ 0E101A_F4F1FB"))
+                                                .lineLimit(1)
+                                                .frame(maxWidth: .infinity, alignment: .leading)
+                                            
+                                            Text(item.amountStr)
+                                                .font(.jetBrainsRegular(11))
+                                                .foregroundColor(
+                                                    Color("TextPrimary_ 0E101A_F4F1FB")
+                                                        .opacity(0.6)
+                                                )
+                                        }
+                                    }
+                                }
+                                .frame(maxWidth: .infinity)
+                            }
+                            .padding(20)
+                            .background(themeManager.white_white4)
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 24)
+                                    .stroke(
+                                        Color("TextPrimary_ 0E101A_F4F1FB")
+                                            .opacity(0.08),
+                                        lineWidth: 1
+                                    )
+                            )
+                            .clipShape(RoundedRectangle(cornerRadius: 24))
+                            .shadow(
+                                color: Color("TextPrimary_ 0E101A_F4F1FB")
+                                    .opacity(0.04),
+                                radius: 8,
+                                y: 4
+                            )
+                            
+                        }
+                        
+                        //MARK: - Top spenders
+                        VStack(spacing: 0) {
+                            HStack(alignment: .firstTextBaseline) {
+                                
+                                Text("TOP SPENDERS")
+                                    .font(.jetBrainsRegular(11))
+                                    .tracking(1.5)
+                                    .foregroundColor(
+                                        Color("TextPrimary_ 0E101A_F4F1FB")
+                                            .opacity(0.6)
+                                    )
+                                
+                                Spacer()
+                                
+                                Text("monthly")
+                                    .font(.jetBrainsRegular(10))
+                                    .tracking(0.5)
+                                    .foregroundColor(
+                                        Color("TextPrimary_ 0E101A_F4F1FB")
+                                            .opacity(0.36)
+                                    )
+                            }
+                            .padding(.top, 22)
+                            .padding(.bottom, 10)
+                            
+                            
+                            
+                            VStack(spacing: 12) {
+                                
+                                ForEach(Array(subscriptions.enumerated()), id: \.offset) { index, item in
+                                    
+                                    SubscriptionRowNew(
+                                        item: item,
+                                        delay: Double(index) * 0.08
+                                    )
+                                }
+                            }
+                            .padding(18)
+                            .background(themeManager.white_white4)
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 24)
+                                    .stroke(
+                                        Color("TextPrimary_ 0E101A_F4F1FB")
+                                            .opacity(0.08),
+                                        lineWidth: 1
+                                    )
+                            )
+                            .clipShape(RoundedRectangle(cornerRadius: 24))
+                            .shadow(
+                                color: Color("TextPrimary_ 0E101A_F4F1FB")
+                                    .opacity(0.04),
+                                radius: 8,
+                                y: 4
+                            )
+                            
+                            
+                        }
+                        .padding(.bottom, upcomingItems.count == 0 ? 120 : 0)
+                        
+                        
+                        //MARK: - Net renewal
+                        if upcomingItems.count > 0 {
+                            VStack(spacing: 0) {
+                                HStack(alignment: .firstTextBaseline) {
+                                    
+                                    Text("NEXT RENEWAL")
+                                        .font(.jetBrainsRegular(11))
+                                        .tracking(1.5)
+                                        .foregroundColor(
+                                            Color("TextPrimary_ 0E101A_F4F1FB")
+                                                .opacity(0.6)
+                                        )
+                                    
+                                    Spacer()
+                                    
+                                    Text(upcomingFirstItem?.subtitle ?? "")
+                                        .font(.jetBrainsRegular(10))
+                                        .tracking(0.5)
+                                        .foregroundColor(
+                                            Color("TextPrimary_ 0E101A_F4F1FB")
+                                                .opacity(0.36)
+                                        )
+                                }
+                                .padding(.top, 22)
+                                .padding(.bottom, 10)
+                                
+                                
+                                
+                                VStack(spacing: 10) {
+                                    
+                                    // MARK: - Featured Card
+                                    
+                                    ZStack {
+                                        HStack(spacing: 14) {
+                                            
+                                            // MARK: - Netflix Icon
+                                            
+                                            ZStack {
+                                                
+                                                /*RoundedRectangle(cornerRadius: 16)
+                                                 .fill(Color.black)
+                                                 
+                                                 Text("N")
+                                                 .font(.geistBold(28))
+                                                 .foregroundColor(Color(hex: "#E50914"))*/
+                                                
+                                                AvatarView(
+                                                    serviceName: upcomingFirstItem?.name ?? "",
+                                                    serviceLogo: upcomingFirstItem?.icon ?? "",
+                                                    size: 56,
+                                                    cornerRadius: 16,
+                                                    fromPreview: false
+                                                )
+                                                
+                                                RoundedRectangle(cornerRadius: 20)
+                                                    .stroke(
+                                                        themeManager.accentTextColor
+                                                            .opacity(0.23),
+                                                        lineWidth: 2
+                                                    )
+                                                    .padding(-4)
+                                                    .scaleEffect(animate ? 1.25 : 1.0)
+                                                    .opacity(animate ? 0.1 : 0.8)
+                                                    .animation(
+                                                        .easeOut(duration: 2)
+                                                        .repeatForever(autoreverses: false),
+                                                        value: animate
+                                                    )
+                                                    .onAppear {
+                                                        animate = true
+                                                    }
+                                            }
+                                            .frame(width: 56, height: 56)
+                                            
+                                            
+                                            // MARK: - Content
+                                            
+                                            VStack(alignment: .leading, spacing: 2) {
+                                                
+                                                Text("CHARGES \(upcomingFirstItem?.subtitle ?? "")".uppercased())
+                                                    .font(.jetBrainsRegular(10))
+                                                    .tracking(1.5)
+                                                    .foregroundColor(themeManager.accentTextColor)
+                                                
+                                                Text(upcomingFirstItem?.name ?? "")
+                                                    .font(.geistSemiBold(18))
+                                                    .tracking(-0.4)
+                                                    .foregroundColor(Color("TextPrimary_ 0E101A_F4F1FB"))
+                                                
+                                                Text(upcomingFirstItem?.planName ?? "")
+                                                    .font(.geistRegular(12))
+                                                    .foregroundColor(
+                                                        Color("TextPrimary_ 0E101A_F4F1FB")
+                                                            .opacity(0.6)
+                                                    )
+                                            }
+                                            
+                                            Spacer()
+                                            
+                                            
+                                            // MARK: - Price
+                                            
+                                            VStack(alignment: .trailing, spacing: 2) {
+                                                
+                                                Text(upcomingFirstItem?.amount ?? "")
+                                                    .font(.geistSemiBold(22))
+                                                    .tracking(-0.6)
+                                                    .foregroundColor(Color("TextPrimary_ 0E101A_F4F1FB"))
+                                                
+                                                Text(upcomingFirstItem?.billingCycleShortLabel ?? "")
+                                                    .font(.jetBrainsRegular(10))
+                                                    .foregroundColor(
+                                                        Color("TextPrimary_ 0E101A_F4F1FB")
+                                                            .opacity(0.36)
+                                                    )
+                                            }
+                                        }
+                                        .padding(18)
+                                    }
+                                    .background(
+                                        LinearGradient(
+                                            colors: [
+                                                themeManager.selectedAccent.primaryColor.opacity(0.063),
+                                                themeManager.selectedAccent.lastColor.opacity(0.03)
+                                            ],
+                                            startPoint: .topLeading,
+                                            endPoint: .bottomTrailing
+                                        )
+                                    )
+                                    .overlay(
+                                        RoundedRectangle(cornerRadius: 24)
+                                            .stroke(
+                                                themeManager.accentTextColor
+                                                    .opacity(0.157),
+                                                lineWidth: 1
+                                            )
+                                    )
+                                    .clipShape(RoundedRectangle(cornerRadius: 24))
+                                    
+                                    
+                                    // MARK: - List
+                                    
+                                    VStack(spacing: 8) {
+                                        
+                                        ForEach(upcomingItems) { item in
+                                            
+                                            UpcomingRow(item: item)
+                                        }
                                     }
                                 }
                                 
-                                //MARK: Show More / Less button
-                                if activeSubsList.count > 1 {
-                                    Button {
-                                        withAnimation(.easeInOut) {
-                                            showAll.toggle()
-                                        }
-                                    } label: {
-                                        Spacer()
-                                        Text(showAll ? "Show Less" : "Show More")
-                                            .font(.appRegular(16))
-                                            .foregroundColor(.blueMain700)
-                                        Image("dropDown_blue")
-                                            .frame(width: 24,height: 24, alignment: .trailing)
-                                            .rotationEffect(.degrees(showAll ? 0 : 180))
-                                            .animation(.easeInOut, value: showAll)
-                                        Spacer()
-                                    }
-                                }
                             }
-                            .padding(.vertical, 16)
-                            .padding(.horizontal, 16)
-                            .overlay(
-                                RoundedRectangle(cornerRadius: 12)
-                                    .stroke(.neutral300Border, lineWidth: 1)
-                            )
-                            .background(.whiteBlackBG)
-                            .cornerRadius(12)
-                            .padding(.bottom,90)
+                            .padding(.bottom, 120)
                         }
-                        
-                        //MARK: View analytics progress
-                        //                        VStack(spacing: 14) {
-                        //                            ForEach(topCategoriesList) { category in
-                        //                                SubscriptionAnalyticsCard(topCategory: category,
-                        //                                                          action: {
-                        //                                    //                            goToSubscriptions()
-                        //                                    ToastManager.shared.showToast(message: "Coming soon in S4",style:ToastStyle.info)
-                        //                                })
-                        //                            }
-                        //                        }
-                        //                        .padding(.top,24)
-                        //                        .padding(.bottom,90)
-                        Spacer()
                     }
+                    .padding(.horizontal, 20)
                 }
-                .background(Color.neutralBg100)
-                .padding(20)
+                .applyAppBackground()
+                
             }
             else{
-//                WelcomeHomeView()
                 WelcomeHomeView(currentPlan: currentPlan)
                     .applyGlobalTransition()
             }
         }
         .navigationBarBackButtonHidden(true)
         .onAppear{
+            guard AppState.shared.isLoggedIn else { return }
             Constants.saveDefaults(value: true, key: "isSyncing")
             if let fullName = commonApiVM.userInfoResponse?.fullName{
                 self.fullName = fullName
@@ -392,7 +785,7 @@ struct HomeView: View {
             homeVM.home(input: HomeRequest(userId: Constants.getUserId()))
             let now = Date()
             selectedYear    = Calendar.current.component(.year, from: now)
-            homeYearlyGraphApi()
+//            homeYearlyGraphApi()
             commonApiVM.getUserInfo(input: getUserInfoRequest(userId: Constants.getUserId()))
 //            commonApiVM.unreadNotificationCount(input: UnreadNotificationCountRequest(userId: Constants.getUserId()))
             let formatter = DateFormatter()
@@ -464,11 +857,92 @@ struct HomeView: View {
 
     private func updateHomeResponse() {
         homeResponse        = homeVM.homeResponse
-        monthlySpend        = "\(homeResponse?.monthlySpendCurrency ?? "")\(homeResponse?.monthlySpend ?? 0.0)"
-        activeSubs          = homeResponse?.activeSubscriptionCount ?? 0
-        activeSubsList      = homeResponse?.expiringSoon ?? []
-        subscriptionsList   = homeResponse?.subscriptionList ?? []
-        topCategoriesList   = homeResponse?.topCategories ?? []
+        let monthlyOverview = homeResponse?.monthlyOverview
+        let status = monthlyOverview?.status ?? ""
+        if status == "on_track"
+        {
+            isOnTrack = true
+        }
+        else{
+            isOnTrack = false
+        }
+        msCurrency = monthlyOverview?.currencySymbol ?? ""
+        let amount = monthlyOverview?.amount ?? 0.00
+        let formatted = String(format: "%.2f", amount)
+        let components = formatted.split(separator: ".")
+        msAmmount = String(components.first ?? "")
+        msAmmountD = "." + String(components.last ?? "")
+        let deltaDirection = monthlyOverview?.deltaDirection ?? ""
+        let deltaAmount = monthlyOverview?.deltaAmount ?? 0.00
+        let formattedDA = String(format: "%.2f", deltaAmount)
+        if deltaDirection == "down"
+        {
+            msDeltaValue = "↓ \(msCurrency)\(formattedDA) vs last month"
+        }
+        else if deltaDirection == "up"
+        {
+            msDeltaValue = "↑ \(msCurrency)\(formattedDA) vs last month"
+        }
+        else{
+            msDeltaValue = "- \(msCurrency)\(formattedDA) vs last month"
+        }
+        
+        let spendProjection = homeResponse?.spendProjection
+        let pnsformatted = String(format: "%.2f", spendProjection?.projectedAnnualSpend ?? 0.00)
+        pnsAmount = "\(spendProjection?.currencySymbol ?? "")\(pnsformatted)"
+        let peakformatted = String(format: "%.2f", spendProjection?.peakAmount ?? 0.00)
+        let peakAmount = "\(spendProjection?.currencySymbol ?? "")\(peakformatted)"
+        if deltaDirection == "down"
+        {
+            pnsDeltaValue = "↓ \(peakAmount) peak in \(spendProjection?.peakMonth ?? "")"
+        }
+        else if deltaDirection == "up"
+        {
+            pnsDeltaValue = "↑ \(peakAmount) peak in \(spendProjection?.peakMonth ?? "")"
+        }
+        else{
+            pnsDeltaValue = "- \(peakAmount) peak in \(spendProjection?.peakMonth ?? "")"
+        }
+        months.removeAll()
+        let monthsobjc = homeResponse?.spendProjection?.months ?? []
+        for item in monthsobjc
+        {
+            months.append(("\(item.month ?? "")".uppercased(), item.amount ?? 0.0))
+        }
+        if months.count > 0 {
+            cuentmonth = months[0].0
+        }
+        let whereItGoes = homeResponse?.whereItGoes
+        let wigformatted = String(format: "%.0f", whereItGoes?.totalAmount ?? 0.00)
+        wigAmount = "\(whereItGoes?.currencySymbol ?? "")\(wigformatted)"
+        items.removeAll()
+        let categories = homeResponse?.whereItGoes?.categories ?? []
+        for item in categories
+        {
+            let itformatted = String(format: "%.2f", item.totalAmount ?? 0.00)
+            items.append(CategoryItem.init(name: item.categoryName ?? "", amount: item.totalAmount ?? 0.00, amountStr: itformatted, color: item.color ?? ""))
+        }
+        
+        subscriptions.removeAll()
+        let topSpenders = homeResponse?.topSpenders ?? []
+        for item in topSpenders
+        {
+            let itformatted = String(format: "%.2f", item.amount ?? 0.00)
+            subscriptions.append(SubscriptionItemNew.init(id: item.id ?? "", name: item.serviceName ?? "", amountStr: itformatted, amount: item.amount ?? 0.00, progress: (item.progressPercentage ?? 0.00)/100, serviceLogo: item.serviceLogo ?? ""))
+        }
+        
+        upcomingItems.removeAll()
+        let nextRenewals = homeResponse?.nextRenewals ?? []
+        for item in nextRenewals
+        {
+            let itformatted = String(format: "%.2f", item.amount ?? 0.00)
+            upcomingItems.append(UpcomingCharge.init(name: item.serviceName ?? "", subtitle: "in \(item.daysUntil ?? 0) days", amount: itformatted, icon: item.serviceLogo ?? "", planName: item.planName ?? "", billingCycleShortLabel: item.billingCycleShortLabel ?? ""))
+        }
+        if upcomingItems.count > 0
+        {
+            upcomingFirstItem = upcomingItems[0]
+            upcomingItems.remove(at: 0)
+        }
         
         withAnimation(.customScreenAnimation) {
             if let response = homeVM.homeResponse {
@@ -488,6 +962,9 @@ struct HomeView: View {
         if let fullName = commonApiVM.userInfoResponse?.fullName{
             self.fullName = fullName
         }
+    }
+    private func goToProfile() {
+        AppIntentRouter.shared.navigate(to: .profileTab)
     }
 }
 
@@ -603,6 +1080,140 @@ struct HeaderView: View {
 //                if commonApiVM.unreadCountResponse == nil{
 //                    commonApiVM.unreadNotificationCount(input: UnreadNotificationCountRequest(userId: Constants.getUserId()))
 //                }
+                guard AppState.shared.isLoggedIn else { return }
+                commonApiVM.unreadNotificationCount(input: UnreadNotificationCountRequest(userId: Constants.getUserId()))
+            }
+        }
+    }
+}
+
+
+//MARK: - HeaderViewWithProfile
+struct HeaderViewWithProfile: View {
+    
+    //MARK: - Properties
+    var title                           : LocalizedStringKey
+    var username                        = ""
+    var subTitle                        : LocalizedStringKey = "Here's your subscription overview"
+    var titleFont                       = 28
+    let action                          : () -> Void
+    let actionProfile                   : () -> Void
+    var profileLogo                     = ""
+    @EnvironmentObject var commonApiVM  : CommonAPIViewModel
+    @EnvironmentObject var themeManager : ThemeManager
+    @Environment(\.colorScheme) var colorScheme
+    
+    var body: some View {
+        //MARK: notification btn
+        ZStack(alignment: .topTrailing) {
+            HStack(spacing: 12) {
+
+                ZStack(alignment: .topTrailing) {
+
+                    Button(action: action) {
+
+                        if colorScheme == .dark {
+                            Image("notification-03")
+                                .renderingMode(.template)
+                                .foregroundColor(.white)
+                                .scaledToFit()
+                                .frame(width: 20, height: 20)
+                                .frame(width: 40, height: 40)
+                                .background(
+                                    themeManager.white_white4,
+                                    in: RoundedRectangle(cornerRadius: 20)
+                                )
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 20)
+                                        .stroke(Color("TextPrimary_ 0E101A_F4F1FB").opacity(0.08), lineWidth: 1)
+                                )
+                        }
+                        else{
+                            Image("notification-03")
+                                .resizable()
+                                .scaledToFit()
+                                .frame(width: 20, height: 20)
+                                .frame(width: 40, height: 40)
+                                .background(
+                                    themeManager.white_white4,
+                                    in: RoundedRectangle(cornerRadius: 20)
+                                )
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 20)
+                                        .stroke(Color("TextPrimary_ 0E101A_F4F1FB").opacity(0.08), lineWidth: 1)
+                                )
+                        }
+                       
+                    }
+
+                    if let count = commonApiVM.unreadCountResponse?.unreadCount{
+                        if count != 0{
+                            let filterCount = ""//count >= 10 ? "9+" : "\(count)"
+                            Text(filterCount)
+                                .font(.appBold(11))
+                                .foregroundColor(.white)
+                                .frame(width: 5, height: 5)
+                                .padding(3)
+                                .background(themeManager.accentTextColor)
+                                .clipShape(Circle())
+                                .shadow(color: themeManager.accentShadowColor, radius: 5, x: 0, y: 0)
+                                .offset(x: -7, y: 4)
+                        }
+                    }
+                }
+                Button(action: actionProfile) {
+                    AvatarView(
+                        serviceName: username,
+                        serviceLogo: profileLogo,
+                        size: 40,
+                        cornerRadius: 20,
+                        fromPreview: true
+                    )
+                }
+                
+            }
+            .frame(maxWidth: .infinity, alignment: .trailing)
+            .padding(.trailing, 16)
+            
+            VStack(alignment: .leading,spacing: 2) {
+                // MARK: - Title
+                HStack{
+                    Image("AppLogo")
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 22, height: 24)
+                    
+                    
+                    if colorScheme == .dark {
+                        Image("AppNameDark")
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 60, height: 14)
+                    } else {
+                        Image("AppName")
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 60, height: 14)
+                    }
+                }
+                
+                //MARK: - SubTitle
+                Text(title)
+                    .font(.geistMedium(22))
+                    .multilineTextAlignment(.leading)
+                    .foregroundColor(Color.neutralMain700)
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(.trailing,16)
+            .padding(.horizontal,20)
+        }
+        .offset(x: 0, y: -5)
+        .onAppear{
+            if Constants.FeatureConfig.isS4Enabled {
+//                if commonApiVM.unreadCountResponse == nil{
+//                    commonApiVM.unreadNotificationCount(input: UnreadNotificationCountRequest(userId: Constants.getUserId()))
+//                }
+                guard AppState.shared.isLoggedIn else { return }
                 commonApiVM.unreadNotificationCount(input: UnreadNotificationCountRequest(userId: Constants.getUserId()))
             }
         }
@@ -618,6 +1229,7 @@ struct AvatarView: View {
     var fontSize        : CGFloat = 20
     var fromPreview     : Bool = false
     @State private var imageLoadFailed          = false
+    @EnvironmentObject var themeManager : ThemeManager
     
     private var initials: String {
         let words = serviceName
@@ -649,17 +1261,34 @@ struct AvatarView: View {
     var body: some View {
         Group {
             if (serviceLogo ?? "").isEmpty {
-                ZStack {
-                    Color.whiteBlackBG
-                    Text(initials)
-                        .font(.appBold(fontSize))
-                        .foregroundColor(.secondaryNavyBlue400)
+                if fromPreview{
+                    ZStack {
+                        themeManager.accentGradient
+                        Text(initials)
+                            .font(.appBold(fontSize))
+                            .foregroundColor(.white)
+                    }
+                    .overlay(
+                        RoundedRectangle(cornerRadius: cornerRadius)
+                            .stroke(.neutral300Border, lineWidth: 1)
+                    )
+                    .cornerRadius(cornerRadius)
+                    //.background(themeManager.accentGradient)
                 }
-                .overlay(
-                    RoundedRectangle(cornerRadius: cornerRadius)
-                        .stroke(.neutral300Border, lineWidth: 1)
-                )
-                .cornerRadius(cornerRadius)
+                else{
+                    ZStack {
+                        Color.whiteBlackBG
+                        Text(initials)
+                            .font(.appBold(fontSize))
+                            .foregroundColor(.secondaryNavyBlue400)
+                    }
+                    .overlay(
+                        RoundedRectangle(cornerRadius: cornerRadius)
+                            .stroke(.neutral300Border, lineWidth: 1)
+                    )
+                    .cornerRadius(cornerRadius)
+                }
+                
             } else {
                 if fromPreview{
                     if let url = serviceLogoURL {
@@ -680,6 +1309,7 @@ struct AvatarView: View {
                                     RoundedRectangle(cornerRadius: cornerRadius)
                                         .stroke(.neutral300Border, lineWidth: 1)
                                 )
+                                
                                 .cornerRadius(cornerRadius)
                         }
                     }

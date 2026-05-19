@@ -234,24 +234,74 @@ struct SubzilloApp: App {
     
     var body: some Scene {
         WindowGroup {
-            RootView()
-                .environmentObject(router)
-                .environmentObject(appDelegate)
-                .environmentObject(networkMonitor)
-                .environmentObject(toastManager)
-                .environmentObject(bottomToastManager)
-                .environmentObject(mediaPicker)
-                .environmentObject(themeManager)
-                .environmentObject(sharedViewModel)
-                .environmentObject(sessionManager)
-                .environment(\.managedObjectContext, persistenceController.container.viewContext)
-                .buttonStyle(InteractiveButtonStyle())
-        }
-        .onChange(of: scenePhase) { newPhase in
-            if newPhase == .active {
+            ZStack {
+                RootView()
+            }
+            .environmentObject(router)
+            .environmentObject(appDelegate)
+            .environmentObject(networkMonitor)
+            .environmentObject(toastManager)
+            .environmentObject(bottomToastManager)
+            .environmentObject(mediaPicker)
+            .environmentObject(themeManager)
+            .environmentObject(sharedViewModel)
+            .environmentObject(sessionManager)
+            .environment(\.managedObjectContext, persistenceController.container.viewContext)
+            .buttonStyle(InteractiveButtonStyle())
+            .withLoader()
+            .withAlert()
+            .withToast()
+            .withBottomToast()
+            .onAppear {
+                sharedViewModel.getCurrencies()
+                sharedViewModel.getCountries()
+                if Constants.FeatureConfig.isS4Enabled {
+                    sharedViewModel.getAppVersionInfo()
+                }
+            }
+            .onOpenURL { url in
+                print("SubzilloApp: onOpenURL received: \(url.absoluteString)")
+                ULink.shared.handleIncomingURL(url)
+                if url.scheme == "subzillo" && url.host == "share" {
+                    if AppState.shared.isLoggedIn {
+                        SharedImageManager.shared.checkSharedImage()
+                        if SharedImageManager.shared.sharedImage != nil {
+                            NotificationCenter.default.post(name: .closeAllBottomSheets, object: nil)
+                            AppIntentRouter.shared.navigate(to: .addSubscriptionsView)
+                        }
+                    }
+                }
+            }
+            .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("DeviceTokenUpdated"))) { _ in
+                print("🔔 Received DeviceTokenUpdated notification")
                 checkAndUpdateDeviceToken()
             }
         }
+        .onChange(of: scenePhase) { phase in
+            switch phase {
+            case .active:
+                //                print("✅ App is in Foreground (Active)")
+                appDelegate.requestAuthorization()
+                checkAndUpdateDeviceToken()
+                if Constants.FeatureConfig.isS4Enabled {
+                    sharedViewModel.getAppVersionInfo()
+                }
+            case .inactive:
+                print("⚠️ App is Inactive (e.g., transitioning)")
+            case .background:
+                print("🌙 App is in Background")
+            }
+        }
+        .onChange(of: appDelegate.deviceToken) { _ in
+            checkAndUpdateDeviceToken()
+        }
+        
+        //        }
+        //        .onChange(of: scenePhase) { newPhase in
+        //            if newPhase == .active {
+        //                checkAndUpdateDeviceToken()
+        //            }
+        //        }
     }
     
     func checkAndUpdateDeviceToken() {
@@ -296,6 +346,7 @@ struct RootView: View {
             ZStack {
                 if let currentRoute = router.path.last {
                     // Main Content Swap (Full Screen)
+//                    SubscriptionPreviewView()
                     destinationView(for: currentRoute)
                         .id(currentRoute) // Forces a fresh animation on every screen change
                         .applyGlobalTransition()
@@ -368,7 +419,7 @@ struct RootView: View {
     private var showTabBar: Bool {
         guard let current = router.path.last else { return false }
         switch current {
-        case .splash, .login, .signup, .onboarding, .welcome, .verifyOtp, .SuccessView, .termsAndPrivacy:
+        case .splash, .login, .signup, .onboarding, .welcome, .verifyOtp, .SuccessView, .termsAndPrivacy, .onboardingSuccess:
             return false
         default:
             return true
@@ -385,7 +436,7 @@ struct RootView: View {
         case .smartAssistantAI:
             SmartAIAssistantView()
         case .appearance:
-            Text("Test")
+            AppearanceView()
         case .notifications:
             NotificationsView()
         case .home:
@@ -454,6 +505,10 @@ struct RootView: View {
             AgentChatView()
         case .splash:
             SplashView()
+        case .profileTab:
+            ProfileView()
+        case .onboardingSuccess:
+            OnboardingSuccess()
         }
     }
 }

@@ -460,6 +460,52 @@ struct UploadErrorImageSheet: View {
     }
 }
 
+struct UploadItemNew: View {
+    
+    var title: LocalizedStringKey
+    var subTitle: LocalizedStringKey
+    var image: String
+    var backgroundColor: Color
+    var action: () -> Void
+    
+    var body: some View {
+        
+        Button(action: action) {
+            
+            HStack(spacing: 14) {
+                
+                Image(image)
+                    .frame(width: 48, height: 48)
+                    .background(backgroundColor)
+                    .clipShape(
+                        RoundedRectangle(cornerRadius: 12)
+                    )
+                
+                VStack(alignment: .leading, spacing: 2) {
+                    
+                    Text(title)
+                        .font(.geistSemiBold(15))
+                        .foregroundColor(
+                            Color("TextPrimary_ 0E101A_F4F1FB")
+                        )
+                    
+                    Text(subTitle)
+                        .font(.geistRegular(12))
+                        .foregroundColor(
+                            Color("TextPrimary_ 0E101A_F4F1FB").opacity(0.6)
+                        )
+                        .lineLimit(1)
+                        .truncationMode(.tail)
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+                
+                Image("rightArrow1")
+                    .frame(width: 16, height: 16)
+            }
+            .padding(16)
+        }
+    }
+}
 struct UploadItem: View {
     var title                   : LocalizedStringKey
     var subTitle                : LocalizedStringKey
