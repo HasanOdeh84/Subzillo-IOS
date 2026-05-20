@@ -22,31 +22,28 @@ struct GradientBorderButton: View {
                         Image(buttonImage ?? "")
                             .frame(width: 20, height: 20)
                         Text(LocalizedStringKey(title))
-                            .font(.geistBold(15))
-                            .foregroundColor(Color.navyBlueCTA700)
+                            .font(.geistBold(17))
+                            .foregroundColor(Color.dangerE43C5CFF5A7A)
                     }
                 } else {
                     Text(LocalizedStringKey(title))
-                        .font(.geistBold(15))
-                        .foregroundColor(Color.navyBlueCTA700)
+                        .font(.geistBold(17))
+                        .foregroundColor(Color.dangerE43C5CFF5A7A)
                 }
             }
             .frame(maxWidth: .infinity, minHeight: buttonHeight)
             .background(backgroundColor)
+            .cornerRadius(buttonHeight/2)
             .overlay(
-                RoundedRectangle(cornerRadius: 8)
+                RoundedRectangle(cornerRadius: buttonHeight/2)
                     .stroke(
-                        LinearGradient(
-                            gradient: Gradient(colors: [Color.gradientPurple, Color.gradientBlue]),
-                            startPoint: .top,
-                            endPoint: .bottom
-                        ),
-                        lineWidth: 2
+                        .dangerE43C5CFF5A7A,
+                        lineWidth: 1
                     )
             )
-            .cornerRadius(8)
-            .contentShape(RoundedRectangle(cornerRadius: 8)) // Ensures whole button is tappable
+            .contentShape(RoundedRectangle(cornerRadius: buttonHeight/2)) // Ensures whole button is tappable
         }
+        .buttonStyle(InteractiveButtonStyle())
     }
 }
 
@@ -177,6 +174,7 @@ struct GradientBgButton: View {
             //            )
             .contentShape(RoundedRectangle(cornerRadius: buttonHeight / 2))
         }
+        .buttonStyle(InteractiveButtonStyle())
     }
 }
 

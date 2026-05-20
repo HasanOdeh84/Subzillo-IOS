@@ -101,7 +101,7 @@ struct SubscriptionCalendarView: View {
             }
         }
         .padding(18)
-        .background(Color.white)
+        .background(themeManager.white_white4)
         .overlay(
             RoundedRectangle(cornerRadius: 22)
                 .stroke(
@@ -133,12 +133,12 @@ extension SubscriptionCalendarView {
                 )
                 .frame(width: 28, height: 28)
                 .background(
-                    Color("SurfaceHi_Light_F1F2F7")
+                    themeManager.white_white4
                 )
                 .overlay(
                     RoundedRectangle(cornerRadius: 8)
                         .stroke(
-                            Color.textPrimary0E101AF4F1FB.opacity(0.08),
+                            themeManager.black_white.opacity(0.08),
                             lineWidth: 1
                         )
                 )
@@ -202,7 +202,7 @@ extension SubscriptionCalendarView {
                         
                     } else if isHighlighted {
                         
-                        Color("SurfaceHi_Light_F1F2F7")
+                        themeManager.white_white4
                         
                     } else {
                         

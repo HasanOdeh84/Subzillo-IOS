@@ -42,7 +42,9 @@ struct SubscriptionsView: View {
     @State private var showRenewSheet           : Bool = false
     @State private var selectedSubscription     : SubscriptionListData? = nil
     @State private var renewSheetHeight         : CGFloat = .zero
+    @StateObject var commonVM                   = CommonAPIViewModel()
     @EnvironmentObject var themeManager         : ThemeManager
+    @Environment(\.colorScheme) var colorScheme
     @EnvironmentObject var commonApiVM          : CommonAPIViewModel
     @State var selectedCategory                 = ""
     @State var categoryResponse                 = [Category.init(id:"",name: "All")]
@@ -53,7 +55,7 @@ struct SubscriptionsView: View {
         CalendarHighlight(day: 21, dots: 1),
         CalendarHighlight(day: 27, dots: 2)
     ]
-    
+    @State private var isPlanExists             : Bool = true
     var hasSelection: Bool {
         subscriptionsList.contains(where: { $0.isSelected ?? false })
     }
@@ -105,41 +107,66 @@ struct SubscriptionsView: View {
                     }
                     
                     Spacer()
-                    
-                    //if let segment = selectedSegment {
-                       
-                       // if segment == .first{
-                            Button {
-                                clickOnFilter()
-                            } label: {
-                                
-                                Image("filterIcon")
-                                    .frame(width: 40, height: 40)
-                                    .background(
-                                        Circle()
-                                            .fill(Color("Surface_FFFFFF_0A0612"))
-                                    )
-                                    .overlay(
-                                        Circle()
-                                            .stroke(
-                                                Color.black.opacity(0.08),
-                                                lineWidth: 1
-                                            )
-                                    )
-                         //   }
-                        //}
+                    if isPlanExists == true {
+                        if let segment = selectedSegment {
+                            
+                            if segment == .first{
+                                Button {
+                                    clickOnFilter()
+                                } label: {
+                                    
+                                    Image("filterIcon")
+                                        .renderingMode(colorScheme == .dark ? .template : .original)
+                                        .foregroundColor(themeManager.black_white)
+                                        .frame(width: 40, height: 40)
+                                        .background(
+                                            Circle()
+                                                .fill(themeManager.white_white4)
+                                        )
+                                        .overlay(
+                                            Circle()
+                                                .stroke(
+                                                    themeManager.black_white.opacity(0.08),
+                                                    lineWidth: 1
+                                                )
+                                        )
+                                }
+                            }
+                        }
                     }
-                   
+                    else{
+                        HStack(spacing: 8) {
+                            
+                            Circle()
+                                .fill(Color.dangerE43C5CFF5A7A)
+                                .frame(width: 7, height: 7)
+                            
+                            Text("\(commonVM.userInfoResponse?.planSubscriptionLimit ?? 0)/\(commonVM.userInfoResponse?.planSubscriptionLimit ?? 0) \(commonVM.userInfoResponse?.planName ?? "")")
+                                .font(.jetBrainsBold(12))
+                                .foregroundColor(Color.dangerE43C5CFF5A7A.opacity(0.8))
+                        }
+                        .padding(.horizontal, 14)
+                        .padding(.vertical, 8)
+                        .background(
+                            Capsule()
+                                .fill(Color.dangerE43C5CFF5A7A.opacity(0.12))
+                        )
+                        .overlay(
+                            Capsule()
+                                .stroke(Color.dangerE43C5CFF5A7A.opacity(0.4), lineWidth: 1)
+                        )
+                        .padding(.top, 10)
+                    }
                 }
                 .padding(.top, 40)
                 
                 /*HeaderView(title: "Your subscriptions",titleFont: 24) {
-                    Constants.FeatureConfig.performS4Action {
-                        goToNotifications()
-                    }
-                }
-                .padding(.top, 50)
-                .frame(alignment: .leading)*/
+                 Constants.FeatureConfig.performS4Action {
+                 goToNotifications()
+                 }
+                 }
+                 .padding(.top, 50)
+                 .frame(alignment: .leading)*/
                 
                 if selectionMode{
                     //MARK: cancel and delete buttons
@@ -155,79 +182,92 @@ struct SubscriptionsView: View {
                     }
                     .padding(.top, 16)
                 }else{
-                    
-                    HStack(spacing: 10) {
-                        
-                        // MARK: - Segment
-                        
-                        SegmentViewNew(
-                            selectedSegment: $selectedSegment,
-                            leftText: "List",
-                            rightText: "Calendar"
-                        )
-                        .environmentObject(themeManager)
-                        
-                        Spacer()
-                        
-                        
-                        if let segment = selectedSegment {
+                    if isPlanExists == true {
+                        HStack(spacing: 10) {
                             
-                            if segment == .first{
-                                // MARK: - Sort Button
+                            // MARK: - Segment
+                            
+                            SegmentViewNew(
+                                selectedSegment: $selectedSegment,
+                                leftText: "List",
+                                rightText: "Calendar"
+                            )
+                            .environmentObject(themeManager)
+                            
+                            Spacer()
+                            
+                            
+                            if let segment = selectedSegment {
                                 
-                                Button {
-                                    clickOnSort()
-                                } label: {
+                                if segment == .first{
+                                    // MARK: - Sort Button
                                     
-                                    HStack(spacing: 6) {
+                                    Button {
+                                        //                                        clickOnSort()
+                                        if filterData.costOrder == 0{
+                                            filterData.costOrder = 1
+                                        }else if filterData.costOrder == 1{
+                                            filterData.costOrder = 4
+                                        }else if filterData.costOrder == 4{
+                                            filterData.costOrder = 1
+                                        }
+                                        page = 0
+                                        self.subscriptionsList.removeAll()
+                                        listSubsApi()
+                                    } label: {
                                         
-                                        Image("chart")
-                                            .frame(width: 12, height: 12)
-                                        
-                                        HStack(spacing: 0) {
+                                        HStack(spacing: 6) {
                                             
-                                            Text("Sort: ")
-                                                .font(.geistMedium(11))
+                                            Image("chart")
+                                                .renderingMode(colorScheme == .dark ? .template : .original)
+                                                .foregroundColor(themeManager.black_white)
+                                                .frame(width: 12, height: 12)
                                             
-                                            if self.filterData.costOrder == 1 || self.filterData.costOrder == 2
-                                            {
-                                                Text("Price")
-                                                    .font(.geistSemiBold(11))
-                                                    .foregroundStyle(
-                                                        themeManager.accentGradient
-                                                    )
-                                            }
-                                            else{
-                                                Text("Date")
-                                                    .font(.geistSemiBold(11))
-                                                    .foregroundStyle(
-                                                        themeManager.accentGradient
-                                                    )
+                                            HStack(spacing: 0) {
+                                                
+                                                Text("Sort: ")
+                                                    .font(.geistMedium(11))
+                                                
+                                                if self.filterData.costOrder == 1 || self.filterData.costOrder == 2
+                                                {
+                                                    Text("Price")
+                                                        .font(.geistSemiBold(11))
+                                                        .foregroundStyle(
+                                                            themeManager.accentTextColor
+                                                        )
+                                                }
+                                                else{
+                                                    Text("Date")
+                                                        .font(.geistSemiBold(11))
+                                                        .foregroundStyle(
+                                                            themeManager.accentTextColor
+                                                        )
+                                                }
                                             }
                                         }
+                                        .foregroundColor(
+                                            Color("TextPrimary_ 0E101A_F4F1FB")
+                                        )
+                                        .padding(.horizontal, 12)
+                                        .frame(height: 32)
+                                        .background(themeManager.white_white4)
+                                        .clipShape(Capsule())
+                                        .overlay(
+                                            Capsule()
+                                                .stroke(
+                                                    themeManager.black_white.opacity(0.08),
+                                                    lineWidth: 1
+                                                )
+                                        )
                                     }
-                                    .foregroundColor(
-                                        Color("TextPrimary_ 0E101A_F4F1FB")
-                                    )
-                                    .padding(.horizontal, 12)
-                                    .frame(height: 32)
-                                    .background(Color.whiteBlack)
-                                    .clipShape(Capsule())
-                                    .overlay(
-                                        Capsule()
-                                            .stroke(
-                                                Color.black.opacity(0.08),
-                                                lineWidth: 1
-                                            )
-                                    )
                                 }
                             }
                         }
+                        .padding(.top, 16)
+                        .padding(.bottom, 12)
                     }
-                    .padding(.top, 16)
-                    .padding(.bottom, 12)
                 }
-                if categoryResponse.count != 0{
+                if categoryResponse.count != 0 && isPlanExists == true {
                     
                     ScrollView(.horizontal, showsIndicators: false) {
                         
@@ -258,7 +298,7 @@ struct SubscriptionsView: View {
                                                 if isSelected {
                                                     themeManager.accentGradient
                                                 } else {
-                                                    Color.whiteBlack
+                                                    themeManager.white_white4
                                                 }
                                             }
                                         )
@@ -268,7 +308,7 @@ struct SubscriptionsView: View {
                                                 .stroke(
                                                     isSelected ?
                                                     Color.clear :
-                                                        Color.black.opacity(0.08),
+                                                        themeManager.black_white.opacity(0.08),
                                                     lineWidth: 1
                                                 )
                                         )
@@ -286,92 +326,92 @@ struct SubscriptionsView: View {
                         }
                     }
                 }
-                
-                /*VStack(spacing: 8) {
-                    
-                    // MARK: - Top Labels
-                    HStack {
+                if isPlanExists == false {
+                    VStack(spacing: 8) {
                         
-                        Text("Free plan limit")
-                            .font(.geistMedium(12))
-                            .foregroundColor(
-                                Color.black.opacity(0.6)
-                            )
-                        
-                        Spacer()
-                        
-                        Text("5 / 5")
-                            .font(.jetBrainsBold(12))
-                            .foregroundColor(
-                                Color(hex: "#D9485F")
-                            )
-                    }
-                    
-                    // MARK: - Progress Bar
-                    GeometryReader { geometry in
-                        
-                        ZStack(alignment: .leading) {
+                        // MARK: - Top Labels
+                        HStack {
                             
-                            Capsule()
-                                .fill(
-                                    Color.black.opacity(0.08)
+                            Text("\(commonVM.userInfoResponse?.planName ?? "") plan limit")
+                                .font(.geistMedium(12))
+                                .foregroundColor(
+                                    themeManager.black_white.opacity(0.6)
                                 )
-                                .frame(height: 6)
                             
-                            Capsule()
-                                .fill(
-                                    Color(hex: "#D9485F")
-                                )
-                                .frame(
-                                    width: geometry.size.width * 1.0, // progress
-                                    height: 6
+                            Spacer()
+                            
+                            Text("\(commonVM.userInfoResponse?.planSubscriptionLimit ?? 0) / \(commonVM.userInfoResponse?.planSubscriptionLimit ?? 0)")
+                                .font(.jetBrainsBold(12))
+                                .foregroundColor(
+                                    Color.dangerE43C5CFF5A7A
                                 )
                         }
+                        
+                        // MARK: - Progress Bar
+                        GeometryReader { geometry in
+                            
+                            ZStack(alignment: .leading) {
+                                
+                                Capsule()
+                                    .fill(
+                                        themeManager.black_white.opacity(0.08)
+                                    )
+                                    .frame(height: 6)
+                                
+                                Capsule()
+                                    .fill(
+                                        Color.dangerE43C5CFF5A7A
+                                    )
+                                    .frame(
+                                        width: geometry.size.width * 1.0, // progress
+                                        height: 6
+                                    )
+                            }
+                        }
+                        .frame(height: 6)
                     }
-                    .frame(height: 6)
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 12)
+                    .background(
+                        themeManager.white_white4
+                    )
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 16)
+                            .stroke(
+                                themeManager.black_white.opacity(0.08),
+                                lineWidth: 1
+                            )
+                    )
+                    .clipShape(
+                        RoundedRectangle(cornerRadius: 16)
+                    )
+                    .padding(.top, 20)
                 }
-                .padding(.horizontal, 16)
-                .padding(.vertical, 12)
-                .background(
-                    Color.white
-                )
-                .overlay(
-                    RoundedRectangle(cornerRadius: 16)
-                        .stroke(
-                            Color.black.opacity(0.08),
-                            lineWidth: 1
-                        )
-                )
-                .clipShape(
-                    RoundedRectangle(cornerRadius: 16)
-                )
-                .padding(.top, 20)*/
-                
                 /*// MARK: - year and Month
-                if viewMode != .analytics {
-                    if selectedSegment == .second{
-                        Button(action: dateSelection) {
-                            FieldView(text: $chargeDate, textValue: "", title: "", image: "Calendar1", placeHolder: "mm/yyyy", isButton: false, isText: true, isDate:true)
-                        }
-                        .sheet(isPresented: $isDatePickerPresented) {
-                            CustomCalenderSheet(
-                                isPresented         : $isDatePickerPresented,
-                                selectedMonth       : $month,
-                                selectedYear        : $year,
-                                onDone: {
-                                    let monthString = String(format: "%02d", month)
-                                    self.chargeDate = "\(monthString)/\(year)"
-                                    getSubsByMonthApi()
-                                }
-                            )
-                            .presentationDetents([.height(300)])
-                            .presentationDragIndicator(.hidden)
-                        }
-                    }
-                }*/
+                 if viewMode != .analytics {
+                 if selectedSegment == .second{
+                 Button(action: dateSelection) {
+                 FieldView(text: $chargeDate, textValue: "", title: "", image: "Calendar1", placeHolder: "mm/yyyy", isButton: false, isText: true, isDate:true)
+                 }
+                 .sheet(isPresented: $isDatePickerPresented) {
+                 CustomCalenderSheet(
+                 isPresented         : $isDatePickerPresented,
+                 selectedMonth       : $month,
+                 selectedYear        : $year,
+                 onDone: {
+                 let monthString = String(format: "%02d", month)
+                 self.chargeDate = "\(monthString)/\(year)"
+                 getSubsByMonthApi()
+                 }
+                 )
+                 .presentationDetents([.height(300)])
+                 .presentationDragIndicator(.hidden)
+                 }
+                 }
+                 }*/
             }
-            .padding(.bottom, 24)
-
+            .padding(.bottom, 17)
+            
             //MARK: Analytics view
             if viewMode == .analytics {
                 if Constants.FeatureConfig.isS4Enabled {
@@ -414,6 +454,15 @@ struct SubscriptionsView: View {
                             Spacer()
                         } else if monthlySubscriptions.count != 0{
                             LazyVStack  {
+                                
+                                HStack{
+                                    Text("Upcoming renewals · \(subscriptions.count)")
+                                        .padding(.bottom, 10)
+                                        .multilineTextAlignment(.leading)
+                                        .foregroundStyle(themeManager.textPrimaryLight6_dark62)
+                                        .font(.jetBrainsMedium(11))
+                                 Spacer()
+                                }
                                 ForEach(subscriptions, id: \.id) { subscription in
                                     Button {
                                         AppIntentRouter.shared.navigate(
@@ -431,7 +480,6 @@ struct SubscriptionsView: View {
                             .scrollIndicators(.hidden)
                             .frame(maxWidth: .infinity)
                             .scrollContentBackground(.hidden)
-                            .background(.neutralBg100)
                             .padding(.bottom,86)
                         }else{
                             Spacer()
@@ -479,7 +527,7 @@ struct SubscriptionsView: View {
                                                 toggleSelection(at: index)
                                             },
                                             onLongPress        : {
-                                                handleLongPress(at: index)
+                                                // handleLongPress(at: index)
                                             },
                                             onRenew: {
                                                 selectedSubscription = sub
@@ -641,6 +689,10 @@ struct SubscriptionsView: View {
             year    = Calendar.current.component(.year, from: now)
             month   = Calendar.current.component(.month, from: now)
             self.chargeDate = formatter.string(from: now)
+            commonVM.getUserInfo(input: getUserInfoRequest(userId: Constants.getUserId()))
+        }
+        .onChange(of: commonVM.userInfoResponse) { _ in
+            updateUserInfo()
         }
         .onChange(of: commonApiVM.categoriesResponse) { _ in updateCatInfo() }
         .sheet(isPresented: $showDeletePopup , onDismiss: {
@@ -653,10 +705,10 @@ struct SubscriptionsView: View {
             InfoAlertSheet(
                 onDelegate: {
                     deleteSubscription()
-                }, title    : "Are you sure you want to delete the subscriptions?\nData will be permanently deleted",
-                subTitle    :"",
-                imageName   : "del_red_big",
-                buttonIcon  : "deleteIcon",
+                }, title    : "Are you sure you want to delete the subscriptions?",
+                subTitle    : "Data will be permanently deleted",
+                imageName   : "del_red_new",
+                buttonIcon  : "del_red_newSmall",
                 buttonTitle : "Delete",
                 imageSize   : 70
             )
@@ -681,7 +733,7 @@ struct SubscriptionsView: View {
                 filterSelect: filterSelect
             )
             .presentationDragIndicator(.hidden)
-            .presentationDetents([.height(600)])
+            .presentationDetents([.height(500)])
         }
         .sheet(isPresented: $showSortSheet) {
             FilterSheet(
@@ -833,6 +885,12 @@ struct SubscriptionsView: View {
         return Calendar.current.component(.day, from: date)
     }
     //MARK: - User defined methods
+    private func updateUserInfo() {
+        //print(commonApiVM.userInfoResponse)
+        if commonVM.userInfoResponse?.remainingSubscriptionLimit == 0 {
+            isPlanExists = false
+        }
+    }
     private func updateCatInfo() {
         categoryResponse.removeAll()
         categoryResponse.append(Category.init(id:"",name: "All"))
@@ -863,7 +921,8 @@ struct SubscriptionsView: View {
                                                                          
                                                                          categoryId                  : selectedCategory,
                                                                          familyMembers               : filterData.familyMemberIds,
-                                                                         monthYear                   : filterData.monthYear), sortBy: filterData.costOrder)
+                                                                         monthYear                   : filterData.monthYear),
+                                             sortBy : filterData.costOrder)
         subscriptionsVM.listSubscriptions(input: input, showLoader: showLoader)
     }
     
@@ -955,54 +1014,54 @@ struct SubscriptionsView: View {
             return date1 < date2
         }
         /*if let days = subscriptionsVM.getSubsByMonthResponse?.days{
-            for day in days{
-                var mainRelations       = [RelationsInfo]()
-                var plans               = [PlanInfo]()
-                if let subscriptions = day.subscriptions{
-                    var relations           : [String] = []
-                    for subscription in subscriptions{
-                        //subscriptionFor Need to change with nickName
-                        let relation = (subscription.subscriptionFor == "" || subscription.subscriptionFor == Constants.getUserId()) ? "Me".localized : subscription.subscriptionFor
-                        if !relations.contains(relation ?? "Me") {
-                            relations.append(relation ?? "Me")
-                        }
-                    }
-                    for relation in relations {
-                        var nickName    = ""
-                        var color       = ""
-                        var relationId  = ""
-                        for sub in subscriptions {
-                            //subscriptionFor Need to change with nickName
-                            //                            let rel     = sub.subscriptionFor == "" ? "Me" : sub.subscriptionFor
-                            let rel     = (sub.subscriptionFor == "" || sub.subscriptionFor == Constants.getUserId()) ? "Me".localized : sub.subscriptionFor
-                            relationId  = (sub.subscriptionFor == "" ? Constants.getUserId() : sub.subscriptionFor) ?? ""
-                            if rel == relation {
-                                plans.append(PlanInfo(id        : sub.id ?? "",
-                                                      name      : sub.serviceName,
-                                                      image     : sub.serviceLogo,
-                                                      amount    : sub.amount,
-                                                      currency  : sub.currencySymbol,
-                                                      card      : sub.paymentMethodName))
-                                nickName = sub.nickName ?? ""
-                                color = sub.color ?? ""
-                            }
-                        }
-                        mainRelations.append(RelationsInfo(id       : relationId,
-                                                           name     : relation == "Me" ? "" : nickName,
-                                                           color    : color, plans: plans))
-                    }
-                    print("relations \(relations)")
-                }
-                subscriptions.append(SubscriptionInfoo(id           : (day.id == nil || day.id == "") ? "\(day.date ?? "")_\(index)" : day.id ?? "",
-                                                       amount       : day.totalAmount,
-                                                       currency     : day.currencySymbol,
-                                                       createdAt    : day.date,
-                                                       plans        : plans,
-                                                       relations    : mainRelations,
-                                                       isOpen       : false,
-                                                       status       : day.status))
-            }
-        }*/
+         for day in days{
+         var mainRelations       = [RelationsInfo]()
+         var plans               = [PlanInfo]()
+         if let subscriptions = day.subscriptions{
+         var relations           : [String] = []
+         for subscription in subscriptions{
+         //subscriptionFor Need to change with nickName
+         let relation = (subscription.subscriptionFor == "" || subscription.subscriptionFor == Constants.getUserId()) ? "Me".localized : subscription.subscriptionFor
+         if !relations.contains(relation ?? "Me") {
+         relations.append(relation ?? "Me")
+         }
+         }
+         for relation in relations {
+         var nickName    = ""
+         var color       = ""
+         var relationId  = ""
+         for sub in subscriptions {
+         //subscriptionFor Need to change with nickName
+         //                            let rel     = sub.subscriptionFor == "" ? "Me" : sub.subscriptionFor
+         let rel     = (sub.subscriptionFor == "" || sub.subscriptionFor == Constants.getUserId()) ? "Me".localized : sub.subscriptionFor
+         relationId  = (sub.subscriptionFor == "" ? Constants.getUserId() : sub.subscriptionFor) ?? ""
+         if rel == relation {
+         plans.append(PlanInfo(id        : sub.id ?? "",
+         name      : sub.serviceName,
+         image     : sub.serviceLogo,
+         amount    : sub.amount,
+         currency  : sub.currencySymbol,
+         card      : sub.paymentMethodName))
+         nickName = sub.nickName ?? ""
+         color = sub.color ?? ""
+         }
+         }
+         mainRelations.append(RelationsInfo(id       : relationId,
+         name     : relation == "Me" ? "" : nickName,
+         color    : color, plans: plans))
+         }
+         print("relations \(relations)")
+         }
+         subscriptions.append(SubscriptionInfoo(id           : (day.id == nil || day.id == "") ? "\(day.date ?? "")_\(index)" : day.id ?? "",
+         amount       : day.totalAmount,
+         currency     : day.currencySymbol,
+         createdAt    : day.date,
+         plans        : plans,
+         relations    : mainRelations,
+         isOpen       : false,
+         status       : day.status))
+         }
+         }*/
     }
     
     func editSubscription(sub: SubscriptionListData, isRenew: Bool = false){
@@ -1135,6 +1194,7 @@ struct SubscriptionsView: View {
 
 //MARK: - SwipeActionCard
 struct SwipeActionCard<Content: View>: View {
+    @Environment(\.colorScheme) var colorScheme
     @EnvironmentObject var themeManager: ThemeManager
     let id                          : Int
     @Binding var openCardIndex      : Int?
@@ -1145,7 +1205,7 @@ struct SwipeActionCard<Content: View>: View {
     let onDelete                    : () -> Void
     let content                     : Content
     @State private var offsetX      : CGFloat = 0
-    private let maxOffset           : CGFloat = -130
+    private let maxOffset           : CGFloat = -140
     
     init(
         id              : Int,
@@ -1169,63 +1229,62 @@ struct SwipeActionCard<Content: View>: View {
     
     var body: some View {
         ZStack(alignment: .trailing) {
-            // DELETE (foreground, overlays Edit)
-            Button {
-                onDelete()
-                closeCard()
-            } label: {
-                VStack(spacing: 8) {
-                    Image("del_white")
-                    Text("Delete")
-                        .font(.geistSemiBold(14))
-                        .foregroundColor(.white)
+            // EDIT and DELETE BUTTONS CONTAINER
+            HStack(spacing: 0) {
+                // EDIT
+                Button {
+                    onEdit()
+                    closeCard()
+                } label: {
+                    VStack(spacing: 6) {
+                        Image("edit_white")
+                            .renderingMode(.template)
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 20, height: 20)
+                        Text("Edit")
+                            .font(.geistSemiBold(13))
+                    }
+                    .foregroundColor(colorScheme == .dark ? Color(hex: "#23C16B") : .white)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .background(colorScheme == .dark ? Color(hex: "#23C16B").opacity(0.12) : Color(hex: "#34A853"))
+                    .clipShape(
+                        RoundedCorner(radius: 18, corners: [.topLeft, .bottomLeft])
+                    )
+                    .overlay(
+                        RoundedCorner(radius: 18, corners: [.topLeft, .bottomLeft])
+                            .stroke(colorScheme == .dark ? Color(hex: "#23C16B").opacity(0.3) : Color.clear, lineWidth: 1)
+                    )
                 }
-                .frame(width: 70, height: 74)
-                .background(Color("redColor"))
-                .clipShape(
-                    RoundedCorner(
-                        radius: 8,
-                        corners: [.topRight, .bottomRight]
+                
+                // DELETE
+                Button {
+                    onDelete()
+                    closeCard()
+                } label: {
+                    VStack(spacing: 6) {
+                        Image("del_white")
+                            .renderingMode(.template)
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 20, height: 20)
+                        Text("Delete")
+                            .font(.geistSemiBold(13))
+                    }
+                    .foregroundColor(colorScheme == .dark ? Color.dangerE43C5CFF5A7A : .white)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .background(colorScheme == .dark ? Color.dangerE43C5CFF5A7A.opacity(0.12) : Color.dangerE43C5CFF5A7A)
+                    .clipShape(
+                        RoundedCorner(radius: 18, corners: [.topRight, .bottomRight])
                     )
-                )
-                .overlay(
-                    RoundedCorner(
-                        radius: 8,
-                        corners: [.topRight, .bottomRight]
+                    .overlay(
+                        RoundedCorner(radius: 18, corners: [.topRight, .bottomRight])
+                            .stroke(colorScheme == .dark ? Color.dangerE43C5CFF5A7A.opacity(0.3) : Color.clear, lineWidth: 1)
                     )
-                    .stroke(Color.neutral300Border, lineWidth: 1)
-                )
-            }
-            
-            // EDIT (background)
-            Button {
-                onEdit()
-                closeCard()
-            } label: {
-                VStack(spacing: 8) {
-                    Image("edit_white")
-                    Text("Edit")
-                        .font(.geistSemiBold(14))
-                        .foregroundColor(.white)
                 }
-                .frame(width: 70, height: 74)
-                .background(Color.greenClr)
-                .clipShape(
-                    RoundedCorner(
-                        radius: 8,
-                        corners: [.topRight, .bottomRight]
-                    )
-                )
-                .overlay(
-                    RoundedCorner(
-                        radius: 8,
-                        corners: [.topRight, .bottomRight]
-                    )
-                    .stroke(Color.neutral300Border, lineWidth: 1)
-                )
             }
-            .offset(x: -65)
-            .zIndex(0)
+            .frame(width: 140, height: 74)
+            .opacity(offsetX < -2 ? 1 : 0) // Hide when completely closed to prevent corner leak
             
             // Foreground content
             content

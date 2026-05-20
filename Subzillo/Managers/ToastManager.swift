@@ -81,7 +81,7 @@ class ToastManager: ObservableObject {
     func showToast(message: String, style:ToastStyle = .success , duration: TimeInterval = 2) {
         hideTimer?.invalidate()
         currentToast = Toast(message: message,style: style, duration: duration)
-        isShowingToast = false
+        isShowingToast = true
         
         hideTimer = Timer.scheduledTimer(withTimeInterval: duration, repeats: false) { [weak self] _ in
             self?.isShowingToast = false

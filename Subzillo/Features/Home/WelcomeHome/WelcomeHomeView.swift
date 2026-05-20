@@ -111,7 +111,7 @@ struct WelcomeHomeView: View {
                                 
                                 // Small Title
                                 Text("LET'S GET STARTED")
-                                    .font(.jetBrainsRegular(10))
+                                    .font(.jetBrainsSemiBold(11))
                                     .tracking(2)
                                     .foregroundColor(
                                         themeManager.accentTextColor
@@ -140,8 +140,6 @@ struct WelcomeHomeView: View {
                         .onAppear {
                             animateGlow = true
                         }
-                        
-                        
                         
                         VStack(spacing: 10) {
                             
@@ -195,13 +193,14 @@ struct WelcomeHomeView: View {
                                 .background(
                                     themeManager.accentGradient
                                 )
-                                .clipShape(RoundedRectangle(cornerRadius: 18))
+                                .cornerRadius(18)
                                 .shadow(
                                     color: themeManager.accentShadowColor,
                                     radius: 3,//12
                                     x: 0,
                                     y: 4//8
                                 )
+//                                .clipShape(RoundedRectangle(cornerRadius: 18))
                             }
                             
                             
@@ -216,11 +215,11 @@ struct WelcomeHomeView: View {
                             
                             // MARK: - Google
                             
-//                            SubscriptionRowButton(
-//                                icon: "",
-//                                title: "Import Google subscriptions",
-//                                subtitle: "Pull from your Google Play account", action: goToAddEntry
-//                            )
+                            //                            SubscriptionRowButton(
+                            //                                icon: "",
+                            //                                title: "Import Google subscriptions",
+                            //                                subtitle: "Pull from your Google Play account", action: goToAddEntry
+                            //                            )
                             
                             
                             // MARK: - Manual
@@ -282,7 +281,7 @@ struct WelcomeHomeView: View {
             buildLine(line: title, styledPart: styledPart, isMask: false)
                 .multilineTextAlignment(.center)
                 .overlay(
-                    themeManager.accentGradient
+                    themeManager.gradient(style: .vertical)
                         .mask(
                             buildLine(line: title, styledPart: styledPart, isMask: true)
                                 .multilineTextAlignment(.center)

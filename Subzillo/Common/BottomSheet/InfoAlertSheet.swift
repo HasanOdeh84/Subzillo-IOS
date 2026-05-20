@@ -22,13 +22,14 @@ struct InfoAlertSheet: View {
     var isCancelButtonVisible               : Bool = false
     var isImageVisible                      : Bool = true
     var isBtn                               : Bool = true
+    @EnvironmentObject var themeManager     : ThemeManager
     
     //MARK: - body
     var body: some View {
         VStack(alignment: .center, spacing: 24) {
             Capsule()
                 .fill(Color.grayCapsule)
-                .frame(width: 150, height: 5)
+                .frame(width: 40, height: 5)
                 .padding(.top,24)
             
             if !isCancelButtonVisible{
@@ -46,14 +47,14 @@ struct InfoAlertSheet: View {
             {
                 VStack(alignment: .center, spacing: isCancelButtonVisible ? 12 : 8) {
                     Text(LocalizedStringKey(title ?? ""))
-                        .font(.appSemiBold(24))
-                        .foregroundStyle(.neutralMain700)
+                        .font(.geistSemiBold(16))
+                        .foregroundStyle(.textPrimary0E101AF4F1FB)
                         .multilineTextAlignment(.center)
                         .fixedSize(horizontal: false, vertical: true)
                     
                     Text(LocalizedStringKey(subTitle ?? ""))
-                        .font(.appRegular(18))
-                        .foregroundStyle(.underlineGray)
+                        .font(.geistMedium(12))
+                        .foregroundStyle(themeManager.textPrimaryLight6_dark62)
                         .multilineTextAlignment(.center)
                         .lineSpacing(4)
                         .fixedSize(horizontal: false, vertical: true)
@@ -61,8 +62,8 @@ struct InfoAlertSheet: View {
             }
             else{
                 Text(LocalizedStringKey(title ?? ""))
-                    .font(titleFont)
-                    .foregroundStyle(.underlineGray)
+                    .font(.geistSemiBold(16))
+                    .foregroundStyle(.textPrimary0E101AF4F1FB)
                     .multilineTextAlignment(.center)
                     .lineSpacing(4)
                     .padding(.horizontal, 40)
@@ -94,6 +95,7 @@ struct InfoAlertSheet: View {
         }
         .padding(.horizontal, 20)
         .fixedSize(horizontal: false, vertical: true)
+        .background(.bottomBGFFFFFF120A1F)
         .overlay {
             GeometryReader { geo in
                 Color.clear

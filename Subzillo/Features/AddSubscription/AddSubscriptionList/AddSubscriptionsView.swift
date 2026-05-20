@@ -222,11 +222,14 @@ struct AddSubscriptionsView: View {
         }
     }
     private func clickOnUploadScreenshot() {
+        
+        
         Constants.FeatureConfig.performS4Action {
             if commonVM.userInfoResponse?.remainingSubscriptionLimit == 0 {
                 SheetManager.shared.isUpgradeSheetVisible = true
             } else {
-                showUploadPopup = true
+                //showUploadPopup = true
+                AppIntentRouter.shared.navigate(to: .uploadView)
             }
         }
     }

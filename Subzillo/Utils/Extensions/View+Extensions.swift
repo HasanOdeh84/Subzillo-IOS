@@ -122,48 +122,46 @@ struct InnerHeightPreferenceKey: PreferenceKey {
     }
 }*/
 struct InteractiveButtonStyle: ButtonStyle {
-
     func makeBody(configuration: Configuration) -> some View {
-
-        AnimatedButton(configuration: configuration)
+        InteractiveButtonWrapper(configuration: configuration)
     }
 }
-private struct AnimatedButton: View {
 
+private struct InteractiveButtonWrapper: View {
     let configuration: ButtonStyle.Configuration
-
-    @State private var isPressed = false
+    @State private var quickTapped = false
+    @State private var didLongPress = false
 
     var body: some View {
-
+        let isCurrentlyPressed = configuration.isPressed || quickTapped
+        
         configuration.label
-            .scaleEffect(isPressed ? 0.92 : 1.0)
+            .scaleEffect(isCurrentlyPressed ? 0.92 : 1.0)
             .animation(
-                .interactiveSpring(
-                    response: 0.2,
-                    dampingFraction: 0.7
-                ),
-                value: isPressed
+                .interactiveSpring(response: 0.2, dampingFraction: 0.7),
+                value: isCurrentlyPressed
             )
             .onChange(of: configuration.isPressed) { pressed in
-
                 if pressed {
-
-                    isPressed = true
-
-                    UIImpactFeedbackGenerator(style: .medium)
-                        .impactOccurred()
-
+                    didLongPress = true
+                    UIImpactFeedbackGenerator(style: .medium).impactOccurred()
                 } else {
-
-                    DispatchQueue.main.asyncAfter(
-                        deadline: .now() + 0.08
-                    ) {
-
-                        isPressed = false
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                        didLongPress = false
                     }
                 }
             }
+            .simultaneousGesture(
+                TapGesture().onEnded {
+                    if !didLongPress {
+                        UIImpactFeedbackGenerator(style: .medium).impactOccurred()
+                        quickTapped = true
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
+                            quickTapped = false
+                        }
+                    }
+                }
+            )
     }
 }
 /*

@@ -42,7 +42,104 @@ struct FilterSheet: View {
     @State private var sheetHeight              : CGFloat = 400
     
     //MARK: - body
+    @Environment(\.colorScheme) var colorScheme
+    @EnvironmentObject var themeManager: ThemeManager
+    
     var body: some View {
+        VStack(spacing: 0) {
+            // Handle bar
+            Capsule()
+                .fill(Color.textPrimary0E101AF4F1FB.opacity(0.15))
+                .frame(width: 40, height: 4)
+                .padding(.top, 20)
+                .padding(.bottom, 24)
+            
+            VStack(alignment: .leading, spacing: 0) {
+                // Title
+                Text("Filter & Sort")
+                    .font(.geistSemiBold(16))
+                    .foregroundColor(Color.textPrimary0E101AF4F1FB)
+                    .padding(.bottom, 4)
+                
+                Text("Refine what you see")
+                    .font(.geistRegular(14))
+                    .foregroundColor(themeManager.textPrimaryLight6_dark62)
+                    .padding(.bottom, 24)
+                
+                // INCLUDE Section
+                Text("INCLUDE")
+                    .font(.jetBrainsMedium(11))
+                    .tracking(1.5)
+                    .foregroundColor(themeManager.textPrimaryLight6_dark62)
+                    .padding(.bottom, 12)
+                
+                VStack(spacing: 12) {
+                    FilterToggleRow(
+                        title: "Expired subscriptions",
+                        subtitle: "Show subs that have ended",
+                        isOn: $filterData.includeExpiredSubscriptions
+                    )
+                    FilterToggleRow(
+                        title: "Family subscriptions",
+                        subtitle: "Shared by family members",
+                        isOn: $filterData.includeFamilySubscriptions
+                    )
+                }
+                .padding(.bottom, 24)
+                
+                // SORT BY Section
+                Text("INCLUDE") // Keeping text from mockup design
+                    .font(.jetBrainsMedium(11))
+                    .tracking(1.5)
+                    .foregroundColor(themeManager.textPrimaryLight6_dark62)
+                    .padding(.bottom, 12)
+                
+                HStack(spacing: 12) {
+                    FilterSortCard(
+                        title: "Renewal date",
+                        subtitle: "Nearest first",
+                        isSelected: filterData.costOrder == 4 || filterData.costOrder == 3,
+                        action: { filterData.costOrder = 4 }
+                    )
+                    
+                    FilterSortCard(
+                        title: "Price",
+                        subtitle: "Highest first",
+                        isSelected: filterData.costOrder == 1 || filterData.costOrder == 2,
+                        action: { filterData.costOrder = 1 }
+                    )
+                }
+                .padding(.bottom, 32)
+                
+//                Spacer(minLength: 0)
+                
+                // Apply Button
+                GradientBgButton(
+                    title       : "Apply filters",
+                    isSolid     : true,
+                    showChevron : false
+                ) {
+                    onApplyAction()
+                }
+//                Button(action: onApplyAction) {
+//                    Text("Apply filters")
+//                        .font(.geistSemiBold(16))
+//                        .foregroundColor(.white)
+//                        .frame(maxWidth: .infinity, minHeight: 56)
+//                        .background(themeManager.accentGradient)
+//                        .cornerRadius(28)
+//                        .shadow(color: themeManager.accentShadowColor, radius: 15, x: 0, y: 8)
+//                }
+//                .buttonStyle(InteractiveButtonStyle())
+                .padding(.bottom, 15)
+            }
+            .padding(.horizontal, 24)
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+        .background(.bottomBGFFFFFF120A1F)
+        .ignoresSafeArea(edges: .bottom)
+        /*
+        // --- OLD UI COMMENTED OUT AS REQUESTED ---
         VStack {
             ZStack{
                 Capsule()
@@ -282,6 +379,7 @@ struct FilterSheet: View {
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(Color.neutralBg100)
         .ignoresSafeArea(edges: .bottom)
+        */
         .onAppear{
             commonApiVM.getCategories()
             addSubscriptionVM.listFamilyMembers(input: ListFamilyMembersRequest(userId: Constants.getUserId()))
@@ -453,5 +551,96 @@ struct FilterSheet: View {
         }
         onDelegate?(filterData)
         dismiss()
+    }
+}
+
+// MARK: - New Filter Components
+struct FilterToggleRow: View {
+    var title: String
+    var subtitle: String
+    @Binding var isOn: Bool
+    @Environment(\.colorScheme) var colorScheme
+    @EnvironmentObject var themeManager: ThemeManager
+
+    var body: some View {
+        HStack {
+            VStack(alignment: .leading, spacing: 4) {
+                Text(title)
+                    .font(.geistSemiBold(15))
+                    .foregroundColor(Color.textPrimary0E101AF4F1FB)
+                Text(subtitle)
+                    .font(.geistRegular(13))
+                    .foregroundColor(themeManager.textPrimaryLight6_dark62)
+            }
+            Spacer()
+            CustomFilterToggle(isOn: $isOn)
+        }
+        .padding(.horizontal, 16)
+        .padding(.vertical, 14)
+        .background(
+            RoundedRectangle(cornerRadius: 16)
+                .fill(themeManager.white_white4)
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: 16)
+                .stroke(themeManager.textPrimaryLight8_white8, lineWidth: 1)
+        )
+    }
+}
+
+struct CustomFilterToggle: View {
+    @Binding var isOn: Bool
+    @EnvironmentObject var themeManager: ThemeManager
+    
+    var body: some View {
+        ZStack {
+            Capsule()
+                .fill(isOn ? AnyShapeStyle(themeManager.accentGradient) : AnyShapeStyle(Color.flagBgF1F2F7F7F7F9))
+                .frame(width: 44, height: 24)
+            
+            Circle()
+                .fill(Color.white)
+                .frame(width: 20, height: 20)
+                .shadow(color: .black.opacity(0.15), radius: 2, x: 0, y: 1)
+                .offset(x: isOn ? 10 : -10)
+        }
+        .animation(.spring(response: 0.3, dampingFraction: 0.7), value: isOn)
+        .onTapGesture {
+            isOn.toggle()
+        }
+    }
+}
+
+struct FilterSortCard: View {
+    var title: String
+    var subtitle: String
+    var isSelected: Bool
+    var action: () -> Void
+    @Environment(\.colorScheme) var colorScheme
+    @EnvironmentObject var themeManager: ThemeManager
+
+    var body: some View {
+        Button(action: action) {
+            VStack(alignment: .leading, spacing: 4) {
+                Text(title)
+                    .font(.geistSemiBold(13))
+                    .foregroundColor(isSelected ? themeManager.accentTextColor : Color.textPrimary0E101AF4F1FB)
+                Text(subtitle)
+                    .font(.jetBrainsMedium(10))
+                    .foregroundColor(themeManager.textPrimaryLight6_dark62)
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(.horizontal, 16)
+            .padding(.vertical, 14)
+            .background(
+                RoundedRectangle(cornerRadius: 16)
+                    .fill(isSelected ? AnyShapeStyle(themeManager.accentTextColor.opacity(0.133)) : AnyShapeStyle(themeManager.white_white4))
+            )
+            .overlay(
+                RoundedRectangle(cornerRadius: 16)
+                    .stroke(isSelected ? themeManager.accentTextColor : themeManager.textPrimaryLight8_white8, lineWidth: 1)
+            )
+        }
+        .buttonStyle(InteractiveButtonStyle())
     }
 }

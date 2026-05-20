@@ -15,6 +15,7 @@ struct StatCardNew: View {
     let value: String
     var suffix: String? = nil
     @EnvironmentObject var themeManager     : ThemeManager
+    @Environment(\.colorScheme) var colorScheme
     var body: some View {
         
         VStack(alignment: .leading, spacing: 0) {
@@ -55,7 +56,7 @@ struct StatCardNew: View {
         .frame(maxWidth: .infinity, alignment: .leading)
         .frame(height: 80)
         .padding(12)
-        .background(themeManager.white_white4)
+        .background(colorScheme == .dark ? themeManager.white_white4 : Color.surfaceHiLightF1F2F7)
         .overlay(
             RoundedRectangle(cornerRadius: 14)
                 .stroke(
@@ -70,27 +71,32 @@ struct StatCardNew: View {
 
 // MARK: - Cheapest Card
 
-struct CheapestStatCard: View {
+struct HighestStatCard: View {
+    var data : highestActiveSubscription?
     @EnvironmentObject var themeManager     : ThemeManager
+    @Environment(\.colorScheme) var colorScheme
+    
     var body: some View {
+        let formattedAmount = String(format: "%.2f", data?.amount ?? 0.0)
         
         VStack(alignment: .leading, spacing: 0) {
             
-            Text("CHEAPEST")
+            Text("HIGHEST")
                 .font(.jetBrainsRegular(9))
                 .tracking(1.2)
                 .foregroundColor(
                     Color("TextPrimary_ 0E101A_F4F1FB")
                         .opacity(0.6)
                 )
+                .padding(.top, -10)
             
-            Text("$2.99")
+            Text("\(data?.currencySymbol ?? "") \(formattedAmount)")
                 .font(.geistSemiBold(18))
                 .tracking(-0.5)
                 .foregroundColor(Color("TextPrimary_ 0E101A_F4F1FB"))
                 .padding(.top, 4)
             
-            Text("iCloud+")
+            Text(data?.serviceName ?? "")
                 .font(.jetBrainsRegular(9))
                 .foregroundColor(
                     Color("TextPrimary_ 0E101A_F4F1FB")
@@ -101,7 +107,7 @@ struct CheapestStatCard: View {
         .frame(maxWidth: .infinity, alignment: .leading)
         .frame(height: 80)
         .padding(12)
-        .background(themeManager.white_white4)
+        .background(colorScheme == .dark ? themeManager.white_white4 : Color.surfaceHiLightF1F2F7)
         .overlay(
             RoundedRectangle(cornerRadius: 14)
                 .stroke(
@@ -169,7 +175,7 @@ struct DonutChartViewNew: View {
 // MARK: - Row
 
 struct SubscriptionRowNew: View {
-    
+    @Environment(\.colorScheme) var colorScheme
     @EnvironmentObject var themeManager     : ThemeManager
     let item: SubscriptionItemNew
     let delay: Double
@@ -196,7 +202,8 @@ struct SubscriptionRowNew: View {
                     serviceLogo: item.serviceLogo,
                     size: 30,
                     cornerRadius: 8.4,
-                    fromPreview: false
+                    fromPreview: false,
+                    isShadow: false
                 )
                 
             }
@@ -204,7 +211,7 @@ struct SubscriptionRowNew: View {
             .overlay(
                 RoundedRectangle(cornerRadius: 8.4)
                     .stroke(
-                        Color.black.opacity(0.06),
+                        themeManager.black_white.opacity(0.06),
                         lineWidth: 0.5
                     )
             )
@@ -222,7 +229,7 @@ struct SubscriptionRowNew: View {
                     
                     Spacer()
                     
-                    Text(item.amountStr)
+                    Text("\(item.currencySymbol)\(item.amountStr)")
                         .font(.jetBrainsRegular(12))
                         .foregroundColor(
                             Color("TextPrimary_ 0E101A_F4F1FB")
@@ -238,7 +245,7 @@ struct SubscriptionRowNew: View {
                     ZStack(alignment: .leading) {
                         
                         RoundedRectangle(cornerRadius: 6)
-                            .fill(themeManager.white_white4)
+                            .fill(colorScheme == .dark ? themeManager.white_white4 : Color.surfaceHiLightF1F2F7)
                         
                         RoundedRectangle(cornerRadius: 6)
                             .fill(
@@ -293,9 +300,9 @@ struct UpcomingRow: View {
                 serviceLogo: item.icon,
                 size: 32,
                 cornerRadius: 8.4,
-                fromPreview: false
+                fromPreview: false,
+                isShadow: false
             )
-            
             
             VStack(alignment: .leading, spacing: 1) {
                 
@@ -313,7 +320,7 @@ struct UpcomingRow: View {
             
             Spacer()
             
-            Text(item.amount)
+            Text("\(item.currencySymbol)\(item.amount)")
                 .font(.geistSemiBold(13))
                 .foregroundColor(Color("TextPrimary_ 0E101A_F4F1FB"))
         }
@@ -360,4 +367,5 @@ struct UpcomingCharge: Identifiable {
     let icon: String
     let planName: String
     let billingCycleShortLabel: String
+    let currencySymbol: String
 }

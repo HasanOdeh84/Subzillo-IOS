@@ -34,9 +34,9 @@ struct RegistrationView: View {
                 // Header section
                 VStack(alignment: .leading, spacing: 24) {
                     // Back Button
-                    CircleBackButton {
-                        AppIntentRouter.shared.pop()
-                    }
+//                    CircleBackButton {
+//                        AppIntentRouter.shared.pop()
+//                    }
                     
                     // Logo with Glow
                     ZStack {
@@ -95,10 +95,12 @@ struct RegistrationView: View {
                                     .foregroundColor(.textPrimary0E101AF4F1FB)
                                     .keyboardType(.emailAddress)
                                     .autocapitalization(.none)
+                                    .opacity(isEmailDisabled ? 0.5 : 1.0)
                                     .disabled(isEmailDisabled)
                             }
                         } else {
-                            RegistrationFieldSection(header: verifyData?.verifyType == 1 ? "ENTER YOUR PHONE NUMBER" : "ENTER YOUR PHONE NUMBER [OPTIONAL]") {
+                            let initialVerifyType = verifyData?.originalVerifyType ?? verifyData?.verifyType
+                            RegistrationFieldSection(header: initialVerifyType == 1 ? "ENTER YOUR PHONE NUMBER" : "ENTER YOUR PHONE NUMBER [OPTIONAL]") {
                                 PhoneNumberField(phoneNumber        : $phoneNumber,
                                                  header             : "",
                                                  placeholder        : "00 000 0000",
@@ -107,9 +109,9 @@ struct RegistrationView: View {
                                                  isCountry          : true,
                                                  fromSingup         : true,
                                                  fromSocailLogin    : fromSocialLogin)
-                                .opacity(verifyData?.verifyType == 1 ? 0.5 : 1.0)
-                                .disabled(verifyData?.verifyType == 1)
-                                .if(verifyData?.verifyType != 1) { view in
+                                .opacity(initialVerifyType == 1 ? 0.5 : 1.0)
+                                .disabled(initialVerifyType == 1)
+                                .if(initialVerifyType != 1) { view in
                                     view.addDoneButton{}
                                 }
                             }
@@ -118,19 +120,19 @@ struct RegistrationView: View {
                                 TextField("", text: $fullName, prompt: Text("Enter your full name").foregroundColor(themeManager.textPrimaryLight6_dark62))
                                     .font(.geistMedium(14))
                                     .foregroundColor(.textPrimary0E101AF4F1FB)
-                                    .if(verifyData?.verifyType == 1) { view in
+                                    .if(initialVerifyType == 1) { view in
                                         view.addDoneButton{}
                                     }
                             }
                             
-                            RegistrationFieldSection(header: verifyData?.verifyType == 1 ? "EMAIL [OPTIONAL]" : "EMAIL", icon: "email_login") {
+                            RegistrationFieldSection(header: initialVerifyType == 1 ? "EMAIL [OPTIONAL]" : "EMAIL", icon: "email_login") {
                                 TextField("", text: $email, prompt: Text(verbatim: "name@example.com").foregroundColor(themeManager.textPrimaryLight6_dark62))
                                     .font(.geistMedium(14))
                                     .foregroundColor(.textPrimary0E101AF4F1FB)
                                     .keyboardType(.emailAddress)
                                     .autocapitalization(.none)
-                                    .opacity(verifyData?.verifyType == 2 ? 0.5 : 1.0)
-                                    .disabled(verifyData?.verifyType == 2)
+                                    .opacity(initialVerifyType == 2 ? 0.5 : 1.0)
+                                    .disabled(initialVerifyType == 2)
                             }
                         }
                     }
@@ -169,10 +171,20 @@ struct RegistrationView: View {
         .onAppear {
             if let data = SessionManager.shared.loginData {
                 verifyData = data
-                if verifyData?.verifyType == 1 {
-                    phoneNumber = verifyData?.formattedPhNo ?? ""
+                let initialVerifyType = verifyData?.originalVerifyType ?? verifyData?.verifyType
+                if initialVerifyType == 1 {
+                    phoneNumber = verifyData?.formattedPhNo ?? verifyData?.phoneNumber ?? ""
+                    if let savedEmail = verifyData?.email, !savedEmail.isEmpty {
+                        email = savedEmail
+                    }
                 } else {
                     email = verifyData?.email ?? ""
+                    if let savedPhone = verifyData?.formattedPhNo, !savedPhone.isEmpty {
+                        phoneNumber = savedPhone
+                    }
+                }
+                if let savedName = verifyData?.fullName, !savedName.isEmpty {
+                    fullName = savedName
                 }
                 if fromSocialLogin {
                     isEmailDisabled = email == "" ? false : true
@@ -211,7 +223,7 @@ struct RegistrationView: View {
         if let errorMessage = LoginSignupValidations().validateSignup(input: input, isSocialLogin: fromSocialLogin) {
             ToastManager.shared.showToast(message: errorMessage.localized, style: ToastStyle.error)
         } else {
-            registerVM.register(input: input, verifyType: verifyData?.verifyType ?? 0, fromSocialLogin: fromSocialLogin, appleEmail: appleEmail, verifyData: verifyData)
+            registerVM.register(input: input, verifyType: verifyData?.verifyType ?? 0, fromSocialLogin: fromSocialLogin, appleEmail: appleEmail, verifyData: verifyData, formattedPhNo: phoneNumber)
         }
     }
 }

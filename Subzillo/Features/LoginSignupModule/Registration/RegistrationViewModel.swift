@@ -21,7 +21,7 @@ class RegistrationViewModel: ObservableObject {
         self.sessionManager = sessionManager
     }
     
-    func register(input:RegisterRequest,verifyType:Int,fromSocialLogin:Bool = false,appleEmail:String = "",verifyData: LoginSignupVerifyData?) {
+    func register(input:RegisterRequest,verifyType:Int,fromSocialLogin:Bool = false,appleEmail:String = "",verifyData: LoginSignupVerifyData?, formattedPhNo: String = "") {
         apiReference.postApi(endPoint: APIEndpoint.registration, method: .POST,token: authKey,body: input,showLoader: true, responseType: RegisterResponse.self)
             .sink { [weak self] completion in
                 if case let .failure(error) = completion {
@@ -45,6 +45,8 @@ class RegistrationViewModel: ObservableObject {
                 let data = LoginSignupVerifyData(verifyType         : verifyType,
                                                  email              : input.email,
                                                  phoneNumber        : input.phoneNumber,
+                                                 formattedPhNo      : formattedPhNo,
+                                                 originalVerifyType : SessionManager.shared.loginData?.originalVerifyType ?? SessionManager.shared.loginData?.verifyType,
                                                  countryCode        : input.countryCode,
                                                  userId             : SessionManager.shared.loginData?.userId ?? "",
                                                  isNewUser          : SessionManager.shared.loginData?.isNewUser ?? false,
@@ -52,6 +54,7 @@ class RegistrationViewModel: ObservableObject {
                                                  fullName           : input.fullName,
                                                  socialLogin        : SessionManager.shared.loginData?.socialLogin ?? false)
                 self.sessionManager.saveLoginData(data)
+                Constants.saveDefaults(value: input.fullName, key: Constants.username)
                 if fromSocialLogin && verifyData?.socialLoginType == loginType.apple{
                     if response.data?.emailOtpVerifiedStatus == false && response.data?.mobileOtpVerifiedStatus == false{
                         if input.email != appleEmail{
@@ -63,6 +66,8 @@ class RegistrationViewModel: ObservableObject {
                             let data = LoginSignupVerifyData(verifyType         : verifyType,
                                                              email              : input.email,
                                                              phoneNumber        : input.phoneNumber,
+                                                             formattedPhNo      : formattedPhNo,
+                                                             originalVerifyType : SessionManager.shared.loginData?.originalVerifyType ?? SessionManager.shared.loginData?.verifyType,
                                                              countryCode        : input.countryCode,
                                                              userId             : SessionManager.shared.loginData?.userId ?? "",
                                                              isNewUser          : SessionManager.shared.loginData?.isNewUser ?? false,
@@ -85,6 +90,8 @@ class RegistrationViewModel: ObservableObject {
                             let data = LoginSignupVerifyData(verifyType         : verifyType,
                                                              email              : input.email,
                                                              phoneNumber        : input.phoneNumber,
+                                                             formattedPhNo      : formattedPhNo,
+                                                             originalVerifyType : SessionManager.shared.loginData?.originalVerifyType ?? SessionManager.shared.loginData?.verifyType,
                                                              countryCode        : input.countryCode,
                                                              userId             : SessionManager.shared.loginData?.userId ?? "",
                                                              isNewUser          : SessionManager.shared.loginData?.isNewUser ?? false,
@@ -102,6 +109,8 @@ class RegistrationViewModel: ObservableObject {
                         let data = LoginSignupVerifyData(verifyType         : verifyType,
                                                          email              : input.email,
                                                          phoneNumber        : input.phoneNumber,
+                                                         formattedPhNo      : formattedPhNo,
+                                                         originalVerifyType : SessionManager.shared.loginData?.originalVerifyType ?? SessionManager.shared.loginData?.verifyType,
                                                          countryCode        : input.countryCode,
                                                          userId             : SessionManager.shared.loginData?.userId ?? "",
                                                          isNewUser          : SessionManager.shared.loginData?.isNewUser ?? false,
@@ -119,6 +128,8 @@ class RegistrationViewModel: ObservableObject {
                         let data = LoginSignupVerifyData(verifyType         : 1,
                                                          email              : input.email,
                                                          phoneNumber        : input.phoneNumber,
+                                                         formattedPhNo      : formattedPhNo,
+                                                         originalVerifyType : SessionManager.shared.loginData?.originalVerifyType ?? SessionManager.shared.loginData?.verifyType,
                                                          countryCode        : input.countryCode,
                                                          userId             : SessionManager.shared.loginData?.userId ?? "",
                                                          isNewUser          : SessionManager.shared.loginData?.isNewUser ?? false,
@@ -138,6 +149,8 @@ class RegistrationViewModel: ObservableObject {
                         let data = LoginSignupVerifyData(verifyType         : verifyType,
                                                          email              : input.email,
                                                          phoneNumber        : input.phoneNumber,
+                                                         formattedPhNo      : formattedPhNo,
+                                                         originalVerifyType : SessionManager.shared.loginData?.originalVerifyType ?? SessionManager.shared.loginData?.verifyType,
                                                          countryCode        : input.countryCode,
                                                          userId             : SessionManager.shared.loginData?.userId ?? "",
                                                          isNewUser          : SessionManager.shared.loginData?.isNewUser ?? false,
@@ -154,7 +167,7 @@ class RegistrationViewModel: ObservableObject {
         .store(in: &self.subscriptions)
     }
     
-    func mergeAccount(input:SendMergeOtpRequest,fullName:String) {
+    func mergeAccount(input:SendMergeOtpRequest,fullName:String, formattedPhNo: String = "") {
         apiReference.postApi(endPoint: APIEndpoint.sendMergeOtp, method: .POST,token: authKey,body: input,showLoader: true, responseType: GeneralResponse.self)
             .sink { [weak self] completion in
                 if case let .failure(error) = completion {
@@ -169,6 +182,8 @@ class RegistrationViewModel: ObservableObject {
             let data = LoginSignupVerifyData(verifyType         : verifyType,
                                              email              : input.email,
                                              phoneNumber        : input.phoneNumber,
+                                             formattedPhNo      : formattedPhNo,
+                                             originalVerifyType : SessionManager.shared.loginData?.originalVerifyType ?? SessionManager.shared.loginData?.verifyType,
                                              countryCode        : input.countryCode,
                                              userId             : SessionManager.shared.loginData?.userId ?? "",
                                              isNewUser          : SessionManager.shared.loginData?.isNewUser ?? false,

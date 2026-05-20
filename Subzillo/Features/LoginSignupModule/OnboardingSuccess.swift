@@ -17,7 +17,7 @@ struct OnboardingSuccess: View {
                 .ignoresSafeArea()
                 .allowsHitTesting(false)
             
-            ScrollView(){
+            ScrollView(showsIndicators: false){
                 VStack(spacing: 0) {
                     
                     // MARK: - Top Content
@@ -30,12 +30,12 @@ struct OnboardingSuccess: View {
                             ForEach(0..<3, id: \.self) { index in
                                 Circle()
                                     .stroke(
-                                        themeManager.selectedAccent.primaryColor.opacity(0.25),
-                                        lineWidth: 1.5
+                                        themeManager.textPrimaryLight6_white6.opacity(0.50),
+                                        lineWidth: 0.8
                                     )
                                     .scaleEffect(1)
                                     .opacity(0.8)
-                                    .frame(width: 120, height: 120)
+                                    .frame(width: 150, height: 150)
                                     .modifier(
                                         SuccessRingAnimation(delay: Double(index) * 0.4)
                                     )
@@ -47,28 +47,28 @@ struct OnboardingSuccess: View {
                                     .fill(
                                         LinearGradient(
                                             colors: [
-                                                Color(red: 92/255, green: 228/255, blue: 168/255),
-                                                Color.gradientBlue
+                                                Color.green58D3B5,
+                                                Color.blue4898DF
                                             ],
-                                            startPoint: .topLeading,
-                                            endPoint: .bottomTrailing
+                                            startPoint: .top,
+                                            endPoint: .bottom
                                         )
                                     )
                                     .frame(width: 96, height: 96)
                                     .shadow(
-                                        color: Color(red: 92/255, green: 228/255, blue: 168/255)
-                                            .opacity(0.4),
+                                        color: Color.green58D3B5
+                                            .opacity(0.50),
                                         radius: 30,
                                         x: 0,
                                         y: 20
                                     )
                                 
-                                Image("checkmark1")
-                                    .frame(width: 52, height: 52)
+//                                Image("checkmark1")
+//                                    .frame(width: 52, height: 52)
                             }
-//                            LottieView(name: "onboarding_success")
-//                                .frame(width: 120, height: 120)
-//                                .background(Color.clear)
+                            LottieView(name: "onboarding_tick", loopMode: .playOnce)
+                                .frame(width: 50, height: 50)
+                                .background(Color.clear)
                         }
                         .padding(.top, 24)
                         
@@ -81,13 +81,13 @@ struct OnboardingSuccess: View {
                                         Color("TextPrimary_ 0E101A_F4F1FB")
                                     )
                                 
-                                Text(" Sami")
+                                Text(" \(Constants.getUserDefaultsValue(for: Constants.username))")
                                     .font(.geistSemiBold(26))
                                     .italic()
                                     .overlay(
                                         themeManager.accentGradient
                                             .mask(
-                                                Text("Sami.")
+                                                Text("\(Constants.getUserDefaultsValue(for: Constants.username)).")
                                                     .font(.geistSemiBold(26))
                                             )
                                     )
@@ -373,7 +373,7 @@ struct OnboardingSuccess: View {
                 
                 Text(number)
                     .font(.geistBold(11))
-                    .foregroundColor(themeManager.white_white4)
+                    .foregroundColor(Color.white)
             }
             .frame(width: 22, height: 22)
             

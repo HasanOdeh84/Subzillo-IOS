@@ -92,20 +92,33 @@ struct nextRenewals: Codable, Hashable{
     var daysUntil               : Int? = nil
 }
 struct statsObjc: Codable, Hashable{
-    //var cheapest                : String? = ""
-    var activeSubscriptions     : Int? = nil
-    var yearlySpend             : Float? = nil
-    var currency                : String? = ""
-    var currencySymbol          : String? = ""
+    var activeSubscriptions             : Int? = nil
+    var yearlySpend                     : Float? = nil
+    var currency                        : String? = ""
+    var currencySymbol                  : String? = ""
+    var highestActiveSubscription       : highestActiveSubscription?
 }
 struct spendProjection: Codable, Hashable{
     var peakMonth               : String? = ""
-    var projectedAnnualSpend    : Int? = nil
+    var projectedAnnualSpend    : Double? = nil
     var peakAmount              : Float? = nil
     var currency                : String? = ""
     var currencySymbol          : String? = ""
     var months                  : [monthObjc]?
 }
+
+struct highestActiveSubscription: Codable, Hashable{
+    var id                          : String? = ""
+    var serviceName                 : String? = nil
+    var serviceLogo                 : String? = nil
+    var planName                    : String? = ""
+    var amount                      : Double? = nil
+    var currency                    : String?
+    var currencySymbol              : String?
+    var billingCycle                : String?
+    var billingCycleShortLabel      : String?
+}
+
 struct monthObjc: Codable, Hashable{
     var month                   : String? = ""
     var year                    : Int? = nil
@@ -206,15 +219,17 @@ struct CategoryItem: Identifiable {
     let amount                  : Float
     let amountStr               : String
     let color                   : String
+    let currencySymbol          : String
 }
 
 // MARK: - Model
 
 struct SubscriptionItemNew {
-    let id : String
-    let name: String
-    let amountStr: String
-    let amount: Float
-    let progress: Float
-    let serviceLogo: String
+    let id              : String
+    let name            : String
+    let amountStr       : String
+    let amount          : Float
+    let progress        : Float
+    let serviceLogo     : String
+    let currencySymbol  : String
 }

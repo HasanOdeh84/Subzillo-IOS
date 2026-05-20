@@ -13,14 +13,15 @@ struct ConnectedEmailItemView: View {
     var isInlineSyncing         : Bool = false
     var emailsScanned           : Int = 0
     var subscriptionsFound      : Int = 0
-    
+    @EnvironmentObject var themeManager     : ThemeManager
+    @Environment(\.colorScheme) var colorScheme
     var body: some View {
         VStack() {
             HStack(spacing: 12) {
                 // Provider Icon
                 Image(provider.iconName)
                     .frame(width: 40, height: 40)
-                    .background(Color(hex: "#FCE8E6"))
+                    .background(colorScheme == .dark ? themeManager.black_white.opacity(0.08) : Color(hex: "#FCE8E6"))
                     .clipShape(
                         RoundedRectangle(cornerRadius: 10)
                     )
@@ -102,7 +103,7 @@ struct ConnectedEmailItemView: View {
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 14)
-        .background(Color.white)
+        .background(themeManager.white_white4)
         .contentShape(Rectangle())
         .onTapGesture {
             withAnimation {
@@ -208,7 +209,6 @@ struct ConnectedEmailItemView: View {
         }
         .buttonStyle(PlainButtonStyle())
     }
-    @EnvironmentObject var themeManager: ThemeManager
     @ViewBuilder
     private func syncButton(title: String) -> some View {
         Button(action: {

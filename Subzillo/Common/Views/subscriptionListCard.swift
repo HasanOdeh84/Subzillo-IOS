@@ -24,6 +24,37 @@ struct subscriptionListCard: View {
     var onRenew             : (() -> Void)? = nil
     @State var isExpired    = false
     @EnvironmentObject var themeManager         : ThemeManager
+    @Environment(\.colorScheme) var colorScheme
+    
+    private var friendlyDateText: String {
+        let rawDateStr = subscriptionData.nextPaymentDate ?? ""
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd"
+        formatter.locale = Locale(identifier: "en_US_POSIX")
+        
+        guard let targetDate = formatter.date(from: rawDateStr) else {
+            return Constants.shared.dateConversion(rawDateStr)
+        }
+        
+        let calendar = Calendar.current
+        let today = calendar.startOfDay(for: Date())
+        let target = calendar.startOfDay(for: targetDate)
+        
+        let days = calendar.dateComponents([.day], from: today, to: target).day ?? 0
+        
+        if days < 0 {
+            return "Expired"
+        } else if days == 0 {
+            return "Today"
+        } else if days > 30 {
+            let outputFormatter = DateFormatter()
+            outputFormatter.dateFormat = "dd/MM/yyyy"
+            return outputFormatter.string(from: targetDate)
+        } else {
+            return "In \(days)d"
+        }
+    }
+    
     //MARK: - body
     var body: some View {
         ZStack {
@@ -36,7 +67,7 @@ struct subscriptionListCard: View {
                     .padding(.horizontal,12)
                 }
                 
-                AvatarView(serviceName: subscriptionData.serviceName ?? "", serviceLogo: subscriptionData.serviceLogo ?? "", size: 42)
+                AvatarView(serviceName: subscriptionData.serviceName ?? "", serviceLogo: subscriptionData.serviceLogo ?? "", size: 42, isShadow: false)
                 
                 VStack(alignment: .leading,spacing: 4){
                    // Text(isActive ? "Next renewal" : "\(subscriptionData.serviceName ?? "") | \(subscriptionData.subscriptionType ?? "")")
@@ -58,14 +89,28 @@ struct subscriptionListCard: View {
                     }
                     HStack(spacing: 3){
                         
-                        Text("in \(Constants.shared.dateConversion(subscriptionData.nextPaymentDate ?? "").daysDifferenceFromToday() ?? 0)d · ")
+                        Text("\(subscriptionData.subscriptionType ?? "") . ")
                             .font(.jetBrainsRegular(12))
                             .foregroundColor(Color("TextPrimary_ 0E101A_F4F1FB").opacity(0.6))
                             .multilineTextAlignment(.leading)
-                        Text("\(subscriptionData.subscriptionType ?? "")")
+                        
+                        Text(friendlyDateText)
                             .font(.jetBrainsRegular(12))
                             .foregroundColor(Color("TextPrimary_ 0E101A_F4F1FB").opacity(0.6))
                             .multilineTextAlignment(.leading)
+                        
+                        if subscriptionData.renewBtnStatus ?? false{
+                            Button(action: { onRenew?() }) {
+                                Text("Renew")
+                                    .font(.geistBold(14))
+                                    .foregroundColor(.disCardRed)
+                                    .underline()
+                                    .multilineTextAlignment(.leading)
+                            }
+                            .buttonStyle(PlainButtonStyle())
+                            .padding(.leading, 5)
+                        }
+                        
                         /*if subscriptionData.status == "expired" && onRenew != nil {
                             Button(action: { onRenew?() }) {
                                 Text("Renew")
@@ -158,7 +203,7 @@ struct subscriptionListCard: View {
             }
         }
         .frame(height: 74)
-        .background(.whiteBlackBG)
+        .background(colorScheme == .dark ? Color(hex: "#181126") : themeManager.white_white4)
         .cornerRadius(18)
         .overlay(
             RoundedRectangle(cornerRadius: 18)

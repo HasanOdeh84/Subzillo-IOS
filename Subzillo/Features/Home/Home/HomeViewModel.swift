@@ -33,7 +33,7 @@ class HomeViewModel: ObservableObject {
             } receiveValue: { [weak self] response in
                 PrintLogger.modelLog(response, type: .response, isInput: false)
                 self?.homeResponse = response.data
-                print(response.data)
+                //print(response.data)
             }
             .store(in: &self.subscriptions)
     }

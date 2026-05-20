@@ -467,6 +467,8 @@ struct UploadItemNew: View {
     var image: String
     var backgroundColor: Color
     var action: () -> Void
+    @EnvironmentObject var themeManager     : ThemeManager
+    @Environment(\.colorScheme) var colorScheme
     
     var body: some View {
         
@@ -476,7 +478,7 @@ struct UploadItemNew: View {
                 
                 Image(image)
                     .frame(width: 48, height: 48)
-                    .background(backgroundColor)
+                    .background(colorScheme == .dark ? themeManager.black_white.opacity(0.08) : backgroundColor)
                     .clipShape(
                         RoundedRectangle(cornerRadius: 12)
                     )
@@ -498,9 +500,15 @@ struct UploadItemNew: View {
                         .truncationMode(.tail)
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
-                
-                Image("rightArrow1")
-                    .frame(width: 16, height: 16)
+                if colorScheme == .dark
+                {
+                    Image("backGrayright1")
+                        .frame(width: 16, height: 16)
+                }
+                else{
+                    Image("rightArrow1")
+                        .frame(width: 16, height: 16)
+                }
             }
             .padding(16)
         }

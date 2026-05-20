@@ -576,7 +576,7 @@ struct UpcomingSubscriptionRow: View {
                 Text(getMonthAndDay(from: subscriptionData.nextPaymentDate ?? "").month.uppercased())
                     .font(.jetBrainsMedium(9))
                     .foregroundColor(
-                        Color.gradientPurple
+                        themeManager.selectedAccent.lastColor
                     )
                     .tracking(1)
                 
@@ -603,7 +603,7 @@ struct UpcomingSubscriptionRow: View {
             )
             
             // MARK: -  Icon
-            AvatarView(serviceName: subscriptionData.serviceName ?? "", serviceLogo: subscriptionData.serviceLogo ?? "", size: 32)
+            AvatarView(serviceName: subscriptionData.serviceName ?? "", serviceLogo: subscriptionData.serviceLogo ?? "", size: 32, isShadow: false)
             
             // MARK: - Content
             VStack(alignment: .leading, spacing: 2) {
@@ -618,7 +618,7 @@ struct UpcomingSubscriptionRow: View {
                 Text("in \(Constants.shared.dateConversion(subscriptionData.nextPaymentDate ?? "").daysDifferenceFromToday() ?? 0)d")
                     .font(.jetBrainsRegular(10))
                     .foregroundColor(
-                        Color.black.opacity(0.6)
+                        themeManager.black_white.opacity(0.6)
                     )
                     .lineLimit(1)
             }
@@ -626,19 +626,28 @@ struct UpcomingSubscriptionRow: View {
             Spacer(minLength: 8)
             
             // MARK: - Amount
-            Text("\(subscriptionData.currencySymbol ?? "")\(String(describing: subscriptionData.amount ?? 0.0))")
-                .font(.geistSemiBold(14))
-                .foregroundColor(
-                    Color.textPrimary0E101AF4F1FB
-                )
-                .lineLimit(1)
+            if subscriptionData.billingCycle == "free"{
+                Text("Free")
+                    .font(.geistSemiBold(14))
+                    .foregroundColor(
+                        Color.successLight0EA870
+                    )
+                    .lineLimit(1)
+            }else{
+                Text("\(subscriptionData.currencySymbol ?? "")\(String(describing: subscriptionData.amount ?? 0.0))")
+                    .font(.geistSemiBold(14))
+                    .foregroundColor(
+                        Color.textPrimary0E101AF4F1FB
+                    )
+                    .lineLimit(1)
+            }
         }
         .padding(12)
-        .background(Color.white)
+        .background(themeManager.white_white4)
         .overlay(
             RoundedRectangle(cornerRadius: 14)
                 .stroke(
-                    Color.black.opacity(0.08),
+                    themeManager.black_white.opacity(0.08),
                     lineWidth: 1
                 )
         )

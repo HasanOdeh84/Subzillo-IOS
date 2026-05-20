@@ -346,7 +346,6 @@ struct RootView: View {
             ZStack {
                 if let currentRoute = router.path.last {
                     // Main Content Swap (Full Screen)
-//                    SubscriptionPreviewView()
                     destinationView(for: currentRoute)
                         .id(currentRoute) // Forces a fresh animation on every screen change
                         .applyGlobalTransition()
@@ -509,6 +508,10 @@ struct RootView: View {
             ProfileView()
         case .onboardingSuccess:
             OnboardingSuccess()
+        case .uploadView:
+            UploadView()
+        case .inboxScanningView:
+            InboxScanningView()
         }
     }
 }

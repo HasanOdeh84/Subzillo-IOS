@@ -12,6 +12,7 @@ public struct LoginSignupVerifyData: Codable, Hashable {
     let email               : String?
     let phoneNumber         : String?
     let formattedPhNo       : String?
+    let originalVerifyType  : Int?
     let countryCode         : String?
     let userId              : String?
     let isNewUser           : Bool?
@@ -25,6 +26,7 @@ public struct LoginSignupVerifyData: Codable, Hashable {
         email               : String? = nil,
         phoneNumber         : String? = nil,
         formattedPhNo       : String? = nil,
+        originalVerifyType  : Int? = nil,
         countryCode         : String? = nil,
         userId              : String? = nil,
         isNewUser           : Bool? = nil,
@@ -38,6 +40,7 @@ public struct LoginSignupVerifyData: Codable, Hashable {
         self.email              = email
         self.phoneNumber        = phoneNumber
         self.formattedPhNo      = formattedPhNo
+        self.originalVerifyType = originalVerifyType
         self.countryCode        = countryCode
         self.userId             = userId
         self.isNewUser          = isNewUser

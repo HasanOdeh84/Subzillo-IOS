@@ -190,9 +190,28 @@ struct HomeView: View {
                                                     )
                                             )
                                             .clipShape(Capsule())
+                                    }else{
+                                        Text("OFF TRACK")
+                                            .font(.jetBrainsMedium(10))
+                                            .tracking(1)
+                                            .foregroundColor(Color("Warning_Any_FFCB5C"))
+                                            .padding(.horizontal, 10)
+                                            .padding(.vertical, 6)
+                                            .background(
+                                                Color("Warning_Any_FFCB5C")
+                                                    .opacity(0.12)
+                                            )
+                                            .overlay(
+                                                Capsule()
+                                                    .stroke(
+                                                        Color("Warning_Any_FFCB5C")
+                                                            .opacity(0.2),
+                                                        lineWidth: 1
+                                                    )
+                                            )
+                                            .clipShape(Capsule())
                                     }
                                 }
-                                
                                 
                                 // MARK: - Bottom Stats
                                 
@@ -209,7 +228,7 @@ struct HomeView: View {
                                         value: "\(homeResponse?.stats?.currencySymbol ?? "")\(homeResponse?.stats?.yearlySpend ?? 0)"
                                     )
                                     
-                                    CheapestStatCard()
+                                    HighestStatCard(data: homeResponse?.stats?.highestActiveSubscription)
                                 }
                                 .padding(.top, 20)
                             }
@@ -301,14 +320,8 @@ struct HomeView: View {
                                 }
                                 .padding(.bottom, 18)
                                 
-                                
                                 // MARK: - Chart
-                                
                                 Chart {
-                                    
-                                    
-                                    
-                                    
                                     // MARK: - Bars
                                     
                                     ForEach(Array(months.enumerated()), id: \.offset) { index, item in
@@ -319,7 +332,7 @@ struct HomeView: View {
                                         
                                         let barStyle: AnyShapeStyle = index == 0
                                         ? AnyShapeStyle(activeGradient)
-                                        : AnyShapeStyle(inactiveColor)
+                                        : AnyShapeStyle((colorScheme == .dark ? inactiveColor : Color.surfaceHiLightF1F2F7.opacity(0.7)))
                                         
                                         BarMark(
                                             x: .value("Month", item.0),
@@ -447,7 +460,6 @@ struct HomeView: View {
                         //MARK: - Where it goes
                         VStack(spacing: 0) {
                             HStack(alignment: .firstTextBaseline) {
-                                
                                 Text("WHERE IT GOES")
                                     .font(.jetBrainsRegular(11))
                                     .tracking(1.5)
@@ -457,26 +469,17 @@ struct HomeView: View {
                                     )
                                 
                                 Spacer()
-                                
                             }
                             .padding(.top, 22)
                             .padding(.bottom, 10)
                             
-                            
-                            
                             HStack(spacing: 18) {
-                                
                                 // MARK: - Donut Chart
-                                
                                 ZStack {
-                                    
                                     DonutChartViewNew(items: items)
                                     
-                                    
                                     // Center Content
-                                    
                                     VStack(spacing: 2) {
-                                        
                                         Text("TOTAL")
                                             .font(.jetBrainsRegular(9))
                                             .tracking(1)
@@ -500,15 +503,10 @@ struct HomeView: View {
                                 }
                                 .frame(width: 136, height: 136)
                                 
-                                
                                 // MARK: - Legend
-                                
                                 VStack(spacing: 8) {
-                                    
                                     ForEach(items) { item in
-                                        
                                         HStack(spacing: 8) {
-                                            
                                             RoundedRectangle(cornerRadius: 2)
                                                 .fill(Color(hex: item.color))
                                                 .frame(width: 8, height: 8)
@@ -519,7 +517,7 @@ struct HomeView: View {
                                                 .lineLimit(1)
                                                 .frame(maxWidth: .infinity, alignment: .leading)
                                             
-                                            Text(item.amountStr)
+                                            Text("\(item.currencySymbol)\(item.amountStr)")
                                                 .font(.jetBrainsRegular(11))
                                                 .foregroundColor(
                                                     Color("TextPrimary_ 0E101A_F4F1FB")
@@ -547,13 +545,11 @@ struct HomeView: View {
                                 radius: 8,
                                 y: 4
                             )
-                            
                         }
                         
                         //MARK: - Top spenders
                         VStack(spacing: 0) {
                             HStack(alignment: .firstTextBaseline) {
-                                
                                 Text("TOP SPENDERS")
                                     .font(.jetBrainsRegular(11))
                                     .tracking(1.5)
@@ -575,12 +571,8 @@ struct HomeView: View {
                             .padding(.top, 22)
                             .padding(.bottom, 10)
                             
-                            
-                            
                             VStack(spacing: 12) {
-                                
                                 ForEach(Array(subscriptions.enumerated()), id: \.offset) { index, item in
-                                    
                                     SubscriptionRowNew(
                                         item: item,
                                         delay: Double(index) * 0.08
@@ -604,17 +596,13 @@ struct HomeView: View {
                                 radius: 8,
                                 y: 4
                             )
-                            
-                            
                         }
                         .padding(.bottom, upcomingItems.count == 0 ? 120 : 0)
-                        
                         
                         //MARK: - Net renewal
                         if upcomingItems.count > 0 {
                             VStack(spacing: 0) {
                                 HStack(alignment: .firstTextBaseline) {
-                                    
                                     Text("NEXT RENEWAL")
                                         .font(.jetBrainsRegular(11))
                                         .tracking(1.5)
@@ -636,19 +624,12 @@ struct HomeView: View {
                                 .padding(.top, 22)
                                 .padding(.bottom, 10)
                                 
-                                
-                                
                                 VStack(spacing: 10) {
-                                    
                                     // MARK: - Featured Card
-                                    
                                     ZStack {
                                         HStack(spacing: 14) {
-                                            
                                             // MARK: - Netflix Icon
-                                            
                                             ZStack {
-                                                
                                                 /*RoundedRectangle(cornerRadius: 16)
                                                  .fill(Color.black)
                                                  
@@ -661,7 +642,8 @@ struct HomeView: View {
                                                     serviceLogo: upcomingFirstItem?.icon ?? "",
                                                     size: 56,
                                                     cornerRadius: 16,
-                                                    fromPreview: false
+                                                    fromPreview: false,
+                                                    isShadow: false
                                                 )
                                                 
                                                 RoundedRectangle(cornerRadius: 20)
@@ -684,11 +666,8 @@ struct HomeView: View {
                                             }
                                             .frame(width: 56, height: 56)
                                             
-                                            
                                             // MARK: - Content
-                                            
                                             VStack(alignment: .leading, spacing: 2) {
-                                                
                                                 Text("CHARGES \(upcomingFirstItem?.subtitle ?? "")".uppercased())
                                                     .font(.jetBrainsRegular(10))
                                                     .tracking(1.5)
@@ -709,12 +688,9 @@ struct HomeView: View {
                                             
                                             Spacer()
                                             
-                                            
                                             // MARK: - Price
-                                            
                                             VStack(alignment: .trailing, spacing: 2) {
-                                                
-                                                Text(upcomingFirstItem?.amount ?? "")
+                                                Text("\(upcomingFirstItem?.currencySymbol ?? "")\(upcomingFirstItem?.amount ?? "")")
                                                     .font(.geistSemiBold(22))
                                                     .tracking(-0.6)
                                                     .foregroundColor(Color("TextPrimary_ 0E101A_F4F1FB"))
@@ -749,18 +725,13 @@ struct HomeView: View {
                                     )
                                     .clipShape(RoundedRectangle(cornerRadius: 24))
                                     
-                                    
                                     // MARK: - List
-                                    
                                     VStack(spacing: 8) {
-                                        
                                         ForEach(upcomingItems) { item in
-                                            
                                             UpcomingRow(item: item)
                                         }
                                     }
                                 }
-                                
                             }
                             .padding(.bottom, 120)
                         }
@@ -785,9 +756,9 @@ struct HomeView: View {
             homeVM.home(input: HomeRequest(userId: Constants.getUserId()))
             let now = Date()
             selectedYear    = Calendar.current.component(.year, from: now)
-//            homeYearlyGraphApi()
+            //            homeYearlyGraphApi()
             commonApiVM.getUserInfo(input: getUserInfoRequest(userId: Constants.getUserId()))
-//            commonApiVM.unreadNotificationCount(input: UnreadNotificationCountRequest(userId: Constants.getUserId()))
+            //            commonApiVM.unreadNotificationCount(input: UnreadNotificationCountRequest(userId: Constants.getUserId()))
             let formatter = DateFormatter()
             formatter.dateFormat = "yyyy-MM"
             monthYear = formatter.string(from: now)
@@ -796,7 +767,7 @@ struct HomeView: View {
         .onChange(of: homeVM.apiError) { _ in
             if homeVM.apiError != nil {
                 withAnimation(.customScreenAnimation) {
-                    isHome = false 
+                    isHome = false
                 }
             }
         }
@@ -854,7 +825,6 @@ struct HomeView: View {
         tabSelected = .addSubscription
     }
     
-
     private func updateHomeResponse() {
         homeResponse        = homeVM.homeResponse
         let monthlyOverview = homeResponse?.monthlyOverview
@@ -863,7 +833,7 @@ struct HomeView: View {
         {
             isOnTrack = true
         }
-        else{
+        else if status == "off_track"{
             isOnTrack = false
         }
         msCurrency = monthlyOverview?.currencySymbol ?? ""
@@ -884,7 +854,7 @@ struct HomeView: View {
             msDeltaValue = "↑ \(msCurrency)\(formattedDA) vs last month"
         }
         else{
-            msDeltaValue = "- \(msCurrency)\(formattedDA) vs last month"
+            msDeltaValue = "\(msCurrency)\(formattedDA) vs last month"
         }
         
         let spendProjection = homeResponse?.spendProjection
@@ -901,7 +871,7 @@ struct HomeView: View {
             pnsDeltaValue = "↑ \(peakAmount) peak in \(spendProjection?.peakMonth ?? "")"
         }
         else{
-            pnsDeltaValue = "- \(peakAmount) peak in \(spendProjection?.peakMonth ?? "")"
+            pnsDeltaValue = "\(peakAmount) peak in \(spendProjection?.peakMonth ?? "")"
         }
         months.removeAll()
         let monthsobjc = homeResponse?.spendProjection?.months ?? []
@@ -920,7 +890,11 @@ struct HomeView: View {
         for item in categories
         {
             let itformatted = String(format: "%.2f", item.totalAmount ?? 0.00)
-            items.append(CategoryItem.init(name: item.categoryName ?? "", amount: item.totalAmount ?? 0.00, amountStr: itformatted, color: item.color ?? ""))
+            items.append(CategoryItem.init(name             : item.categoryName ?? "",
+                                           amount           : item.totalAmount ?? 0.00,
+                                           amountStr        : itformatted,
+                                           color            : item.color ?? "",
+                                           currencySymbol   : item.currencySymbol ?? ""))
         }
         
         subscriptions.removeAll()
@@ -928,7 +902,7 @@ struct HomeView: View {
         for item in topSpenders
         {
             let itformatted = String(format: "%.2f", item.amount ?? 0.00)
-            subscriptions.append(SubscriptionItemNew.init(id: item.id ?? "", name: item.serviceName ?? "", amountStr: itformatted, amount: item.amount ?? 0.00, progress: (item.progressPercentage ?? 0.00)/100, serviceLogo: item.serviceLogo ?? ""))
+            subscriptions.append(SubscriptionItemNew.init(id: item.id ?? "", name: item.serviceName ?? "", amountStr: itformatted, amount: item.amount ?? 0.00, progress: (item.progressPercentage ?? 0.00)/100, serviceLogo: item.serviceLogo ?? "", currencySymbol: item.currencySymbol ?? ""))
         }
         
         upcomingItems.removeAll()
@@ -936,7 +910,7 @@ struct HomeView: View {
         for item in nextRenewals
         {
             let itformatted = String(format: "%.2f", item.amount ?? 0.00)
-            upcomingItems.append(UpcomingCharge.init(name: item.serviceName ?? "", subtitle: "in \(item.daysUntil ?? 0) days", amount: itformatted, icon: item.serviceLogo ?? "", planName: item.planName ?? "", billingCycleShortLabel: item.billingCycleShortLabel ?? ""))
+            upcomingItems.append(UpcomingCharge.init(name: item.serviceName ?? "", subtitle: "in \(item.daysUntil ?? 0)d", amount: itformatted, icon: item.serviceLogo ?? "", planName: item.planName ?? "", billingCycleShortLabel: item.billingCycleShortLabel ?? "", currencySymbol: item.currencySymbol ?? ""))
         }
         if upcomingItems.count > 0
         {
@@ -952,7 +926,7 @@ struct HomeView: View {
             }
         }
     }
-
+    
     func homeYearlyGraphApi(){
         homeVM.homeYearlyGraph(input: HomeYearlyGraphRequest(userId: Constants.getUserId(), year: selectedYear))
     }
@@ -1077,16 +1051,15 @@ struct HeaderView: View {
         .offset(x: 0, y: -5)
         .onAppear{
             if Constants.FeatureConfig.isS4Enabled {
-//                if commonApiVM.unreadCountResponse == nil{
-//                    commonApiVM.unreadNotificationCount(input: UnreadNotificationCountRequest(userId: Constants.getUserId()))
-//                }
+                //                if commonApiVM.unreadCountResponse == nil{
+                //                    commonApiVM.unreadNotificationCount(input: UnreadNotificationCountRequest(userId: Constants.getUserId()))
+                //                }
                 guard AppState.shared.isLoggedIn else { return }
                 commonApiVM.unreadNotificationCount(input: UnreadNotificationCountRequest(userId: Constants.getUserId()))
             }
         }
     }
 }
-
 
 //MARK: - HeaderViewWithProfile
 struct HeaderViewWithProfile: View {
@@ -1107,11 +1080,8 @@ struct HeaderViewWithProfile: View {
         //MARK: notification btn
         ZStack(alignment: .topTrailing) {
             HStack(spacing: 12) {
-
                 ZStack(alignment: .topTrailing) {
-
                     Button(action: action) {
-
                         if colorScheme == .dark {
                             Image("notification-03")
                                 .renderingMode(.template)
@@ -1143,9 +1113,8 @@ struct HeaderViewWithProfile: View {
                                         .stroke(Color("TextPrimary_ 0E101A_F4F1FB").opacity(0.08), lineWidth: 1)
                                 )
                         }
-                       
                     }
-
+                    
                     if let count = commonApiVM.unreadCountResponse?.unreadCount{
                         if count != 0{
                             let filterCount = ""//count >= 10 ? "9+" : "\(count)"
@@ -1186,22 +1155,22 @@ struct HeaderViewWithProfile: View {
                     
                     if colorScheme == .dark {
                         Image("AppNameDark")
-                        .resizable()
-                        .scaledToFit()
-                        .frame(width: 60, height: 14)
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 60, height: 14)
                     } else {
                         Image("AppName")
-                        .resizable()
-                        .scaledToFit()
-                        .frame(width: 60, height: 14)
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 60, height: 14)
                     }
                 }
                 
                 //MARK: - SubTitle
                 Text(title)
-                    .font(.geistMedium(22))
+                    .font(.geistSemiBold(22))
                     .multilineTextAlignment(.leading)
-                    .foregroundColor(Color.neutralMain700)
+                    .foregroundColor(Color.textPrimary0E101AF4F1FB)
             }
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(.trailing,16)
@@ -1210,9 +1179,9 @@ struct HeaderViewWithProfile: View {
         .offset(x: 0, y: -5)
         .onAppear{
             if Constants.FeatureConfig.isS4Enabled {
-//                if commonApiVM.unreadCountResponse == nil{
-//                    commonApiVM.unreadNotificationCount(input: UnreadNotificationCountRequest(userId: Constants.getUserId()))
-//                }
+                //                if commonApiVM.unreadCountResponse == nil{
+                //                    commonApiVM.unreadNotificationCount(input: UnreadNotificationCountRequest(userId: Constants.getUserId()))
+                //                }
                 guard AppState.shared.isLoggedIn else { return }
                 commonApiVM.unreadNotificationCount(input: UnreadNotificationCountRequest(userId: Constants.getUserId()))
             }
@@ -1221,13 +1190,148 @@ struct HeaderViewWithProfile: View {
 }
 
 //MARK: - AvatarView
+//struct AvatarView: View {
+//    var serviceName     : String
+//    var serviceLogo     : String?
+//    var size            : CGFloat = 34
+//    var cornerRadius    : CGFloat = 8
+//    var fontSize        : CGFloat = 18
+//    var fromPreview     : Bool = false
+//    @State private var imageLoadFailed          = false
+//    @EnvironmentObject var themeManager : ThemeManager
+//    
+//    private var initials: String {
+//        let words = serviceName
+//            .split(separator: " ")
+//            .filter { !$0.isEmpty }
+//        
+//        if words.count == 1 {
+//            return String(words[0].prefix(1)).uppercased()
+//        } else {
+//            return words.prefix(2)
+//                .map { String($0.prefix(1)).uppercased() }
+//                .joined()
+//        }
+//    }
+//    
+//    private var serviceLogoURL: URL? {
+//        guard let logo = serviceLogo,
+//              !logo.isEmpty else { return nil }
+//        
+//        if let url = URL(string: logo), url.scheme != nil {
+//            // Already absolute URL
+//            return url
+//        }
+//        
+//        let baseURL = Constants.getUserDefaultsValue(for: Constants.providerBaseUrl)
+//        return URL(string: baseURL + logo)
+//    }
+//    
+//    var body: some View {
+//        Group {
+//            if (serviceLogo ?? "").isEmpty {
+//                if fromPreview{
+//                    ZStack {
+//                        themeManager.accentGradient
+//                        Text(initials)
+//                            .font(.geistBold(fontSize))
+//                            .foregroundColor(.white)
+//                    }
+//                    .frame(width: size, height: size)
+//                    .background(
+//                        RoundedRectangle(cornerRadius: cornerRadius)
+//                            .fill(Color.clear)
+//                            .shadow(
+//                                color: themeManager.accentShadowColor,
+//                                radius: 8,
+//                                x: 0,
+//                                y: 4
+//                            )
+//                    )
+//                    .clipShape(RoundedRectangle(cornerRadius: cornerRadius))
+//                }
+//                else{
+//                    ZStack {
+//                        Color.whiteBlackBG
+//                        Text(initials)
+//                            .font(.geistBold(fontSize))
+//                            .foregroundColor(.white)
+//                    }
+//                    .frame(width: size, height: size)
+//                    .background(
+//                        RoundedRectangle(cornerRadius: cornerRadius)
+//                            .fill(Color.clear)
+//                            .shadow(
+//                                color: themeManager.accentShadowColor,
+//                                radius: 8,
+//                                x: 0,
+//                                y: 4
+//                            )
+//                    )
+//                    .clipShape(RoundedRectangle(cornerRadius: cornerRadius))
+//                }
+//                
+//            } else {
+//                if fromPreview{
+//                    if let url = serviceLogoURL {
+//                        if imageLoadFailed {
+//                            Image("profile_avatar")
+//                                .resizable()
+//                                .scaledToFill()
+//                        }else{
+//                            WebImage(url: url)
+//                                .resizable()
+//                                .onFailure { _ in
+//                                    imageLoadFailed = true
+//                                }
+//                                .indicator(.activity)
+//                                .transition(.fade(duration: 0.5))
+//                                .scaledToFit()
+//                                .overlay(
+//                                    RoundedRectangle(cornerRadius: cornerRadius)
+//                                        .stroke(.neutral300Border, lineWidth: 1)
+//                                )
+//                            
+//                                .cornerRadius(cornerRadius)
+//                        }
+//                    }
+//                }else{
+//                    if imageLoadFailed {
+//                        Image("profile_avatar")
+//                            .resizable()
+//                            .scaledToFill()
+//                    }else{
+//                        WebImage(url: URL(string: serviceLogo ?? ""))
+//                            .resizable()
+//                            .onFailure { _ in
+//                                imageLoadFailed = true
+//                            }
+//                            .indicator(.activity)
+//                            .transition(.fade(duration: 0.5))
+//                            .scaledToFit()
+//                            .overlay(
+//                                RoundedRectangle(cornerRadius: cornerRadius)
+//                                    .stroke(.neutral300Border, lineWidth: 1)
+//                            )
+//                            .cornerRadius(cornerRadius)
+//                    }
+//                }
+//            }
+//        }
+//        .frame(width: size, height: size)
+//        .cornerRadius(cornerRadius)
+//        .clipped()
+//    }
+//}
+
 struct AvatarView: View {
     var serviceName     : String
     var serviceLogo     : String?
     var size            : CGFloat = 34
     var cornerRadius    : CGFloat = 8
-    var fontSize        : CGFloat = 20
+    var fontSize        : CGFloat = 18
     var fromPreview     : Bool = false
+    var isShadow        : Bool = true
     @State private var imageLoadFailed          = false
     @EnvironmentObject var themeManager : ThemeManager
     
@@ -1261,84 +1365,89 @@ struct AvatarView: View {
     var body: some View {
         Group {
             if (serviceLogo ?? "").isEmpty {
-                if fromPreview{
-                    ZStack {
+                ZStack {
+                    if fromPreview {
                         themeManager.accentGradient
-                        Text(initials)
-                            .font(.appBold(fontSize))
-                            .foregroundColor(.white)
+                    } else {
+                        Color.grayCBD5E1475569
                     }
-                    .overlay(
-                        RoundedRectangle(cornerRadius: cornerRadius)
-                            .stroke(.neutral300Border, lineWidth: 1)
-                    )
-                    .cornerRadius(cornerRadius)
-                    //.background(themeManager.accentGradient)
+                    
+                    Text(initials)
+                        .font(.geistBold(fontSize))
+                        .foregroundColor(Color("TextPrimary_ 0E101A_F4F1FB"))
                 }
-                else{
-                    ZStack {
-                        Color.whiteBlackBG
-                        Text(initials)
-                            .font(.appBold(fontSize))
-                            .foregroundColor(.secondaryNavyBlue400)
-                    }
-                    .overlay(
-                        RoundedRectangle(cornerRadius: cornerRadius)
-                            .stroke(.neutral300Border, lineWidth: 1)
-                    )
-                    .cornerRadius(cornerRadius)
-                }
-                
             } else {
-                if fromPreview{
-                    if let url = serviceLogoURL {
-                        if imageLoadFailed {
-                            Image("profile_avatar")
-                                .resizable()
-                                .scaledToFill()
-                        }else{
-                            WebImage(url: url)
-                                .resizable()
-                                .onFailure { _ in
-                                    imageLoadFailed = true
+                Group {
+                    if fromPreview {
+                        if let url = serviceLogoURL {
+                            if imageLoadFailed {
+//                                Image("profile")
+//                                    .resizable()
+//                                    .scaledToFill()
+                                ZStack {
+                                    if fromPreview {
+                                        themeManager.accentGradient
+                                    } else {
+                                        Color.grayCBD5E1475569
+                                    }
+                                    
+                                    Text(initials)
+                                        .font(.geistBold(fontSize))
+                                        .foregroundColor(Color("TextPrimary_ 0E101A_F4F1FB"))
                                 }
+                            } else {
+                                WebImage(url: url)
+                                    .resizable()
+                                    .onFailure { _ in imageLoadFailed = true }
+                                    .indicator(.activity)
+                                    .transition(.fade(duration: 0.5))
+                                    .scaledToFit()
+                            }
+                        }
+                    } else {
+                        if imageLoadFailed {
+//                            Image("profile")
+//                                .resizable()
+//                                .scaledToFill()
+                            ZStack {
+                                if fromPreview {
+                                    themeManager.accentGradient
+                                } else {
+                                    Color.grayCBD5E1475569
+                                }
+                                
+                                Text(initials)
+                                    .font(.geistBold(fontSize))
+                                    .foregroundColor(Color("TextPrimary_ 0E101A_F4F1FB"))
+                            }
+                        } else {
+                            WebImage(url: URL(string: serviceLogo ?? ""))
+                                .resizable()
+                                .onFailure { _ in imageLoadFailed = true }
                                 .indicator(.activity)
                                 .transition(.fade(duration: 0.5))
                                 .scaledToFit()
-                                .overlay(
-                                    RoundedRectangle(cornerRadius: cornerRadius)
-                                        .stroke(.neutral300Border, lineWidth: 1)
-                                )
-                                
-                                .cornerRadius(cornerRadius)
                         }
                     }
-                }else{
-                    if imageLoadFailed {
-                        Image("profile_avatar")
-                            .resizable()
-                            .scaledToFill()
-                    }else{
-                        WebImage(url: URL(string: serviceLogo ?? ""))
-                            .resizable()
-                            .onFailure { _ in
-                                imageLoadFailed = true
-                            }
-                            .indicator(.activity)
-                            .transition(.fade(duration: 0.5))
-                            .scaledToFit()
-                            .overlay(
-                                RoundedRectangle(cornerRadius: cornerRadius)
-                                    .stroke(.neutral300Border, lineWidth: 1)
-                            )
-                            .cornerRadius(cornerRadius)
-                    }
                 }
+                // Optional: Adds a solid background so transparent PNGs cast a
+                // rounded box shadow instead of casting a shadow of the logo itself
+                .background(themeManager.white_white4)
             }
         }
         .frame(width: size, height: size)
-        .cornerRadius(cornerRadius)
-        .clipped()
+        .clipShape(RoundedRectangle(cornerRadius: cornerRadius))
+//        .overlay(
+//            RoundedRectangle(cornerRadius: cornerRadius)
+//                .stroke(.neutral300Border, lineWidth: 1)
+//        )
+        // Apply the shadow AFTER all framing and clipping is done
+        .shadow(
+            color: isShadow ? themeManager.accentShadowColor : Color.clear,
+            radius: 8,
+            x: 0,
+            y: 4
+        )
     }
 }
 
@@ -1431,7 +1540,6 @@ struct SpendingRowView: View {
                 .font(.appBold(14))
                 .foregroundColor(.neutralMain700)
                 .frame(alignment: .trailing)
-            //                .frame(width: 60, alignment: .trailing)
         }
     }
 }
@@ -1908,13 +2016,12 @@ struct YearOverviewChartView: View {
                                     .fixedSize()
                             }
                         }
-                    }                    
+                    }
                 }
                 .frame(height: 220)
                 .chartOverlay { proxy in
                     GeometryReader { geo in
                         ZStack(alignment: .topLeading) {
-                            
                             Rectangle()
                                 .fill(Color.clear)
                                 .contentShape(Rectangle())

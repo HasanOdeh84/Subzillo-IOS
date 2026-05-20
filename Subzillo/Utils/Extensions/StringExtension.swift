@@ -55,6 +55,7 @@ extension String {
             to: target
         ).day
     }
+    
     var billingCycleShortForm: String {
         
         switch self.lowercased() {

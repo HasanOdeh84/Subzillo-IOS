@@ -164,6 +164,13 @@ final class ThemeManager: ObservableObject {
         )
     }
     
+    var textPrimaryLight6_white6: Color {
+        .dynamic(
+            light: Color.textPrimaryLight0E101A.opacity(0.6),
+            dark: Color.white.opacity(0.6)
+        )
+    }
+    
     var black5_white6: Color {
         .dynamic(
             light: Color.black.opacity(0.05),
@@ -175,6 +182,13 @@ final class ThemeManager: ObservableObject {
         .dynamic(
             light: Color.black,
             dark: Color.white
+        )
+    }
+    
+    var white_black: Color {
+        .dynamic(
+            light: Color.white,
+            dark: Color.black
         )
     }
     

@@ -121,7 +121,7 @@ struct SegmentViewNew: View {
             }
         }
         .padding(3)
-        .background(Color.whiteBlack)
+        .background(themeManager.white_white4)
         .clipShape(Capsule())
         .overlay(
             Capsule()

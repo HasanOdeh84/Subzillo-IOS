@@ -26,6 +26,8 @@ struct ConnectEmailView: View {
     @State private var mailFromPush         : String?
     @State private var integrationIdFromPush: String?
     @State private var reconnectSheetHeight : CGFloat = .zero
+    @EnvironmentObject var themeManager     : ThemeManager
+    @Environment(\.colorScheme) var colorScheme
     
     //MARK: - body
     var body: some View {
@@ -36,17 +38,26 @@ struct ConnectEmailView: View {
                 // MARK: - back
                 Button(action: goBack) {
                     HStack {
-                        Image("back_gray")
+                        
+                        if colorScheme == .dark
+                        {
+                            Image("back_gray")
+                                .renderingMode(.template)
+                                .foregroundColor(.white)
+                        }
+                        else{
+                            Image("back_gray")
+                        }
                     }
                     .frame(width: 38, height: 38)
                     .background(
                         Circle()
-                            .fill(Color("Surface_FFFFFF_0A0612"))
+                            .fill(themeManager.white_white4)
                     )
                     .overlay(
                         Circle()
                             .stroke(
-                                Color.black.opacity(0.08),
+                                themeManager.black_white.opacity(0.08),
                                 lineWidth: 1
                             )
                     )
@@ -69,199 +80,6 @@ struct ConnectEmailView: View {
             }
             .padding(.horizontal)
             .padding(.top, 0)
-           /* ScrollView(showsIndicators: false) {
-                
-                VStack(alignment: .leading, spacing: 0) {
-                    
-                    
-                    
-                    
-                    // MARK: - Header
-                    
-                    Text("Connected mails")
-                        .font(.geistBold(17))
-                        .foregroundColor(
-                            Color("TextPrimary_ 0E101A_F4F1FB")
-                        )
-                        .padding(.bottom, 12)
-                    
-                    
-                    // MARK: - Search
-                    
-                    if connectedEmailsVM.connectedEmails.count != 0 {
-                        
-                        HStack(spacing: 10) {
-                            
-                            Image(systemName: "magnifyingglass")
-                                .font(.system(size: 16, weight: .medium))
-                                .foregroundColor(
-                                    Color("TextPrimary_ 0E101A_F4F1FB").opacity(0.6)
-                                )
-                            
-                            TextField(
-                                LocalizedStringKey("Search"),
-                                text: $connectedEmailsVM.searchText
-                            )
-                            .font(.geistRegular(15))
-                            .foregroundColor(
-                                Color("TextPrimary_ 0E101A_F4F1FB")
-                            )
-                        }
-                        .padding(.horizontal, 14)
-                        .frame(height: 48)
-                        .background(Color.whiteBlack)
-                        .clipShape(RoundedRectangle(cornerRadius: 14))
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 14)
-                                .stroke(Color.black.opacity(0.08), lineWidth: 1.5)
-                        )
-                        .padding(.bottom, 14)
-                    }
-                    
-                    
-                    // MARK: - Connected Emails
-                    
-                    if connectedEmailsVM.filteredEmails.count != 0 {
-                        
-                        LazyVStack(spacing: 10) {
-                            
-                            ForEach(connectedEmailsVM.filteredEmails) { email in
-                                
-                                VStack(spacing: 0) {
-                                    
-                                    // Top Content
-                                    
-                                    HStack(spacing: 12) {
-                                        
-                                        Image("google")
-                                            .frame(width: 40, height: 40)
-                                            .background(Color(hex: "#FCE8E6"))
-                                            .clipShape(
-                                                RoundedRectangle(cornerRadius: 10)
-                                            )
-                                        
-                                        VStack(alignment: .leading, spacing: 2) {
-                                            
-                                            Text(email.email ?? "")
-                                                .font(.geistBold(14))
-                                                .foregroundColor(
-                                                    Color("TextPrimary_ 0E101A_F4F1FB")
-                                                )
-                                            
-                                            Text("24/04/2026")
-                                                .font(.custom("JetBrainsMono-Regular", size: 11))
-                                                .foregroundColor(
-                                                    Color("TextPrimary_ 0E101A_F4F1FB").opacity(0.6)
-                                                )
-                                        }
-                                        
-                                        Spacer()
-                                    }
-                                    .padding(.bottom, 12)
-                                    
-                                    
-                                    // Buttons
-                                    
-                                    HStack(spacing: 10) {
-                                        
-                                        Button {
-                                            connectedEmailsVM.syncEmail(email)
-                                        } label: {
-                                            
-                                            Text("Sync")
-                                                .font(.geistSemiBold(13))
-                                                .foregroundColor(.white)
-                                                .frame(maxWidth: .infinity)
-                                                .frame(height: 38)
-                                                .background(
-                                                    LinearGradient(
-                                                        colors: [
-                                                            Color(hex: "#A719DD"),
-                                                            Color(hex: "#7C5CFF"),
-                                                            Color(hex: "#4489EB")
-                                                        ],
-                                                        startPoint: .topLeading,
-                                                        endPoint: .bottomTrailing
-                                                    )
-                                                )
-                                                .clipShape(
-                                                    RoundedRectangle(cornerRadius: 10)
-                                                )
-                                                .shadow(
-                                                    color: Color(hex: "#7C5CFF").opacity(0.35),
-                                                    radius: 10,
-                                                    x: 0,
-                                                    y: 4
-                                                )
-                                        }
-                                        
-                                        Button {
-                                            connectedEmailsVM.viewEmail(email)
-                                        } label: {
-                                            
-                                            Text("View")
-                                                .font(.geistSemiBold(13))
-                                                .foregroundColor(
-                                                    Color(hex: "#7C5CFF")
-                                                )
-                                                .frame(maxWidth: .infinity)
-                                                .frame(height: 38)
-                                                .background(Color.clear)
-                                                .overlay(
-                                                    RoundedRectangle(cornerRadius: 10)
-                                                        .stroke(
-                                                            Color(hex: "#7C5CFF"),
-                                                            lineWidth: 1.5
-                                                        )
-                                                )
-                                        }
-                                    }
-                                }
-                                .padding(16)
-                                .background(Color.whiteBlack)
-                                .clipShape(RoundedRectangle(cornerRadius: 16))
-                                .overlay(
-                                    RoundedRectangle(cornerRadius: 16)
-                                        .stroke(
-                                            Color.black.opacity(0.08),
-                                            lineWidth: 1
-                                        )
-                                )
-                            }
-                        }
-                        
-                    } else {
-                        
-                        VStack(spacing: 16) {
-                            
-                            Image("noEmails")
-                                .resizable()
-                                .scaledToFit()
-                                .frame(width: 100, height: 100)
-                            
-                            Text("No emails Added Yet")
-                                .font(.geistBold(16))
-                                .foregroundColor(
-                                    Color("TextPrimary_ 0E101A_F4F1FB")
-                                )
-                            
-                            Text("Add a email to manage your subscriptions and payments easily.")
-                                .font(.geistRegular(16))
-                                .foregroundColor(
-                                    Color("TextPrimary_ 0E101A_F4F1FB").opacity(0.6)
-                                )
-                                .multilineTextAlignment(.center)
-                                .padding(.horizontal, 20)
-                        }
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 40)
-                    }
-                    
-                    Spacer(minLength: 100)
-                }
-                .padding(.horizontal, 20)
-                .padding(.top, 20)
-            }*/
             ScrollView(showsIndicators: false) {
                 // MARK: - Email Providers
                 
@@ -297,11 +115,11 @@ struct ConnectEmailView: View {
                         action: iCloudAction
                     )
                 }
-                .background(Color.whiteBlack)
+                .background(themeManager.white_white4)
                 .clipShape(RoundedRectangle(cornerRadius: 18))
                 .overlay(
                     RoundedRectangle(cornerRadius: 18)
-                        .stroke(Color.black.opacity(0.08), lineWidth: 1)
+                        .stroke(themeManager.black_white.opacity(0.08), lineWidth: 1)
                 )
                 
                 // MARK: - Connected mails Header
@@ -335,11 +153,11 @@ struct ConnectEmailView: View {
                         }
                         .padding(.horizontal, 14)
                         .frame(height: 48)
-                        .background(Color.whiteBlack)
+                        .background(themeManager.white_white4)
                         .clipShape(RoundedRectangle(cornerRadius: 14))
                         .overlay(
                             RoundedRectangle(cornerRadius: 14)
-                                .stroke(Color.black.opacity(0.08), lineWidth: 1.5)
+                                .stroke(themeManager.black_white.opacity(0.08), lineWidth: 1.5)
                         )
                         .padding(.bottom, 14)
                     }
@@ -372,6 +190,7 @@ struct ConnectEmailView: View {
                             }
                         }
                         .padding(.top, 5)
+                        .padding(.bottom, 120)
                     } else {
                         if connectedEmailsVM.searchText == "" {
                             VStack(spacing: 16) {
@@ -396,7 +215,7 @@ struct ConnectEmailView: View {
                                     .padding(.horizontal, 20)
                             }
                             .frame(maxWidth: .infinity)
-                            .padding(.vertical, 40)
+                            .padding(.vertical, 120)
                         }
                     }
                 }
@@ -408,7 +227,7 @@ struct ConnectEmailView: View {
             .padding(20)
         }
         .navigationBarBackButtonHidden()
-        .background(Color.neutralBg100)
+        .applyAppBackground()
         //MARK: OnAppear
         .onAppear {
             Constants.saveDefaults(value: true, key: "isSyncing")

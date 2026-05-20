@@ -51,6 +51,8 @@ enum NavigationRoute: Hashable{
     case connectICloudView
     case AgentChatView
     case profileTab
+    case uploadView
+    case inboxScanningView
 }
 
 extension NavigationRoute {
