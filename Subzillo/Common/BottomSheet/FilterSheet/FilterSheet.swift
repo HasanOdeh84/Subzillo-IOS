@@ -529,14 +529,14 @@ struct FilterSheet: View {
         }
     }
     
-    func getSubsByMonthApi() {
-        let input = GetSubscriptionsByMonthRequest(
-            userId: Constants.getUserId(),
-            year: year,
-            month: month
-        )
-        subscriptionsVM.getSubscriptionsByMonth(input: input)
-    }
+//    func getSubsByMonthApi() {
+//        let input = GetSubscriptionsByMonthRequest(
+//            userId: Constants.getUserId(),
+//            year: year,
+//            month: month
+//        )
+//        subscriptionsVM.getSubscriptionsByMonth(input: input)
+//    }
     
     //MARK: - Button actions
     private func onApplyAction() {

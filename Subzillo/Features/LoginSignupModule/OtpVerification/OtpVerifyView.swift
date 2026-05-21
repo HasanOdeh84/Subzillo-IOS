@@ -15,6 +15,7 @@ struct OtpVerifyView: View {
     @StateObject private var otpVerifyVM    = OtpVerifyViewModel()
     @State private var otpFields            : [String] = Array(repeating: "", count: 6)
     @FocusState private var focusedField    : Int?
+    @State private var shakeAttempts        : Int = 0
     @State private var timer                = 60
     @State private var isTimerRunning       = true
     @State private var timerCancellable     : AnyCancellable?
@@ -136,7 +137,7 @@ struct OtpVerifyView: View {
                     Text("Code sent to")
                         .font(.geistRegular(12))
                         .foregroundColor(themeManager.textPrimaryLight6_dark62)
-                    Text(verifyData?.verifyType == 2 ? (verifyData?.email ?? "") : (verifyData?.phoneNumber ?? ""))
+                    Text(verifyData?.verifyType == 2 ? (verifyData?.email ?? "") : getFormattedPhoneNumber())
                         .font(.geistSemiBold(12))
                         .foregroundColor(.textPrimary0E101AF4F1FB)
                 }
@@ -158,6 +159,7 @@ struct OtpVerifyView: View {
             }
         }
         .padding(.horizontal, 20)
+        .modifier(Shake(animatableData: CGFloat(shakeAttempts)))
     }
     
     @ViewBuilder
@@ -187,7 +189,13 @@ struct OtpVerifyView: View {
         let isOtpComplete = otpFields.joined().count == 6
         
         Button {
-            verifyOtp()
+            if isOtpComplete {
+                verifyOtp()
+            } else {
+                withAnimation(.default) {
+                    shakeAttempts += 1
+                }
+            }
         } label: {
             HStack {
                 Text("Verify")
@@ -201,7 +209,6 @@ struct OtpVerifyView: View {
             .cornerRadius(16)
             .shadow(color: isOtpComplete ? themeManager.accentShadowColor : .clear, radius: 12, x: 0, y: 8)
         }
-        .disabled(!isOtpComplete)
         .padding(.horizontal, 20)
         .padding(.bottom, 32)
     }
@@ -224,6 +231,14 @@ struct OtpVerifyView: View {
             verifyText = "Verify your email"
             sendCodeText = "email"
         }
+    }
+    
+    private func getFormattedPhoneNumber() -> String {
+        let code = verifyData?.countryCode ?? ""
+        let number = verifyData?.phoneNumber ?? ""
+        if code.isEmpty { return number }
+        let cleanCode = code.hasPrefix("+") ? code : "+\(code)"
+        return "\(cleanCode) \(number)"
     }
     
     //MARK: - Methods
@@ -322,21 +337,30 @@ struct OTPTextField: View {
         .overlay(
             ZStack {
                 // Soft outer glow/border
-                if focusedField == index {
-                    RoundedRectangle(cornerRadius: 14)
-                        .stroke(
-                            themeManager.accentTextColor.opacity(0.25),
-                            lineWidth: 4
-                        )
-                        .padding(-2)
-                }
+//                if focusedField == index {
+//                    RoundedRectangle(cornerRadius: 14)
+//                        .stroke(
+//                            themeManager.accentTextColor.opacity(0.25),
+//                            lineWidth: 4
+//                        )
+//                        .padding(-2)
+//                } //only one box highlight when it is focused
+                RoundedRectangle(cornerRadius: 14)
+                    .stroke(
+                        themeManager.accentTextColor.opacity(0.25),
+                        lineWidth: 4
+                    )
+                    .padding(-2)
+                
                 // Main sharp border
                 RoundedRectangle(cornerRadius: 12)
                     .stroke(
-                        focusedField == index
-                        ? themeManager.accentTextColor
-                        : Color.textPrimary0E101AF4F1FB.opacity(0.12),
-                        lineWidth: focusedField == index ? 1.5 : 1
+//                        focusedField == index
+//                        ? themeManager.accentTextColor
+//                        : Color.textPrimary0E101AF4F1FB.opacity(0.12),
+//                        lineWidth: focusedField == index ? 1.5 : 1 //only one box highlight when it is focused
+                        themeManager.accentTextColor,
+                        lineWidth: 1.5
                     )
             }
         )
@@ -438,5 +462,18 @@ class BackspaceTextField: UITextField {
             onBackspace?()
         }
         super.deleteBackward()
+    }
+}
+
+// MARK: - Shake Animation Effect
+struct Shake: GeometryEffect {
+    var amount: CGFloat = 10
+    var shakesPerUnit = 3
+    var animatableData: CGFloat
+
+    func effectValue(size: CGSize) -> ProjectionTransform {
+        ProjectionTransform(CGAffineTransform(translationX:
+            amount * sin(animatableData * .pi * CGFloat(shakesPerUnit)),
+            y: 0))
     }
 }

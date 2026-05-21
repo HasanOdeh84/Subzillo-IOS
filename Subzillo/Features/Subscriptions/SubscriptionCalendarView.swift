@@ -129,16 +129,16 @@ extension SubscriptionCalendarView {
             Image(image)
                 .renderingMode(.template)
                 .foregroundColor(
-                    (Color.textPrimary0E101AF4F1FB).opacity(0.6)
+                    themeManager.textPrimaryLight6_dark62
                 )
                 .frame(width: 28, height: 28)
                 .background(
-                    themeManager.white_white4
+                    .calenderF1F2F7FFFFFF
                 )
                 .overlay(
                     RoundedRectangle(cornerRadius: 8)
                         .stroke(
-                            themeManager.black_white.opacity(0.08),
+                            themeManager.textPrimaryLight8_white8,
                             lineWidth: 1
                         )
                 )

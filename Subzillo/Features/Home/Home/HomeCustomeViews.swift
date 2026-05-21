@@ -53,8 +53,7 @@ struct StatCardNew: View {
                 )
                 .padding(.top, 2)
         }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .frame(height: 80)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         .padding(12)
         .background(colorScheme == .dark ? themeManager.white_white4 : Color.surfaceHiLightF1F2F7)
         .overlay(
@@ -88,7 +87,6 @@ struct HighestStatCard: View {
                     Color("TextPrimary_ 0E101A_F4F1FB")
                         .opacity(0.6)
                 )
-                .padding(.top, -10)
             
             Text("\(data?.currencySymbol ?? "") \(formattedAmount)")
                 .font(.geistSemiBold(18))
@@ -104,8 +102,7 @@ struct HighestStatCard: View {
                 )
                 .padding(.top, 2)
         }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .frame(height: 80)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         .padding(12)
         .background(colorScheme == .dark ? themeManager.white_white4 : Color.surfaceHiLightF1F2F7)
         .overlay(
@@ -357,6 +354,7 @@ struct UpcomingCharge: Identifiable {
     
     let id = UUID()
     
+    let subscriptionId: String
     let name: String
     let subtitle: String
     let amount: String

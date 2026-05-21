@@ -18,7 +18,8 @@ struct UploadView: View {
     @EnvironmentObject var themeManager         : ThemeManager
     @Environment(\.colorScheme) var colorScheme
     
-    @State private var showImagePicker          = false
+    @State private var showCameraPicker         = false
+    @State private var showGalleryPicker        = false
     @State private var selectedImage            : UIImage? = nil
     @State private var pickerSource             : PickerType = .gallery
     @State private var isCamera                 = false
@@ -132,7 +133,7 @@ struct UploadView: View {
                 // MARK: - Upload Box
                 VStack(spacing: 12) {
                     Button {
-                        cameraAction()
+                        galleryAction()
                     } label: {
                         ZStack {
                             
@@ -321,14 +322,13 @@ struct UploadView: View {
             }*/
         }
         .applyAppBackground()
-        .sheet(isPresented: $showImagePicker) {
-            if pickerSource == .camera {
-                ImagePicker(sourceType: .camera, selectedImage: $selectedImage, isAllowsEditing: false)
-                    .edgesIgnoringSafeArea(.all)
-                    .ignoresSafeArea()
-            } else {
-                ImagePicker(sourceType: .photoLibrary, selectedImage: $selectedImage)
-            }
+        .fullScreenCover(isPresented: $showCameraPicker) {
+            ImagePicker(sourceType: .camera, selectedImage: $selectedImage, isAllowsEditing: false)
+                .edgesIgnoringSafeArea(.all)
+                .ignoresSafeArea()
+        }
+        .sheet(isPresented: $showGalleryPicker) {
+            ImagePicker(sourceType: .photoLibrary, selectedImage: $selectedImage)
         }
         .onChange(of: selectedImage) { image in
             if let image = image {
@@ -384,7 +384,8 @@ struct UploadView: View {
             .presentationDetents([.height(580)])
         }
         .onReceive(NotificationCenter.default.publisher(for: .closeAllBottomSheets)) { _ in
-            showImagePicker = false
+            showCameraPicker = false
+            showGalleryPicker = false
             uploadImageVM.showErrorPopup = false
             showPermissionAlert = false
         }
@@ -451,13 +452,13 @@ struct UploadView: View {
         switch AVCaptureDevice.authorizationStatus(for: .video) {
         case .authorized:
             pickerSource = .camera
-            showImagePicker = true
+            showCameraPicker = true
         case .notDetermined:
             AVCaptureDevice.requestAccess(for: .video) { granted in
                 DispatchQueue.main.async {
                     if granted {
                         pickerSource = .camera
-                        showImagePicker = true
+                        showCameraPicker = true
                     } else {
                         showPermissionDenied(message: "Camera access is denied. Please enable it in Settings.")
                     }
@@ -473,13 +474,13 @@ struct UploadView: View {
         switch status {
         case .authorized, .limited:
             pickerSource = .gallery
-            showImagePicker = true
+            showGalleryPicker = true
         case .notDetermined:
             PHPhotoLibrary.requestAuthorization(for: .readWrite) { newStatus in
                 DispatchQueue.main.async {
                     if newStatus == .authorized || newStatus == .limited {
                         pickerSource = .gallery
-                        showImagePicker = true
+                        showGalleryPicker = true
                     } else {
                         showPermissionDenied(message: "Photo Library access is denied. Please enable it in Settings.")
                     }

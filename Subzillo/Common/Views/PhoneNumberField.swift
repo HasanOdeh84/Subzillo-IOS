@@ -70,6 +70,7 @@ struct PhoneNumberField: View {
             VStack(spacing: 4) {
                 HStack(spacing: 0) {
                     Button {
+                        UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
                         withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) {
                             isExpanded.toggle()
                         }

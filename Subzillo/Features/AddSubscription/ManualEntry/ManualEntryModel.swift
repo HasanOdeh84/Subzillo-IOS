@@ -145,9 +145,23 @@ struct FetchProviderData: Codable, Hashable, Identifiable {
     var id                              : String? = nil
     var categoryId                      : String? = nil
     var categoryName                    : String? = nil
-    var providerSubscriptionPlansList   : [ProviderSubscriptionPlan]? = []
     var source                          : String? = nil
+    var currencyCode                    : String? = nil
+    var currencySymbol                  : String? = nil
+    var providerSubscriptionPlansList   : [ProviderPlanData]? = []
     var urls                            : [String]? = nil
+}
+
+struct ProviderPlanData: Codable, Hashable, Identifiable {
+    var id                              : String? { providerId }
+    var providerId                      : String? = nil
+    var providerName                    : String? = nil
+    var providerLogo                    : String? = nil
+    var categoryId                      : String? = nil
+    var categoryName                    : String? = nil
+    var currencyCode                    : String? = nil
+    var currencySymbol                  : String? = nil
+    var providerSubscriptionPlansList   : [ProviderSubscriptionPlan]? = []
 }
 
 struct ProviderSubscriptionPlan: Codable, Identifiable, Hashable {
@@ -158,6 +172,7 @@ struct ProviderSubscriptionPlan: Codable, Identifiable, Hashable {
     var currencyCode    : String? = nil
     var currencySymbol  : String? = nil
     var source          : String? = nil
+    var countryCode     : String? = nil
 }
 
 struct PlanTypeItem: Identifiable {

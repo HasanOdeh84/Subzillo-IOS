@@ -49,6 +49,7 @@ struct SubscriptionsView: View {
     @State var selectedCategory                 = ""
     @State var categoryResponse                 = [Category.init(id:"",name: "All")]
     @State private var subsCount                = "10"
+    @State private var lockedSubsCount          = 0
     @State private var subsAmount               = "$120.95"
     @State private var currentDateNew = Date()
     @State private var highlights: [CalendarHighlight] = [
@@ -58,6 +59,19 @@ struct SubscriptionsView: View {
     @State private var isPlanExists             : Bool = true
     var hasSelection: Bool {
         subscriptionsList.contains(where: { $0.isSelected ?? false })
+    }
+    
+    //    var lockedSubsCount: Int {
+    //        if selectedSegment == .first {
+    //            return subscriptionsList.filter { $0.viewStatus == false }.count
+    //        } else {
+    //            return subscriptions.filter { $0.viewStatus == false }.count
+    //        }
+    //    }
+    
+    var isFilterActive: Bool {
+        return !filterData.includeFamilySubscriptions ||
+        !filterData.includeExpiredSubscriptions
     }
     private var currentYear: Int {
         Calendar.current.component(.year, from: currentDate)
@@ -130,6 +144,15 @@ struct SubscriptionsView: View {
                                                     lineWidth: 1
                                                 )
                                         )
+                                        .overlay(alignment: .topTrailing) {
+                                            if isFilterActive {
+                                                Circle()
+                                                    .fill(themeManager.accentColor)
+                                                    .frame(width: 8, height: 8)
+                                                    .shadow(color: themeManager.accentColor, radius: 4, x: 0, y: 0)
+                                                    .offset(x: -9, y: 9)
+                                            }
+                                        }
                                 }
                             }
                         }
@@ -461,7 +484,7 @@ struct SubscriptionsView: View {
                                         .multilineTextAlignment(.leading)
                                         .foregroundStyle(themeManager.textPrimaryLight6_dark62)
                                         .font(.jetBrainsMedium(11))
-                                 Spacer()
+                                    Spacer()
                                 }
                                 ForEach(subscriptions, id: \.id) { subscription in
                                     Button {
@@ -475,28 +498,37 @@ struct SubscriptionsView: View {
                                         UpcomingSubscriptionRow(subscriptionData:subscription)
                                     }
                                 }
+                                
+                                //                                if lockedSubsCount > 0 {
+                                //                                    lockedSubsCard(count: lockedSubsCount)
+                                //                                        .padding(.horizontal, 20)
+                                //                                        .padding(.top, 10)
+                                //                                }
                             }
                             .listStyle(.plain)
                             .scrollIndicators(.hidden)
                             .frame(maxWidth: .infinity)
                             .scrollContentBackground(.hidden)
                             .padding(.bottom,86)
-                        }else{
-                            Spacer()
-                            VStack(){
-                                Image("noSubs")
-                                    .frame(width: 59, height: 80, alignment: .center)
-                                Text("You haven’t added any\nsubscriptions")
-                                    .padding(10)
-                                    .multilineTextAlignment(.center)
-                                    .foregroundStyle(Color.neutral800)
-                                    .font(.appBold(16))
-                            }
-                            Spacer()
                         }
+                        //                        else{
+                        //                            Spacer()
+                        //                            VStack(){
+                        //                                Image("noSubs")
+                        //                                    .frame(width: 59, height: 80, alignment: .center)
+                        //                                Text("You haven’t added any\nsubscriptions")
+                        //                                    .padding(10)
+                        //                                    .multilineTextAlignment(.center)
+                        //                                    .foregroundStyle(Color.neutral800)
+                        //                                    .font(.appBold(16))
+                        //                            }
+                        //                            Spacer()
+                        //                        }
                     }
                     .scrollIndicators(.hidden)
+                    
                 }  else if segment == .first{
+                    //MARK: - Subscriptions list view
                     if subscriptionsVM.isLoading && page == 0 {
                         Spacer()
                     } else if subscriptionsList.count != 0{
@@ -580,10 +612,17 @@ struct SubscriptionsView: View {
                                             loadNextPageIfNeeded()
                                         }
                                     }
-                                    .padding(.bottom, index == subscriptionsList.count - 1 ? 90 : 0)
+                                    .padding(.bottom, (index == subscriptionsList.count - 1 && lockedSubsCount == 0) ? 90 : 0)
                                 }
                                 .background(Color.clear)
                                 .padding(.top, 0)
+                                
+                                if lockedSubsCount > 0 {
+                                    lockedSubsCard(count: lockedSubsCount)
+                                        .listRowSeparator(.hidden)
+                                        .listRowInsets(.init(top: 10, leading: 4, bottom: 90, trailing: 4)) // Reset padding to match standard rows
+                                        .listRowBackground(Color.clear)
+                                }
                             }
                             .listStyle(.plain)
                             .scrollIndicators(.hidden)
@@ -751,9 +790,15 @@ struct SubscriptionsView: View {
             .presentationDetents([.height(350)])
         }
         .onChange(of: selectedCategory) { value in
-            page = 0
-            self.subscriptionsList.removeAll()
-            listSubsApi()
+            if selectedSegment == .first{
+                page = 0
+                self.subscriptionsList.removeAll()
+                listSubsApi()
+            }else{
+                //                page = 0
+                //                self.subscriptionsList.removeAll()
+                getSubsByMonthApi()
+            }
         }
         .onChange(of: pendingFilterSelect) { value in
             guard let value else { return }
@@ -946,7 +991,10 @@ struct SubscriptionsView: View {
     }
     
     func getSubsByMonthApi(){
-        let input = GetSubscriptionsByMonthRequest(userId: Constants.getUserId(), year: year, month: month)
+        let input = GetSubscriptionsByMonthRequest(userId       : Constants.getUserId(),
+                                                   year         : year,
+                                                   month        : month,
+                                                   categoryId   : selectedCategory)
         subscriptionsVM.getSubscriptionsByMonth(input: input)
     }
     
@@ -964,6 +1012,7 @@ struct SubscriptionsView: View {
             SubscriptionDBManager.shared.updateSubscription(params: item)
         }
         subsCount = "\(listResponse.totalSubscriptions ?? 0)"
+        lockedSubsCount = listResponse.totalHiddenSubscriptions ?? 0
         subsAmount = "\(listResponse.currentMonthSpendingCurrencySymbol ?? "")\(listResponse.currentMonthSpendingAmount ?? 0.00)"
         if page == 0 {
             self.subscriptionsList = listArray
@@ -1190,6 +1239,56 @@ struct SubscriptionsView: View {
             isDatePickerPresented = true
         }
     }
+    // MARK: - Locked Subs Card
+    private func lockedSubsCard(count: Int) -> some View {
+        HStack(spacing: 12) {
+            // Icon
+            ZStack {
+                themeManager.accentGradient
+                    .clipShape(RoundedRectangle(cornerRadius: 12))
+                Image("sparkles")
+                    .foregroundColor(.white)
+                    .font(.system(size: 16))
+            }
+            .frame(width: 44, height: 44)
+            
+            // Text
+            VStack(alignment: .leading, spacing: 2) {
+                Text("Unlock \(count) more subs")
+                    .font(.geistSemiBold(14))
+                    .foregroundColor(Color("TextPrimary_ 0E101A_F4F1FB"))
+                Text("Upgrade to Premium for\nunlimited tracking")
+                    .font(.geistRegular(12))
+                    .foregroundColor(themeManager.textPrimaryLight6_dark62)
+                //                    .lineLimit(2)
+            }
+            
+            Spacer()
+            
+            // Button
+            Button(action: {
+                AppIntentRouter.shared.navigate(to: .pricingPlans())
+            }) {
+                Text("Upgrade")
+                    .font(.geistSemiBold(14))
+                    .foregroundColor(.white)
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 8)
+                    .background(themeManager.accentGradient)
+                    .clipShape(Capsule())
+            }
+        }
+        .frame(maxWidth: .infinity)
+        .padding(16)
+        .background(
+            RoundedRectangle(cornerRadius: 20)
+                .fill(LinearGradient.brandFromDark0133_brandToDark0133)
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: 20)
+                .stroke(themeManager.selectedAccent.senColor.opacity(0.3), lineWidth: 1)
+        )
+    }
 }
 
 //MARK: - SwipeActionCard
@@ -1204,6 +1303,7 @@ struct SwipeActionCard<Content: View>: View {
     let onEdit                      : () -> Void
     let onDelete                    : () -> Void
     let content                     : Content
+    @State private var isSwiped     : Bool = false
     @State private var offsetX      : CGFloat = 0
     private let maxOffset           : CGFloat = -140
     
@@ -1230,61 +1330,144 @@ struct SwipeActionCard<Content: View>: View {
     var body: some View {
         ZStack(alignment: .trailing) {
             // EDIT and DELETE BUTTONS CONTAINER
-            HStack(spacing: 0) {
-                // EDIT
-                Button {
-                    onEdit()
-                    closeCard()
-                } label: {
-                    VStack(spacing: 6) {
-                        Image("edit_white")
-                            .renderingMode(.template)
-                            .resizable()
-                            .scaledToFit()
-                            .frame(width: 20, height: 20)
-                        Text("Edit")
-                            .font(.geistSemiBold(13))
-                    }
-                    .foregroundColor(colorScheme == .dark ? Color(hex: "#23C16B") : .white)
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
-                    .background(colorScheme == .dark ? Color(hex: "#23C16B").opacity(0.12) : Color(hex: "#34A853"))
-                    .clipShape(
-                        RoundedCorner(radius: 18, corners: [.topLeft, .bottomLeft])
-                    )
-                    .overlay(
-                        RoundedCorner(radius: 18, corners: [.topLeft, .bottomLeft])
-                            .stroke(colorScheme == .dark ? Color(hex: "#23C16B").opacity(0.3) : Color.clear, lineWidth: 1)
-                    )
-                }
-                
-                // DELETE
-                Button {
-                    onDelete()
-                    closeCard()
-                } label: {
-                    VStack(spacing: 6) {
-                        Image("del_white")
-                            .renderingMode(.template)
-                            .resizable()
-                            .scaledToFit()
-                            .frame(width: 20, height: 20)
+            //            HStack(spacing: 0) {
+            //                // EDIT
+            //                Button {
+            //                    onEdit()
+            //                    closeCard()
+            //                } label: {
+            //                    VStack(spacing: 6) {
+            //                        Image("edit_white")
+            //                            .renderingMode(.template)
+            //                            .resizable()
+            //                            .scaledToFit()
+            //                            .frame(width: 20, height: 20)
+            //                        Text("Edit")
+            //                            .font(.geistSemiBold(13))
+            //                    }
+            //                    .foregroundColor(colorScheme == .dark ? Color(hex: "#23C16B") : .white)
+            //                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+            //                    .background(colorScheme == .dark ? Color(hex: "#23C16B").opacity(0.12) : Color(hex: "#34A853"))
+            //                    .clipShape(
+            //                        RoundedCorner(radius: 18, corners: [.topLeft, .bottomLeft])
+            //                    )
+            //                    .overlay(
+            //                        RoundedCorner(radius: 18, corners: [.topLeft, .bottomLeft])
+            //                            .stroke(colorScheme == .dark ? Color(hex: "#23C16B").opacity(0.3) : Color.clear, lineWidth: 1)
+            //                    )
+            //                }
+            //
+            //                // DELETE
+            //                Button {
+            //                    onDelete()
+            //                    closeCard()
+            //                } label: {
+            //                    VStack(spacing: 6) {
+            //                        Image("del_white")
+            //                            .renderingMode(.template)
+            //                            .resizable()
+            //                            .scaledToFit()
+            //                            .frame(width: 20, height: 20)
+            //                        Text("Delete")
+            //                            .font(.geistSemiBold(13))
+            //                    }
+            //                    .foregroundColor(colorScheme == .dark ? Color.dangerE43C5CFF5A7A : .white)
+            //                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+            //                    .background(colorScheme == .dark ? Color.dangerE43C5CFF5A7A.opacity(0.12) : Color.dangerE43C5CFF5A7A)
+            //                    .clipShape(
+            //                        RoundedCorner(radius: 18, corners: [.topRight, .bottomRight])
+            //                    )
+            //                    .overlay(
+            //                        RoundedCorner(radius: 18, corners: [.topRight, .bottomRight])
+            //                            .stroke(colorScheme == .dark ? Color.dangerE43C5CFF5A7A.opacity(0.3) : Color.clear, lineWidth: 1)
+            //                    )
+            //                }
+            //            }
+            //            .frame(width: 140, height: 74)
+            //            .opacity(offsetX < -2 ? 1 : 0) // Hide when completely closed to prevent corner leak
+            
+            
+            
+            VStack {
+                HStack{
+                    Spacer()
+                    VStack(spacing: 8){
+                        Image("swipeDel")
                         Text("Delete")
-                            .font(.geistSemiBold(13))
+                            .font(.jetBrainsBold(11))
+                            .foregroundColor(colorScheme == .light ? .textPrimaryDarkF4F1FB : .dangerDarkFF5A7A)
                     }
-                    .foregroundColor(colorScheme == .dark ? Color.dangerE43C5CFF5A7A : .white)
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
-                    .background(colorScheme == .dark ? Color.dangerE43C5CFF5A7A.opacity(0.12) : Color.dangerE43C5CFF5A7A)
-                    .clipShape(
-                        RoundedCorner(radius: 18, corners: [.topRight, .bottomRight])
-                    )
-                    .overlay(
-                        RoundedCorner(radius: 18, corners: [.topRight, .bottomRight])
-                            .stroke(colorScheme == .dark ? Color.dangerE43C5CFF5A7A.opacity(0.3) : Color.clear, lineWidth: 1)
-                    )
+                    .padding(.leading, 5)
+                    .frame(alignment: .trailing)
+                    .frame(width: 80, height: 74)
                 }
+                .frame(width: 190, height: 74)
             }
-            .frame(width: 140, height: 74)
+            .frame(width: 190, height: 74)
+            .background(colorScheme == .light ? .dangerLightE43C5C : .dangerLightE43C5C.opacity(0.4))
+            .clipShape(
+                RoundedCorner(
+                    radius: 18,
+                    corners: [.topRight, .bottomRight]
+                )
+            )
+            .overlay(
+                RoundedCorner(
+                    radius: 18,
+                    corners: [.topRight, .bottomRight]
+                )
+                .stroke(colorScheme == .light ? .E_2_E_8_F_0 : .dangerLightE43C5C.opacity(0.40), lineWidth: 1)
+//                .stroke(colorScheme == .light ? .E_2_E_8_F_0 : .dangerLightE43C5C, lineWidth: 1)
+                .padding(0.5)
+            )
+            .onTapGesture {
+                withAnimation {
+                    offsetX = 0
+                    isSwiped = false
+                }
+                onDelete()
+            }
             .opacity(offsetX < -2 ? 1 : 0) // Hide when completely closed to prevent corner leak
+            
+            VStack(spacing: 8) {
+                VStack(spacing: 8){
+                    Image("swipeEdit")
+                    Text("Edit")
+                        .font(.jetBrainsBold(11))
+                        .foregroundColor(colorScheme == .light ? .textPrimaryDarkF4F1FB : .successDark5CE4A8)
+                }
+                .padding(.leading, 15)
+                .frame(alignment: .trailing)
+                .frame(width: 70, height: 74)
+            }
+            .frame(width: 90, height: 74)
+            .background(colorScheme == .light ? .successLight0EA870 : .successLight0EA870.opacity(0.4))
+            .clipShape(
+                RoundedCorner(
+                    radius: 18,
+                    corners: [.topRight, .bottomRight]
+                )
+            )
+            .overlay(
+                RoundedCorner(
+                    radius: 18,
+                    corners: [.topRight, .bottomRight]
+                )
+                .stroke(colorScheme == .light ? .E_2_E_8_F_0 : .successDark5CE4A8.opacity(0.40), lineWidth: 1)
+//                .stroke(colorScheme == .light ? .E_2_E_8_F_0 : .successDark5CE4A8, lineWidth: 1)
+                .padding(0.5)
+            )
+            .offset(x: -70)
+            .zIndex(0)
+            .onTapGesture {
+                withAnimation {
+                    offsetX = 0
+                    isSwiped = false
+                }
+                onEdit()
+            }
+            .opacity(offsetX < -2 ? 1 : 0) // Hide when completely closed to prevent corner leak
+            
             
             // Foreground content
             content

@@ -66,6 +66,7 @@ struct HomeView: View {
     @State var subscriptions: [SubscriptionItemNew] = []
     @State var upcomingFirstItem: UpcomingCharge?
     @State var upcomingItems: [UpcomingCharge] = []
+//    @State private var selectedMonth: String = cuentmonth
     
     private var currentSubscriptions: [SubscriptionListData] {
         showAll ? activeSubsList : Array(activeSubsList.prefix(1))
@@ -194,18 +195,17 @@ struct HomeView: View {
                                         Text("OFF TRACK")
                                             .font(.jetBrainsMedium(10))
                                             .tracking(1)
-                                            .foregroundColor(Color("Warning_Any_FFCB5C"))
+                                            .foregroundColor(colorScheme == .dark ? Color("Warning_Any_FFCB5C") : Color("orange_FFA500"))
                                             .padding(.horizontal, 10)
                                             .padding(.vertical, 6)
                                             .background(
-                                                Color("Warning_Any_FFCB5C")
-                                                    .opacity(0.12)
+                                                colorScheme == .dark ? Color("Warning_Any_FFCB5C").opacity(0.12) : Color("orange_FFA500").opacity(0.20)
+                                                    
                                             )
                                             .overlay(
                                                 Capsule()
                                                     .stroke(
-                                                        Color("Warning_Any_FFCB5C")
-                                                            .opacity(0.2),
+                                                        colorScheme == .dark ? Color("Warning_Any_FFCB5C").opacity(0.2) : Color("orange_FFA500").opacity(0.2),
                                                         lineWidth: 1
                                                     )
                                             )
@@ -230,6 +230,7 @@ struct HomeView: View {
                                     
                                     HighestStatCard(data: homeResponse?.stats?.highestActiveSubscription)
                                 }
+                                .fixedSize(horizontal: false, vertical: true)
                                 .padding(.top, 20)
                             }
                             .padding(20)
@@ -321,120 +322,448 @@ struct HomeView: View {
                                 .padding(.bottom, 18)
                                 
                                 // MARK: - Chart
-                                Chart {
-                                    // MARK: - Bars
+//                                    Chart {
+//                                        // MARK: - Bars
+//                                        
+//                                        ForEach(Array(months.enumerated()), id: \.offset) { index, item in
+//                                            
+//                                            let activeGradient = themeManager.accentGradient
+//                                            
+//                                            let inactiveColor = themeManager.white_white4.opacity(0.7)
+//                                            
+//                                            let barStyle: AnyShapeStyle = index == 0
+//                                            ? AnyShapeStyle(activeGradient)
+//                                            : AnyShapeStyle((colorScheme == .dark ? inactiveColor : Color.surfaceHiLightF1F2F7.opacity(0.7)))
+//                                            
+//                                            BarMark(
+//                                                x: .value("Month", item.0),
+//                                                y: .value("Spend", item.1)
+//                                            )
+//                                            .foregroundStyle(barStyle)
+//                                            .cornerRadius(3)
+//                                            .opacity(0.9)
+//                                        }
+//                                        
+//                                        ForEach(Array(months.enumerated()), id: \.offset) { index, item in
+//                                            
+//                                            // Area
+//                                            AreaMark(
+//                                                x: .value("Month", item.0),
+//                                                y: .value("Spend", item.1)
+//                                            )
+//                                            .foregroundStyle(
+//                                                LinearGradient(
+//                                                    colors: [
+//                                                        themeManager.accentTextColor.opacity(0.15),
+//                                                        themeManager.accentTextColor.opacity(0)
+//                                                    ],
+//                                                    startPoint: .top,
+//                                                    endPoint: .bottom
+//                                                )
+//                                            )
+//                                        }
+//                                        
+//                                        // MARK: - Line
+//                                        
+//                                        ForEach(Array(months.enumerated()), id: \.offset) { index, item in
+//                                            
+//                                            LineMark(
+//                                                x: .value("Month", item.0),
+//                                                y: .value("Spend", item.1)
+//                                            )
+//                                            .foregroundStyle(themeManager.accentTextColor)
+//                                            .lineStyle(
+//                                                StrokeStyle(
+//                                                    lineWidth: 1.8,
+//                                                    lineCap: .round,
+//                                                    lineJoin: .round
+//                                                )
+//                                            )
+//                                        }
+//                                        
+//                                        
+//                                        // MARK: - Highlight Point
+//                                        
+//                                        PointMark(
+//                                            x: .value("Month", months[0].0),
+//                                            y: .value("Spend", months[0].1)
+//                                        )
+//                                        .foregroundStyle(.white)
+//                                        .symbolSize(90)
+//                                        
+//                                        PointMark(
+//                                            x: .value("Month", months[0].0),
+//                                            y: .value("Spend", months[0].1)
+//                                        )
+//                                        .foregroundStyle(themeManager.accentTextColor)
+//                                        .symbolSize(40)
+//                                    }
+//                                    .chartYAxis(.hidden)
+//                                    .chartXAxis {
+//                                        
+//                                        AxisMarks(values: months.map { $0.0 }) { value in
+//                                            
+//                                            AxisValueLabel {
+//                                                
+//                                                if let month = value.as(String.self) {
+//                                                    
+//                                                    Text(month)
+//                                                        .font(
+//                                                            month == cuentmonth
+//                                                            ? .jetBrainsSemiBold(8)
+//                                                            : .jetBrainsRegular(8)
+//                                                        )
+//                                                        .tracking(0.5)
+//                                                        .foregroundColor(
+//                                                            month == cuentmonth
+//                                                            ? themeManager.accentTextColor
+//                                                            : Color("TextPrimary_ 0E101A_F4F1FB")
+//                                                                .opacity(0.36)
+//                                                        )
+//                                                }
+//                                            }
+//                                            
+//                                            AxisGridLine(stroke: StrokeStyle(lineWidth: 0))
+//                                            AxisTick(stroke: StrokeStyle(lineWidth: 0))
+//                                        }
+//                                    }
+//                                    .frame(height: 120)
+//                                
+//                                Rectangle()
+//                                    .fill(
+//                                        Color("TextPrimary_ 0E101A_F4F1FB")
+//                                            .opacity(0.08)
+//                                    )
+//                                    .frame(height: 1)
+//                                    .offset(x: 0, y: -14)
+                                
+                                
+                                
+                                /*VStack {
                                     
-                                    ForEach(Array(months.enumerated()), id: \.offset) { index, item in
+                                    if let selectedData = months.first(where: { $0.0 == selectedMonth }) {
                                         
-                                        let activeGradient = themeManager.accentGradient
-                                        
-                                        let inactiveColor = themeManager.white_white4.opacity(0.7)
-                                        
-                                        let barStyle: AnyShapeStyle = index == 0
-                                        ? AnyShapeStyle(activeGradient)
-                                        : AnyShapeStyle((colorScheme == .dark ? inactiveColor : Color.surfaceHiLightF1F2F7.opacity(0.7)))
-                                        
-                                        BarMark(
-                                            x: .value("Month", item.0),
-                                            y: .value("Spend", item.1)
-                                        )
-                                        .foregroundStyle(barStyle)
-                                        .cornerRadius(3)
-                                        .opacity(0.9)
+                                        Text("₹\(selectedData.1, specifier: "%.2f")")
+                                            .font(.jetBrainsSemiBold(12))
+                                            .foregroundColor(themeManager.accentTextColor)
+                                            .padding(.bottom, 4)
                                     }
                                     
-                                    ForEach(Array(months.enumerated()), id: \.offset) { index, item in
+                                    Chart {
                                         
-                                        // Area
-                                        AreaMark(
-                                            x: .value("Month", item.0),
-                                            y: .value("Spend", item.1)
-                                        )
-                                        .foregroundStyle(
-                                            LinearGradient(
-                                                colors: [
-                                                    themeManager.accentTextColor.opacity(0.15),
-                                                    themeManager.accentTextColor.opacity(0)
-                                                ],
-                                                startPoint: .top,
-                                                endPoint: .bottom
-                                            )
-                                        )
-                                    }
-                                    
-                                    // MARK: - Line
-                                    
-                                    ForEach(Array(months.enumerated()), id: \.offset) { index, item in
-                                        
-                                        LineMark(
-                                            x: .value("Month", item.0),
-                                            y: .value("Spend", item.1)
-                                        )
-                                        .foregroundStyle(themeManager.accentTextColor)
-                                        .lineStyle(
-                                            StrokeStyle(
-                                                lineWidth: 1.8,
-                                                lineCap: .round,
-                                                lineJoin: .round
-                                            )
-                                        )
-                                    }
-                                    
-                                    
-                                    // MARK: - Highlight Point
-                                    
-                                    PointMark(
-                                        x: .value("Month", months[0].0),
-                                        y: .value("Spend", months[0].1)
-                                    )
-                                    .foregroundStyle(.white)
-                                    .symbolSize(90)
-                                    
-                                    PointMark(
-                                        x: .value("Month", months[0].0),
-                                        y: .value("Spend", months[0].1)
-                                    )
-                                    .foregroundStyle(themeManager.accentTextColor)
-                                    .symbolSize(40)
-                                }
-                                .chartYAxis(.hidden)
-                                .chartXAxis {
-                                    
-                                    AxisMarks(values: months.map { $0.0 }) { value in
-                                        
-                                        AxisValueLabel {
+                                        ForEach(Array(months.enumerated()), id: \.offset) { index, item in
                                             
-                                            if let month = value.as(String.self) {
-                                                
-                                                Text(month)
-                                                    .font(
-                                                        month == cuentmonth
-                                                        ? .jetBrainsSemiBold(8)
-                                                        : .jetBrainsRegular(8)
-                                                    )
-                                                    .tracking(0.5)
-                                                    .foregroundColor(
-                                                        month == cuentmonth
-                                                        ? themeManager.accentTextColor
-                                                        : Color("TextPrimary_ 0E101A_F4F1FB")
-                                                            .opacity(0.36)
-                                                    )
-                                            }
+                                            let isSelected = item.0 == selectedMonth
+                                            
+                                            let activeGradient = themeManager.accentGradient
+                                            
+                                            let inactiveColor = themeManager.white_white4.opacity(0.7)
+                                            
+                                            let barStyle: AnyShapeStyle = isSelected
+                                            ? AnyShapeStyle(activeGradient)
+                                            : AnyShapeStyle(
+                                                colorScheme == .dark
+                                                ? inactiveColor
+                                                : Color.surfaceHiLightF1F2F7.opacity(0.7)
+                                            )
+                                            
+                                            // MARK: - Bar
+                                            
+                                            BarMark(
+                                                x: .value("Month", item.0),
+                                                y: .value("Spend", item.1)
+                                            )
+                                            .foregroundStyle(barStyle)
+                                            .cornerRadius(4)
+                                            .opacity(isSelected ? 1 : 0.5)
+                                            
+                                            // MARK: - Line
+                                            
+                                            LineMark(
+                                                x: .value("Month", item.0),
+                                                y: .value("Spend", item.1)
+                                            )
+                                            .foregroundStyle(themeManager.accentTextColor)
+                                            .lineStyle(
+                                                StrokeStyle(
+                                                    lineWidth: 2,
+                                                    lineCap: .round,
+                                                    lineJoin: .round
+                                                )
+                                            )
+                                            
+                                            // MARK: - Area
+                                            
+                                            AreaMark(
+                                                x: .value("Month", item.0),
+                                                y: .value("Spend", item.1)
+                                            )
+                                            .foregroundStyle(
+                                                LinearGradient(
+                                                    colors: [
+                                                        themeManager.accentTextColor.opacity(0.15),
+                                                        themeManager.accentTextColor.opacity(0)
+                                                    ],
+                                                    startPoint: .top,
+                                                    endPoint: .bottom
+                                                )
+                                            )
                                         }
                                         
-                                        AxisGridLine(stroke: StrokeStyle(lineWidth: 0))
-                                        AxisTick(stroke: StrokeStyle(lineWidth: 0))
+                                        // MARK: - Selected Point
+                                        
+                                        if let selectedData = months.first(where: { $0.0 == selectedMonth }) {
+                                            
+                                            PointMark(
+                                                x: .value("Month", selectedData.0),
+                                                y: .value("Spend", selectedData.1)
+                                            )
+                                            .foregroundStyle(.white)
+                                            .symbolSize(90)
+                                            
+                                            PointMark(
+                                                x: .value("Month", selectedData.0),
+                                                y: .value("Spend", selectedData.1)
+                                            )
+                                            .foregroundStyle(themeManager.accentTextColor)
+                                            .symbolSize(40)
+                                        }
                                     }
+//                                    .chartScrollableAxes(.horizontal)
+//                                    .chartXVisibleDomain(length: 5)
+                                    .chartYAxis(.hidden)
+                                    .chartXAxis {
+                                        
+                                        AxisMarks(values: months.map { $0.0 }) { value in
+                                            
+                                            AxisValueLabel {
+                                                
+                                                if let month = value.as(String.self) {
+                                                    
+                                                    Text(month)
+                                                        .font(
+                                                            month == selectedMonth
+                                                            ? .jetBrainsSemiBold(8)
+                                                            : .jetBrainsRegular(8)
+                                                        )
+                                                        .foregroundColor(
+                                                            month == selectedMonth
+                                                            ? themeManager.accentTextColor
+                                                            : Color("TextPrimary_ 0E101A_F4F1FB")
+                                                                .opacity(0.36)
+                                                        )
+                                                }
+                                            }
+                                            
+                                            AxisGridLine(stroke: StrokeStyle(lineWidth: 0))
+                                            AxisTick(stroke: StrokeStyle(lineWidth: 0))
+                                        }
+                                    }
+                                    .chartOverlay { proxy in
+                                        
+                                        GeometryReader { geometry in
+                                            
+                                            Rectangle()
+                                                .fill(Color.clear)
+                                                .contentShape(Rectangle())
+                                                .gesture(
+                                                    DragGesture(minimumDistance: 0)
+                                                        .onChanged { value in
+                                                            
+                                                            let origin = geometry[proxy.plotAreaFrame].origin
+                                                            
+                                                            let currentX = value.location.x - origin.x
+                                                            
+                                                            if let month: String = proxy.value(atX: currentX) {
+                                                                
+                                                                selectedMonth = month
+                                                            }
+                                                        }
+                                                )
+                                        }
+                                    }
+                                    .frame(height: 160)
+                                    
+                                    Rectangle()
+                                        .fill(
+                                            Color("TextPrimary_ 0E101A_F4F1FB")
+                                                .opacity(0.08)
+                                        )
+                                        .frame(height: 1)
+                                        .offset(y: -14)
                                 }
-                                .frame(height: 120)
+                                */
                                 
-                                Rectangle()
-                                    .fill(
-                                        Color("TextPrimary_ 0E101A_F4F1FB")
-                                            .opacity(0.08)
-                                    )
-                                    .frame(height: 1)
-                                    .offset(x: 0, y: -14)
+                                
+                                VStack {
+                                       
+                                       Chart {
+                                           
+                                           ForEach(Array(months.enumerated()), id: \.offset) { index, item in
+                                               
+                                               let isSelected = item.0 == cuentmonth
+                                               
+                                               let activeGradient = themeManager.accentGradient
+                                               
+                                               let inactiveColor = Color("gray_CBD5E1_475569").opacity(0.50)
+                                               
+//                                               let barStyle: AnyShapeStyle = isSelected
+//                                               ? AnyShapeStyle(activeGradient)
+//                                               : AnyShapeStyle(
+//                                                   colorScheme == .dark
+//                                                   ? inactiveColor
+//                                                   : Color.surfaceHiLightF1F2F7.opacity(0.7)
+//                                               )
+                                               
+                                               let barStyle: AnyShapeStyle = isSelected
+                                               ? AnyShapeStyle(activeGradient)
+                                               : AnyShapeStyle(
+                                                inactiveColor
+                                               )
+                                               
+                                               // MARK: - Bar
+                                               
+                                               BarMark(
+                                                   x: .value("Month", item.0),
+                                                   y: .value("Spend", item.1)
+                                               )
+                                               .foregroundStyle(barStyle)
+                                               .cornerRadius(4)
+                                               .opacity(isSelected ? 1 : 0.5)
+                                               
+                                               // MARK: - Line
+                                               
+                                               LineMark(
+                                                   x: .value("Month", item.0),
+                                                   y: .value("Spend", item.1)
+                                               )
+                                               .foregroundStyle(themeManager.accentTextColor)
+                                               .lineStyle(
+                                                   StrokeStyle(
+                                                       lineWidth: 2,
+                                                       lineCap: .round,
+                                                       lineJoin: .round
+                                                   )
+                                               )
+                                               
+                                               // MARK: - Area
+                                               
+                                               AreaMark(
+                                                   x: .value("Month", item.0),
+                                                   y: .value("Spend", item.1)
+                                               )
+                                               .foregroundStyle(
+                                                   LinearGradient(
+                                                       colors: [
+                                                           themeManager.accentTextColor.opacity(0.15),
+                                                           themeManager.accentTextColor.opacity(0)
+                                                       ],
+                                                       startPoint: .top,
+                                                       endPoint: .bottom
+                                                   )
+                                               )
+                                           }
+                                           
+                                           // MARK: - Selected Point
+                                           
+                                           if let selectedData = months.first(where: { $0.0 == cuentmonth }) {
+                                               
+                                               PointMark(
+                                                   x: .value("Month", selectedData.0),
+                                                   y: .value("Spend", selectedData.1)
+                                               )
+                                               .foregroundStyle(.white)
+                                               .symbolSize(90)
+                                               
+                                               PointMark(
+                                                   x: .value("Month", selectedData.0),
+                                                   y: .value("Spend", selectedData.1)
+                                               )
+                                               .foregroundStyle(themeManager.accentTextColor)
+                                               .symbolSize(40)
+                                               
+                                               // MARK: - Price Annotation
+                                               
+                                               PointMark(
+                                                   x: .value("Month", selectedData.0),
+                                                   y: .value("Spend", selectedData.1)
+                                               )
+                                               .annotation(position: .top) {
+                                                   
+                                                   Text("\(homeResponse?.spendProjection?.currencySymbol ?? "")\(selectedData.1, specifier: "%.2f")")
+                                                       .font(.jetBrainsSemiBold(11))
+                                                       .foregroundColor(themeManager.accentTextColor)
+                                                       .padding(.horizontal, 8)
+                                                       .padding(.vertical, 4)
+                                               }
+                                           }
+                                       }
+//                                       .chartScrollableAxes(.horizontal)
+//                                       .chartXVisibleDomain(length: 5)
+                                       .chartYAxis(.hidden)
+                                       .chartXAxis {
+                                           
+                                           AxisMarks(values: months.map { $0.0 }) { value in
+                                               
+                                               AxisValueLabel {
+                                                   
+                                                   if let month = value.as(String.self) {
+                                                       
+                                                       Text(month)
+                                                           .font(
+                                                               month == cuentmonth
+                                                               ? .jetBrainsSemiBold(8)
+                                                               : .jetBrainsRegular(8)
+                                                           )
+                                                           .tracking(0.5)
+                                                           .foregroundColor(
+                                                               month == cuentmonth
+                                                               ? themeManager.accentTextColor
+                                                               : Color("TextPrimary_ 0E101A_F4F1FB")
+                                                                   .opacity(0.36)
+                                                           )
+                                                   }
+                                               }
+                                               
+                                               AxisGridLine(stroke: StrokeStyle(lineWidth: 0))
+                                               AxisTick(stroke: StrokeStyle(lineWidth: 0))
+                                           }
+                                       }
+                                       .chartOverlay { proxy in
+                                           
+                                           GeometryReader { geometry in
+                                               
+                                               Rectangle()
+                                                   .fill(Color.clear)
+                                                   .contentShape(Rectangle())
+                                                   .gesture(
+                                                       DragGesture(minimumDistance: 0)
+                                                           .onChanged { value in
+                                                               
+                                                               let origin = geometry[proxy.plotAreaFrame].origin
+                                                               
+                                                               let currentX = value.location.x - origin.x
+                                                               
+                                                               if let month: String = proxy.value(atX: currentX) {
+                                                                   
+                                                                   cuentmonth = month
+                                                               }
+                                                           }
+                                                   )
+
+                                           }
+                                       }
+                                       .frame(height: 160)
+                                       
+//                                       Rectangle()
+//                                           .fill(
+//                                               Color("TextPrimary_ 0E101A_F4F1FB")
+//                                                   .opacity(0.08)
+//                                           )
+//                                           .frame(height: 1)
+//                                           .offset(y: -14)
+                                   }
+                            
                                 
                                 
                             }
@@ -577,6 +906,9 @@ struct HomeView: View {
                                         item: item,
                                         delay: Double(index) * 0.08
                                     )
+                                    .onTapGesture {
+                                        AppIntentRouter.shared.navigate(to: .subscriptionMatchView(fromList: true, subscriptionId: item.id))
+                                    }
                                 }
                             }
                             .padding(18)
@@ -724,11 +1056,19 @@ struct HomeView: View {
                                             )
                                     )
                                     .clipShape(RoundedRectangle(cornerRadius: 24))
+                                    .onTapGesture {
+                                        if let upcomingFirstItem {
+                                            AppIntentRouter.shared.navigate(to: .subscriptionMatchView(fromList: true, subscriptionId: upcomingFirstItem.subscriptionId))
+                                        }
+                                    }
                                     
                                     // MARK: - List
                                     VStack(spacing: 8) {
                                         ForEach(upcomingItems) { item in
                                             UpcomingRow(item: item)
+                                                .onTapGesture {
+                                                    AppIntentRouter.shared.navigate(to: .subscriptionMatchView(fromList: true, subscriptionId: item.subscriptionId))
+                                                }
                                         }
                                     }
                                 }
@@ -753,7 +1093,12 @@ struct HomeView: View {
             if let fullName = commonApiVM.userInfoResponse?.fullName{
                 self.fullName = fullName
             }
-            homeVM.home(input: HomeRequest(userId: Constants.getUserId()))
+            
+            let delay = homeVM.isInitialLoad ? 0.5 : 0.0
+            DispatchQueue.main.asyncAfter(deadline: .now() + delay) {
+                homeVM.home(input: HomeRequest(userId: Constants.getUserId()))
+                homeVM.isInitialLoad = false
+            }
             let now = Date()
             selectedYear    = Calendar.current.component(.year, from: now)
             //            homeYearlyGraphApi()
@@ -910,7 +1255,7 @@ struct HomeView: View {
         for item in nextRenewals
         {
             let itformatted = String(format: "%.2f", item.amount ?? 0.00)
-            upcomingItems.append(UpcomingCharge.init(name: item.serviceName ?? "", subtitle: "in \(item.daysUntil ?? 0)d", amount: itformatted, icon: item.serviceLogo ?? "", planName: item.planName ?? "", billingCycleShortLabel: item.billingCycleShortLabel ?? "", currencySymbol: item.currencySymbol ?? ""))
+            upcomingItems.append(UpcomingCharge.init(subscriptionId: item.id ?? "", name: item.serviceName ?? "", subtitle: "in \(item.daysUntil ?? 0)d", amount: itformatted, icon: item.serviceLogo ?? "", planName: item.planName ?? "", billingCycleShortLabel: item.billingCycleShortLabel ?? "", currencySymbol: item.currencySymbol ?? ""))
         }
         if upcomingItems.count > 0
         {

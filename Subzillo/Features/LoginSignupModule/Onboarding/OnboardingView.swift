@@ -137,7 +137,7 @@ struct OnboardingView: View {
                             tellUsAbtYourselfView()
                         }else{
                             GeometryReader { geometry in
-                                ScrollView(.vertical, showsIndicators: false) {
+                                ScrollView(.vertical) {
                                     VStack(spacing: 0) {
                                         Spacer(minLength: 20)
                                         
@@ -349,7 +349,7 @@ struct OnboardingView: View {
     //MARK: Tell us about yourself view
     func tellUsAbtYourselfView() -> some View {
         ScrollViewReader { proxy in
-            ScrollView(showsIndicators: false) {
+            ScrollView() {
                 VStack(alignment: .leading, spacing: 38) {
                     VStack(alignment: .leading, spacing: 8) {
                         Text("One last thing.")
@@ -444,7 +444,7 @@ struct OnboardingView: View {
         let input = UpdateOnboardingRequest(userId                  : Constants.getUserId(),
                                             preferredCurrency       : selectedCurrency?.code ?? "",
                                             preferredCurrencySymbol : selectedCurrency?.symbol ?? "",
-                                            noofSubscriptions       : (selectedSubscriptions ?? 0),
+                                            noofSubscriptions       : (selectedSubscriptions ?? 0) - 1,
                                             averageMonthlySpend     : (selectedSpending ?? 0),
                                             isoCountryCode          : selectedCountry?.countryCode ?? "")
         if let errorMessage = LoginSignupValidations().validateOnboarding(input: input) {

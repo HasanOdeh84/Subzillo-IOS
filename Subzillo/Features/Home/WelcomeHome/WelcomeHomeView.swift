@@ -235,7 +235,7 @@ struct WelcomeHomeView: View {
                         VStack {
                             
                             Button {
-                                goToAddEntry()
+                                AppIntentRouter.shared.navigate(to: .addSubscriptionsView)
                             } label: {
                                 
                                 Text("I'll do it later →")
@@ -336,7 +336,7 @@ struct WelcomeHomeView: View {
         AppIntentRouter.shared.navigate(to: .manualEntry(isFromEdit: false))
     }
     private func goToAddEntry() {
-        AppIntentRouter.shared.navigate(to: .addSubscriptionsView)
+        Constants.shared.OpenSubscriptionsInAppStore()
     }
     private func goToProfile() {
         AppIntentRouter.shared.navigate(to: .profileTab)

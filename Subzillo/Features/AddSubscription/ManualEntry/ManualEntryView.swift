@@ -632,8 +632,14 @@ struct ManualEntryView: View {
                                             showLoader  : true)
     }
     
+    func getAllPlans() -> [ProviderSubscriptionPlan] {
+        guard let providers = addSubscriptionVM.providerData?.providerSubscriptionPlansList else { return [] }
+        return providers.compactMap { $0.providerSubscriptionPlansList }.flatMap { $0 }
+    }
+
     func filteredPricePlans() -> [ProviderSubscriptionPlan] {
-        guard let plans = addSubscriptionVM.providerData?.providerSubscriptionPlansList else {
+        let plans = getAllPlans()
+        guard !plans.isEmpty else {
             return []
         }
         
@@ -677,10 +683,8 @@ struct ManualEntryView: View {
     //    }
     
     func filteredPlanTypes() -> [PlanTypeItem] {
-        guard
-            let plans = addSubscriptionVM.providerData?.providerSubscriptionPlansList,
-            !plans.isEmpty
-        else {
+        let plans = getAllPlans()
+        guard !plans.isEmpty else {
             return [
                 PlanTypeItem(name: "Free"),
                 PlanTypeItem(name: "Basic")
@@ -700,10 +704,8 @@ struct ManualEntryView: View {
     }
     
     func filteredBillingCycles() -> [String] {
-        guard
-            let plans = addSubscriptionVM.providerData?.providerSubscriptionPlansList,
-            !plans.isEmpty
-        else {
+        let plans = getAllPlans()
+        guard !plans.isEmpty else {
             // Fallback when API returns no plans
             return ["Monthly", "Yearly"]
         }
@@ -821,9 +823,10 @@ struct ManualEntryView: View {
     }
     
     func updateAmount(billing:String){
+        let plans = getAllPlans()
         guard
             !billing.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty,
-            let plans = addSubscriptionVM.providerData?.providerSubscriptionPlansList
+            !plans.isEmpty
         else {
             return
         }
@@ -871,10 +874,11 @@ struct ManualEntryView: View {
     
     private func autoFillDetails(isAmount:Bool = false){
         activeField = nil
+        let plans = getAllPlans()
         if isAmount{
             guard
                 let enteredAmount = Double(amount),
-                let plans = addSubscriptionVM.providerData?.providerSubscriptionPlansList
+                !plans.isEmpty
             else {
                 isAmountError = false
                 return
@@ -894,14 +898,14 @@ struct ManualEntryView: View {
                 updateCurrency(currencyCode     : matchedPlan.currencyCode ?? Constants.shared.currencyCode,
                                currencySymbol   : matchedPlan.currencySymbol ?? Constants.shared.currencySymbol)
             } else {
-                if addSubscriptionVM.providerData?.providerSubscriptionPlansList?.count != 0{
+                if !plans.isEmpty {
                     isAmountError = true
                 }
             }
         }else{
             guard
                 !planType.isEmpty,
-                let plans = addSubscriptionVM.providerData?.providerSubscriptionPlansList
+                !plans.isEmpty
             else {
                 isPlanTypeError = false
                 //For first-time users, the available plan types are Free Plan and Basic Plan. When the user selects either one, the billing cycle should be displayed as Monthly by default.
@@ -939,7 +943,7 @@ struct ManualEntryView: View {
                 if planType == "Free"{
                     amount = "0.0"
                 }
-                if !(addSubscriptionVM.providerData?.providerSubscriptionPlansList?.isEmpty ?? true) {
+                if !plans.isEmpty {
                     isPlanTypeError = true
                 }
             }

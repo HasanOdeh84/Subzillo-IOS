@@ -9,7 +9,7 @@ enum urlType:Int{
     case prod   = 3
 }
 
-let Environment = urlType.qa
+let Environment = urlType.stage
 var baseurl: String {
     switch Environment {
     case .dev:

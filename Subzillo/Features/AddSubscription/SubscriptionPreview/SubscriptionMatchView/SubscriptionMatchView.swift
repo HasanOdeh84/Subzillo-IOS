@@ -322,7 +322,8 @@ struct SubscriptionMatchView: View {
                 if subscriptionsVM.isDeletedSubscription == true {
                     SubscriptionDBManager.shared.deleteSubscription(id: subscriptionData?.id ?? "")
                 }
-                AppIntentRouter.shared.pop()
+//                AppIntentRouter.shared.pop()
+                AppIntentRouter.shared.navigate(to: .subscriptionsListView())
             }
             .sheet(isPresented: $showDeletePopup) {
                 InfoAlertSheet(

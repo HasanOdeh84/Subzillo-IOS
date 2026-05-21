@@ -33,7 +33,8 @@ public struct ListSubscriptionsResponseData: Codable, Hashable{
     let totalPages          : Int?
     let totalCount          : Int?
     let subscriptions       : [SubscriptionListData]?
-    let totalSubscriptions          : Int?
+    let totalSubscriptions                  : Int?
+    let totalHiddenSubscriptions            : Int?
     let currentMonthSpendingAmount          : Float?
     var currentMonthSpendingCurrency        : String?
     var currentMonthSpendingCurrencySymbol        : String?
@@ -43,6 +44,7 @@ struct GetSubscriptionsByMonthRequest: Codable{
     let userId  : String
     let year    : Int
     let month   : Int
+    let categoryId   : String
 }
 
 struct MonthlySubscriptionsResponse: Codable {

@@ -100,7 +100,7 @@ struct LoginView: View {
                         .frame(height: 1)
                     Text("or")
                         .font(.geistMedium(14))
-                        .foregroundColor(.textPrimary0E101AF4F1FB.opacity(0.62))
+                        .foregroundColor(themeManager.textPrimaryLight6_dark62)
                     Rectangle()
                         .fill(themeManager.textPrimaryLight8_white8)
                         .frame(height: 1)

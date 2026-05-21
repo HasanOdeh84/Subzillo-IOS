@@ -122,9 +122,7 @@ struct VoiceCommandView: View {
                             title       : "Cancel",
                             background  : Color.clear,
                             action      : {
-                                audioManager.stopRecording()
-                                audioManager.discardAll()
-                                voiceCommandVM.resetVoiceFlow()
+                                showDiscardPopup = true
                             }
                         )
                         
@@ -196,11 +194,14 @@ struct VoiceCommandView: View {
         .sheet(isPresented: $showDiscardPopup) {
             InfoAlertSheet(
                 onDelegate: {
+//                    audioManager.discardAll()
+                    audioManager.stopRecording()
                     audioManager.discardAll()
+                    voiceCommandVM.resetVoiceFlow()
                 }, title    : "Are you sure you want to discard the recording?",
                 subTitle    : "",
                 imageName   : "infoIcon",
-                buttonIcon  : "deleteIcon",
+                buttonIcon  : "del_red_newSmall",
                 buttonTitle : "Discard"
             )
             .id(UUID())

@@ -17,6 +17,7 @@ class HomeViewModel: ObservableObject {
     @Published var homeResponse             : HomeResponseData?
     @Published var homeYearGraphResponse    : HomeYearlyGraphData?
     @Published var apiError                 : APIError? = nil
+    var isInitialLoad                       : Bool = true
     
     init(router: AppIntentRouter = .shared) {
         self.router = router

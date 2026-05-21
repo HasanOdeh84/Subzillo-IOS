@@ -191,6 +191,8 @@ struct EditAccountBottomSheet: View {
         if currency != ""{
             if let currencies = commonApiVM.currencyResponse {
                 selectedCurrency = currencies.first(where: { $0.code == currency})
+            }else{
+                commonApiVM.getCurrencies()
             }
             if selectedCurrency == nil{
                 selectedCurrency = Currency(id      : nil,

@@ -200,6 +200,7 @@ public struct SubscriptionListData: Codable, Hashable, Identifiable{
     var paymentMethodDataName   : String?
     var viewStatus              : Bool? //for lock and unlock subscriptions
     var renewBtnStatus          : Bool? 
+    var billingCycleShortLabel  : String? 
 }
 
 public struct TopCategoriesData: Codable, Hashable, Identifiable {

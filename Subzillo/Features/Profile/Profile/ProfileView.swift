@@ -364,7 +364,8 @@ struct ProfileView: View {
                 accountTypeVerify   = type
                 profileVM.updateProfile(input: input)
             })
-            .presentationDetents([.height(350)])
+//            .presentationDetents(selectedAccountType == .currency ? [.medium, .large] : [.height(350)])
+            .presentationDetents([.large])
             .presentationDragIndicator(.hidden)
         }
         .sheet(isPresented: $showVerifyOtpSheet) {

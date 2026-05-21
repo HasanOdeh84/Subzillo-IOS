@@ -67,7 +67,30 @@ struct subscriptionListCard: View {
                     .padding(.horizontal,12)
                 }
                 
-                AvatarView(serviceName: subscriptionData.serviceName ?? "", serviceLogo: subscriptionData.serviceLogo ?? "", size: 42, isShadow: false)
+                ZStack(alignment: .bottomTrailing) {
+                    AvatarView(serviceName: subscriptionData.serviceName ?? "", serviceLogo: subscriptionData.serviceLogo ?? "", size: 42, isShadow: false)
+                    
+                    if subscriptionData.nickName ?? "Me" != "Me" && subscriptionData.nickName ?? "Me" != "" {
+                        ZStack {
+                            Circle()
+                                .fill(themeManager.accentGradient)
+                            
+                            Image("person_white")
+                                .resizable()
+                                .scaledToFit()
+                                .foregroundColor(.white)
+                                .font(Font.body.weight(.bold))
+                                .padding(3)
+                        }
+                        .frame(width: 16, height: 16)
+                        .clipShape(Circle())
+                        .overlay(
+                            Circle()
+                                .stroke(Color.bgPrimaryF7F7F90A0612, lineWidth: 2)
+                        )
+                        .offset(x: 4, y: 4)
+                    }
+                }
                 
                 VStack(alignment: .leading,spacing: 4){
                    // Text(isActive ? "Next renewal" : "\(subscriptionData.serviceName ?? "") | \(subscriptionData.subscriptionType ?? "")")
@@ -77,13 +100,13 @@ struct subscriptionListCard: View {
                             .foregroundColor(isActive ? Color.neutral600 : Color("TextPrimary_ 0E101A_F4F1FB"))
                             .multilineTextAlignment(.leading)
                         if subscriptionData.nickName ?? "Me" != "Me" && subscriptionData.nickName ?? "Me" != "" {
-                            Text(" FAMILY ")
+                            Text(" \(subscriptionData.nickName ?? "Me") ") // "Family"
                                 .font(.jetBrainsRegular(8))
-                                .foregroundColor(themeManager.selectedAccent.primaryColor)
-                                .background(themeManager.selectedAccent.primaryColor.opacity(0.133))
+                                .foregroundColor(Color(hex: subscriptionData.color!))
+                                .background(Color(hex: subscriptionData.color!).opacity(0.133))
                                 .cornerRadius(4)
                                 .padding(.horizontal, 6)
-                                .padding(.vertical, 2)
+                                .padding(.vertical, 6)
                                 .multilineTextAlignment(.leading)
                         }
                     }
@@ -132,11 +155,21 @@ struct subscriptionListCard: View {
                 Spacer()
                 
                 VStack(alignment: .trailing,spacing: 8){
-                    Text("\(subscriptionData.currencySymbol ?? "")\(String(describing: subscriptionData.amount ?? 0.0))")
-                        .font(.geistSemiBold(16))
-                        .foregroundColor(isActive ? .navyBlueCTA700White : Color("TextPrimary_ 0E101A_F4F1FB"))
+                    if subscriptionData.billingCycle == "free"{
+                        Text("Free")
+                            .font(.geistSemiBold(14))
+                            .foregroundColor(
+                                Color.successLight0EA870
+                            )
+                            .lineLimit(1)
+                    }else{
+                        Text("\(subscriptionData.currencySymbol ?? "")\(String(describing: subscriptionData.amount ?? 0.0))")
+                            .font(.geistSemiBold(16))
+                            .foregroundColor(isActive ? .navyBlueCTA700White : Color("TextPrimary_ 0E101A_F4F1FB"))
+                    }
                     
-                    Text("/\((subscriptionData.billingCycle ?? "").billingCycleShortForm)")
+//                    Text("/\((subscriptionData.billingCycle ?? "").billingCycleShortForm)")
+                    Text("\(subscriptionData.billingCycleShortLabel ?? "")")
                         .font(.jetBrainsRegular(10))
                         .foregroundColor(Color("TextPrimary_ 0E101A_F4F1FB").opacity(0.36))
                     
@@ -207,7 +240,7 @@ struct subscriptionListCard: View {
         .cornerRadius(18)
         .overlay(
             RoundedRectangle(cornerRadius: 18)
-                .stroke(Color.textPrimary0E101AF4F1FB.opacity(0.08), lineWidth: 1)
+                .stroke(colorScheme == .light ? .E_2_E_8_F_0 : Color.E_2_E_8_F_0.opacity(0.11), lineWidth: 1)
         )
         .onLongPressGesture {
             if subscriptionData.viewStatus != false {

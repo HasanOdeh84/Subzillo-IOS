@@ -233,7 +233,7 @@ struct SubscriptionPreviewView: View {
                                                                    detailType   : ReviewExtractedType.amount,
                                                                    confidence   : subscriptionData?.amountConfidence ?? 0.0,
                                                                    extractedData: subscriptionData,
-                                                                   providerPlansList : manualEntryVM.providerData?.providerSubscriptionPlansList)
+                                                                   providerPlansList : getAllPlans())
                                         .id(ReviewExtractedType.amount)
                                         .presentationDragIndicator(.hidden)
                                         .presentationDetents([.height(400)])                                        }
@@ -349,7 +349,7 @@ struct SubscriptionPreviewView: View {
                                                            detailType           : ReviewExtractedType.billingCycle,
                                                            confidence           : subscriptionData?.billingCycleConfidence ?? 0.0,
                                                            extractedData        : subscriptionData,
-                                                           providerPlansList    : manualEntryVM.providerData?.providerSubscriptionPlansList)
+                                                           providerPlansList    : getAllPlans())
                                 .id(ReviewExtractedType.billingCycle)
                                 .presentationDragIndicator(.hidden)
                                 .presentationDetents([.height(400)])
@@ -473,6 +473,7 @@ struct SubscriptionPreviewView: View {
                 .frame(maxWidth: .infinity)
                 .padding(.horizontal, 6)
                 .padding(.vertical, 24)
+                .padding(.bottom, 120)
             }
         }
         .padding(.top, 10)
@@ -548,7 +549,7 @@ struct SubscriptionPreviewView: View {
                                        detailType           : ReviewExtractedType.planType,
                                        confidence           : subscriptionData?.subscriptionTypeConfidence ?? 0.0,
                                        extractedData        : subscriptionData,
-                                       providerPlansList    : manualEntryVM.providerData?.providerSubscriptionPlansList)
+                                       providerPlansList    : getAllPlans())
             .id(ReviewExtractedType.planType)
             .presentationDragIndicator(.hidden)
             .presentationDetents([.height(400)])
@@ -721,6 +722,11 @@ struct SubscriptionPreviewView: View {
                                                                         currencyCode    : subscriptionData?.currency ?? "" == "" ? Constants.shared.currencyCode : subscriptionData?.currency ?? ""))
     }
     
+    func getAllPlans() -> [ProviderSubscriptionPlan] {
+        guard let providers = manualEntryVM.providerData?.providerSubscriptionPlansList else { return [] }
+        return providers.compactMap { $0.providerSubscriptionPlansList }.flatMap { $0 }
+    }
+    
     private func updateProviderData() {
         if isServiceChanged{
             isServiceChanged = false
@@ -754,7 +760,7 @@ struct SubscriptionPreviewView: View {
     
     private func validateAmount() {
         guard let enteredAmount = subscriptionData?.amount,
-              let plans = manualEntryVM.providerData?.providerSubscriptionPlansList,
+              let plans = Optional(getAllPlans()),
               !plans.isEmpty else {
             isAmountError = false
             return
