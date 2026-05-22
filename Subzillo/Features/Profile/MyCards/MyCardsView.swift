@@ -160,8 +160,8 @@ struct MyCardsView: View {
                     deleteCard()
                 }, title    : "Are you sure you want to delete this card?\n This card will be permanently removed.",
                 subTitle    :"",
-                imageName   : "del_red_big",
-                buttonIcon  : "deleteIcon",
+                imageName   : "del_red_new",
+                buttonIcon  : "del_red_newSmall",
                 buttonTitle : "Delete",
                 imageSize   : 70
             )

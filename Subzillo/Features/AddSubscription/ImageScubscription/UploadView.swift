@@ -335,7 +335,7 @@ struct UploadView: View {
                 if pickerSource == .camera  {
                     // Directly upload for camera or chatbot, skip preview
                     uploadImage()
-                    selectedImage = nil // Reset so gallery can still work after
+                    //selectedImage = nil // Reset so gallery can still work after
                 } else {
                     showPreview = true
                 }
@@ -346,7 +346,7 @@ struct UploadView: View {
                 ImagePreviewView(image: image, onConfirm: {
                     uploadImage()
                 }, onCancel: {
-                    selectedImage = nil
+                    //selectedImage = nil
                 })
                 //                    .presentationDetents([.fraction(0.8), .large])
                 .background(Color.clear)
@@ -395,12 +395,11 @@ struct UploadView: View {
         }
         if showLocalLoader {
             //ScanningImageLoaderView()
-            
             ZStack {
                
                 
                 // Fullscreen Loader
-                ScanningImageLoaderView()
+                ScanningImageLoaderView(selectedImage:selectedImage)
                     .frame(
                         maxWidth: .infinity,
                         maxHeight: .infinity
@@ -411,6 +410,8 @@ struct UploadView: View {
            .transition(.opacity)
            .zIndex(100)
             
+            
+            //selectedImage = nil
             /*ZStack {
                 // Invisible shield to block interactions while loader is active
                 Color.black.opacity(0.001)

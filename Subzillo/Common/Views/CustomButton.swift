@@ -75,7 +75,7 @@ struct CustomButton: View {
                 : AnyView(themeManager.accentGradient)
             )*/
             
-            .cornerRadius(12)
+            .cornerRadius(height/2)
             .shadow(color: themeManager.accentShadowColor, radius: 15, x: 0, y: 10)
         }
         .buttonStyle(InteractiveButtonStyle())

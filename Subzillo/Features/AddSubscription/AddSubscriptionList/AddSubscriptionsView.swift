@@ -222,9 +222,7 @@ struct AddSubscriptionsView: View {
         }
     }
     private func clickOnUploadScreenshot() {
-        
-        
-        Constants.FeatureConfig.performS4Action {
+       Constants.FeatureConfig.performS4Action {
             if commonVM.userInfoResponse?.remainingSubscriptionLimit == 0 {
                 SheetManager.shared.isUpgradeSheetVisible = true
             } else {

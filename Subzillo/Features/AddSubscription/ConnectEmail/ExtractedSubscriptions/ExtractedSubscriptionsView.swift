@@ -17,22 +17,25 @@ struct ExtractedSubscriptionsView: View {
     @State var subscriptions                    = [SubscriptionData]()
     @State var fromEmailSyncScreen              : Bool = false
     var integrationId                           : String = ""
-    @State private var selectedSegment          : Segment? = .first
     @State private var showRenewSheet           = false
     @State private var selectedSubscription     : SubscriptionData?
     @EnvironmentObject var router               : AppIntentRouter
     @State private var hasAppeared              : Bool = false
     @State private var needsRefresh             : Bool = false
+    @EnvironmentObject var themeManager         : ThemeManager
+    @Environment(\.colorScheme) var colorScheme
     
-    private var filteredSubscriptions: [SubscriptionData] {
+    private var activeSubscriptions: [SubscriptionData] {
         viewModel.subscriptions.filter { sub in
-            if sub.isExpiredLocally == true { return false } // Don't show in active/inactive filter if manually marked as Expired? Wait, user said "update that subscription card with Expired tag without highlight the card and below text".
-            let isInactive = Constants.shared.isSubscriptionExpired(nextPaymentDate: sub.nextPaymentDate ?? "")
-            if selectedSegment == .first {
-                return !isInactive // Active
-            } else {
-                return isInactive // Inactive
-            }
+            if sub.isExpiredLocally == true { return false }
+            return !Constants.shared.isSubscriptionExpired(nextPaymentDate: sub.nextPaymentDate ?? "")
+        }
+    }
+    
+    private var inactiveSubscriptions: [SubscriptionData] {
+        viewModel.subscriptions.filter { sub in
+            if sub.isExpiredLocally == true { return false }
+            return Constants.shared.isSubscriptionExpired(nextPaymentDate: sub.nextPaymentDate ?? "")
         }
     }
     
@@ -40,91 +43,51 @@ struct ExtractedSubscriptionsView: View {
         VStack(alignment: .leading, spacing: 0) {
             // MARK: - Header
             HStack(spacing: 8) {
-                Button(action: {
+                
+                CircleBackButton {
                     AppIntentRouter.shared.pop()
-                }) {
-                    Image("back_gray")
                 }
                 
-                Text("Extracted Subscriptions")
-                    .font(.appRegular(24))
-                    .foregroundColor(Color.neutralMain700)
+                //                Spacer()
+                //
+                //                Text("\(viewModel.subscriptions.count) found")
+                //                    .font(.geistSemiBold(16))
+                //                    .foregroundColor(Color("TextPrimary_ 0E101A_F4F1FB"))
                 
                 Spacer()
+                
             }
-            .padding(.top, 20)
+            .padding(.top, 10)
+            .overlay(
+                Text("\(viewModel.subscriptions.count) found")
+                    .font(.geistSemiBold(16))
+                    .foregroundColor(Color("TextPrimary_ 0E101A_F4F1FB"))
+                    .padding(.top, 10)
+            )
             
-            // MARK: - Quick Navigation & Skip All
-            if viewModel.subscriptions.count != 0 {
-                HStack {
-                    Text("Quick Navigation")
-                        .font(.appRegular(18))
-                        .foregroundColor(Color.neutralMain700)
-                    
-                    Spacer()
-                    
-                    Button(action: {
-                        AppIntentRouter.shared.pop()
-                    }) {
-                        Text("Skip all")
-                            .font(.appBold(16))
-                            .foregroundColor(Color.navyBlueCTA700)
-                    }
+            // MARK: - Title
+            VStack(alignment: .leading, spacing: 8) {
+                HStack(spacing: 6) {
+                    Text("Here's what Subzi")
+                        .font(.geistSemiBold(26))
+                        .foregroundColor(Color("TextPrimary_ 0E101A_F4F1FB"))
+                    Text("found")
+                        .font(.appSemiBoldItalic(26))
+//                        .italic()
+                        .foregroundStyle(
+                            themeManager.gradient(style: .vertical)
+                        )
                 }
-                .padding(.top, 20)
+                
+                Text("Validated against our catalogue. Confirm the active ones; skip anything expired or already cancelled.")
+                    .font(.geistMedium(12))
+                    .foregroundColor(themeManager.textPrimaryLight6_dark62)
+                    .lineSpacing(4)
             }
+            .padding(.top, 24)
             
             // MARK: - Subscriptions List
-            if viewModel.subscriptions.count != 0 {
-                ScrollView {
-                    //                if viewModel.subscriptions.count != 0 {
-                    VStack(spacing: 16) {
-                        ForEach(viewModel.subscriptions.indices, id: \.self) { index in
-                            let sub = viewModel.subscriptions[index]
-                            HStack(spacing: 12) {
-                                // Checkbox OUTSIDE
-                                Button(action: {
-                                    viewModel.toggleSelection(for: sub.id ?? "")
-                                }) {
-                                    Image(viewModel.selectedIds.contains(sub.id ?? "") ? "Checkmark" : "UnCheckmark")
-                                        .resizable()
-                                        .frame(width: 24, height: 24)
-                                }
-                                
-                                // Individual Card
-                                SubscriptionRowEmail(
-                                    subscription: sub,
-                                    isSelected: viewModel.selectedIds.contains(sub.id ?? ""),
-                                    onToggle: {
-                                        viewModel.toggleSelection(for: sub.id ?? "")
-                                    },
-                                    onRenew: {
-                                        selectedSubscription = sub
-                                        router.navigate(to: .subscriptionPreviewView(
-                                            subscriptionsData   : [sub],
-                                            content             : "",
-                                            isFromImage         : false,
-                                            isFromEmail         : true,
-                                            audioUrl            : nil,
-                                            fromEmailSync       : true,
-                                            isRenew             : true
-                                        ))
-                                    },
-                                    onExpire: {
-                                        if let index = viewModel.subscriptions.firstIndex(where: { $0.id == sub.id }) {
-                                            viewModel.subscriptions[index].isExpiredLocally = true
-                                            viewModel.subscriptions[index].isRenewedLocally = false
-                                        }
-                                    }
-                                )
-                            }
-                            .padding(.horizontal, 2)
-                        }
-                    }
-                    .padding(.top, 12)
-                }
-                .padding(.top, 10)
-            } else {
+            if viewModel.subscriptions.isEmpty {
                 VStack(spacing: 16) {
                     Spacer()
                     Image("noSubs")
@@ -132,54 +95,208 @@ struct ExtractedSubscriptionsView: View {
                     
                     Text("No subscriptions found")
                         .font(.appBold(16))
-                        .foregroundColor(Color.neutral800)
+                        .foregroundColor(Color("TextPrimary_ 0E101A_F4F1FB"))
                     Spacer()
                 }
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 40)
-            }
-            
-            // MARK: - Action Buttons
-            if viewModel.subscriptions.count != 0 {
-                if viewModel.showActionButtons {
-                    HStack(spacing: 16) {
-                        Button(action: {
-                            viewModel.showDeletePopup = true
-                        }) {
-                            Text("Delete")
-                                .font(.appBold(18))
-                                .foregroundColor(Color("redColor"))
-                                .frame(maxWidth: .infinity)
-                                .frame(height: 50)
-                                .background(Color.systemError)
-                                .cornerRadius(10)
-                                .overlay(
-                                    RoundedRectangle(cornerRadius: 10)
-                                        .stroke(Color.red, lineWidth: 1)
-                                )
+            } else {
+                ScrollView {
+                    VStack(alignment: .leading, spacing: 24) {
+                        
+                        // MARK: - Active Section
+                        if !activeSubscriptions.isEmpty {
+                            VStack(alignment: .leading, spacing: 16) {
+                                HStack(spacing: 6) {
+                                    Circle()
+                                        .fill(Color("Success_0EA870_5CE4A8"))
+                                        .frame(width: 6, height: 6)
+                                        .shadow(color: .success0EA8705CE4A8.opacity(0.80), radius: 4, x: 0, y: 0)
+                                    
+                                    Text("ACTIVE • \(activeSubscriptions.count)")// recent receipts")
+                                        .font(.jetBrainsSemiBold(10))
+                                        .tracking(1.5)
+                                        .foregroundColor(Color("TextPrimary_ 0E101A_F4F1FB"))
+                                    
+                                    //                                    Text("•")
+                                    //                                        .font(.system(size: 10))
+                                    //                                        .foregroundColor(Color("TextPrimary_ 0E101A_F4F1FB").opacity(0.6))
+                                    //
+                                    //                                    Text("\(activeSubscriptions.count) recent receipts")
+                                    //                                        .font(.jetBrainsRegular(11))
+                                    //                                        .foregroundColor(Color("TextPrimary_ 0E101A_F4F1FB").opacity(0.6))
+                                    
+                                    Spacer()
+                                    
+                                    let allSelected = viewModel.selectedIds.count == viewModel.subscriptions.count
+                                    
+                                    Button(action: {
+                                        //                                        let allSelected = activeSubscriptions.allSatisfy { viewModel.selectedIds.contains($0.id ?? "") }
+                                        if allSelected {
+                                            //                                            for sub in activeSubscriptions {
+                                            //                                                if let id = sub.id { viewModel.selectedIds.remove(id) }
+                                            //                                            }
+                                            viewModel.selectedIds.removeAll()
+                                        } else {
+                                            //                                            for sub in activeSubscriptions {
+                                            //                                                if let id = sub.id { viewModel.selectedIds.insert(id) }
+                                            //                                            }
+                                            for sub in viewModel.subscriptions {
+                                                if let id = sub.id {
+                                                    viewModel.selectedIds.insert(id)
+                                                }
+                                            }
+                                        }
+                                    }) {
+                                        Text(allSelected ? "Unselect all" : "Select all")
+                                            .font(.geistBold(12))
+                                            .foregroundStyle(
+                                                themeManager.accentGradient
+                                            )
+                                    }
+                                }
+                                
+                                VStack(spacing: 12) {
+                                    ForEach(activeSubscriptions, id: \.id) { sub in
+                                        SubscriptionRowEmail(
+                                            subscription    : sub,
+                                            isSelected      : viewModel.selectedIds.contains(sub.id ?? ""),
+                                            isActive        : true,
+                                            onToggle        : {
+                                                viewModel.toggleSelection(for: sub.id ?? "")
+                                            },
+                                            onRenew         : {
+                                                selectedSubscription = sub
+                                                router.navigate(to: .subscriptionPreviewView(
+                                                    subscriptionsData   : [sub],
+                                                    content             : "",
+                                                    isFromImage         : false,
+                                                    isFromEmail         : true,
+                                                    audioUrl            : nil,
+                                                    fromEmailSync       : true,
+                                                    isRenew             : true
+                                                ))
+                                            },
+                                            onExpire        : {
+                                                if let index = viewModel.subscriptions.firstIndex(where: { $0.id == sub.id }) {
+                                                    viewModel.subscriptions[index].isExpiredLocally = true
+                                                    viewModel.subscriptions[index].isRenewedLocally = false
+                                                }
+                                            }
+                                        )
+                                    }
+                                }
+                            }
                         }
                         
-                        Button(action: {
-                            hasAppeared = false
-                            viewModel.continueAction()
-                        }) {
-                            Text("Continue")
-                                .font(.appBold(18))
-                                .foregroundColor(.white)
-                                .frame(maxWidth: .infinity)
-                                .frame(height: 50)
-                                .background(Color.navyBlueCTA700)
-                                .cornerRadius(10)
+                        // MARK: - Maybe Expired Section
+                        if !inactiveSubscriptions.isEmpty {
+                            VStack(alignment: .leading, spacing: 16) {
+                                HStack(spacing: 6) {
+                                    
+                                    Circle()
+                                        .fill(Color.warningAnyFFCB5C)
+                                        .frame(width: 6, height: 6)
+                                        .shadow(color: .warningAnyFFCB5C.opacity(0.80), radius: 4, x: 0, y: 0)
+                                    
+                                    //                                    Circle().fill(Color(hex: "#FFC233")).frame(width: 6, height: 6) // Yellow/Orange
+                                    Text("MAYBE EXPIRED • \(inactiveSubscriptions.count)")// no receipt in 4+ months")
+                                        .font(.jetBrainsSemiBold(10))
+                                        .tracking(1.5)
+                                        .foregroundColor(Color("TextPrimary_ 0E101A_F4F1FB"))
+                                    
+                                    //                                    Text("•")
+                                    //                                        .font(.system(size: 10))
+                                    //                                        .foregroundColor(Color("TextPrimary_ 0E101A_F4F1FB").opacity(0.6))
+                                    //
+                                    //                                    Text("\(inactiveSubscriptions.count) no receipt in 4+ months")
+                                    //                                        .font(.jetBrainsRegular(11))
+                                    //                                        .foregroundColor(Color("TextPrimary_ 0E101A_F4F1FB").opacity(0.6))
+                                    
+                                    Spacer()
+                                    
+                                    let allSelected = viewModel.selectedIds.count == viewModel.subscriptions.count
+                                    
+                                    Button(action: {
+                                        //                                        let allSelected = activeSubscriptions.allSatisfy { viewModel.selectedIds.contains($0.id ?? "") }
+                                        if allSelected {
+                                            //                                            for sub in activeSubscriptions {
+                                            //                                                if let id = sub.id { viewModel.selectedIds.remove(id) }
+                                            //                                            }
+                                            viewModel.selectedIds.removeAll()
+                                        } else {
+                                            //                                            for sub in activeSubscriptions {
+                                            //                                                if let id = sub.id { viewModel.selectedIds.insert(id) }
+                                            //                                            }
+                                            for sub in viewModel.subscriptions {
+                                                if let id = sub.id {
+                                                    viewModel.selectedIds.insert(id)
+                                                }
+                                            }
+                                        }
+                                    }) {
+                                        Text(allSelected ? "Unselect all" : "Select all")
+                                            .font(.geistBold(12))
+                                            .foregroundStyle(
+                                                themeManager.accentGradient
+                                            )
+                                    }
+                                }
+                                
+                                VStack(spacing: 12) {
+                                    ForEach(inactiveSubscriptions, id: \.id) { sub in
+                                        SubscriptionRowEmail(
+                                            subscription    : sub,
+                                            isSelected      : viewModel.selectedIds.contains(sub.id ?? ""),
+                                            isActive        : false,
+                                            onToggle        : {
+                                                viewModel.toggleSelection(for: sub.id ?? "")
+                                            },
+                                            onRenew         : {
+                                                selectedSubscription = sub
+                                                router.navigate(to: .subscriptionPreviewView(
+                                                    subscriptionsData   : [sub],
+                                                    content             : "",
+                                                    isFromImage         : false,
+                                                    isFromEmail         : true,
+                                                    audioUrl            : nil,
+                                                    fromEmailSync       : true,
+                                                    isRenew             : true
+                                                ))
+                                            },
+                                            onExpire        : {
+                                                if let index = viewModel.subscriptions.firstIndex(where: { $0.id == sub.id }) {
+                                                    viewModel.subscriptions[index].isExpiredLocally = true
+                                                    viewModel.subscriptions[index].isRenewedLocally = false
+                                                }
+                                            }
+                                        )
+                                    }
+                                }
+                            }
                         }
+                        
                     }
-                    .padding(.bottom, 20)
-                    .padding(.top, 20)
+                    .padding(.top, 24)
                 }
+                
+                if viewModel.selectedIds.count != 0{
+                    GradientBgButton(
+                        title       : "Add \(viewModel.selectedIds.count)",
+                        isSolid     : true,
+                        showChevron : true
+                    ) {
+                        hasAppeared = false
+                        viewModel.continueAction()
+                    }
+                }
+                
+                Spacer(minLength: 120)
             }
         }
         .padding(.horizontal, 20)
         .navigationBarBackButtonHidden()
-        .background(Color.neutralBg100)
+        .applyAppBackground()
         .sheet(isPresented: $viewModel.showDeletePopup , onDismiss: {
             // onDismiss logic
         }) {
@@ -188,8 +305,8 @@ struct ExtractedSubscriptionsView: View {
                     viewModel.deleteSelected(fromEmailSyncScreen: fromEmailSyncScreen)
                 }, title    : "Are you sure you want to delete the subscriptions?\nData will be permanently deleted",
                 subTitle    :"",
-                imageName   : "del_red_big",
-                buttonIcon  : "deleteIcon",
+                imageName   : "del_red_new",
+                buttonIcon  : "del_red_newSmall",
                 buttonTitle : "Delete",
                 imageSize   : 70
             )
@@ -202,22 +319,33 @@ struct ExtractedSubscriptionsView: View {
             .presentationDetents([.height(deleteSheetHeight)])
         }
         .onAppear {
-//            if !hasAppeared {
-//                hasAppeared = true
-//                if fromEmailSyncScreen {
-//                    
-//                } else {
-//                    self.viewModel.subscriptions = subscriptions
-//                }
-//                self.viewModel.integrationId = integrationId
-//                self.viewModel.getEmailSubscriptionsList()
-//            } else {
-//                // If re-appearing, refresh the list
-//                self.viewModel.getEmailSubscriptionsList()
-//            }
+            //            if !hasAppeared {
+            //                hasAppeared = true
+            //                if fromEmailSyncScreen {
+            //
+            //                } else {
+            //                    self.viewModel.subscriptions = subscriptions
+            //                }
+            //                self.viewModel.integrationId = integrationId
+            //                self.viewModel.getEmailSubscriptionsList()
+            //            } else {
+            //                // If re-appearing, refresh the list
+            //                self.viewModel.getEmailSubscriptionsList()
+            //            }
             self.viewModel.subscriptions = subscriptions
             self.viewModel.integrationId = integrationId
             self.viewModel.getEmailSubscriptionsList()
+            
+            //            // Auto select active ones initially like in mock
+            //            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+            //                if viewModel.selectedIds.isEmpty {
+            //                    for sub in activeSubscriptions {
+            //                        if let id = sub.id {
+            //                            viewModel.selectedIds.insert(id)
+            //                        }
+            //                    }
+            //                }
+            //            }
         }
         .onReceive(NotificationCenter.default.publisher(for: .refreshExtractedSubs)) { _ in
             self.viewModel.getEmailSubscriptionsList()
@@ -225,82 +353,105 @@ struct ExtractedSubscriptionsView: View {
     }
 }
 
-// MARK: - row component
+// MARK: - Row Component
 struct SubscriptionRowEmail: View {
     let subscription    : SubscriptionData
     let isSelected      : Bool
+    let isActive        : Bool
     let onToggle        : () -> Void
     var onRenew         : () -> Void = {}
     var onExpire        : () -> Void = {}
+    @EnvironmentObject var themeManager: ThemeManager
+    @Environment(\.colorScheme) var colorScheme
     
     var body: some View {
-        let isInactive = Constants.shared.isSubscriptionExpired(nextPaymentDate: subscription.nextPaymentDate ?? "") && (subscription.isExpiredLocally != true)
-        let isExpired = subscription.isExpiredLocally == true
-        
-        VStack(alignment: .leading, spacing: 12) {
-            HStack(spacing: 8) {
-                Text(subscription.serviceName ?? "Unknown")
-                    .font(.appRegular(14))
-                    .foregroundColor(Color.neutralMain700)
+        Button(action: onToggle) {
+            HStack(spacing: 12) {
+                //                ZStack {
+                //                    RoundedRectangle(cornerRadius: 12)
+                //                        .fill(colorScheme == .dark ? Color.white.opacity(0.1) : Color.gray.opacity(0.1))
+                //                        .frame(width: 44, height: 44)
+                //
+                //                    if let logo = subscription.serviceLogo, !logo.isEmpty, let url = URL(string: logo) {
+                //                        AsyncImage(url: url) { image in
+                //                            image.resizable().scaledToFill()
+                //                        } placeholder: {
+                //                            Text(String(subscription.serviceName?.first ?? "U"))
+                //                                .font(.appBold(20))
+                //                                .foregroundColor(Color("TextPrimary_ 0E101A_F4F1FB"))
+                //                        }
+                //                        .frame(width: 24, height: 24)
+                //                        .clipShape(RoundedRectangle(cornerRadius: 6))
+                //                    } else {
+                //                        // Fallback letter
+                //                        Text(String(subscription.serviceName?.first ?? "U"))
+                //                            .font(.appBold(20))
+                //                            .foregroundColor(Color("TextPrimary_ 0E101A_F4F1FB"))
+                //                    }
+                //                }
                 
-                if isExpired {
-                    Text("Expired")
-                        .font(.appBold(14))
-                        .foregroundColor(.disCardRed)
-                } else {
-                    Text(isInactive ? "" : "Active")
-                        .font(.appBold(14))
-                        .foregroundColor(isInactive ? .disCardRed : .greenLG)
+                AvatarView(serviceName  : subscription.serviceName ?? "",
+                           serviceLogo  : subscription.serviceLogo ?? "",
+                           size         : 38,
+                           isShadow     : false)
+                
+                VStack(alignment: .leading, spacing: 4) {
+                    HStack(spacing: 8) {
+                        Text(subscription.serviceName ?? "Unknown")
+                            .font(.geistSemiBold(13))
+                            .foregroundColor(Color("TextPrimary_ 0E101A_F4F1FB"))
+                        
+                        // Tag
+                        Text(isActive ? "ACTIVE" : "MAYBE EXPIRED")
+                            .font(.jetBrainsMedium(9))
+                            .tracking(1)
+                            .padding(.horizontal, 6)
+                            .padding(.vertical, 3)
+                            .background(isActive ? Color("Success_0EA870_5CE4A8").opacity(0.133) : Color.warningAnyFFCB5C.opacity(0.133))
+                            .foregroundColor(isActive ? Color("Success_0EA870_5CE4A8") : Color.warningAnyFFCB5C)
+                            .cornerRadius(4)
+                    }
+                    
+                    // Description
+                    let plan = subscription.subscriptionType ?? subscription.categoryName ?? "Standard"
+                    let priceText = "\(subscription.currencySymbol ?? Constants.shared.currencyCode)\(String(format: "%.2f", subscription.amount ?? 0.0))\(subscription.billingCycleShortLabel ?? "/mo")"
+                    Text("\(plan) • \(priceText)")
+                        .font(.jetBrainsBold(10))
+                        .foregroundColor(themeManager.textPrimaryLight6_dark62)
                 }
                 
                 Spacer()
                 
-                // Amount and Currency
-                Text("\(subscription.currencySymbol ?? Constants.shared.currencyCode) \(String(format: "%.2f", subscription.amount ?? 0.0))")
-                    .font(.appRegular(14))
-                    .foregroundColor(Color.neutralMain700)
-            }
-            
-            if isInactive {
-                VStack(alignment: .leading, spacing: 12) {
-                    Text("This service is currently inactive. Please choose an action: renew or expire.")
-                        .font(.appRegular(12))
-                        .foregroundColor(.disCardRed)
-                        .padding(.leading, 0)
-                    
-                    HStack(spacing: 16) {
-                        Button(action: onRenew) {
-                            Text("Renew")
-                                .font(.appBold(14))
-                                .foregroundColor(.white)
-                                .frame(width: 100, height: 36)
-                                .background(Color.navyBlueCTA700)
-                                .cornerRadius(8)
-                        }
-                        
-                        Button(action: onExpire) {
-                            Text("Expire")
-                                .font(.appBold(14))
-                                .foregroundColor(.disCardRed)
-                                .frame(width: 100, height: 36)
-                                .background(Color.white)
-                                .cornerRadius(8)
-                                .overlay(
-                                    RoundedRectangle(cornerRadius: 8)
-                                        .stroke(Color.disCardRed, lineWidth: 1)
-                                )
-                        }
+                // Checkbox
+                ZStack {
+                    RoundedRectangle(cornerRadius: 7)
+                        .fill(isSelected ? themeManager.accentGradient : LinearGradient(colors: [Color.clear], startPoint: .leading, endPoint: .trailing))
+                        .frame(width: 24, height: 24)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 7)
+                                .stroke(isSelected ? Color.clear : themeManager.textPrimaryLight14_white14, lineWidth: 1.5)
+                        )
+                        .shadow(color: themeManager.accentTextColor, radius: 4,x: 0,y: 0)
+                    if isSelected {
+                        Image(systemName: "checkmark")
+                            .font(.system(size: 12, weight: .bold))
+                            .foregroundColor(.white)
                     }
                 }
             }
+            .padding(.vertical, 16)
+            .padding(.horizontal, 16)
+            .background(
+                RoundedRectangle(cornerRadius: 16)
+                    .fill(colorScheme == .dark ? Color.clear : Color.white)
+            )
+            .overlay(
+                RoundedRectangle(cornerRadius: 16)
+                    .stroke(themeManager.textPrimaryLight14_white14, lineWidth: 1)
+            )
+            .opacity(isActive || isSelected ? 1.0 : 0.6)
         }
-        .padding(.vertical, 16)
-        .padding(.horizontal, 16)
-        .background(Color.white)
-        .cornerRadius(12)
-        .overlay(
-            RoundedRectangle(cornerRadius: 12)
-                .stroke(isInactive ? Color.disCardRed : Color.neutral300Border, lineWidth: 1)
-        )
+        .buttonStyle(PlainButtonStyle())
     }
 }
+

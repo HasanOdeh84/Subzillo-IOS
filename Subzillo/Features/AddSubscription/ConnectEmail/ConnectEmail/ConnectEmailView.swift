@@ -279,8 +279,8 @@ struct ConnectEmailView: View {
                     deleteEmailAction()
                 }, title    : "Are you sure you want to delete the mail \(selectedEmail?.email ?? "")",
                 subTitle    : "",
-                imageName   : "del_red_big",
-                buttonIcon  : "deleteIcon",
+                imageName   : "del_red_new",
+                buttonIcon  : "del_red_newSmall",
                 buttonTitle : "Delete",
                 imageSize   : 70
             )

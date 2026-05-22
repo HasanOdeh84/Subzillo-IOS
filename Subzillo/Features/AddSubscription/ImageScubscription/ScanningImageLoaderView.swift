@@ -8,6 +8,7 @@ import SwiftUI
 
 struct ScanningImageLoaderView: View {
     
+    var selectedImage            : UIImage? = nil
     @State private var parseP: CGFloat = 0
     @EnvironmentObject var themeManager         : ThemeManager
     @Environment(\.colorScheme) var colorScheme
@@ -16,8 +17,6 @@ struct ScanningImageLoaderView: View {
         
         ZStack {
             
-            Color.white
-                .ignoresSafeArea()
             
             VStack(spacing: 0) {
                 
@@ -93,8 +92,12 @@ struct ScanningImageLoaderView: View {
                         
                         VStack(alignment: .leading,
                                spacing: 10) {
-                            
-                            Text("SMS · Your Bank")
+                            Image(uiImage: selectedImage!)
+                                .resizable()
+                                .frame(width: 260,
+                                        height: 325)
+                                .cornerRadius(10)
+                            /*Text("SMS · Your Bank")
                                 .font(
                                     .system(size: 10,
                                             weight: .medium,
@@ -139,7 +142,7 @@ struct ScanningImageLoaderView: View {
                                 )
                                 .foregroundColor(
                                     Color.black.opacity(0.55)
-                                )
+                                )*/
                         }
                         .padding(16)
                         

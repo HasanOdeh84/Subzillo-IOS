@@ -122,6 +122,49 @@ struct InnerHeightPreferenceKey: PreferenceKey {
     }
 }*/
 struct InteractiveButtonStyle: ButtonStyle {
+    
+    func makeBody(configuration: Configuration) -> some View {
+        InteractiveButtonWrapper(configuration: configuration)
+    }
+}
+
+private struct InteractiveButtonWrapper: View {
+    
+    let configuration: ButtonStyle.Configuration
+    
+    @State private var pressed = false
+    
+    var body: some View {
+        
+        configuration.label
+            .scaleEffect(pressed ? 0.92 : 1.0)
+            .animation(
+                .interactiveSpring(
+                    response: 0.2,
+                    dampingFraction: 0.7
+                ),
+                value: pressed
+            )
+            .onChange(of: configuration.isPressed) { isPressed in
+                
+                if isPressed {
+                    
+                    pressed = true
+                    
+                    UIImpactFeedbackGenerator(style: .medium)
+                        .impactOccurred()
+                    
+                } else {
+                    
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.08) {
+                        pressed = false
+                    }
+                }
+            }
+    }
+}
+/*
+struct InteractiveButtonStyle: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
         InteractiveButtonWrapper(configuration: configuration)
     }
@@ -164,6 +207,7 @@ private struct InteractiveButtonWrapper: View {
             )
     }
 }
+ */
 /*
 struct InteractiveButtonStyle: ButtonStyle {
 
@@ -204,6 +248,15 @@ extension LinearGradient {
         colors: [
             Color.brandGlowDarkA719DD,
             Color.brandToDark4489EB
+        ],
+        startPoint: .leading,
+        endPoint: .trailing
+    )
+    
+    static let brandGlowDark0133_brandToDark0133 = LinearGradient(
+        colors: [
+            .brandGlowDarkA719DD.opacity(0.133),
+            .brandToDark4489EB.opacity(0.133)
         ],
         startPoint: .leading,
         endPoint: .trailing

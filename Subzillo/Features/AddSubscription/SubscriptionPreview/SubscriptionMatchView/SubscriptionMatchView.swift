@@ -331,8 +331,8 @@ struct SubscriptionMatchView: View {
                         deleteSubscription()
                     }, title    : "Are you sure you want to delete the subscriptions?\nData will be permanently deleted",
                     subTitle    :"",
-                    imageName   : "del_red_big",
-                    buttonIcon  : "deleteIcon",
+                    imageName   : "del_red_new",
+                    buttonIcon  : "del_red_newSmall",
                     buttonTitle : "Delete",
                     imageSize   : 70
                 )

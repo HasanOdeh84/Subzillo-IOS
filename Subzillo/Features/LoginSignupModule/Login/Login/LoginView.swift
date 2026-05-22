@@ -87,7 +87,11 @@ struct LoginView: View {
                                           header        : "")
                     }
                     
-                    CustomButton(title: "Log in") {
+                    GradientBgButton(
+                        title       : "Log in",
+                        isSolid     : true,
+                        showChevron : true
+                    ) {
                         isLoginClicked = true
                         loginApi()
                     }

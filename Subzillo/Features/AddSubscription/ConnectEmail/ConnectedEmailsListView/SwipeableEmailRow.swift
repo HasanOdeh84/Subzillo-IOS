@@ -22,23 +22,29 @@ struct SwipeableMailRow: View {
     let menuWidth: CGFloat          = 60
     @State private var rowHeight    : CGFloat = 0
     @State var isIntegrations       : Bool = false
+    @Environment(\.colorScheme) private var colorScheme
+    @EnvironmentObject var themeManager : ThemeManager
     
     //MARK: Body
     var body: some View {
         ZStack(alignment: .trailing) {
             VStack() {
                 VStack(spacing: 8){
-                    Image("del_white")
+                    Image("swipeDel")
                     Text("Delete")
-                        .font(.geistSemiBold(14))
-                        .foregroundColor(.white)
+                        .font(.jetBrainsBold(11))
+                        .foregroundColor(colorScheme == .light ? .textPrimaryDarkF4F1FB : .dangerDarkFF5A7A)
+//                    Image("del_white")
+//                    Text("Delete")
+//                        .font(.geistSemiBold(14))
+//                        .foregroundColor(.white)
                 }
                 .padding(.leading, 5)
                 .frame(alignment: .trailing)
                 .frame(width: 70, height: rowHeight)
             }
             .frame(width: 70, height: rowHeight)
-            .background(Color("redColor"))
+            .background(colorScheme == .light ? .dangerLightE43C5C : .dangerLightE43C5C.opacity(0.4))
             .clipShape(
                 RoundedCorner(
                     radius: 12,
@@ -50,7 +56,7 @@ struct SwipeableMailRow: View {
                     radius: 12,
                     corners: [.topRight, .bottomRight]
                 )
-                .stroke(Color.neutral300Border, lineWidth: 1)
+                .stroke(colorScheme == .light ? .E_2_E_8_F_0 : .dangerLightE43C5C.opacity(0.40), lineWidth: 1)
             )
             .zIndex(0)
             .opacity(offset != 0 || isSwiped ? 1 : 0) // Hide when not swiping
@@ -77,7 +83,10 @@ struct SwipeableMailRow: View {
                                    isInlineSyncing  : isInlineSyncing,
                                    emailsScanned    : emailsScanned,
                                    subscriptionsFound: subscriptionsFound)
-            .background(Color.clear)
+//            .background(isSwiped ? Color.bgPrimaryF7F7F90A0612 : themeManager.white_white4)
+//            .background(themeManager.white_white4)
+
+//            .background(Color.clear)
             .background(
                 GeometryReader { geo in
                     Color.clear

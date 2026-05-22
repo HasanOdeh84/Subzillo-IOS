@@ -1,20 +1,22 @@
 import SwiftUI
 
 struct ConnectedEmailItemView: View {
-    @State private var isExpanded: Bool = false
-    let email                   : ListConnectedEmailsData
-    let onSync                  : () -> Void
-    let onSyncing               : () -> Void
-    let onView                  : () -> Void
-    let onDownloadLogs          : () -> Void
-    let onReconnect             : () -> Void
-    @State var provider         : EmailProvider = EmailProvider.gmail
-    @State var isIntegrations   : Bool = false
-    var isInlineSyncing         : Bool = false
-    var emailsScanned           : Int = 0
-    var subscriptionsFound      : Int = 0
+    
+    @State private var isExpanded           : Bool = false
+    let email                               : ListConnectedEmailsData
+    let onSync                              : () -> Void
+    let onSyncing                           : () -> Void
+    let onView                              : () -> Void
+    let onDownloadLogs                      : () -> Void
+    let onReconnect                         : () -> Void
+    @State var provider                     : EmailProvider = EmailProvider.gmail
+    @State var isIntegrations               : Bool = false
+    var isInlineSyncing                     : Bool = false
+    var emailsScanned                       : Int = 0
+    var subscriptionsFound                  : Int = 0
     @EnvironmentObject var themeManager     : ThemeManager
     @Environment(\.colorScheme) var colorScheme
+    
     var body: some View {
         VStack() {
             HStack(spacing: 12) {
@@ -26,7 +28,6 @@ struct ConnectedEmailItemView: View {
                         RoundedRectangle(cornerRadius: 10)
                     )
                 
-                
                 VStack(alignment: .leading, spacing: 2) {
                     Text(email.email ?? "")
                         .font(.geistBold(14))
@@ -36,7 +37,7 @@ struct ConnectedEmailItemView: View {
                     
                     if let lastSync = email.lastSyncDate, !lastSync.isEmpty {
                         Text(lastSync)
-                            .font(.custom("JetBrainsMono-Regular", size: 11))
+                            .font(.jetBrainsRegular(11))
                             .foregroundColor(
                                 Color("TextPrimary_ 0E101A_F4F1FB").opacity(0.6)
                             )
@@ -49,7 +50,7 @@ struct ConnectedEmailItemView: View {
                     .foregroundColor(.neutral500)
                     .font(.system(size: 14, weight: .semibold))
             }
-//            .opacity(isAllSyncing ? 0.6 : 1.0)
+            //            .opacity(isAllSyncing ? 0.6 : 1.0)
             
             // Action Buttons
             if !isIntegrations {
@@ -57,6 +58,7 @@ struct ConnectedEmailItemView: View {
                     Spacer()
                     VStack(alignment: .trailing, spacing: 8) {
                         actionButtons
+                            .padding(.vertical, 10)
                         
                         if isExpanded {
                             Divider()
@@ -103,7 +105,8 @@ struct ConnectedEmailItemView: View {
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 14)
-        .background(themeManager.white_white4)
+        .background(colorScheme == .dark ? Color(hex: "#181126") : themeManager.white_white4)
+//        .background(themeManager.white_white4)
         .contentShape(Rectangle())
         .onTapGesture {
             withAnimation {
@@ -113,7 +116,7 @@ struct ConnectedEmailItemView: View {
         .cornerRadius(12)
         .overlay(
             RoundedRectangle(cornerRadius: 12)
-                .stroke(Color.neutral300Border, lineWidth: 1)
+                .stroke(themeManager.textPrimaryLight8_white8, lineWidth: 1)
         )
         .onAppear {
             if email.type == 1 {
@@ -150,26 +153,46 @@ struct ConnectedEmailItemView: View {
         if syncStatus == 1 {
             HStack(spacing: 10){
                 Button(action: { onSyncing() }) {
-                    Text("Syncing...")
-                        .font(.geistSemiBold(13))
-                        .foregroundColor(.white)
-                        .frame(maxWidth: .infinity)
-                        .frame(height: 38)
-                        .background(
-                            themeManager.accentGradient
-                        )
-                        .clipShape(
-                            RoundedRectangle(cornerRadius: 10)
-                        )
-                        .shadow(
-                            color: themeManager.selectedAccent.senColor.opacity(0.35),
-                            radius: 10,
-                            x: 0,
-                            y: 4
-                        )
+                    HStack(spacing: 4){
+                        
+                        Image("sync_new")
+                            .frame(width: 24, height: 24)
+                        
+                        Text("Syncing...")
+                            .font(.geistSemiBold(13))
+                            .foregroundColor(themeManager.accentTextColor)
+                        //                            .frame(maxWidth: .infinity)
+                        //                            .frame(height: 38)
+                        //                            .background(
+                        //                                LinearGradient.brandGlowDark0133_brandToDark0133
+                        //                            )
+                        //                            .clipShape(
+                        //                                RoundedRectangle(cornerRadius: 38/2)
+                        //                            )
+                        //                            .shadow(
+                        //                                color: themeManager.accentTextColor.opacity(0.35),
+                        //                                radius: 10,
+                        //                                x: 0,
+                        //                                y: 4
+                        //                            )
+                    }
                 }
+                .frame(maxWidth: .infinity)
+                .frame(height: 38)
+                .background(
+                    LinearGradient.brandGlowDark0133_brandToDark0133
+                )
+                .clipShape(
+                    RoundedRectangle(cornerRadius: 38/2)
+                )
+                .shadow(
+                    color: themeManager.accentTextColor.opacity(0.35),
+                    radius: 10,
+                    x: 0,
+                    y: 4
+                )
                 .buttonStyle(PlainButtonStyle())
-                .opacity(0.6)
+                //                .opacity(0.6)
                 
                 viewButton()
             }
@@ -178,12 +201,15 @@ struct ConnectedEmailItemView: View {
         } else if syncStatus == 0 && viewStatus{
             viewButton()
         } else if syncStatus == 0 || (syncStatus == 2 && viewStatus == false){
-            HStack(spacing: 12){
+            VStack(spacing: 10){
+                HStack(spacing: 12){
+                    syncButton(title: "Sync")
+                    viewButton()
+                }
+                
                 if email.isValid == false && email.type == 1 {
                     reconnectButton(title: "Reconnect")
                 }
-                syncButton(title: "Sync")
-                viewButton()
             }
         }
     }
@@ -193,21 +219,22 @@ struct ConnectedEmailItemView: View {
     private func reconnectButton(title: String) -> some View {
         Button(action: { onReconnect() }) {
             Text(title)
-                .font(.appSemiBold(14))
-                .foregroundColor(.redBadge)
+                .font(.geistSemiBold(14))
+                .foregroundColor(.dangerE43C5CFF5A7A)
                 .padding(.horizontal, 16)
-                .frame(height: 30)
-                .background(Color.white)
-                .cornerRadius(5)
+                .frame(maxWidth: .infinity)
+                .frame(height: 38)
+                .background(Color.clear)
+                .cornerRadius(38/2)
                 .overlay(
-                    RoundedRectangle(cornerRadius: 5)
+                    RoundedRectangle(cornerRadius: 38/2)
                         .stroke(
-                            Color.redBadge,
+                            Color.dangerE43C5CFF5A7A,
                             lineWidth: 1
                         )
                 )
         }
-        .buttonStyle(PlainButtonStyle())
+        .buttonStyle(InteractiveButtonStyle())
     }
     @ViewBuilder
     private func syncButton(title: String) -> some View {
@@ -225,7 +252,7 @@ struct ConnectedEmailItemView: View {
                     themeManager.accentGradient
                 )
                 .clipShape(
-                    RoundedRectangle(cornerRadius: 10)
+                    RoundedRectangle(cornerRadius: 38/2)
                 )
                 .shadow(
                     color: themeManager.selectedAccent.senColor.opacity(0.35),
@@ -253,16 +280,16 @@ struct ConnectedEmailItemView: View {
             Text(title)
                 .font(.geistSemiBold(13))
                 .foregroundColor(
-                    themeManager.selectedAccent.senColor
+                    themeManager.accentTextColor
                 )
                 .frame(maxWidth: .infinity)
                 .frame(height: 38)
                 .background(Color.clear)
                 .overlay(
-                    RoundedRectangle(cornerRadius: 10)
+                    RoundedRectangle(cornerRadius: 38/2)
                         .stroke(
-                            themeManager.selectedAccent.senColor,
-                            lineWidth: 1.5
+                            themeManager.accentTextColor,
+                            lineWidth: 1
                         )
                 )
         }
