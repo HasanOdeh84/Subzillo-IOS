@@ -218,7 +218,7 @@ struct OnboardingSuccess: View {
     //                .padding(.top, 20)
                 }
                 .padding(.horizontal, 24)
-                .padding(.bottom, 136)
+                .padding(.bottom, 40)
             }
         }
         .applyAppBackground()

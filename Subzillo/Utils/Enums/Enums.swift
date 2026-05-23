@@ -53,6 +53,9 @@ enum NavigationRoute: Hashable{
     case profileTab
     case uploadView
     case inboxScanningView
+    case exceedLimit
+    case subConformation
+    case pushPermissions
 }
 
 extension NavigationRoute {

@@ -78,6 +78,8 @@ public struct ListUserCardsResponseData: Codable, Hashable {
     var cardNumber          : String? = nil
     var nickName            : String? = nil
     var cardHolderName      : String? = nil
+    var cardType            : Int? = 0
+    var isPrimary           : Bool? = false
 }
 
 public struct ListFamilyMembersRequest: Codable {
@@ -132,7 +134,8 @@ public struct GetServiceProvidersListData: Codable, Hashable, Identifiable {
 
 public struct FetchProviderDataRequest: Codable {
     let userId               : String
-    let serviceName          : String
+    let serviceName          : String?
+    let providerName         : String?
     let currencyCode         : String
 }
 
@@ -165,14 +168,24 @@ struct ProviderPlanData: Codable, Hashable, Identifiable {
 }
 
 struct ProviderSubscriptionPlan: Codable, Identifiable, Hashable {
-    let id              = UUID()
-    var planName        : String? = nil
-    var price           : Double? = nil
-    var billingCycle    : String? = nil
-    var currencyCode    : String? = nil
-    var currencySymbol  : String? = nil
-    var source          : String? = nil
-    var countryCode     : String? = nil
+    var id = UUID()
+    var planName       : String? = nil
+    var price          : Double? = nil
+    var billingCycle   : String? = nil
+    var currencyCode   : String? = nil
+    var currencySymbol : String? = nil
+    var source         : String? = nil
+    var countryCode    : String? = nil
+    
+    enum CodingKeys: String, CodingKey {
+        case planName
+        case price
+        case billingCycle
+        case currencyCode
+        case currencySymbol
+        case source
+        case countryCode
+    }
 }
 
 struct PlanTypeItem: Identifiable {

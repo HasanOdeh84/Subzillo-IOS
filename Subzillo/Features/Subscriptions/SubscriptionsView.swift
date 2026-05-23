@@ -582,7 +582,8 @@ struct SubscriptionsView: View {
                                                         )
                                                     )
                                                 } else {
-                                                    SheetManager.shared.isUpgradeSheetVisible = true
+                                                    //SheetManager.shared.isUpgradeSheetVisible = true
+                                                    AppIntentRouter.shared.navigate(to: .exceedLimit)
                                                 }
                                             }else{
                                                 AppIntentRouter.shared.navigate(

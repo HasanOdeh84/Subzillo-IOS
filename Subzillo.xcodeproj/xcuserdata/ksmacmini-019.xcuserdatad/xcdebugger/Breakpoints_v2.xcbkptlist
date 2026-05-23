@@ -160,7 +160,7 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "550"
             endingLineNumber = "550"
-            landmarkName = "pop(count:)"
+            landmarkName = "navigateAndReplace(to:)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
@@ -176,7 +176,7 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "551"
             endingLineNumber = "551"
-            landmarkName = "pop(count:)"
+            landmarkName = "navigateAndReplace(to:)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
@@ -192,8 +192,8 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "553"
             endingLineNumber = "553"
-            landmarkName = "pop(count:)"
-            landmarkType = "7">
+            landmarkName = "AppIntentRouter"
+            landmarkType = "21">
          </BreakpointContent>
       </BreakpointProxy>
    </Breakpoints>

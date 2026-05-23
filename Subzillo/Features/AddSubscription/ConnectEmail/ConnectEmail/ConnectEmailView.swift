@@ -34,33 +34,11 @@ struct ConnectEmailView: View {
         VStack(alignment: .leading) {
             
             // MARK: - Header
-            HStack(spacing: 8) {
+            HStack(spacing: 12) {
                 // MARK: - back
-                Button(action: goBack) {
-                    HStack {
-                        
-                        if colorScheme == .dark
-                        {
-                            Image("back_gray")
-                                .renderingMode(.template)
-                                .foregroundColor(.white)
-                        }
-                        else{
-                            Image("back_gray")
-                        }
-                    }
-                    .frame(width: 38, height: 38)
-                    .background(
-                        Circle()
-                            .fill(themeManager.white_white4)
-                    )
-                    .overlay(
-                        Circle()
-                            .stroke(
-                                themeManager.black_white.opacity(0.08),
-                                lineWidth: 1
-                            )
-                    )
+
+                CircleBackButton {
+                    goBack()
                 }
                 
                 VStack(alignment: .leading, spacing: 1) {
@@ -80,6 +58,7 @@ struct ConnectEmailView: View {
             }
             .padding(.horizontal)
             .padding(.top, 0)
+            
             ScrollView(showsIndicators: false) {
                 // MARK: - Email Providers
                 
@@ -215,16 +194,18 @@ struct ConnectEmailView: View {
                                     .padding(.horizontal, 20)
                             }
                             .frame(maxWidth: .infinity)
-                            .padding(.vertical, 120)
+                            .padding(.top, 40)
+                            .padding(.bottom, 120)
                         }
                     }
                 }
-                .padding(.vertical, 24)
+                .padding(.top, 24)
                 .padding(.horizontal, 5)
                 Spacer()
             }
             .frame(maxWidth: .infinity)
-            .padding(20)
+            .padding(.horizontal, 20)
+            .padding(.top, 20)
         }
         .navigationBarBackButtonHidden()
         .applyAppBackground()

@@ -24,7 +24,8 @@ struct MyCardsView: View {
     @State private var isScrollDisabled : Bool = false
     @State private var sheetHeight              : CGFloat = .zero
     @State private var sheetID                  = UUID()
-    
+    @EnvironmentObject var themeManager         : ThemeManager
+    @Environment(\.colorScheme) var colorScheme
     struct EditableCardWrapper: Identifiable {
         let id = UUID()
         let data: ListUserCardsResponseData
@@ -35,48 +36,77 @@ struct MyCardsView: View {
     //MARK: - Body
     var body: some View {
         VStack{
-            //Header
-            HStack {
+            
+            // MARK: - Header
+            HStack(spacing: 8) {
+                // MARK: - back
                 Button(action: {
                     AppIntentRouter.shared.pop()
                 }) {
-                    Image("back_gray")
-                        .frame(width: 24,height: 24)
+                    HStack {
+                        
+                        if colorScheme == .dark
+                        {
+                            Image("back_gray")
+                                .renderingMode(.template)
+                                .foregroundColor(.white)
+                        }
+                        else{
+                            Image("back_gray")
+                        }
+                    }
+                    .frame(width: 38, height: 38)
+                    .background(
+                        Circle()
+                            .fill(themeManager.white_white4)
+                    )
+                    .overlay(
+                        Circle()
+                            .stroke(
+                                themeManager.black_white.opacity(0.08),
+                                lineWidth: 1
+                            )
+                    )
                 }
-                
-                Text("My Cards")
-                    .font(.appRegular(24))
-                    .foregroundColor(.neutralMain700)
                 
                 Spacer()
                 
-                Button("Add") {
-                    addCard()
+                VStack(alignment: .leading, spacing: 1) {
+                    Text("My Cards")
+                        .font(.geistBold(16))
+                        .foregroundColor(
+                            Color("TextPrimary_ 0E101A_F4F1FB")
+                        )
                 }
-                .foregroundColor(.neutralDisabled200White)
-                .padding(.horizontal, 18)
-                .padding(.vertical, 4)
-                .background(Color.navyBlueCTA700)
-                .cornerRadius(5)
-                .frame(width: 75, height: 27)
+                
+                Spacer()
+                
+                // MARK: - Empty Space
+                Color.clear
+                    .frame(width: 40, height: 40)
             }
-            .frame(height: 32)
-            
+            .padding(.horizontal, 20)
             if manualVM.listUserCardsResponse == nil || manualVM.listUserCardsResponse?.count == 0{
                 VStack(alignment: .center, spacing: 9){
                     Spacer()
                     Image("noCard")
                         .frame(width: 100, height: 100)
                     Text("No Cards Added Yet")
-                        .font(.appBold(16))
-                        .foregroundStyle(Color.neutral800)
+                        .font(.geistSemiBold(16))
+                        .foregroundStyle(.textPrimary0E101AF4F1FB)
                         .multilineTextAlignment(.center)
                     Text("Add a card to manage your subscriptions and payments easily.")
-                        .font(.appRegular(16))
-                        .foregroundStyle(Color.grayText)
+                        .font(.geistRegular(14))
+                        .foregroundStyle(.textPrimary0E101AF4F1FB.opacity(0.6))
                         .multilineTextAlignment(.center)
+                    
+                    addButton
+                        .padding(.top, 20)
+                        .padding(.bottom, 126)
+                    
                     Spacer()
                 }
+                .padding(.horizontal, 20)
             }else{
                 ScrollView(showsIndicators: false) {
                     LazyVStack(spacing: 20) {
@@ -97,15 +127,18 @@ struct MyCardsView: View {
                                 }
                             )
                         }
+                        addButton
+                            .padding(.horizontal, 20)
                     }
                     .padding(.top, 20)
                 }
                 .scrollDisabled(isScrollDisabled)
             }
+            
         }
-        .padding(.horizontal, 24)
+        
         .padding(.vertical, 16)
-        .background(.neutralBg100)
+        .applyAppBackground()
         .navigationBarBackButtonHidden(true)
         .onAppear{
             userCardsApi()
@@ -207,24 +240,28 @@ struct MyCardsView: View {
         switch remainder {
         case 0:
             return LinearGradient(
-                gradient: Gradient(colors: [Color.blackLG, Color.grayLG]),
+                gradient: Gradient(colors: [.brandFromDarkA719DD, .brandMidDark7C5CFF, .brandToDark4489EB]),
                 startPoint: .topTrailing,
                 endPoint: .bottomLeading
             )
         case 1:
             return LinearGradient(
-                gradient: Gradient(colors: [Color.blueLG, Color.darkBlueLG]),
+                gradient: Gradient(colors: [.sunsetFromF35BB3, .sunsetMidCB61FA, .sunsetTo764CFF]),
                 startPoint: .topLeading,
                 endPoint: .bottomTrailing
             )
         case 2:
             return LinearGradient(
-                gradient: Gradient(colors: [Color.orangeLG, Color.brownLG]),
+                gradient: Gradient(colors: [.auroraFrom13D8B0, .auroraMid5598EA, .auroraTo9A28DF]),
                 startPoint: .topLeading,
                 endPoint: .bottomTrailing
             )
         default:
-            return LinearGradient(gradient: Gradient(colors: [.gray]), startPoint: .leading, endPoint: .trailing)
+            return LinearGradient(
+                gradient: Gradient(colors: [.brandFromDarkA719DD, .brandMidDark7C5CFF, .brandToDark4489EB]),
+                startPoint: .topTrailing,
+                endPoint: .bottomLeading
+            )
         }
     }
 }
@@ -233,12 +270,175 @@ struct MyCardsView: View {
     MyCardsView()
 }
 
+extension MyCardsView {
+    
+    var addButton: some View {
+        
+        VStack{
+            Button {
+                addCard()
+            } label: {
+                
+                HStack(spacing: 8) {
+                    
+                    Image(systemName: "plus")
+                        .font(.system(size: 14, weight: .medium))
+                    
+                    Text("Add card")
+                        .font(.geistSemiBold(15))
+                }
+                .foregroundStyle(Color.textPrimary0E101AF4F1FB)
+                .frame(maxWidth: .infinity)
+                .frame(height: 48)
+                .background(themeManager.white_white4)
+                .clipShape(Capsule())
+                .overlay {
+                    Capsule()
+                        .stroke(
+                            Color.textPrimary0E101AF4F1FB.opacity(0.08),
+                            lineWidth: 0
+                        )
+                }
+                .shadow(
+                    color: themeManager.black_white.opacity(0.04),
+                    radius: 6,
+                    y: 2
+                )
+            }
+        }
+    }
+}
 //MARK: - CardView
 struct CardView: View {
     let card            : ListUserCardsResponseData
     let linearGradient  : LinearGradient
     
     var body: some View {
+        
+        ZStack {
+            
+            // MARK: Background Gradient
+            
+            linearGradient
+            
+            // MARK: Decorative Circles
+            
+            Circle()
+                .fill(Color.white.opacity(0.15))
+                .frame(width: 160, height: 160)
+                .offset(x: 80, y: -80)
+            
+            Circle()
+                .fill(Color.black.opacity(0.15))
+                .frame(width: 180, height: 180)
+                .offset(x: -90, y: 90)
+            
+            // MARK: Content
+            
+            VStack(alignment: .leading) {
+                
+                // MARK: Top
+                
+                HStack(alignment: .top) {
+                    
+                    VStack(alignment: .leading, spacing: 4) {
+                        
+                        Text("SUBZILLO · CARD")
+                            .font(.jetBrainsRegular(10))
+                            .tracking(2)
+                            .opacity(0.7)
+                        
+                        if card.isPrimary == true {
+                            Text("PRIMARY")
+                                .font(.jetBrainsRegular(9))
+                                .tracking(1)
+                                .padding(.horizontal, 6)
+                                .padding(.vertical, 2)
+                                .background(
+                                    Color.white.opacity(0.2)
+                                )
+                                .clipShape(
+                                    RoundedRectangle(cornerRadius: 4)
+                                )
+                        }
+                        
+                        Text("\(card.nickName ?? "")")
+                            .font(
+                                .geistSemiBold(13)
+                            )
+                    }
+                    
+                    Spacer()
+                    
+                    RoundedRectangle(cornerRadius: 4)
+                        .fill(Color.white.opacity(0.25))
+                        .frame(width: 36, height: 28)
+                }
+                
+                Spacer()
+                
+                // MARK: Card Number
+                
+                Text("•••• •••• •••• \(card.cardNumber ?? "")")
+                    .font(.jetBrainsMedium(18))
+                    .tracking(3)
+                
+                Spacer()
+                
+                // MARK: Bottom
+                
+                HStack(alignment: .bottom) {
+                    
+                    VStack(alignment: .leading, spacing: 4) {
+                        
+                        Text("CARDHOLDER")
+                            .font(.jetBrainsRegular(8))
+                            .tracking(1)
+                            .opacity(0.6)
+                        
+                        Text("\(card.nickName ?? "")")
+                            .font(
+                                .system(size: 13, weight: .semibold)
+                            )
+                    }
+                    
+                    Spacer()
+                    
+                    VStack(alignment: .leading, spacing: 4) {
+                        
+                        Text("")
+                            .font(.jetBrainsRegular(8))
+                            .tracking(1)
+                            .opacity(0.6)
+                        
+                        Text("")
+                            .font(
+                                .geistSemiBold(13)
+                            )
+                    }
+                    
+                    Spacer()
+                    
+                    Text("\(card.cardHolderName ?? "")")
+                        .font(
+                            .jetBrainsBoldItalic(18)
+                        )
+                }
+            }
+            .padding(20)
+            .foregroundStyle(.white)
+        }
+        .frame(height: 200)
+        .clipShape(
+            RoundedRectangle(cornerRadius: 22)
+        )
+        .shadow(
+            color: .black.opacity(0.3),
+            radius: 25,
+            y: 20
+        )
+    }
+    /*{
         ZStack {
             RoundedRectangle(cornerRadius: 14)
                 .fill(linearGradient)
@@ -306,7 +506,7 @@ struct CardView: View {
             }
         }
         .frame(height: 148)
-    }
+    }*/
     
     func formatName(_ name: String) -> String {
         return name.map { String($0) }.joined(separator: " ").uppercased()
@@ -325,37 +525,38 @@ struct SwipeableCardRow: View {
     @State private var isSwiped : Bool = false
     let swipeThreshold: CGFloat = -70
     let menuWidth: CGFloat      = 135
-    
+    @Environment(\.colorScheme) var colorScheme
+    @EnvironmentObject var themeManager: ThemeManager
     var body: some View {
         ZStack(alignment: .trailing) {
             VStack {
                 HStack{
                     VStack(spacing: 8){
-                        Image("del_white")
+                        Image("swipeDel")
                         Text("Delete")
-                            .font(.appSemiBold(14))
-                            .foregroundColor(.white)
+                            .font(.jetBrainsBold(11))
+                            .foregroundColor(colorScheme == .light ? .textPrimaryDarkF4F1FB : .dangerDarkFF5A7A)
                     }
-                    .padding(.leading, 5)
+                    .padding(.leading, 20)
                     .frame(alignment: .trailing)
-                    .frame(width: 80, height: 148)
+                    .frame(width: 80, height: 200)
                 }
-                .frame(width: 80, height: 148)
+                .frame(width: 80, height: 200)
             }
-            .frame(width: 80, height: 148)
-            .background(Color("redColor"))
+            .frame(width: 100, height: 200)
+            .background(colorScheme == .light ? .dangerLightE43C5C : .dangerLightE43C5C.opacity(0.4))
             .clipShape(
                 RoundedCorner(
-                    radius: 14,
+                    radius: 25,
                     corners: [.topRight, .bottomRight]
                 )
             )
             .overlay(
                 RoundedCorner(
-                    radius: 14,
+                    radius: 25,
                     corners: [.topRight, .bottomRight]
                 )
-                .stroke(Color.neutral300Border, lineWidth: 1)
+                .stroke(colorScheme == .light ? .E_2_E_8_F_0 : .dangerLightE43C5C.opacity(0.40), lineWidth: 1)
             )
             .onTapGesture {
                 withAnimation {
@@ -367,29 +568,29 @@ struct SwipeableCardRow: View {
             
             VStack(spacing: 8) {
                 VStack(spacing: 8){
-                    Image("edit_white")
+                    Image("swipeEdit")
                     Text("Edit")
-                        .font(.appSemiBold(14))
-                        .foregroundColor(.white)
+                        .font(.jetBrainsBold(11))
+                        .foregroundColor(colorScheme == .light ? .textPrimaryDarkF4F1FB : .successDark5CE4A8)
                 }
                 .padding(.leading, 15)
                 .frame(alignment: .trailing)
-                .frame(width: 70, height: 148)
+                .frame(width: 70, height: 200)
             }
-            .frame(width: 90, height: 148)
-            .background(Color.greenClr)
+            .frame(width: 90, height: 200)
+            .background(colorScheme == .light ? .successLight0EA870 : .successLight0EA870.opacity(0.4))
             .clipShape(
                 RoundedCorner(
-                    radius: 14,
+                    radius: 25,
                     corners: [.topRight, .bottomRight]
                 )
             )
             .overlay(
                 RoundedCorner(
-                    radius: 14,
+                    radius: 25,
                     corners: [.topRight, .bottomRight]
                 )
-                .stroke(Color.neutral300Border, lineWidth: 1)
+                .stroke(colorScheme == .light ? .E_2_E_8_F_0 : .successDark5CE4A8.opacity(0.40), lineWidth: 1)
             )
             .offset(x: -70)
             .zIndex(0)
@@ -449,6 +650,7 @@ struct SwipeableCardRow: View {
                 )
                 .zIndex(1)
         }
+        .padding(.horizontal, 20)
         .listRowSeparator(.hidden)
         .listRowBackground(Color.clear)
         .onChange(of: activeCardId) { newValue in

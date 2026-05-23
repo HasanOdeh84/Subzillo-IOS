@@ -94,63 +94,65 @@ struct ThemeCard: View {
     let isSelected  : Bool
     
     var body: some View {
-        VStack(spacing: 0) {
-            // Preview Graphic Container
-            ZStack {
-                if mode == .light {
-                    lightPreview
-                } else if mode == .dark {
-                    darkPreview
-                } else {
-                    autoPreview
+        ScrollView{
+            VStack(spacing: 0) {
+                // Preview Graphic Container
+                ZStack {
+                    if mode == .light {
+                        lightPreview
+                    } else if mode == .dark {
+                        darkPreview
+                    } else {
+                        autoPreview
+                    }
                 }
-            }
-            .frame(height: 72)
-            .frame(maxWidth: .infinity)
-            .background(
-                mode == .light ? .offWhiteF5F3FC :
-                    mode == .dark ? .grayBg0E0820 :
-                    Color.clear
-            )
-            
-            // Label
-            Text(mode.rawValue)
-                .font(.geistSemiBold(12))
-                .foregroundColor(
-                    isSelected ? themeManager.accentThemeColor : themeManager.textPrimaryLight6_dark62
-                )
+                .frame(height: 72)
                 .frame(maxWidth: .infinity)
-                .frame(height: 36)
                 .background(
-                    isSelected ? (themeManager.selectedAccent == .violet ? LinearGradient.brandFromDark0133_brandToDark0133 : themeManager.selectedAccent == .sunset ? LinearGradient.sunsetFrom0133_sunsetTo0133 : LinearGradient.auroraFrom0133_auroraTo0133 ) : LinearGradient(colors: [themeManager.white_white4], startPoint: .leading, endPoint: .trailing)
+                    mode == .light ? .offWhiteF5F3FC :
+                        mode == .dark ? .grayBg0E0820 :
+                        Color.clear
                 )
-            
-        }
-        .frame(maxWidth: .infinity)
-        .cornerRadius(16)
-        .overlay(
-            Group {
-                if isSelected {
-                    RoundedRectangle(cornerRadius: 14)
-                        .stroke(
-                            themeManager.accentThemeColor,
-                            lineWidth: 2
-                        )
-                } else {
-                    RoundedRectangle(cornerRadius: 14)
-                        .stroke(
-                            themeManager.textPrimaryLight8_white8,
-                            lineWidth: 1
-                        )
-                }
+                
+                // Label
+                Text(mode.rawValue)
+                    .font(.geistSemiBold(12))
+                    .foregroundColor(
+                        isSelected ? themeManager.accentThemeColor : themeManager.textPrimaryLight6_dark62
+                    )
+                    .frame(maxWidth: .infinity)
+                    .frame(height: 36)
+                    .background(
+                        isSelected ? (themeManager.selectedAccent == .violet ? LinearGradient.brandFromDark0133_brandToDark0133 : themeManager.selectedAccent == .sunset ? LinearGradient.sunsetFrom0133_sunsetTo0133 : LinearGradient.auroraFrom0133_auroraTo0133 ) : LinearGradient(colors: [themeManager.white_white4], startPoint: .leading, endPoint: .trailing)
+                    )
+                
             }
-        )
-        .shadow(
-            color: isSelected ? .brandMidDark7C5CFF.opacity(0.55) : Color.clear,
-            radius: isSelected ? 8 : 0,
-            x: 0,
-            y: 4
-        )
+            .frame(maxWidth: .infinity)
+            .cornerRadius(16)
+            .overlay(
+                Group {
+                    if isSelected {
+                        RoundedRectangle(cornerRadius: 14)
+                            .stroke(
+                                themeManager.accentThemeColor,
+                                lineWidth: 2
+                            )
+                    } else {
+                        RoundedRectangle(cornerRadius: 14)
+                            .stroke(
+                                themeManager.textPrimaryLight8_white8,
+                                lineWidth: 1
+                            )
+                    }
+                }
+            )
+            .shadow(
+                color: isSelected ? .brandMidDark7C5CFF.opacity(0.55) : Color.clear,
+                radius: isSelected ? 8 : 0,
+                x: 0,
+                y: 4
+            )
+        }
     }
     
     // Light Preview Shapes

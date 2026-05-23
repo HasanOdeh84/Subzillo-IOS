@@ -120,6 +120,7 @@ struct SyncStatusData: Codable {
     let latestService       : String?
     let integrationId       : String?
     let recentSubscriptions : [RecentSubscriptionData]?
+    let scanningEmails      : [ScanningEmailsData]?
 }
 
 //struct RecentSubscriptionData : Codable, Identifiable, Hashable {
@@ -142,5 +143,18 @@ struct RecentSubscriptionData: Codable, Identifiable, Hashable {
 
     enum CodingKeys: String, CodingKey {
         case serviceName, subject, emailDate
+    }
+}
+
+struct ScanningEmailsData: Codable, Identifiable, Hashable {
+    let id          = UUID()
+    let title       : String?
+    let subject     : String?
+    let from        : String?
+    let date        : String?
+    let body        : String?
+
+    enum CodingKeys: String, CodingKey {
+        case title, subject, from, date, body
     }
 }

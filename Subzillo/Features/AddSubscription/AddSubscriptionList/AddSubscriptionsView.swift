@@ -206,16 +206,19 @@ struct AddSubscriptionsView: View {
     private func clickOnAddByVoice() {
         Constants.FeatureConfig.performS4Action {
             if commonVM.userInfoResponse?.remainingSubscriptionLimit == 0 {
-                SheetManager.shared.isUpgradeSheetVisible = true
+                //SheetManager.shared.isUpgradeSheetVisible = true
+                AppIntentRouter.shared.navigate(to: .exceedLimit)
             } else {
                 AppIntentRouter.shared.navigate(to: .voiceCommandView)
             }
         }
     }
     private func clickOnConnectEmail() {
+        
         Constants.FeatureConfig.performS4Action {
             if commonVM.userInfoResponse?.remainingSubscriptionLimit == 0 {
-                SheetManager.shared.isUpgradeSheetVisible = true
+               // SheetManager.shared.isUpgradeSheetVisible = true
+                AppIntentRouter.shared.navigate(to: .exceedLimit)
             } else {
                 AppIntentRouter.shared.navigate(to: .connectEmail)
             }
@@ -224,7 +227,8 @@ struct AddSubscriptionsView: View {
     private func clickOnUploadScreenshot() {
        Constants.FeatureConfig.performS4Action {
             if commonVM.userInfoResponse?.remainingSubscriptionLimit == 0 {
-                SheetManager.shared.isUpgradeSheetVisible = true
+                //SheetManager.shared.isUpgradeSheetVisible = true
+                AppIntentRouter.shared.navigate(to: .exceedLimit)
             } else {
                 //showUploadPopup = true
                 AppIntentRouter.shared.navigate(to: .uploadView)
@@ -234,7 +238,8 @@ struct AddSubscriptionsView: View {
     private func clickOnManuvalEntry() {
         Constants.FeatureConfig.performS4Action {
             if commonVM.userInfoResponse?.remainingSubscriptionLimit == 0 {
-                SheetManager.shared.isUpgradeSheetVisible = true
+                //SheetManager.shared.isUpgradeSheetVisible = true
+                AppIntentRouter.shared.navigate(to: .exceedLimit)
             } else {
                 AppIntentRouter.shared.navigate(to: .manualEntry(isFromEdit: false))
             }

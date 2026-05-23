@@ -305,19 +305,10 @@ struct WelcomeHomeView: View {
                 .foregroundColor(isMask ? .clear : Color("TextPrimary_ 0E101A_F4F1FB"))
             
             if index < parts.count - 1 {
-                if #available(iOS 17.0, *) {
-                    result = result + Text(styledPart)
-                        .font(.jetBrainsSemiBoldItalic(26))
-                        .italic()
-                        .foregroundStyle(
-                            themeManager.accentGradient
-                        )
-                } else {
                     result = result + Text(styledPart)
                         .font(.jetBrainsSemiBoldItalic(26))
                         .italic()
                         .foregroundColor(isMask ? .black : .clear)
-                }
             }
         }
         return result

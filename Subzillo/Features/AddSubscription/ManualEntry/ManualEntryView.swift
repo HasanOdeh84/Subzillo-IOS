@@ -626,9 +626,10 @@ struct ManualEntryView: View {
     //MARK: - User defined methods
     
     func fetchProviderDataApi(){
-        addSubscriptionVM.fetchProviderData(input       : FetchProviderDataRequest(userId   : Constants.getUserId(),
-                                                                                   serviceName     : serviceName.trimmed,
-                                                                                   currencyCode    : selectedCurrency?.code ?? "" == "" ? Constants.shared.currencyCode : selectedCurrency?.code ?? ""),
+        addSubscriptionVM.fetchProviderData(input       : FetchProviderDataRequest(userId           : Constants.getUserId(),
+                                                                                   serviceName      : serviceName.trimmed,
+                                                                                   providerName     : nil,
+                                                                                   currencyCode     : selectedCurrency?.code ?? "" == "" ? Constants.shared.currencyCode : selectedCurrency?.code ?? ""),
                                             showLoader  : true)
     }
     

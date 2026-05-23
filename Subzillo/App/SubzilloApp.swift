@@ -463,7 +463,8 @@ struct RootView: View {
         case .voiceCommandView:
             VoiceCommandView()
         case .subscriptionPreviewView(let subscriptionsData, let content, let isFromImage, let isFromEmail, let audioUrl, let fromEmailSync, let isRenew):
-            SubscriptionPreviewView(isFromImage:isFromImage, isFromEmail: isFromEmail, subscriptionsData: subscriptionsData, content: content, audioURL: audioUrl, fromEmailSync: fromEmailSync, isRenew: isRenew)
+//            SubscriptionPreviewView(isFromImage:isFromImage, isFromEmail: isFromEmail, subscriptionsData: subscriptionsData, content: content, audioURL: audioUrl, fromEmailSync: fromEmailSync, isRenew: isRenew)
+            SubConformation(isFromImage:isFromImage, isFromEmail: isFromEmail, subscriptionsData: subscriptionsData, content: content, audioURL: audioUrl, fromEmailSync: fromEmailSync, isRenew: isRenew)
         case .subscriptionMatchView(let subscriptionData, let fromList, let fromPush, let subscriptionId):
             SubscriptionMatchView(subscriptionData: subscriptionData, subscriptionId: subscriptionId, fromList: fromList, fromPush: fromPush)
         case .pasteTextView:
@@ -495,7 +496,8 @@ struct RootView: View {
         case .inviteFriends(let uLink):
             InviteFriendsView(uLink: uLink)
         case .emailSyncProgress(let logId):
-            EmailSyncProgressView(logId: logId)
+//            EmailSyncProgressView(logId: logId)
+            InboxScanningView(logId: logId)
         case .extractedSubscriptions(let subscriptions, let fromEmailSync, let integrationId):
             ExtractedSubscriptionsView(subscriptions: subscriptions, fromEmailSyncScreen: fromEmailSync, integrationId: integrationId)
         case .connectICloudView:
@@ -511,7 +513,13 @@ struct RootView: View {
         case .uploadView:
             UploadView()
         case .inboxScanningView:
-            InboxScanningView()
+            InboxScanningView(logId: "")
+        case .exceedLimit:
+            ExceedLimit()
+        case .subConformation:
+            SubConformation()
+        case .pushPermissions:
+            PushPermissions()
         }
     }
 }

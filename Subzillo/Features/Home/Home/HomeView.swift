@@ -1719,7 +1719,7 @@ struct AvatarView: View {
                     
                     Text(initials)
                         .font(.geistBold(fontSize))
-                        .foregroundColor(Color("TextPrimary_ 0E101A_F4F1FB"))
+                        .foregroundColor(fromPreview == true ? .white : Color("TextPrimary_ 0E101A_F4F1FB"))
                 }
             } else {
                 Group {

@@ -87,7 +87,8 @@ struct FamilyMembersView: View {
                                 }
                                 , addSubscriptionBtn: { id in
                                     if manualVM.listFamilyMembersResponse?.remainingSubscriptionLimit == 0 {
-                                        SheetManager.shared.isUpgradeSheetVisible = true
+                                        //SheetManager.shared.isUpgradeSheetVisible = true
+                                        AppIntentRouter.shared.navigate(to: .exceedLimit)
                                     } else {
                                         familyMembersVM.navigate(to: .manualEntry(isFromEdit        : false,
                                                                                   isFromListEdit    : false,

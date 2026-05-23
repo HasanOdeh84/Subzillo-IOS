@@ -718,7 +718,7 @@ struct SubscriptionPreviewView: View {
     
     func fetchProviderDataApi(){
         manualEntryVM.fetchProviderData(input: FetchProviderDataRequest(userId          : Constants.getUserId(),
-                                                                        serviceName     : subscriptionData?.serviceName ?? "",
+                                                                        serviceName     : subscriptionData?.serviceName ?? "", providerName  : nil,
                                                                         currencyCode    : subscriptionData?.currency ?? "" == "" ? Constants.shared.currencyCode : subscriptionData?.currency ?? ""))
     }
     

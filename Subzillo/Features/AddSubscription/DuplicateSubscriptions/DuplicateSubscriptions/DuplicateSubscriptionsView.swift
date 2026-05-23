@@ -10,19 +10,19 @@ struct DuplicateSubscriptionsView: View {
     
     // MARK: - Properties
     @Environment(\.dismiss) private var dismiss
-    @State var duplicateSubsList    : [DuplicateDataInfo]
-    @StateObject var dupSubscriptionVM = DuplicateSubscriptionsViewModel()
-    @State var fromFamily           : Bool = false
-    @State var isFromEmail          : Bool = false
-    @EnvironmentObject var themeManager: ThemeManager
+    @State var duplicateSubsList        : [DuplicateDataInfo]
+    @StateObject var dupSubscriptionVM  = DuplicateSubscriptionsViewModel()
+    @State var fromFamily               : Bool = false
+    @State var isFromEmail              : Bool = false
+    @EnvironmentObject var themeManager : ThemeManager
     @Environment(\.colorScheme) var colorScheme
     
-    /// Index of the duplicate we are currently resolving (0-based)
-    @State private var currentIndex : Int = 0
-    /// Which existing subscription page is visible in the pager
-    @State private var existingPage : Int = 0
-    /// Tracks whether an API call is in flight for the current card
-    @State private var isProcessing : Bool = false
+    // Index of the duplicate we are currently resolving (0-based)
+    @State private var currentIndex     : Int = 0
+    // Which existing subscription page is visible in the pager
+    @State private var existingPage     : Int = 0
+    // Tracks whether an API call is in flight for the current card
+    @State private var isProcessing     : Bool = false
     
     // MARK: - Computed helpers
     private var totalCount: Int   { duplicateSubsList.count }
@@ -54,32 +54,7 @@ struct DuplicateSubscriptionsView: View {
                         // Title
                         HStack(spacing: 6) {
                             
-                            
-                            //                            Text("Which")
-                            //                                .font(.geistSemiBold(22))
-                            //                                .foregroundColor(Color("TextPrimary_ 0E101A_F4F1FB"))
-                            //                            + Text("\(newSub?.serviceName ?? "service")")
-                            //                                .font(.appSemiBoldItalic(24))
-                            ////                                .italic()
-                            //                                .foregroundStyle(
-                            //                                    themeManager.gradient(style: .vertical)
-                            //                                )
-                            //                            + Text("to keep?")
-                            //                                .font(.geistSemiBold(24))
-                            //                                .foregroundColor(Color("TextPrimary_ 0E101A_F4F1FB"))
-                            
-                            Text("Which")
-                                .font(.geistSemiBold(22))
-                                .foregroundColor(Color("TextPrimary_ 0E101A_F4F1FB"))
-                            Text("\(newSub?.serviceName ?? "service")")
-                                .font(.appSemiBoldItalic(24))
-                            //                                .italic()
-                                .foregroundStyle(
-                                    themeManager.gradient(style: .vertical)
-                                )
-                            Text("to keep?")
-                                .font(.geistSemiBold(24))
-                                .foregroundColor(Color("TextPrimary_ 0E101A_F4F1FB"))
+                            titleView(title: "Which \(newSub?.serviceName ?? "service") to keep?", styledPart: "\(newSub?.serviceName ?? "service")")
                         }
                         .padding(.horizontal, 20)
                         .padding(.top, 24)
@@ -175,8 +150,6 @@ struct DuplicateSubscriptionsView: View {
                     .fill(Color("yellow_E0A218_FFCB5C").opacity(0.2))
                     .frame(width: 32, height: 32)
                 Image("bulb_new")
-                //                    .renderingMode(.template)
-                //                    .foregroundColor(Color(hex: "#E0A218"))
                     .frame(width: 16, height: 16)
             }
             
@@ -243,20 +216,46 @@ struct DuplicateSubscriptionsView: View {
                         .animation(.spring(), value: existingPage)
                 }
             }
-//            .padding(.top, 28)
-//            .padding(.bottom, 28)
-            
-            
-            // Page dots
-            //            HStack(spacing: 6) {
-            //                ForEach(existingList.indices, id: \.self) { idx in
-            //                    Circle()
-            //                        .fill(idx == existingPage ? Color(hex: "#627BFF") : Color.neutral300Border)
-            //                        .frame(width: 6, height: 6)
-            //                        .animation(.easeInOut(duration: 0.25), value: existingPage)
-            //                }
-            //            }
         }
+    }
+    
+    @ViewBuilder
+    private func titleView(title: String, styledPart: String) -> some View {
+        if !styledPart.isEmpty && title.contains(styledPart) {
+            buildLine(line: title, styledPart: styledPart, isMask: false)
+                .multilineTextAlignment(.center)
+                .overlay(
+                    themeManager.gradient(style: .vertical)
+                        .mask(
+                            buildLine(line: title, styledPart: styledPart, isMask: true)
+                                .multilineTextAlignment(.center)
+                        )
+                )
+                .foregroundColor(.clear)
+        } else {
+            Text(title)
+                .font(.geistSemiBold(24))
+                .foregroundColor(Color("TextPrimary_ 0E101A_F4F1FB"))
+                .multilineTextAlignment(.center)
+        }
+    }
+    
+    private func buildLine(line: String, styledPart: String, isMask: Bool) -> Text {
+        let parts = line.components(separatedBy: styledPart)
+        var result = Text("")
+        for (index, part) in parts.enumerated() {
+            result = result + Text(part)
+                .font(.geistSemiBold(24))
+                .foregroundColor(isMask ? .clear : Color("TextPrimary_ 0E101A_F4F1FB"))
+            
+            if index < parts.count - 1 {
+                result = result + Text(styledPart)
+                    .font(.jetBrainsSemiBoldItalic(24))
+                    .italic()
+                    .foregroundColor(isMask ? .black : .clear)
+            }
+        }
+        return result
     }
     
     // MARK: - Action buttons
@@ -273,22 +272,6 @@ struct DuplicateSubscriptionsView: View {
                     saveAsSeparate(item: item)
                 }
             )
-            //            Button(action: {
-            //                guard !isProcessing else { return }
-            //                saveAsSeparate(item: item)
-            //            }) {
-            //                Text("Save as separate")
-            //                    .font(.appBold(14))
-            //                    .foregroundColor(Color("TextPrimary_ 0E101A_F4F1FB"))
-            //                    .frame(maxWidth: .infinity)
-            //                    .frame(height: 52)
-            //                    .background(colorScheme == .dark ? Color.white.opacity(0.04) : Color.white)
-            //                    .cornerRadius(26)
-            //                    .overlay(
-            //                        RoundedRectangle(cornerRadius: 26)
-            //                            .stroke(Color("TextPrimary_ 0E101A_F4F1FB").opacity(0.2), lineWidth: 1)
-            //                    )
-            //            }
             
             // Save as existing
             GradientBgButton(
@@ -299,25 +282,6 @@ struct DuplicateSubscriptionsView: View {
                 guard !isProcessing else { return }
                 saveAsExisting(item: item)
             }
-            
-            //            Button(action: {
-            //                guard !isProcessing else { return }
-            //                saveAsExisting(item: item)
-            //            }) {
-            //                Text("Save as existing")
-            //                    .font(.appBold(14))
-            //                    .foregroundColor(.white)
-            //                    .frame(maxWidth: .infinity)
-            //                    .frame(height: 52)
-            //                    .background(
-            //                        LinearGradient(
-            //                            gradient: Gradient(colors: [Color(hex: "#A23BFF"), Color(hex: "#4E73FF")]),
-            //                            startPoint: .leading,
-            //                            endPoint: .trailing
-            //                        )
-            //                    )
-            //                    .cornerRadius(26)
-            //            }
         }
         
         Button(action: skipForNow) {
@@ -505,7 +469,7 @@ struct DupSubCard: View {
             .padding(.vertical, 12)
         }
         .background(!isNew ? (themeManager.selectedAccent == .violet ? LinearGradient.brandFromDark0133_brandToDark0133 : themeManager.selectedAccent == .sunset ? LinearGradient.sunsetFrom0133_sunsetTo0133 : LinearGradient.auroraFrom0133_auroraTo0133 ) : LinearGradient(colors: [themeManager.white_white4], startPoint: .leading, endPoint: .trailing))
-//        .background(themeManager.white_white4)
+        //        .background(themeManager.white_white4)
         .cornerRadius(13)
         .overlay(
             RoundedRectangle(cornerRadius: 13)

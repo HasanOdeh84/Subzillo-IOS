@@ -63,21 +63,21 @@ struct OnboardingView: View {
     
     let pages: [OnboardingPage] = [
         OnboardingPage(
-            lottie      : "onboarding1_new",
+            lottie      : "orbit_animation6",
             subtitle    : "SUBZILLO • AI FINANCE",
             title       : "Your subscriptions,\nfinally under control.",
             styledPart  : "finally",
             description : "An AI copilot that tracks, analyzes and cancels the ones you don't need."
         ),
         OnboardingPage(
-            lottie      : "onboarding2_new",
+            lottie      : "audiolines",
             subtitle    : "",
             title       : "Just say it.\nWe'll add it.",
             styledPart  : "",
             description : "Talk to Subzillo like a friend. Our AI parses the price, the provider, the renewal date."
         ),
         OnboardingPage(
-            lottie      : "onboarding3_new",
+            lottie      : "scaning_animation4",
             subtitle    : "",
             title       : "Scan your inbox.\nZero typing.",
             styledPart  : "Zero typing.",
@@ -141,18 +141,67 @@ struct OnboardingView: View {
                                     VStack(spacing: 0) {
                                         Spacer(minLength: 20)
                                         
-                                        //                                    // Lottie Animation
-                                        //                                    LottieView(name: pages[index].lottie, loopMode: .loop)
-                                        Image(pages[index].lottie)
-                                            .frame(height: 280)
-                                            .padding(.bottom, 20)
+                                        // Lottie Animation
                                         
-                                        // Subtitle
-                                        Text(pages[index].subtitle)
-                                            .font(.jetBrainsMedium(11))
-                                            .kerning(2.0)
-                                            .foregroundColor(themeManager.accentTextColor)
-                                            .padding(.bottom, 16)
+                                        if index == 2{
+                                            if systemScheme == .dark{
+                                                LottieView(name: "scaning_animation_dark", loopMode: .loop, isAspectFit: false)
+                                                    .frame(height: 280, alignment: .center)
+                                                    .padding(.bottom, 20)
+                                            }else{
+                                                LottieView(name: pages[index].lottie, loopMode: .loop, isAspectFit: false)
+                                                    .frame(height: 280)
+                                                    .padding(.bottom, 20)
+                                            }
+                                        }else if index == 1{
+                                            ZStack(alignment: .top) {
+                                                LottieView(name: pages[index].lottie, loopMode: .loop, isAspectFit: false)
+                                                    .frame(width: 250, height: 280)
+                                                
+                                                HStack(spacing: 12) {
+                                                    Image("micPurple")
+                                                        .renderingMode(.template)
+                                                        .frame(width: 18, height: 18)
+                                                        .foregroundStyle(themeManager.accentTextColor)
+                                                    
+                                                    Text("\"Say a subscription out loud\"")
+                                                        .font(.jetBrainsMedium(13))
+                                                        .foregroundColor(Color.textPrimary0E101AF4F1FB)
+                                                }
+                                                .padding(.horizontal, 24)
+                                                .padding(.vertical, 16)
+                                                .background(
+                                                    Capsule()
+                                                        .fill(systemScheme == .light ? .white.opacity(0.88) : Color.bgPrimaryDark0A0612.opacity(0.82))
+                                                )
+                                                .shadow(
+                                                    color: themeManager.selectedAccent.senColor.opacity(0.55),
+                                                    radius: 15,
+                                                    x: 0,
+                                                    y: 8
+                                                )
+                                                .offset(y: 30)
+                                            }
+                                            .padding(.bottom, 20)
+                                        }else{
+                                            LottieView(name: pages[index].lottie, loopMode: .loop, isAspectFit: false)
+                                                .frame(width: 250, height: 280)
+                                                .padding(.bottom, 20)
+                                        }
+                                        
+                                        Spacer(minLength: index == 0 ? 0 : 100)
+//                                        Image(pages[index].lottie)
+//                                            .frame(height: 280)
+//                                            .padding(.bottom, 20)
+                                        
+                                        if pages[index].subtitle != ""{
+                                            // Subtitle
+                                            Text(pages[index].subtitle)
+                                                .font(.jetBrainsMedium(11))
+                                                .kerning(2.0)
+                                                .foregroundColor(themeManager.accentTextColor)
+                                                .padding(.bottom, 16)
+                                        }
                                         
                                         // Title with Styled Part
                                         titleView(for: pages[index])
@@ -171,7 +220,7 @@ struct OnboardingView: View {
                                         Spacer()
                                     }
                                     .frame(minWidth: geometry.size.width)
-                                    .frame(minHeight: geometry.size.height)
+//                                    .frame(minHeight: geometry.size.height)
                                 }
                             }
                         }
