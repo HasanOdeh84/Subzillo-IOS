@@ -21,6 +21,7 @@ class DuplicateSubscriptionsViewModel: ObservableObject {
     }
     
     func resolveDuplicateSubscription(input:ResolveDuplicateSubscriptionRequest) {
+        self.subscriptioIds = nil
         apiReference.postApi(endPoint: APIEndpoint.resolveDuplicateSubscription, method: .POST,token: authKey,body: input,showLoader: true, responseType: ResolveDuplicateSubscriptionResponse.self)
             .sink { [weak self] completion in
                 if case let .failure(error) = completion {

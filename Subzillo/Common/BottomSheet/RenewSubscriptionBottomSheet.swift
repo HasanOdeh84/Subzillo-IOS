@@ -19,6 +19,7 @@ struct RenewSubscriptionBottomSheet: View {
     var onRenewWithChanges              : () -> Void
     var onNo                            : (() -> Void)? = nil
     @State private var contentHeight    : CGFloat = .zero
+    @EnvironmentObject var themeManager : ThemeManager
     
     var body: some View {
         VStack(spacing: 0) {
@@ -70,6 +71,7 @@ struct RenewSubscriptionBottomSheet: View {
                         CustomBorderButton(
                             title       : btn3,
                             background  : Color.clear,
+                            borderColor : themeManager.textPrimaryLight14_white14,
                             action      : {
                                 dismiss()
                                 onNo?()

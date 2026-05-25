@@ -13,6 +13,8 @@ public struct EditCardRequest: Codable {
     let cardNumber     : String
     let nickName       : String
     let cardHolderName : String
+    let cardType       : Int
+    let isDefault      : Bool
 }
 
 public struct DeleteCardRequest: Codable {

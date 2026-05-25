@@ -138,7 +138,7 @@ class ManualEntryViewModel: ObservableObject {
         apiReference.postApi(endPoint: endPoint, method: .POST,token: authKey,body: input,showLoader: showLoader, responseType: FetchProviderDataResponse.self)
             .sink { [weak self] completion in
                 if case let .failure(error) = completion {
-                    self?.handleError(error,endPoint: APIEndpoint.fetchProviderData)
+                    self?.handleError(error,endPoint: endPoint)
                 }
             }
         receiveValue: { [weak self] response in

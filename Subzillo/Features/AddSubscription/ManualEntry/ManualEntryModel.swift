@@ -79,7 +79,7 @@ public struct ListUserCardsResponseData: Codable, Hashable {
     var nickName            : String? = nil
     var cardHolderName      : String? = nil
     var cardType            : Int? = 0
-    var isPrimary           : Bool? = false
+    var isDefault           : Bool? = false
 }
 
 public struct ListFamilyMembersRequest: Codable {
@@ -111,6 +111,8 @@ public struct AddCardRequest: Codable {
     let cardNumber              : String
     let nickName                : String
     let cardHolderName          : String
+    let cardType                : Int
+    let isDefault               : Bool
 }
 
 public struct AddFamilyMemberRequest: Codable, Hashable  {

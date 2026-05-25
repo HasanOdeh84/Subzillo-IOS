@@ -428,27 +428,16 @@ struct SubscriptionMatchView: View {
                                                  nickName               : subData.nickName,
                                                  color                  : subData.color)
             
-            var remindersData = [
-                ManualDataInfo(id: "1", title: "3 days before renewal", value: "-3d"),
-                ManualDataInfo(id: "2", title: "1 day before renewal", value: "-1d"),
-                ManualDataInfo(id: "3", title: "On renewal day", value:"0d")
-            ]
-            var renewalReminder = subscriptionData?.renewalReminders ?? []
-            for i in remindersData.indices {
-                remindersData[i].isSelected = renewalReminder.contains(remindersData[i].value ?? "")
-            }
-            renewalReminderValue = ""
-            for item in remindersData        {
-                if item.isSelected ?? false == true
-                {
-                    renewalReminder.append(item.value!)
-                    if renewalReminderValue != "" {
-                        renewalReminderValue = "\(renewalReminderValue)\n\(item.title ?? "")"
-                    }
-                    else{
-                        renewalReminderValue = item.title ?? ""
-                    }
+            let renewalReminder = subscriptionData?.renewalReminders ?? []
+            if let first = renewalReminder.first {
+                let stripped = first.replacingOccurrences(of: "-", with: "").replacingOccurrences(of: "d", with: "")
+                if let days = Int(stripped), days > 0 {
+                    renewalReminderValue = "\(days) days before renewal"
+                } else {
+                    renewalReminderValue = "Off"
                 }
+            } else {
+                renewalReminderValue = "Off"
             }
             if subscriptionData?.cardName != "" && subscriptionData?.cardNumber != ""{
                 paymentMethodDataName = "\(subscriptionData?.cardName ?? "")****\(subscriptionData?.cardNumber ?? "")"
@@ -464,27 +453,16 @@ struct SubscriptionMatchView: View {
             subscriptionData?.categoryId            = subscriptionMatchVM.getSubsDetailsResponse?.category
             subscriptionData?.renewalReminder       = subscriptionMatchVM.getSubsDetailsResponse?.renewalReminders
             subscriptionData?.paymentMethodId       = subscriptionMatchVM.getSubsDetailsResponse?.paymentMethod
-            var remindersData = [
-                ManualDataInfo(id: "1", title: "3 days before renewal", value: "-3d"),
-                ManualDataInfo(id: "2", title: "1 day before renewal", value: "-1d"),
-                ManualDataInfo(id: "3", title: "On renewal day", value:"0d")
-            ]
-            var renewalReminder = subscriptionData?.renewalReminders ?? []
-            for i in remindersData.indices {
-                remindersData[i].isSelected = renewalReminder.contains(remindersData[i].value ?? "")
-            }
-            renewalReminderValue = ""
-            for item in remindersData        {
-                if item.isSelected ?? false == true
-                {
-                    renewalReminder.append(item.value!)
-                    if renewalReminderValue != "" {
-                        renewalReminderValue = "\(renewalReminderValue)\n\(item.title ?? "")"
-                    }
-                    else{
-                        renewalReminderValue = item.title ?? ""
-                    }
+            let renewalReminder = subscriptionData?.renewalReminders ?? []
+            if let first = renewalReminder.first {
+                let stripped = first.replacingOccurrences(of: "-", with: "").replacingOccurrences(of: "d", with: "")
+                if let days = Int(stripped), days > 0 {
+                    renewalReminderValue = "\(days) days before renewal"
+                } else {
+                    renewalReminderValue = "Off"
                 }
+            } else {
+                renewalReminderValue = "Off"
             }
             if subscriptionData?.cardName != "" && subscriptionData?.cardNumber != ""{
                 paymentMethodDataName = "\(subscriptionData?.cardName ?? "")****\(subscriptionData?.cardNumber ?? "")"

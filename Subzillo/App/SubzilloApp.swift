@@ -520,6 +520,17 @@ struct RootView: View {
             SubConformation()
         case .pushPermissions:
             PushPermissions()
+        case .addNewCardSheet(let  nickName, let cardNumber, let cardName, let shouldCallAPI, let isEdit, let cardId, let selectedType, let isDefault):
+            AddNewCardSheet(
+                        nickName: nickName,
+                        cardNumber: cardNumber,
+                        cardName: cardName,
+                        shouldCallAPI: shouldCallAPI,
+                        isEdit: isEdit,
+                        cardId: cardId,
+                        selectedType: selectedType,
+                        isDefault: isDefault
+                    )
         }
     }
 }

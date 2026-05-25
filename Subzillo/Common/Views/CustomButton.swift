@@ -85,9 +85,12 @@ struct CustomButton: View {
 struct CustomBorderButton: View {
     let title       : String
     var background  : Color = .neutralBg100
+    var borderColor : Color = .neutralBg100
     var textColor   : Color = .textPrimary0E101AF4F1FB
     var height      : CGFloat = 48
     var cornerRadius: CGFloat = 8
+    var showIcon    : Bool = false
+    var icon        : String = ""
     var action      : () -> Void = {}
     @EnvironmentObject var themeManager : ThemeManager
     
@@ -95,18 +98,29 @@ struct CustomBorderButton: View {
         Button(action: {
             action()
         }) {
-            Text(LocalizedStringKey(title))
-                .multilineTextAlignment(.center)
-                .foregroundColor(textColor)
-                .font(.appSemiBold(15))
-                .frame(maxWidth: .infinity, minHeight: height)
-                .background(.clear)
-                .overlay(
-                    RoundedRectangle(cornerRadius: height / 2)
-                        .stroke(themeManager.textPrimaryLight14_white14, lineWidth: 2)
-                )
-                .cornerRadius(height / 2)
-                .contentShape(RoundedRectangle(cornerRadius: height / 2))
+            HStack(spacing: 8) {
+                Spacer()
+                
+                Text(LocalizedStringKey(title))
+                    .multilineTextAlignment(.center)
+                    .foregroundColor(textColor)
+                    .font(.appSemiBold(15))
+                
+                if showIcon {
+                    Image(icon)
+                        .frame(width: 16, height: 16)
+                }
+                
+                Spacer()
+            }
+            .frame(maxWidth: .infinity, minHeight: height)
+            .background(background)
+            .overlay(
+                RoundedRectangle(cornerRadius: height / 2)
+                    .stroke(borderColor, lineWidth: 2)
+            )
+            .cornerRadius(height / 2)
+            .contentShape(RoundedRectangle(cornerRadius: height / 2))
         }
         .buttonStyle(InteractiveButtonStyle())
     }

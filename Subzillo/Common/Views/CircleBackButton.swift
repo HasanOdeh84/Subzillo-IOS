@@ -39,18 +39,6 @@ struct CircleBackButton: View {
                         lineWidth: 1
                     )
             )
-//            Image(systemName: "chevron.left")
-//                .font(.system(size: 16, weight: .semibold))
-//                .foregroundColor(.textPrimary0E101AF4F1FB)
-//                .frame(width: 40, height: 40)
-//                .background(
-//                    Circle()
-//                        .fill(.cardBgLoginFFFFFFFFFFFF)
-//                )
-//                .overlay(
-//                    Circle()
-//                        .stroke(themeManager.textPrimaryLight8_white8, lineWidth: 1)
-//                )
         }
         .buttonStyle(InteractiveButtonStyle())
     }
@@ -66,5 +54,40 @@ struct CircleBackButton: View {
             CircleBackButton()
                 .preferredColorScheme(.dark)
         }
+    }
+}
+
+struct CircleEditButton: View {
+    @Environment(\.dismiss) private var dismiss
+    @Environment(\.colorScheme) private var colorScheme
+    @EnvironmentObject var themeManager : ThemeManager
+    
+    var action: (() -> Void)? = nil
+    
+    var body: some View {
+        Button {
+            if let action = action {
+                action()
+            }
+        } label: {
+            HStack {
+                Image("edit_new")
+                    .renderingMode(.template)
+                    .foregroundColor(Color.textPrimary0E101AF4F1FB)
+            }
+            .frame(width: 40, height: 40)
+            .background(
+                Circle()
+                    .fill(themeManager.white_white4)
+            )
+            .overlay(
+                Circle()
+                    .stroke(
+                        themeManager.textPrimaryLight8_white8,
+                        lineWidth: 1
+                    )
+            )
+        }
+        .buttonStyle(InteractiveButtonStyle())
     }
 }

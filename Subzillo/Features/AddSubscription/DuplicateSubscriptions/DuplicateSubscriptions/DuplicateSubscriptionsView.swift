@@ -107,8 +107,10 @@ struct DuplicateSubscriptionsView: View {
             existingPage = 0
         }
         .onChange(of: dupSubscriptionVM.subscriptioIds) { _ in
-            isProcessing = false
-            advanceOrFinish()
+            if dupSubscriptionVM.subscriptioIds != nil{
+                isProcessing = false
+                advanceOrFinish()
+            }
         }
     }
     
@@ -267,6 +269,7 @@ struct DuplicateSubscriptionsView: View {
             CustomBorderButton(
                 title       : "Save as separate",
                 background  : Color.clear,
+                borderColor : themeManager.textPrimaryLight14_white14,
                 action      : {
                     guard !isProcessing else { return }
                     saveAsSeparate(item: item)
@@ -441,7 +444,8 @@ struct DupSubCard: View {
                         .foregroundColor(Color("TextPrimary_ 0E101A_F4F1FB"))
                     
                     if let cycle = sub.billingCycle {
-                        Text(getShortCycle(cycle))
+//                        Text(getShortCycle(cycle))
+                        Text("\(sub.billingCycleShortLabel ?? "")")
                             .font(.jetBrainsMedium(11))
                             .foregroundColor(Color("TextPrimary_ 0E101A_F4F1FB").opacity(0.6))
                     }

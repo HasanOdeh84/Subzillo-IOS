@@ -44,6 +44,7 @@ public struct SubscriptionInfo: Codable, Hashable {
     var categoryName            : String?
     var cardNumber              : String?
     var cardName                : String?
+    var billingCycleShortLabel  : String?
 }
 
 public struct ResolveDuplicateSubscriptionRequest: Codable {

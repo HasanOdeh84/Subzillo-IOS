@@ -11,11 +11,13 @@ struct InboxScanningView: View {
     //MARK: - Properties
     @State var logId: String
     @StateObject var viewModel                      = EmailSyncProgressViewModel()
+    @State private var isPulsing                    = false
     @State private var isNavigatingToManualEntry    = false
     @State private var progress                     : CGFloat = 0
     @State private var step                         : Int = 0
     @State private var total                        : Double = 0
     @State private var caught                       : [ScanningEmailsData] = []
+    @State private var activeCardBounce             = false
     @EnvironmentObject var themeManager             : ThemeManager
     @Environment(\.colorScheme) var colorScheme
     
@@ -175,7 +177,7 @@ extension InboxScanningView {
                     )
                 }
             }
-            //            .padding(.horizontal, 24)
+            .padding(.horizontal, 24)
             
             scanBeam
             
@@ -334,7 +336,12 @@ extension InboxScanningView {
                     lineWidth: 1
                 )
         }
-        .scaleEffect(1 - CGFloat(distance) * 0.04)
+        //        .scaleEffect(1 - CGFloat(distance) * 0.04)
+        .scaleEffect(
+            isActive
+            ? (activeCardBounce ? 0.92 : 1.02)
+            : (1 - CGFloat(distance) * 0.04)
+        )
         .opacity(1 - CGFloat(distance) * 0.3)
         .shadow(
             color: isMatched
@@ -342,7 +349,21 @@ extension InboxScanningView {
             : .clear,
             radius: 16
         )
+        //            .animation(.easeInOut(duration: 0.35), value: step)
+        .animation(
+            isActive
+            ? .interpolatingSpring(
+                mass: 0.5,
+                stiffness: 180,
+                damping: 8,
+                initialVelocity: 4
+            )
+            : .easeInOut(duration: 0.35),
+            value: activeCardBounce
+        )
         .animation(.easeInOut(duration: 0.35), value: step)
+        //        .scaleEffect(isActive ? (isPulsing ? 1.05 : 0.95) : 1.0)
+        //        .animation(.easeInOut(duration: 0.5).repeatForever(autoreverses: true), value: isPulsing)
     }
 }
 
@@ -482,6 +503,10 @@ extension InboxScanningView {
 // MARK: - Animation
 extension InboxScanningView {
     func startAnimation() {
+        //        withAnimation(.easeInOut(duration: 0.5).repeatForever(autoreverses: true)) {
+        //            isPulsing.toggle()
+        //        }
+        //
         Timer.scheduledTimer(withTimeInterval: 0.07, repeats: true) { timer in
             
             withAnimation(.linear(duration: 0.07)) {
@@ -510,7 +535,20 @@ extension InboxScanningView {
             //                    }
             //                }
             //            }
-            step += 1
+            
+            //            step += 1
+            
+            withAnimation {
+                activeCardBounce = true
+            }
+            
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.12) {
+                withAnimation {
+                    activeCardBounce = false
+                }
+                
+                step += 1
+            }
         }
     }
 }

@@ -1,7 +1,17 @@
 {
   "images" : [
     {
-      "filename" : "Radio.svg",
+      "filename" : "Component 5.svg",
+      "idiom" : "universal"
+    },
+    {
+      "appearances" : [
+        {
+          "appearance" : "luminosity",
+          "value" : "dark"
+        }
+      ],
+      "filename" : "Component 5_.svg",
       "idiom" : "universal"
     }
   ],

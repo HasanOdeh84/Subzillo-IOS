@@ -81,11 +81,7 @@ struct ManualEntryView: View {
     @State private var relationsData            = [
         ManualDataInfo(id: Constants.getUserId(), title: "Me".localized)
     ]
-    @State private var remindersData            = [
-        ManualDataInfo(id: "1", title: "3 days before renewal".localized, value: "-3d"),
-        ManualDataInfo(id: "2", title: "1 day before renewal".localized, value: "-1d"),
-        ManualDataInfo(id: "3", title: "On renewal day".localized, value:"0d")
-    ]
+    @State private var reminderDays: Int = 3
     @State var isPlanTypeError                  : Bool = false
     @State var isAmountError                    : Bool = false
     @State private var activeField              : FieldType?
@@ -102,6 +98,7 @@ struct ManualEntryView: View {
     @State var isCurrencyUpdate                 = false
     var isFromEmail                             : Bool = false
     var fromEmailSync                           : Bool = false
+    @EnvironmentObject var themeManager         : ThemeManager
     
     //MARK: - body
     var body: some View {
@@ -110,69 +107,119 @@ struct ManualEntryView: View {
             
             // MARK: Header
             HStack(alignment: .top, spacing: 8) {
+                //                // MARK: - back
+                //                Button(action: goBack) {
+                //                    Image("back_gray")
+                //                }
+                //
+                //                VStack(alignment: .leading, spacing: 2) {
+                //                    // MARK: Title
+                //                    Text(LocalizedStringKey(isFromEdit == true ? "Edit Details" : "Manual Entry"))
+                //                        .font(.appRegular(24))
+                //                        .foregroundColor(Color.neutralMain700)
+                //
+                //                    // MARK: SubTitle
+                //                    Text(LocalizedStringKey(isFromEdit == true ? "Update your details" : "Add your subscription details manually."))
+                //                        .font(.appRegular(18))
+                //                        .foregroundColor(Color.neutral500)
+                //                }
+                //                Spacer()
                 // MARK: - back
-                Button(action: goBack) {
-                    Image("back_gray")
+                CircleBackButton {
+                    goBack()
                 }
                 
-                VStack(alignment: .leading, spacing: 2) {
-                    // MARK: Title
-                    Text(LocalizedStringKey(isFromEdit == true ? "Edit Details" : "Manual Entry"))
-                        .font(.appRegular(24))
-                        .foregroundColor(Color.neutralMain700)
-                    
-                    // MARK: SubTitle
-                    Text(LocalizedStringKey(isFromEdit == true ? "Update your details" : "Add your subscription details manually."))
-                        .font(.appRegular(18))
-                        .foregroundColor(Color.neutral500)
-                }
                 Spacer()
+                
+                VStack(alignment: .leading, spacing: 1) {
+                    Text(LocalizedStringKey(isFromEdit == true ? "Edit subscription" : "Manual entry"))
+                        .font(.geistSemiBold(16))
+                        .foregroundColor(
+                            Color("TextPrimary_ 0E101A_F4F1FB")
+                        )
+                }
+                .padding(.top, 10)
+                
+                Spacer()
+                
+                // MARK: - Empty Space
+                Color.clear
+                    .frame(width: 40, height: 40)
             }
             .padding(.horizontal)
-            .padding(.top, 15)
+            //            .padding(.top, 15)
             
             ScrollView(showsIndicators: false) {
-                VStack(spacing: 24) {
-                    Text("Required Information")
-                        .font(.appRegular(18))
-                        .foregroundColor(.underlineGray)
-                        .lineLimit(1)
-                        .layoutPriority(1)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .frame(height: 28)
-                        .padding(.leading, 5)
+                VStack(spacing: 14) {
+                    //                    Text("Required Information")
+                    //                        .font(.appRegular(18))
+                    //                        .foregroundColor(.underlineGray)
+                    //                        .lineLimit(1)
+                    //                        .layoutPriority(1)
+                    //                        .frame(maxWidth: .infinity, alignment: .leading)
+                    //                        .frame(height: 28)
+                    //                        .padding(.leading, 5)
+                    VStack(alignment: .leading, spacing: 2) {
+                        // MARK: Title
+                        titleView(title: "Type the details", styledPart: "details")
+                        //                        Text(LocalizedStringKey("Type the "))
+                        //                            .font(.geistSemiBold(28))
+                        //                            .foregroundColor(Color("TextPrimary_ 0E101A_F4F1FB"))
+                        //                        + Text(LocalizedStringKey("details"))
+                        //                            .font(.jetBrainsSemiBoldItalic(28))
+                        //                            .foregroundStyle(themeManager.gradient(style: .vertical))
+                        //
+                        // MARK: SubTitle
+                        Text(LocalizedStringKey("We'll validate against 500+ known providers and auto-fill the rest."))
+                            .font(.geistMedium(12))
+                            .foregroundColor(themeManager.textPrimaryLight6_dark62)
+                    }
                     
                     //MARK: Service field
                     
                     FieldSuggestionView1(
                         text        : $serviceName,
-                        title       : "Service Name",
-                        image       : "gridIcon",
-                        placeHolder : "e.g. Netflix, Spotify, Adobe",
+                        title       : "Subscription Name",
+                        image       : "tag_new",
+                        placeHolder : "e.g. Netflix, ChatGPT...",
                         suggestions : addSubscriptionVM.servicesList ?? [],
                         displayKey  : { $0.name ?? "" },
+                        isService   : true,
                         fieldType   : FieldType.serviceName,
                         activeField : $activeField,
-                        //                        lastActionText : $serviceLastActionText,
                         action      : {
-                            if serviceName != ""{
-                                if serviceName.trimmed != serviceLastActionText{
-                                    serviceLastActionText = serviceName.trimmed
-                                    fetchProviderDataApi()
-                                }
-                            }else{
+                            if serviceName.isEmpty {
                                 clearData()
                             }
                         }
                     )
                     .allowsHitTesting(!isRenew)
                     .opacity(isRenew ? 0.6 : 1.0)
+                    .onChange(of: serviceName) { newValue in
+                        if newValue.count >= 3 {
+                            if newValue.trimmed != serviceLastActionText {
+                                serviceLastActionText = newValue.trimmed
+                                fetchProviderDataApi(showLoader: false)
+                            }
+                        } else {
+                            addSubscriptionVM.providerData = nil
+                            serviceLastActionText = ""
+                            if newValue.isEmpty {
+                                clearData()
+                            }
+                        }
+                    }
+                    .padding(.top, 6)
+                    
+                    if addSubscriptionVM.providerData != nil, !getAllPlans().isEmpty, serviceName.count >= 3 {
+                        matchCard
+                    }
                     
                     //MARK: PlanType field
                     FieldSuggestionView1(
                         text        : $planType,
                         title       : "Plan Type",
-                        image       : "gridicon2",
+                        image       : "tag_new",
                         placeHolder : "Plan type",
                         suggestions : planTypeSuggestions,
                         displayKey  : { (item: PlanTypeItem) in item.name },
@@ -227,13 +274,13 @@ struct ManualEntryView: View {
                      }
                      */
                     
-                    HStack(spacing: 24) {
+                    HStack(spacing: 10) {
                         //MARK: Amount field
                         VStack{
                             FieldSuggestionView1(
                                 text        : $amount,
-                                title       : "Amount",
-                                image       : "currencyIcon",
+                                title       : "Price",
+                                image       : "tag_new",
                                 placeHolder : "0.00",
                                 currency    : selectedCurrency?.symbol ?? Constants.shared.currencySymbol,
                                 isNumberPad : true,
@@ -257,7 +304,7 @@ struct ManualEntryView: View {
                         //MARK: currency field
                         VStack{
                             Button(action: currencySelection) {
-                                FieldView(text: $currency, textValue: selectedCurrency?.code ?? "", title: "Currency", image: "globeIcon", placeHolder: Constants.shared.currencyCode, isButton: true, isText: true)
+                                FieldView(text: $currency, textValue: selectedCurrency?.code ?? "", title: "Currency", image: "globeIcon", placeHolder: Constants.shared.currencyCode, isButton: true, isText: true, isCurrency: true, currencySymbol: selectedCurrency?.symbol ?? "")
                                     .frame(width: 140, alignment: .trailing)
                             }
                             .sheet(isPresented: $showCurrencySheet) {
@@ -283,7 +330,7 @@ struct ManualEntryView: View {
                             Image("info")
                                 .frame(width: 24, height: 24)
                             Text("Amount is not matching with the existing data. Are you sure you want to continue?")
-                                .font(.appRegular(14))
+                                .font(.geistRegular(14))
                                 .foregroundColor(Color.systemInfoBlue)
                             Spacer()
                         }
@@ -291,53 +338,50 @@ struct ManualEntryView: View {
                         .padding(.top, -29)
                     }
                     
-                    //MARK: Category field
-                    Button(action: selectCategory) {
-                        FieldView(text: $category, textValue: selectedCategory?.name ?? category, title: "Category", image: "gridIcon", placeHolder: "Please select", isButton: true, isText: true)
-                    }
-                    .allowsHitTesting(!isRenew)
-                    .opacity(isRenew ? 0.6 : 1.0)
-                    .sheet(isPresented: $showCategorySheet) {
-                        CategoriesBottomSheet(selectedCategory: $selectedCategory, categoryResponse:commonApiVM.categoriesResponse, header: "Select Category", placeholder: "Search")
-                            .presentationDetents([.large])
-                            .presentationDragIndicator(.hidden)
-                    }
-                    
                     //MARK: Billing cycle field
-                    Button(action: selectBilling) {
-                        FieldView(text: $billingCycle, textValue: selectedBilling ?? "", title: "Billing Cycle", image: "billing", placeHolder: "Select billing cycle", isButton: true, isText: true)
-                    }
-                    .sheet(isPresented: $showBillingCycleSheet) {
-                        BillingCycleBottomSheet(selectedBilling         : $selectedBilling,
-                                                billingCyclesResponse   : allBillingCycles(),
-                                                header                  : "Select Billing Cycle",
-                                                placeholder             : "Search",
-                                                onSelect: { billing in
-                            //amount should be changed based on the billing cycle
-                            self.updateAmount(billing: billing)
-                        })
-                        .onAppear {
-                            DispatchQueue.main.async {
-                                sheetHeight = sheetHeight
+                    VStack(alignment: .leading, spacing: 10) {
+                        Text("BILLING CYCLE")
+                            .font(.jetBrainsMedium(11))
+                            .tracking(1)
+                            .foregroundColor(themeManager.textPrimaryLight6_dark62)
+                            .padding(.leading, 5)
+                        
+                        ScrollView(.horizontal, showsIndicators: false) {
+                            HStack(spacing: 4) {
+                                ForEach(allBillingCycles(), id: \.self) { cycle in
+                                    let isSelected = selectedBilling?.lowercased() == cycle.lowercased()
+                                    Button(action: {
+                                        selectedBilling = cycle
+                                        updateAmount(billing: cycle)
+                                    }) {
+                                        Text(cycle)
+                                            .font(.geistMedium(12))
+                                            .foregroundColor(isSelected ? .white : themeManager.textPrimaryLight6_dark62)
+                                            .padding(.horizontal, 16)
+                                            .frame(height: 44)
+                                            .background(
+                                                Group {
+                                                    if isSelected {
+                                                        themeManager.gradient(style: .horizontal)
+                                                            .cornerRadius(10)
+                                                    } else {
+                                                        Color.clear
+                                                    }
+                                                }
+                                            )
+                                            .shadow(color: isSelected ? themeManager.accentTextColor : Color.clear, radius: 4,x: 0,y: 2)
+                                    }
+                                }
                             }
+                            .padding(4)
+                            .frame(minWidth: UIScreen.main.bounds.width - 30, alignment: .leading)
                         }
-                        .id(sheetID)
-                        .overlay {
-                            GeometryReader { geo in
-                                Color.clear
-                                    .preference(
-                                        key: InnerHeightPreferenceKey.self,
-                                        value: geo.size.height
-                                    )
-                            }
-                        }
-                        .onPreferenceChange(InnerHeightPreferenceKey.self) { height in
-                            if height > 150 {
-                                sheetHeight = height
-                            }
-                        }
-                        .presentationDetents([.height(sheetHeight)])
-                        .presentationDragIndicator(.hidden)
+                        .background(themeManager.white_white4)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 16)
+                                .stroke(themeManager.textPrimaryLight8_white8, lineWidth: 1)
+                        )
+                        .cornerRadius(16)
                     }
                     .onChange(of: selectedBilling) { billing in
                         guard let billing else { return }
@@ -355,7 +399,7 @@ struct ManualEntryView: View {
                     
                     //MARK: Next Charge Date field
                     Button(action: dateSelection) {
-                        FieldView(text: $chargeDate, textValue: "", title: "Next Charge Date", image: "Calendar1", placeHolder: "dd/mm/yyyy", isButton: false, isText: true, isDate:true)
+                        FieldView(text: $chargeDate, textValue: "", title: "Next Charge Date", image: "timer_new", placeHolder: "dd/mm/yyyy", isButton: false, isText: true, isDate:true)
                     }
                     .background(
                         DatePickerPopup(isPresented: $isDatePickerPresented, selectedDate: $tempDate) { date in
@@ -366,54 +410,100 @@ struct ManualEntryView: View {
                         }
                     )
                     
-                    if let source = addSubscriptionVM.providerData?.source{
-                        HStack(spacing: 5){
-                            Text("Source: ")
-                                .font(.appBold(14))
-                                .foregroundColor(Color.neutralMain700)
-                                .padding(.leading, 5)
-                            
-                            Text("\(source)")
-                                .font(.appRegular(14))
-                                .foregroundColor(Color.neutralMain700)
-                            
-                            Spacer()
-                        }
-                    }
-                    
-                    if let urls = addSubscriptionVM.providerData?.urls, !urls.isEmpty {
-                        VStack(alignment: .leading, spacing: 4) {
-                            Text("URLs:")
-                                .font(.appBold(14))
-                                .foregroundColor(Color.neutralMain700)
-                            
-                            //                            ForEach(urls, id: \.self) { url in
-                            //                                Text(url)
-                            //                                    .font(.appRegular(14))
-                            //                                    .foregroundColor(Color.neutralMain700)
-                            //                            }
-                            
-                            ForEach(urls, id: \.self) { url in
-                                if let link = URL(string: url) {
-                                    Link(url, destination: link)
-                                        .font(.appRegular(14))
+                    //MARK: Category field
+                    VStack(alignment: .leading, spacing: 10) {
+                        Text("CATEGORY")
+                            .font(.jetBrainsMedium(11))
+                            .tracking(1)
+                            .foregroundColor(themeManager.textPrimaryLight6_dark62)
+                            .padding(.leading, 5)
+                        
+                        if let categories = commonApiVM.categoriesResponse {
+                            FlowLayout {
+                                ForEach(categories, id: \.id) { cat in
+                                    let isSelected = selectedCategory?.id == cat.id
+                                    Button(action: {
+                                        selectedCategory = cat
+                                        category = cat.name ?? ""
+                                    }) {
+                                        Text(cat.name ?? "")
+                                            .font(.geistMedium(12))
+                                            .foregroundColor(isSelected ? .white : themeManager.textPrimaryLight6_dark62)
+                                            .padding(.horizontal, 16)
+                                            .frame(height: 36)
+                                            .background(
+                                                Group {
+                                                    if isSelected {
+                                                        themeManager.gradient(style: .horizontal)
+                                                    } else {
+                                                        themeManager.white_white4
+                                                    }
+                                                }
+                                            )
+                                            .cornerRadius(18)
+                                            .overlay(
+                                                RoundedRectangle(cornerRadius: 18)
+                                                    .stroke(isSelected ? Color.clear : themeManager.textPrimaryLight8_white8, lineWidth: 1)
+                                            )
+                                            .shadow(color: isSelected ? themeManager.accentTextColor : Color.clear, radius: 5,x: 0,y: 3)
+                                    }
                                 }
                             }
+                            .padding(.horizontal, 5)
                         }
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .padding(.leading, 5)
                     }
+                    .allowsHitTesting(!isRenew)
+                    .opacity(isRenew ? 0.6 : 1.0)
+                    
+                    //                    if let source = addSubscriptionVM.providerData?.source{
+                    //                        HStack(spacing: 5){
+                    //                            Text("Source: ")
+                    //                                .font(.geistBold(14))
+                    //                                .foregroundColor(Color.neutralMain700)
+                    //                                .padding(.leading, 5)
+                    //
+                    //                            Text("\(source)")
+                    //                                .font(.geistRegular(14))
+                    //                                .foregroundColor(Color.neutralMain700)
+                    //
+                    //                            Spacer()
+                    //                        }
+                    //                    }
+                    //
+                    //                    if let urls = addSubscriptionVM.providerData?.urls, !urls.isEmpty {
+                    //                        VStack(alignment: .leading, spacing: 4) {
+                    //                            Text("URLs:")
+                    //                                .font(.geistBold(14))
+                    //                                .foregroundColor(Color.neutralMain700)
+                    //
+                    //                            //                            ForEach(urls, id: \.self) { url in
+                    //                            //                                Text(url)
+                    //                            //                                    .font(.appRegular(14))
+                    //                            //                                    .foregroundColor(Color.neutralMain700)
+                    //                            //                            }
+                    //
+                    //                            ForEach(urls, id: \.self) { url in
+                    //                                if let link = URL(string: url) {
+                    //                                    Link(url, destination: link)
+                    //                                        .font(.geistRegular(14))
+                    //                                }
+                    //                            }
+                    //                        }
+                    //                        .frame(maxWidth: .infinity, alignment: .leading)
+                    //                        .padding(.leading, 5)
+                    //                    }
                     
                     //MARK: Optional Details
                     Button(action: optionalDetailsAction) {
                         HStack(spacing: 8) {
                             Text("Optional Details")
-                                .font(.appRegular(18))
-                                .foregroundColor(.whiteBlackBGnoPic)
+                                .font(.geistMedium(16))
+                                .foregroundColor(themeManager.textPrimaryLight6_dark62)
                                 .lineLimit(1)
                                 .layoutPriority(1)
                                 .padding(.leading, 5)
-                            DashedHorizontalDivider(dash: [3,3])
+                            //                            DashedHorizontalDivider(dash: [3,3])
+                            Spacer()
                             HStack {
                                 Image("downArrow")
                                     .rotationEffect(.degrees(isMoreEnable ? 180 : 0))
@@ -423,11 +513,12 @@ struct ManualEntryView: View {
                         }
                         .frame(height: 28)
                     }
+                    .padding(.trailing, 10)
                     
                     if isMoreEnable == true {
                         
                         Button(action: selectpaymentMethod) {
-                            FieldView(text: $paymentMethod, textValue: paymentMethod, title: "Payment Method", image: "Calendar2", placeHolder: "Select payment method", isButton: true, isText: true)
+                            FieldView(text: $paymentMethod, textValue: paymentMethod, title: "Payment Method", image: "Calendar2", placeHolder: "Select payment method", isButton: true, isText: true, isPayment: true)
                         }
                         .sheet(isPresented: $showPaymentMethodSheet) {
                             PaymentMethodsSheet(selectedPaymentMethod: $selectedPayment, paymentMethodResponse:commonApiVM.paymentMethodResponse, header: "Select Payment Method", placeholder: "Search")
@@ -461,20 +552,21 @@ struct ManualEntryView: View {
                         })
                         .frame(height: canAddMembers == true ? Double(75 + (52 * relationsData.count)) : Double(30 + (52 * relationsData.count)))
                         
-                        ListView(type: .reminders, title: "Renewal Reminders", addMore: false, data: $remindersData, selectedIndex: $reminderInedex)
-                            .frame(height: Double(30 + (52 * remindersData.count)))
+                        ReminderSliderView(reminderDays: $reminderDays)
                         
                         VStack(alignment: .leading, spacing: 4) {
                             Text("Notes")
-                                .font(.appRegular(14))
-                                .foregroundColor(Color.neutralMain700)
+                                .font(.jetBrainsMedium(11))
+                                .tracking(1)
+                                .textCase(.uppercase)
+                                .foregroundColor(themeManager.textPrimaryLight6_dark62)
                             VStack{
                                 
                                 if notes.isEmpty {
                                     Text("Add any additional notes about this subscription...")
                                         .background(Color.clear)
-                                        .font(.appRegular(14))
-                                        .foregroundColor(.neutral500)
+                                        .font(.geistRegular(15))
+                                        .foregroundColor(themeManager.textPrimaryLight6_dark62)
                                         .frame(maxWidth: .infinity, alignment: .leading)
                                 }
                                 TextEditor(text: $notes)
@@ -484,8 +576,8 @@ struct ManualEntryView: View {
                                     .autocapitalization(.none)
                                     .frame(maxWidth: .infinity, alignment: .leading)
                                     .multilineTextAlignment(.leading)
-                                    .font(.appRegular(14))
-                                    .foregroundColor(Color.neutralMain700)
+                                    .font(.geistRegular(15))
+                                    .foregroundColor(.textPrimary0E101AF4F1FB)
                                     .padding(.horizontal, -5)
                                     .padding(.top, -8)
                                     .offset(x: 0, y: notes.isEmpty ? -25 : 0)
@@ -495,11 +587,11 @@ struct ManualEntryView: View {
                             .padding(16)
                             .frame(height: 110)
                             .overlay(
-                                RoundedRectangle(cornerRadius: 12)
-                                    .stroke(.neutral300Border, lineWidth: 1)
+                                RoundedRectangle(cornerRadius: 14)
+                                    .stroke(themeManager.textPrimaryLight8_white8, lineWidth: 1)
                             )
-                            .background(Color.whiteNeutralCardBG)
-                            .cornerRadius(12)
+                            .background(themeManager.white_white4)
+                            .cornerRadius(14)
                         }
                         .padding(5)
                         
@@ -562,9 +654,19 @@ struct ManualEntryView: View {
                          }
                          */
                     }
-                    CustomButton(title: isFromEdit == true ? "Save Changes" : "Save Subscription", action: saveAction)
-                        .padding(.horizontal, 0)
-                        .padding(.bottom, 120)
+                    
+                    GradientBgButton(
+                        title       : isFromEdit == true ? "Save Changes" : "Save Subscription",
+                        isSolid     : true,
+                        showChevron : true
+                    ) {
+                        saveAction()
+                    }
+                    .padding(5)
+                    .padding(.bottom, 120)
+                    //                    CustomButton(title: isFromEdit == true ? "Save Changes" : "Save Subscription", action: saveAction)
+                    //                        .padding(5)
+                    //                        .padding(.bottom, 120)
                 }
             }
             .padding(.horizontal, 15)
@@ -572,7 +674,7 @@ struct ManualEntryView: View {
         }
         .navigationBarBackButtonHidden()
         .padding(.top, 10)
-        .background(.neutralBg100)
+        .applyAppBackground()
         //MARK: OnAppear
         .onAppear{
             addSubscriptionVM.getServiceProvidersList()
@@ -625,19 +727,59 @@ struct ManualEntryView: View {
     
     //MARK: - User defined methods
     
-    func fetchProviderDataApi(){
+    @ViewBuilder
+    private func titleView(title: String, styledPart: String) -> some View {
+        if !styledPart.isEmpty && title.contains(styledPart) {
+            buildLine(line: title, styledPart: styledPart, isMask: false)
+                .multilineTextAlignment(.center)
+                .overlay(
+                    themeManager.gradient(style: .vertical)
+                        .mask(
+                            buildLine(line: title, styledPart: styledPart, isMask: true)
+                                .multilineTextAlignment(.center)
+                        )
+                )
+                .foregroundColor(.clear)
+        } else {
+            Text(title)
+                .font(.geistSemiBold(28))
+                .foregroundColor(Color("TextPrimary_ 0E101A_F4F1FB"))
+                .multilineTextAlignment(.center)
+        }
+    }
+    
+    private func buildLine(line: String, styledPart: String, isMask: Bool) -> Text {
+        let parts = line.components(separatedBy: styledPart)
+        var result = Text("")
+        for (index, part) in parts.enumerated() {
+            result = result + Text(part)
+                .font(.geistSemiBold(28))
+                .foregroundColor(isMask ? .clear : Color("TextPrimary_ 0E101A_F4F1FB"))
+            
+            if index < parts.count - 1 {
+                result = result + Text(styledPart)
+                    .font(.jetBrainsSemiBoldItalic(28))
+                    .italic()
+                    .foregroundColor(isMask ? .black : .clear)
+            }
+        }
+        return result
+    }
+    
+    func fetchProviderDataApi(showLoader: Bool = true){
         addSubscriptionVM.fetchProviderData(input       : FetchProviderDataRequest(userId           : Constants.getUserId(),
-                                                                                   serviceName      : serviceName.trimmed,
-                                                                                   providerName     : nil,
+                                                                                   serviceName      : nil,
+                                                                                   providerName     : serviceName.trimmed,
                                                                                    currencyCode     : selectedCurrency?.code ?? "" == "" ? Constants.shared.currencyCode : selectedCurrency?.code ?? ""),
-                                            showLoader  : true)
+                                            showLoader  : showLoader,
+                                            endPoint    : APIEndpoint.fetchProviderDbPlans)
     }
     
     func getAllPlans() -> [ProviderSubscriptionPlan] {
         guard let providers = addSubscriptionVM.providerData?.providerSubscriptionPlansList else { return [] }
         return providers.compactMap { $0.providerSubscriptionPlansList }.flatMap { $0 }
     }
-
+    
     func filteredPricePlans() -> [ProviderSubscriptionPlan] {
         let plans = getAllPlans()
         guard !plans.isEmpty else {
@@ -1211,8 +1353,11 @@ struct ManualEntryView: View {
         }
         if isFromEdit || isRenew{
             let renewalReminder = globalSubscriptionData?.renewalReminder ?? []
-            for i in remindersData.indices {
-                remindersData[i].isSelected = renewalReminder.contains(remindersData[i].value ?? "")
+            if let first = renewalReminder.first {
+                let stripped = first.replacingOccurrences(of: "-", with: "").replacingOccurrences(of: "d", with: "")
+                reminderDays = Int(stripped) ?? 0
+            } else {
+                reminderDays = 3
             }
             notes = globalSubscriptionData?.notes ?? ""
             serviceName = globalSubscriptionData?.serviceName ?? ""
@@ -1394,19 +1539,9 @@ struct ManualEntryView: View {
         }
         var renewalReminder         :[String] = []
         var renewalReminderValue = ""
-        for item in remindersData
-        {
-            if item.isSelected ?? false == true
-            {
-                renewalReminder.append(item.value!)
-                if renewalReminderValue != "" {
-                    renewalReminderValue = "\(renewalReminderValue)\n\(item.title ?? "")"
-                }
-                else{
-                    renewalReminderValue = item.title ?? ""
-                }
-            }
-        }
+        let val = reminderDays == 0 ? "0d" : "-\(reminderDays)d"
+        renewalReminder.append(val)
+        renewalReminderValue = reminderDays == 0 ? "Off" : "\(reminderDays) days before renewal"
         
         let input = AddSubscriptionRequest(userId               : Constants.getUserId(),
                                            serviceName          : serviceName.trimmed,
@@ -1605,6 +1740,7 @@ struct SecureCCVField: View
     var title           : String?
     var placeHolder     : String?
     var maxDigits       : Int = 3
+    @EnvironmentObject var themeManager: ThemeManager
     
     var masked: String {
         String(repeating: "•", count: ccv.count)
@@ -1613,8 +1749,10 @@ struct SecureCCVField: View
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
             Text(LocalizedStringKey(title ?? ""))
-                .font(.appRegular(14))
-                .foregroundColor(.neutralMain700)
+                .font(.jetBrainsMedium(11))
+                .tracking(1)
+                .textCase(.uppercase)
+                .foregroundColor(themeManager.textPrimaryLight6_dark62)
             HStack{
                 SecureField(LocalizedStringKey(placeHolder ?? ""), text: $ccv)
                     .keyboardType(.numberPad)
@@ -1624,17 +1762,17 @@ struct SecureCCVField: View
                     .onChange(of: ccv) { newValue in
                         filterDigitsAndLimit(maxDigits: maxDigits)
                     }
-                    .font(.appRegular(14))
-                    .foregroundColor(.neutral2500)
+                    .font(.geistRegular(15))
+                    .foregroundColor(.textPrimary0E101AF4F1FB)
                 
             }
             .padding(16)
             .frame(height: 52)
-            .background(.whiteNeutralCardBG)
+            .background(themeManager.white_white4)
             .cornerRadius(12)
             .overlay(
                 RoundedRectangle(cornerRadius: 12)
-                    .stroke(Color.neutral2200, lineWidth: 1)
+                    .stroke(themeManager.textPrimaryLight8_white8, lineWidth: 1)
             )
         }
     }
@@ -1663,16 +1801,60 @@ struct FieldView: View
     var maxDigits       : Int = 0
     var isNumberPad     : Bool = false
     var maxCharacters   : Int = 0
+    var isPayment       = false
     var isDate          = false
     var isCardNo        = false
-    
+    var isCurrency      = false
+    var currencySymbol  = ""
+    @EnvironmentObject var themeManager: ThemeManager
     var body: some View {
-        VStack(alignment: .leading, spacing: 4) {
+        VStack(alignment: .leading, spacing: 8) {
+            
             Text(LocalizedStringKey(title ?? ""))
-                .font(.appRegular(14))
-                .foregroundColor(.neutralMain700)
+                .font(.jetBrainsMedium(11))
+                .tracking(1)
+                .textCase(.uppercase)
+                .foregroundStyle(themeManager.textPrimaryLight6_dark62)
+                .padding(.bottom, 5)
+            
             HStack{
-                Image(image ?? "")
+                if isDate || isPayment{
+                    Image(image ?? "")
+                        .renderingMode(.template)
+                        .foregroundStyle(themeManager.accentTextColor)
+                }else{
+                    if !isCurrency{
+                        Image(image ?? "")
+                            .renderingMode(.template)
+                            .foregroundStyle(.textPrimary0E101AF4F1FB.opacity(0.6) )
+                    }
+                }
+                
+                if isCurrency{
+                    HStack(spacing: 10){
+                        Text(LocalizedStringKey(currencySymbol))
+                            .multilineTextAlignment(.leading)
+                            .font(.geistBold(15))
+                            .foregroundColor(.textPrimary0E101AF4F1FB)
+                        
+                        if textValue != ""
+                        {
+                            Text(LocalizedStringKey(textValue ?? ""))
+                                .multilineTextAlignment(.leading)
+                                .font(isCurrency ? .geistBold(15) : .geistRegular(15))
+                                .foregroundColor(.textPrimary0E101AF4F1FB)
+                        }
+                        else{
+                            Text(LocalizedStringKey(placeHolder ?? ""))
+                                .multilineTextAlignment(.leading)
+                                .font(.geistRegular(15))
+                                .foregroundColor(themeManager.textPrimaryLight6_dark62)
+                        }
+                        
+                        Spacer()
+                    }
+                }
+                
                 if isText == true {
                     if isDate{
                         if text != ""
@@ -1680,35 +1862,39 @@ struct FieldView: View
                             Text(text)
                                 .padding(6)
                                 .multilineTextAlignment(.leading)
-                                .font(.appRegular(14))
-                                .foregroundColor(Color.neutralMain700)
+                                .font(.geistRegular(15))
+                                .foregroundStyle(
+                                    Color.textPrimary0E101AF4F1FB
+                                )
                                 .frame(maxWidth:.infinity, alignment: .leading)
                         }
                         else{
                             Text(LocalizedStringKey(placeHolder ?? ""))
                                 .padding(6)
                                 .multilineTextAlignment(.leading)
-                                .font(.appRegular(14))
-                                .foregroundColor(Color.neutral2500)
+                                .font(.geistRegular(15))
+                                .foregroundColor(themeManager.textPrimaryLight6_dark62)
                                 .frame(maxWidth:.infinity, alignment: .leading)
                         }
                     }else{
-                        if textValue != ""
-                        {
-                            Text(LocalizedStringKey(textValue ?? ""))
-                                .padding(6)
-                                .multilineTextAlignment(.leading)
-                                .font(.appRegular(14))
-                                .foregroundColor(Color.neutralMain700)
-                                .frame(maxWidth:.infinity, alignment: .leading)
-                        }
-                        else{
-                            Text(LocalizedStringKey(placeHolder ?? ""))
-                                .padding(6)
-                                .multilineTextAlignment(.leading)
-                                .font(.appRegular(14))
-                                .foregroundColor(Color.neutral2500)
-                                .frame(maxWidth:.infinity, alignment: .leading)
+                        if !isCurrency{
+                            if textValue != ""
+                            {
+                                Text(LocalizedStringKey(textValue ?? ""))
+                                    .padding(isCurrency ? 0 : 6)
+                                    .multilineTextAlignment(.leading)
+                                    .font(isCurrency ? .geistBold(15) : .geistRegular(15))
+                                    .foregroundColor(.textPrimary0E101AF4F1FB)
+                                    .frame(maxWidth:.infinity, alignment: .leading)
+                            }
+                            else{
+                                Text(LocalizedStringKey(placeHolder ?? ""))
+                                    .padding(6)
+                                    .multilineTextAlignment(.leading)
+                                    .font(.geistRegular(15))
+                                    .foregroundColor(themeManager.textPrimaryLight6_dark62)
+                                    .frame(maxWidth:.infinity, alignment: .leading)
+                            }
                         }
                     }
                 }
@@ -1716,16 +1902,19 @@ struct FieldView: View
                     if isNumberPad{
                         HStack{
                             if maxDigits == 4{
-                                Text("**** **** ****")
-                                    .foregroundColor(.whiteBlackBGnoPic)
+                                Text("•••• ••••")
+                                    .font(.geistRegular(14))
+                                    .foregroundStyle(
+                                        Color.textPrimary0E101AF4F1FB
+                                    )
                             }
                             TextField(LocalizedStringKey(maxDigits == 4 ? "" : placeHolder ?? ""), text: $text)
                                 .keyboardType(isNumberPad == true ? .decimalPad : .default)
                                 .keyboardType(.default)
                                 .autocapitalization(.none)
                                 .multilineTextAlignment(.leading)
-                                .font(.appRegular(14))
-                                .foregroundColor(.whiteBlackBGnoPic)
+                                .font(.geistRegular(15))
+                                .foregroundColor(.textPrimary0E101AF4F1FB)
                                 .onChange(of: text) { newValue in
                                     if isCardNo{
                                         filterDigitsAndLimit(maxDigits: maxDigits)
@@ -1738,16 +1927,19 @@ struct FieldView: View
                     }else{
                         HStack{
                             if maxDigits == 4{
-                                Text("**** **** ****")
-                                    .foregroundColor(.whiteBlackBGnoPic)
+                                Text("4829")
+                                    .font(.geistRegular(14))
+                                    .foregroundStyle(
+                                        Color.textPrimary0E101AF4F1FB
+                                    )
                             }
                             TextField(LocalizedStringKey(maxDigits == 4 ? "" : placeHolder ?? ""), text: $text)
                                 .keyboardType(isNumberPad == true ? .numberPad : .default)
                                 .keyboardType(.default)
                                 .autocapitalization(.none)
                                 .multilineTextAlignment(.leading)
-                                .font(.appRegular(14))
-                                .foregroundColor(.whiteBlackBGnoPic)
+                                .font(.geistRegular(15))
+                                .foregroundColor(.textPrimary0E101AF4F1FB)
                                 .onChange(of: text) { newValue in
                                     filterDigitsAndLimit(maxDigits: maxDigits)
                                 }
@@ -1762,12 +1954,19 @@ struct FieldView: View
             }
             .padding(16)
             .frame(height: 52)
-            .overlay(
-                RoundedRectangle(cornerRadius: 12)
-                    .stroke(.neutral300Border, lineWidth: 1)
+            .background(themeManager.white_white4)
+            .overlay {
+                
+                RoundedRectangle(cornerRadius: 14)
+                    .stroke(
+                        Color.textPrimary0E101AF4F1FB
+                            .opacity(0.08),
+                        lineWidth: 1
+                    )
+            }
+            .clipShape(
+                RoundedRectangle(cornerRadius: 14)
             )
-            .background(Color.whiteNeutralCardBG)
-            .cornerRadius(12)
         }
         .padding(5)
     }
@@ -1841,10 +2040,11 @@ struct FieldSuggestionView<Item: Identifiable>: View {
         }
     }
     var onSelect: (Item) -> Void = {_ in }
+    @EnvironmentObject var themeManager : ThemeManager
     
     //MARK: - body
     var body: some View {
-        VStack(alignment: .leading, spacing: 4) {
+        VStack(alignment: .leading, spacing: 8) {
             
             // MARK: - Title
             Text(LocalizedStringKey(title ?? ""))
@@ -1928,7 +2128,9 @@ struct FieldSuggestionView<Item: Identifiable>: View {
                                 closeSuggestions()
                             }
                             if index < filtered.count - 1 {
-                                DashedHorizontalDivider()
+                                //                                DashedHorizontalDivider()
+                                Divider()
+                                    .overlay(themeManager.textPrimaryLight8_white8)
                             }
                         }
                     }
@@ -1941,10 +2143,10 @@ struct FieldSuggestionView<Item: Identifiable>: View {
         }
         .padding(.horizontal, 5)
         .overlay(
-            RoundedRectangle(cornerRadius: 12)
-                .stroke(.neutral2200, lineWidth: 1)
+            RoundedRectangle(cornerRadius: 14)
+                .stroke(themeManager.textPrimaryLight8_white8, lineWidth: 1)
         )
-        .background(Color.whiteNeutralCardBG)
+        .background(themeManager.white_white4)
         .cornerRadius(12)
     }
     
@@ -1968,6 +2170,7 @@ struct FieldSuggestionView1<Item: Identifiable>: View {
     var suggestions     : [Item]
     var displayKey      : (Item) -> String
     var borderColor     = true
+    var isService       = false
     @FocusState private var isFocused   : Bool
     var fieldType                       : FieldType
     @Binding var activeField            : FieldType?
@@ -1989,28 +2192,33 @@ struct FieldSuggestionView1<Item: Identifiable>: View {
     
     let action          : () -> Void
     
+    @EnvironmentObject var themeManager: ThemeManager
+    
     var body: some View {
-        VStack(alignment: .leading, spacing: 4) {
+        VStack(alignment: .leading, spacing: 8) {
             
             // MARK: - Title
             Text(LocalizedStringKey(title ?? ""))
-                .font(.appRegular(14))
-                .foregroundColor(.neutralMain700)
+                .font(.jetBrainsMedium(11))
+                .tracking(1)
+                .textCase(.uppercase)
+                .foregroundColor(themeManager.textPrimaryLight6_dark62)
             
             // MARK: - TextField Area
             HStack {
                 if isNumberPad{
-                    Text(currency ?? "" == "" ? Constants.shared.currencySymbol : currency ?? "")
-                        .foregroundStyle(Color.neutral400)
-                        .font(.appRegular(24))
+                    //                    Text(currency ?? "" == "" ? Constants.shared.currencySymbol : currency ?? "")
+                    //                        .foregroundStyle(Color.neutral400)
+                    //                        .font(.appRegular(24))
+                    Image(image ?? "")
                 }else{
                     Image(image ?? "")
                 }
                 TextField(LocalizedStringKey(placeHolder ?? ""), text: $text)
                     .keyboardType(isNumberPad ? .decimalPad : .default)
                     .autocapitalization(.none)
-                    .font(.appRegular(14))
-                    .foregroundColor(.whiteBlackBGnoPic)
+                    .font(.geistRegular(15))
+                    .foregroundColor(.textPrimary0E101AF4F1FB)
                     .focused($isFocused)
                     .onChange(of: isFocused) { focused in
                         if focused {
@@ -2035,18 +2243,21 @@ struct FieldSuggestionView1<Item: Identifiable>: View {
             }
             .padding(16)
             .frame(height: 52)
-            .background(Color.whiteNeutralCardBG)
+            .background(themeManager.white_white4)
+            .cornerRadius(14)
             .overlay(
-                RoundedRectangle(cornerRadius: 12)
-                //                    .stroke(.neutral300Border, lineWidth: 1)
-                    .stroke(borderColor ? .neutral300Border : .red, lineWidth: borderColor ? 1 : 2)
+                selectionFieldBorderView
+                //                RoundedRectangle(cornerRadius: 14)
+                //                //                    .stroke(.neutral300Border, lineWidth: 1)
+                //                    .stroke(borderColor ? themeManager.textPrimaryLight8_white8 : .red, lineWidth: borderColor ? 1 : 2)
             )
-            .cornerRadius(12)
             
             // MARK: - Suggestion List
             if showSuggestions {
-                suggestionList
-                    .padding(.top, 10)
+                if !isService{
+                    suggestionList
+                        .padding(.top, 10)
+                }
             }
         }
         .padding(5)
@@ -2064,7 +2275,7 @@ struct FieldSuggestionView1<Item: Identifiable>: View {
                         VStack(spacing: 0) {
                             HStack {
                                 Text(LocalizedStringKey(displayKey(item)))
-                                    .foregroundColor(.neutralMain700)
+                                    .foregroundColor(.textPrimary0E101AF4F1FB)
                                 Spacer()
                             }
                             .padding(.vertical, 10)
@@ -2074,30 +2285,45 @@ struct FieldSuggestionView1<Item: Identifiable>: View {
                                 closeSuggestions()
                             }
                             if index < filtered.count - 1 {
-                                DashedHorizontalDivider()
+                                Divider()
+                                    .overlay(themeManager.textPrimaryLight8_white8)
+                                    .padding(.horizontal, -20)
+                                //                                DashedHorizontalDivider()
                             }
                         }
                     }
                 }
                 .padding(.horizontal, 16)
-                .padding(.bottom, 10)
+                //                .padding(.bottom, 10)
             }
             .frame(height: height)
             .clipped()
         }
         .padding(.horizontal, 5)
         .overlay(
-            RoundedRectangle(cornerRadius: 12)
-                .stroke(.neutral2200, lineWidth: 1)
+            RoundedRectangle(cornerRadius: 14)
+                .stroke(themeManager.textPrimaryLight8_white8, lineWidth: 1)
         )
-        .background(Color.whiteNeutralCardBG)
-        .cornerRadius(12)
+        .background(themeManager.white_white4)
+        .cornerRadius(14)
     }
     
     private func closeSuggestions() {
         DispatchQueue.main.async {
             isFocused = false
             activeField = nil
+        }
+    }
+    
+    @ViewBuilder
+    private var selectionFieldBorderView: some View {
+        if isFocused{
+            themeManager.selectionFieldBorder
+        }else{
+            //            RoundedRectangle(cornerRadius: 14)
+            //                .stroke(themeManager.textPrimaryLight8_white8, lineWidth: 1)
+            RoundedRectangle(cornerRadius: 14)
+                .stroke(borderColor ? themeManager.textPrimaryLight8_white8 : .red, lineWidth: borderColor ? 1 : 2)
         }
     }
 }
@@ -2116,84 +2342,63 @@ struct ListView: View {
     @State private var sheetID                  = UUID()
     var onDismiss   : (() -> Void)?
     var onAddFamily : ((String, String, String, String) -> Void)?
+    @EnvironmentObject var themeManager         : ThemeManager
     
     var body: some View {
         VStack(spacing: 0) {
             Text(LocalizedStringKey(title ?? ""))
-                .font(.appRegular(14))
-                .foregroundColor(.neutralMain700)
-                .padding(.bottom, 4)
+                .font(.jetBrainsMedium(11))
+                .tracking(1)
+                .textCase(.uppercase)
+                .foregroundColor(themeManager.textPrimaryLight6_dark62)
+                .padding(.bottom, 8)
                 .frame(maxWidth:.infinity, alignment: .leading)
             VStack(alignment: .leading, spacing: 0) {
                 
                 if type == .reminders {
                     remindersStack
+                        .background(.clear)
                 } else {
                     defaultList
+                        .background(.clear)
                 }
                 
                 if addMore == true
                 {
-                    Divider()
-                        .overlay(Color.neutral2200)
+                    if type != .reminders{
+                        if data.count != 0 {
+                            Divider()
+                                .overlay(themeManager.textPrimaryLight8_white8)
+                        }
+                    }else{
+                        Divider()
+                            .overlay(themeManager.textPrimaryLight8_white8)
+                    }
                     VStack(alignment: .center, spacing: 0) {
                         Button(action: addMoreAction) {
                             HStack(spacing: 8) {
                                 Image("AddMore")
+                                    .renderingMode(.template)
+                                    .foregroundStyle(themeManager.accentTextColor)
                                     .frame(width: 20, height: 20)
                                 Text(LocalizedStringKey(type == .cards ? "Add New Card" : "Add New Member"))
-                                    .font(.appRegular(14))
-                                    .foregroundColor(Color.blueMain700)
+                                    .font(.geistRegular(15))
+                                    .foregroundColor(themeManager.accentTextColor)
                             }
                             .frame(maxWidth:.infinity, alignment: .center)
                             .frame(height: 52)
                         }
-                        .sheet(isPresented: $showNewCardSheet,onDismiss:{
-                            if shouldCallAPI {
-                                onDismiss?()
-                                shouldCallAPI = false
-                            }
-                        }) {
-                            AddNewCardSheet(shouldCallAPI:$shouldCallAPI)
-                            //                                .onAppear {
-                            //                                    DispatchQueue.main.async {
-                            //                                        sheetHeight = sheetHeight
-                            //                                    }
-                            //                                }
-                            //                                .id(sheetID)
-                            //                                .overlay {
-                            //                                    GeometryReader { geo in
-                            //                                        Color.clear
-                            //                                            .preference(
-                            //                                                key: InnerHeightPreferenceKey.self,
-                            //                                                value: geo.size.height
-                            //                                            )
-                            //                                    }
-                            //                                }
-                            //                                .onPreferenceChange(InnerHeightPreferenceKey.self) { height in
-                            //                                    if height > 150 {
-                            //                                        sheetHeight = height
-                            //                                    }
-                            //                                }
-                            //                                .presentationDetents([.height(sheetHeight)])
-                                .presentationDetents([.medium, .large])
-                                .presentationDragIndicator(.hidden)
-                            //                                .interactiveDismissDisabled(false)
-                        }
-                        //                        .onChange(of: showNewCardSheet) { newValue in
-                        //                            if newValue == false {
-                        //                                onDismiss?()
-                        //                            }
-                        //                        }
+                        .buttonStyle(.plain)
                     }
+                    .background(Color.clear)
                 }
             }
             .overlay(
-                RoundedRectangle(cornerRadius: 16)
-                    .stroke(.neutral300Border, lineWidth: 1)
+                RoundedRectangle(cornerRadius: 14)
+                    .stroke(themeManager.textPrimaryLight8_white8, lineWidth: 1)
             )
-            .background(Color.whiteNeutralCardBG)
-            .cornerRadius(16)
+            .background(themeManager.white_white4)
+            .cornerRadius(14)
         }
         .padding(5)
         .onReceive(NotificationCenter.default.publisher(for: .closeAllBottomSheets)) { _ in
@@ -2226,7 +2431,7 @@ struct ListView: View {
                     
                     if index < data.count - 1 {
                         Divider()
-                            .overlay(Color.neutral2200)
+                            .overlay(themeManager.textPrimaryLight8_white8)
                     }
                     
                 }
@@ -2250,7 +2455,7 @@ struct ListView: View {
                     
                     if index < data.count - 1 {
                         Divider()
-                            .overlay(Color.neutral2200)
+                            .overlay(themeManager.textPrimaryLight8_white8)
                     }
                 }
                 .contentShape(Rectangle())
@@ -2319,7 +2524,10 @@ struct ListView: View {
         {
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
                 sheetID = UUID()
-                showNewCardSheet = true
+                //showNewCardSheet = true
+                
+                AppIntentRouter.shared.navigate(to: .addNewCardSheet(shouldCallAPI: shouldCallAPI))
+                
             }
         }else if type == .relations{
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
@@ -2334,24 +2542,25 @@ struct BillingCycleItem: View {
     var title           : String?
     var subtitle        : String?
     var isSelected      : Bool = false
+    @EnvironmentObject var themeManager: ThemeManager
     
     var body: some View {
         HStack(spacing: 12) {
             HStack(spacing: 12) {
                 Image(isSelected == true ? "SelectedRadio" : "UnSelectedRadio")
                 Text(LocalizedStringKey(title ?? ""))
-                    .font(.appRegular(14))
-                    .foregroundColor(.neutralMain700)
+                    .font(.geistRegular(15))
+                    .foregroundColor(.textPrimary0E101AF4F1FB)
             }
             Spacer()
             Text(LocalizedStringKey(subtitle ?? ""))
-                .font(.appRegular(14))
-                .foregroundColor(.neutral500)
+                .font(.geistRegular(15))
+                .foregroundColor(themeManager.textPrimaryLight6_dark62)
                 .multilineTextAlignment(.trailing)
         }
         .padding(16)
         .frame(height: 52)
-        .background(.whiteNeutralCardBG)
+        .background(themeManager.white_white4)
     }
 }
 
@@ -2361,43 +2570,66 @@ struct SubscriptionItem: View {
     var subtitle                : String?
     var isSelected              : Bool = false
     var isSubTitlePresent       : Bool = false
+    @EnvironmentObject var themeManager: ThemeManager
     
     var body: some View {
         HStack(spacing: 12) {
-            Image(isSelected == true ? "SelectedRadio" : "UnSelectedRadio")
+            if isSelected{
+                Image(isSelected == true ? "SelectedRadio" : "UnSelectedRadio")
+                    .renderingMode(.template)
+                    .foregroundStyle(themeManager.accentGradient)
+            }else{
+                Image("UnSelectedRadio")
+            }
             Text(LocalizedStringKey(title ?? ""))
-                .font(.appRegular(14))
-                .foregroundColor(.neutralMain700)
+                .font(.geistRegular(15))
+                .foregroundColor(.textPrimary0E101AF4F1FB)
             if isSubTitlePresent == true {
                 Text("**** **** **** \(subtitle ?? "")")
-                    .font(.appRegular(14))
-                    .foregroundColor(.neutral500)
+                    .font(.geistRegular(15))
+                    .foregroundColor(themeManager.textPrimaryLight6_dark62)
                     .multilineTextAlignment(.trailing)
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(16)
         .frame(height: 52)
-        .background(.whiteNeutralCardBG)
+        .background(themeManager.white_white4)
     }
 }
 
 //MARK: - ReminderItem
 struct ReminderItem: View {
-    var title                   : String?
-    var isSelected              : Bool = false
+    var title                           : String?
+    var isSelected                      : Bool = false
+    @EnvironmentObject var themeManager : ThemeManager
     
     var body: some View {
         HStack(spacing: 12) {
-            Image(isSelected == true ? "Checkmark" : "UnCheckmark")
+            ZStack {
+                RoundedRectangle(cornerRadius: 7)
+                    .fill(isSelected ? themeManager.accentGradient : LinearGradient(colors: [Color.clear], startPoint: .leading, endPoint: .trailing))
+                    .frame(width: 22, height: 22)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 7)
+                            .stroke(isSelected ? Color.clear : themeManager.textPrimaryLight14_white14, lineWidth: 1.5)
+                    )
+                    .shadow(color: themeManager.accentTextColor, radius: 4,x: 0,y: 0)
+                if isSelected {
+                    Image(systemName: "checkmark")
+                        .font(.system(size: 12, weight: .bold))
+                        .foregroundColor(.white)
+                }
+            }
+            //            Image(isSelected == true ? "Checkmark" : "UnCheckmark")
             Text(LocalizedStringKey(title ?? ""))
-                .font(.appRegular(14))
-                .foregroundColor(.neutralMain700)
+                .font(.geistRegular(15))
+                .foregroundColor(.textPrimary0E101AF4F1FB)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(16)
         .frame(height: 52)
-        .background(.whiteNeutralCardBG)
+        .background(themeManager.white_white4)
     }
 }
 
@@ -2435,5 +2667,297 @@ struct OriginalImageView: View {
                 .padding(.bottom, 20)
             }
         }
+    }
+}
+
+//MARK: - Match card view
+extension ManualEntryView {
+    @ViewBuilder
+    var matchCard: some View {
+        HStack(alignment: .top, spacing: 12) {
+            
+            // MARK: Icon
+            ZStack {
+                RoundedRectangle(cornerRadius: 10)
+                    .fill(themeManager.accentGradient)
+                    .shadow(
+                        color: themeManager.selectedAccent.senColor
+                            .opacity(0.55),
+                        radius: 5,
+                        x: 0,
+                        y: 2
+                    )
+                
+                Image("sparkles")
+                    .frame(width: 16, height: 16)
+            }
+            .frame(width: 36, height: 36)
+            
+            // MARK: Content
+            VStack(alignment: .leading, spacing: 0) {
+                
+                // Title
+                HStack(spacing: 6) {
+                    let providerName = addSubscriptionVM.providerData?.providerSubscriptionPlansList?.first?.providerName ?? ""
+                    let isHundredPercent = serviceName.trimmed.lowercased() == providerName.trimmed.lowercased()
+                    
+                    Text("Matched to \(providerName)")
+                        .font(.geistSemiBold(12))
+                        .foregroundStyle(
+                            .textPrimary0E101AF4F1FB
+                        )
+                    
+                    Text(isHundredPercent ? "100% MATCH" : "85% MATCH")
+                        .font(.jetBrainsMedium(9))
+                        .tracking(1)
+                        .foregroundStyle(
+                            Color.successLight0EA870
+                        )
+                        .padding(.horizontal, 6)
+                        .padding(.vertical, 2)
+                        .background(
+                            Color.successLight0EA870
+                                .opacity(0.133)
+                        )
+                        .clipShape(
+                            RoundedRectangle(
+                                cornerRadius: 5,
+                                style: .continuous
+                            )
+                        )
+                }
+                
+                // Description
+                Text(getAttributedDescription())
+                    .font(.geistRegular(11))
+                    .lineSpacing(2)
+                    .padding(.top, 2)
+                
+                // Plans
+                let plans = getAllPlans()
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: 6) {
+                        if !plans.isEmpty {
+                            ForEach(plans, id: \.self) { plan in
+                                Button(action: {
+                                    planType = plan.planName ?? ""
+                                    selectedPlanType = plan.planName ?? ""
+                                    if let price = plan.price {
+                                        amount = String(format: "%.2f", price)
+                                    }
+                                    if let cycle = plan.billingCycle, !cycle.isEmpty {
+                                        selectedBilling = cycle
+                                    }
+                                    if let curr = plan.currencyCode {
+                                        // find currency
+                                        if let currencies = commonApiVM.currencyResponse {
+                                            selectedCurrency = currencies.first(where: { $0.code == curr })
+                                            currency = curr
+                                        }
+                                    }
+                                    
+                                    // Update Next Charge Date if billing cycle changes
+                                    if selectedBilling != nil && selectedBilling != "" {
+                                        if isRenew {
+                                            let baseDate = Date()
+                                            chargeDate = Constants.shared.getNextDateByFrequency(frequency: selectedBilling ?? "", baseDate: baseDate).formattedDate(from: "dd/MM/yyyy", to: "yyyy-MM-dd")
+                                        } else {
+                                            chargeDate = Constants.shared.getNextDateByFrequency(frequency: selectedBilling ?? "").formattedDate(from: "dd/MM/yyyy", to: "yyyy-MM-dd")
+                                        }
+                                    }
+                                    
+                                    // Also set category and service name
+                                    if let pName = addSubscriptionVM.providerData?.providerSubscriptionPlansList?.first?.providerName, !pName.isEmpty {
+                                        serviceLastActionText = pName.trimmed // Update this first!
+                                        serviceName = pName
+                                    }
+                                    if let catName = addSubscriptionVM.providerData?.categoryName {
+                                        category = catName
+                                        if let categories = commonApiVM.categoriesResponse {
+                                            selectedCategory = categories.first(where: { $0.name?.lowercased() == catName.lowercased()})
+                                        }
+                                    }
+                                    
+                                    isAmountError = false
+                                }) {
+                                    PlanPillView(
+                                        title: plan.planName ?? "",
+                                        price: "\(plan.currencySymbol ?? "")\(plan.price ?? 0.0)"
+                                    )
+                                }
+                                .buttonStyle(.plain)
+                            }
+                        } else {
+                            // Fallback
+                            Button(action: {
+                                planType = "Free"
+                                selectedPlanType = "Free"
+                                amount = "0.0"
+                                isAmountError = false
+                            }) {
+                                PlanPillView(
+                                    title: "Free",
+                                    price: "\(selectedCurrency?.symbol ?? "")0.00"
+                                )
+                            }
+                            .buttonStyle(.plain)
+                            
+                            Button(action: {
+                                planType = "Basic"
+                                selectedPlanType = "Basic"
+                                isAmountError = false
+                            }) {
+                                PlanPillView(
+                                    title: "Basic",
+                                    price: "\(selectedCurrency?.symbol ?? "")-"
+                                )
+                            }
+                            .buttonStyle(.plain)
+                        }
+                    }
+                    .padding(.top, 8)
+                }
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+        }
+        .padding(14)
+        .background(themeManager.accentGradient.opacity(0.133))
+        .overlay {
+            RoundedRectangle(
+                cornerRadius: 18,
+                style: .continuous
+            )
+            .stroke(
+                themeManager.selectedAccent.senColor
+                    .opacity(0.333),
+                lineWidth: 1
+            )
+        }
+        .clipShape(
+            RoundedRectangle(
+                cornerRadius: 18,
+                style: .continuous
+            )
+        )
+    }
+    
+    private func getAttributedDescription() -> AttributedString {
+        var result = AttributedString("Auto-filled category ")
+        result.foregroundColor = themeManager.textPrimaryLight6_dark62
+        
+        var cat = AttributedString(addSubscriptionVM.providerData?.categoryName ?? category)
+        cat.font = .geistSemiBold(11)
+        cat.foregroundColor = .textPrimary0E101AF4F1FB
+        
+        var cycle = AttributedString(", cycle ")
+        cycle.foregroundColor = themeManager.textPrimaryLight6_dark62
+        
+        var bil = AttributedString(selectedBilling ?? "")
+        bil.font = .geistSemiBold(11)
+        bil.foregroundColor = .textPrimary0E101AF4F1FB
+        
+        var currencyAttr = AttributedString(", currency ")
+        currencyAttr.foregroundColor = themeManager.textPrimaryLight6_dark62
+        
+        var cur = AttributedString(selectedCurrency?.code ?? "")
+        cur.font = .geistSemiBold(11)
+        cur.foregroundColor = .textPrimary0E101AF4F1FB
+        
+        var dot = AttributedString(".")
+        dot.foregroundColor = themeManager.textPrimaryLight6_dark62
+        
+        result += cat
+        result += cycle
+        result += bil
+        result += currencyAttr
+        result += cur
+        result += dot
+        
+        return result
+    }
+}
+
+//MARK: - ReminderSliderView
+struct ReminderSliderView: View {
+    @Binding var reminderDays: Int
+    @EnvironmentObject var themeManager: ThemeManager
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text("REMIND ME BEFORE RENEWAL")
+                .font(.jetBrainsMedium(11))
+                .tracking(1)
+                .textCase(.uppercase)
+                .foregroundColor(themeManager.textPrimaryLight6_dark62)
+            
+            VStack(spacing: 16) {
+                HStack(alignment: .bottom, spacing: 4) {
+                    Text("\(reminderDays)")
+                        .font(.appSemiBold(22))
+                        .foregroundColor(.textPrimary0E101AF4F1FB)
+                    
+                    Text("days before")
+                        .font(.geistMedium(11))
+                        .foregroundColor(themeManager.textPrimaryLight6_dark62)
+                        .padding(.bottom, 4)
+                    
+                    Spacer()
+                    
+                    //                    Text("0 = off")
+                    //                        .font(.jetBrainsMedium(11))
+                    //                        .tracking(1)
+                    //                        .foregroundColor(themeManager.textPrimaryLight6_dark62)
+                    //                        .padding(.bottom, 4)
+                }
+                
+                GeometryReader { geometry in
+                    let sliderWidth = geometry.size.width
+                    let thumbWidth: CGFloat = 28
+                    let trackHeight: CGFloat = 8
+                    let range: ClosedRange<Double> = 0...14
+                    let percentage = CGFloat((Double(reminderDays) - range.lowerBound) / (range.upperBound - range.lowerBound))
+                    let activeWidth = percentage * (sliderWidth - thumbWidth)
+                    
+                    ZStack(alignment: .leading) {
+                        // Background Track
+                        RoundedRectangle(cornerRadius: trackHeight / 2)
+                            .fill(themeManager.textPrimaryLight8_white8)
+                            .frame(height: trackHeight)
+                        
+                        // Active Track
+                        RoundedRectangle(cornerRadius: trackHeight / 2)
+                            .fill(themeManager.accentGradient)
+                            .frame(width: activeWidth + thumbWidth / 2, height: trackHeight)
+                        
+                        // Thumb
+                        RoundedRectangle(cornerRadius: 12)
+                            .fill(Color.white)
+                            .frame(width: thumbWidth, height: 16)
+                            .shadow(color: Color.black.opacity(0.15), radius: 2, x: 0, y: 1)
+                            .offset(x: activeWidth)
+                            .gesture(
+                                DragGesture()
+                                    .onChanged { gesture in
+                                        let x = min(max(0, gesture.location.x - thumbWidth / 2), sliderWidth - thumbWidth)
+                                        let newPercentage = Double(x / (sliderWidth - thumbWidth))
+                                        let newValue = newPercentage * (range.upperBound - range.lowerBound) + range.lowerBound
+                                        reminderDays = Int(round(newValue))
+                                    }
+                            )
+                    }
+                    .frame(height: 16)
+                }
+                .frame(height: 16)
+                .padding(.bottom, 4)
+            }
+            .padding(16)
+            .background(themeManager.white_white4)
+            .overlay(
+                RoundedRectangle(cornerRadius: 14)
+                    .stroke(themeManager.textPrimaryLight8_white8, lineWidth: 1)
+            )
+            .cornerRadius(14)
+        }
+        .padding(5)
     }
 }

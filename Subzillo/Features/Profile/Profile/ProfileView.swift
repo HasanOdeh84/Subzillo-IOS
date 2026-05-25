@@ -37,6 +37,7 @@ struct ProfileView: View {
     @State var showDeletePopup              : Bool = false
     @State private var deleteSheetHeight    : CGFloat = .zero
     @State private var imageLoadFailed      = false
+    @EnvironmentObject var themeManager     : ThemeManager
     
     //MARK: - Body
     var body: some View {
@@ -312,7 +313,9 @@ struct ProfileView: View {
                             .stroke(Color.neutral300Border, lineWidth: 1)
                     )
                     
-                    CustomBorderButton(title: "Logout") {
+                    CustomBorderButton(title        : "Logout",
+                                       background  : Color.clear,
+                                       borderColor : themeManager.textPrimaryLight14_white14) {
                         showDeletePopup = true
                     }
                     .padding(.bottom,90)

@@ -63,23 +63,24 @@ struct SubConformation: View {
     
     //MARK: - Body
     var body: some View {
-        VStack(spacing: 0) {
-            headerView
-                .padding(.top, 10)
-            
-            ScrollView{
-                matchCard
+        VStack{
+            VStack(spacing: 0) {
+                headerView
+                    .padding(.top, 10)
                 
-                detailsCard
-                
-                actionButtons
-                    .padding(.bottom, 120)
-                
+                ScrollView{
+                    matchCard
+                    
+                    detailsCard
+                    
+                    actionButtons
+                        .padding(.bottom, 120)
+                }
             }
+            .padding(.horizontal, 20)
         }
-        .applyAppBackground()
-        .padding(.horizontal, 20)
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+        .applyAppBackground()
         .navigationBarBackButtonHidden()
         //MARK: OnAppear
         .onAppear{
@@ -964,6 +965,7 @@ extension SubConformation {
             CustomBorderButton(
                 title       : "Cancel",
                 background  : Color.clear,
+                borderColor : themeManager.textPrimaryLight14_white14,
                 action      : {
                     if !accumulatedDuplicates.isEmpty {
                         isFromAdd = true

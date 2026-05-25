@@ -56,6 +56,16 @@ enum NavigationRoute: Hashable{
     case exceedLimit
     case subConformation
     case pushPermissions
+    case addNewCardSheet(
+            nickName: String = "",
+            cardNumber: String = "",
+            cardName: String = "",
+            shouldCallAPI: Bool = false,
+            isEdit: Bool = false,
+            cardId: String = "",
+            selectedType: CardType = .Visa,
+            isDefault: Bool = false
+        )
 }
 
 extension NavigationRoute {

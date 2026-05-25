@@ -121,6 +121,7 @@ struct VoiceCommandView: View {
                         CustomBorderButton(
                             title       : "Cancel",
                             background  : Color.clear,
+                            borderColor : themeManager.textPrimaryLight14_white14,
                             action      : {
                                 showDiscardPopup = true
                             }

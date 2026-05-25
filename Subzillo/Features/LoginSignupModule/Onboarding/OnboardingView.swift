@@ -117,9 +117,6 @@ struct OnboardingView: View {
                 if currentPage != 4 {
                     Button {
                         currentPage = 4
-//                        withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
-//                            
-//                        }
                     } label: {
                         Text("Skip")
                             .font(.geistSemiBold(14))
@@ -139,24 +136,33 @@ struct OnboardingView: View {
                             GeometryReader { geometry in
                                 ScrollView(.vertical) {
                                     VStack(spacing: 0) {
-                                        Spacer(minLength: 20)
+                                        
+                                        if index == 0{
+                                            Spacer(minLength: 20)
+                                        }else if index == 3{
+                                            Spacer(minLength: 0)
+                                        }else if index == 2{
+                                            Spacer(minLength: 60)
+                                        }else{
+                                            Spacer(minLength: 100)
+                                        }
                                         
                                         // Lottie Animation
-                                        
                                         if index == 2{
                                             if systemScheme == .dark{
                                                 LottieView(name: "scaning_animation_dark", loopMode: .loop, isAspectFit: false)
-                                                    .frame(height: 280, alignment: .center)
+                                                    .frame(height: 340, alignment: .center)
                                                     .padding(.bottom, 20)
                                             }else{
                                                 LottieView(name: pages[index].lottie, loopMode: .loop, isAspectFit: false)
-                                                    .frame(height: 280)
+                                                    .frame(height: 340)
                                                     .padding(.bottom, 20)
                                             }
                                         }else if index == 1{
                                             ZStack(alignment: .top) {
                                                 LottieView(name: pages[index].lottie, loopMode: .loop, isAspectFit: false)
-                                                    .frame(width: 250, height: 280)
+                                                    .frame(height: 120)
+                                                    .padding(.top, 100)
                                                 
                                                 HStack(spacing: 12) {
                                                     Image("micPurple")
@@ -182,17 +188,19 @@ struct OnboardingView: View {
                                                 )
                                                 .offset(y: 30)
                                             }
-                                            .padding(.bottom, 20)
+                                            .padding(.bottom, 50)
+                                        }else if index == 3{
+                                            OnboardingChatView(isActive: currentPage == 3)
+                                                .padding(.bottom, 20)
                                         }else{
                                             LottieView(name: pages[index].lottie, loopMode: .loop, isAspectFit: false)
                                                 .frame(width: 250, height: 280)
                                                 .padding(.bottom, 20)
                                         }
                                         
-                                        Spacer(minLength: index == 0 ? 0 : 100)
-//                                        Image(pages[index].lottie)
-//                                            .frame(height: 280)
-//                                            .padding(.bottom, 20)
+                                        //                                        Image(pages[index].lottie)
+                                        //                                            .frame(height: 280)
+                                        //                                            .padding(.bottom, 20)
                                         
                                         if pages[index].subtitle != ""{
                                             // Subtitle
@@ -220,7 +228,7 @@ struct OnboardingView: View {
                                         Spacer()
                                     }
                                     .frame(minWidth: geometry.size.width)
-//                                    .frame(minHeight: geometry.size.height)
+                                    //                                    .frame(minHeight: geometry.size.height)
                                 }
                             }
                         }
@@ -230,60 +238,6 @@ struct OnboardingView: View {
             }
             .animation(.none, value: currentPage)
             .tabViewStyle(PageTabViewStyle(indexDisplayMode: .never)) // hide default dots
-
-            
-//            if currentPage != 4 {
-//                // Onboarding Pages
-//                TabView(selection: Binding(
-//                    get: { min(currentPage, pages.count - 1) },
-//                    set: { currentPage = $0 }
-//                )) {
-//                    ForEach(0..<pages.count, id: \.self) { index in
-//                        GeometryReader { geometry in
-//                            ScrollView(.vertical, showsIndicators: false) {
-//                                VStack(spacing: 0) {
-//                                    Spacer(minLength: 20)
-//                                    
-//                                    //                                    // Lottie Animation
-//                                    //                                    LottieView(name: pages[index].lottie, loopMode: .loop)
-//                                    Image(pages[index].lottie)
-//                                        .frame(height: 280)
-//                                        .padding(.bottom, 20)
-//                                    
-//                                    // Subtitle
-//                                    Text(pages[index].subtitle)
-//                                        .font(.jetBrainsMedium(11))
-//                                        .kerning(2.0)
-//                                        .foregroundColor(themeManager.accentTextColor)
-//                                        .padding(.bottom, 16)
-//                                    
-//                                    // Title with Styled Part
-//                                    titleView(for: pages[index])
-//                                        .multilineTextAlignment(.center)
-//                                        .padding(.horizontal, 40)
-//                                        .padding(.bottom, 20)
-//                                    
-//                                    // Description
-//                                    Text(pages[index].description)
-//                                        .font(.geistMedium(16))
-//                                        .lineSpacing(4)
-//                                        .foregroundColor(Color.textDim60637AA8A4C0)
-//                                        .multilineTextAlignment(.center)
-//                                        .padding(.horizontal, 40)
-//                                    
-//                                    Spacer()
-//                                }
-//                                .frame(minWidth: geometry.size.width)
-//                                .frame(minHeight: geometry.size.height)
-//                            }
-//                        }
-//                        .tag(index)
-//                    }
-//                }
-//                .tabViewStyle(PageTabViewStyle(indexDisplayMode: .never))
-//            } else {
-//                tellUsAbtYourselfView()
-//            }
             
             // Custom Page Control
             HStack(spacing: 8) {
@@ -552,111 +506,6 @@ struct WrapButtonsView: View {
     }
 }
 
-struct CapsuleInnerShadow: ViewModifier {
-    var color: Color = Color.black.opacity(0.12)
-    var radius: CGFloat = 6       // blur
-    var verticalOffset: CGFloat = -4   // pulls shadow to top
-    
-    func body(content: Content) -> some View {
-        content
-            .overlay(
-                Capsule()
-                    .fill(
-                        Color.clear
-                            .shadow(.inner(
-                                color: color,
-                                radius: radius,
-                                x: 0,
-                                y: verticalOffset
-                            ))
-                    )
-                    .mask(
-                        VStack(spacing: 0) {
-                            Color.white              // keep top shadow visible
-                            Color.clear.frame(height: 12) // cut bottom shadow
-                        }
-                            .mask(Capsule())
-                    )
-            )
-    }
-}
-
-extension View {
-    func capsuleInnerShadow(
-        color: Color = Color.black.opacity(0.12),
-        radius: CGFloat = 6,
-        offset: CGFloat = -4
-    ) -> some View {
-        modifier(CapsuleInnerShadow(color: color, radius: radius, verticalOffset: offset))
-    }
-}
-
-
-//struct ContentView: View {
-//    let cornerRadius: CGFloat = 20
-//    let shadowColor = Color.gray.opacity(0.5)
-//    let shadowRadius: CGFloat = 8
-//    // Offset the shadow down to hide the bottom edge
-//    let shadowYOffset: CGFloat = 10
-//    // Small offsets for left/right to ensure the shadow is visible there
-//    let shadowXOffset: CGFloat = 1
-//
-//    var body: some View {
-//        VStack{
-//            RoundedRectangle(cornerRadius: cornerRadius)
-//                .fill(Color.white.shadow(.inner(color: shadowColor, radius: shadowRadius, x: shadowXOffset, y: -shadowYOffset))) // Use -Y for top shadow
-//                .frame(width: 200, height: 150)
-//                .background(Color.white) // Ensure the background is white so the shadow is visible
-//                .cornerRadius(cornerRadius) // Clip the background to the corners        }
-//    }
-//}
-//
-struct ContentView: View {
-    let cornerRadius: CGFloat = 20
-    let shadowColor = Color.gray.opacity(0.45)
-    let shadowRadius: CGFloat = 10
-    
-    var body: some View {
-        RoundedRectangle(cornerRadius: cornerRadius)
-            .fill(Color.white)
-            .overlay(
-                RoundedRectangle(cornerRadius: cornerRadius)
-                    .fill(
-                        Color.white
-                            .shadow(.inner(
-                                color: shadowColor,
-                                radius: shadowRadius,
-                                x: 0,
-                                y: -4        // pulls shadow upward → top + sides
-                            ))
-                    )
-                    .mask(
-                        VStack(spacing: 0) {
-                            Rectangle()
-                                .fill(Color.white)
-                                .frame(height: 90) // top area where shadow should appear
-                            Rectangle()
-                                .fill(Color.clear) // remove shadow at bottom
-                        }
-                    )
-            )
-            .frame(width: 220, height: 120)
-    }
-}
-
-extension View {
-    func topSideInnerShadow(color: Color = .gray, radius: CGFloat = 5, x: CGFloat = 0, y: CGFloat = -3) -> some View {
-        self.overlay(
-            Rectangle()
-                .stroke(color, lineWidth: radius)
-                .offset(x: x, y: y)
-                .clipped()
-                .blur(radius: radius / 2) // Smooth blur effect
-                .mask(self) // Confine the effect to the shape of the original view
-        )
-    }
-}
-
 struct FlowLayout: Layout {
     // Define spacing constants once
     let horizontalSpacing: CGFloat = 8
@@ -698,7 +547,7 @@ struct FlowLayout: Layout {
             let subviewSize = subview.sizeThatFits(proposal)
             
             // Check if the current chip exceeds the container width
-//            if currentX + subviewSize.width > containerWidth {
+            //            if currentX + subviewSize.width > containerWidth {
             if currentX + subviewSize.width > bounds.maxX {
                 // Wrap to the next line
                 currentX = bounds.minX

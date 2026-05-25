@@ -119,6 +119,7 @@ struct MyCardsView: View {
                                 onEdit: {
                                     print("Edit tapped for \(card.nickName ?? "")")
                                     editingCard = EditableCardWrapper(data: card)
+                                    editCard()
                                 },
                                 onDelete: {
                                     print("Delete tapped for \(card.nickName ?? "")")
@@ -143,50 +144,27 @@ struct MyCardsView: View {
         .onAppear{
             userCardsApi()
         }
-        .sheet(isPresented: $addCardSheet) {
-            AddNewCardSheet(shouldCallAPI   : $shouldCallAPI,
+        /*.sheet(isPresented: $addCardSheet) {
+            AddNewCardSheet(shouldCallAPI   : shouldCallAPI,
                             action: {
                 self.userCardsApi()
             })
-//            .onAppear {
-//                DispatchQueue.main.async {
-//                    sheetHeight = sheetHeight
-//                }
-//            }
-//            .id(sheetID)
-//            .overlay {
-//                GeometryReader { geo in
-//                    Color.clear
-//                        .preference(
-//                            key: InnerHeightPreferenceKey.self,
-//                            value: geo.size.height
-//                        )
-//                }
-//            }
-//            .onPreferenceChange(InnerHeightPreferenceKey.self) { height in
-//                if height > 150 {
-//                    sheetHeight = height
-//                }
-//            }
-//            .presentationDetents([.height(sheetHeight)])
             .presentationDetents([.medium, .large])
             .presentationDragIndicator(.hidden)
-//            .interactiveDismissDisabled(false)
-        }
-        .sheet(item: $editingCard) { wrapper in
+        }*/
+        /*.sheet(item: $editingCard) { wrapper in
             AddNewCardSheet(nickName        : wrapper.data.nickName ?? "",
                             cardNumber      : wrapper.data.cardNumber ?? "",
                             cardName        : wrapper.data.cardHolderName ?? "",
-                            shouldCallAPI   : $shouldCallAPI,
+                            shouldCallAPI   : shouldCallAPI,
                             isEdit          : true,
                             cardId          : wrapper.data.id ?? "",
                             action: {
                 self.userCardsApi()
             })
             .presentationDetents([.medium, .large])
-//            .presentationDetents([.height(500), .large])
             .presentationDragIndicator(.hidden)
-        }
+        }*/
         .sheet(isPresented: $showDeletePopup) {
             InfoAlertSheet(
                 onDelegate: {
@@ -222,12 +200,36 @@ struct MyCardsView: View {
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
             sheetID = UUID()
             activeCardId = nil
-            addCardSheet = true
+            //addCardSheet = true
+            AppIntentRouter.shared.navigate(to: .addNewCardSheet(shouldCallAPI: shouldCallAPI))
         }
+        
+       
     }
     
     func editCard(){
-        editCardSheet = true
+        let cardType = CardType(
+            rawValue: editingCard?.data.cardType ?? 0
+        ) ?? .Other
+
+        let nickName = editingCard?.data.nickName ?? ""
+        let cardNumber = editingCard?.data.cardNumber ?? ""
+        let cardName = editingCard?.data.cardHolderName ?? ""
+        let cardId = editingCard?.data.id ?? ""
+        let isDefault = editingCard?.data.isDefault ?? false
+
+        AppIntentRouter.shared.navigate(
+            to: .addNewCardSheet(
+                nickName: nickName,
+                cardNumber: cardNumber,
+                cardName: cardName,
+                shouldCallAPI: shouldCallAPI,
+                isEdit: true,
+                cardId: cardId,
+                selectedType: cardType,
+                isDefault: isDefault
+            )
+        )
     }
     
     func deleteCard(){
@@ -348,7 +350,7 @@ struct CardView: View {
                             .tracking(2)
                             .opacity(0.7)
                         
-                        if card.isPrimary == true {
+                        if card.isDefault == true {
                             Text("PRIMARY")
                                 .font(.jetBrainsRegular(9))
                                 .tracking(1)
@@ -396,7 +398,7 @@ struct CardView: View {
                             .tracking(1)
                             .opacity(0.6)
                         
-                        Text("\(card.nickName ?? "")")
+                        Text("\(card.cardHolderName ?? "")")
                             .font(
                                 .system(size: 13, weight: .semibold)
                             )
@@ -419,7 +421,7 @@ struct CardView: View {
                     
                     Spacer()
                     
-                    Text("\(card.cardHolderName ?? "")")
+                    Text("\(CardType(rawValue: card.cardType ?? 0)?.title ?? "")")
                         .font(
                             .jetBrainsBoldItalic(18)
                         )
