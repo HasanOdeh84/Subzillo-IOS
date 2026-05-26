@@ -16,7 +16,8 @@ class ProfileViewModel: ObservableObject {
     private let router                  : AppIntentRouter
     @Published var isUpdate             = false
     @Published var isProfileUpdate      = false
-    
+    var hasLoadedInitialData            = false
+
     init(router: AppIntentRouter = .shared) {
         self.router = router
     }

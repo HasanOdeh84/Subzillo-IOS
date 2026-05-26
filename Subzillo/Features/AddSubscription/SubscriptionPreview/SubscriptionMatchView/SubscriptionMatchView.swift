@@ -29,6 +29,8 @@ struct SubscriptionMatchView: View {
     @State private var showRenewSheet           : Bool = false
     @State private var renewSheetHeight         : CGFloat = .zero
     @State private var imageLoadFailed          = false
+    @EnvironmentObject var themeManager         : ThemeManager
+    @State var paidWith                         : String = ""
     
     private var serviceLogoURL: URL? {
         guard let logo = subscriptionData?.serviceLogo,
@@ -46,217 +48,21 @@ struct SubscriptionMatchView: View {
     //MARK: - body
     var body: some View {
         VStack(alignment: .leading,spacing: 0) {
-            // MARK: - Header
-            HStack(spacing: 8) {
-                // MARK: - back
-                Button(action: goBack) {
-                    HStack {
-                        Image("back_gray")
-                    }
-                    .foregroundColor(.blue)
-                }
-                
-                Text(fromList ? "Subscription Details" : "Subscription Match Details")
-                    .font(.appRegular(24))
-                    .foregroundColor(Color.neutralMain700)
-                
-                Spacer(minLength: 0)
-            }
-            .padding(.horizontal)
-            .padding(.top, 20)
+            headerView
             
             ScrollView {
-                VStack(alignment: .leading,spacing: 16) {
-                    ZStack(alignment: .topTrailing) {
-                        if (subscriptionData?.serviceLogo ?? "").isEmpty {
-                            ZStack {
-                                Color.whiteBlackBG
-                                Text(initials)
-                                    .font(.appSemiBold(50))
-                                    .foregroundColor(.secondaryNavyBlue400)
-                            }
-                            .frame(width: 128, height: 128)
-                            .overlay(
-                                RoundedRectangle(cornerRadius: 64)
-                                    .stroke(.neutral300Border, lineWidth: 1)
-                            )
-                            .cornerRadius(64)
-                        } else {
-                            if fromList{
-                                if imageLoadFailed {
-                                    Image("profile_avatar")
-                                        .resizable()
-                                        .scaledToFill()
-                                }else{
-                                    WebImage(url: URL(string: subscriptionData?.serviceLogo ?? ""))
-                                        .resizable()
-                                        .onFailure { _ in
-                                            imageLoadFailed = true
-                                        }
-                                        .scaledToFill()
-                                        .frame(width: 128, height: 128)
-                                        .cornerRadius(64)
-                                        .clipped()
-                                }
-                            }else{
-                                //                                WebImage(url: URL(string: "\(Constants.getUserDefaultsValue(for: Constants.providerBaseUrl))\(subscriptionData?.serviceLogo ?? "")"))
-                                //                                    .resizable()
-                                //                                    .scaledToFill()
-                                //                                    .frame(width: 128, height: 128)
-                                //                                    .cornerRadius(64)
-                                //                                    .clipped()
-                                
-                                if imageLoadFailed {
-                                    Image("profile_avatar")
-                                        .resizable()
-                                        .scaledToFill()
-                                }else{
-                                    if let url = serviceLogoURL {
-                                        WebImage(url: url)
-                                            .resizable()
-                                            .onFailure { _ in
-                                                imageLoadFailed = true
-                                            }
-                                            .scaledToFill()
-                                            .frame(width: 128, height: 128)
-                                            .cornerRadius(64)
-                                            .clipped()
-                                    }
-                                }
-                            }
-                        }
-                        
-                        if !fromList{
-                            Image("matchIcon")
-                                .frame(width: 33, height: 33)
-                                .offset(x: 2, y: 0)
-                                .background(colorValue)
-                                .overlay(
-                                    RoundedRectangle(cornerRadius: 16.5)
-                                        .stroke(Color.white, lineWidth: 2)
-                                )
-                                .shadow(color: Color.dropShadowColor1, radius: 2, x: 0, y: 2)
-                                .cornerRadius(16.5)
-                        }
-                    }
-                    .frame(width: 140, height: 128, alignment: .center)
-                    .frame(maxWidth: .infinity, alignment: .center)
-                    .padding(.top,20)
-                    
-                    VStack(alignment: .leading,spacing: 8) {
-                        
-                        SubscriptionDetailsPlainItem(title: "Service Name", value: subscriptionData?.serviceName ?? "")
-                        SubscriptionDetailsPlainItem(title: "Category", value: subscriptionData?.categoryName ?? "")
-                        SubscriptionDetailsPlainItem(title: "Plan Type", value: subscriptionData?.subscriptionType ?? "")
-                        SubscriptionDetailsPlainItem(title: "Price", value: "\(subscriptionData?.currencySymbol ?? "")\(subscriptionData?.amount ?? 0.0)")
-                        SubscriptionDetailsPlainItem(title: "Currency", value: subscriptionData?.currency ?? Constants.shared.currencyCode)
-                        SubscriptionDetailsPlainItem(title: "Billing Cycle", value: subscriptionData?.billingCycle ?? "")
-                        //                        SubscriptionDetailsPlainItem(title: "Subscription Start  Date", value: (subscriptionData?.lastPaymentDate ?? "").formattedDate())
-                        SubscriptionDetailsPlainItem(title: "Next Charge Date", value: (subscriptionData?.nextPaymentDate ?? "").formattedDate(to: "d MMM yyyy"))
-                        SubscriptionDetailsPlainItem(title: "Payment Method", value: subscriptionData?.paymentMethodName ?? "")
-                        if fromList{
-                            if subscriptionData?.paymentMethodStatus == true{
-                                SubscriptionDetailsPlainItem(title: "Card Linked", value: paymentMethodDataName)
-                            }
-                            //subscriptionFor Need to change with nickName
-                            if subscriptionData?.subscriptionFor ?? "" == "" || subscriptionData?.subscriptionFor ?? "" == Constants.getUserId(){
-                                SubscriptionDetailsPlainItem(title: "Benefit From", value: "Me".localized)
-                            }else{
-                                SubscriptionDetailsPlainItem(title: "Benefit From", value: subscriptionData?.nickName)
-                            }
-                            //                            SubscriptionDetailsPlainItem(title: "Benefit From", value: subscriptionData?.subscriptionFor ?? "" == "" ? "Me" : subscriptionData?.subscriptionFor ?? "")
-                            SubscriptionDetailsPlainItem(title: "Renewal Reminders", value: renewalReminderValue)
-                        }else{
-                            if subscriptionData?.paymentMethodName ?? "" != ""{
-                                SubscriptionDetailsPlainItem(title: "Card Linked", value: subscriptionData?.paymentMethodDataName ?? "")
-                            }
-                            SubscriptionDetailsPlainItem(title: "Benefit From", value: subscriptionData?.subscriptionForName ?? "")
-                            SubscriptionDetailsPlainItem(title: "Renewal Reminders", value: subscriptionData?.renewalReminderValue ?? "")
-                        }
-                        SubscriptionDetailsPlainItem(title: "Status", value: fromList ? (subscriptionData?.status == "expired" ? "Inactive".localized : "Active".localized) : "Active".localized)
-                        SubscriptionDetailsPlainItem(title: "Note", value: subscriptionData?.notes ?? "")
-                    }
-                    .padding(24)
-                    .background(.whiteNeutralCardBG)
-                    .cornerRadius(12)
-                    .shadow(color: Color.dropShadowColor1, radius: 2, x: 0, y: 2)
+                VStack(alignment: .center, spacing: 16) {
+                    logoView
+                    titleAndSubtitleView
+                    priceView
+                    renewButtonView
+                    gridDataBoxView
+                    actionButtonsView
                 }
-                .padding(.vertical, 16)
-                .padding(.horizontal,20)
-                
-                if fromList{
-                    VStack(spacing: 12) {
-                        
-                        HStack(spacing: 12){
-                            
-                            // MARK: - Delete Button
-                            Button() {
-                                showDeletePopup = true
-                            } label: {
-                                HStack(spacing: 5) {
-                                    Image("delete_red")
-                                        .resizable()
-                                        .frame(width: 17, height: 19)
-                                    
-                                    Text("Delete")
-                                        .font(.appSemiBold(14))
-                                        .foregroundColor(Color.disCardRed)
-                                }
-                                .frame(maxWidth: .infinity, minHeight: 56)
-                                .background(Color.whiteBlack)
-                                .cornerRadius(8)
-                                .overlay(
-                                    // keep the stroke visually inside by padding the shape inward
-                                    RoundedCorner(radius: 8)
-                                        .stroke(
-                                            Color.disCardRed,
-                                            lineWidth: 1
-                                        )
-                                )
-                            }
-                            
-                            //MARK: Edit button
-                            GradientBorderButton(title: "Edit", isBtn: true, buttonImage: "EditIcon", action: { onEdit()
-                            }, backgroundColor: .whiteBlack, buttonHeight: 56)
-                        }
-                        .padding(.horizontal)
-                    }
-                    .padding(.bottom,20)
-                }else{
-                    VStack(spacing: 12) {
-                        //                        if subscriptionData?.status == "expired" {
-                        //                            CustomButton(
-                        //                                title   : "Renew",
-                        //                                height  : 56,
-                        //                                action  : {
-                        //                                    showRenewSheet = true
-                        //                                }
-                        //                            )
-                        //                            //                            GradientBorderButton(title: "Renew", isBtn: true, buttonImage: "update", action: { showRenewSheet = true }, backgroundColor: .whiteBlack, buttonHeight: 56)
-                        //                            //                                .padding(.horizontal)
-                        //                        }
-                        
-                        //MARK: Edit button
-                        GradientBorderButton(title: "Edit", isBtn: true, buttonImage: "EditIcon", action: { onEdit()
-                        }, backgroundColor: .whiteBlack, buttonHeight: 56)
-                        .padding(.horizontal)
-                    }
-                    .padding(.bottom,20)
-                }
-                
-                if subscriptionData?.renewBtnStatus ?? false {
-                    CustomButton(
-                        title   : "Renew",
-                        height  : 56,
-                        action  : {
-                            showRenewSheet = true
-                        }
-                    )
-                    .padding(.horizontal)
-                }
+                .padding(.horizontal, 24)
+                .padding(.bottom, 120)
             }
             .padding(.top, 10)
-            .background(.neutralBg100)
             .navigationBarBackButtonHidden(true)
             .onAppear {
                 justAppeared = true
@@ -322,7 +128,7 @@ struct SubscriptionMatchView: View {
                 if subscriptionsVM.isDeletedSubscription == true {
                     SubscriptionDBManager.shared.deleteSubscription(id: subscriptionData?.id ?? "")
                 }
-//                AppIntentRouter.shared.pop()
+                //                AppIntentRouter.shared.pop()
                 AppIntentRouter.shared.navigate(to: .subscriptionsListView())
             }
             .sheet(isPresented: $showDeletePopup) {
@@ -381,18 +187,238 @@ struct SubscriptionMatchView: View {
                 }
                 .presentationDetents([.height(renewSheetHeight)])
                 .presentationDragIndicator(.hidden)
-                //                .onPreferenceChange(InnerHeightPreferenceKey.self) { height in
-                //                    if height > 0 {
-                //                        renewSheetHeight = height
-                //                    }
-                //                }
-                //                .presentationDragIndicator(.hidden)
-                //                .presentationDetents([.height(renewSheetHeight)])
             }
         }
-        .background(.neutralBg100)
+        .applyAppBackground()
     }
     
+    // MARK: - Views
+    private var headerView: some View {
+        HStack(spacing: 8) {
+            CircleBackButton(action: goBack)
+            Spacer(minLength: 0)
+        }
+        .padding(.horizontal)
+        .padding(.top, 20)
+    }
+    
+    private var logoView: some View {
+        ZStack(alignment: .topTrailing) {
+            if (subscriptionData?.serviceLogo ?? "").isEmpty {
+                ZStack {
+                    Color.flagBgF1F2F7F7F7F9
+                    Text(initials)
+                        .font(.geistSemiBold(40))
+                        .foregroundColor(Color("TextPrimary_ 0E101A_F4F1FB"))
+                }
+                .frame(width: 80, height: 80)
+                //                        .overlay(
+                //                            RoundedRectangle(cornerRadius: 24)
+                //                                .stroke(themeManager.textPrimaryLight6_dark62, lineWidth: 1)
+                //                        )
+                .cornerRadius(24)
+            } else {
+                if fromList {
+                    if imageLoadFailed {
+                        Image("profile_avatar")
+                            .resizable()
+                            .scaledToFill()
+                            .frame(width: 80, height: 80)
+                            .cornerRadius(24)
+                    } else {
+                        WebImage(url: URL(string: subscriptionData?.serviceLogo ?? ""))
+                            .resizable()
+                            .onFailure { _ in imageLoadFailed = true }
+                            .scaledToFill()
+                            .frame(width: 80, height: 80)
+                            .cornerRadius(24)
+                            .clipped()
+                    }
+                } else {
+                    if imageLoadFailed {
+                        Image("profile_avatar")
+                            .resizable()
+                            .scaledToFill()
+                            .frame(width: 80, height: 80)
+                            .cornerRadius(24)
+                    } else {
+                        if let url = serviceLogoURL {
+                            WebImage(url: url)
+                                .resizable()
+                                .onFailure { _ in imageLoadFailed = true }
+                                .scaledToFill()
+                                .frame(width: 80, height: 80)
+                                .cornerRadius(24)
+                                .clipped()
+                        }
+                    }
+                }
+            }
+        }
+        //        AvatarView(serviceName  : subscriptionData?.serviceName ?? "",
+        //                   serviceLogo  : subscriptionData?.serviceLogo ?? "",
+        //                   size         : 88,
+        //                   cornerRadius : 24,
+        //                   fontSize     : 40,
+        //                   isShadow     : true)
+        .padding(.top, 20)
+    }
+    
+    private var titleAndSubtitleView: some View {
+        VStack(spacing: 4) {
+            Text(subscriptionData?.serviceName ?? "")
+                .font(.geistBold(28))
+                .foregroundColor(.textPrimary0E101AF4F1FB)
+            
+            let planType = subscriptionData?.subscriptionType ?? "Premium"
+            let dateStr = subscriptionData?.createdAt != nil && subscriptionData?.createdAt != "" ? subscriptionData!.createdAt!.formattedDate(to: "MMM yyyy") : "Jan 2022"
+            Text("\(planType) - since \(dateStr)")
+                .font(.geistMedium(13))
+                .foregroundColor(themeManager.textPrimaryLight6_dark62)
+        }
+    }
+    
+    private var priceView: some View {
+        HStack(alignment: .lastTextBaseline, spacing: 2) {
+            Text(subscriptionData?.currencySymbol ?? "$")
+                .font(.geistMedium(20))
+                .foregroundColor(themeManager.textPrimaryLight6_dark62)
+            Text("\(String(format: "%.2f", subscriptionData?.amount ?? 0.0))")
+                .font(.geistSemiBold(44))
+                .foregroundColor(.textPrimary0E101AF4F1FB)
+            
+            let cycle = subscriptionData?.billingCycleShortLabel ?? (subscriptionData?.billingCycle == "yearly" || subscriptionData?.billingCycle == "annual" ? "yr" : "mo")
+            Text("\(cycle)")
+                .font(.jetBrainsMedium(14))
+                .foregroundColor(themeManager.textPrimaryLight6_dark62)
+        }
+        .padding(.top, 4)
+    }
+    
+    @ViewBuilder
+    private var renewButtonView: some View {
+        if subscriptionData?.renewBtnStatus ?? true {
+            GradientBgButton(
+                title           : "Renew",
+                isSolid         : true,
+                action          : { showRenewSheet = true },
+                buttonHeight    : 52
+            )
+            //            .padding(.top, 8)
+        }
+    }
+    
+    private var gridDataBoxView: some View {
+        VStack(spacing: 24) {
+            HStack(alignment: .top, spacing: 0) {
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("NEXT RENEWAL")
+                        .font(.jetBrainsMedium(10))
+                        .foregroundColor(themeManager.textPrimaryLight6_dark62)
+                        .kerning(1.0)
+                    Text((subscriptionData?.nextPaymentDate ?? "").formattedDate(to: "MMM dd"))
+                        .font(.geistSemiBold(16))
+                        .foregroundColor(themeManager.accentTextColor)
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+                
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("PAID WITH")
+                            .font(.jetBrainsMedium(10))
+                            .foregroundColor(themeManager.textPrimaryLight6_dark62)
+                            .kerning(1.0)
+                        //                    var cardLinked = paymentMethodDataName.isEmpty ? "•••• 4829" : paymentMethodDataName
+                        Text(paidWith == "" ? "-----------" : paidWith)
+                            .font(.geistSemiBold(16))
+                            .foregroundColor(.textPrimary0E101AF4F1FB)
+                    }
+                    .frame(maxWidth: .infinity, alignment: .leading)
+            }
+            
+            HStack(alignment: .top, spacing: 0) {
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("CATEGORY")
+                        .font(.jetBrainsMedium(10))
+                        .foregroundColor(themeManager.textPrimaryLight6_dark62)
+                        .kerning(1.0)
+                    //
+                    //                        let cycleVal = subscriptionData?.billingCycle?.lowercased() ?? "monthly"
+                    //                        let amountVal = subscriptionData?.amount ?? 0.0
+                    //                        let annualVal = (cycleVal == "yearly" || cycleVal == "annual") ? amountVal : (cycleVal == "weekly" ? amountVal * 52 : amountVal * 12)
+                    
+                    Text("\(subscriptionData?.categoryName ?? "-----------")")
+                        .font(.geistSemiBold(16))
+                        .foregroundColor(.textPrimary0E101AF4F1FB)
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+                
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("PLAN TYPE")
+                        .font(.jetBrainsMedium(10))
+                        .foregroundColor(themeManager.textPrimaryLight6_dark62)
+                        .kerning(1.0)
+                    Text(subscriptionData?.subscriptionType ?? "Premium")
+                        .font(.geistSemiBold(16))
+                        .foregroundColor(.success0EA8705CE4A8)
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+            }
+        }
+        .padding(.top, 16)
+        .padding(.bottom, 24)
+        .padding(.horizontal, 24)
+        //        .shadow(color: Color.dropShadowColor1, radius: 2, x: 0, y: 2)
+        .overlay(
+            RoundedRectangle(cornerRadius: 22)
+                .stroke(themeManager.textPrimaryLight8_white8, lineWidth: 1)
+        )
+        .background(themeManager.white_white4)
+        .cornerRadius(22)
+    }
+    
+    private var actionButtonsView: some View {
+        VStack(spacing: 16) {
+            CustomBorderButton(
+                title       : "Edit plan",
+                background  : Color.clear,
+                borderColor : themeManager.textPrimaryLight14_white14,
+                textColor   : .textPrimary0E101AF4F1FB,
+                font        : .geistBold(17),
+                height      : 52,
+                showIcon    : true,
+                icon        : "edit_new",
+                iconOnLeft  : true,
+                action      : { onEdit() }
+            )
+            
+            CustomBorderButton(
+                title       : "Upgrade or Downgrade",
+                background  : Color.warningAnyFFCB5C.opacity(0.1),
+                borderColor : Color.warningAnyFFCB5C.opacity(0.35),
+                textColor   : Color.warningAnyFFCB5C,
+                height      : 52,
+                showIcon    : true,
+                icon        : "tag_yellow",
+                iconOnLeft  : true,
+                action      : { /* action? */ }
+            )
+            
+            CustomBorderButton(
+                title       : "Cancel subscription",
+                background  : Color.dangerE43C5CFF5A7A.opacity(0.1),
+                borderColor : Color.dangerE43C5CFF5A7A.opacity(0.3),
+                textColor   : Color.dangerE43C5CFF5A7A,
+                height      : 52,
+                showIcon    : true,
+                icon        : "del_red_newSmall",
+                iconOnLeft  : true,
+                action      : { showDeletePopup = true }
+            )
+        }
+        .padding(.top, 8)
+    }
+    
+    //MARK: - User defined methods
     func showOfflineDetails()
     {
         if fromList{
@@ -441,6 +467,10 @@ struct SubscriptionMatchView: View {
             }
             if subscriptionData?.cardName != "" && subscriptionData?.cardNumber != ""{
                 paymentMethodDataName = "\(subscriptionData?.cardName ?? "")****\(subscriptionData?.cardNumber ?? "")"
+                paidWith = "••••  \(subscriptionData?.cardNumber ?? "")"
+            }
+            else{
+                paidWith = subscriptionData?.paymentMethodName ?? ""
             }
             getSubDetails()
         }

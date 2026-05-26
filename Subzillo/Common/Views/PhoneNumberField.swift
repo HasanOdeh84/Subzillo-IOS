@@ -29,6 +29,7 @@ struct PhoneNumberField: View {
     @State var countryCode                  = ""
     @State var flag                         = ""
     @State private var previousCountry: Country?
+    var showTick: Bool = false
     @Environment(\.colorScheme) private var systemScheme
     @EnvironmentObject var themeManager     : ThemeManager
     
@@ -168,11 +169,18 @@ struct PhoneNumberField: View {
                             digits          : $phoneNumber,
                             formatterService: formatterService
                         )
-                        .padding(.horizontal, 16)
+                        .padding(.leading, 16)
+                        .padding(.trailing, showTick ? 4 : 16)
                         .frame(height: 52)
                         .foregroundStyle(Color.textPrimary0E101AF4F1FB)
                         .font(.geistMedium(14))
                         .disabled(false)
+                        
+                        if showTick {
+                            Image("tick_green")
+                                .frame(width: 13, height: 20)
+                                .padding(.trailing, 16)
+                        }
                     }
                 }
                 .frame(height: 56)

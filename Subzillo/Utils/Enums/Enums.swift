@@ -16,7 +16,7 @@ enum NavigationRoute: Hashable{
     case login
     case splash
     case termsAndPrivacy(isTerm:Bool?)
-    case verifyOtp(fromLogin: Bool,verifyMergeType:Int = 1)
+    case verifyOtp(fromLogin: Bool, verifyMergeType: Int = 1, isEditProfile: Bool = false, editEmail: String = "", editPhone: String = "", editCountryCode: String = "", editVerifyType: Int = 1)
     case SuccessView(isOtp:Bool?,isMobile:Bool = true)
     case signup(fromSocialLogin:Bool = false)
     case onboarding
@@ -51,6 +51,7 @@ enum NavigationRoute: Hashable{
     case connectICloudView
     case AgentChatView
     case profileTab
+    case editProfile
     case uploadView
     case inboxScanningView
     case exceedLimit
@@ -66,6 +67,7 @@ enum NavigationRoute: Hashable{
             selectedType: CardType = .Visa,
             isDefault: Bool = false
         )
+    case biometric
 }
 
 extension NavigationRoute {

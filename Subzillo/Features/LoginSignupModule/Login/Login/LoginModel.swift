@@ -7,6 +7,14 @@
 
 import Foundation
 
+public struct LoginWithUserIdRequest: Codable {
+    let userId          : String
+    var platform        : Int = Constants.platform
+    let deviceId        : String
+    var uniqueId        : String = UUID().uuidString
+    var pushMode        : Int = Constants.shared.pushMode
+}
+
 public struct checkLoginRequest: Codable {
     let loginType       : Int
     let email           : String

@@ -222,28 +222,28 @@ struct ProfileView: View {
                             .overlay(Color.border)
                         AccountInfo(title: "Full Name", subTitle: fullName) {
                             Constants.FeatureConfig.performS4Action {
-                                selectedAccountType = .name
+                                router.navigate(to: .editProfile)
                             }
                         }
                         Divider()
                             .overlay(Color.border)
                         AccountInfo(title: "Email", subTitle: email) {
                             Constants.FeatureConfig.performS4Action {
-                                selectedAccountType = .email
+                                router.navigate(to: .editProfile)
                             }
                         }
                         Divider()
                             .overlay(Color.border)
                         AccountInfo(title: "Mobile Number", subTitle: mobile) {
                             Constants.FeatureConfig.performS4Action {
-                                selectedAccountType = .mobile
+                                router.navigate(to: .editProfile)
                             }
                         }
                         Divider()
                             .overlay(Color.border)
                         AccountInfo(title: "Currency", subTitle: currency) {
                             Constants.FeatureConfig.performS4Action {
-                                selectedAccountType = .currency
+                                router.navigate(to: .editProfile)
                             }
                         }
                     }

@@ -16,6 +16,8 @@ public struct UpdateProfileRequest: Codable {
     let countryCode     : String
     let currency        : String
     let currencySymbol  : String
+    var noofSubscriptions : Int?
+    var averageMonthlySpend : Int?
 }
 
 public struct UpdatePasswordRequest: Codable {

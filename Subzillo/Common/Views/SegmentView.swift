@@ -93,6 +93,7 @@ struct SegmentViewNew: View {
     
     var leftText: String
     var rightText: String
+    var isUpgrade: Bool = false
     
     @EnvironmentObject var themeManager: ThemeManager
     
@@ -102,7 +103,8 @@ struct SegmentViewNew: View {
             
             segmentButton(
                 title: leftText,
-                isSelected: selectedSegment == .first
+                isSelected: selectedSegment == .first,
+                isUpgrade: isUpgrade
             ) {
                 
                 withAnimation(.easeInOut(duration: 0.2)) {
@@ -112,7 +114,8 @@ struct SegmentViewNew: View {
             
             segmentButton(
                 title: rightText,
-                isSelected: selectedSegment == .second
+                isSelected: selectedSegment == .second,
+                isUpgrade: isUpgrade
             ) {
                 
                 withAnimation(.easeInOut(duration: 0.2)) {
@@ -126,7 +129,7 @@ struct SegmentViewNew: View {
         .overlay(
             Capsule()
                 .stroke(
-                    Color.black.opacity(0.08),
+                    isUpgrade == true ? Color("TextPrimary_ 0E101A_F4F1FB").opacity(0.08) : themeManager.black_white.opacity(0.08),
                     lineWidth: 1
                 )
         )
@@ -139,20 +142,21 @@ struct SegmentViewNew: View {
     private func segmentButton(
         title: String,
         isSelected: Bool,
+        isUpgrade: Bool,
         action: @escaping () -> Void
     ) -> some View {
         
         Button(action: action) {
             
             Text(title)
-                .font(.geistSemiBold(11))
+                .font(.geistSemiBold(isUpgrade == true ? 13 : 11))
                 .foregroundColor(
                     isSelected ?
                     .white :
                     Color("TextPrimary_ 0E101A_F4F1FB").opacity(0.6)
                 )
-                .padding(.horizontal, 14)
-                .frame(height: 30)
+                .padding(.horizontal, isUpgrade == true ? 18 : 14)
+                .frame(height: isUpgrade == true ? 38 : 30)
                 .background(
                     Group {
                         if isSelected {
@@ -167,9 +171,9 @@ struct SegmentViewNew: View {
                     color: isSelected ?
                     themeManager.selectedAccent.senColor.opacity(0.55) :
                     .clear,
-                    radius: 10,
+                    radius: isUpgrade == true ? 14 : 12,
                     x: 0,
-                    y: 2
+                    y: isUpgrade == true ? 4 : 2
                 )
         }
     }

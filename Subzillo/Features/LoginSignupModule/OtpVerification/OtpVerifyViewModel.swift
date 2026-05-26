@@ -23,7 +23,7 @@ class OtpVerifyViewModel: ObservableObject {
         self.sessionManager = sessionManager
     }
     
-    func verifyOtp(input:OtpVerifyRequest,fromLogin:Bool,fromSocialLogin:Bool = false) {
+    func verifyOtp(input:OtpVerifyRequest,fromLogin:Bool,fromSocialLogin:Bool = false, isEdit: Bool = false) {
         apiReference.postApi(endPoint: APIEndpoint.verifyOtp, method: .POST, token: authKey, body: input, showLoader: true, responseType: GeneralResponse.self)
             .sink { [weak self] completion in
                 if case let .failure(error) = completion {
@@ -35,6 +35,19 @@ class OtpVerifyViewModel: ObservableObject {
             PrintLogger.modelLog(response, type: .response, isInput: false)
             ToastManager.shared.showToast(message: response.message ?? "")
             self.otpVerifyResponse = response
+            if isEdit{
+                let data = LoginSignupVerifyData(verifyType         : 1,
+                                                 email              : input.email,
+                                                 phoneNumber        : input.phoneNumber,
+                                                 countryCode        : input.countryCode,
+                                                 userId             : SessionManager.shared.loginData?.userId ?? "",
+                                                 isNewUser          : SessionManager.shared.loginData?.isNewUser ?? false,
+                                                 isSignupCompleted  : SessionManager.shared.loginData?.isSignupCompleted ?? false,
+                                                 fullName           : SessionManager.shared.loginData?.fullName ?? "",
+                                                 socialLogin        : true)//optional
+                self.sessionManager.saveLoginData(data)
+                AppIntentRouter.shared.pop()
+            }else{
             if fromSocialLogin && input.verifyType == 2{
                 let data = LoginSignupVerifyData(verifyType         : 1,
                                                  email              : input.email,
@@ -63,9 +76,9 @@ class OtpVerifyViewModel: ObservableObject {
                             router.navigate(to: .home)
                         }
                     }
-//                    else if !(sessionManager.loginData?.onboardingStatus ?? false) && sessionManager.loginData?.isSignupCompleted == true{
-//                        AppIntentRouter.shared.navigate(to: .onboarding)
-//                    }
+                    //                    else if !(sessionManager.loginData?.onboardingStatus ?? false) && sessionManager.loginData?.isSignupCompleted == true{
+                    //                        AppIntentRouter.shared.navigate(to: .onboarding)
+                    //                    }
                     else{
                         if fromLogin{
                             router.navigate(to: .signup())
@@ -76,6 +89,7 @@ class OtpVerifyViewModel: ObservableObject {
                     
                 }
             }
+        }
         }
         .store(in: &self.subscriptions)
     }

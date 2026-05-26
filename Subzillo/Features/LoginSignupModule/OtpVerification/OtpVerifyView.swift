@@ -33,6 +33,11 @@ struct OtpVerifyView: View {
     @State var changeNumberEmail            : String = "number"
     @State var buttonText                   : String = "Phone Number"
     @State var verifyMergeType              : Int = 1
+    @State var isEditProfile                : Bool = false
+    @State var editEmail                    : String = ""
+    @State var editPhone                    : String = ""
+    @State var editCountryCode              : String = ""
+    @State var editVerifyType               : Int = 1
     @EnvironmentObject var themeManager     : ThemeManager
     @Environment(\.colorScheme) var colorScheme
     
@@ -122,7 +127,7 @@ struct OtpVerifyView: View {
                             )
                     )
                 
-                Image(verifyData?.verifyType == 2 ? "email_purple" : "phone_purple")
+                Image((isEditProfile ? editVerifyType : verifyData?.verifyType) == 2 ? "email_purple" : "phone_purple")
                     .renderingMode(.template)
                     .frame(width: 20, height: 20)
                     .foregroundColor(themeManager.accentTextColor)
@@ -137,7 +142,7 @@ struct OtpVerifyView: View {
                     Text("Code sent to")
                         .font(.geistRegular(12))
                         .foregroundColor(themeManager.textPrimaryLight6_dark62)
-                    Text(verifyData?.verifyType == 2 ? (verifyData?.email ?? "") : getFormattedPhoneNumber())
+                    Text((isEditProfile ? editVerifyType : verifyData?.verifyType) == 2 ? (isEditProfile ? editEmail : (verifyData?.email ?? "")) : getFormattedPhoneNumber())
                         .font(.geistSemiBold(12))
                         .foregroundColor(.textPrimary0E101AF4F1FB)
                 }
@@ -175,7 +180,7 @@ struct OtpVerifyView: View {
             }
         } else {
             Button {
-                otpVerifyVM.resendOtp(input: ResendOtpRequest(userId: Constants.getUserId(), verifyType: verifyData?.verifyType))
+                otpVerifyVM.resendOtp(input: ResendOtpRequest(userId: Constants.getUserId(), verifyType: isEditProfile ? editVerifyType : verifyData?.verifyType))
             } label: {
                 Text("Resend code")
                     .font(.geistSemiBold(13))
@@ -224,8 +229,9 @@ struct OtpVerifyView: View {
     }
     
     private func updateVerifyText() {
-        if verifyData?.verifyType == 1 {
-            verifyText = "Verify your phone"
+        let type = isEditProfile ? editVerifyType : verifyData?.verifyType
+        if type == 1 {
+            verifyText = "Verify your phone number"
             sendCodeText = "phone number"
         } else {
             verifyText = "Verify your email"
@@ -234,8 +240,8 @@ struct OtpVerifyView: View {
     }
     
     private func getFormattedPhoneNumber() -> String {
-        let code = verifyData?.countryCode ?? ""
-        let number = verifyData?.phoneNumber ?? ""
+        let code = isEditProfile ? editCountryCode : (verifyData?.countryCode ?? "")
+        let number = isEditProfile ? editPhone : (verifyData?.phoneNumber ?? "")
         if code.isEmpty { return number }
         let cleanCode = code.hasPrefix("+") ? code : "+\(code)"
         return "\(cleanCode) \(number)"
@@ -293,17 +299,18 @@ struct OtpVerifyView: View {
             ToastManager.shared.showToast(message: errorMessage,style: ToastStyle.error)
         } else {
             let input = OtpVerifyRequest(
-                verifyType          : verifyData?.verifyType ?? 0,
-                email               : verifyData?.email ?? "",
-                phoneNumber         : verifyData?.phoneNumber ?? "",
-                countryCode         : verifyData?.countryCode ?? "",
+                verifyType          : isEditProfile ? editVerifyType : (verifyData?.verifyType ?? 0),
+                email               : isEditProfile ? editEmail : (verifyData?.email ?? ""),
+                phoneNumber         : isEditProfile ? editPhone : (verifyData?.phoneNumber ?? ""),
+                countryCode         : isEditProfile ? editCountryCode : (verifyData?.countryCode ?? ""),
                 otp                 : Int(otp) ?? 0,
-                userId              : verifyData?.userId ?? "",
+                userId              : isEditProfile ? Constants.getUserId() : (verifyData?.userId ?? ""),
                 verifyMergeType     : verifyMergeType
             )
             otpVerifyVM.verifyOtp(input             : input,
                                   fromLogin         : fromLogin,
-                                  fromSocialLogin   : verifyData?.socialLogin ?? false)
+                                  fromSocialLogin   : verifyData?.socialLogin ?? false,
+                                  isEdit            : isEditProfile)
         }
     }
 }

@@ -447,8 +447,8 @@ struct OnboardingView: View {
         let input = UpdateOnboardingRequest(userId                  : Constants.getUserId(),
                                             preferredCurrency       : selectedCurrency?.code ?? "",
                                             preferredCurrencySymbol : selectedCurrency?.symbol ?? "",
-                                            noofSubscriptions       : (selectedSubscriptions ?? 0) - 1,
-                                            averageMonthlySpend     : (selectedSpending ?? 0),
+                                            noofSubscriptions       : selectedSubscriptions ?? 1,
+                                            averageMonthlySpend     : selectedSpending ?? 1,
                                             isoCountryCode          : selectedCountry?.countryCode ?? "")
         if let errorMessage = LoginSignupValidations().validateOnboarding(input: input) {
             ToastManager.shared.showToast(message: errorMessage,style: ToastStyle.error)

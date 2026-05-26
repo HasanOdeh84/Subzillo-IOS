@@ -6,77 +6,287 @@
 //
 
 import SwiftUI
+import LocalAuthentication
+
+enum SupportedBiometric {
+    case faceID
+    case touchID
+    case none
+}
 
 struct Biometric: View {
     
     @EnvironmentObject var themeManager: ThemeManager
     @State private var selectedBiometric = 0
+    @State private var context = LAContext()
+    @State private var biometricType: LABiometryType = .none
+    @State private var isSuccess = 0
     
     var body: some View {
         
         VStack(spacing: 0) {
-            
-            // MARK: Top Action
-            
-            HStack {
-                
-                Spacer()
-                
-                Button("Not now") {
+            if isSuccess == 0 {
+                ScrollView(showsIndicators: false){
+                    // MARK: Top Action
                     
-                }
-                .font(.geistSemiBold(13))
-                .foregroundStyle(
-                    Color.textPrimary0E101AF4F1FB
-                        .opacity(0.6)
-                )
-            }
-            .padding(.horizontal, 20)
-            .padding(.top, 56)
-            
-            
-            Spacer(minLength: 20)
-            
-            
-            // MARK: Center Content
-            
-            VStack(spacing: 28) {
-                
-                biometricAnimationView
-                
-                titleView
-                
-                featuresView
-            }
-            .padding(.horizontal, 28)
-            
-            
-            Spacer(minLength: 20)
-            
-            
-            // MARK: Bottom Actions
-            
-            VStack(spacing: 10) {
-                
-                enableButton
-                
-                biometricSelector
-                
-                Button("Skip for now") {
+                    HStack {
+                        
+                        Spacer()
+                        
+                        Button("Not now") {
+                            skipAction()
+                        }
+                        .font(.geistSemiBold(13))
+                        .foregroundStyle(
+                            Color.textPrimary0E101AF4F1FB
+                                .opacity(0.6)
+                        )
+                    }
+                    .padding(.horizontal, 20)
+                    .padding(.top, 10)
                     
+                    
+                    Spacer(minLength: 20)
+                    
+                    
+                    // MARK: Center Content
+                    
+                    VStack(spacing: 28) {
+                        
+                        biometricAnimationView
+                        
+                        titleView
+                        
+                        featuresView
+                    }
+                    .padding(.horizontal, 28)
+                    
+                    
+                    Spacer(minLength: 20)
+                    
+                    
+                    // MARK: Bottom Actions
+                    
+                    VStack(spacing: 10) {
+                        
+                        enableButton
+                        
+                        //biometricSelector
+                        
+                        Button("Skip for now") {
+                            skipAction()
+                        }
+                        .font(.geistMedium(13))
+                        .foregroundStyle(
+                            Color.textPrimary0E101AF4F1FB
+                                .opacity(0.6)
+                        )
+                        .frame(height: 44)
+                    }
+                    .padding(.horizontal, 20)
+                    .padding(.bottom, 36)
                 }
-                .font(.geistMedium(13))
-                .foregroundStyle(
-                    Color.textPrimary0E101AF4F1FB
-                        .opacity(0.6)
-                )
-                .frame(height: 44)
             }
-            .padding(.horizontal, 20)
-            .padding(.bottom, 36)
+            else{
+                
+                ZStack {
+                    Circle()
+                        .fill(
+                            LinearGradient(
+                                colors: [
+                                    Color.green58D3B5,
+                                    Color.blue4898DF
+                                ],
+                                startPoint: .top,
+                                endPoint: .bottom
+                            )
+                        )
+                        .frame(width: 130, height: 130)
+                        .shadow(
+                            color: Color.green58D3B5
+                                .opacity(0.50),
+                            radius: 30,
+                            x: 0,
+                            y: 20
+                        )
+                    
+                    Image("checkmark1")
+                        .frame(width: 62, height: 62)
+                }
+
+                VStack(spacing: 8) {
+                    
+                    Text("\(selectedBiometric == 0 ? "Face ID" : "Touch ID") enabled")
+                        .font(.geistBold(26))
+                        .foregroundStyle(
+                            Color.textPrimary0E101AF4F1FB
+                        )
+                        .multilineTextAlignment(.center)
+                    
+                    Text("You're all set. Your subscriptions are locked behind biometrics.")
+                        .font(.geistRegular(14))
+                        .foregroundStyle(
+                            Color.textPrimary0E101AF4F1FB
+                                .opacity(0.6)
+                        )
+                        .multilineTextAlignment(.center)
+                        .lineSpacing(3)
+                }
+                .frame(maxWidth: 300)
+                .padding(.top, 60)
+            }
         }
         .applyAppBackground()
+        .onAppear {
+            let biometric = supportedBiometric()
+
+            if supportedBiometric() == .faceID {
+                
+                selectedBiometric = 0
+                
+            } else if biometric == .touchID {
+                
+                selectedBiometric = 1
+                
+            }
+            setupBiometrics()
+        }
     }
+    
+    func supportedBiometric() -> SupportedBiometric {
+        
+        let context = LAContext()
+        var error: NSError?
+        
+        context.canEvaluatePolicy(
+            .deviceOwnerAuthenticationWithBiometrics,
+            error: &error
+        )
+        
+        switch context.biometryType {
+            
+        case .faceID:
+            return .faceID
+            
+        case .touchID:
+            return .touchID
+            
+        default:
+            return .none
+        }
+    }
+    
+    func enableAction()
+    {
+        authenticate()
+    }
+    
+    func skipAction()
+    {
+        AppIntentRouter.shared.navigate(to: .pushPermissions)
+    }
+}
+
+private extension Biometric {
+    
+    func setupBiometrics() {
+        
+        context.canEvaluatePolicy(
+            .deviceOwnerAuthentication,
+            error: nil
+        )
+        
+        biometricType = context.biometryType
+    }
+    
+    func authenticate() {
+        
+        
+        context = LAContext()
+        context.localizedCancelTitle = ""//Enter OTP"
+        
+        var error: NSError?
+        
+        guard context.canEvaluatePolicy(
+            .deviceOwnerAuthentication,
+            error: &error
+        ) else {
+            
+            print(error?.localizedDescription ?? "Can't evaluate policy")
+            return
+        }
+        
+        Task {
+            
+            do {
+                
+                try await context.evaluatePolicy(
+                    .deviceOwnerAuthentication,
+                    localizedReason: "Log in to your account"
+                )
+                
+                await MainActor.run {
+                    
+                    let usersData = Constants.getUserDetails(for: "loginedUsersData")
+                    let filteredUser = usersData.first {
+                           $0["userId"] == Constants.getUserId()
+                       }
+                    
+                    if filteredUser != nil
+                    {
+                        var usersBioData = Constants.getUserDetails(for: "BiometricUsers")
+                        let userExists = usersBioData.contains {
+                            $0["userId"] == Constants.getUserId()
+                        }
+                        
+                        if userExists == false
+                        {
+                            usersBioData.append(filteredUser!)
+                            Constants.saveDefaults(value:usersBioData, key: "BiometricUsers")
+                        }
+                    }
+                    
+                    
+                    isSuccess = 1
+                    biometricType = context.biometryType
+                    
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 2.3) {
+                        AppIntentRouter.shared.navigate(to: .pushPermissions)
+                    }
+                    
+                }
+                
+            } catch {
+                
+                guard let authError = error as? LAError else {
+                    print(error.localizedDescription)
+                    return
+                }
+                
+                switch authError.code {
+                    
+                case .userFallback:
+                    
+                    // User tapped "Enter OTP"
+                    AppIntentRouter.shared.navigate(to: .pushPermissions)
+                    
+                case .userCancel:
+                    
+                    // User tapped "Enter OTP"
+                    AppIntentRouter.shared.navigate(to: .pushPermissions)
+                    
+                case .biometryLockout:
+                    
+                    print("Biometry locked")
+                    
+                default:
+                    
+                    print(authError.localizedDescription)
+                }
+            }
+        }
+    }
+    
 }
 
 // MARK: - Components
@@ -91,27 +301,27 @@ private extension Biometric {
                 
                 Circle()
                     .stroke(
-                        Color(hex: "#A719DD")
+                        themeManager.selectedAccent.primaryColor
                             .opacity(0.13),
                         lineWidth: 1
                     )
-                    .scaleEffect(1 + CGFloat(index) * 0.22)
+                    .scaleEffect(1 + CGFloat(2) * 0.22)
                     .frame(width: 130, height: 130)
             }
+            
             
             Circle()
                 .fill(themeManager.accentGradient)
                 .frame(width: 130, height: 130)
                 .shadow(
-                    color: Color(hex: "#7C5CFF").opacity(0.55),
+                    color: themeManager.selectedAccent.senColor.opacity(0.55),
                     radius: 25,
                     y: 16
                 )
                 .overlay {
                     
-                    Image(systemName: "faceid")
-                        .font(.system(size: 58, weight: .light))
-                        .foregroundStyle(.white)
+                    Image(selectedBiometric == 0 ? "faceid" : "touchid")
+                        .frame(width: 62, height: 62)
                 }
         }
         .frame(width: 180, height: 180)
@@ -121,7 +331,7 @@ private extension Biometric {
         
         VStack(spacing: 8) {
             
-            Text("Protect with Face ID")
+            Text("Protect with \(selectedBiometric == 0 ? "Face ID" : "Touch ID")")
                 .font(.geistBold(26))
                 .foregroundStyle(
                     Color.textPrimary0E101AF4F1FB
@@ -163,29 +373,14 @@ private extension Biometric {
     
     var enableButton: some View {
         
-        Button {
-            
-        } label: {
-            
-            HStack(spacing: 8) {
-                
-                Text("Enable Face ID")
-                
-                Image(systemName: "chevron.right")
-                    .font(.system(size: 12, weight: .bold))
-            }
-            .font(.geistSemiBold(15))
-            .foregroundStyle(.white)
-            .frame(maxWidth: .infinity)
-            .frame(height: 52)
-            .background(themeManager.accentGradient)
-            .clipShape(Capsule())
-            .shadow(
-                color: Color(hex: "#7C5CFF").opacity(0.55),
-                radius: 14,
-                y: 6
-            )
+        GradientBgButton(
+            title       : selectedBiometric == 0 ? "Enable Face ID" : "Enable Touch ID",
+            isSolid     : true,
+            showChevron : true
+        ) {
+            enableAction()
         }
+    
     }
     
     var biometricSelector: some View {
@@ -203,7 +398,7 @@ private extension Biometric {
             )
         }
         .padding(4)
-        .background(.white)
+        .background(themeManager.white_white4)
         .overlay {
             
             RoundedRectangle(cornerRadius: 12)
@@ -242,12 +437,11 @@ private extension Biometric {
                         
                         RoundedRectangle(cornerRadius: 9)
                             .fill(
-                                Color.black.opacity(0.05)
+                                themeManager.black_white.opacity(0.05)
                             )
                     }
                 }
         }
-        .buttonStyle(.plain)
     }
 }
 
@@ -257,27 +451,19 @@ struct FaceIDFeatureRow: View {
     
     let title: String
     let subtitle: String
-    
-    private let gradient = LinearGradient(
-        colors: [
-            Color(hex: "#A719DD").opacity(0.13),
-            Color(hex: "#4489EB").opacity(0.13)
-        ],
-        startPoint: .topLeading,
-        endPoint: .bottomTrailing
-    )
+    @EnvironmentObject var themeManager: ThemeManager
     
     var body: some View {
         
         HStack(alignment: .top, spacing: 12) {
             
             RoundedRectangle(cornerRadius: 9)
-                .fill(gradient)
+                .fill(themeManager.accentGradient.opacity(0.133))
                 .overlay {
                     
                     RoundedRectangle(cornerRadius: 9)
                         .stroke(
-                            Color(hex: "#A719DD")
+                            themeManager.selectedAccent.primaryColor
                                 .opacity(0.2),
                             lineWidth: 1
                         )
@@ -285,11 +471,8 @@ struct FaceIDFeatureRow: View {
                 .frame(width: 28, height: 28)
                 .overlay {
                     
-                    Image(systemName: "checkmark")
-                        .font(.system(size: 11, weight: .bold))
-                        .foregroundStyle(
-                            Color(hex: "#7C5CFF")
-                        )
+                    Image("checkmark2")
+                        .frame(width: 14, height: 14)
                 }
             
             VStack(alignment: .leading, spacing: 2) {
@@ -313,7 +496,7 @@ struct FaceIDFeatureRow: View {
         }
         .padding(.horizontal, 14)
         .padding(.vertical, 12)
-        .background(.white)
+        .background(themeManager.white_white4)
         .clipShape(
             RoundedRectangle(cornerRadius: 14)
         )

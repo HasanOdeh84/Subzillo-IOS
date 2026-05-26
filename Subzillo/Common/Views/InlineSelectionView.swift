@@ -12,6 +12,7 @@ struct InlineSelectionView<T: Hashable>: View {
     
     // MARK: - Properties
     let title: String
+    var font: Font = .jetBrainsMedium(14)
     let items: [T]
     @Binding var selectedItem: T?
     @Binding var isExpanded: Bool
@@ -52,7 +53,7 @@ struct InlineSelectionView<T: Hashable>: View {
     private var headerView: some View {
         if !title.isEmpty {
             Text(LocalizedStringKey(title))
-                .font(.jetBrainsMedium(14))
+                .font(font)
                 .foregroundColor(Color.textDim60637AA8A4C0)
                 .padding(.horizontal, 4)
         }

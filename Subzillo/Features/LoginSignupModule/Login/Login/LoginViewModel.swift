@@ -26,6 +26,32 @@ class LoginViewModel: ObservableObject {
         self.sessionManager = sessionManager
     }
     
+    func loginWithID(input:LoginWithUserIdRequest) {
+        showRestoreAccSheet = false
+        apiReference.postApi(endPoint: APIEndpoint.loginWithUserId, method: .POST,token: defaultAuthKey,body: input,showLoader: true, responseType: LoginResponse.self)
+            .sink { [weak self] completion in
+                if case let .failure(error) = completion {
+                    self?.handleError(error,endPoint: APIEndpoint.checkLogin)
+                }
+            }
+        receiveValue: { [weak self] response in
+            guard let self = self else { return }
+            PrintLogger.modelLog(response, type: .response, isInput: false)
+            KeychainHelperApp.save(response.data?.accessToken, account: Constants.authKey)
+            KeychainHelperApp.save(response.data?.refreshToken, account: Constants.refreshKey)
+            Constants.saveDefaults(value: response.data?.userId, key: Constants.userId)
+            
+            self.loginResponse = response
+            if response.data?.deleteStatus ?? false {
+                showRestoreAccSheet = true
+            }else{
+                AppState.shared.login()
+                self.router.navigate(to: .home)
+            }
+        }
+        .store(in: &self.subscriptions)
+    }
+    
     func login(input:checkLoginRequest, formattedPhNo: String) {
         showRestoreAccSheet = false
         apiReference.postApi(endPoint: APIEndpoint.checkLogin, method: .POST,token: defaultAuthKey,body: input,showLoader: true, responseType: LoginResponse.self)
@@ -40,6 +66,24 @@ class LoginViewModel: ObservableObject {
             KeychainHelperApp.save(response.data?.accessToken, account: Constants.authKey)
             KeychainHelperApp.save(response.data?.refreshToken, account: Constants.refreshKey)
             Constants.saveDefaults(value: response.data?.userId, key: Constants.userId)
+            
+            var usersData = Constants.getUserDetails(for: "loginedUsersData")
+            let userExists = usersData.contains {
+                $0["userId"] == response.data?.userId
+            }
+            
+            if userExists == false
+            {
+                let userData: [String: String] = [
+                        "userId": response.data?.userId ?? "",
+                        "email": input.email,
+                        "phone": input.phoneNumber
+                    ]
+                usersData.append(userData)
+                Constants.saveDefaults(value:usersData, key: "loginedUsersData")
+            }
+            
+            
             self.loginResponse = response
             let data = LoginSignupVerifyData(verifyType         : input.loginType,
                                              email              : input.email,

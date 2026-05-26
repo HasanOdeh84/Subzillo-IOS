@@ -1714,7 +1714,7 @@ struct AvatarView: View {
                     if fromPreview {
                         themeManager.accentGradient
                     } else {
-                        Color.grayCBD5E1475569
+                        Color.flagBgF1F2F7F7F7F9
                     }
                     
                     Text(initials)
@@ -1733,7 +1733,7 @@ struct AvatarView: View {
                                     if fromPreview {
                                         themeManager.accentGradient
                                     } else {
-                                        Color.grayCBD5E1475569
+                                        Color.flagBgF1F2F7F7F7F9
                                     }
                                     
                                     Text(initials)
@@ -1758,7 +1758,7 @@ struct AvatarView: View {
                                 if fromPreview {
                                     themeManager.accentGradient
                                 } else {
-                                    Color.grayCBD5E1475569
+                                    Color.flagBgF1F2F7F7F7F9
                                 }
                                 
                                 Text(initials)

@@ -438,7 +438,7 @@
 				CODE_SIGN_ENTITLEMENTS = Subzillo/SubzilloDebug.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 94;
+				CURRENT_PROJECT_VERSION = 95;
 				DEVELOPMENT_ASSET_PATHS = "\"Subzillo/Resources/Preview Content\"";
 				DEVELOPMENT_TEAM = S7KJCQYHM8;
 				ENABLE_PREVIEWS = YES;
@@ -448,6 +448,7 @@
 				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 				INFOPLIST_KEY_LSSupportsOpeningDocumentsInPlace = YES;
 				INFOPLIST_KEY_NSCameraUsageDescription = "This app requires access to your camera to let you capture photos or documents for your profile and for adding subscriptions and to upload images to chatbot.";
+				INFOPLIST_KEY_NSFaceIDUsageDescription = "Use Face ID instead of a OTP to access your account.";
 				INFOPLIST_KEY_NSMicrophoneUsageDescription = "We need access to the microphone to record your voice to add subscription and used to send voice messages to chatbot.";
 				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "This app requires access to your photo library so you can select and upload existing images from your device and used to select images for chatbot.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
@@ -460,7 +461,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.4.7;
+				MARKETING_VERSION = 1.4.8;
 				PRODUCT_BUNDLE_IDENTIFIER = com.subzillo.app;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -482,7 +483,7 @@
 				CODE_SIGN_ENTITLEMENTS = Subzillo/Subzillo.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 94;
+				CURRENT_PROJECT_VERSION = 95;
 				DEVELOPMENT_ASSET_PATHS = "\"Subzillo/Resources/Preview Content\"";
 				DEVELOPMENT_TEAM = S7KJCQYHM8;
 				ENABLE_PREVIEWS = YES;
@@ -492,6 +493,7 @@
 				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 				INFOPLIST_KEY_LSSupportsOpeningDocumentsInPlace = YES;
 				INFOPLIST_KEY_NSCameraUsageDescription = "This app requires access to your camera to let you capture photos or documents for your profile and for adding subscriptions and to upload images to chatbot.";
+				INFOPLIST_KEY_NSFaceIDUsageDescription = "Use Face ID instead of a OTP to access your account.";
 				INFOPLIST_KEY_NSMicrophoneUsageDescription = "We need access to the microphone to record your voice to add subscription and used to send voice messages to chatbot.";
 				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "This app requires access to your photo library so you can select and upload existing images from your device and used to select images for chatbot.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
@@ -504,7 +506,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.4.7;
+				MARKETING_VERSION = 1.4.8;
 				PRODUCT_BUNDLE_IDENTIFIER = com.subzillo.app;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";

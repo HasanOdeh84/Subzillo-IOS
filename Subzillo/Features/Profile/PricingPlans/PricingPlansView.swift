@@ -20,9 +20,11 @@ struct PricingPlanUI: Identifiable {
     let isCurrent: Bool
     let isLoading: Bool
     let downgradeText: String?
+    let isPopularPlan: Bool?
+    let isBestPlan: Bool?
     let action: (() -> Void)?
     
-    init(title: String, price: String? = nil, priceSubtitle: String? = nil, features: [String], badgeText: String? = nil, badgeColor: Color? = nil, buttonTitle: String, isCurrent: Bool = false, isLoading: Bool = false, downgradeText: String? = nil, action: (() -> Void)? = nil) {
+    init(title: String, price: String? = nil, priceSubtitle: String? = nil, features: [String], badgeText: String? = nil, badgeColor: Color? = nil, buttonTitle: String, isCurrent: Bool = false, isLoading: Bool = false, downgradeText: String? = nil, isPopularPlan: Bool = false, isBestPlan: Bool = false, action: (() -> Void)? = nil) {
         self.title = title
         self.price = price
         self.priceSubtitle = priceSubtitle
@@ -33,6 +35,8 @@ struct PricingPlanUI: Identifiable {
         self.isCurrent = isCurrent
         self.isLoading = isLoading
         self.downgradeText = downgradeText
+        self.isPopularPlan = isPopularPlan
+        self.isBestPlan = isBestPlan
         self.action = action
     }
 }
@@ -58,78 +62,110 @@ struct PricingPlansView: View {
     @State private var lastProcessedDate        : Date = .distantPast
     @State private var loadingStatus            : PricingPlanProcessingType? = nil
     var selectedTab                             : Segment = .first
+    @EnvironmentObject var themeManager         : ThemeManager
+    @Environment(\.colorScheme) var colorScheme
+    @State private var selectedPlanId: String = ""
     
     //MARK: - Body
     var body: some View {
         ZStack {
             VStack(spacing: 0) {
                 // MARK: Header
-                HStack(spacing: 8) {
-                    // MARK: back
+                HStack(alignment: .center, spacing: 12) {
+                    
                     Button(action: {
                         AppIntentRouter.shared.pop()
                     }) {
                         HStack {
-                            Image("back_gray")
+                            
+                            if colorScheme == .dark
+                            {
+                                Image("back_gray")
+                                    .renderingMode(.template)
+                                    .foregroundColor(.white)
+                            }
+                            else{
+                                Image("back_gray")
+                            }
                         }
-                        .foregroundColor(.blue)
+                        .frame(width: 38, height: 38)
+                        .background(
+                            Circle()
+                                .fill(themeManager.white_white4)
+                        )
+                        .overlay(
+                            Circle()
+                                .stroke(
+                                    themeManager.black_white.opacity(0.08),
+                                    lineWidth: 1
+                                )
+                        )
                     }
                     
-                    VStack(alignment: .leading, spacing: 2) {
-                        // MARK: Title
-                        Text("Plans & Pricing")
-                            .font(.appRegular(24))
-                            .foregroundColor(Color.neutralMain700)
-                            .padding(.top, 20)
+                    VStack(alignment: .leading, spacing: 3) {
                         
-                        // MARK: SubTitle
-                        Text("Here's subscription Plans")
-                            .font(.appRegular(18))
-                            .foregroundColor(Color.neutral500)
+                        Text("Plans")
+                            .font(.jetBrainsRegular(11))
+                            .foregroundStyle(
+                                Color.textPrimary0E101AF4F1FB
+                                    .opacity(0.6)
+                            )
+                            .tracking(1.5)
+                            .textCase(.uppercase)
+                        
+                        Text("Pick your vibe")
+                            .font(.geistBold(22))
+                            .foregroundStyle(
+                                Color.textPrimary0E101AF4F1FB
+                            )
+                            .tracking(-0.8)
+                            .lineSpacing(2)
                     }
+                    
                     Spacer()
                 }
+                .padding(.horizontal, 20)
                 .padding(.top, 50)
-                .padding(.horizontal, 24)
-                .padding(.bottom, 24)
+                .padding(.bottom, 20)
                 
-                HStack{
-                    Spacer()
-                    Button(action: {
-                        Constants.shared.OpenSubscriptionsInAppStore()
-                    }) {
-                        Text("Manage Subscription")
-                            .font(.appRegular(18))
-                            .foregroundColor(.blue)
-                            .underline()
-                    }
-                }
-                .padding(.horizontal, 24)
-                .padding(.bottom, 24)
                 
                 // MARK: Toggle
-                PlanToggleView(selectedSegment : $selectedSegment,
-                               leftText        : "Monthly",
-                               rightText       : "Annually")
-                .padding(.bottom, 24)
-                .padding(.horizontal, 24)
+                HStack {
+                    SegmentViewNew(
+                        selectedSegment: $selectedSegment,
+                        leftText: "Monthly",
+                        rightText: "Annual · −20%",
+                        isUpgrade: true
+                    )
+                    .environmentObject(themeManager)
+                    .frame(width: 220)
+                    
+                    Spacer()
+                }
+                .padding(.bottom, 20)
+                .padding(.horizontal, 20)
                 
                 ScrollView(showsIndicators: false) {
-                    VStack(spacing: 24) {
+                    VStack(spacing: 15) {
                         
                         // MARK: Plans List
-                        VStack(spacing: 20) {
+                        VStack(spacing: 12) {
+                            
                             ForEach(viewModel.pricingPlans) { plan in
-                                PricingPlanCard(plan: getUIPlan(from: plan))
+                                
+                                PricingPlanCard(
+                                    plan: getUIPlan(from: plan),
+                                    isSelected: selectedPlanId == (plan.id ?? "")
+                                ) {
+                                    
+                                    selectedPlanId = plan.id ?? ""
+                                }
                             }
                         }
                         
-                        // MARK: tip view
-                        //                        GradienCustomeView(title    : "Need help choosing?",
-                        //                                           subTitle : "Compare all features and find the perfect plan for your subscription management needs.")
                         
                         Text(getAttributedText())
-                            .font(.appRegular(14))
+                            .font(.jetBrainsRegular(10))
                             .multilineTextAlignment(.center)
                             .padding(.vertical, 16)
                             .environment(\.openURL, OpenURLAction { url in
@@ -152,16 +188,16 @@ struct PricingPlansView: View {
                             }
                         } label: {
                             Text("Restore Purchases")
-                                .font(.appBold(14))
-                                .foregroundColor(.neutralMain700)
-                                .underline(true, color: .neutralMain700)
+                                .font(.geistBold(14))
+                                .foregroundColor(.textPrimary0E101AF4F1FB)
+                                .underline(true, color: .textPrimary0E101AF4F1FB)
                         }
                     }
-                    .padding(.horizontal, 24)
-                    .padding(.bottom, 40)
+                    .padding(.horizontal, 20)
+                    .padding(.bottom, 140)
                 }
             }
-            .background(Color.neutralBg100)
+            .applyAppBackground()
             .ignoresSafeArea()
             .navigationBarBackButtonHidden(true)
             
@@ -249,16 +285,16 @@ struct PricingPlansView: View {
         var attriString = AttributedString(
             localized: "This is an auto-renewing subscription. You will be charged automatically at the end of each billing period unless you cancel at least 24 hours before the renewal date. You can manage or cancel your subscription anytime from your Apple ID settings. For more information please visit our Terms & Conditions and Privacy Policy"
         )
-        attriString.foregroundColor = .neutralMain700
+        attriString.foregroundColor = .textPrimary0E101AF4F1FB.opacity(0.36)
         if let privacyRange = attriString.range(of: "Privacy Policy") {
             attriString[privacyRange].link = URL(string: "app://privacy")
-            attriString[privacyRange].foregroundColor = .blueMain700
-            attriString[privacyRange].font = .appBold(12)
+            attriString[privacyRange].foregroundColor = Color.textPrimary0E101AF4F1FB
+            attriString[privacyRange].font = .jetBrainsBold(10)
         }
         if let termsRange = attriString.range(of: "Terms & Conditions") {
             attriString[termsRange].link = URL(string: "app://terms")
-            attriString[termsRange].foregroundColor = .blueMain700
-            attriString[termsRange].font = .appBold(12)
+            attriString[termsRange].foregroundColor = Color.textPrimary0E101AF4F1FB
+            attriString[termsRange].font = .jetBrainsBold(10)
         }
         return attriString
     }
@@ -424,20 +460,20 @@ struct PricingPlansView: View {
                 //                    billingCycle = "/ year"
                 //                }
                 if isYearlySelected{
-                    billingCycle = "/ year"
+                    billingCycle = "/ye"
                 }else{
-                    billingCycle = "/ month"
+                    billingCycle = "/mo"
                 }
             } else {
                 // Product ID exists but product not fetched from StoreKit yet
                 isLoadingPrice = true
                 price = "$ 0.00"
-                billingCycle = isYearlySelected ? "/ year" : "/ month"
+                billingCycle = isYearlySelected ? "/ye" : "/mo"
             }
         } else {
             // Free plan or fallback
             price = "\(plan.currencySymbol ?? "$")\(plan.price ?? 0.0)"
-            billingCycle = isYearlySelected ? "/ year" : "/ month"
+            billingCycle = isYearlySelected ? "/ye" : "/mo"
         }
         
         var buttonTitle         = ""
@@ -465,7 +501,7 @@ struct PricingPlansView: View {
         
         return PricingPlanUI(
             title           : planName,
-            price           : isFreePlan ? nil : price,
+            price           : price,
             priceSubtitle   : isFreePlan ? nil : billingCycle,
             features        : [plan.description ?? "Basic features"],
             badgeColor      : isCurrentPlan ? Color.neutral600 : nil,
@@ -473,6 +509,8 @@ struct PricingPlansView: View {
             isCurrent       : isCurrentPlan,
             isLoading       : isLoadingPrice,
             downgradeText   : downGradeText,
+            isPopularPlan   : isSilverPlan ? true : false,
+            isBestPlan      : isGoldPlan ? true : false,
             action          : {
                 self.loadingStatus = .loading
                 viewModel.runPrePaymentCheck { isSafe in
@@ -535,6 +573,202 @@ struct PricingPlansView: View {
 
 // MARK: - Subviews
 struct PricingPlanCard: View {
+    let plan: PricingPlanUI
+    let isSelected: Bool
+    let onTap: () -> Void
+    @EnvironmentObject var themeManager         : ThemeManager
+    var body: some View {
+        Button {
+            onTap()
+        } label: {
+            VStack(alignment: .leading, spacing: 0) {
+                if plan.isPopularPlan == true {
+                    HStack {
+                        
+                        Text("POPULAR")
+                            .font(.jetBrainsBold(9))
+                            .tracking(1.5)
+                            .foregroundStyle(.white)
+                            .padding(.horizontal, 12)
+                            .padding(.vertical, 4)
+                            .background(
+                                themeManager.accentGradient.opacity(0.8)
+                            )
+                            .clipShape(
+                                UnevenRoundedRectangle(
+                                    topLeadingRadius: 0,
+                                    bottomLeadingRadius: 10,
+                                    bottomTrailingRadius: 10,
+                                    topTrailingRadius: 0
+                                )
+                            )
+                            .shadow(
+                                color: themeManager.selectedAccent.senColor.opacity(0.55),
+                                radius: 12,
+                                y: 4
+                            )
+                        
+                        Spacer()
+                    }
+                    .padding(.horizontal, 20)
+                }
+                VStack(alignment: .leading, spacing: 0) {
+                    
+                    HStack(alignment: .top) {
+                        
+                        VStack(alignment: .leading, spacing: 6) {
+                            
+                            HStack(spacing: 8) {
+                                
+                                Text(plan.title)
+                                    .font(.geistBold(16))
+                                    .foregroundStyle(Color.textPrimary0E101AF4F1FB)
+                                if plan.isBestPlan == true {
+                                    Text("BEST VALUE")
+                                        .font(.jetBrainsMedium(10))
+                                        .foregroundStyle(
+                                            Color("Red_E85D75")
+                                        )
+                                        .tracking(1)
+                                        .padding(.horizontal, 8)
+                                        .frame(height: 20)
+                                        .background(
+                                            Color("Red_E85D75")
+                                                .opacity(0.15)
+                                        )
+                                        .clipShape(
+                                            RoundedRectangle(cornerRadius: 6)
+                                        )
+                                }
+                            }
+                            if plan.isCurrent == true {
+                                Text("Current plan")
+                                    .font(.geistRegular(12))
+                                    .foregroundStyle(
+                                        Color.textPrimary0E101AF4F1FB
+                                            .opacity(0.6)
+                                    )
+                            }
+                        }
+                        
+                        Spacer()
+                        
+                        VStack(alignment: .trailing, spacing: 2) {
+                            
+                            Text(plan.price ?? "")
+                                .font(.geistExtraBold(26))
+                                .foregroundStyle(
+                                    Color.textPrimary0E101AF4F1FB
+                                )
+                                .tracking(-1)
+                            
+                            Text(plan.priceSubtitle ?? "")
+                                .font(.jetBrainsRegular(11))
+                                .foregroundStyle(
+                                    Color.textPrimary0E101AF4F1FB
+                                        .opacity(0.6)
+                                )
+                        }
+                    }
+                    
+                    
+                    if isSelected == true {
+                        // MARK: - Features
+                        
+                        VStack(alignment: .leading, spacing: 7) {
+                            ForEach(plan.features, id: \.self) { title in
+                                featureRow(title)
+                            }
+                        }
+                        .padding(.top, 12)
+                        .padding(.bottom, 16)
+                        
+                        // MARK: - Button
+                        
+                        if plan.isCurrent == false {
+                            Button {
+                                plan.action?()
+                            } label: {
+                                
+                                Text("\(plan.buttonTitle) →")
+                                    .font(.geistBold(15))
+                                    .tracking(-0.3)
+                                    .foregroundStyle(themeManager.white_black)
+                                    .frame(maxWidth: .infinity)
+                                    .frame(height: 48)
+                                    .background(
+                                        themeManager.black_white
+                                    )
+                                    .clipShape(
+                                        RoundedRectangle(cornerRadius: 14)
+                                    )
+                            }
+                        }
+                    }
+                    else{
+                        Text(plan.features[0])
+                            .font(.geistRegular(12))
+                            .foregroundStyle(
+                                Color.textPrimary0E101AF4F1FB
+                                    .opacity(0.6)
+                            )
+                            .lineSpacing(3)
+                            .padding(.top, 6)
+                    }
+                    
+                   /* if plan.buttonTitle != ""{
+                        CustomButton(title      : plan.buttonTitle,
+                                     background : plan.isCurrent ? Color.neutralDisabled200 : Color.primaryBlue800,
+                                     textColor  : plan.isCurrent ? Color.neutral500 : Color.white,
+                                     height     : 48,
+                                     isHidden   : plan.isCurrent ? true : false,
+                                     action: {
+                            plan.action?()
+                        })
+                        .disabled(plan.isCurrent || plan.isLoading)
+                    }*/
+                }
+                .padding(18)
+            }
+            .background(themeManager.white_white4)
+            .clipShape(
+                RoundedRectangle(cornerRadius: 20)
+            )
+            .overlay {
+                
+                RoundedRectangle(cornerRadius: 20)
+                    .stroke(
+                        isSelected == true ? themeManager.selectedAccent.senColor : Color.textPrimary0E101AF4F1FB.opacity(0.08),
+                        lineWidth: 1
+                    )
+            }
+            .shadow(
+                color: isSelected == true ? themeManager.selectedAccent.senColor.opacity(0.55) : .clear,
+                radius: 32,
+                y: 8
+            )
+        }
+    }
+    @ViewBuilder
+    func featureRow(_ title: String) -> some View {
+        
+        HStack(spacing: 10) {
+            
+            Circle()
+                .fill(
+                    themeManager.accentGradient
+                )
+                .frame(width: 7, height: 7)
+            
+            Text(title)
+                .font(.system(size: 13))
+                .foregroundStyle(
+                    Color.textPrimary0E101AF4F1FB
+                )
+        }
+    }
+}
+struct PricingPlanCardold: View {
     let plan: PricingPlanUI
     
     var body: some View {

@@ -418,7 +418,7 @@ struct RootView: View {
     private var showTabBar: Bool {
         guard let current = router.path.last else { return false }
         switch current {
-        case .splash, .login, .signup, .onboarding, .welcome, .verifyOtp, .SuccessView, .termsAndPrivacy, .onboardingSuccess:
+        case .splash, .login, .signup, .onboarding, .welcome, .verifyOtp, .SuccessView, .termsAndPrivacy, .onboardingSuccess, .biometric, .pushPermissions:
             return false
         default:
             return true
@@ -450,8 +450,8 @@ struct RootView: View {
             }else{
                 OnboardingView()
             }
-        case .verifyOtp(let fromLogin, let verifyMergeType):
-            OtpVerifyView(fromLogin:fromLogin, verifyMergeType:verifyMergeType)
+        case .verifyOtp(let fromLogin, let verifyMergeType, let isEditProfile, let editEmail, let editPhone, let editCountryCode, let editVerifyType):
+            OtpVerifyView(fromLogin: fromLogin, verifyMergeType: verifyMergeType, isEditProfile: isEditProfile, editEmail: editEmail, editPhone: editPhone, editCountryCode: editCountryCode, editVerifyType: editVerifyType)
         case .termsAndPrivacy(isTerm: let isTerm):
             TermsAndPrivacyView(isTerm:isTerm ?? false)
         case .SuccessView(isOtp: let isOtp,let isMobile):
@@ -508,6 +508,8 @@ struct RootView: View {
             SplashView()
         case .profileTab:
             ProfileView()
+        case .editProfile:
+            EditProfileView()
         case .onboardingSuccess:
             OnboardingSuccess()
         case .uploadView:
@@ -520,6 +522,8 @@ struct RootView: View {
             SubConformation()
         case .pushPermissions:
             PushPermissions()
+        case .biometric:
+            Biometric()
         case .addNewCardSheet(let  nickName, let cardNumber, let cardName, let shouldCallAPI, let isEdit, let cardId, let selectedType, let isDefault):
             AddNewCardSheet(
                         nickName: nickName,

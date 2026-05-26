@@ -87,10 +87,12 @@ struct CustomBorderButton: View {
     var background  : Color = .neutralBg100
     var borderColor : Color = .neutralBg100
     var textColor   : Color = .textPrimary0E101AF4F1FB
+    var font        : Font = .geistBold(15)
     var height      : CGFloat = 48
     var cornerRadius: CGFloat = 8
     var showIcon    : Bool = false
     var icon        : String = ""
+    var iconOnLeft  : Bool = false
     var action      : () -> Void = {}
     @EnvironmentObject var themeManager : ThemeManager
     
@@ -101,12 +103,17 @@ struct CustomBorderButton: View {
             HStack(spacing: 8) {
                 Spacer()
                 
+                if showIcon && iconOnLeft {
+                    Image(icon)
+                        .frame(width: 16, height: 16)
+                }
+                
                 Text(LocalizedStringKey(title))
                     .multilineTextAlignment(.center)
                     .foregroundColor(textColor)
-                    .font(.appSemiBold(15))
+                    .font(font)
                 
-                if showIcon {
+                if showIcon && !iconOnLeft {
                     Image(icon)
                         .frame(width: 16, height: 16)
                 }

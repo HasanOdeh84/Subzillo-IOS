@@ -232,19 +232,21 @@ struct RegistrationFieldSection<Content: View>: View {
     let header: String
     var icon: String? = nil
     let content: Content
+    var font : Font = .jetBrainsMedium(11)
     
     @EnvironmentObject var themeManager: ThemeManager
     
-    init(header: String, icon: String? = nil, @ViewBuilder content: () -> Content) {
+    init(header: String, icon: String? = nil, @ViewBuilder content: () -> Content, font: Font = .jetBrainsMedium(11)) {
         self.header = header
         self.icon = icon
         self.content = content()
+        self.font = font
     }
     
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             Text(LocalizedStringKey(header))
-                .font(.jetBrainsMedium(11))
+                .font(font)
                 .foregroundColor(themeManager.textPrimaryLight6_dark62)
                 .tracking(1.2)
             

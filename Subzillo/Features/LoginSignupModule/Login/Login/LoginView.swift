@@ -9,6 +9,7 @@ import SwiftUI
 import GoogleSignInSwift
 import _AuthenticationServices_SwiftUI
 import libPhoneNumber
+import LocalAuthentication
 
 struct LoginView: View {
     
@@ -28,6 +29,9 @@ struct LoginView: View {
     @State var isLoginClicked                   = true
     @Environment(\.colorScheme) var systemScheme
     @EnvironmentObject var themeManager         : ThemeManager
+    @State private var selectedBiometric        = 0
+    @State private var showLoginAlert           = false
+    @State private var context                  = LAContext()
     
     //MARK: - Body
     var body: some View {
@@ -93,9 +97,57 @@ struct LoginView: View {
                         showChevron : true
                     ) {
                         isLoginClicked = true
-                        loginApi()
+                        
+                        let usersBioData = Constants.getUserDetails(for: "BiometricUsers")
+                        var userExists = false
+                        if segmentSelected == .first {
+                            let phone = phoneNumber.normalizedPhoneNumber()
+                            let userExists1 = usersBioData.contains {
+                                $0["phone"] == phone
+                            }
+                            userExists = userExists1
+                        }
+                        else{
+                            let userExists1 = usersBioData.contains {
+                                $0["email"] == email.trimmed
+                            }
+                            userExists = userExists1
+                        }
+                        if userExists == true
+                        {
+                            //loginOptions()
+                            showLoginAlert = true
+                        }
+                        
+                        else{
+                            loginApi()
+                        }
+                            
                     }
                     .padding(.top, 12)
+                    .alert(
+                        "Login",
+                        isPresented: $showLoginAlert
+                    ) {
+                        
+                        Button("With OTP") {
+                            
+                            loginApi()
+                        }
+                        
+                        Button("With \(selectedBiometric == 0 ? "Face ID" : "Touch ID")") {
+                            
+                            authenticate()
+                        }
+                        
+                        Button("Cancel", role: .cancel) {
+                            
+                        }
+                        
+                    } message: {
+                        
+                        Text("Choose your preferred login method.")
+                    }
                 }
                 
                 HStack(spacing: 12) {
@@ -155,6 +207,15 @@ struct LoginView: View {
             .padding(.horizontal, 28)
             .navigationBarBackButtonHidden(true)
             .onAppear{
+                setupBiometrics()
+                let biometric = supportedBiometric()
+                if supportedBiometric() == .faceID {
+                    selectedBiometric = 0
+                    
+                } else if biometric == .touchID {
+                    selectedBiometric = 1
+                }
+                
                 Constants.saveDefaults(value: false, key: "isSyncing")
                 if let countries = commonApiVM.countriesResponse {
                     if let savedData = SessionManager.shared.loginData {
@@ -229,8 +290,151 @@ struct LoginView: View {
         .applyAppBackground()
         .ignoresSafeArea()
     }
-    
+    //MARK: Biometric
+    func setupBiometrics() {
+        
+        context.canEvaluatePolicy(
+            .deviceOwnerAuthentication,
+            error: nil
+        )
+    }
+    func supportedBiometric() -> SupportedBiometric {
+        
+        let context = LAContext()
+        var error: NSError?
+        
+        context.canEvaluatePolicy(
+            .deviceOwnerAuthenticationWithBiometrics,
+            error: &error
+        )
+        
+        switch context.biometryType {
+            
+        case .faceID:
+            return .faceID
+            
+        case .touchID:
+            return .touchID
+            
+        default:
+            return .none
+        }
+    }
+    func authenticate() {
+        
+        
+        context = LAContext()
+        context.localizedCancelTitle = "Login with OTP"
+        
+        var error: NSError?
+        
+        guard context.canEvaluatePolicy(
+            .deviceOwnerAuthentication,
+            error: &error
+        ) else {
+            
+            print(error?.localizedDescription ?? "Can't evaluate policy")
+            return
+        }
+        
+        Task {
+            
+            do {
+                
+                try await context.evaluatePolicy(
+                    .deviceOwnerAuthentication,
+                    localizedReason: "Log in to your account"
+                )
+                
+                await MainActor.run {
+                    
+                    let usersBioData = Constants.getUserDetails(for: "BiometricUsers")
+                    
+                    var userExists = false
+                    if segmentSelected == .first {
+                        let phone = phoneNumber.normalizedPhoneNumber()
+                        let userExists1 = usersBioData.contains {
+                            $0["phone"] == phone
+                        }
+                        userExists = userExists1
+                    }
+                    else{
+                        let userExists1 = usersBioData.contains {
+                            $0["email"] == email.trimmed
+                        }
+                        userExists = userExists1
+                    }
+                    
+                    if userExists == true
+                    {
+                        if segmentSelected == .first {
+                            let phone = phoneNumber.normalizedPhoneNumber()
+                            let filteredUser = usersBioData.first {
+                                $0["phone"] == phone
+                            }
+                            if filteredUser != nil {
+                                loginApiWithUserId(userId: filteredUser!["userId"] ?? "")
+                            }
+                            else{
+                                loginApi()
+                            }
+                        }
+                        else{
+                            let filteredUser = usersBioData.first {
+                                $0["email"] == email.trimmed
+                            }
+                            if filteredUser != nil {
+                                loginApiWithUserId(userId: filteredUser!["userId"] ?? "")
+                            }
+                            else{
+                                loginApi()
+                            }
+                        }
+                    }
+                    else{
+                        loginApi()
+                    }
+                    
+                }
+                
+            } catch {
+                
+                guard let authError = error as? LAError else {
+                    print(error.localizedDescription)
+                    return
+                }
+                
+                switch authError.code {
+                    
+                case .userFallback:
+                    
+                    // User tapped "Enter OTP"
+                    loginApi()
+                    
+                case .userCancel:
+                    
+                    // User tapped "Enter OTP"
+                    loginApi()
+                    
+                case .biometryLockout:
+                    
+                    loginApi()
+                    
+                default:
+                    
+                    print(authError.localizedDescription)
+                }
+            }
+        }
+    }
     //MARK: - User defined methods
+    func loginApiWithUserId(userId:String){
+        let input = LoginWithUserIdRequest(
+            userId          : userId,
+            deviceId        : appDelegate.deviceToken ?? ""
+        )
+        loginVM.loginWithID(input: input)
+    }
     func loginApi(){
         let phone = phoneNumber.normalizedPhoneNumber()
         let ph = PhoneNumberFormatterService(regionCode: selectedCountry?.countryCode ?? "").formattedNumber(digits: phoneNumber)

@@ -9,7 +9,7 @@ enum urlType:Int{
     case prod   = 3
 }
 
-let Environment = urlType.stage
+let Environment = urlType.dev
 var baseurl: String {
     switch Environment {
     case .dev:
@@ -35,6 +35,7 @@ enum HTTPMethod: String {
 }
 
 enum APIEndpoint: String {
+    case loginWithUserId                = "/loginWithUserId"
     case checkLogin                     = "/checkLogin"
     case verifyOtp                      = "/verifyOtp"
     case resendOtp                      = "/resendOtp"

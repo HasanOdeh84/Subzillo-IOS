@@ -22,14 +22,14 @@ struct PushPermissions: View {
             HStack {
                 Spacer()
                 
-                Button {
+                /*Button {
                     skipAction()
                 } label: {
                     Text("Not now")
                         .font(.system(size: 13, weight: .semibold))
                         .foregroundStyle(.textPrimary0E101AF4F1FB.opacity(0.6))
                     
-                }
+                }*/
                 
             }
             .padding(.horizontal, 20)
@@ -179,9 +179,9 @@ struct PushPermissions: View {
             VStack(spacing: 10) {
                 
                 Button {
-                    
+                    turnOn()
                 } label: {
-                    Text("Turn on notifications")
+                    Text("Next")
                         .font(.geistSemiBold(15))
                         .foregroundStyle(.white)
                         .frame(maxWidth: .infinity)
@@ -197,7 +197,7 @@ struct PushPermissions: View {
                         )
                 }
                 
-                Button {
+                /*Button {
                     skipAction()
                 } label: {
                     Text("Maybe later")
@@ -206,7 +206,7 @@ struct PushPermissions: View {
                             .textPrimary0E101AF4F1FB.opacity(0.6)
                         )
                         .frame(height: 44)
-                }
+                }*/
             }
             .padding(.horizontal, 20)
             .padding(.bottom, 66)
@@ -217,11 +217,15 @@ struct PushPermissions: View {
     }
     func skipAction()
     {
-        
+        AppIntentRouter.shared.navigate(to: .onboardingSuccess)
     }
     func gotoSettings()
     {
         AppIntentRouter.shared.navigate(to: .settings)
+    }
+    func turnOn()
+    {
+        AppIntentRouter.shared.navigate(to: .onboardingSuccess)
     }
 }
 struct NotificationCard: View {
