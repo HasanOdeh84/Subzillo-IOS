@@ -131,16 +131,9 @@ struct ExtractedSubscriptionsView: View {
                                     let allSelected = viewModel.selectedIds.count == viewModel.subscriptions.count
                                     
                                     Button(action: {
-                                        //                                        let allSelected = activeSubscriptions.allSatisfy { viewModel.selectedIds.contains($0.id ?? "") }
                                         if allSelected {
-                                            //                                            for sub in activeSubscriptions {
-                                            //                                                if let id = sub.id { viewModel.selectedIds.remove(id) }
-                                            //                                            }
                                             viewModel.selectedIds.removeAll()
                                         } else {
-                                            //                                            for sub in activeSubscriptions {
-                                            //                                                if let id = sub.id { viewModel.selectedIds.insert(id) }
-                                            //                                            }
                                             for sub in viewModel.subscriptions {
                                                 if let id = sub.id {
                                                     viewModel.selectedIds.insert(id)
@@ -199,47 +192,33 @@ struct ExtractedSubscriptionsView: View {
                                         .frame(width: 6, height: 6)
                                         .shadow(color: .warningAnyFFCB5C.opacity(0.80), radius: 4, x: 0, y: 0)
                                     
-                                    //                                    Circle().fill(Color(hex: "#FFC233")).frame(width: 6, height: 6) // Yellow/Orange
                                     Text("MAYBE EXPIRED • \(inactiveSubscriptions.count)")// no receipt in 4+ months")
                                         .font(.jetBrainsSemiBold(10))
                                         .tracking(1.5)
                                         .foregroundColor(Color("TextPrimary_ 0E101A_F4F1FB"))
                                     
-                                    //                                    Text("•")
-                                    //                                        .font(.system(size: 10))
-                                    //                                        .foregroundColor(Color("TextPrimary_ 0E101A_F4F1FB").opacity(0.6))
-                                    //
-                                    //                                    Text("\(inactiveSubscriptions.count) no receipt in 4+ months")
-                                    //                                        .font(.jetBrainsRegular(11))
-                                    //                                        .foregroundColor(Color("TextPrimary_ 0E101A_F4F1FB").opacity(0.6))
-                                    
                                     Spacer()
                                     
                                     let allSelected = viewModel.selectedIds.count == viewModel.subscriptions.count
                                     
-                                    Button(action: {
-                                        //                                        let allSelected = activeSubscriptions.allSatisfy { viewModel.selectedIds.contains($0.id ?? "") }
-                                        if allSelected {
-                                            //                                            for sub in activeSubscriptions {
-                                            //                                                if let id = sub.id { viewModel.selectedIds.remove(id) }
-                                            //                                            }
-                                            viewModel.selectedIds.removeAll()
-                                        } else {
-                                            //                                            for sub in activeSubscriptions {
-                                            //                                                if let id = sub.id { viewModel.selectedIds.insert(id) }
-                                            //                                            }
-                                            for sub in viewModel.subscriptions {
-                                                if let id = sub.id {
-                                                    viewModel.selectedIds.insert(id)
+                                    if activeSubscriptions.count == 0{
+                                        Button(action: {
+                                            if allSelected {
+                                                viewModel.selectedIds.removeAll()
+                                            } else {
+                                                for sub in viewModel.subscriptions {
+                                                    if let id = sub.id {
+                                                        viewModel.selectedIds.insert(id)
+                                                    }
                                                 }
                                             }
+                                        }) {
+                                            Text(allSelected ? "Unselect all" : "Select all")
+                                                .font(.geistBold(12))
+                                                .foregroundStyle(
+                                                    themeManager.accentGradient
+                                                )
                                         }
-                                    }) {
-                                        Text(allSelected ? "Unselect all" : "Select all")
-                                            .font(.geistBold(12))
-                                            .foregroundStyle(
-                                                themeManager.accentGradient
-                                            )
                                     }
                                 }
                                 

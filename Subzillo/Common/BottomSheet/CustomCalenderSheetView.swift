@@ -23,6 +23,8 @@ struct CustomCalenderSheet: View {
                                    "July", "August", "September", "October", "November", "December"]
     let years                   = Array(2025...(Calendar.current.component(.year, from: Date()) + 100))
     
+    @EnvironmentObject var themeManager : ThemeManager
+    
     //MARK: - body
     var body: some View {
         VStack(spacing: 16) {
@@ -55,7 +57,7 @@ struct CustomCalenderSheet: View {
             }
             .frame(height: 150)
             
-            CustomButton(title: "Ok"){
+            CustomButton(title: "Ok", shadow: themeManager.accentShadowColor){
                 selectedMonth = tempMonth
                 selectedYear = tempYear
                 onDone()
@@ -83,6 +85,7 @@ struct CustomYearBottomSheet: View {
     @State private var tempYear: Int = 2025
     
     let years                   = Array(2025...(Calendar.current.component(.year, from: Date()) + 100))
+    @EnvironmentObject var themeManager : ThemeManager
     
     //MARK: - body
     var body: some View {
@@ -106,7 +109,7 @@ struct CustomYearBottomSheet: View {
             }
             .frame(height: 150)
             
-            CustomButton(title: "Ok"){
+            CustomButton(title: "Ok", shadow: themeManager.accentShadowColor){
                 selectedYear = tempYear
                 onDone(tempYear)
                 isPresented = false

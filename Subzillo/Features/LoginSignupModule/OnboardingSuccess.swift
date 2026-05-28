@@ -75,23 +75,24 @@ struct OnboardingSuccess: View {
                         // MARK: - Title
                         VStack(spacing: 8) {
                             HStack(spacing: 0) {
-                                Text("You're all set, ")
-                                    .font(.geistSemiBold(26))
-                                    .foregroundColor(
-                                        Color("TextPrimary_ 0E101A_F4F1FB")
-                                    )
-                                
-                                Text(" \(Constants.getUserDefaultsValue(for: Constants.username))")
-                                    .font(.geistSemiBold(26))
-                                    .italic()
-                                    .overlay(
-                                        themeManager.accentGradient
-                                            .mask(
-                                                Text("\(Constants.getUserDefaultsValue(for: Constants.username)).")
-                                                    .font(.geistSemiBold(26))
-                                            )
-                                    )
-                                    .foregroundColor(.clear)
+                                titleView(title: "You're all set, \(Constants.getUserDefaultsValue(for: Constants.username))", styledPart: "\(Constants.getUserDefaultsValue(for: Constants.username))")
+//                                Text("You're all set, ")
+//                                    .font(.geistSemiBold(26))
+//                                    .foregroundColor(
+//                                        Color("TextPrimary_ 0E101A_F4F1FB")
+//                                    )
+//                                
+//                                Text(" \(Constants.getUserDefaultsValue(for: Constants.username))")
+//                                    .font(.geistSemiBold(26))
+//                                    .italic()
+//                                    .overlay(
+//                                        themeManager.accentGradient
+//                                            .mask(
+//                                                Text("\(Constants.getUserDefaultsValue(for: Constants.username)).")
+//                                                    .font(.geistSemiBold(26))
+//                                            )
+//                                    )
+//                                    .foregroundColor(.clear)
                                 
                             }
                             .multilineTextAlignment(.center)
@@ -392,6 +393,45 @@ struct OnboardingSuccess: View {
             
             Spacer()
         }
+    }
+    
+    @ViewBuilder
+    private func titleView(title: String, styledPart: String) -> some View {
+        if !styledPart.isEmpty && title.contains(styledPart) {
+            buildLine(line: title, styledPart: styledPart, isMask: false)
+                .multilineTextAlignment(.center)
+                .overlay(
+                    themeManager.gradient(style: .vertical)
+                        .mask(
+                            buildLine(line: title, styledPart: styledPart, isMask: true)
+                                .multilineTextAlignment(.center)
+                        )
+                )
+                .foregroundColor(.clear)
+        } else {
+            Text(title)
+                .font(.geistSemiBold(24))
+                .foregroundColor(Color("TextPrimary_ 0E101A_F4F1FB"))
+                .multilineTextAlignment(.center)
+        }
+    }
+    
+    private func buildLine(line: String, styledPart: String, isMask: Bool) -> Text {
+        let parts = line.components(separatedBy: styledPart)
+        var result = Text("")
+        for (index, part) in parts.enumerated() {
+            result = result + Text(part)
+                .font(.geistSemiBold(24))
+                .foregroundColor(isMask ? .clear : Color("TextPrimary_ 0E101A_F4F1FB"))
+            
+            if index < parts.count - 1 {
+                result = result + Text(styledPart)
+                    .font(.jetBrainsSemiBoldItalic(24))
+                    .italic()
+                    .foregroundColor(isMask ? .black : .clear)
+            }
+        }
+        return result
     }
 }
 

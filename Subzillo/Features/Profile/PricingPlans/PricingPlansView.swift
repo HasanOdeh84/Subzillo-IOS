@@ -73,33 +73,8 @@ struct PricingPlansView: View {
                 // MARK: Header
                 HStack(alignment: .center, spacing: 12) {
                     
-                    Button(action: {
+                    CircleBackButton {
                         AppIntentRouter.shared.pop()
-                    }) {
-                        HStack {
-                            
-                            if colorScheme == .dark
-                            {
-                                Image("back_gray")
-                                    .renderingMode(.template)
-                                    .foregroundColor(.white)
-                            }
-                            else{
-                                Image("back_gray")
-                            }
-                        }
-                        .frame(width: 38, height: 38)
-                        .background(
-                            Circle()
-                                .fill(themeManager.white_white4)
-                        )
-                        .overlay(
-                            Circle()
-                                .stroke(
-                                    themeManager.black_white.opacity(0.08),
-                                    lineWidth: 1
-                                )
-                        )
                     }
                     
                     VStack(alignment: .leading, spacing: 3) {
@@ -700,7 +675,7 @@ struct PricingPlanCard: View {
                                         themeManager.black_white
                                     )
                                     .clipShape(
-                                        RoundedRectangle(cornerRadius: 14)
+                                        RoundedRectangle(cornerRadius: 48/2)
                                     )
                             }
                         }
@@ -770,6 +745,8 @@ struct PricingPlanCard: View {
 }
 struct PricingPlanCardold: View {
     let plan: PricingPlanUI
+    @EnvironmentObject var themeManager         : ThemeManager
+    @Environment(\.colorScheme) private var colorScheme
     
     var body: some View {
         ZStack(alignment: .topTrailing) {
@@ -820,15 +797,28 @@ struct PricingPlanCardold: View {
                 }
                 
                 if plan.buttonTitle != ""{
-                    CustomButton(title      : plan.buttonTitle,
-                                 background : plan.isCurrent ? Color.neutralDisabled200 : Color.primaryBlue800,
-                                 textColor  : plan.isCurrent ? Color.neutral500 : Color.white,
-                                 height     : 48,
-                                 isHidden   : plan.isCurrent ? true : false,
-                                 action: {
-                        plan.action?()
-                    })
+                    
+                    CustomBorderButton(
+                        title       : plan.buttonTitle,
+                        background  : .textPrimary0E101AF4F1FB,
+                        borderColor : .clear,
+                        textColor   : colorScheme == .light ? .textPrimaryDarkF4F1FB : .textPrimaryLight0E101A,
+                        action      : {
+                            plan.action?()
+                        }
+                    )
                     .disabled(plan.isCurrent || plan.isLoading)
+                    
+//                    CustomButton(title      : plan.buttonTitle,
+//                                 background : plan.isCurrent ? Color.neutralDisabled200 : Color.primaryBlue800,
+//                                 shadow     : themeManager.accentShadowColor,
+//                                 textColor  : plan.isCurrent ? Color.neutral500 : Color.white,
+//                                 height     : 48,
+//                                 isHidden   : plan.isCurrent ? true : false,
+//                                 action: {
+//                        plan.action?()
+//                    })
+//                    .disabled(plan.isCurrent || plan.isLoading)
                 }
             }
             .padding(24)

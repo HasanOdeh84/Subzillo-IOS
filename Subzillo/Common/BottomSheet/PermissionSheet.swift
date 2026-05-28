@@ -15,6 +15,7 @@ struct PermissionSheet: View {
     var type                          : String
     var value                         : String
     var hideManualBtn                 : Bool = false
+    @EnvironmentObject var themeManager     : ThemeManager
     
     //MARK: - body
     var body: some View {
@@ -65,7 +66,7 @@ struct PermissionSheet: View {
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(.horizontal, 30)
             
-            CustomButton(title: "Open settings", buttonImage: "settingsicon", action: onSettingsAction)
+            CustomButton(title: "Open settings",shadow: themeManager.accentShadowColor, buttonImage: "settingsicon", action: onSettingsAction)
                 .padding(.top, 24)
             
             if !hideManualBtn{

@@ -46,6 +46,7 @@ struct RenewSubscriptionBottomSheet: View {
                 VStack(spacing: 16) {
                     CustomButton(
                         title   : btn1,
+                        shadow  : themeManager.accentShadowColor,
                         height  : 56,
                         action  : {
                             dismiss()

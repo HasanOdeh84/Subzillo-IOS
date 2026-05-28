@@ -135,7 +135,7 @@ struct AddSubscriptionsView: View {
                 .frame(maxWidth: .infinity)
                 .padding(.top, 24)
                 .padding(.horizontal, 4)
-                .padding(.bottom, 200)
+                .padding(.bottom, 120)
             }
         }
         .padding(20)

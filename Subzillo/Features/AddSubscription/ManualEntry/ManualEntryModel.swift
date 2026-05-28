@@ -104,6 +104,8 @@ public struct ListFamilyMembersResponseData: Codable, Hashable {
     var countryCode         : String? = nil
     var color               : String? = nil
     var subscriptions       : [SubscriptionListData]? = nil
+    var tag                 : String? = nil
+    var role                : String? = nil
 }
 
 public struct AddCardRequest: Codable {

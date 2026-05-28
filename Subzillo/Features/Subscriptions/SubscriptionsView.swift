@@ -745,12 +745,14 @@ struct SubscriptionsView: View {
             InfoAlertSheet(
                 onDelegate: {
                     deleteSubscription()
-                }, title    : "Are you sure you want to delete the subscriptions?",
-                subTitle    : "Data will be permanently deleted",
-                imageName   : "del_red_new",
-                buttonIcon  : "del_red_newSmall",
-                buttonTitle : "Delete",
-                imageSize   : 70
+                }, title                : "Are you sure you want to delete the subscriptions?",
+                subTitle                : "Data will be permanently deleted",
+                imageName               : "del_red_new",
+                buttonIcon              : "del_red_newSmall",
+                buttonTitle             : "Delete",
+                imageSize               : 70,
+                isCancelButtonVisible   : true,
+                isImageVisible          : true
             )
             .onPreferenceChange(InnerHeightPreferenceKey.self) { height in
                 if height > 0 {

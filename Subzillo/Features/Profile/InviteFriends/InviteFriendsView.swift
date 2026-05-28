@@ -15,98 +15,293 @@ struct InviteFriendsView: View {
     @EnvironmentObject private var commonVM : CommonAPIViewModel
     @State private var referralLink         : String = ""
     var uLink                               : String? = ""
+    @EnvironmentObject var themeManager     : ThemeManager
+    @Environment(\.colorScheme) var colorScheme
+    var progress                            : CGFloat = 0.5
+    var currentValue: Int = 1
+    var totalValue: Int = 2
+    //    @State private var circleprogress:CGFloat = 0.0
+    @State private var circleprogress: Double = 0.0
+    
+    private var attributedDescription: AttributedString {
+        
+        var result = AttributedString("Next: ")
+        result.foregroundColor = themeManager.textPrimaryLight6_dark62
+        
+        var streaming = AttributedString("Add 3 subscriptions")
+        streaming.font = .geistSemiBold(11)
+        streaming.foregroundColor = .textPrimary0E101AF4F1FB
+        
+        result += streaming
+        
+        return result
+    }
     
     // MARK: - Body
     var body: some View {
         VStack(spacing: 0) {
             // MARK: Header
-            HStack(alignment: .center, spacing: 8) {
-                // MARK: - back
-                Button(action: {
+            HStack(alignment: .center, spacing: 12) {
+                
+                CircleBackButton {
                     AppIntentRouter.shared.pop()
-                }) {
-                    HStack {
-                        Image("back_gray")
-                    }
-                    .foregroundColor(.blue)
                 }
                 
-                Text("Invite friends")
-                    .font(.appRegular(24))
-                    .foregroundColor(Color.neutralMain700)
+                VStack(alignment: .leading, spacing: 3) {
+                    
+                    Text("Earn together")
+                        .font(.jetBrainsRegular(11))
+                        .foregroundStyle(
+                            Color.textPrimary0E101AF4F1FB
+                                .opacity(0.6)
+                        )
+                        .tracking(1.5)
+                        .textCase(.uppercase)
+                    
+                    Text("Invite friends")
+                        .font(.geistBold(22))
+                        .foregroundStyle(
+                            Color.textPrimary0E101AF4F1FB
+                        )
+                        .tracking(-0.8)
+                        .lineSpacing(2)
+                }
                 
                 Spacer()
             }
-            .padding(.top, 70)
             .padding(.horizontal, 20)
-            .padding(.bottom, 24)
+            .padding(.top, 50)
+            .padding(.bottom, 20)
             
             ScrollView(showsIndicators: false) {
-                VStack(alignment: .leading, spacing: 32) {
+                
+                HStack(spacing: 20) {
+                    
+                    ZStack {
+                        ZStack {
+                            ArcShape(startAngle: .degrees(-210),
+                                     endAngle: .degrees(30))
+                            .stroke(
+                                themeManager.black_white.opacity(0.05),
+                                style: StrokeStyle(
+                                    lineWidth: 9,
+                                    lineCap: .round
+                                )
+                            )
+                            
+                            ArcShape(
+                                startAngle: .degrees(-210),
+                                endAngle: .degrees(30)
+                            )
+                            .trim(from: 0, to: circleprogress)
+                            .stroke(
+//                                themeManager.accentGradient,
+                                themeManager.gradient(style: .horizontal),
+                                style: StrokeStyle(
+                                    lineWidth: 9,
+                                    lineCap: .round
+                                )
+                            )
+                            .shadow(
+                                color: themeManager.selectedAccent.senColor.opacity(0.45),
+                                radius: 6
+                            )
+                        }
+                        .frame(width: 150, height: 150)
+                        .offset(y: -46)
+                        
+                        VStack(spacing: 2) {
+                            
+                            Text("\(currentValue)")
+                                .font(.geistExtraBold(32))
+                                .foregroundStyle(
+                                    themeManager.black_white
+                                )
+                            
+                            Text("REFERRALS")
+                                .font(.jetBrainsRegular(11))
+                                .tracking(1)
+                                .foregroundStyle(
+                                    themeManager.black_white.opacity(0.4)
+                                )
+                        }
+                        .offset(y: 12)
+                    }
+                    .frame(width: 150, height: 150)
+                    .padding(.leading, 20)
+                    .padding(.bottom, 20)
+                    
+                    VStack(alignment: .leading, spacing: 0) {
+                        
+                        Text("1 more to next reward")
+                            .font(.geistBold(16))
+                            .tracking(-0.4)
+                            .foregroundStyle(
+                                Color.textPrimary0E101AF4F1FB
+                            )
+                            .lineLimit(2)
+                        
+                        Text(attributedDescription)
+                            .font(.geistRegular(12))
+                            .foregroundStyle(
+                                Color.textPrimary0E101AF4F1FB
+                                    .opacity(0.6)
+                            )
+                            .padding(.top, 6)
+                        
+//                        VStack(alignment: .leading, spacing: 0) {
+//                            
+//                            GeometryReader { geo in
+//                                
+//                                ZStack(alignment: .leading) {
+//                                    
+//                                    Capsule()
+//                                        .fill(
+//                                            themeManager.black_white.opacity(0.08)
+//                                        )
+//                                    
+//                                    Capsule()
+//                                        .fill(
+//                                            themeManager.accentGradient
+//                                        )
+//                                        .frame(
+//                                            width: geo.size.width * progress
+//                                        )
+//                                }
+//                            }
+//                            .frame(height: 5)
+//                            
+//                            Text("1/2 referrals")
+//                                .font(.jetBrainsRegular(10))
+//                                .foregroundStyle(
+//                                    Color.textPrimary0E101AF4F1FB
+//                                        .opacity(0.6)
+//                                )
+//                                .padding(.top, 4)
+//                        }
+//                        .padding(.top, 10)
+                    }
+                    .frame(maxWidth: .infinity, alignment: .center)
+                }
+                .padding(.horizontal, 24)
+                .padding(.vertical, 10)
+                .background {
+                    RoundedRectangle(cornerRadius: 28)
+                        .fill(themeManager.white_white4)
+                        .overlay(alignment: .top) {
+                            
+                            RadialGradient(
+                                colors: [
+                                    themeManager.selectedAccent.primaryColor
+                                        .opacity(0.16),
+                                    .clear
+                                ],
+                                center: .top,
+                                startRadius: 0,
+                                endRadius: 300
+                            )
+                        }
+                        .clipShape(
+                            RoundedRectangle(cornerRadius: 28)
+                        )
+                }
+                .overlay {
+                    
+                    RoundedRectangle(cornerRadius: 28)
+                        .stroke(
+                            Color.textPrimary0E101AF4F1FB
+                                .opacity(0.14),
+                            lineWidth: 1
+                        )
+                }
+                .padding(.horizontal, 20)
+                .padding(.bottom, 20)
+                
+                VStack(alignment: .leading, spacing: 20) {
                     
                     // MARK: Invite Section
-                    VStack(alignment: .leading, spacing: 12) {
-                        Text("Invite your friends")
-                            .font(.appRegular(14))
-                            .foregroundColor(Color.graphText)
+                    VStack(alignment: .leading, spacing: 10) {
                         
-                        HStack(spacing: 12) {
-                            TextField("", text: $referralLink)
-                                .font(.appRegular(16))
-                                .foregroundColor(Color.blueMain700)
-                                .padding(.horizontal, 16)
-                                .frame(height: 48)
-                                .background(Color.white)
-                                .cornerRadius(12)
-                                .overlay(
-                                    RoundedRectangle(cornerRadius: 12)
-                                        .stroke(Color.neutral2200, lineWidth: 1)
-                                )
-                                .disabled(true)
+                        Text("YOUR INVITE LINK")
+                            .font(.jetBrainsRegular(11))
+                            .tracking(1.5)
+                            .foregroundStyle(
+                                Color.textPrimary0E101AF4F1FB
+                                    .opacity(0.6)
+                            )
+                        
+                        HStack(spacing: 8) {
                             
-                            CustomButton(title      : "Share",
-                                         background : Color.navyBlueCTA700,
-                                         textColor  : .white,
-                                         width      : 100,
-                                         height     : 48,
-                                         isShare    : true,
-                                         action     : {
+                            HStack {
+                                
+                                TextField("", text: $referralLink)
+                                    .font(.jetBrainsRegular(13))
+                                    .foregroundColor(Color.textPrimary0E101AF4F1FB
+                                        .opacity(0.6))
+                                    .disabled(true)
+                                
+                            }
+                            .frame(height: 50)
+                            .padding(.horizontal, 14)
+                            .background(
+                                themeManager.white_white4
+                            )
+                            .clipShape(
+                                RoundedRectangle(cornerRadius: 14)
+                            )
+                            .overlay {
+                                
+                                RoundedRectangle(cornerRadius: 14)
+                                    .stroke(
+                                        Color.textPrimary0E101AF4F1FB
+                                            .opacity(0.08),
+                                        lineWidth: 1
+                                    )
+                            }
+                            
+                            Button {
                                 if !referralLink.isEmpty {
                                     shareLink(referralLink)
                                 } else {
                                     ToastManager.shared.showToast(message: "No referral link available", style: .info)
                                 }
-                            })
-                            .frame(width: 100)
-                            
-//                            ShareLink(item: referralLink, subject: Text("Check out this amazing app!"), message: Text("Hey, I've been using this app and thought you'd like it. Use this link to download it.")) {
-//                                Text("Share")
-//                                    .font(.appSemiBold(16))
-//                                    .foregroundColor(.white)
-//                                    .padding(.horizontal, 13)
-//                                    .padding(.vertical, 11)
-//                                    .background(
-//                                        LinearGradient(colors: [Color.linearGradient3, Color.linearGradient4, Color.blueMain700],
-//                                                       startPoint: .top,
-//                                                       endPoint: .bottom)
-//                                    )
-//                                    .cornerRadius(7)
-//                                    .frame(width: 100, height: 48)
-//                            }
+                            } label: {
+                                
+                                HStack(spacing: 6) {
+                                    
+                                    Text("Share")
+                                        .font(.geistBold(13))
+                                }
+                                .foregroundStyle(.white)
+                                .frame(width:73, height: 50)
+                                .padding(.horizontal, 18)
+                                .background(
+                                    themeManager.accentGradient
+                                )
+                                .clipShape(
+                                    RoundedRectangle(cornerRadius: 14)
+                                )
+                                .shadow(
+                                    color: themeManager.selectedAccent.senColor.opacity(0.55),
+                                    radius: 20,
+                                    y: 6
+                                )
+                            }
                         }
                     }
                     
                     //MARK: - How it works
-                    GradienCustomeView(title            : "How it work?",
-                                       subTitle         : "",
-                                       isImage          : false,
-                                       isInviteFriends  : true)
+                    ReferralHowItWorksView()
                     
                     // MARK: Rewards Section
                     VStack(alignment: .leading, spacing: 16) {
-                        Text("Rewards")
-                            .font(.appSemiBold(24))
-                            .foregroundColor(Color.neutralMain700)
+                        Text("REWARDS")
+                            .font(.jetBrainsRegular(11))
+                            .tracking(1.5)
+                            .foregroundStyle(
+                                Color.textPrimary0E101AF4F1FB
+                                    .opacity(0.6)
+                            )
                         if viewModel.rewards.isEmpty {
                             HStack{
                                 Spacer()
@@ -119,9 +314,9 @@ struct InviteFriendsView: View {
                                     
                                     Text("No rewards yet. Invite your friends and start earning today!")
                                         .padding(30)
-                                        .foregroundStyle(Color.gray)
+                                        .foregroundStyle(Color.textPrimary0E101AF4F1FB.opacity(0.6))
                                         .multilineTextAlignment(.center)
-                                        .font(.appRegular(16))
+                                        .font(.geistRegular(16))
                                     Spacer()
                                 }
                                 Spacer()
@@ -144,22 +339,27 @@ struct InviteFriendsView: View {
                             }
                         }
                     }
-                    .padding(.bottom, 40)
+                    .padding(.bottom, 140)
                 }
                 .padding(.horizontal, 20)
             }
         }
-        .background(Color.neutralBg100)
+        .applyAppBackground()
         .ignoresSafeArea()
         .navigationBarBackButtonHidden(true)
         .onAppear {
             rewardsApi()
-//            if let link = uLink, !link.isEmpty {
-//                referralLink = link
-//            } else {
-//                referralLink = "https://subzillo.com"
-//            }
+            //            if let link = uLink, !link.isEmpty {
+            //                referralLink = link
+            //            } else {
+            //                referralLink = "https://subzillo.com"
+            //            }
             commonVM.getUserInfo(input: getUserInfoRequest(userId: Constants.getUserId()))
+            
+            withAnimation(.easeOut(duration: 1.2).delay(0.1)) {
+                circleprogress = 0.5
+            }
+            
         }
         .onChange(of: viewModel.redeemSucess) { _ in
             if viewModel.redeemSucess{
@@ -208,7 +408,7 @@ struct InviteFriendsView: View {
 }
 
 // MARK: - Subviews
-struct RewardItemView: View {
+struct RewardItemViewold: View {
     let reward      : RewardsData
     var onRedeem    : () -> Void
     
@@ -290,5 +490,263 @@ struct RewardItemView: View {
                 .stroke(Color.neutral300Border, lineWidth: 1)
         )
         .frame(maxWidth: .infinity)
+    }
+}
+struct RewardItemView: View {
+    
+    let reward      : RewardsData
+    var onRedeem    : () -> Void
+    
+    @EnvironmentObject var themeManager: ThemeManager
+    @Environment(\.colorScheme) var colorScheme
+    
+    var body: some View {
+        
+        HStack(spacing: 10) {
+            
+            // MARK: - Icon
+            
+            ZStack {
+                
+                
+                RoundedRectangle(cornerRadius: 12)
+                    .fill(
+                        (reward.redeemed ?? false) == true ? themeManager.accentColor : themeManager.black_white.opacity(0.05)
+                    )
+                    .frame(width: 40, height: 40)
+                
+                Image(
+                    (reward.redeemed ?? false) || colorScheme == .dark
+                    ? "giftwhite"
+                    : "gift"
+                )
+                .resizable()
+                .scaledToFit()
+                .frame(width: 18, height: 18, alignment: .top)
+                
+                
+            }
+            
+            // MARK: - Content
+            
+            VStack(alignment: .leading, spacing: 2) {
+                
+                Text("Add \(reward.subscriptionReward ?? 0) subscription")
+                    .font(.geistBold(14))
+                    .tracking(-0.2)
+                    .foregroundStyle(
+                        Color.textPrimary0E101AF4F1FB
+                    )
+                
+                (Text("Unlock at ") + Text("\(reward.creditsRequired ?? 0)").font(.jetBrainsRegular(12)) + Text(" referral subscriptions"))
+                    .font(.geistRegular(12))
+                    .foregroundStyle(
+                        Color.textPrimary0E101AF4F1FB
+                            .opacity(0.6)
+                    )
+            }
+            
+            Spacer(minLength: 0)
+            
+            // MARK: - Lock
+            
+            HStack(spacing: 5) {
+                
+                if reward.eligible ?? false || reward.redeemed ?? false{
+                    if reward.redeemed ?? false{
+                        HStack(spacing: 5) {
+                            
+                            Image(systemName: "checkmark")
+                                .font(.system(size: 8, weight: .bold))
+                                .foregroundStyle(.white)
+                            
+                            Text("EARNED")
+                                .font(.jetBrainsMedium(10))
+                                .tracking(1)
+                                .foregroundStyle(.white)
+                        }
+                        .padding(.horizontal, 10)
+                        .frame(height: 24)
+                        .background(
+                            themeManager.accentGradient
+                        )
+                        .clipShape(
+                            Capsule()
+                        )
+                        .shadow(
+                            color: themeManager.selectedAccent.senColor.opacity(0.55),
+                            radius: 12,
+                            y: 4
+                        )
+                        
+                    } else{
+                        Button(action: onRedeem) {
+                            Text("Redeem")
+                                .font(.jetBrainsRegular(16))
+                                .foregroundColor(.white)
+                                .padding(.horizontal, 13)
+                                .padding(.vertical, 11)
+                                .background(
+                                    themeManager.accentGradient
+                                )
+                                .cornerRadius(7)
+                        }
+                        
+                    }
+                } else {
+                    Image("lock")
+                        .renderingMode(.template)
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 12, height: 12)
+                        .foregroundStyle(
+                            Color.textPrimary0E101AF4F1FB
+                                .opacity(0.6)
+                        )
+                    
+                    Text("Locked")
+                        .font(.jetBrainsRegular(11))
+                        .foregroundStyle(
+                            Color.textPrimary0E101AF4F1FB
+                                .opacity(0.6)
+                        )
+                }
+                
+                
+            }
+        }
+        .padding(.horizontal, 16)
+        .padding(.vertical, 14)
+        .background(
+            Group {
+                if (reward.redeemed ?? false) == true {
+                    themeManager.accentGradient.opacity(0.133)
+                } else {
+                    themeManager.white_white4
+                }
+            }
+        )
+        .clipShape(
+            RoundedRectangle(cornerRadius: 18)
+        )
+        .overlay {
+            
+            RoundedRectangle(cornerRadius: 18)
+                .stroke(
+                    (reward.redeemed ?? false) == true ? themeManager.selectedAccent.senColor : Color.textPrimary0E101AF4F1FB.opacity(0.08),
+                    lineWidth: 1
+                )
+        }
+    }
+}
+struct ReferralHowItWorksView: View {
+    
+    @EnvironmentObject var themeManager: ThemeManager
+    
+    let steps: [String] = [
+        "Share your link with friends",
+        "They sign up and add a subscription",
+        "You both earn rewards automatically"
+    ]
+    
+    var body: some View {
+        
+        VStack(alignment: .leading, spacing: 0) {
+            
+            Text("How it works")
+                .font(.geistBold(13))
+                .foregroundStyle(
+                    Color.textPrimary0E101AF4F1FB
+                )
+                .padding(.bottom, 12)
+            
+            VStack(alignment: .leading, spacing: 10) {
+                
+                ForEach(Array(steps.enumerated()), id: \.offset) { index, title in
+                    
+                    HStack(alignment: .top, spacing: 10) {
+                        
+                        ZStack {
+                            
+                            Circle()
+                                .fill(
+                                    themeManager.accentGradient
+                                )
+                                .frame(width: 22, height: 22)
+                                .shadow(
+                                    color: themeManager.selectedAccent.senColor.opacity(0.55),
+                                    radius: 10
+                                )
+                            
+                            Text("\(index + 1)")
+                                .font(.geistBold(11))
+                                .foregroundStyle(.white)
+                        }
+                        
+                        Text(title)
+                            .font(.geistRegular(13))
+                            .foregroundStyle(
+                                Color.textPrimary0E101AF4F1FB
+                            )
+                            .lineSpacing(4)
+                            .padding(.top, 2)
+                        
+                        Spacer(minLength: 0)
+                    }
+                }
+            }
+        }
+        .padding(.horizontal, 20)
+        .padding(.vertical, 18)
+        .background {
+            
+            RoundedRectangle(cornerRadius: 20)
+                .fill(
+                    LinearGradient(
+                        colors: [
+                            themeManager.selectedAccent.primaryColor.opacity(0.13),
+                            themeManager.selectedAccent.lastColor.opacity(0.13)
+                        ],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    )
+                )
+        }
+        .overlay {
+            
+            RoundedRectangle(cornerRadius: 20)
+                .stroke(
+                    themeManager.selectedAccent.primaryColor.opacity(0.2),
+                    lineWidth: 1
+                )
+        }
+    }
+}
+// MARK: - Arc Shape
+struct ArcShape: Shape {
+    
+    let startAngle: Angle
+    let endAngle: Angle
+    
+    func path(in rect: CGRect) -> Path {
+        
+        let radius = min(rect.width, rect.height) / 2
+        
+        let center = CGPoint(
+            x: rect.midX,
+            y: rect.maxY
+        )
+        
+        var path = Path()
+        
+        path.addArc(
+            center: center,
+            radius: radius,
+            startAngle: startAngle,
+            endAngle: endAngle,
+            clockwise: false
+        )
+        
+        return path
     }
 }

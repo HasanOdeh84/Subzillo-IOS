@@ -199,11 +199,13 @@ struct VoiceCommandView: View {
                     audioManager.stopRecording()
                     audioManager.discardAll()
                     voiceCommandVM.resetVoiceFlow()
-                }, title    : "Are you sure you want to discard the recording?",
-                subTitle    : "",
-                imageName   : "infoIcon",
-                buttonIcon  : "del_red_newSmall",
-                buttonTitle : "Discard"
+                }, title                : "Are you sure you want to discard the recording?",
+                subTitle                : "",
+                imageName               : "infoIcon",
+                buttonIcon              : "del_red_newSmall",
+                buttonTitle             : "Discard",
+                isCancelButtonVisible   : true,
+                isImageVisible          : true
             )
             .id(UUID())
             .onPreferenceChange(InnerHeightPreferenceKey.self) { height in

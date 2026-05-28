@@ -10,6 +10,7 @@ import Foundation
 public struct NotificationsListRequest: Codable {
     let userId              : String
     let page                : Int
+    let tabId                 : Int
 }
 
 public struct NotificationsListResponse: Codable {
@@ -43,9 +44,11 @@ public struct MarkNotificationReadRequest: Codable {
     let userId              : String
     let notificationId      : String
     let type                : Int //type -> 1 - mark all notifications as read, 2 - mark single notification as read
+    let tabId                 : Int
 }
 
 public struct DeleteNotificationRequest: Codable {
     let userId              : String
     let notificationIds     : [String]
+    let tab                 : Int
 }

@@ -17,6 +17,7 @@ class NotificationsViewModel: ObservableObject {
     @Published var notificationData         : NotificationsListResponseData?
     @Published var unreadCount              : Int = 0
     @Published var isLoading                : Bool = false
+    @Published var selectedTab              : Int = 1
     private var currentPage                 : Int = 0
     
     init(router: AppIntentRouter = .shared) {
@@ -25,7 +26,7 @@ class NotificationsViewModel: ObservableObject {
     }
     
     func notificationsListApi() {
-        let input = NotificationsListRequest(userId: Constants.getUserId(), page: currentPage)
+        let input = NotificationsListRequest(userId: Constants.getUserId(), page: currentPage, tabId: selectedTab)
         if currentPage == 0 {
             notificationsList.removeAll()
         }
@@ -53,6 +54,11 @@ class NotificationsViewModel: ObservableObject {
         notificationsListApi()
     }
     
+    func resetAndFetch() {
+        currentPage = 0
+        notificationsListApi()
+    }
+    
     func deleteNotificationAPI(input: DeleteNotificationRequest) {
         apiReference.postApi(endPoint: APIEndpoint.deleteNotification, method: .POST, token: authKey, body: input, showLoader: true, responseType: GeneralResponse.self)
             .sink { [weak self] completion in
@@ -73,7 +79,7 @@ class NotificationsViewModel: ObservableObject {
     
     func deleteNotifications(ids: [String]) {
         notificationsList.removeAll { ids.contains($0.id) }
-        deleteNotificationAPI(input: DeleteNotificationRequest(userId: Constants.getUserId(), notificationIds: ids))
+        deleteNotificationAPI(input: DeleteNotificationRequest(userId: Constants.getUserId(), notificationIds: ids, tab: selectedTab))
         updateUnreadCount()
     }
     
@@ -100,7 +106,7 @@ class NotificationsViewModel: ObservableObject {
             notificationsList[i].readStatus = true
         }
         unreadCount = 0
-        let input = MarkNotificationReadRequest(userId: Constants.getUserId(), notificationId: "", type: 1)
+        let input = MarkNotificationReadRequest(userId: Constants.getUserId(), notificationId: "", type: 1, tabId: selectedTab)
         markNotificationReadAPI(input: input)
     }
     
@@ -108,13 +114,18 @@ class NotificationsViewModel: ObservableObject {
         if let index = notificationsList.firstIndex(where: { $0.id == id }) {
             if notificationsList[index].readStatus == false{
                 notificationsList[index].readStatus = true
-                let input = MarkNotificationReadRequest(userId: Constants.getUserId(), notificationId: id, type: 2)
+                let input = MarkNotificationReadRequest(userId: Constants.getUserId(), notificationId: id, type: 2, tabId: selectedTab)
                 markNotificationReadAPI(input: input)
             }
             switch notificationsList[index].type ?? 0{
-            case 1:  navigate(to: .connectedEmailsList(isIntegrations: false))
+            case 1:  navigate(to: .connectEmail)
             case 2:  navigate(to: .subscriptionMatchView(fromList: true, subscriptionId: notificationsList[index].subscriptionId ?? ""))
             case 3:  navigate(to: .pricingPlans())//removed as now, we don't have this type
+            case 4:  navigate(to: .inviteFriends())
+            case 5:  navigate(to: .home)
+            case 6:  navigate(to: .inviteFriends())
+            case 7:  navigate(to: .home)
+            case 8:  navigate(to: .home) //need to change this
             default:
                 break
             }

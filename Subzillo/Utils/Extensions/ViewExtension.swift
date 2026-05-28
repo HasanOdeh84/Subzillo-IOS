@@ -121,6 +121,7 @@ struct DoneButtonToolbar: ViewModifier {
                         isFocused = false
                         UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
                     }
+                    .dynamicTypeSize(.medium) // <-- Add this to limit text scaling
                 }
             }
     }
@@ -142,6 +143,7 @@ struct DoneButtonToolbar1: ViewModifier {
                             for: nil
                         )
                     }
+                    .dynamicTypeSize(.medium) // <-- Add this to limit text scaling
                 }
             }
     }

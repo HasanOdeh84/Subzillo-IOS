@@ -53,21 +53,46 @@ struct ProfileHeader: View {
     var onSettings                      : (() -> Void)? = nil
     var onNotificationAction            : (() -> Void)? = nil
     @EnvironmentObject var commonApiVM  : CommonAPIViewModel
-    
+    @EnvironmentObject var themeManager         : ThemeManager
+    @Environment(\.colorScheme) var colorScheme
     var body: some View {
         HStack {
             Button(action: {
                 onSettings?()
             }) {
-                Image("settings")
-                    .frame(width: 24,height: 24)
+                HStack {
+                    if colorScheme == .dark
+                    {
+                        Image("settings")
+                            .renderingMode(.template)
+                            .foregroundColor(.white)
+                            .frame(width: 20,height: 20)
+                    }
+                    else{
+                        Image("settings")
+                            .frame(width: 20,height: 20)
+                    }
+                    
+                }
+                .frame(width: 38, height: 38)
+                .background(
+                    Circle()
+                        .fill(themeManager.white_white4)
+                )
+                .overlay(
+                    Circle()
+                        .stroke(
+                            themeManager.black_white.opacity(0.08),
+                            lineWidth: 1
+                        )
+                )
             }
             
             Spacer()
             
             Text(title)
-                .font(.appRegular(24))
-                .foregroundColor(.neutralMain700)
+                .font(.geistBold(16))
+                .foregroundColor(.textPrimary0E101AF4F1FB)
             
             Spacer()
             
@@ -75,22 +100,54 @@ struct ProfileHeader: View {
                 Button(action: {
                     onNotificationAction?()
                 }) {
-                    Image("notification-03")
-                        .frame(width: 32, height: 32)
+                    HStack {
+                        if colorScheme == .dark
+                        {
+                            Image("notification-03")
+                                .renderingMode(.template)
+                                .foregroundColor(.white)
+                                .frame(width: 18,height: 18)
+                        }
+                        else{
+                            Image("notification-03")
+                                .frame(width: 18,height: 18)
+                        }
+                    }
+                    .frame(width: 38, height: 38)
+                    .background(
+                        Circle()
+                            .fill(themeManager.white_white4)
+                    )
+                    .overlay(
+                        Circle()
+                            .stroke(
+                                themeManager.black_white.opacity(0.08),
+                                lineWidth: 1
+                            )
+                    )
                 }
                 
                 if let count = commonApiVM.unreadCountResponse?.unreadCount{
                     if count != 0{
-                        let filterCount = count >= 10 ? "9+" : "\(count)"
+                        let filterCount = ""//count >= 10 ? "9+" : "\(count)"
+//                        Text(filterCount)
+//                            .font(.geistBold(9))
+//                            .foregroundColor(Color.white)
+//                            .frame(width: 10, height: 10)
+//                            .multilineTextAlignment(.center)
+//                        //                        .padding(4)
+//                            .background(Color.dangerLightE43C5C)
+//                            .cornerRadius(4)
+//                            .offset(x: 0, y: -5)
                         Text(filterCount)
                             .font(.appBold(11))
-                            .foregroundColor(Color.white)
-                            .frame(width: 16, height: 15)
-                            .multilineTextAlignment(.center)
-                        //                        .padding(4)
-                            .background(Color.redBadge)
-                            .cornerRadius(4)
-                            .offset(x: 0, y: -5)
+                            .foregroundColor(.white)
+                            .frame(width: 5, height: 5)
+                            .padding(3)
+                            .background(themeManager.accentTextColor)
+                            .clipShape(Circle())
+                            .shadow(color: themeManager.accentShadowColor, radius: 5, x: 0, y: 0)
+                            .offset(x: -7, y: 4)
                     }
                 }
             }
@@ -219,6 +276,7 @@ struct AccountInfo: View {
 
 struct ProfileItem: View {
     var title                           : LocalizedStringKey
+    var subtitle                        : LocalizedStringKey? = nil
     var image                           : String
     var action                          : () -> Void
     var isDarkMode                      = false
@@ -227,44 +285,69 @@ struct ProfileItem: View {
     
     var body: some View {
         Button(action: action) {
-            HStack(spacing: 16) {
-                VStack(spacing: 0) {
+            
+            HStack(spacing: 14) {
+                
+                // Icon
+                ZStack {
+                    
+                    RoundedRectangle(cornerRadius: 10)
+                        .fill(
+                            Color.calenderF1F2F7FFFFFF
+                        )
+                    
                     Image(image)
-                        .frame(width: 48, height: 48)
-                        .background(Color.neutralBg100)
-                        .clipShape(RoundedRectangle(cornerRadius: 8))
-                }
-                .frame(alignment: .leading)
-                .frame(width: 40, height: 40)
-                .cornerRadius(8)
-                .overlay(
-                    RoundedRectangle(cornerRadius: 8)
-                        .stroke(Color.neutral300Border, lineWidth: 2)
-                )
-                
-                VStack(alignment: .leading, spacing: 0) {
-                    Text(title)
-                        .font(.appRegular(16))
-                    .foregroundColor(.neutralMain700)                }
-                .frame(maxWidth: .infinity, alignment: .leading)
-                
-                if isDarkMode{
-                    Toggle("", isOn: Binding(
-                        get: { themeManager.currentAppearance == .dark },
-                        set: { newValue in
-                            themeManager.setAppearance(newValue ? .dark : .light)
-                        }
-                    ))
-                }else{
-                    Image("arrow-right-01-round")
+                        .resizable()
                         .renderingMode(.template)
-                        .foregroundColor(.secondaryNavyBlue400)
-                        .frame(width: 24, height: 24)
+                        .frame(width: 16, height: 16)
+                        .foregroundStyle(
+                            themeManager.selectedAccent.senColor
+                        )
                 }
+                .frame(width: 32, height: 32)
+                
+                // Title
+                Text(title)
+                    .font(.geistMedium(14))
+                    .foregroundStyle(
+                        Color.textPrimary0E101AF4F1FB
+                    )
+                
+                Spacer()
+                
+                // Subtitle
+                if let subtitle = subtitle {
+                    
+                    Text(subtitle)
+                        .font(.geistRegular(12))
+                        .foregroundStyle(
+                            Color.textPrimary0E101AF4F1FB
+                                .opacity(0.6)
+                        )
+                }
+                
+                // Arrow
+                Image("backGrayright")
+                    .renderingMode(.template)
+                    .frame(width: 14, height: 14)
+                    .foregroundStyle(
+                        Color.textPrimary0E101AF4F1FB
+                            .opacity(0.36)
+                    )
             }
-            .frame(maxWidth: .infinity)
-            .padding(16)
-            .frame(height: 72)
+            .padding(.horizontal, 16)
+            .frame(height: 60)
+            .background(
+                RoundedRectangle(cornerRadius: 14)
+                    .fill(themeManager.white_white4)
+            )
+            .overlay {
+                RoundedRectangle(cornerRadius: 14)
+                    .stroke(
+                        themeManager.textPrimaryLight8_white8,
+                        lineWidth: 1
+                    )
+            }
         }
     }
 }

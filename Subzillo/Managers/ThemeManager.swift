@@ -205,6 +205,12 @@ final class ThemeManager: ObservableObject {
             dark: Color.white.opacity(0.14)
         )
     }
+    var textPrimaryDark_white07: Color {
+        .dynamic(
+            light: Color.textPrimaryDarkF4F1FB,
+            dark: Color.white.opacity(0.078)
+        )
+    }
     
     var selectionFieldBorder: some View {
         return ZStack {

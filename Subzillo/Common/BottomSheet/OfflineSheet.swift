@@ -13,6 +13,7 @@ struct OfflineSheet: View {
     //MARK: - Properties
     var onDelegate: (() -> Void)?
     @Environment(\.dismiss) private var dismiss
+    @EnvironmentObject var themeManager     : ThemeManager
     
     //MARK: - body
     var body: some View {
@@ -83,7 +84,7 @@ struct OfflineSheet: View {
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(.horizontal, 30)
             
-            CustomButton(title: "Ok", action: onOkAction)
+            CustomButton(title: "Ok",shadow: themeManager.accentShadowColor, action: onOkAction)
                 .padding(.top, 24)
                 .padding(.bottom,20)
         }

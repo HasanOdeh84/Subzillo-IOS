@@ -363,6 +363,7 @@ struct UploadErrorImageSheet: View {
     var onDelegate      : (() -> Void)?
     var onDismiss       : (() -> Void)?
     @Environment(\.dismiss) private var dismiss
+    @EnvironmentObject var themeManager : ThemeManager
     
     //MARK: - body
     var body: some View {
@@ -431,7 +432,7 @@ struct UploadErrorImageSheet: View {
             .padding(.bottom, isImage ? 24 : 0)
             
             if isImage{
-                CustomButton(title: "Retry", buttonImage: "refresh", action: onRetryAction)
+                CustomButton(title: "Retry",shadow: themeManager.accentShadowColor, buttonImage: "refresh", action: onRetryAction)
             }
             
             GradientBorderButton(title: "Add Manually Instead", isBtn: true, buttonImage: "text-creation1", action: onManualAction, backgroundColor: .whiteBlackBG)
@@ -566,6 +567,7 @@ struct AppstoreRedirectionSheet: View {
     
     //MARK: - Properties
     @Environment(\.dismiss) private var dismiss
+    @EnvironmentObject var themeManager : ThemeManager
     
     //MARK: - body
     var body: some View {
@@ -594,7 +596,7 @@ struct AppstoreRedirectionSheet: View {
                 }
             }
             
-            CustomButton(title: "Continue", buttonImage: "", action: onContinueAction)
+            CustomButton(title: "Continue",shadow: themeManager.accentShadowColor, buttonImage: "", action: onContinueAction)
                 .padding(.vertical, 24)
         }
         .padding(.horizontal, 24)

@@ -43,6 +43,8 @@ public struct UserInfo: Codable, Hashable {
     var referralCode                : String?
     var referralLink                : String?
     var isoCountryCode              : String?
+    var createdAt                   : String?
+    var monthlySpendReminders       : Bool?
 }
 
 public struct UnreadNotificationCountRequest: Codable {

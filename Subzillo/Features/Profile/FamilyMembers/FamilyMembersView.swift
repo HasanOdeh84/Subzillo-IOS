@@ -11,6 +11,8 @@ struct FamilyMembersView: View {
     
     //MARK: - Properties
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.colorScheme) private var colorScheme
+    @EnvironmentObject var themeManager     : ThemeManager
     @State var openFamilyMemberSheet        = false
     @StateObject var manualVM               = ManualEntryViewModel()
     @State private var expandedMemberId     : String? = nil
@@ -22,139 +24,166 @@ struct FamilyMembersView: View {
     @State var selectedCountry              : Country?
     @State var showDeletePopup              : Bool = false
     @State var deleteFamilyMemberId         : String = ""
-    
-    @State private var deleteSheetHeight : CGFloat = .zero
-
+    @State private var deleteSheetHeight    : CGFloat = .zero
     struct EditableFamilyWrapper: Identifiable {
         let id = UUID()
         let data: ListFamilyMembersResponseData
     }
+    @EnvironmentObject private var commonVM : CommonAPIViewModel
     
     //MARK: - Body
     var body: some View {
-        VStack {
-            // Header
+        VStack(spacing: 0) {
+            // MARK: - Header
             HStack {
-                Button(action: {
+                CircleBackButton {
                     AppIntentRouter.shared.pop()
-                }) {
-                    Image("back_gray")
-                        .frame(width: 24, height: 24)
                 }
                 
-                Text("Family Members")
-                    .font(.appRegular(24))
-                    .foregroundColor(.neutralMain700)
+                Spacer()
+                
+                Text("Family members")
+                    .font(.geistSemiBold(16))
+                    .foregroundColor(Color("TextPrimary_ 0E101A_F4F1FB"))
                 
                 Spacer()
+                
+                Spacer().frame(width: 44)
             }
-            .frame(height: 32)
-            .padding(.top, 16)
-            .padding(.bottom, 19)
-            .padding(.horizontal, 5)
+            .padding(.top, 60)
+            .padding(.horizontal, 24)
+            .padding(.bottom, 24)
             
-            //MARK: Family members list
-            if let members = manualVM.listFamilyMembersResponse?.familyMembers, !members.isEmpty {
-                ScrollView(showsIndicators: false) {
-                    VStack(spacing:0) {
+            // MARK: - Family Plan Card & Members List inside ScrollView
+            ScrollView(showsIndicators: false) {
+                // Family Plan Card
+                let remaining = manualVM.listFamilyMembersResponse?.remainingFamilyMembersLimit ?? 5
+                let usedSeats = 5 - remaining
+                
+                VStack(spacing: 8) {
+                    Text("FAMILY PLAN")
+                        .font(.jetBrainsMedium(11))
+                        .tracking(2)
+                        .foregroundColor(themeManager.accentTextColor)
+                    
+                    Text("\(max(0, usedSeats))/5 seats")
+                        .font(.geistSemiBold(26))
+                        .foregroundColor(Color("TextPrimary_ 0E101A_F4F1FB"))
+                    
+                    Text("Share subscriptions and savings")
+                        .font(.geistRegular(12))
+                        .foregroundColor(themeManager.textPrimaryLight6_dark62)
+                        .padding(.bottom, 8)
+                    
+                    // Progress bar
+                    GeometryReader { geo in
+                        ZStack(alignment: .leading) {
+                            Capsule()
+                                .fill(themeManager.textPrimaryLight14_white14)
+                                .frame(height: 6)
+                            
+                            Capsule()
+                                .fill(themeManager.accentGradient)
+                                .frame(width: geo.size.width * CGFloat(min(5, max(0, usedSeats))) / 5, height: 6)
+                        }
+                    }
+                    .frame(height: 6)
+                    .padding(.horizontal, 24)
+                }
+                .padding(.vertical, 24)
+                .background(
+                    RoundedRectangle(cornerRadius: 16)
+                        .fill(LinearGradient.brandFromDark0133_brandToDark0133)
+                )
+                .overlay(
+                    RoundedRectangle(cornerRadius: 16)
+                        .stroke(themeManager.accentTextColor.opacity(0.2), lineWidth: 1)
+                )
+                .padding(.horizontal, 24)
+                .padding(.bottom, 24)
+                
+                // MARK: - Members List Title
+                HStack {
+                    Text("MEMBERS")
+                        .font(.jetBrainsMedium(11))
+                        .tracking(2)
+                        .foregroundColor(themeManager.textPrimaryLight6_dark62)
+                    Spacer()
+                }
+                .padding(.horizontal, 24)
+                .padding(.bottom, 10)
+                
+                LazyVStack(spacing: 12) {
+                    // MARK: - Self Card (Owner)
+                    FamilyMemberCard(
+                        member      : ListFamilyMembersResponseData(
+                            id              : "self",
+                            nickName        : commonVM.userInfoResponse?.fullName ?? "",
+                            phoneNumber     : "",
+                            countryCode     : "",
+                            color           : "#A719DD",
+                            subscriptions   : nil,
+                            tag             : "YOU",
+                            role            : "Owner"
+                        ),
+                        isSelfCard  : true,
+                        editBtn     : {}
+                    )
+                    
+                    if let members = manualVM.listFamilyMembersResponse?.familyMembers, !members.isEmpty {
                         ForEach(members, id: \.id) { member in
                             FamilyMemberCard(
-                                member              : member,
-                                isExpanded          : expandedMemberId == member.id,
-                                openSwipeCardIndex  : $openSwipeCardIndex,
-                                onTap               : {
-                                    withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
-                                        if expandedMemberId == member.id {
-                                            expandedMemberId = nil
-                                        } else {
-                                            expandedMemberId = member.id
-                                            openSwipeCardIndex = nil // Reset swipes
-                                        }
-                                    }
-                                },
+                                member: member,
+                                isSelfCard: false,
                                 editBtn: {
                                     if let countries = commonApiVM.countriesResponse {
                                         selectedCountry = countries.first(where: { $0.dialCode == member.countryCode })
                                     }
                                     editingFamily = EditableFamilyWrapper(data: member)
-                                },
-                                delBtn : {
-                                    deleteFamilyMemberId = member.id ?? ""
-                                    showDeletePopup = true
-                                },
-                                delSubscriptionBtn:{
-                                    listFamilyMembersApi()
                                 }
-                                , addSubscriptionBtn: { id in
-                                    if manualVM.listFamilyMembersResponse?.remainingSubscriptionLimit == 0 {
-                                        //SheetManager.shared.isUpgradeSheetVisible = true
-                                        AppIntentRouter.shared.navigate(to: .exceedLimit)
-                                    } else {
-                                        familyMembersVM.navigate(to: .manualEntry(isFromEdit        : false,
-                                                                                  isFromListEdit    : false,
-                                                                                  subscriptionId    : "",
-                                                                                  familyMemberId    : id))
-                                    }
-                                }
-                            )
-                            Divider()
-                                .overlay(Color.border)
+                            ) {
+                                deleteFamilyMemberId = member.id ?? ""
+                                showDeletePopup = true
+                            }
                         }
                     }
-                    .cornerRadius(16)
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 16)
-                            .stroke(Color.neutral300Border, lineWidth: 1)
-                    )
-                    .padding(5)
+                    Spacer().frame(height: 40)
                 }
-                .cornerRadius(16)
-            } else {
-                //MARK: Empty view
-                VStack(spacing: 24) {
-                    Spacer()
-                    Image("box_blue")
-                        .resizable()
-                        .aspectRatio(contentMode: .fit)
-                        .frame(width: 100, height: 100)
-                    
-                    VStack(spacing: 16) {
-                        Text("No family members yet")
-                            .font(.appRegular(24))
-                            .foregroundColor(Color.grayClr)
-                            .multilineTextAlignment(.center)
-                        
-                        Text("You haven’t added any family members yet")
-                            .font(.appRegular(16))
-                            .foregroundColor(Color.grayClr)
-                            .multilineTextAlignment(.center)
-                    }
-                    Spacer()
-                }
+                .padding(.horizontal, 24)
             }
             
-            Spacer()
+            Spacer(minLength: 0)
             
-            //MARK: Add Family Member Button
-                GradientBorderButton(
-                    title: "Add Family Member",
-                    isBtn: true,
-                    buttonImage: "profile_add",
-                    action: {
-                        if manualVM.listFamilyMembersResponse?.remainingFamilyMembersLimit == 0 {
+            // MARK: - Invite Member Button
+            VStack {
+                CustomBorderButton(
+                    title       : "Invite member",
+                    background  : themeManager.white_white4,
+                    borderColor : themeManager.textPrimaryLight8_white8,
+                    textColor   : Color("TextPrimary_ 0E101A_F4F1FB"),
+                    font        : .geistSemiBold(15),
+                    height      : 48,
+                    showIcon    : true,
+                    icon        : "plus_new",
+                    iconOnLeft  : true,
+                    action      : {
+                        let remaining = manualVM.listFamilyMembersResponse?.remainingFamilyMembersLimit ?? 5
+                        if remaining == 0 {
                             SheetManager.shared.isFamilyMemberLimitSheetVisible = true
-                        }else{
+                        } else {
                             DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
                                 openFamilyMemberSheet = true
                             }
                         }
-                        print("Add Family Member tapped")
                     }
                 )
-                .padding(.bottom, 20)
+            }
+            .padding(.horizontal, 24)
+            .padding(.bottom, 120)
+            .padding(.top, 10)
         }
-        .padding(.horizontal, 15)
-        .background(Color.neutralBg100)
+        .applyAppBackground()
+        .ignoresSafeArea()
         .navigationBarBackButtonHidden(true)
         .sheet(isPresented: $openFamilyMemberSheet) {
             AddFamilyMemberBottomSheet(header       : "Add Family Member",
@@ -206,12 +235,14 @@ struct FamilyMembersView: View {
             InfoAlertSheet(
                 onDelegate: {
                     deleteFamilyMemberApi()
-                }, title    : "Are you sure you want to delete this family member?\nAll related subscriptions will be permanently deleted",
-                subTitle    :"",
-                imageName   : "del_red_new",
-                buttonIcon  : "del_red_newSmall",
-                buttonTitle : "Delete",
-                imageSize   : 70
+                }, title                : "Are you sure you want to delete this family member?",
+                subTitle                : "All related subscriptions will be permanently deleted",
+                imageName               : "del_red_new",
+                buttonIcon              : "del_red_newSmall",
+                buttonTitle             : "Delete",
+                imageSize               : 70,
+                isCancelButtonVisible   : true,
+                isImageVisible          : true
             )
             .onPreferenceChange(InnerHeightPreferenceKey.self) { height in
                 if height > 0 {
@@ -250,195 +281,104 @@ struct FamilyMembersView: View {
 //MARK: - FamilyMemberCard
 struct FamilyMemberCard: View {
     let member                              : ListFamilyMembersResponseData
-    let isExpanded                          : Bool
-    @Binding var openSwipeCardIndex         : Int?
-    let onTap                               : () -> Void
+    var isSelfCard                          : Bool = false
     let editBtn                             : () -> Void
-    let delBtn                              : () -> Void
-    let delSubscriptionBtn                  : () -> Void
-    let addSubscriptionBtn                  : (String) -> Void
-    @State private var activeCardId         : String? = nil
-    @State private var isScrollDisabled     : Bool = false
-    @State var showDeletePopup              : Bool = false
-    @StateObject var subscriptionsVM        = SubscriptionsViewModel()
-    @State var delSubscriptionId            = ""
-    @State private var deleteSheetHeight    : CGFloat = .zero
+    var delBtn                              : () -> Void = {}
+    @EnvironmentObject var themeManager     : ThemeManager
+    @Environment(\.colorScheme) var colorScheme
     
     var body: some View {
-        VStack(spacing: 0) {
-            // MARK: - Collapsed Header
-            HStack(spacing: 24) {
-                ZStack {
-                    RoundedRectangle(cornerRadius: 4)
-                        .fill(Color(hex: member.color ?? "#619BEE"))
-                        .frame(width: 48, height: 48)
-                    
-                    Image("person")
-                        .frame(width: 20, height: 20)
-                }
+        HStack(spacing: 16) {
+            // Initial circle
+            ZStack {
+                Rectangle()
+                    .fill(Color(hex: member.color ?? "#619BEE"))
+                    .frame(width: 44, height: 44)
+                    .cornerRadius(14)
+                    .shadow(color: .black.opacity(0.2), radius: 6, x: 0, y:4)
                 
-                VStack(alignment: .leading, spacing: 8) {
+                Text(getInitials(name: member.nickName ?? "M"))
+                    .font(.geistSemiBold(15))
+                    .foregroundColor(.white)
+            }
+            
+            VStack(alignment: .leading, spacing: 4) {
+                HStack(spacing: 8) {
                     Text(member.nickName ?? "Member")
-                        .font(.appRegular(16))
-                        .foregroundColor(.neutralMain700)
+                        .font(.geistSemiBold(14))
+                        .foregroundColor(Color("TextPrimary_ 0E101A_F4F1FB"))
                     
-                    Text(member.phoneNumber ?? "")
-                        .font(.appRegular(14))
-                        .foregroundColor(.neutral500)
+                    if let tag = member.tag, !tag.isEmpty {
+                        Text(tag)
+                            .font(.jetBrainsMedium(9))
+                            .foregroundColor(themeManager.accentTextColor)
+                            .padding(.horizontal, 6)
+                            .padding(.vertical, 2)
+                            .background(themeManager.accentTextColor.opacity(0.133))
+                            .cornerRadius(4)
+                            .tracking(1)
+                            .textCase(.uppercase)
+//                            .clipShape(Capsule())
+                    }
                 }
                 
-                Spacer()
-                
-                HStack(spacing: 24) {
+//                Text(member.role ?? "Member")
+//                    .font(.jetBrainsMedium(11))
+//                    .foregroundColor(themeManager.textPrimaryLight6_dark62)
+            }
+            
+            Spacer()
+            
+            if !isSelfCard {
+                HStack(spacing: 8){
                     Button {
                         editBtn()
                     } label: {
-                        Image("edit_gray")
+                        Image("edit_new")
+                            .renderingMode(.template)
+                            .foregroundStyle(themeManager.textPrimaryLight6_dark62)
+                            .frame(width: 32, height: 32)
+                            .background(.calenderF1F2F7FFFFFF)
+                            .cornerRadius(10)
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 10)
+                                    .stroke(themeManager.textPrimaryLight8_white8)
+                            )
                     }
                     
                     Button {
                         delBtn()
                     } label: {
                         Image("del_gray")
+                            .renderingMode(.template)
+                            .foregroundStyle(themeManager.textPrimaryLight6_dark62)
+                            .frame(width: 32, height: 32)
+                            .background(.calenderF1F2F7FFFFFF)
+                            .cornerRadius(10)
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 10)
+                                    .stroke(themeManager.textPrimaryLight8_white8)
+                            )
                     }
                 }
             }
-            .padding(16)
-            .background(Color.white)
-            .contentShape(Rectangle())
-            .onTapGesture {
-                onTap()
-            }
-            
-            // MARK: - Expanded Content
-            if isExpanded {
-                VStack(spacing: 0) {
-                    if let subs = member.subscriptions, !subs.isEmpty {
-                        VStack{
-                            ScrollView {
-                                VStack(spacing: 0) {
-                                    ForEach(Array(subs.enumerated()), id: \.element.id) { index, sub in
-                                        SwipeableSubscriptionRow(
-                                            sub             : sub,
-                                            activeCardId    : $activeCardId,
-                                            isScrollDisabled: $isScrollDisabled,
-                                            onEdit: {
-                                                print("Edit sub: \(sub.serviceName ?? "")")
-                                                editSubscription(sub: sub, familyMemberId: member.id ?? "")
-                                            },
-                                            onDelete: {
-                                                print("Delete sub: \(sub.serviceName ?? "")")
-                                                delSubscriptionId = sub.id ?? ""
-                                                showDeletePopup = true
-                                            }
-                                        )
-                                        if index < subs.count - 1 {
-                                            Divider()
-                                                .overlay(Color.neutral300Border)
-                                        }
-                                    }
-                                }
-                            }
-                            .scrollDisabled(isScrollDisabled)
-                            //                            .scrollDisabled(subs.count <= 3) // Disable scroll if few items
-                        }
-                        .frame(maxHeight: 200)
-                        .background(.neutralBg100)
-                        .clipShape(RoundedRectangle(cornerRadius: 8))
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 8)
-                                .stroke(Color.neutral300Border, lineWidth: 1)
-                        )
-                        .padding(.horizontal, 16)
-                        .padding(.bottom, 16)
-                    }
-                    
-                    //MARK: Add New Subscription Button
-                    Button(action: {
-                        guard let id = member.id, !id.isEmpty else { return }
-                        print("Add New Subscription tapped for \(member.nickName ?? "")")
-                        addSubscriptionBtn(id)
-                    }) {
-                        HStack {
-                            Image(systemName: "plus")
-                            Text("Add New")
-                                .font(.appRegular(16))
-                                .underline()
-                        }
-                        .foregroundColor(Color.navyBlueCTA700)
-                        .padding(.bottom, 16)
-                    }
-                    
-                }
-                .background(Color.white)
-            }
         }
-        .background(Color.white)
-        .sheet(isPresented: $showDeletePopup , onDismiss: {
-        }) {
-            InfoAlertSheet(
-                onDelegate: {
-                    deleteSubscription()
-                }, title    : "Are you sure you want to delete the subscriptions?\nData will be permanently deleted",
-                subTitle    :"",
-                imageName   : "del_red_new",
-                buttonIcon  : "del_red_newSmall",
-                buttonTitle : "Delete",
-                imageSize   : 70
-            )
-            .onPreferenceChange(InnerHeightPreferenceKey.self) { height in
-                if height > 0 {
-                    deleteSheetHeight = height
-                }
-            }
-            .presentationDragIndicator(.hidden)
-            .presentationDetents([.height(deleteSheetHeight)])
-        }
-        .onChange(of: subscriptionsVM.isDeletedSubscription) { _ in updateDeleteSubscription() }
+        .padding(16)
+        .background(themeManager.white_white4)
+        .cornerRadius(16)
+        .overlay(
+            RoundedRectangle(cornerRadius: 16)
+                .stroke(themeManager.textPrimaryLight8_white8)
+        )
+//        .shadow(color: Color.black.opacity(colorScheme == .light ? 0.05 : 0.02), radius: 10, x: 0, y: 5)
     }
     
-    //MARK: - User defined methods
-    func editSubscription(sub: SubscriptionListData, familyMemberId: String){
-        let subData = SubscriptionData(id               : sub.id ?? "",
-                                       serviceName      : sub.serviceName ?? "",
-                                       subscriptionType : sub.subscriptionType ?? "",
-                                       amount           : sub.amount ?? 0.0,
-                                       currency         : sub.currency ?? "",
-                                       currencySymbol   : sub.currencySymbol ?? "",
-                                       billingCycle     : sub.billingCycle ?? "",
-                                       nextPaymentDate  : sub.nextPaymentDate ?? "",
-                                       paymentMethodId  : sub.paymentMethod ?? "",
-                                       paymentMethod    : sub.paymentMethod ?? "",
-                                       paymentMethodName: sub.paymentMethodName ?? "",
-                                       categoryId       : sub.category ?? "",
-                                       categoryName     : sub.categoryName ?? "",
-                                       reason           : sub.notes ?? "",
-                                       subscriptionFor      : sub.subscriptionFor ?? "",
-                                       paymentMethodDataId  : sub.paymentMethodDataId ?? "",
-                                       paymentMethodDataName: sub.paymentMethodDataName ?? "",
-                                       renewalReminder      : sub.renewalReminder,
-                                       renewalReminders     : sub.renewalReminder,
-                                       notes                : sub.notes ?? "")
-        globalSubscriptionData = subData
-        AppIntentRouter.shared.navigate(to: .manualEntry(isFromEdit     : true,
-                                                         isFromListEdit : true,
-                                                         subscriptionId : sub.id ?? "",
-                                                         familyMemberId : familyMemberId))
-    }
-    
-    func deleteSubscription() {
-        //        var selectedIDs: [String] {
-        //            (member.subscriptions ?? [])
-        //                .filter { $0.isSelected == true }
-        //                .compactMap { $0.id }
-        //        }
-        subscriptionsVM.deleteSubscription(input: DeleteSubscriptionRequest(userId: Constants.getUserId(), subscriptionIds: [delSubscriptionId]))
-    }
-    
-    func updateDeleteSubscription(){
-        if subscriptionsVM.isDeletedSubscription ?? false{
-            delSubscriptionBtn()
+    func getInitials(name: String) -> String {
+        let components = name.components(separatedBy: " ")
+        if components.count > 1 {
+            return "\(components[0].prefix(1))\(components[1].prefix(1))".uppercased()
         }
+        return "\(name.prefix(2))".uppercased()
     }
 }
 

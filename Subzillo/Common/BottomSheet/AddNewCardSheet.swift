@@ -61,33 +61,9 @@ struct AddNewCardSheet: View {
             // MARK: - Header
             HStack(spacing: 8) {
                 // MARK: - back
-                Button(action: goBack) {
-                    HStack {
-                        
-                        if colorScheme == .dark
-                        {
-                            Image("back_gray")
-                                .renderingMode(.template)
-                                .foregroundColor(.white)
-                        }
-                        else{
-                            Image("back_gray")
-                        }
-                    }
-                    .frame(width: 38, height: 38)
-                    .background(
-                        Circle()
-                            .fill(themeManager.white_white4)
-                    )
-                    .overlay(
-                        Circle()
-                            .stroke(
-                                themeManager.black_white.opacity(0.08),
-                                lineWidth: 1
-                            )
-                    )
+                CircleBackButton {
+                    AppIntentRouter.shared.pop()
                 }
-                
                 Spacer()
                 
                 VStack(alignment: .leading, spacing: 1) {
@@ -328,7 +304,7 @@ struct AddNewCardSheet: View {
                         )
                     }
                     
-                        
+                    
                     FieldView(text: $cardNumber, title: "Last 4 digits (optional)", image: "cardNum", placeHolder: "4829", maxDigits: 4, isNumberPad: true, isCardNo: true)
                         .addDoneButton{
                         }
@@ -340,15 +316,13 @@ struct AddNewCardSheet: View {
                                 toastManager.showToast(message: "Nickname cannot exceed 15 characters".localized, style: .error)
                             }
                         }
-                        
-                   
                     
                     Button {
-                                
+                        
                         withAnimation(.easeInOut(duration: 0.25)) {
                             isDefault.toggle()
                         }
-                                
+                        
                     } label: {
                         
                         HStack {
@@ -396,7 +370,7 @@ struct AddNewCardSheet: View {
                                     )
                                 
                                 Circle()
-                                    .fill(themeManager.white_white4)
+                                    .fill(.white)
                                     .frame(width: 20, height: 20)
                                     .padding(3)
                                     .shadow(
@@ -441,6 +415,8 @@ struct AddNewCardSheet: View {
             }
             
         }
+        .keyboardAdaptive()
+        .dismissKeyboardOnBackgroundTap()
         .applyAppBackground()
         .modifier(ToastModifier(toast: toastManager))
         .onChange(of: myCardsVM.isEdit) { value in

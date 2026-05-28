@@ -55,3 +55,11 @@ public struct ImageSubscription: Codable {
     var status            : String?
     var email             : String?
 }
+
+struct SettingsItem: Identifiable {
+    
+    let id = UUID()
+    let title: String
+    let subtitle: String?
+    let icon: String
+}

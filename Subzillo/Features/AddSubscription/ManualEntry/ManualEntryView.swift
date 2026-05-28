@@ -2257,6 +2257,11 @@ struct FieldSuggestionView1<Item: Identifiable>: View {
                 if !isService{
                     suggestionList
                         .padding(.top, 10)
+                }else if isService{
+                    if text.count < 3{
+                        suggestionList
+                            .padding(.top, 10)
+                    }
                 }
             }
         }
@@ -2287,7 +2292,7 @@ struct FieldSuggestionView1<Item: Identifiable>: View {
                             if index < filtered.count - 1 {
                                 Divider()
                                     .overlay(themeManager.textPrimaryLight8_white8)
-                                    .padding(.horizontal, -20)
+                                    .padding(.horizontal, -30)
                                 //                                DashedHorizontalDivider()
                             }
                         }

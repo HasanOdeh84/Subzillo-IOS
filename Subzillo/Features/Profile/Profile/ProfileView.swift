@@ -39,6 +39,20 @@ struct ProfileView: View {
     @State private var imageLoadFailed      = false
     @EnvironmentObject var themeManager     : ThemeManager
     
+    private var initials: String {
+        let words = fullName
+            .split(separator: " ")
+            .filter { !$0.isEmpty }
+        
+        if words.count == 1 {
+            return String(words[0].prefix(1)).uppercased()
+        } else {
+            return words.prefix(2)
+                .map { String($0.prefix(1)).uppercased() }
+                .joined()
+        }
+    }
+    
     //MARK: - Body
     var body: some View {
         VStack{
@@ -54,282 +68,347 @@ struct ProfileView: View {
             .padding(.top, 50)
             
             ScrollView(showsIndicators: false){
-                VStack(spacing: 24){
-                    VStack(spacing: 8){
-                        ZStack(alignment: .topTrailing) {
-                            if commonApiVM.userInfoResponse?.profileImage ?? "" != ""{
-                                if imageLoadFailed {
-                                    Image("profile_avatar")
-                                        .resizable()
-                                        .scaledToFill()
-                                }else{
-                                    WebImage(url: URL(string: commonApiVM.userInfoResponse?.profileImage ?? ""))
-                                        .onFailure { _ in
-                                            imageLoadFailed = true
-                                        }
-                                    //                            Image(systemName: "person.crop.circle.fill")
-                                        .resizable()
-                                    //                                .indicator(.activity)
-                                    //                                .transition(.fade(duration: 0.5))
-                                        .scaledToFill()
-                                        .frame(width: 96, height: 96)
-                                        .foregroundColor(.gray)
-                                        .background(Color.white)
-                                        .overlay(
-                                            RoundedRectangle(cornerRadius: 96/2)
-                                                .stroke(Color.white, lineWidth: 2)
-                                        )
-                                        .cornerRadius(96/2)
-                                        .shadow(color: Color.dropShadow, radius: 2, x: 0, y: 2)
-                                }
-                            }else{
-                                Image("profile_avatar")
-                                    .resizable()
-                                    .scaledToFit()
-                                    .frame(width: 96, height: 96)
-//                                    .foregroundColor(.gray)
-//                                    .background(Color.white)
-                                    .overlay(
-                                        RoundedRectangle(cornerRadius: 96/2)
-                                            .stroke(Color.white, lineWidth: 2)
+                VStack(spacing: 0){
+                    VStack(spacing: 2){
+                        ZStack {
+                            // Glow
+                            Circle()
+                                .fill(
+                                    RadialGradient(
+                                        colors: [
+                                            themeManager.selectedAccent.senColor.opacity(0.55),
+                                            .clear
+                                        ],
+                                        center: .center,
+                                        startRadius: 0,
+                                        endRadius: 60
                                     )
-                                    .cornerRadius(96/2)
-                                    .shadow(color: Color.dropShadow, radius: 2, x: 0, y: 2)
-                            }
+                                )
+                                .frame(width: 124, height: 124)
+                                .blur(radius: 18)
                             
-                            VStack(spacing: 0) {
-                                Button(action: {
-                                    Constants.FeatureConfig.performS4Action {
-                                        showUploadPopup = true
+                            // Main Avatar
+                            ZStack {
+                                Circle()
+                                    .fill(
+                                        themeManager.accentGradient
+                                    )
+                                    .shadow(
+                                        color: themeManager.selectedAccent.senColor.opacity(0.55),
+                                        radius: 30,
+                                        y: 10
+                                    )
+                                
+                                Circle()
+                                    .fill(themeManager.white_black.opacity(0.12))
+                                    .blur(radius: 8)
+                                    .padding(6)
+                                
+                                if commonApiVM.userInfoResponse?.profileImage ?? "" != ""{
+                                    if imageLoadFailed {
+                                        Text(initials)
+                                            .font(.geistSemiBold(36))
+                                            .tracking(-1)
+                                            .foregroundStyle(.white)
+                                    }else{
+                                        WebImage(url: URL(string: commonApiVM.userInfoResponse?.profileImage ?? ""))
+                                            .onFailure { _ in
+                                                imageLoadFailed = true
+                                            }
+                                            .resizable()
+                                            .scaledToFill()
+                                            .frame(width: 100, height: 100)
                                     }
-                                }) {
-                                    Image("camera_white")
-                                        .frame(width: 16, height: 16)
+                                }else{
+                                    Text(initials)
+                                        .font(.geistSemiBold(36))
+                                        .tracking(-1)
+                                        .foregroundStyle(.white)
                                 }
+                                
                             }
-                            .frame(width: 32, height: 32)
-                            .background(
-                                Circle()
-                                    .fill(Color.blueMain700)
-                            )
-                            .overlay(
-                                Circle()
-                                    .stroke(Color.white, lineWidth: 1)
-                            )
-                            .shadow(color: Color.dropShadow, radius: 4, x: 0, y: 2)
-                            .offset(x: 0, y: 64)
+                            .frame(width: 100, height: 100)
+                            
                         }
-                        //                        ZStack(alignment: .bottomTrailing) {
-                        //                            Image(systemName: "person.crop.circle.fill")
-                        //                                .resizable()
-                        //                                .scaledToFill()
-                        //                                .frame(width: 150, height: 150)
-                        //                                .foregroundColor(.gray)
-                        //                                .background(Color.white)
-                        //                                .clipShape(Circle())
-                        //                                .overlay(
-                        //                                    Circle()
-                        //                                        .stroke(Color.white, lineWidth: 2)
-                        //                                )
-                        //                                .shadow(color: Color.dropShadow, radius: 10, x: 0, y: 5)
-                        //
-                        //                            Image(systemName: "camera.fill")
-                        //                                .font(.system(size: 20))
-                        //                                .foregroundColor(.white)
-                        //                                .padding(12)
-                        //                                .background(Color.blue)
-                        //                                .clipShape(Circle())
-                        //                                .overlay(
-                        //                                    Circle()
-                        //                                        .stroke(Color.white, lineWidth: 1)
-                        //                                )
-                        //                                .shadow(color: Color.dropShadow, radius: 4, x: 0, y: 2)
-                        //                                .offset(x: -5, y: -5)
-                        //                        }
+                        .frame(width: 124, height: 124)
                         
                         Text(fullName)
-                            .font(.appRegular(24))
-                            .foregroundStyle(Color.neutralMain700)
+                            .font(.geistSemiBold(26))
+                            .foregroundStyle(themeManager.black_white)
                             .multilineTextAlignment(.center)
                         
-                        Text(mobile)
-                            .font(.appRegular(18))
-                            .foregroundStyle(Color.blueMain700)
-                            .multilineTextAlignment(.center)
-                    }
-                    
-                    VStack(alignment: .leading){
-                        Text("Current Plan")
-                            .font(.appSemiBold(14))
-                            .foregroundStyle(Color.neutral600)
-                        
-                        HStack(alignment: .bottom, spacing: 4) {
-                            if commonApiVM.userInfoResponse?.planName ?? "" == "" {
-                                Text("Free plan")
-                                    .font(.appSemiBold(18))
-                                    .foregroundStyle(Color.buttonsText)
-                            }else{
-                                Text(LocalizedStringKey(commonApiVM.userInfoResponse?.planName ?? "Free plan"))
-                                    .font(.appSemiBold(18))
-                                    .foregroundStyle(Color.buttonsText)
+                        HStack{
+                            Text(mobile == "" ? email : mobile)
+                                .font(.geistRegular(12))
+                                .foregroundStyle(Color.textPrimary0E101AF4F1FB.opacity(0.6))
+                                .multilineTextAlignment(.center)
+                            
+                            if commonApiVM.userInfoResponse?.createdAt ?? "" != ""{
+                                Text(". \(commonApiVM.userInfoResponse?.createdAt?.formattedDate(from: "yyyy-MM-dd'T'HH:mm:ss.SSSZ", to: "MMM yyyy") ?? "")")
+                                    .font(.geistRegular(12))
+                                    .foregroundStyle(Color.textPrimary0E101AF4F1FB.opacity(0.6))
+                                    .multilineTextAlignment(.center)
                             }
-                            if let billingCycle = commonApiVM.userInfoResponse?.planBillingCycle {
-                                if billingCycle != ""{
-                                    Text(LocalizedStringKey("(\(billingCycle))"))
-                                        .font(.appSemiBold(16))
-                                        .foregroundColor(.buttonsText)
+                        }
+                    }
+                    .padding(.vertical, 14)
+                    
+                    ZStack {
+                        // Background
+                        RoundedRectangle(cornerRadius: 20)
+                            .fill(themeManager.white_white4)
+                        
+                        // Top Glow
+                        Ellipse()
+                            .fill(
+                                themeManager.selectedAccent.primaryColor
+                                    .opacity(0.2)
+                            )
+                            .blur(radius: 20)
+                            .offset(y: -18)
+                        
+                        HStack(spacing: 10) {
+                            // Text
+                            VStack(alignment: .leading, spacing: 2) {
+                                
+                                HStack(spacing: 5) {
+                                    Image("sparkles")
+                                        .resizable()
+                                        .renderingMode(.template)
+                                        .foregroundStyle(themeManager.accentGradient)
+                                        .frame(width: 16, height: 16)
+                                    
+                                    let planText = commonApiVM.userInfoResponse?.planName ?? "Free plan"
+                                    let cycle = "\(commonApiVM.userInfoResponse?.planBillingCycle ?? "")"
+                                    Text("\(planText) \(cycle == "" ? "" : "· \(cycle)")")
+                                        .font(.jetBrainsBold(14))
+                                        .foregroundStyle(
+                                            LinearGradient(
+                                                colors: [
+                                                    themeManager.selectedAccent.primaryColor,
+                                                    themeManager.selectedAccent.lastColor
+                                                ],
+                                                startPoint: .leading,
+                                                endPoint: .trailing
+                                            )
+                                        )
+                                }
+                                
+                                if commonApiVM.userInfoResponse?.planExpiresAt ?? "" != ""{
+                                    Text("Next renewal is \(commonApiVM.userInfoResponse?.planExpiresAt?.formattedDate(from: "yyyy-MM-dd'T'HH:mm:ss.SSSZ", to: "MMM yyyy") ?? "")")
+                                        .font(.geistSemiBold(10))
+                                        .foregroundStyle(
+                                            Color.textPrimary0E101AF4F1FB
+                                                .opacity(0.8)
+                                        )
                                 }
                             }
-                        }
-                        if let planExpiresAt = commonApiVM.userInfoResponse?.planExpiresAt {
-                            if planExpiresAt != ""{
-                                Text(LocalizedStringKey("Next renewal is \(planExpiresAt.toLocalizedStringDate().lowercased())"))
-                                    .font(.appSemiBold(14))
-                                    .foregroundColor(.neutral600)
+                            
+                            Spacer()
+                            
+                            HStack(spacing: 6) {
+                                Button {
+                                    Constants.FeatureConfig.performS4Action {
+                                        if commonApiVM.userInfoResponse?.internalPlanType ?? 0 == 3{
+                                            profileVM.navigate(to: .pricingPlans(selectedTab: .second))
+                                        }else{
+                                            profileVM.navigate(to: .pricingPlans())
+                                        }
+                                    }
+                                } label: {
+                                    Text("Manage")
+                                        .font(.geistSemiBold(15))
+                                }
                             }
+                            .foregroundStyle(
+                                themeManager.selectedAccent.senColor
+                            )
+                            .padding(.horizontal, 14)
+                            .frame(width: 130, height: 32)
+                            .background(
+                                LinearGradient(
+                                    colors: [
+                                        themeManager.selectedAccent.primaryColor.opacity(0.2),
+                                        themeManager.selectedAccent.lastColor.opacity(0.2)
+                                    ],
+                                    startPoint: .topLeading,
+                                    endPoint: .bottomTrailing
+                                )
+                            )
+                            .overlay {
+                                RoundedRectangle(cornerRadius: 16)
+                                    .stroke(
+                                        themeManager.selectedAccent.senColor
+                                            .opacity(0.4),
+                                        lineWidth: 1
+                                    )
+                            }
+                            .clipShape(
+                                Capsule()
+                            )
                         }
+                        .padding(.horizontal, 14)
+                    }
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .frame( height: 67)
+                    .clipShape(
+                        RoundedRectangle(cornerRadius: 20)
+                    )
+                    .overlay {
+                        RoundedRectangle(cornerRadius: 20)
+                            .stroke(
+                                themeManager.textPrimaryLight8_white8,
+                                lineWidth: 1
+                            )
+                    }
+                    .padding(.bottom, 20)
+                    .padding(.horizontal, 4)
+                    
+                    VStack(alignment: .leading, spacing: 0) {
                         
-                        if commonApiVM.userInfoResponse?.upgradeBtnStatus ?? false{
-                            GradientBgBtn(title: "Upgrade today", action: {
+                        Text("ACCOUNT")
+                            .font(.jetBrainsMedium(10))
+                            .tracking(1.4)
+                            .textCase(.uppercase)
+                            .foregroundStyle(
+                                Color.textPrimary0E101AF4F1FB
+                                    .opacity(0.6)
+                            )
+                            .padding(.horizontal, 2)
+                            .padding(.bottom, 10)
+                        VStack(spacing: 6) {
+                            ProfileItem(title: "Edit account info", image: "cardName", action:{
+                                profileVM.navigate(to: NavigationRoute.editProfile)
+                            })
+                            
+                            ProfileItem(title: "Family members", image: "cardName", action:{
                                 Constants.FeatureConfig.performS4Action {
-                                    if commonApiVM.userInfoResponse?.internalPlanType ?? 0 == 3{
-                                        profileVM.navigate(to: .pricingPlans(selectedTab: .second))
-                                    }else{
+                                    profileVM.navigate(to: NavigationRoute.familyMembersView)
+                                }
+                            })
+                            
+                            ProfileItem(title: "My cards", image: "email_purple1", action:{
+                                Constants.FeatureConfig.performS4Action {
+                                    profileVM.navigate(to: NavigationRoute.myCards)
+                                }
+                            })
+                            
+                            ProfileItem(title: "Plans & pricing", image: "start", action:{
+                                Constants.FeatureConfig.performS4Action {
+                                    if Constants.FeatureConfig.featurePhase == .all{
                                         profileVM.navigate(to: .pricingPlans())
+                                    }else{
+                                        ToastManager.shared.showToast(message: "Coming soon in S4", style: .info)
+                                    }
+                                }
+                            })
+                            
+                            ProfileItem(title: "Appearance", image: "appricon", action:{
+                                Constants.FeatureConfig.performS4Action {
+                                    profileVM.navigate(to: .appearance)
+                                }
+                            }, isDarkMode: false)
+                            
+//                            ProfileItem(title: "Integrations", image: "sparkles", action:{
+//                                Constants.FeatureConfig.performS4Action {
+//                                    profileVM.navigate(to: NavigationRoute.connectedEmailsList(isIntegrations: true))
+//                                }
+//                            })
+                            
+                            ProfileItem(title: "Invite friends", image: "notification-03", action:{
+                                Constants.FeatureConfig.performS4Action {
+                                    if Constants.FeatureConfig.featurePhase == .all{
+                                        profileVM.navigate(to: .inviteFriends(uLink: commonApiVM.userInfoResponse?.referralLink))
+                                    }else{
+                                        ToastManager.shared.showToast(message: "Coming soon in S4", style: .info)
                                     }
                                 }
                             })
                         }
                     }
-                    .padding(24)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .cornerRadius(16)
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 16)
-                            .stroke(Color.neutral300Border, lineWidth: 1)
-                    )
+                    .padding(.bottom, 20)
+                    .padding(.horizontal, 4)
                     
-                    VStack(spacing: 0) {
-                        HStack{
-                            Text("Account Information")
-                                .font(.appRegular(16))
-                                .foregroundStyle(Color.neutralMain700)
-                                .padding(16)
-                                .multilineTextAlignment(.leading)
-                            Spacer()
-                        }
-                        Divider()
-                            .overlay(Color.border)
-                        AccountInfo(title: "Full Name", subTitle: fullName) {
-                            Constants.FeatureConfig.performS4Action {
-                                router.navigate(to: .editProfile)
-                            }
-                        }
-                        Divider()
-                            .overlay(Color.border)
-                        AccountInfo(title: "Email", subTitle: email) {
-                            Constants.FeatureConfig.performS4Action {
-                                router.navigate(to: .editProfile)
-                            }
-                        }
-                        Divider()
-                            .overlay(Color.border)
-                        AccountInfo(title: "Mobile Number", subTitle: mobile) {
-                            Constants.FeatureConfig.performS4Action {
-                                router.navigate(to: .editProfile)
-                            }
-                        }
-                        Divider()
-                            .overlay(Color.border)
-                        AccountInfo(title: "Currency", subTitle: currency) {
-                            Constants.FeatureConfig.performS4Action {
-                                router.navigate(to: .editProfile)
-                            }
-                        }
-                    }
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .cornerRadius(16)
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 16)
-                            .stroke(Color.neutral300Border, lineWidth: 1)
-                    )
-                    
-                    VStack(spacing: 0) {
-                        ProfileItem(title: "Plans & Pricing", image: "award", action:{
-                            Constants.FeatureConfig.performS4Action {
-                                if Constants.FeatureConfig.featurePhase == .all{
-                                    profileVM.navigate(to: .pricingPlans())
-                                }else{
-                                    ToastManager.shared.showToast(message: "Coming soon in S4", style: .info)
-                                }
-                            }
-                        })
-                        Divider()
-                            .overlay(Color.border)
-                        ProfileItem(title: "My Cards", image: "card", action:{
-                            Constants.FeatureConfig.performS4Action {
-                                profileVM.navigate(to: NavigationRoute.myCards)
-                            }
-                        })
+                    VStack(alignment: .leading, spacing: 0) {
                         
-                        Divider()
-                            .overlay(Color.border)
-                        ProfileItem(title: "Appearance", image: "darkMode", action:{
-                            Constants.FeatureConfig.performS4Action {
-                                profileVM.navigate(to: .appearance)
-                            }
-                        }, isDarkMode: false)
+                        Text("Danger zone")
+                            .font(.jetBrainsMedium(10))
+                            .tracking(1.4)
+                            .textCase(.uppercase)
+                            .foregroundStyle(
+                                Color.textPrimary0E101AF4F1FB
+                                    .opacity(0.6)
+                            )
+                            .padding(.horizontal, 2)
+                            .padding(.bottom, 10)
                         
-                        Divider()
-                            .overlay(Color.border)
-                        ProfileItem(title: "Integrations", image: "link", action:{
-                            Constants.FeatureConfig.performS4Action {
-                                profileVM.navigate(to: NavigationRoute.connectedEmailsList(isIntegrations: true))
-                            }
-                        })
-                        Divider()
-                            .overlay(Color.border)
-                        ProfileItem(title: "Family Members", image: "familyMembers", action:{
-                            Constants.FeatureConfig.performS4Action {
-                                profileVM.navigate(to: NavigationRoute.familyMembersView)
-                            }
-                        })
-                        Divider()
-                            .overlay(Color.border)
-                        ProfileItem(title: "Invite friends", image: "user-add-02", action:{
-                            Constants.FeatureConfig.performS4Action {
-                                if Constants.FeatureConfig.featurePhase == .all{
-                                    profileVM.navigate(to: .inviteFriends(uLink: commonApiVM.userInfoResponse?.referralLink))
-                                }else{
-                                    ToastManager.shared.showToast(message: "Coming soon in S4", style: .info)
+                        Button {
+                            showDeletePopup = true
+                        } label: {
+                            HStack(spacing: 14) {
+                                
+                                // Icon
+                                ZStack {
+                                    
+                                    RoundedRectangle(cornerRadius: 10)
+                                        .fill(
+                                            Color.dangerE43C5CFF5A7A.opacity(0.13)
+                                        )
+                                    
+                                    Image("crossicon")
+                                        .frame(width: 13, height: 13)
                                 }
+                                .frame(width: 32, height: 32)
+                                
+                                // Title
+                                Text("Sign out")
+                                    .font(.geistMedium(14))
+                                    .foregroundStyle(
+                                        Color.dangerE43C5CFF5A7A
+                                    )
+                                
+                                Spacer()
+                                
+                                // Arrow
+                                Image("backGrayright")
+                                    .renderingMode(.template)
+                                    .frame(width: 14, height: 14)
+                                    .foregroundStyle(
+                                        Color.textPrimary0E101AF4F1FB
+                                            .opacity(0.36)
+                                    )
                             }
-                        })
+                            .padding(.horizontal, 16)
+                            .frame(height: 60)
+                            .background(
+                                RoundedRectangle(cornerRadius: 14)
+                                    .fill(themeManager.white_white4)
+                            )
+                            .overlay {
+                                
+                                RoundedRectangle(cornerRadius: 14)
+                                    .stroke(
+                                        Color.textPrimary0E101AF4F1FB
+                                            .opacity(0.08),
+                                        lineWidth: 1
+                                    )
+                            }
+                        }
+                        
                     }
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .cornerRadius(16)
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 16)
-                            .stroke(Color.neutral300Border, lineWidth: 1)
-                    )
+                    .padding(.bottom,120)
+                    .padding(.horizontal, 4)
                     
-                    CustomBorderButton(title        : "Logout",
-                                       background  : Color.clear,
-                                       borderColor : themeManager.textPrimaryLight14_white14) {
-                        showDeletePopup = true
-                    }
-                    .padding(.bottom,90)
-                    
-//                    HStack(spacing: 4) {
-//                        Text(LocalizedStringKey("Version \(appVersion)"))
-//                            .font(.footnote)
-//                            .foregroundColor(.gray)
-//                        
-//                        Text(LocalizedStringKey("Build \(buildNumber)"))
-//                            .font(.footnote)
-//                            .foregroundColor(.gray)
-//                    }
-//
+                    //                    HStack(spacing: 4) {
+                    //                        Text(LocalizedStringKey("Version \(appVersion)"))
+                    //                            .font(.footnote)
+                    //                            .foregroundColor(.gray)
+                    //
+                    //                        Text(LocalizedStringKey("Build \(buildNumber)"))
+                    //                            .font(.footnote)
+                    //                            .foregroundColor(.gray)
+                    //                    }
+                    //
                 }
                 .navigationBarBackButtonHidden(true)
                 .background(MediaPickerHost().allowsHitTesting(false)) // host
@@ -342,7 +421,7 @@ struct ProfileView: View {
             }
         }
         .padding(20)
-        .background(Color.neutralBg100.ignoresSafeArea())
+        .applyAppBackground()
         .sheet(item: $selectedAccountType) { type in
             EditAccountBottomSheet(onDelegate       : {
             },
@@ -367,7 +446,7 @@ struct ProfileView: View {
                 accountTypeVerify   = type
                 profileVM.updateProfile(input: input)
             })
-//            .presentationDetents(selectedAccountType == .currency ? [.medium, .large] : [.height(350)])
+            //            .presentationDetents(selectedAccountType == .currency ? [.medium, .large] : [.height(350)])
             .presentationDetents([.large])
             .presentationDragIndicator(.hidden)
         }
@@ -380,7 +459,7 @@ struct ProfileView: View {
                 getUserDetailsApi()
             })
             .presentationDetents([.medium, .large])
-//            .presentationDetents([.height(550)])
+            //            .presentationDetents([.height(550)])
             .presentationDragIndicator(.hidden)
         }
         .onChange(of: profileVM.isUpdate) { value in
@@ -416,7 +495,8 @@ struct ProfileView: View {
                 buttonIcon              : "deleteIcon",
                 buttonTitle             : "Ok",
                 imageSize               : 70,
-                isCancelButtonVisible   : true
+                isCancelButtonVisible   : true,
+                isImageVisible          : false
             )
             .onPreferenceChange(InnerHeightPreferenceKey.self) { height in
                 if height > 0 {

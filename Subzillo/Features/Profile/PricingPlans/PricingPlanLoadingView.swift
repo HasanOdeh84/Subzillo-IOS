@@ -16,6 +16,7 @@ struct PricingPlanLoadingView: View {
     
     var type: PricingPlanProcessingType
     var onTryAgain: (() -> Void)? = nil
+    @EnvironmentObject var themeManager : ThemeManager
     
     var body: some View {
         ZStack {
@@ -78,6 +79,7 @@ struct PricingPlanLoadingView: View {
             
             CustomButton(title      : "Try Again",
                          background : Color.primaryBlue800,
+                         shadow     : themeManager.accentShadowColor,
                          textColor  : .white,
                          height     : 52,
                          action     : {

@@ -22,6 +22,7 @@ struct InfoAlertSheet: View {
     var isCancelButtonVisible               : Bool = false
     var isImageVisible                      : Bool = true
     var isBtn                               : Bool = true
+    var isBgGradient                        : Bool = false
     @EnvironmentObject var themeManager     : ThemeManager
     
     //MARK: - body
@@ -32,15 +33,13 @@ struct InfoAlertSheet: View {
                 .frame(width: 40, height: 5)
                 .padding(.top,24)
             
-            if !isCancelButtonVisible{
-                if isImageVisible{
-                    ZStack(alignment: .topTrailing) {
-                        Image(imageName ?? "")
-                            .frame(width: imageSize, height: imageSize)
-                    }
-                    .frame(width: imageSize, height: imageSize, alignment: .center)
-                    .frame(maxWidth: .infinity, alignment: .center)
+            if isImageVisible{
+                ZStack(alignment: .topTrailing) {
+                    Image(imageName ?? "")
+                        .frame(width: imageSize, height: imageSize)
                 }
+                .frame(width: imageSize, height: imageSize, alignment: .center)
+                .frame(maxWidth: .infinity, alignment: .center)
             }
             
             if subTitle != ""
@@ -80,11 +79,22 @@ struct InfoAlertSheet: View {
                                      .padding(.bottom, 24)
             }else{
                 HStack(spacing: 0)  {
-                    GradientBorderButton(title: "Cancel", action:{
-                        dismiss()
-                    }, backgroundColor:.whiteBlack)
+                    CustomBorderButton(
+                        title       : "Cancel",
+                        background  : Color.clear,
+                        borderColor : themeManager.textPrimaryLight14_white14,
+                        action      : {
+                            dismiss()
+                        }
+                    )
                     .padding(.horizontal)
-                    CustomButton(title: buttonTitle ?? "", height:50, action: {
+                    CustomButton(title          : buttonTitle ?? "",
+                                 background     : .dangerE43C5CFF5A7A,
+                                 shadow         : .dangerE43C5CFF5A7A.opacity(0.55),
+                                 textColor      : .white,
+                                 height         : 50,
+                                 isBgGradient   : isBgGradient,
+                                 action         : {
                         onDelegate?()
                         dismiss()
                     })
@@ -175,6 +185,7 @@ struct SubscriptionAlertSheet: View {
     var buttonTitle                         : String?
     var titleFont                           : Font? = .appRegular(18)
     var isBtn                               : Bool = true
+    @EnvironmentObject var themeManager     : ThemeManager
     
     //MARK: - body
     var body: some View {
@@ -199,7 +210,7 @@ struct SubscriptionAlertSheet: View {
                     .fixedSize(horizontal: false, vertical: true)
             }
             
-            CustomButton(title: buttonTitle ?? "", height:50, action: {
+            CustomButton(title: buttonTitle ?? "",shadow: themeManager.accentShadowColor, height:50, action: {
                 onDelegate?()
                 dismiss()
             })

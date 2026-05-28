@@ -32,7 +32,7 @@ struct MyCardsView: View {
     }
     
     @State private var deleteSheetHeight        : CGFloat = .zero
-
+    
     //MARK: - Body
     var body: some View {
         VStack{
@@ -40,33 +40,8 @@ struct MyCardsView: View {
             // MARK: - Header
             HStack(spacing: 8) {
                 // MARK: - back
-                Button(action: {
+                CircleBackButton {
                     AppIntentRouter.shared.pop()
-                }) {
-                    HStack {
-                        
-                        if colorScheme == .dark
-                        {
-                            Image("back_gray")
-                                .renderingMode(.template)
-                                .foregroundColor(.white)
-                        }
-                        else{
-                            Image("back_gray")
-                        }
-                    }
-                    .frame(width: 38, height: 38)
-                    .background(
-                        Circle()
-                            .fill(themeManager.white_white4)
-                    )
-                    .overlay(
-                        Circle()
-                            .stroke(
-                                themeManager.black_white.opacity(0.08),
-                                lineWidth: 1
-                            )
-                    )
                 }
                 
                 Spacer()
@@ -100,11 +75,11 @@ struct MyCardsView: View {
                         .foregroundStyle(.textPrimary0E101AF4F1FB.opacity(0.6))
                         .multilineTextAlignment(.center)
                     
+                    Spacer()
+                    
                     addButton
                         .padding(.top, 20)
-                        .padding(.bottom, 126)
-                    
-                    Spacer()
+                        .padding(.bottom, 120)
                 }
                 .padding(.horizontal, 20)
             }else{
@@ -128,16 +103,16 @@ struct MyCardsView: View {
                                 }
                             )
                         }
-                        addButton
-                            .padding(.horizontal, 20)
                     }
                     .padding(.top, 20)
                 }
                 .scrollDisabled(isScrollDisabled)
+                
+                addButton
+                    .padding(.horizontal, 20)
+                    .padding(.bottom, 120)
             }
-            
         }
-        
         .padding(.vertical, 16)
         .applyAppBackground()
         .navigationBarBackButtonHidden(true)
@@ -145,36 +120,38 @@ struct MyCardsView: View {
             userCardsApi()
         }
         /*.sheet(isPresented: $addCardSheet) {
-            AddNewCardSheet(shouldCallAPI   : shouldCallAPI,
-                            action: {
-                self.userCardsApi()
-            })
-            .presentationDetents([.medium, .large])
-            .presentationDragIndicator(.hidden)
-        }*/
+         AddNewCardSheet(shouldCallAPI   : shouldCallAPI,
+         action: {
+         self.userCardsApi()
+         })
+         .presentationDetents([.medium, .large])
+         .presentationDragIndicator(.hidden)
+         }*/
         /*.sheet(item: $editingCard) { wrapper in
-            AddNewCardSheet(nickName        : wrapper.data.nickName ?? "",
-                            cardNumber      : wrapper.data.cardNumber ?? "",
-                            cardName        : wrapper.data.cardHolderName ?? "",
-                            shouldCallAPI   : shouldCallAPI,
-                            isEdit          : true,
-                            cardId          : wrapper.data.id ?? "",
-                            action: {
-                self.userCardsApi()
-            })
-            .presentationDetents([.medium, .large])
-            .presentationDragIndicator(.hidden)
-        }*/
+         AddNewCardSheet(nickName        : wrapper.data.nickName ?? "",
+         cardNumber      : wrapper.data.cardNumber ?? "",
+         cardName        : wrapper.data.cardHolderName ?? "",
+         shouldCallAPI   : shouldCallAPI,
+         isEdit          : true,
+         cardId          : wrapper.data.id ?? "",
+         action: {
+         self.userCardsApi()
+         })
+         .presentationDetents([.medium, .large])
+         .presentationDragIndicator(.hidden)
+         }*/
         .sheet(isPresented: $showDeletePopup) {
             InfoAlertSheet(
                 onDelegate: {
                     deleteCard()
-                }, title    : "Are you sure you want to delete this card?\n This card will be permanently removed.",
-                subTitle    :"",
-                imageName   : "del_red_new",
-                buttonIcon  : "del_red_newSmall",
-                buttonTitle : "Delete",
-                imageSize   : 70
+                }, title                : "Are you sure you want to delete this card?",
+                subTitle                : "This card will be permanently removed.",
+                imageName               : "del_red_new",
+                buttonIcon              : "del_red_newSmall",
+                buttonTitle             : "Delete",
+                imageSize               : 70,
+                isCancelButtonVisible   : true,
+                isImageVisible          : true
             )
             .onPreferenceChange(InnerHeightPreferenceKey.self) { height in
                 if height > 0 {
@@ -203,21 +180,19 @@ struct MyCardsView: View {
             //addCardSheet = true
             AppIntentRouter.shared.navigate(to: .addNewCardSheet(shouldCallAPI: shouldCallAPI))
         }
-        
-       
     }
     
     func editCard(){
         let cardType = CardType(
             rawValue: editingCard?.data.cardType ?? 0
         ) ?? .Other
-
+        
         let nickName = editingCard?.data.nickName ?? ""
         let cardNumber = editingCard?.data.cardNumber ?? ""
         let cardName = editingCard?.data.cardHolderName ?? ""
         let cardId = editingCard?.data.id ?? ""
         let isDefault = editingCard?.data.isDefault ?? false
-
+        
         AppIntentRouter.shared.navigate(
             to: .addNewCardSheet(
                 nickName: nickName,
@@ -441,74 +416,74 @@ struct CardView: View {
         )
     }
     /*{
-        ZStack {
-            RoundedRectangle(cornerRadius: 14)
-                .fill(linearGradient)
-            
-            VStack(alignment: .leading, spacing: 14) {
-                HStack {
-                    Text(formatName(card.cardHolderName ?? ""))
-                        .font(.appMedium(12))
-                        .foregroundColor(.white)
-                        .padding(.top, 14)
-                    
-                    Spacer()
-                }
-                
-                HStack(spacing: 12) {
-                    Image("sim")
-                        .resizable()
-                        .aspectRatio(contentMode: .fit)
-                        .frame(width: 35, height: 25)
-                    
-                    Image("wave")
-                        .frame(width: 14, height: 13)
-                    
-                    Spacer()
-                }
-                
-                HStack {
-                    Text("****   ****   ****   \(card.cardNumber ?? "")")
-//                        .font(.system(size: 20, weight: .bold, design: .monospaced))
-//                        .font(.appBold(20))
-//                        .lineSpacing(4)
-//                        .minimumScaleFactor(0.7)
-//                        .foregroundColor(.white)
-                        .font(.system(size: 20, weight: .bold, design: .monospaced))
-                            .lineLimit(1)
-                            .minimumScaleFactor(0.65)
-                            .allowsTightening(true)
-                            .foregroundColor(.white)
-                    
-                    Spacer()
-                }
-                
-                Spacer()
-            }
-            .padding(.horizontal, 12)
-            
-            VStack {
-                Spacer()
-                HStack {
-                    Spacer()
-                    Text(card.nickName ?? "")
-                        .font(.appSemiBold(11))
-                        .foregroundColor(.white)
-                        .padding(.horizontal, 20)
-                        .padding(.vertical, 2)
-                        .frame(height: 20)
-                        .background(LinearGradient(
-                            gradient        : Gradient(colors: [Color.lightGreenLG, Color.greenLG]),
-                            startPoint      : .topLeading,
-                            endPoint        : .bottomTrailing
-                        ))
-                        .cornerRadius(14, corners: [.topLeft])
-                        .cornerRadius(14, corners: [.bottomRight])
-                }
-            }
-        }
-        .frame(height: 148)
-    }*/
+     ZStack {
+     RoundedRectangle(cornerRadius: 14)
+     .fill(linearGradient)
+     
+     VStack(alignment: .leading, spacing: 14) {
+     HStack {
+     Text(formatName(card.cardHolderName ?? ""))
+     .font(.appMedium(12))
+     .foregroundColor(.white)
+     .padding(.top, 14)
+     
+     Spacer()
+     }
+     
+     HStack(spacing: 12) {
+     Image("sim")
+     .resizable()
+     .aspectRatio(contentMode: .fit)
+     .frame(width: 35, height: 25)
+     
+     Image("wave")
+     .frame(width: 14, height: 13)
+     
+     Spacer()
+     }
+     
+     HStack {
+     Text("****   ****   ****   \(card.cardNumber ?? "")")
+     //                        .font(.system(size: 20, weight: .bold, design: .monospaced))
+     //                        .font(.appBold(20))
+     //                        .lineSpacing(4)
+     //                        .minimumScaleFactor(0.7)
+     //                        .foregroundColor(.white)
+     .font(.system(size: 20, weight: .bold, design: .monospaced))
+     .lineLimit(1)
+     .minimumScaleFactor(0.65)
+     .allowsTightening(true)
+     .foregroundColor(.white)
+     
+     Spacer()
+     }
+     
+     Spacer()
+     }
+     .padding(.horizontal, 12)
+     
+     VStack {
+     Spacer()
+     HStack {
+     Spacer()
+     Text(card.nickName ?? "")
+     .font(.appSemiBold(11))
+     .foregroundColor(.white)
+     .padding(.horizontal, 20)
+     .padding(.vertical, 2)
+     .frame(height: 20)
+     .background(LinearGradient(
+     gradient        : Gradient(colors: [Color.lightGreenLG, Color.greenLG]),
+     startPoint      : .topLeading,
+     endPoint        : .bottomTrailing
+     ))
+     .cornerRadius(14, corners: [.topLeft])
+     .cornerRadius(14, corners: [.bottomRight])
+     }
+     }
+     }
+     .frame(height: 148)
+     }*/
     
     func formatName(_ name: String) -> String {
         return name.map { String($0) }.joined(separator: " ").uppercased()
@@ -531,21 +506,38 @@ struct SwipeableCardRow: View {
     @EnvironmentObject var themeManager: ThemeManager
     var body: some View {
         ZStack(alignment: .trailing) {
+            //            VStack {
+            //                HStack{
+            //                    Spacer()
+            //                    VStack(spacing: 8){
+            //                        Image("swipeDel")
+            //                        Text("Delete")
+            //                            .font(.jetBrainsBold(11))
+            //                            .foregroundColor(colorScheme == .light ? .textPrimaryDarkF4F1FB : .dangerDarkFF5A7A)
+            //                    }
+            //                    .padding(.leading, 20)
+            //                    .frame(alignment: .trailing)
+            //                    .frame(width: 80, height: 200)
+            //                }
+            //                .frame(width: 80, height: 200)
+            //            }
+            //            .frame(width: 200, height: 200)
             VStack {
                 HStack{
+                    Spacer()
                     VStack(spacing: 8){
                         Image("swipeDel")
                         Text("Delete")
                             .font(.jetBrainsBold(11))
                             .foregroundColor(colorScheme == .light ? .textPrimaryDarkF4F1FB : .dangerDarkFF5A7A)
                     }
-                    .padding(.leading, 20)
+                    .padding(.leading, 5)
                     .frame(alignment: .trailing)
                     .frame(width: 80, height: 200)
                 }
-                .frame(width: 80, height: 200)
+                .frame(width: 190, height: 200)
             }
-            .frame(width: 100, height: 200)
+            .frame(width: 190, height: 200)
             .background(colorScheme == .light ? .dangerLightE43C5C : .dangerLightE43C5C.opacity(0.4))
             .clipShape(
                 RoundedCorner(

@@ -11,6 +11,7 @@ struct CustomButton: View {
 
     let title       : String
     var background  : Color = .navyBlueCTA700
+    var shadow      : Color = .navyBlueCTA700
     var textColor   : Color = .white
     var width       : CGFloat = 160
     var height      : CGFloat = 56
@@ -18,6 +19,7 @@ struct CustomButton: View {
     var buttonImage : String = ""
     var isShare     : Bool = false
     var isHidden    : Bool = false
+    var isBgGradient: Bool = false
     var action      : () -> Void = {}
     @EnvironmentObject var themeManager: ThemeManager
     
@@ -43,6 +45,7 @@ struct CustomButton: View {
             }
             .frame(maxWidth: .infinity, minHeight: height)
             .background {
+                /*
                  if isShare {
                     LinearGradient(
                         colors: [
@@ -61,22 +64,16 @@ struct CustomButton: View {
                 else {
                     themeManager.accentGradient
                 }
+                 */
+                if isBgGradient{
+                    themeManager.accentGradient
+                }else{
+                    background
+                }
             }
-           /* .background(
-                isShare
-                ? AnyView(
-                    LinearGradient(
-                        colors: [Color.linearGradient3, Color.linearGradient4, Color.blueMain700],
-                        startPoint: .top,
-                        endPoint: .bottom
-                    )
-                )
-                //: AnyView(background)
-                : AnyView(themeManager.accentGradient)
-            )*/
-            
             .cornerRadius(height/2)
-            .shadow(color: themeManager.accentShadowColor, radius: 15, x: 0, y: 10)
+            .contentShape(RoundedRectangle(cornerRadius: height / 2))
+            .shadow(color: isBgGradient ? themeManager.accentShadowColor : shadow, radius: 15, x: 0, y: 10)
         }
         .buttonStyle(InteractiveButtonStyle())
     }

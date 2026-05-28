@@ -135,12 +135,14 @@ struct SubscriptionMatchView: View {
                 InfoAlertSheet(
                     onDelegate: {
                         deleteSubscription()
-                    }, title    : "Are you sure you want to delete the subscriptions?\nData will be permanently deleted",
-                    subTitle    :"",
-                    imageName   : "del_red_new",
-                    buttonIcon  : "del_red_newSmall",
-                    buttonTitle : "Delete",
-                    imageSize   : 70
+                    }, title                : "Are you sure you want to delete the subscriptions?",
+                    subTitle                : "Data will be permanently deleted",
+                    imageName               : "del_red_new",
+                    buttonIcon              : "del_red_newSmall",
+                    buttonTitle             : "Delete",
+                    imageSize               : 70,
+                    isCancelButtonVisible   : true,
+                    isImageVisible          : true
                 )
                 .onPreferenceChange(InnerHeightPreferenceKey.self) { height in
                     if height > 0 {
@@ -271,7 +273,7 @@ struct SubscriptionMatchView: View {
                 .foregroundColor(.textPrimary0E101AF4F1FB)
             
             let planType = subscriptionData?.subscriptionType ?? "Premium"
-            let dateStr = subscriptionData?.createdAt != nil && subscriptionData?.createdAt != "" ? subscriptionData!.createdAt!.formattedDate(to: "MMM yyyy") : "Jan 2022"
+            let dateStr = subscriptionData?.createdAt != nil && subscriptionData?.createdAt != "" ? subscriptionData!.createdAt!.formattedDate(from: "yyyy-MM-dd'T'HH:mm:ss.SSSZ", to: "MMM yyyy") : "Jan 2022"
             Text("\(planType) - since \(dateStr)")
                 .font(.geistMedium(13))
                 .foregroundColor(themeManager.textPrimaryLight6_dark62)

@@ -11,23 +11,23 @@ struct ManualEntryValidations {
     
     //MARK: - Add card
     func addCard(input: AddCardRequest) -> String? {
-        if input.nickName.isEmpty{
-            return "Card Nickname is required"
-        }
-        if !Validations().isValidNickName(input.nickName){
-            return "Invalid characters not allowed"
-        }
-        if input.cardNumber.isEmpty {
-            return "Card Number is required"
-        }
-        if input.cardNumber.count != 4{
-            return "Enter a valid card number"
-        }
         if input.cardHolderName.isEmpty{
             return "Name on Card is required"
         }
         if !Validations().isValidName(input.cardHolderName){
             return "Invalid name format"
+        }
+//        if input.nickName.isEmpty{
+//            return "Card Nickname is required"
+//        }
+//        if !Validations().isValidNickName(input.nickName){
+//            return "Invalid characters not allowed"
+//        }
+        if input.cardNumber.isEmpty {
+            return "Card Number is required"
+        }
+        if input.cardNumber.count != 4{
+            return "Enter a valid card number"
         }
         return nil // All validations passed
     }

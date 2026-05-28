@@ -297,11 +297,13 @@ struct ConnectEmailView: View {
             InfoAlertSheet(
                 onDelegate: {
                     gmailAction()
-                }, title: "Gmail needs reconnection",
-                subTitle: "Please reconnect your Gmail account to resume syncing.",
-                imageName: "info",
-                buttonTitle: "Reconnect",
-                isCancelButtonVisible: true
+                }, title                : "Gmail needs reconnection",
+                subTitle                : "Please reconnect your Gmail account to resume syncing.",
+                imageName               : "info",
+                buttonTitle             : "Reconnect",
+                isCancelButtonVisible   : true,
+                isImageVisible          : false,
+                isBgGradient            : true
             )
             .onPreferenceChange(InnerHeightPreferenceKey.self) { height in
                 if height > 0 {
