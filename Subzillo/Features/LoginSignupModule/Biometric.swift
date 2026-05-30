@@ -359,10 +359,10 @@ private extension Biometric {
                 subtitle: "Subs data hidden from shoulder-surfers"
             )
             
-            FaceIDFeatureRow(
+            /*FaceIDFeatureRow(
                 title: "Confirm cancellations",
                 subtitle: "Biometric check before canceling a sub"
-            )
+            )*/
             
             FaceIDFeatureRow(
                 title: "Fully private",

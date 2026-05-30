@@ -27,7 +27,7 @@ struct pricingPlanData : Codable{
 struct PricingPlan: Identifiable, Equatable, Codable  {
     let id                  : String?
     let planName            : String?
-    let description         : String?
+    let description         : [String]?
     let price               : Double?
     let currencyCode        : String?
     let currencySymbol      : String?
@@ -35,8 +35,8 @@ struct PricingPlan: Identifiable, Equatable, Codable  {
     let isCurrentPlan       : Bool?
     let iosProductId        : String?
     let internalPlanType    : Int? // Must match UserInfo.planType ranking
-    let isPopularPlan       : Bool?
-    let isBestPlan          : Bool?
+    let popularStatus       : Bool?
+    let bestValueStatus     : Bool?
 }
 
 struct SubscribePlanRequest: Codable {
@@ -65,4 +65,13 @@ struct CheckTransactionData: Codable {
     let userId              : String?
     let allowTransfer       : Bool?
     let subscriptionStatus  : String?
+}
+
+public struct getYearlyDiscountResponse: Codable {
+    let message : String?
+    let data    : DiscountData?
+}
+
+public struct DiscountData: Codable, Hashable {
+    let discount          : Int?
 }

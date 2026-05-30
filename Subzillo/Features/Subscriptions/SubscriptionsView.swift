@@ -702,12 +702,14 @@ struct SubscriptionsView: View {
                         Spacer()
                         VStack(){
                             Image("noSubs")
+                                .renderingMode(.template)
+                                .foregroundStyle(themeManager.gradient(style: .vertical))
                                 .frame(width: 59, height: 80, alignment: .center)
                             Text("You haven’t added any\nsubscriptions")
                                 .padding(10)
                                 .multilineTextAlignment(.center)
-                                .foregroundStyle(Color.neutral800)
-                                .font(.appBold(16))
+                                .foregroundStyle(.textPrimary0E101AF4F1FB)
+                                .font(.geistSemiBold(16))
                         }
                         Spacer()
                     }

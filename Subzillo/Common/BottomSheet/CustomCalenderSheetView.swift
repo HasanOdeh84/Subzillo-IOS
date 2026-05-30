@@ -91,8 +91,8 @@ struct CustomYearBottomSheet: View {
     var body: some View {
         VStack(spacing: 16) {
             Capsule()
-                .fill(Color.grayCapsule)
-                .frame(width: 150, height: 5)
+                .fill(Color.capsuleBlack12White14)
+                .frame(width: 40, height: 5)
                 .padding(.top,20)
             
             Text("Select year")

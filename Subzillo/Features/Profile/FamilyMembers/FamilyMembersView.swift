@@ -140,6 +140,18 @@ struct FamilyMembersView: View {
                                         selectedCountry = countries.first(where: { $0.dialCode == member.countryCode })
                                     }
                                     editingFamily = EditableFamilyWrapper(data: member)
+                                    AppIntentRouter.shared.navigate(to:
+                                            .addFamilyMemberBottomSheet(idVal            : editingFamily?.data.id ?? "",
+                                                                        header           : "Edit family member",
+                                                                        description      : "",
+                                                                        buttonName       : "Update",
+                                                                        buttonImg        : "update",
+                                                                        selectedCountry  : selectedCountry ?? nil,
+                                                                        phoneNumber      : editingFamily?.data.phoneNumber ?? "",
+                                                                        nickName         : editingFamily?.data.nickName ?? "",
+                                                                        selectedColor    : editingFamily?.data.color ?? "",
+                                                                        isEdit           : true)
+                                    )
                                 }
                             ) {
                                 deleteFamilyMemberId = member.id ?? ""
@@ -171,9 +183,12 @@ struct FamilyMembersView: View {
                         if remaining == 0 {
                             SheetManager.shared.isFamilyMemberLimitSheetVisible = true
                         } else {
-                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                                openFamilyMemberSheet = true
-                            }
+                           // DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                               // openFamilyMemberSheet = true
+                                
+                            AppIntentRouter.shared.navigate(to: .addFamilyMemberBottomSheet(header: "Add family member", description: "Add a family member to manage and share plans together.", buttonName: "Save", selectedCountry: nil))
+                                
+                           // }
                         }
                     }
                 )
@@ -185,7 +200,7 @@ struct FamilyMembersView: View {
         .applyAppBackground()
         .ignoresSafeArea()
         .navigationBarBackButtonHidden(true)
-        .sheet(isPresented: $openFamilyMemberSheet) {
+        /*.sheet(isPresented: $openFamilyMemberSheet) {
             AddFamilyMemberBottomSheet(header       : "Add Family Member",
                                        description  : "Add a family member to manage and share plans together.",
                                        buttonName   : "Save",
@@ -222,7 +237,7 @@ struct FamilyMembersView: View {
             .id(UUID())
             .presentationDetents([.height(600)])
             .presentationDragIndicator(.hidden)
-        }
+        }*/
         .onAppear {
             listFamilyMembersApi()
         }
@@ -391,25 +406,39 @@ struct ColorPickerGrid: View {
                              "#E9D2A1",
                              "#FF5959"]
     @Binding var selectedColor: String
-    
+    @EnvironmentObject var themeManager: ThemeManager
     var body: some View {
         ScrollView(.horizontal, showsIndicators: false){
-            HStack {
+            HStack(spacing: 8) {
                 ForEach(colors, id: \.self) { color in
-                    Rectangle()
-                        .frame(width: 48, height: 48)
-                        .foregroundStyle(Color.safeHex(color))
-                        .clipShape(.rect(cornerRadius: 4)) // shorthand for RoundedRectangle(cornerRadius: 6)
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 4)
-                                .stroke(selectedColor == color ? Color.navyBlueCTA700 : Color.clear, lineWidth: 2)
-                        )
-                        .onTapGesture {
-                            selectedColor = color
+                    ZStack {
+                        Rectangle()
+                            .frame(width: 44, height: 44)
+                            .foregroundStyle(Color.safeHex(color))
+                            .clipShape(RoundedRectangle(cornerRadius: 8))
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 8)
+                                    .stroke(
+                                        selectedColor == color
+                                        ? themeManager.selectedAccent.senColor
+                                        : Color.clear,
+                                        lineWidth: 2
+                                    )
+                            )
+
+                        if selectedColor == color {
+                            Image("selected")
+                                .resizable()
+                                .scaledToFit()
+                                .frame(width: 20, height: 20)
                         }
+                    }
+                    .onTapGesture {
+                        selectedColor = color
+                    }
                 }
             }
-            .padding(.vertical,10)
+            .padding(.vertical,5)
             .padding(.leading,3)
         }
     }

@@ -17,7 +17,7 @@ struct InfoAlertSheet: View {
     var imageName                           : String?
     var buttonIcon                          : String?
     var buttonTitle                         : String?
-    var titleFont                           : Font? = .appRegular(18)
+    var titleFont                           : Font? = .geistRegular(18)
     var imageSize                           : CGFloat = 100
     var isCancelButtonVisible               : Bool = false
     var isImageVisible                      : Bool = true
@@ -29,7 +29,7 @@ struct InfoAlertSheet: View {
     var body: some View {
         VStack(alignment: .center, spacing: 24) {
             Capsule()
-                .fill(Color.grayCapsule)
+                .fill(Color.capsuleBlack12White14)
                 .frame(width: 40, height: 5)
                 .padding(.top,24)
             
@@ -128,15 +128,16 @@ struct InfoVoiceAlertSheet: View {
     var imageName                           : String?
     var buttonIcon                          : String?
     var buttonTitle                         : String?
-    var titleFont                           : Font? = .appRegular(18)
+    var titleFont                           : Font? = .geistSemiBold(16)
     var imageSize                           : CGFloat = 100
+    @EnvironmentObject var themeManager     : ThemeManager
     
     //MARK: - body
     var body: some View {
         VStack(alignment: .center, spacing: 24) {
             Capsule()
                 .fill(Color.grayCapsule)
-                .frame(width: 150, height: 5)
+                .frame(width: 40, height: 5)
                 .padding(.top,24)
             
             ZStack(alignment: .topTrailing) {
@@ -148,16 +149,33 @@ struct InfoVoiceAlertSheet: View {
             
             Text(LocalizedStringKey(title ?? ""))
                 .font(titleFont)
-                .foregroundStyle(.underlineGray)
+                .foregroundStyle(.textPrimary0E101AF4F1FB)
                 .multilineTextAlignment(.center)
                 .fixedSize(horizontal: false, vertical: true)
             
-            GradientBorderButton(title          : buttonTitle ?? "",
-                                 isBtn          : true,
-                                 buttonImage    : buttonIcon ?? "") {
-                onDelegate?()
-                dismiss()
-            }
+            
+            CustomBorderButton(
+                title       : buttonTitle ?? "",
+                background  : .auroraMid5598EA,
+                borderColor : Color.clear,
+                textColor   : Color.white,
+                height      : 52,
+                showIcon    : true,
+                icon        : buttonIcon ?? "",
+                iconOnLeft  : true,
+                isBgGradient: true,
+                action      : {
+                    onDelegate?()
+                    dismiss()
+                }
+            )
+            
+//            GradientBorderButton(title          : buttonTitle ?? "",
+//                                 isBtn          : true,
+//                                 buttonImage    : buttonIcon ?? "") {
+//                onDelegate?()
+//                dismiss()
+//            }
             .padding(.bottom, 24)
         }
         .padding(.horizontal, 24)
@@ -183,7 +201,7 @@ struct SubscriptionAlertSheet: View {
     var subTitle                            : String?
     var buttonIcon                          : String?
     var buttonTitle                         : String?
-    var titleFont                           : Font? = .appRegular(18)
+    var titleFont                           : Font? = .geistRegular(18)
     var isBtn                               : Bool = true
     @EnvironmentObject var themeManager     : ThemeManager
     
@@ -197,23 +215,32 @@ struct SubscriptionAlertSheet: View {
             
             VStack(alignment: .center, spacing: 8) {
                 Text(LocalizedStringKey(title ?? ""))
-                    .font(.appSemiBold(24))
+                    .font(.geistSemiBold(16))
                     .foregroundStyle(.neutralMain700)
                     .multilineTextAlignment(.center)
                     .fixedSize(horizontal: false, vertical: true)
                 
                 Text(LocalizedStringKey(subTitle ?? ""))
-                    .font(.appRegular(18))
+                    .font(.geistMedium(12))
                     .foregroundStyle(.underlineGray)
                     .multilineTextAlignment(.center)
                     .lineSpacing(4)
                     .fixedSize(horizontal: false, vertical: true)
             }
             
-            CustomButton(title: buttonTitle ?? "",shadow: themeManager.accentShadowColor, height:50, action: {
+//            CustomButton(title: buttonTitle ?? "",shadow: themeManager.accentShadowColor, height:50, action: {
+//                onDelegate?()
+//                dismiss()
+//            })
+            
+            GradientBgButton(
+                title       : buttonTitle ?? "",
+                isSolid     : true,
+                showChevron : false
+            ) {
                 onDelegate?()
                 dismiss()
-            })
+            }
             Spacer()
         }
         .padding(.horizontal, 20)

@@ -652,37 +652,38 @@ extension SubConformation {
                 // Plans
                 let plans = getAllPlans()
                 ScrollView(.horizontal, showsIndicators: false) {
-                    HStack(spacing: 6) {
-                        if !plans.isEmpty {
-                            ForEach(plans, id: \.self) { plan in
-                                Button(action: {
-                                    subscriptionData?.subscriptionType = plan.planName
-                                    if let price = plan.price {
-                                        subscriptionData?.amount = price
+                    if !plans.isEmpty {
+                        let row1 = plans.enumerated().filter { $0.offset % 3 == 0 }.map { $0.element }
+                        let row2 = plans.enumerated().filter { $0.offset % 3 == 1 }.map { $0.element }
+                        let row3 = plans.enumerated().filter { $0.offset % 3 == 2 }.map { $0.element }
+                        
+                        VStack(alignment: .leading, spacing: 6) {
+                            if !row1.isEmpty {
+                                HStack(spacing: 6) {
+                                    ForEach(row1, id: \.self) { plan in
+                                        planPillButton(for: plan)
                                     }
-                                    if let cycle = plan.billingCycle, !cycle.isEmpty {
-                                        subscriptionData?.billingCycle = cycle
-                                    }
-                                    // Update Next Charge Date if billing cycle changes
-                                    if isRenew {
-                                        let baseDate = Date()
-                                        let chargeDateFromToday = Constants.shared.getNextDateByFrequency(frequency: subscriptionData?.billingCycle ?? "", baseDate: baseDate).formattedDate(from: "dd/MM/yyyy", to: "yyyy-MM-dd")
-                                        subscriptionData?.nextPaymentDate = chargeDateFromToday
-                                    } else {
-                                        let chargeDate = Constants.shared.getNextDateByFrequency(frequency: subscriptionData?.billingCycle ?? "").formattedDate(from: "dd/MM/yyyy", to: "yyyy-MM-dd")
-                                        subscriptionData?.nextPaymentDate = chargeDate
-                                    }
-                                    validateAmount()
-                                }) {
-                                    PlanPillView(
-                                        title: plan.planName ?? "",
-                                        price: "\(subscriptionData?.currencySymbol ?? "")\(plan.price ?? 0.0)"
-                                    )
                                 }
-                                .buttonStyle(.plain)
                             }
-                        } else {
-                            // Fallback plans to keep the UI intact if no plans are found
+                            if !row2.isEmpty {
+                                HStack(spacing: 6) {
+                                    ForEach(row2, id: \.self) { plan in
+                                        planPillButton(for: plan)
+                                    }
+                                }
+                            }
+                            if !row3.isEmpty {
+                                HStack(spacing: 6) {
+                                    ForEach(row3, id: \.self) { plan in
+                                        planPillButton(for: plan)
+                                    }
+                                }
+                            }
+                        }
+                        .padding(.top, 8)
+                    } else {
+                        // Fallback plans to keep the UI intact if no plans are found
+                        HStack(spacing: 6) {
                             Button(action: {
                                 subscriptionData?.subscriptionType = "Free"
                                 subscriptionData?.amount = 0.0
@@ -706,8 +707,8 @@ extension SubConformation {
                             }
                             .buttonStyle(.plain)
                         }
+                        .padding(.top, 8)
                     }
-                    .padding(.top, 8)
                 }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
@@ -732,6 +733,36 @@ extension SubConformation {
                 style: .continuous
             )
         )
+    }
+    
+    
+    @ViewBuilder
+    private func planPillButton(for plan: ProviderSubscriptionPlan) -> some View {
+        Button(action: {
+            subscriptionData?.subscriptionType = plan.planName
+            if let price = plan.price {
+                subscriptionData?.amount = price
+            }
+            if let cycle = plan.billingCycle, !cycle.isEmpty {
+                subscriptionData?.billingCycle = cycle
+            }
+            // Update Next Charge Date if billing cycle changes
+            if isRenew {
+                let baseDate = Date()
+                let chargeDateFromToday = Constants.shared.getNextDateByFrequency(frequency: subscriptionData?.billingCycle ?? "", baseDate: baseDate).formattedDate(from: "dd/MM/yyyy", to: "yyyy-MM-dd")
+                subscriptionData?.nextPaymentDate = chargeDateFromToday
+            } else {
+                let chargeDate = Constants.shared.getNextDateByFrequency(frequency: subscriptionData?.billingCycle ?? "").formattedDate(from: "dd/MM/yyyy", to: "yyyy-MM-dd")
+                subscriptionData?.nextPaymentDate = chargeDate
+            }
+            validateAmount()
+        }) {
+            PlanPillView(
+                title: plan.planName ?? "",
+                price: "\(subscriptionData?.currencySymbol ?? "")\(plan.price ?? 0.0)"
+            )
+        }
+        .buttonStyle(.plain)
     }
     
     private func getAttributedDescription() -> AttributedString {

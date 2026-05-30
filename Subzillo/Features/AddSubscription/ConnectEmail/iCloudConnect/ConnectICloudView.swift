@@ -14,7 +14,7 @@ struct ConnectICloudView: View {
     @State private var password         : String = ""
     @State private var showInstructions : Bool = true
     @StateObject var connectEmailVM     = ConnectEmailViewModel()
-    
+    @EnvironmentObject var themeManager : ThemeManager
     var isValid: Bool {
         let validDomains = ["@icloud.com", "@me.com", "@mac.com"]
         return validDomains.contains(where: { email.lowercased().hasSuffix($0) }) && !password.isEmpty
@@ -23,27 +23,28 @@ struct ConnectICloudView: View {
     var body: some View {
         VStack(alignment: .leading) {
             // MARK: - Header
-            VStack(alignment: .leading, spacing: 2) {
-                HStack(spacing: 8) {
-                    // MARK: - back
-                    Button(action: {
-                        AppIntentRouter.shared.pop()
-                    }) {
-                        HStack {
-                            Image("back_gray")
-                        }
-                        .foregroundColor(.blue)
-                    }
-                    
-                    // MARK: - Title
-                    Text("Connect Your iCloud Account")
-                        .font(.appRegular(24))
-                        .foregroundColor(Color.neutralMain700)
-                    Spacer()
+            HStack(spacing: 8) {
+                // MARK: - back
+                CircleBackButton {
+                    AppIntentRouter.shared.pop()
                 }
+                
+                Color.clear
+                    .frame(width: 20, height: 40)
+                
+                VStack(alignment: .leading, spacing: 1) {
+                    Text("Connect Your iCloud Account")
+                        .font(.geistBold(16))
+                        .foregroundColor(
+                            Color("TextPrimary_ 0E101A_F4F1FB")
+                        )
+                }
+                
+                Spacer()
+                
             }
-            .padding(.top, 20)
-            .padding(.bottom, 10)
+            .padding(.top, 10)
+            .padding(.bottom, 20)
             
             ScrollView {
                 VStack(alignment: .leading, spacing: 20) {
@@ -51,7 +52,8 @@ struct ConnectICloudView: View {
                                        text          : $email,
                                        isEmail       : true,
                                        header        : "iCloud Email",
-                                       isImage       : false)
+                                       isImage       : false,
+                                       isiCloud      : true)
                     .padding(2)
                     iCloudReusableTextField(placeholder  : "Enter app-specific password",
                                             text          : $password,
@@ -65,12 +67,36 @@ struct ConnectICloudView: View {
 //                            showInstructions.toggle()
                             print("showInstructions is \(showInstructions)")
                         }) {
-                            HStack {
-                                Text("How to generate an App-Specific Password?")
-                                    .font(.appRegular(14))
-                                    .foregroundColor(Color.neutralMain700)
+                            HStack(spacing: 12) {
+                                ZStack {
+                                    
+                                    // Gradient Icon Box
+                                    RoundedRectangle(cornerRadius: 12)
+                                        .fill(
+                                            themeManager.accentGradient
+                                        )
+                                        .frame(width: 36, height: 36)
+                                        .shadow(
+                                            color: themeManager.accentTextColor
+                                                .opacity(0.55),
+                                            radius: 12,
+                                            y: 0
+                                        )
+                                        .overlay(
+                                            RoundedRectangle(cornerRadius: 12)
+                                                .stroke(Color("BGPrimary_ F7F7F9_0A0612").opacity(0.3), lineWidth: 1)
+                                        )
+                                    
+                                    Image("sparkles")
+                                        .frame(width: 16, height: 16)
+                                }
                                 
-                                Spacer()
+                                Text("How to generate an App-Specific Password?")
+                                    .font(.geistSemiBold(14))
+                                    .foregroundStyle(
+                                        Color.textPrimary0E101AF4F1FB
+                                    )
+                                
                             }
                         }
                         
@@ -86,8 +112,8 @@ struct ConnectICloudView: View {
                                     HStack(spacing: 0) {
                                         Text("Step1. Go to ")
                                         Text("appleid.apple.com")
-                                            .underline()
-                                            .foregroundColor(.blue)
+                                            //.underline()
+                                            .foregroundColor(themeManager.selectedAccent.lastColor)
                                             .onTapGesture {
                                                 if let url = URL(string: "https://appleid.apple.com") {
                                                     UIApplication.shared.open(url)
@@ -102,35 +128,50 @@ struct ConnectICloudView: View {
                                 .frame(maxWidth: .infinity, alignment: .leading)
 
                                 Text("Note: Do NOT use your Apple ID password")
-                                    .foregroundColor(.red)
+                                    .font(.geistSemiBold(12))
+                                    .foregroundColor(.dangerLightE43C5C)
                                     .frame(maxWidth: .infinity, alignment: .leading)
                             }
-                            .font(.appRegular(14))
-                            .foregroundColor(Color.neutralMain700)
-                            .padding()
+                            .font(.geistRegular(12))
+                            .foregroundColor(Color.textPrimary0E101AF4F1FB.opacity(0.6))
                             .frame(maxWidth: .infinity, alignment: .leading)
-                            .background(Color(.systemGray6))
-                            .cornerRadius(10)
+                            //.background(Color(.systemGray6))
+                           // .cornerRadius(10)
                         }
                     }
+                    .padding(20)
+                    .background(
+                        RoundedRectangle(cornerRadius: 20)
+                            .fill(themeManager.accentGradient.opacity(0.133))
+                    )
+                    .overlay {
+                        
+                        RoundedRectangle(cornerRadius: 20)
+                            .stroke(
+                                themeManager.selectedAccent.senColor
+                                    .opacity(0.3),
+                                lineWidth: 1
+                            )
+                    }
+                    .cornerRadius(20)
                     
                     // MARK: Disclaimer
                     Text("We do not store your Apple ID password. Your credentials are used only to securely connect your iCloud Mail to detect subscriptions from your emails.")
-                        .font(.appRegular(14))
-                        .foregroundColor(.gray)
+                        .font(.geistRegular(12))
+                        .foregroundColor(Color.textPrimary0E101AF4F1FB.opacity(0.6))
                     
                     // MARK: Connect Button
-                    CustomButton(title: "Connect iCloud"){
+                    
+                    GradientBgButton(title: "Connect iCloud", isSolid: true, showChevron: false) {
                         connectICloud()
                     }
-                    
                     Spacer()
                 }
             }
         }
-        .padding(.horizontal, 24)
+        .padding(.horizontal, 20)
         .navigationBarBackButtonHidden(true)
-        .background(Color.neutralBg100)
+        .applyAppBackground()
         .onChange(of: connectEmailVM.isManualICloudSuccess) { success in
             if success {
                 connectEmailVM.isManualICloudSuccess = false

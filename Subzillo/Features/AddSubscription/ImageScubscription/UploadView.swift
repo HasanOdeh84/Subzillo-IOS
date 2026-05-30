@@ -27,6 +27,7 @@ struct UploadView: View {
     @StateObject var profileVM                  = ProfileViewModel()
     @State private var showLocalLoader          = false
     @State var isUploading                      : Bool = false
+    @State private var showRedirectionAlert     = false
     @EnvironmentObject var themeManager         : ThemeManager
     @Environment(\.colorScheme) var colorScheme
     
@@ -326,7 +327,7 @@ struct UploadView: View {
                         }
                     )
                     .presentationDragIndicator(.hidden)
-                    .presentationDetents([.height(560)])
+                    .presentationDetents([.height(540)])
                 }
                 .sheet(isPresented: $showPermissionAlert) {
                     PermissionSheet(onDelegate: {
@@ -334,9 +335,10 @@ struct UploadView: View {
                     }, title                        : (pickerSource == .camera  ? "We need camera access to add subscriptions by take photo".localized : "We need gallery access to add subscriptions by image upload".localized ),
                                     type            : pickerSource == .camera  ? "camera" : "gallery",
                                     value           : pickerSource == .camera  ? "Tap Camera".localized : "Tap Photos".localized,
+                                    icon            : isCamera == true ? "camePer" : "galleryPer",
                                     hideManualBtn   : false)
                     .presentationDragIndicator(.hidden)
-                    .presentationDetents([.height(580)])
+                    .presentationDetents([.height(560)])
                 }
                 .onReceive(NotificationCenter.default.publisher(for: .closeAllBottomSheets)) { _ in
                     showCameraPicker = false
@@ -347,6 +349,11 @@ struct UploadView: View {
                 .onAppear{
                     // Reset internal selectedImage when appearing
                     selectedImage = nil
+                }
+                .sheet(isPresented: $showRedirectionAlert) {
+                    AppstoreRedirectionSheet()
+                        .presentationDragIndicator(.hidden)
+                        .presentationDetents([.height(360)])
                 }
             }
         }
@@ -370,7 +377,8 @@ struct UploadView: View {
     
     //MARK: - Button actions
     private func applessAction() {
-        Constants.shared.OpenSubscriptionsInAppStore()
+        //Constants.shared.OpenSubscriptionsInAppStore()
+        showRedirectionAlert = true
     }
     
     private func cameraAction() {

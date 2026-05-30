@@ -33,8 +33,8 @@ struct PlanTypeBottomSheet: View {
     var body: some View {
         VStack {
             Capsule()
-                .fill(Color.grayCapsule)
-                .frame(width: 150, height: 5)
+                .fill(Color.capsuleBlack12White14)
+                .frame(width: 40, height: 5)
                 .padding(.top, 24)
             
             Text(LocalizedStringKey(header ?? ""))
@@ -142,8 +142,8 @@ struct PlanTypeBottomSheet: View {
             }else{
                 Text("No data found")
                     .padding(30)
-                    .foregroundStyle(Color.gray)
-                    .font(.appRegular(16))
+                    .foregroundStyle(.textPrimary0E101AF4F1FB)
+                    .font(.geistRegular(16))
                 Spacer()
             }
             //            Spacer()

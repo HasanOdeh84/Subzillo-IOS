@@ -49,7 +49,7 @@ enum NavigationRoute: Hashable{
     case emailSyncProgress(logId: String)
     case extractedSubscriptions(subscriptions: [SubscriptionData], fromEmailSync: Bool, integrationId: String)
     case connectICloudView
-    case AgentChatView
+    case AgentChatView(autoMessage: String? = nil)
     case profileTab
     case editProfile
     case uploadView
@@ -68,6 +68,18 @@ enum NavigationRoute: Hashable{
             isDefault: Bool = false
         )
     case biometric
+    case addFamilyMemberBottomSheet(
+            idVal: String = "",
+            header: String = "",
+            description: String = "",
+            buttonName: String = "",
+            buttonImg: String = "",
+            selectedCountry: Country?,
+            phoneNumber: String = "",
+            nickName: String = "",
+            selectedColor: String = "false",
+            isEdit: Bool = false
+        )
 }
 
 extension NavigationRoute {

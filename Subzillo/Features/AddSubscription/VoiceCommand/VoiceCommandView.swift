@@ -178,7 +178,6 @@ struct VoiceCommandView: View {
                 imageName   : "earIcon",
                 buttonIcon  : "tryIcon",
                 buttonTitle : "Try Again",
-                titleFont   : .appSemiBold(24),
                 imageSize   : 84
             )
             .presentationDragIndicator(.hidden)
@@ -187,10 +186,10 @@ struct VoiceCommandView: View {
         .sheet(isPresented: $showPermissionAlert) {
             PermissionSheet(onDelegate: {
                 //dismiss()
-            }, title: "We need microphone access to add subscriptions by voice", type: "voice", value: "Tap Microphone")
+            }, title: "We need microphone access to add subscriptions by voice", type: "voice", value: "Tap Microphone", icon:"voicePer")
             .id(UUID())
             .presentationDragIndicator(.hidden)
-            .presentationDetents([.height(580)])
+            .presentationDetents([.height(560)])
         }
         .sheet(isPresented: $showDiscardPopup) {
             InfoAlertSheet(

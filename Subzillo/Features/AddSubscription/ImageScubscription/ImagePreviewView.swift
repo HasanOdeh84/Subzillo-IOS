@@ -12,20 +12,22 @@ struct ImagePreviewView: View {
     var image       : UIImage
     var onConfirm   : () -> Void
     var onCancel    : () -> Void
+    @EnvironmentObject var themeManaer: ThemeManager
     
     var body: some View {
         VStack(spacing: 0) {
             // MARK: - Drag Indicator Area
             Capsule()
                 .fill(Color.grayCapsule)
-                .frame(width: 150, height: 5)
+                .frame(width: 40, height: 5)
                 .padding(.vertical, 24)
             
             // MARK: - Title
             HStack {
+                Spacer()
                 Text("Preview")
-                    .font(.appSemiBold(24))
-                    .foregroundColor(.neutralMain700)
+                    .font(.geistSemiBold(24))
+                    .foregroundColor(.textPrimary0E101AF4F1FB)
                 Spacer()
             }
             .padding(.horizontal, 24)
@@ -45,34 +47,33 @@ struct ImagePreviewView: View {
             
             // MARK: - Action Buttons
             HStack(spacing: 32) {
-                Spacer()
                 
-                Button(action: {
-                    onCancel()
-                    dismiss()
-                }) {
-                    Text("Cancel")
-                        .font(.appMedium(18))
-                        .foregroundColor(Color.blueMain700)
-                }
+                CustomBorderButton(
+                    title       : "Cancel",
+                    background  : Color.clear,
+                    borderColor : themeManaer.textPrimaryLight14_white14,
+                    action      : {
+                        onCancel()
+                        dismiss()
+                    }
+                )
                 
-                Button(action: {
+                CustomButton(title          : "Ok",
+                             background     : .dangerE43C5CFF5A7A,
+                             shadow         : .dangerE43C5CFF5A7A.opacity(0.55),
+                             textColor      : .white,
+                             height         : 48,
+                             isBgGradient   : true,
+                             action         : {
                     onConfirm()
                     dismiss()
-                }) {
-                    Text("Ok")
-                        .font(.appSemiBold(18))
-                        .foregroundColor(.white)
-                        .frame(width: 100, height: 48)
-                        .background(Color.blueMain700)
-                        .cornerRadius(24)
-                }
+                })
             }
             .padding(.top, 24)
             .padding(.horizontal, 24)
             .padding(.bottom, 40)
         }
-        .background(Color.white)
+        .background(.bottomBGFFFFFF120A1F)
         .clipShape(RoundedCorner(radius: 32, corners: [.topLeft, .topRight]))
         .ignoresSafeArea(edges: .bottom)
     }

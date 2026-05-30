@@ -171,6 +171,20 @@ final class ThemeManager: ObservableObject {
         )
     }
     
+    var textPrimaryLight1_white8: Color {
+        .dynamic(
+            light: Color.textPrimaryLight0E101A.opacity(0.01),
+            dark: Color.white.opacity(0.08)
+        )
+    }
+    
+    var textPrimaryLight_white: Color {
+        .dynamic(
+            light: Color.textPrimaryLight0E101A,
+            dark: Color.white
+        )
+    }
+    
     var black5_white6: Color {
         .dynamic(
             light: Color.black.opacity(0.05),

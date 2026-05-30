@@ -65,6 +65,8 @@ struct MyCardsView: View {
                 VStack(alignment: .center, spacing: 9){
                     Spacer()
                     Image("noCard")
+                        .renderingMode(.template)
+                        .foregroundStyle(themeManager.gradient(style: .vertical))
                         .frame(width: 100, height: 100)
                     Text("No Cards Added Yet")
                         .font(.geistSemiBold(16))
@@ -72,7 +74,7 @@ struct MyCardsView: View {
                         .multilineTextAlignment(.center)
                     Text("Add a card to manage your subscriptions and payments easily.")
                         .font(.geistRegular(14))
-                        .foregroundStyle(.textPrimary0E101AF4F1FB.opacity(0.6))
+                        .foregroundStyle(themeManager.textPrimaryLight6_dark62)
                         .multilineTextAlignment(.center)
                     
                     Spacer()

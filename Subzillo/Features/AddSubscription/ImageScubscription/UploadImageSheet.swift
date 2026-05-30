@@ -150,7 +150,7 @@ struct UploadImageSheet: View {
                     }
                 )
                 .presentationDragIndicator(.hidden)
-                .presentationDetents([.height(560)])
+                .presentationDetents([.height(540)])
             }
             .sheet(isPresented: $showPermissionAlert) {
                 PermissionSheet(onDelegate: {
@@ -158,9 +158,10 @@ struct UploadImageSheet: View {
                 }, title                        : fromProfile ? (isCamera ? "We need camera access to update profile photo".localized : "We need gallery access to update profile photo".localized) : (isCamera ? "We need camera access to add subscriptions by take photo".localized : "We need gallery access to add subscriptions by image upload".localized ),
                                 type            : isCamera == true ? "camera" : "gallery",
                                 value           : isCamera == true ? "Tap Camera".localized : "Tap Photos".localized,
+                                icon            : isCamera == true ? "camePer" : "galleryPer",
                                 hideManualBtn   : fromProfile ? true : false)
                 .presentationDragIndicator(.hidden)
-                .presentationDetents([.height(fromProfile ? 530 : 580)])
+                .presentationDetents([.height(fromProfile ? 500 : 560)])
             }
             .onReceive(NotificationCenter.default.publisher(for: .closeAllBottomSheets)) { _ in
                 showImagePicker = false
@@ -369,23 +370,25 @@ struct UploadErrorImageSheet: View {
     var body: some View {
         VStack {
             Capsule()
-                .fill(Color.grayCapsule)
-                .frame(width: 150, height: 5)
-                .padding(.vertical, 24)
+                .fill(themeManager.textPrimaryDark_white07)
+                .frame(width: 40, height: 4)
+                .padding(.vertical, 16)
             
             VStack(alignment: .center, spacing: 8) {
                 
                 Image(isImage ? "ErrorImageIcon" : "no_mail")
-                    .frame(width: 84, height: 84)
-                    .padding(.bottom, 16)
+                    .renderingMode(.template)
+                    .foregroundStyle(themeManager.accentGradient)
+                    .frame(width: 80, height: 80)
+                    .padding(.bottom, 18)
                 
                 Text(isImage ? "Couldn't Read Image" : "No Subscriptions Found")
-                    .font(.appSemiBold(24))
-                    .foregroundColor(Color.neutralMain700)
+                    .font(.geistSemiBold(16))
+                    .foregroundColor(Color.textPrimary0E101AF4F1FB)
                 
                 Text(isImage ? "We couldn't extract subscription details from this image. Try these tips:" : "We scanned your recent emails but didn't find any subscription receipts.")
-                    .font(.appRegular(18))
-                    .foregroundColor(Color.neutralMain700)
+                    .font(.geistMedium(12))
+                    .foregroundColor(Color.textPrimary0E101AF4F1FB.opacity(0.4))
                     .multilineTextAlignment(.center)
             }
             
@@ -393,52 +396,73 @@ struct UploadErrorImageSheet: View {
                 
                 HStack(spacing: 16) {
                     Image("bulb-charging")
+                        .renderingMode(.template)
+                        .foregroundStyle(themeManager.selectedAccent.senColor)
                         .frame(width: 24, height: 24)
                     Text(isImage ? "Ensure text is clear and well-lit" : "Recurring payment receipts")
-                        .font(.appRegular(16))
-                        .foregroundColor(Color.neutralMain700)
+                        .font(.geistRegular(14))
+                        .foregroundColor(themeManager.black_white)
                         .frame(maxWidth: .infinity, alignment: .leading)
                 }
                 HStack(spacing: 16) {
                     Image("image-crop")
+                        .renderingMode(.template)
+                        .foregroundStyle(themeManager.selectedAccent.senColor)
                         .frame(width: 24, height: 24)
                     Text(isImage ? "Crop to show only the relevant text" : "Subscription confirmations")
-                        .font(.appRegular(16))
-                        .foregroundColor(Color.neutralMain700)
+                        .font(.geistRegular(14))
+                        .foregroundColor(themeManager.black_white)
                         .frame(maxWidth: .infinity, alignment: .leading)
                 }
                 
                 if !isImage{
                     HStack(spacing: 16) {
                         Image("book-03")
+                            .renderingMode(.template)
+                            .foregroundStyle(themeManager.selectedAccent.senColor)
                             .frame(width: 24, height: 24)
                         Text(isImage ? "Make sure text is in English" : "Billing notifications")
-                            .font(.appRegular(16))
-                            .foregroundColor(Color.neutralMain700)
+                            .font(.geistRegular(14))
+                            .foregroundColor(themeManager.black_white)
                             .frame(maxWidth: .infinity, alignment: .leading)
                     }
                 }
             }
+            .padding(20)
             .frame(maxWidth: .infinity, alignment: .leading)
-            //            .padding(isImage ? 24 : 0)
-            //            if isImage{
-            //                .padding(24)
-            //            }else{
-            //                .padding(.top, 24)
-            //                .padding(.horizontal, 24)
-            //            }
-            .padding(.top, 24)
-            .padding(.horizontal, 24)
-            .padding(.bottom, isImage ? 24 : 0)
+            .background(
+                RoundedRectangle(cornerRadius: 18)
+                    .fill(themeManager.textPrimaryLight1_white8)
+            )
+            .overlay {
+                
+                RoundedRectangle(cornerRadius: 18)
+                    .stroke(
+                        Color.textPrimary0E101AF4F1FB
+                            .opacity(0.08),
+                        lineWidth: 1
+                    )
+            }
+            .cornerRadius(18)
+            .padding(.vertical, 20)
             
             if isImage{
-                CustomButton(title: "Retry",shadow: themeManager.accentShadowColor, buttonImage: "refresh", action: onRetryAction)
+                
+                GradientBgButton(
+                    title       : "Retry",
+                    isSolid     : true,
+                    showChevron : false,
+                    icon        : "refresh",
+                    iconOnLeft  : false,
+                    action      : onRetryAction
+                )
             }
             
-            GradientBorderButton(title: "Add Manually Instead", isBtn: true, buttonImage: "text-creation1", action: onManualAction, backgroundColor: .whiteBlackBG)
-                .padding(.vertical, 24)
+            GradientBorderButtonNew(title: "Add Manually Instead", isBtn: true, buttonImage: "plusicon", action: onManualAction, backgroundColor: themeManager.selectedAccent.senColor)
+                .padding(.vertical, 10)
         }
         .padding(.horizontal, 20)
+        .background(.bottomBGFFFFFF120A1F)
     }
     
     //MARK: - Button actions
@@ -573,47 +597,73 @@ struct AppstoreRedirectionSheet: View {
     var body: some View {
         VStack {
             Capsule()
-                .fill(Color.grayCapsule)
-                .frame(width: 150, height: 5)
-                .padding(.vertical, 24)
+                .fill(themeManager.textPrimaryDark_white07)
+                .frame(width: 40, height: 4)
+                .padding(.vertical, 16)
             
-            VStack(alignment: .leading, spacing: 15) {
+            VStack(alignment: .leading, spacing: 0) {
                 
                 Text("You will be redirected to the subscription list in Appstore.")
-                    .font(.appSemiBold(24))
-                    .foregroundColor(Color.neutralMain700)
+                    .font(.geistSemiBold(16))
+                    .foregroundColor(Color.textPrimary0E101AF4F1FB)
                     .multilineTextAlignment(.center)
                 
-                Text("Please follow these steps carefully:")
-                    .font(.appRegular(18))
-                    .foregroundColor(Color.neutralMain700)
-                    .multilineTextAlignment(.leading)
-                VStack(alignment: .leading, spacing: 5) {
-                    instructionRow(number: "1.", text: "Take a screenshot of the required subscription.")
-                    instructionRow(number: "2.", text: "Come back to the “Upload Screenshot” screen.")
-                    instructionRow(number: "3.", text: "Click on Choose from Gallery.")
-                    instructionRow(number: "4.", text: "Select the screenshot you just captured.")
+                VStack(alignment: .leading, spacing: 0) {
+                    Text("Please follow these steps carefully:")
+                        .font(.geistBold(12))
+                        .foregroundColor(themeManager.black_white)
+                        .multilineTextAlignment(.leading)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding(.bottom, 8)
+                    
+                    VStack(alignment: .leading, spacing: 5) {
+                        instructionRow(number: "1.", text: "Take a screenshot of the required subscription.")
+                        instructionRow(number: "2.", text: "Come back to the “Upload Screenshot” screen.")
+                        instructionRow(number: "3.", text: "Click on Choose from Gallery.")
+                        instructionRow(number: "4.", text: "Select the screenshot you just captured.")
+                    }
                 }
+                .padding(20)
+                .background(
+                    RoundedRectangle(cornerRadius: 18)
+                        .fill(themeManager.textPrimaryLight1_white8)
+                )
+                .overlay {
+                    
+                    RoundedRectangle(cornerRadius: 18)
+                        .stroke(
+                            Color.textPrimary0E101AF4F1FB
+                                .opacity(0.08),
+                            lineWidth: 1
+                        )
+                }
+                .cornerRadius(18)
+                .padding(.vertical, 20)
             }
             
-            CustomButton(title: "Continue",shadow: themeManager.accentShadowColor, buttonImage: "", action: onContinueAction)
-                .padding(.vertical, 24)
+            GradientBgButton(
+                title       : "Continue",
+                isSolid     : true,
+                showChevron : false,
+                action      : onContinueAction
+            )
         }
-        .padding(.horizontal, 24)
+        .padding(.horizontal, 20)
+        .applyAppBackground()
     }
     
     //MARK: - User defined methods
     func instructionRow(number: String, text: LocalizedStringKey) -> some View {
         HStack(alignment: .top, spacing: 3) {
             Text(number)
-                .font(.appRegular(18))
-                .foregroundColor(Color.neutralMain700)
+                .font(.geistRegular(12))
+                .foregroundColor(Color.textPrimary0E101AF4F1FB.opacity(0.6))
                 .frame(width: 22, alignment: .leading)
             
             Text(text)
-                .font(.appRegular(18))
-                .foregroundColor(Color.neutralMain700)
-                .fixedSize(horizontal: false, vertical: true)
+                .font(.geistRegular(12))
+                .foregroundColor(Color.textPrimary0E101AF4F1FB.opacity(0.6))
+                .frame(maxWidth: .infinity, alignment: .leading)
         }
     }
     

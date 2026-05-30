@@ -175,20 +175,22 @@ struct ConnectEmailView: View {
                             VStack(spacing: 16) {
                                 
                                 Image("noEmails")
-                                    .resizable()
+                                    .renderingMode(.template)
+                                    .foregroundStyle(themeManager.gradient(style: .vertical))
+//                                    .resizable()
                                     .scaledToFit()
                                     .frame(width: 100, height: 100)
                                 
                                 Text("No emails Added Yet")
-                                    .font(.geistBold(16))
+                                    .font(.geistSemiBold(16))
                                     .foregroundColor(
                                         Color("TextPrimary_ 0E101A_F4F1FB")
                                     )
                                 
                                 Text("Add a email to manage your subscriptions and payments easily.")
-                                    .font(.geistRegular(16))
+                                    .font(.geistRegular(14))
                                     .foregroundColor(
-                                        Color("TextPrimary_ 0E101A_F4F1FB").opacity(0.6)
+                                        themeManager.textPrimaryLight6_dark62
                                     )
                                     .multilineTextAlignment(.center)
                                     .padding(.horizontal, 20)

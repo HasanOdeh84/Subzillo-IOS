@@ -18,22 +18,17 @@ struct InviteFriendsView: View {
     @EnvironmentObject var themeManager     : ThemeManager
     @Environment(\.colorScheme) var colorScheme
     var progress                            : CGFloat = 0.5
-    var currentValue: Int = 1
-    var totalValue: Int = 2
-    //    @State private var circleprogress:CGFloat = 0.0
-    @State private var circleprogress: Double = 0.0
+    var currentValue                        : Int = 1
+    var totalValue                          : Int = 2
+    @State private var circleprogress       : Double = 0.0
     
     private var attributedDescription: AttributedString {
-        
         var result = AttributedString("Next: ")
         result.foregroundColor = themeManager.textPrimaryLight6_dark62
-        
-        var streaming = AttributedString("Add 3 subscriptions")
+        var streaming = AttributedString("Add \(viewModel.rewardsResponse?.nextReward?.subscriptionReward ?? 0) subscriptions") //subscriptionReward
         streaming.font = .geistSemiBold(11)
         streaming.foregroundColor = .textPrimary0E101AF4F1FB
-        
         result += streaming
-        
         return result
     }
     
@@ -70,7 +65,7 @@ struct InviteFriendsView: View {
                 Spacer()
             }
             .padding(.horizontal, 20)
-            .padding(.top, 50)
+            .padding(.top, 60)
             .padding(.bottom, 20)
             
             ScrollView(showsIndicators: false) {
@@ -112,7 +107,7 @@ struct InviteFriendsView: View {
                         
                         VStack(spacing: 2) {
                             
-                            Text("\(currentValue)")
+                            Text("\(viewModel.rewardsResponse?.nextReward?.creditsNeeded ?? 0)/\(viewModel.rewardsResponse?.nextReward?.creditsRequired ?? 0)")
                                 .font(.geistExtraBold(32))
                                 .foregroundStyle(
                                     themeManager.black_white
@@ -133,14 +128,14 @@ struct InviteFriendsView: View {
                     
                     VStack(alignment: .leading, spacing: 0) {
                         
-                        Text("1 more to next reward")
+                        Text("\((viewModel.rewardsResponse?.nextReward?.creditsRequired ?? 0)-(viewModel.rewardsResponse?.nextReward?.creditsNeeded ?? 0)) more to next reward")
                             .font(.geistBold(16))
                             .tracking(-0.4)
                             .foregroundStyle(
                                 Color.textPrimary0E101AF4F1FB
                             )
                             .lineLimit(2)
-                        
+//                        
                         Text(attributedDescription)
                             .font(.geistRegular(12))
                             .foregroundStyle(
@@ -314,9 +309,9 @@ struct InviteFriendsView: View {
                                     
                                     Text("No rewards yet. Invite your friends and start earning today!")
                                         .padding(30)
-                                        .foregroundStyle(Color.textPrimary0E101AF4F1FB.opacity(0.6))
+                                        .foregroundStyle(Color.textPrimary0E101AF4F1FB)
                                         .multilineTextAlignment(.center)
-                                        .font(.geistRegular(16))
+                                        .font(.geistSemiBold(16))
                                     Spacer()
                                 }
                                 Spacer()
@@ -411,6 +406,7 @@ struct InviteFriendsView: View {
 struct RewardItemViewold: View {
     let reward      : RewardsData
     var onRedeem    : () -> Void
+    @EnvironmentObject var themeManager : ThemeManager
     
     var body: some View {
         HStack(alignment: .top, spacing: 16) {
@@ -456,14 +452,12 @@ struct RewardItemViewold: View {
                     } else{
                         Button(action: onRedeem) {
                             Text("Redeem")
-                                .font(.appSemiBold(16))
+                                .font(.jetBrainsBold(10))
                                 .foregroundColor(.white)
-                                .padding(.horizontal, 13)
-                                .padding(.vertical, 11)
+                                .padding(.horizontal, 18)
+                                .padding(.vertical, 4)
                                 .background(
-                                    LinearGradient(colors: [Color.linearGradient3, Color.linearGradient4, Color.blueMain700],
-                                                   startPoint: .top,
-                                                   endPoint: .bottom)
+                                    themeManager.accentGradient
                                 )
                                 .cornerRadius(7)
                         }
@@ -531,18 +525,18 @@ struct RewardItemView: View {
             
             VStack(alignment: .leading, spacing: 2) {
                 
-                Text("Add \(reward.subscriptionReward ?? 0) subscription")
+                Text("Add \(reward.subscriptionReward ?? 0) subscriptions")
                     .font(.geistBold(14))
                     .tracking(-0.2)
                     .foregroundStyle(
                         Color.textPrimary0E101AF4F1FB
                     )
                 
-                (Text("Unlock at ") + Text("\(reward.creditsRequired ?? 0)").font(.jetBrainsRegular(12)) + Text(" referral subscriptions"))
-                    .font(.geistRegular(12))
+//                (Text("Unlock at ") + Text("\(reward.creditsRequired ?? 0)").font(.jetBrainsRegular(12)) + Text(" referral subscriptions"))
+                Text("\(reward.subscriptionReward ?? 0) more free sub slots . \(reward.creditsRequired ?? 0) referrals")
+                    .font(.jetBrainsRegular(11))
                     .foregroundStyle(
-                        Color.textPrimary0E101AF4F1FB
-                            .opacity(0.6)
+                        themeManager.textPrimaryLight6_dark62
                     )
             }
             

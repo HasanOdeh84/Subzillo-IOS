@@ -14,6 +14,7 @@ struct PermissionSheet: View {
     var title                         : String
     var type                          : String
     var value                         : String
+    var icon                          : String? = "lockicon"
     var hideManualBtn                 : Bool = false
     @EnvironmentObject var themeManager     : ThemeManager
     
@@ -21,60 +22,92 @@ struct PermissionSheet: View {
     var body: some View {
         VStack {
             Capsule()
-                .fill(Color.grayCapsule)
-                .frame(width: 150, height: 5)
-                .padding(.vertical, 24)
+                .fill(Color.capsuleBlack12White14)
+                .frame(width: 40, height: 4)
+                .padding(.vertical, 16)
             
             VStack(alignment: .center, spacing: 8) {
-                Image("lockicon")
-                    .frame(width: 84, height: 84)
-                    .padding(.bottom, 16)
+                Image(icon ?? "lockicon")
+                    .renderingMode(.template)
+                    .foregroundStyle(themeManager.accentGradient)
+                    .frame(width: 80, height: 80)
+                    .padding(.bottom, 18)
                 
-                Text("Permission Required")
-                    .font(.appSemiBold(24))
-                    .foregroundColor(Color.neutralMain700)
+                if type != "notifications"
+                {
+                    Text("Permission Required".capitalized)
+                        .font(.geistSemiBold(16))
+                        .foregroundColor(Color.textPrimary0E101AF4F1FB)
+                }
+                else{
+                    Text("\(type) Permission Required".capitalized)
+                        .font(.geistSemiBold(16))
+                        .foregroundColor(Color.textPrimary0E101AF4F1FB)
+                }
                 
                 Text(LocalizedStringKey(title))
-                    .font(.appRegular(18))
-                    .foregroundColor(Color.neutralMain700)
+                    .font(.geistMedium(12))
+                    .foregroundColor(Color.textPrimary0E101AF4F1FB.opacity(0.4))
                     .multilineTextAlignment(.center)
             }
-            
-            Text(LocalizedStringKey("To enable \(type) input:"))
-                .font(.appSemiBold(16))
-                .foregroundColor(Color.neutralMain700)
-                .multilineTextAlignment(.leading)
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .padding(.top, 20)
-                .padding(.bottom, 8)
-            
-            VStack(alignment: .leading, spacing: 8) {
+            VStack(alignment: .leading, spacing: 0) {
+                Text(LocalizedStringKey("To enable \(type) input:"))
+                    .font(.geistBold(12))
+                    .foregroundColor(themeManager.black_white)
+                    .multilineTextAlignment(.leading)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.bottom, 8)
                 
-                Text("• Go to Settings → Privacy & Security")
-                    .font(.appRegular(16))
-                    .foregroundColor(Color.neutralMain700)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                Text(LocalizedStringKey("• \(value)"))
-                    .font(.appRegular(16))
-                    .foregroundColor(Color.neutralMain700)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                Text("• Enable for Subzillo")
-                    .font(.appRegular(16))
-                    .foregroundColor(Color.neutralMain700)
-                    .frame(maxWidth: .infinity, alignment: .leading)
+                VStack(alignment: .leading, spacing: 8) {
+                    
+                    Text("• Go to Settings → Privacy & Security")
+                        .font(.geistRegular(12))
+                        .foregroundColor(Color.textPrimary0E101AF4F1FB.opacity(0.6))
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                    Text(LocalizedStringKey("• \(value)"))
+                        .font(.geistRegular(12))
+                        .foregroundColor(Color.textPrimary0E101AF4F1FB.opacity(0.6))
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                    Text("• Enable for Subzillo")
+                        .font(.geistRegular(12))
+                        .foregroundColor(Color.textPrimary0E101AF4F1FB.opacity(0.6))
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+                
             }
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(.horizontal, 30)
+            .padding(20)
+            .background(
+                RoundedRectangle(cornerRadius: 18)
+                    .fill(themeManager.textPrimaryLight1_white8)
+            )
+            .overlay {
+                RoundedRectangle(cornerRadius: 18)
+                    .stroke(
+                        Color.textPrimary0E101AF4F1FB
+                            .opacity(0.08),
+                        lineWidth: 1
+                    )
+            }
+            .cornerRadius(18)
+            .padding(.vertical, 20)
             
-            CustomButton(title: "Open settings",shadow: themeManager.accentShadowColor, buttonImage: "settingsicon", action: onSettingsAction)
-                .padding(.top, 24)
+            GradientBgButton(
+                title       : "Open settings",
+                isSolid     : true,
+                showChevron : false,
+                icon        : "settingsicon",
+                iconOnLeft  : false,
+                action      : onSettingsAction
+            )
             
             if !hideManualBtn{
-                GradientBorderButton(title: "Add Manually Instead", isBtn: true, buttonImage: "text-creation1", action: onManualAction, backgroundColor: .whiteBlackBG)
-                    .padding(.vertical, 16)
+                GradientBorderButtonNew(title: "Add Manually Instead", isBtn: true, buttonImage: "plusicon", action: onManualAction, backgroundColor: themeManager.selectedAccent.senColor)
+                    .padding(.vertical, 10)
             }
         }
         .padding(.horizontal, 20)
+        .background(.bottomBGFFFFFF120A1F)
     }
     
     //MARK: - Button actions

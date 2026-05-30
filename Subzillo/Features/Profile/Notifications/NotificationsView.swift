@@ -118,13 +118,15 @@ struct NotificationsView: View {
                 Spacer()
                 VStack(spacing: 12) {
                     Image("noNotifications")
-                        .resizable()
+                        .renderingMode(.template)
+                        .foregroundStyle(themeManager.gradient(style: .vertical))
+//                        .resizable()
                         .scaledToFit()
                         .frame(width: 68, height: 68)
                     
                     Text("No Notifications Yet")
                         .font(.geistSemiBold(16))
-                        .foregroundColor(Color("TextPrimary_ 0E101A_F4F1FB").opacity(0.8))
+                        .foregroundColor(Color("TextPrimary_ 0E101A_F4F1FB"))
                 }
                 Spacer()
             } else {

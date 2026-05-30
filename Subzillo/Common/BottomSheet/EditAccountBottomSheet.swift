@@ -41,12 +41,12 @@ struct EditAccountBottomSheet: View {
     var body: some View {
         VStack(alignment: .center) {
             Capsule()
-                .fill(Color.grayCapsule)
-                .frame(width: 150, height: 5)
+                .fill(Color.capsuleBlack12White14)
+                .frame(width: 40, height: 5)
                 .padding(.top,24)
             
             Text(LocalizedStringKey(title ?? ""))
-                .font(.appRegular(24))
+                .font(.geistRegular(24))
                 .foregroundStyle(.neutralMain700)
                 .multilineTextAlignment(.center)
                 .padding(.top,24)

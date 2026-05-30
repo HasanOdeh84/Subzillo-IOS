@@ -221,11 +221,7 @@ struct NormalOptionView: View {
                     RoundedRectangle(cornerRadius: 14)
                         .fill(
                             isHighlighted ?
-                            LinearGradient(
-                                colors: themeManager.selectedAccent.colors,
-                                startPoint: .topLeading,
-                                endPoint: .bottomTrailing
-                            )
+                            themeManager.accentGradient
                             :
                             LinearGradient(
                                 colors: [
@@ -339,13 +335,17 @@ struct DynamicBackgroundView: View {
                     
                     ZStack {
                         Image(topImageName)
+                            .renderingMode(.template)
                             .resizable()
                             .scaledToFit()
+                            .foregroundStyle(themeManager.selectedAccent.primaryColor)
                             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
                         
                         Image(bottomImageName)
+                            .renderingMode(.template)
                             .resizable()
                             .scaledToFit()
+                            .foregroundStyle(themeManager.selectedAccent.lastColor)
                             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottomTrailing)
                     }
                     .ignoresSafeArea()

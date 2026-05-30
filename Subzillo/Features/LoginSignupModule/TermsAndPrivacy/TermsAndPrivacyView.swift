@@ -17,10 +17,7 @@ struct TermsAndPrivacyView: View {
     
     var body: some View {
         ZStack{
-            Group{
-                Color(.neutralBg100)
-            }
-            .ignoresSafeArea()
+           
             VStack{
                 ProfileHeaderView(
                     title           : isTerm ? "Terms of service" : "Privacy Policy",
@@ -52,6 +49,7 @@ struct TermsAndPrivacyView: View {
             }
             .padding(20)
         }
+        .applyAppBackground()
         .navigationBarBackButtonHidden(true)
         .onAppear{
             settingsVM.getPrivacyData(type: isTerm ? 2 : 1)

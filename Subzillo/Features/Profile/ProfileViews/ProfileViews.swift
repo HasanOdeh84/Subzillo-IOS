@@ -17,17 +17,19 @@ struct ProfileHeaderView: View {
     
     var body: some View {
         HStack {
-            Button(action: {
+            CircleBackButton {
                 onBack?()
-            }) {
-                Image("back_gray")
-                    .frame(width: 24,height: 24)
             }
             
-            Text(title)
-                .font(.appRegular(24))
-                .foregroundColor(.neutralMain700)
+            Spacer()
             
+            VStack(alignment: .leading, spacing: 1) {
+                Text(title)
+                    .font(.geistBold(16))
+                    .foregroundColor(
+                        Color("TextPrimary_ 0E101A_F4F1FB")
+                    )
+            }
             Spacer()
             
             if let trailingTitle = trailingTitle {

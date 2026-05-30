@@ -262,8 +262,9 @@ struct EditProfileView: View {
                     }
                 }
             }
-            .applyAppBackground()
             .navigationBarBackButtonHidden(true)
+            .keyboardAdaptive()
+            .applyAppBackground()
             .onAppear {
                 //                if !profileVM.hasLoadedInitialData {
                 getUserDetailsApi()

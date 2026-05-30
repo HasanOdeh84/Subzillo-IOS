@@ -20,11 +20,11 @@ struct BottomSheetView: View {
     var body: some View {
         VStack {
             Capsule()
-                .fill(Color.grayCapsule)
-                .frame(width: 150, height: 5)
+                .fill(Color.capsuleBlack12White14)
+                .frame(width: 40, height: 5)
             
             Text(LocalizedStringKey(header ?? ""))
-                .font(.appRegular(24))
+                .font(.geistRegular(24))
                 .foregroundStyle(.neutralMain700)
                 .padding(.top,24)
             

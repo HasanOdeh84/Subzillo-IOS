@@ -15,38 +15,45 @@ struct ContactUsView: View {
     
     var body: some View {
         VStack(spacing: 0) {
-            // MARK: Header
-            HStack {
-                Button(action: {
+            // MARK: - Header
+            HStack(spacing: 8) {
+                // MARK: - back
+                CircleBackButton {
                     AppIntentRouter.shared.pop()
-                }) {
-                    Image("back_gray")
-                        .frame(width: 24,height: 24)
+                }
+                Spacer()
+                
+                VStack(alignment: .leading, spacing: 1) {
+                    Text("Contact Us")
+                        .font(.geistBold(16))
+                        .foregroundColor(
+                            Color("TextPrimary_ 0E101A_F4F1FB")
+                        )
                 }
                 
-                Text("Contact Us")
-                    .font(.appRegular(24))
-                    .foregroundColor(.neutralMain700)
-                
                 Spacer()
+                
+                // MARK: - Empty Space
+                Color.clear
+                    .frame(width: 40, height: 40)
             }
-            .padding(.top, 60)
-            .padding(.bottom, 24)
+            .padding(.bottom, 22)
+            .padding(.top, 56)
             
             VStack(alignment: .leading, spacing: 30) {
                 // MARK: Description
-                Text("Don't hesitate to contact us whether you have a suggestion on our improvement, a complain to discuss or an issue to solve.")
-                    .font(.appRegular(14))
-                    .foregroundColor(.neutralMain700)
+                Text("We're here to help! Reach out to us for any suggestions, complaints, or issues. We'll get back to you as soon as possible.")
+                    .font(.geistMedium(12))
+                    .foregroundColor(Color("TextPrimary_ 0E101A_F4F1FB"))
                     .lineSpacing(4)
                     .padding(.horizontal, 5)
                 
                 // MARK: Contact Cards
-                HStack(spacing: 16) {
+                VStack(spacing: 16) {
                     ContactCard(
                         iconName: "call",
                         title: "Call Us",
-                        value: settingsVM.privacyData?.phone ?? "",
+                        value: "Talk to our support team directly.",//settingsVM.privacyData?.phone ?? "",
                         action: {
                             makeCall()
                         }
@@ -55,7 +62,7 @@ struct ContactUsView: View {
                     ContactCard(
                         iconName: "mail",
                         title: "Email Us",
-                        value: settingsVM.privacyData?.email ?? "",
+                        value: "Send us an email anytime.",//settingsVM.privacyData?.email ?? "",
                         action: {
                             sendEmail()
                         }
@@ -66,8 +73,8 @@ struct ContactUsView: View {
             
             Spacer()
         }
-        .padding(.horizontal, 24)
-        .background(Color.neutralBg100)
+        .padding(.horizontal, 20)
+        .applyAppBackground()
         .ignoresSafeArea()
         .navigationBarBackButtonHidden(true)
         .onAppear{
@@ -97,38 +104,64 @@ struct ContactCard: View {
     let title       : String
     let value       : String
     let action      : () -> Void
-    
+    @EnvironmentObject var themeManager         : ThemeManager
     var body: some View {
         Button(action: action) {
-            VStack(spacing: 12) {
-                // Icon Container
-                ZStack {
-                    RoundedRectangle(cornerRadius: 8)
-                        .fill(Color.primaryBlue800)
-                        .frame(width: 44, height: 44)
+            VStack(alignment: .leading,spacing: 0) {
+                HStack(spacing: 12) {
+                    // Icon Container
+                    ZStack {
+                        RoundedRectangle(cornerRadius: 16)
+                            .fill(themeManager.accentGradient)
+                            .frame(width: 58, height: 58)
+                        
+                        Image(iconName)
+                            .foregroundColor(.white)
+                            .font(.system(size: 20))
+                    }
+                    .padding(.bottom, 4)
                     
-                    Image(iconName)
-                        .foregroundColor(.white)
-                        .font(.system(size: 20))
+                    VStack(alignment: .leading, spacing: 2) {
+                        // Title
+                        Text(title)
+                            .font(.geistSemiBold(16))
+                            .foregroundStyle(
+                                Color.textPrimary0E101AF4F1FB
+                            )
+                        
+                        // Subtitle
+                        Text(value)
+                            .font(.geistMedium(10))
+                            .foregroundStyle(
+                                Color.textPrimary0E101AF4F1FB
+                                    .opacity(0.6)
+                            )
+                    }
+                    
+                    Spacer()
+                    
+                    // Arrow
+                    Image("backGrayright")
+                        .renderingMode(.template)
+                        .frame(width: 14, height: 14)
+                        .foregroundStyle(
+                            Color.textPrimary0E101AF4F1FB
+                                .opacity(0.36)
+                        )
                 }
-                .padding(.bottom, 4)
                 
-                Text(title)
-                    .font(.appSemiBold(18))
-                    .foregroundColor(.black)
-                
-                Text(value)
-                    .font(.appRegular(11))
-                    .foregroundColor(.black)
-                    .multilineTextAlignment(.center)
             }
+            .padding(18)
             .frame(maxWidth: .infinity)
-            .frame(height: 160)
-            .background(Color.white)
+            .background(themeManager.white_white4)
             .cornerRadius(16)
             .overlay(
                 RoundedRectangle(cornerRadius: 16)
-                    .stroke(Color.neutral300Border, lineWidth: 1)
+                    .stroke(
+                        Color.textPrimary0E101AF4F1FB
+                            .opacity(0.1),
+                        lineWidth: 1
+                    )
             )
             //                    .shadow(color: Color.black.opacity(0.06), radius: 12, x: 0, y: 6)
         }

@@ -402,7 +402,13 @@ struct SubscriptionMatchView: View {
                 showIcon    : true,
                 icon        : "tag_yellow",
                 iconOnLeft  : true,
-                action      : { /* action? */ }
+                action      : {
+                    let serviceName = subscriptionData?.serviceName ?? ""
+                    guard !serviceName.isEmpty else { return }
+                    AppIntentRouter.shared.navigate(
+                        to: .AgentChatView(autoMessage: "change my \(serviceName) plan")
+                    )
+                }
             )
             
             CustomBorderButton(

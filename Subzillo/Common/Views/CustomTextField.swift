@@ -77,17 +77,27 @@ struct ReusableTextField2: View {
     var header          : LocalizedStringKey?
     var isDisabled      : Bool = false
     var isImage         = true
-    
+    var isiCloud        = false
+    @EnvironmentObject var themeManager: ThemeManager
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             if let header = header {
                 Text(header)
-                    .font(.appRegular(14))
-                    .foregroundColor(Color.neutralMain700)
+                    .font(.jetBrainsMedium(11))
+                    .tracking(1)
+                    .textCase(.uppercase)
+                    .foregroundStyle(themeManager.textPrimaryLight6_dark62)
+                    .padding(.bottom, 5)
             }
             HStack{
                 if isImage{
-                    Image("profile")
+                    Image("person_new")
+                        .frame(width: 18, height: 18)
+                }
+                if isiCloud
+                {
+                    Image("email_login")
+                        .frame(width: 18, height: 18)
                 }
                 //                TextField(placeholder, text: $text)
                 TextField("", text: $text, prompt: Text(verbatim: placeholder))
@@ -95,14 +105,23 @@ struct ReusableTextField2: View {
                     .padding(6)
                     .autocapitalization(.none)
                     .disabled(isDisabled)
+                    .font(.geistRegular(15))
+                    .foregroundColor(.textPrimary0E101AF4F1FB)
             }
             .padding(16)
             .frame(height: 52)
-            .background(.whiteNeutralCardBG)
-            .cornerRadius(12)
-            .overlay(
-                RoundedRectangle(cornerRadius: 12)
-                    .stroke(Color.neutral2200, lineWidth: 1)
+            .background(themeManager.white_white4)
+            .overlay {
+                
+                RoundedRectangle(cornerRadius: 14)
+                    .stroke(
+                        Color.textPrimary0E101AF4F1FB
+                            .opacity(0.08),
+                        lineWidth: 1
+                    )
+            }
+            .clipShape(
+                RoundedRectangle(cornerRadius: 14)
             )
         }
     }
@@ -115,30 +134,44 @@ struct iCloudReusableTextField: View {
     @Binding var text   : String
     var isEmail         : Bool = false
     var header          : LocalizedStringKey?
-    
+    @EnvironmentObject var themeManager: ThemeManager
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             if let header = header {
                 Text(header)
-                    .font(.appRegular(14))
-                    .foregroundColor(Color.neutralMain700)
+                    .font(.jetBrainsMedium(11))
+                    .tracking(1)
+                    .textCase(.uppercase)
+                    .foregroundStyle(themeManager.textPrimaryLight6_dark62)
+                    .padding(.bottom, 5)
             }
             HStack{
+                Image("email_login")
+                    .frame(width: 18, height: 18)
                 SecureField(LocalizedStringKey(placeholder), text: $text)
                     .keyboardType(.default)
                     .padding(6)
                     .disableAutocorrection(true)
                     .autocapitalization(.none)
+                    .font(.geistRegular(15))
+                    .foregroundColor(.textPrimary0E101AF4F1FB)
                 //                    .font(.appRegular(14))
                 //                    .foregroundColor(.neutral2500)
             }
             .padding(16)
             .frame(height: 52)
-            .background(.whiteNeutralCardBG)
-            .cornerRadius(12)
-            .overlay(
-                RoundedRectangle(cornerRadius: 12)
-                    .stroke(Color.neutral2200, lineWidth: 1)
+            .background(themeManager.white_white4)
+            .overlay {
+                
+                RoundedRectangle(cornerRadius: 14)
+                    .stroke(
+                        Color.textPrimary0E101AF4F1FB
+                            .opacity(0.08),
+                        lineWidth: 1
+                    )
+            }
+            .clipShape(
+                RoundedRectangle(cornerRadius: 14)
             )
         }
     }

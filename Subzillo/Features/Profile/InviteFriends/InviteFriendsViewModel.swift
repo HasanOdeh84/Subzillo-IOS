@@ -10,6 +10,7 @@ class InviteFriendsViewModel: ObservableObject {
     private let router                              : AppIntentRouter
     private let sessionManager                      : SessionManager
     @Published var rewards                          : [RewardsData] = []
+    @Published var rewardsResponse                  : RewardsResponseData?
     @Published var redeemSucess                     : Bool = false
     
     init(router: AppIntentRouter = .shared,sessionManager: SessionManager = .shared){
@@ -18,6 +19,8 @@ class InviteFriendsViewModel: ObservableObject {
     }
     
     func rewards(input:RewardsRequest) {
+        rewards = []
+        rewardsResponse = nil
         apiReference.postApi(endPoint: APIEndpoint.userRewardsList, method: .POST,token: authKey,body: input,showLoader: true, responseType: RewardsResponse.self)
             .sink { [weak self] completion in
                 if case let .failure(error) = completion {
@@ -28,6 +31,7 @@ class InviteFriendsViewModel: ObservableObject {
             PrintLogger.modelLog(response, type: .response, isInput: false)
 //            ToastManager.shared.showToast(message: response.message ?? "")
             self?.rewards = response.data?.rewards ?? []
+            self?.rewardsResponse = response.data
         }
         .store(in: &self.subscriptions)
     }

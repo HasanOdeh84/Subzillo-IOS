@@ -17,7 +17,12 @@ class AgentViewModel: ObservableObject {
     @Published var displayMessage: String = ""
     @Published var isInitialLoading: Bool = false
 
+    @Published var showSuccessScreen: Bool = false
+    @Published var completedFields: ExtractedFields? = nil
+    var successIntent: AgentTaskIntent? = nil
+
     @Published var isAgenticMode: Bool = false
+    var pendingAutoMessage: String? = nil
     @Published var sessionId: String? = nil
     @Published var recordTime: TimeInterval = 0
     private var currentIntent: AgentTaskIntent? = nil
@@ -72,6 +77,12 @@ class AgentViewModel: ObservableObject {
             await MainActor.run {
                 self.conversationDbId = convResponse.conversation_db_id
                 self.conversationId = convResponse.conversation_id
+                
+                // Auto-send pending message after session is ready
+                if let autoMsg = self.pendingAutoMessage {
+                    self.pendingAutoMessage = nil
+                    self.sendMessage(autoMsg)
+                }
             }
         } catch {
             print("Error fetching welcome message: \(error)")
@@ -94,49 +105,27 @@ class AgentViewModel: ObservableObject {
                     self.updateDisplayMessage(text)
 
                 case .completed(let fields):
-                    self.isAgentRunning = false
-                    self.showBrowser = false
-                    self.currentStatus = "Task completed!"
-                    self.displayMessage = ""
-
-                    let statusMessage = fields.status ?? "Details found!"
-                    
-                    var replies: [String] = []
-                    if let intent = self.currentIntent, intent == .getDetails || intent == .changePlan {
-                        replies.append("Add this subscription")
-                        print("added -Add this subscription- suggestion")
-                    }
-                    
-                    self.addMessage(sender: .agent, text: statusMessage, fields: fields, suggestedReplies: replies)
-                    
-                    let dataDict: [String: Any] = [
-                        "serviceName": fields.serviceName ?? "Unknown",
-                        "plan": fields.plan ?? "Unknown",
-                        "price": fields.price ?? "0",
-                        "billingDate": fields.billingDate ?? NSNull(),
-                        "status": statusMessage
-                    ]
-                    let payloadDict: [String: Any] = [
-                        "action": "done",
-                        "data": dataDict
-                    ]
-                    
-                    if let jsonData = try? JSONSerialization.data(withJSONObject: payloadDict, options: []),
-                       let jsonString = String(data: jsonData, encoding: .utf8) {
-                        self.sendAgenticContext(message: jsonString, provider: fields.serviceName ?? "Unknown")
+                    if self.currentIntent == .cancelSubscription || self.currentIntent == .changePlan {
+                        self.showSuccessScreen = true
+                        self.completedFields = fields
+                        self.successIntent = self.currentIntent
+                        
+                        let serviceName = fields.serviceName ?? "Service"
+                        let price = fields.price ?? ""
+                        if self.currentIntent == .cancelSubscription {
+                            let priceText = price.isEmpty ? "" : " — \(price) saved"
+                            self.displayMessage = "Canceled\(priceText)\nI archived \(serviceName) in your subs · ..."
+                        } else {
+                            let priceText = price.isEmpty ? "" : " — \(price)"
+                            self.displayMessage = "Plan Changed\(priceText)\nUpdated \(serviceName) in your subs · ..."
+                        }
+                        self.currentStatus = ""
+                        
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 3.0) {
+                            self.executeCompletionLogic(fields: fields)
+                        }
                     } else {
-                        self.sendAgenticContext(message: statusMessage, provider: fields.serviceName ?? "Unknown")
-                    }
-                    
-                    if let serviceName = fields.serviceName,
-                       let cached = self.resolver.storage.getServiceDetails(for: serviceName),
-                       !cached.isFromBackend {
-                        self.addProviderUrlsApi(
-                            providerId: "",
-                            providerName: serviceName,
-                            loginUrl: cached.loginUrl,
-                            billingUrl: cached.billingUrl
-                        )
+                        self.executeCompletionLogic(fields: fields)
                     }
                 case .failed(let error):
                     guard self.isAgentRunning else { return }
@@ -157,6 +146,57 @@ class AgentViewModel: ObservableObject {
                 }
             }
             .store(in: &cancellables)
+    }
+    
+    //MARK: executeCompletionLogic
+    private func executeCompletionLogic(fields: ExtractedFields) {
+        self.isAgentRunning = false
+        self.showBrowser = false
+        self.showSuccessScreen = false
+        self.completedFields = nil
+        self.successIntent = nil
+        self.currentStatus = "Task completed!"
+        self.displayMessage = ""
+
+        let statusMessage = fields.status ?? "Details found!"
+        
+        var replies: [String] = []
+        if let intent = self.currentIntent, intent == .getDetails || intent == .changePlan {
+            replies.append("Add this subscription")
+            print("added -Add this subscription- suggestion")
+        }
+        
+        self.addMessage(sender: .agent, text: statusMessage, fields: fields, suggestedReplies: replies)
+        
+        let dataDict: [String: Any] = [
+            "serviceName": fields.serviceName ?? "Unknown",
+            "plan": fields.plan ?? "Unknown",
+            "price": fields.price ?? "0",
+            "billingDate": fields.billingDate ?? NSNull(),
+            "status": statusMessage
+        ]
+        let payloadDict: [String: Any] = [
+            "action": "done",
+            "data": dataDict
+        ]
+        
+        if let jsonData = try? JSONSerialization.data(withJSONObject: payloadDict, options: []),
+           let jsonString = String(data: jsonData, encoding: .utf8) {
+            self.sendAgenticContext(message: jsonString, provider: fields.serviceName ?? "Unknown")
+        } else {
+            self.sendAgenticContext(message: statusMessage, provider: fields.serviceName ?? "Unknown")
+        }
+        
+        if let serviceName = fields.serviceName,
+           let cached = self.resolver.storage.getServiceDetails(for: serviceName),
+           !cached.isFromBackend {
+            self.addProviderUrlsApi(
+                providerId: "",
+                providerName: serviceName,
+                loginUrl: cached.loginUrl,
+                billingUrl: cached.billingUrl
+            )
+        }
     }
     
 

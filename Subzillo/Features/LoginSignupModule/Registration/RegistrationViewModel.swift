@@ -15,6 +15,7 @@ class RegistrationViewModel: ObservableObject {
     @Published var registerResponse     : RegisterResponse?
     private let router                  : AppIntentRouter
     private let sessionManager          : SessionManager
+    @Published var isMergeAccountSheet  : Bool = false
 
     init(router: AppIntentRouter = .shared,sessionManager: SessionManager = .shared) {
         self.router = router
@@ -33,13 +34,14 @@ class RegistrationViewModel: ObservableObject {
             PrintLogger.modelLog(response, type: .response, isInput: false)
             self.registerResponse = response
             if response.data?.status == 0{
-                AlertManager.shared.showAlert(title: "Merge account", message: response.message ?? "",cancelText: "Cancel",isDestructive: true, okAction: { [weak self] in
-                    self?.mergeAccount(input     : SendMergeOtpRequest(mergeLoginType  : verifyType == 1 ? 2 : 1,
-                                                                 email           : input.email,
-                                                                 countryCode     : input.countryCode,
-                                                                 phoneNumber     : input.phoneNumber),
-                                      fullName  : input.fullName)
-                })
+                isMergeAccountSheet = true
+//                AlertManager.shared.showAlert(title: "Merge account", message: response.message ?? "",cancelText: "Cancel",isDestructive: true, okAction: { [weak self] in
+//                    self?.mergeAccount(input     : SendMergeOtpRequest(mergeLoginType  : verifyType == 1 ? 2 : 1,
+//                                                                 email           : input.email,
+//                                                                 countryCode     : input.countryCode,
+//                                                                 phoneNumber     : input.phoneNumber),
+//                                      fullName  : input.fullName)
+//                })
             }else{
                 ToastManager.shared.showToast(message: response.message ?? "")
                 let data = LoginSignupVerifyData(verifyType         : verifyType,

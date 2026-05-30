@@ -92,9 +92,8 @@ struct SettingsView: View {
                                                                                            syncPeriodId : id))
                             })
                                 .presentationDragIndicator(.hidden)
-                                .presentationDetents([.height(420)])
+                                .presentationDetents([.height(500)])
                         }
-                        
                         
                         SettingsRow(
                             title: "Export My Data",
@@ -477,9 +476,10 @@ struct SettingsView: View {
         .sheet(isPresented: $showPermissionPopup) {
             PermissionSheet(onDelegate: {
                 //AppIntentRouter.shared.pop()
-            }, title: "We need notification access to recieve notifications",
+            }, title: "To receive renewal reminders and price changes, please enable notifications for Subzillo.",
                             type            : "notifications",
                             value           : "Tap Notifications",
+                            icon            : "notPer",
                             hideManualBtn   : true)
             .id(UUID())
             .presentationDragIndicator(.hidden)

@@ -168,7 +168,7 @@ struct AddSubscriptionsView: View {
                 }
             )
             .presentationDragIndicator(.hidden)
-            .presentationDetents([.height(560)])
+            .presentationDetents([.height(540)])
         }
     }
     
@@ -200,7 +200,7 @@ struct AddSubscriptionsView: View {
     }
     private func clickOnSmartAssistant() {
         Constants.FeatureConfig.performS5Action {
-            AppIntentRouter.shared.navigate(to: .AgentChatView)
+            AppIntentRouter.shared.navigate(to: .AgentChatView())
         }
     }
     private func clickOnAddByVoice() {

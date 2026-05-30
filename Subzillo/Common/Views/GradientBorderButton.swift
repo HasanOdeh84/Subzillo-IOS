@@ -46,7 +46,97 @@ struct GradientBorderButton: View {
         .buttonStyle(InteractiveButtonStyle())
     }
 }
+struct GradientBorderButtonNew: View {
+    var title           : String
+    var isBtn           : Bool = false
+    var buttonImage     : String?
+    var action          : () -> Void
+    var backgroundColor : Color = .clear
+    var buttonHeight    : CGFloat = 50
+    var isCancel        : Bool = false
+    
+    var body: some View {
+        Button(action: action) {
+            Group {
+                if isBtn {
+                    HStack {
+                        Image(buttonImage ?? "")
+                            .renderingMode(.template)
+                            .foregroundStyle(backgroundColor)
+                            .frame(width: 20, height: 20)
+                        Text(LocalizedStringKey(title))
+                            .font(.geistBold(17))
+                            .foregroundColor(backgroundColor)
+                    }
+                } else {
+                    Text(LocalizedStringKey(title))
+                        .font(.geistBold(17))
+                        .foregroundColor(backgroundColor)
+                }
+            }
+            .frame(maxWidth: .infinity, minHeight: buttonHeight)
+            .background(isCancel ? backgroundColor.opacity(0.1) : .clear)
+            .cornerRadius(buttonHeight/2)
+            .overlay(
+                RoundedRectangle(cornerRadius: buttonHeight/2)
+                    .stroke(
+                        isCancel ? backgroundColor.opacity(0.3) : backgroundColor,
+                        lineWidth: 1
+                    )
+            )
+            .contentShape(RoundedRectangle(cornerRadius: buttonHeight/2)) // Ensures whole button is tappable
+        }
+        .buttonStyle(InteractiveButtonStyle())
+    }
+}
 
+struct GradientBorderBgButton: View {
+    var title           : String
+    var isBtn           : Bool = false
+    var buttonImage     : String?
+    var action          : () -> Void
+    var backgroundColor : Color = .clear
+    var buttonHeight    : CGFloat = 50
+    var isCancel        : Bool = false
+    
+    var body: some View {
+        Button(action: action) {
+            Group {
+                if isBtn {
+                    HStack {
+                        Image(buttonImage ?? "")
+                            .renderingMode(.template)
+                            .foregroundStyle(backgroundColor)
+                            .frame(width: 20, height: 20)
+                        Text(LocalizedStringKey(title))
+                            .font(.geistBold(17))
+                            .foregroundColor(.textPrimary0E101AF4F1FB)
+                    }
+                } else {
+                    Text(LocalizedStringKey(title))
+                        .font(.geistBold(17))
+                        .foregroundColor(.textPrimary0E101AF4F1FB)
+                }
+            }
+            .frame(maxWidth: .infinity, minHeight: buttonHeight)
+            .background(
+                RoundedRectangle(cornerRadius: buttonHeight/2)
+                    .fill(backgroundColor)
+            )
+            .overlay {
+                
+                RoundedRectangle(cornerRadius: buttonHeight/2)
+                    .stroke(
+                        Color.textPrimary0E101AF4F1FB
+                            .opacity(0.08),
+                        lineWidth: 1
+                    )
+            }
+            .contentShape(RoundedRectangle(cornerRadius: buttonHeight/2)) // Ensures whole button is tappable
+        }
+        .buttonStyle(InteractiveButtonStyle())
+    }
+}
 struct SignInBorderButton: View {
     var title           : String
     var buttonImage     : String?
@@ -118,6 +208,8 @@ struct GradientBgButton: View {
     var title           : String
     var isSolid         : Bool = false
     var showChevron     : Bool = false
+    var icon            : String = ""
+    var iconOnLeft      : Bool = true
     var action          : () -> Void
     var backgroundColor : Color = .clear
     var buttonHeight    : CGFloat = 56
@@ -128,10 +220,17 @@ struct GradientBgButton: View {
             HStack(spacing: 8) {
                 Spacer()
                 
+                if iconOnLeft == false
+                {
+                    Image(icon)
+                        .renderingMode(.template)
+                        .foregroundStyle(.white)
+                }
+                
                 Text(LocalizedStringKey(title))
                     .font(.geistBold(15))
                 
-                if showChevron {
+                if showChevron  {
                     Image(systemName: "chevron.right")
                         .font(.system(size: 14, weight: .bold))
                 }

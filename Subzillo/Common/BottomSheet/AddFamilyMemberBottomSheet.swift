@@ -11,7 +11,7 @@ import SwiftUI
 struct AddFamilyMemberBottomSheet: View {
     
     //MARK: - Properties
-    @Environment(\.dismiss) private var dismiss
+    var idVal                             : String?
     var header                            : String?
     var description                       : String?
     var buttonName                        : String?
@@ -22,36 +22,57 @@ struct AddFamilyMemberBottomSheet: View {
     @State var nickName                   : String = ""
     @State var selectedColor              : String = "#76869E"
     @State var isEdit                     = false
-    let action                            : (String, String, String, String) -> Void
+   // let action                            : (String, String, String, String) -> Void
     @StateObject private var toastManager = ToastManager()
+    @StateObject var manualVM               = ManualEntryViewModel()
+    @StateObject var familyMembersVM        = FamilyMembersViewModel()
     
     //MARK: - body
     var body: some View {
         VStack(spacing: 0) {
-            Capsule()
-                .fill(Color.grayCapsule)
-                .frame(width: 150, height: 5)
-                .padding(.top, 12)
+            // MARK: - Header
+            HStack(spacing: 8) {
+                // MARK: - back
+                CircleBackButton {
+                    AppIntentRouter.shared.pop()
+                }
+                
+                Spacer()
+                
+                VStack(alignment: .leading, spacing: 1) {
+                    Text(LocalizedStringKey(header ?? ""))
+                        .font(.geistBold(16))
+                        .foregroundColor(
+                            Color("TextPrimary_ 0E101A_F4F1FB")
+                        )
+                }
+                
+                Spacer()
+                
+                // MARK: - Empty Space
+                Color.clear
+                    .frame(width: 40, height: 40)
+            }
+            .padding(.horizontal,20)
+            .padding(.top, 16)
             
             ScrollView(showsIndicators: false) {
                 VStack(spacing: 0) {
-                    Text(LocalizedStringKey(header ?? ""))
-                        .font(.appSemiBold(24))
-                        .foregroundStyle(.neutralMain700)
-                        .padding(.top, 24)
-                        .multilineTextAlignment(.center)
                     
                     Text(LocalizedStringKey(description ?? ""))
-                        .font(.appRegular(16))
-                        .foregroundStyle(.grayClr)
-                        .padding(.top, 10)
-                        .multilineTextAlignment(.center)
+                        .font(.jetBrainsBold(11))
+                        .foregroundStyle(.textPrimary0E101AF4F1FB.opacity(0.6))
+                        .padding(.vertical, 20)
+                        .lineSpacing(1.5)
+                        .multilineTextAlignment(.leading)
+                        .frame(maxWidth:.infinity, alignment: .leading)
+                        .padding(.horizontal, 20)
                     
-                    VStack(alignment: .leading, spacing: 24) {
+                    VStack(alignment: .leading, spacing: 15) {
                         ReusableTextField2(placeholder: "Nickname",
                                          text: $nickName,
                                          header: "Family Nickname")
-                            .padding(.top, 20)
+                            .padding(.top, 10)
                         
                         PhoneNumberField(phoneNumber: $phoneNumber,
                                          header: "Family Member phone number",
@@ -66,31 +87,51 @@ struct AddFamilyMemberBottomSheet: View {
                         VStack(alignment: .leading, spacing: 12) {
                             (
                                 Text("Color ")
-                                    .font(.caption)
-                                    .foregroundColor(Color.neutralMain700)
+                                    .font(.jetBrainsMedium(11))
+                                    .foregroundColor(.textPrimary0E101AF4F1FB.opacity(0.5))
                                 +
                                 Text("(To distinguish color family subscriptions)")
-                                    .foregroundColor(Color.neutral500)
+                                    .foregroundColor(.textPrimary0E101AF4F1FB.opacity(0.5))
                             )
-                            .font(.caption)
+                            .font(.jetBrainsMedium(11))
+                            .textCase(.uppercase)
+                            .lineSpacing(1.5)
                             
                             ColorPickerGrid(selectedColor: $selectedColor)
                             // Removed duplicate ColorPickerGrid
                         }
+                        .padding(.top, 10)
                         
-                        GradientBorderButton(title: buttonName ?? "Save",
-                                           isBtn: true,
-                                           buttonImage: buttonImg) {
+                        
+                        GradientBgButton(
+                            title       : buttonName ?? "Save",
+                            isSolid     : true,
+                            showChevron : false,
+                            icon        : "plusicon",
+                            iconOnLeft  : false
+                        ) {
                             handleSave()
                         }
                         .padding(.top, 8)
                     }
+                    .padding(.horizontal, 20)
                 }
-                .padding(.horizontal, 24)
                 .padding(.bottom, 24)
             }
         }
+        .keyboardAdaptive()
+        .applyAppBackground()
         .modifier(ToastModifier(toast: toastManager))
+        .onChange(of: manualVM.isAddFamilyMember) { value in
+            if value{
+                AppIntentRouter.shared.pop()
+            }
+        }
+        .onChange(of: familyMembersVM.isEdit) { value in
+            if value == true{
+                AppIntentRouter.shared.pop()
+            }
+        }
     }
     
     private func handleSave() {
@@ -106,8 +147,13 @@ struct AddFamilyMemberBottomSheet: View {
             if let errorMessage = ProfileValidations.shared.editfamilyMember(input: input) {
                 toastManager.showToast(message: errorMessage.localized, style: .error)
             } else {
-                action(nickName, phoneNumber, countryCode, colorHex)
-                dismiss()
+               // action(nickName, phoneNumber, countryCode, colorHex)
+                let input = EditFamilyMemberRequest(familyMemberId        : idVal ?? "",
+                                                    nickName              : nickName.trimmed,
+                                                    phoneNumber           : phoneNumber,
+                                                    countryCode           : countryCode,
+                                                    color                 : colorHex)
+                familyMembersVM.editFamilyMember(input: input)
             }
         } else {
             let input = AddFamilyMemberRequest(userId: Constants.getUserId(),
@@ -118,8 +164,15 @@ struct AddFamilyMemberBottomSheet: View {
             if let errorMessage = ProfileValidations.shared.addfamilyMember(input: input) {
                 toastManager.showToast(message: errorMessage.localized, style: .error)
             } else {
-                action(nickName, phoneNumber, countryCode, colorHex)
-                dismiss()
+                //action(nickName, phoneNumber, countryCode, colorHex)
+                
+                let input = AddFamilyMemberRequest(userId       : Constants.getUserId(),
+                                                   nickName     : nickName.trimmed,
+                                                   phoneNumber  : phoneNumber,
+                                                   countryCode  : countryCode,
+                                                   color        : colorHex)
+                manualVM.addfamilyMember(input: input)
+
             }
         }
     }

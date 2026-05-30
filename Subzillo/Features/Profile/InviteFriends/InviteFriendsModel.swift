@@ -23,6 +23,7 @@ struct RewardsResponseData: Codable {
     let usedCredits         : Int?
     let extraSlots          : Int?
     let rewards             : [RewardsData]?
+    let nextReward          : RewardsData?
 }
 
 struct RewardsData: Identifiable, Codable {
@@ -32,6 +33,7 @@ struct RewardsData: Identifiable, Codable {
     let subscriptionReward  : Int?
     let eligible            : Bool?
     let redeemed            : Bool?
+    let creditsNeeded       : Int?
 }
 
 struct RedeemRewardRequest: Codable {

@@ -19,8 +19,8 @@ struct OfflineSheet: View {
     var body: some View {
         VStack {
             Capsule()
-                .fill(Color.grayCapsule)
-                .frame(width: 150, height: 5)
+                .fill(Color.capsuleBlack12White14)
+                .frame(width: 40, height: 5)
                 .padding(.vertical, 24)
             
             VStack(alignment: .center, spacing: 8) {
@@ -29,7 +29,7 @@ struct OfflineSheet: View {
                     .padding(.bottom, 16)
                 
                 Text("You're Offline")
-                    .font(.appSemiBold(24))
+                    .font(.geistBold(24))
                     .foregroundColor(Color.neutralMain700)
                 
                 Text("Some features are limited without internet")

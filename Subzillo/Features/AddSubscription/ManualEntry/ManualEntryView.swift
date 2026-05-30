@@ -24,7 +24,9 @@ var isCurrencyUpdateGlobalManual                = false
 
 struct ManualEntryView: View {
     
+    
     //MARK: - Properties
+    @State private var fieldFrame: CGRect = .zero
     var isFromEdit                              = false
     var isFromListEdit                          = false
     var isRenew                                 = false
@@ -104,574 +106,623 @@ struct ManualEntryView: View {
     var body: some View {
         let planTypeSuggestions = filteredPlanTypes()
         VStack(alignment: .leading,spacing: 0) {
-            
-            // MARK: Header
-            HStack(alignment: .top, spacing: 8) {
-                //                // MARK: - back
-                //                Button(action: goBack) {
-                //                    Image("back_gray")
-                //                }
-                //
-                //                VStack(alignment: .leading, spacing: 2) {
-                //                    // MARK: Title
-                //                    Text(LocalizedStringKey(isFromEdit == true ? "Edit Details" : "Manual Entry"))
-                //                        .font(.appRegular(24))
-                //                        .foregroundColor(Color.neutralMain700)
-                //
-                //                    // MARK: SubTitle
-                //                    Text(LocalizedStringKey(isFromEdit == true ? "Update your details" : "Add your subscription details manually."))
-                //                        .font(.appRegular(18))
-                //                        .foregroundColor(Color.neutral500)
-                //                }
-                //                Spacer()
-                // MARK: - back
-                CircleBackButton {
-                    goBack()
-                }
-                
-                Spacer()
-                
-                VStack(alignment: .leading, spacing: 1) {
-                    Text(LocalizedStringKey(isFromEdit == true ? "Edit subscription" : "Manual entry"))
-                        .font(.geistSemiBold(16))
-                        .foregroundColor(
-                            Color("TextPrimary_ 0E101A_F4F1FB")
-                        )
-                }
-                .padding(.top, 10)
-                
-                Spacer()
-                
-                // MARK: - Empty Space
-                Color.clear
-                    .frame(width: 40, height: 40)
-            }
-            .padding(.horizontal)
-            //            .padding(.top, 15)
-            
-            ScrollView(showsIndicators: false) {
-                VStack(spacing: 14) {
-                    //                    Text("Required Information")
+            ZStack(alignment: .topLeading) {
+                // MARK: Header
+                HStack(alignment: .top, spacing: 8) {
+                    //                // MARK: - back
+                    //                Button(action: goBack) {
+                    //                    Image("back_gray")
+                    //                }
+                    //
+                    //                VStack(alignment: .leading, spacing: 2) {
+                    //                    // MARK: Title
+                    //                    Text(LocalizedStringKey(isFromEdit == true ? "Edit Details" : "Manual Entry"))
+                    //                        .font(.appRegular(24))
+                    //                        .foregroundColor(Color.neutralMain700)
+                    //
+                    //                    // MARK: SubTitle
+                    //                    Text(LocalizedStringKey(isFromEdit == true ? "Update your details" : "Add your subscription details manually."))
                     //                        .font(.appRegular(18))
-                    //                        .foregroundColor(.underlineGray)
-                    //                        .lineLimit(1)
-                    //                        .layoutPriority(1)
-                    //                        .frame(maxWidth: .infinity, alignment: .leading)
-                    //                        .frame(height: 28)
-                    //                        .padding(.leading, 5)
-                    VStack(alignment: .leading, spacing: 2) {
-                        // MARK: Title
-                        titleView(title: "Type the details", styledPart: "details")
-                        //                        Text(LocalizedStringKey("Type the "))
-                        //                            .font(.geistSemiBold(28))
-                        //                            .foregroundColor(Color("TextPrimary_ 0E101A_F4F1FB"))
-                        //                        + Text(LocalizedStringKey("details"))
-                        //                            .font(.jetBrainsSemiBoldItalic(28))
-                        //                            .foregroundStyle(themeManager.gradient(style: .vertical))
-                        //
-                        // MARK: SubTitle
-                        Text(LocalizedStringKey("We'll validate against 500+ known providers and auto-fill the rest."))
-                            .font(.geistMedium(12))
-                            .foregroundColor(themeManager.textPrimaryLight6_dark62)
+                    //                        .foregroundColor(Color.neutral500)
+                    //                }
+                    //                Spacer()
+                    // MARK: - back
+                    CircleBackButton {
+                        goBack()
                     }
                     
-                    //MARK: Service field
+                    Spacer()
                     
-                    FieldSuggestionView1(
-                        text        : $serviceName,
-                        title       : "Subscription Name",
-                        image       : "tag_new",
-                        placeHolder : "e.g. Netflix, ChatGPT...",
-                        suggestions : addSubscriptionVM.servicesList ?? [],
-                        displayKey  : { $0.name ?? "" },
-                        isService   : true,
-                        fieldType   : FieldType.serviceName,
-                        activeField : $activeField,
-                        action      : {
-                            if serviceName.isEmpty {
-                                clearData()
-                            }
-                        }
-                    )
-                    .allowsHitTesting(!isRenew)
-                    .opacity(isRenew ? 0.6 : 1.0)
-                    .onChange(of: serviceName) { newValue in
-                        if newValue.count >= 3 {
-                            if newValue.trimmed != serviceLastActionText {
-                                serviceLastActionText = newValue.trimmed
-                                fetchProviderDataApi(showLoader: false)
-                            }
-                        } else {
-                            addSubscriptionVM.providerData = nil
-                            serviceLastActionText = ""
-                            if newValue.isEmpty {
-                                clearData()
-                            }
-                        }
-                    }
-                    .padding(.top, 6)
-                    
-                    if addSubscriptionVM.providerData != nil, !getAllPlans().isEmpty, serviceName.count >= 3 {
-                        matchCard
-                    }
-                    
-                    //MARK: PlanType field
-                    FieldSuggestionView1(
-                        text        : $planType,
-                        title       : "Plan Type",
-                        image       : "tag_new",
-                        placeHolder : "Plan type",
-                        suggestions : planTypeSuggestions,
-                        displayKey  : { (item: PlanTypeItem) in item.name },
-                        fieldType   : FieldType.planType,
-                        activeField : $activeField,
-                        action      : handlePlanTypeChange
-                    )
-                    .allowsHitTesting(!isRenew)
-                    .opacity(isRenew ? 0.6 : 1.0)
-                    
-                    /*
-                     Button(action: selectPlanType) {
-                     FieldView(text: $planType, textValue: selectedPlanType ?? "", title: "Plan Type", image: "gridicon2", placeHolder: "Please select", isButton: true, isText: true)
-                     }
-                     .sheet(isPresented: $showPlanTypeSheet) {
-                     PlanTypeBottomSheet(selectedPlanType    : $selectedPlanType,
-                     planTypeResponse    : filteredPlanTypes(),
-                     header              : "Select Plan Type",
-                     placeholder         : "Search",
-                     action              : {
-                     planLastActionText = selectedPlanType ?? ""
-                     planType = selectedPlanType ?? ""
-                     autoFillDetails(isAmount: false)
-                     })
-                     //                        .onAppear {
-                     //                            DispatchQueue.main.async {
-                     //                                sheetHeight = sheetHeight
-                     //                            }
-                     //                        }
-                     //                        .id(sheetID)
-                     //                        .overlay {
-                     //                            GeometryReader { geo in
-                     //                                Color.clear
-                     //                                    .preference(
-                     //                                        key: InnerHeightPreferenceKey.self,
-                     //                                        value: geo.size.height
-                     //                                    )
-                     //                            }
-                     //                        }
-                     //                        .onPreferenceChange(InnerHeightPreferenceKey.self) { height in
-                     //                            if height > 150 {
-                     //                                sheetHeight = height
-                     //                            }
-                     //                        }
-                     //                        .presentationDetents(
-                     //                            sheetHeight > UIScreen.main.bounds.height * 0.75
-                     //                                ? [.large]
-                     //                                : [.height(sheetHeight)]// .large]
-                     //                        )
-                     .presentationDetents([.medium, .large])
-                     .presentationDragIndicator(.hidden)
-                     }
-                     */
-                    
-                    HStack(spacing: 10) {
-                        //MARK: Amount field
-                        VStack{
-                            FieldSuggestionView1(
-                                text        : $amount,
-                                title       : "Price",
-                                image       : "tag_new",
-                                placeHolder : "0.00",
-                                currency    : selectedCurrency?.symbol ?? Constants.shared.currencySymbol,
-                                isNumberPad : true,
-                                suggestions : filteredPricePlans(),
-                                displayKey  : { plan in
-                                    String(format: "%.2f", plan.price ?? 0)
-                                },
-                                borderColor : !isAmountError,
-                                fieldType   : FieldType.amount,
-                                activeField : $activeField,
-                                //                                lastActionText : $amountLastActionText,
-                                action      : {
-                                    autoFillDetails(isAmount: true)
-                                }
+                    VStack(alignment: .leading, spacing: 1) {
+                        Text(LocalizedStringKey(isFromEdit == true ? "Edit subscription" : "Manual entry"))
+                            .font(.geistSemiBold(16))
+                            .foregroundColor(
+                                Color("TextPrimary_ 0E101A_F4F1FB")
                             )
-                            .addDoneButton{
-                            }
-                            Spacer()
-                        }
-                        
-                        //MARK: currency field
-                        VStack{
-                            Button(action: currencySelection) {
-                                FieldView(text: $currency, textValue: selectedCurrency?.code ?? "", title: "Currency", image: "globeIcon", placeHolder: Constants.shared.currencyCode, isButton: true, isText: true, isCurrency: true, currencySymbol: selectedCurrency?.symbol ?? "")
-                                    .frame(width: 140, alignment: .trailing)
-                            }
-                            .sheet(isPresented: $showCurrencySheet) {
-                                CountriesBottomSheet(selectedCurrency   : $selectedCurrency,
-                                                     selectedCountry    : $selectedCountry,
-                                                     isCountry          : false,
-                                                     currencyResponse   : commonApiVM.currencyResponse,
-                                                     countryResponse    : commonApiVM.countriesResponse,
-                                                     header             : "Currency",
-                                                     placeholder        : "Search",
-                                                     action             : {
-                                    self.handleCurrencySelection()
-                                })
-                                .presentationDetents([.large])
-                                .presentationDragIndicator(.hidden)
-                            }
-                            Spacer()
-                        }
                     }
+                    .padding(.top, 10)
                     
-                    if isAmountError{
-                        HStack(spacing: 6){
-                            Image("info")
-                                .frame(width: 24, height: 24)
-                            Text("Amount is not matching with the existing data. Are you sure you want to continue?")
-                                .font(.geistRegular(14))
-                                .foregroundColor(Color.systemInfoBlue)
-                            Spacer()
+                    Spacer()
+                    
+                    // MARK: - Empty Space
+                    Color.clear
+                        .frame(width: 40, height: 40)
+                }
+                .padding(.horizontal)
+                //            .padding(.top, 15)
+                
+                ScrollView(showsIndicators: false) {
+                    VStack(spacing: 14) {
+                        //                    Text("Required Information")
+                        //                        .font(.appRegular(18))
+                        //                        .foregroundColor(.underlineGray)
+                        //                        .lineLimit(1)
+                        //                        .layoutPriority(1)
+                        //                        .frame(maxWidth: .infinity, alignment: .leading)
+                        //                        .frame(height: 28)
+                        //                        .padding(.leading, 5)
+                        VStack(alignment: .leading, spacing: 2) {
+                            // MARK: Title
+                            titleView(title: "Type the details", styledPart: "details")
+                            //                        Text(LocalizedStringKey("Type the "))
+                            //                            .font(.geistSemiBold(28))
+                            //                            .foregroundColor(Color("TextPrimary_ 0E101A_F4F1FB"))
+                            //                        + Text(LocalizedStringKey("details"))
+                            //                            .font(.jetBrainsSemiBoldItalic(28))
+                            //                            .foregroundStyle(themeManager.gradient(style: .vertical))
+                            //
+                            // MARK: SubTitle
+                            Text(LocalizedStringKey("We'll validate against 500+ known providers and auto-fill the rest."))
+                                .font(.geistMedium(12))
+                                .foregroundColor(themeManager.textPrimaryLight6_dark62)
                         }
-                        .padding(.leading, 5)
-                        .padding(.top, -29)
-                    }
-                    
-                    //MARK: Billing cycle field
-                    VStack(alignment: .leading, spacing: 10) {
-                        Text("BILLING CYCLE")
-                            .font(.jetBrainsMedium(11))
-                            .tracking(1)
-                            .foregroundColor(themeManager.textPrimaryLight6_dark62)
-                            .padding(.leading, 5)
+                        .padding(.top, 20)
                         
-                        ScrollView(.horizontal, showsIndicators: false) {
-                            HStack(spacing: 4) {
-                                ForEach(allBillingCycles(), id: \.self) { cycle in
-                                    let isSelected = selectedBilling?.lowercased() == cycle.lowercased()
-                                    Button(action: {
-                                        selectedBilling = cycle
-                                        updateAmount(billing: cycle)
-                                    }) {
-                                        Text(cycle)
-                                            .font(.geistMedium(12))
-                                            .foregroundColor(isSelected ? .white : themeManager.textPrimaryLight6_dark62)
-                                            .padding(.horizontal, 16)
-                                            .frame(height: 44)
-                                            .background(
-                                                Group {
-                                                    if isSelected {
-                                                        themeManager.gradient(style: .horizontal)
-                                                            .cornerRadius(10)
-                                                    } else {
-                                                        Color.clear
-                                                    }
-                                                }
-                                            )
-                                            .shadow(color: isSelected ? themeManager.accentTextColor : Color.clear, radius: 4,x: 0,y: 2)
-                                    }
+                        //MARK: Service field
+                        
+                        FieldSuggestionView1(
+                            text        : $serviceName,
+                            title       : "Subscription Name",
+                            image       : "tag_new",
+                            placeHolder : "e.g. Netflix, ChatGPT...",
+                            suggestions : addSubscriptionVM.servicesList ?? [],
+                            displayKey  : { $0.name ?? "" },
+                            isService   : true,
+                            fieldType   : FieldType.serviceName,
+                            activeField : $activeField,
+                            action      : {
+                                if serviceName.isEmpty {
+                                    clearData()
                                 }
                             }
-                            .padding(4)
-                            .frame(minWidth: UIScreen.main.bounds.width - 30, alignment: .leading)
-                        }
-                        .background(themeManager.white_white4)
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 16)
-                                .stroke(themeManager.textPrimaryLight8_white8, lineWidth: 1)
                         )
-                        .cornerRadius(16)
-                    }
-                    .onChange(of: selectedBilling) { billing in
-                        guard let billing else { return }
-                        
-                        if (isFromEdit || isRenew) && isInitialPayment {
-                            isInitialPayment = false
-                            return
-                        }
-                        if billing != ""{
-                            chargeDate = Constants.shared.getNextDateByFrequency(
-                                frequency: billing
-                            )
-                        }
-                    }
-                    
-                    //MARK: Next Charge Date field
-                    Button(action: dateSelection) {
-                        FieldView(text: $chargeDate, textValue: "", title: "Next Charge Date", image: "timer_new", placeHolder: "dd/mm/yyyy", isButton: false, isText: true, isDate:true)
-                    }
-                    .background(
-                        DatePickerPopup(isPresented: $isDatePickerPresented, selectedDate: $tempDate) { date in
-                            let formatter = DateFormatter()
-                            formatter.dateFormat = "dd/MM/yyyy"//"yyyy-MM-dd"
-                            self.chargeDate = formatter.string(from: date)
-                            print(chargeDate)
-                        }
-                    )
-                    
-                    //MARK: Category field
-                    VStack(alignment: .leading, spacing: 10) {
-                        Text("CATEGORY")
-                            .font(.jetBrainsMedium(11))
-                            .tracking(1)
-                            .foregroundColor(themeManager.textPrimaryLight6_dark62)
-                            .padding(.leading, 5)
-                        
-                        if let categories = commonApiVM.categoriesResponse {
-                            FlowLayout {
-                                ForEach(categories, id: \.id) { cat in
-                                    let isSelected = selectedCategory?.id == cat.id
-                                    Button(action: {
-                                        selectedCategory = cat
-                                        category = cat.name ?? ""
-                                    }) {
-                                        Text(cat.name ?? "")
-                                            .font(.geistMedium(12))
-                                            .foregroundColor(isSelected ? .white : themeManager.textPrimaryLight6_dark62)
-                                            .padding(.horizontal, 16)
-                                            .frame(height: 36)
-                                            .background(
-                                                Group {
-                                                    if isSelected {
-                                                        themeManager.gradient(style: .horizontal)
-                                                    } else {
-                                                        themeManager.white_white4
-                                                    }
-                                                }
-                                            )
-                                            .cornerRadius(18)
-                                            .overlay(
-                                                RoundedRectangle(cornerRadius: 18)
-                                                    .stroke(isSelected ? Color.clear : themeManager.textPrimaryLight8_white8, lineWidth: 1)
-                                            )
-                                            .shadow(color: isSelected ? themeManager.accentTextColor : Color.clear, radius: 5,x: 0,y: 3)
-                                    }
+                        .allowsHitTesting(!isRenew)
+                        .opacity(isRenew ? 0.6 : 1.0)
+                        .onChange(of: serviceName) { newValue in
+                            if newValue.count >= 3 {
+                                if newValue.trimmed != serviceLastActionText {
+                                    serviceLastActionText = newValue.trimmed
+                                    fetchProviderDataApi(showLoader: false)
+                                }
+                            } else {
+                                addSubscriptionVM.providerData = nil
+                                serviceLastActionText = ""
+                                if newValue.isEmpty {
+                                    clearData()
                                 }
                             }
-                            .padding(.horizontal, 5)
                         }
-                    }
-                    .allowsHitTesting(!isRenew)
-                    .opacity(isRenew ? 0.6 : 1.0)
-                    
-                    //                    if let source = addSubscriptionVM.providerData?.source{
-                    //                        HStack(spacing: 5){
-                    //                            Text("Source: ")
-                    //                                .font(.geistBold(14))
-                    //                                .foregroundColor(Color.neutralMain700)
-                    //                                .padding(.leading, 5)
-                    //
-                    //                            Text("\(source)")
-                    //                                .font(.geistRegular(14))
-                    //                                .foregroundColor(Color.neutralMain700)
-                    //
-                    //                            Spacer()
-                    //                        }
-                    //                    }
-                    //
-                    //                    if let urls = addSubscriptionVM.providerData?.urls, !urls.isEmpty {
-                    //                        VStack(alignment: .leading, spacing: 4) {
-                    //                            Text("URLs:")
-                    //                                .font(.geistBold(14))
-                    //                                .foregroundColor(Color.neutralMain700)
-                    //
-                    //                            //                            ForEach(urls, id: \.self) { url in
-                    //                            //                                Text(url)
-                    //                            //                                    .font(.appRegular(14))
-                    //                            //                                    .foregroundColor(Color.neutralMain700)
-                    //                            //                            }
-                    //
-                    //                            ForEach(urls, id: \.self) { url in
-                    //                                if let link = URL(string: url) {
-                    //                                    Link(url, destination: link)
-                    //                                        .font(.geistRegular(14))
-                    //                                }
-                    //                            }
-                    //                        }
-                    //                        .frame(maxWidth: .infinity, alignment: .leading)
-                    //                        .padding(.leading, 5)
-                    //                    }
-                    
-                    //MARK: Optional Details
-                    Button(action: optionalDetailsAction) {
-                        HStack(spacing: 8) {
-                            Text("Optional Details")
-                                .font(.geistMedium(16))
-                                .foregroundColor(themeManager.textPrimaryLight6_dark62)
-                                .lineLimit(1)
-                                .layoutPriority(1)
-                                .padding(.leading, 5)
-                            //                            DashedHorizontalDivider(dash: [3,3])
-                            Spacer()
-                            HStack {
-                                Image("downArrow")
-                                    .rotationEffect(.degrees(isMoreEnable ? 180 : 0))
-                                    .animation(.easeInOut(duration: 0.25), value: isMoreEnable)
-                            }
-                            .frame(width: 12, height: 7, alignment: .trailing)
-                        }
-                        .frame(height: 28)
-                    }
-                    .padding(.trailing, 10)
-                    
-                    if isMoreEnable == true {
+                        .padding(.top, 6)
                         
-                        Button(action: selectpaymentMethod) {
-                            FieldView(text: $paymentMethod, textValue: paymentMethod, title: "Payment Method", image: "Calendar2", placeHolder: "Select payment method", isButton: true, isText: true, isPayment: true)
-                        }
-                        .sheet(isPresented: $showPaymentMethodSheet) {
-                            PaymentMethodsSheet(selectedPaymentMethod: $selectedPayment, paymentMethodResponse:commonApiVM.paymentMethodResponse, header: "Select Payment Method", placeholder: "Search")
-                                .presentationDetents([.large])
-                                .presentationDragIndicator(.hidden)
-                        }
-                        .onChange(of: selectedPayment) { newValue in
-                            guard let newValue = newValue else { return }
-                            isCards = newValue.status ?? false
-                            paymentMethod = newValue.name!
-                        }
-                        if isCards == true {
-                            ListView(type: .cards, title: "Which card is linked to this subscription?", addMore: true, data: $cardsData, selectedIndex: $cardIndex,onDismiss: {
-                                addSubscriptionVM.listUserCards(input: ListUserCardsRequest(userId: Constants.getUserId()))
-                            } )
-                            .frame(height: Double(75 + (52 * cardsData.count)))
+                        if addSubscriptionVM.providerData != nil, !getAllPlans().isEmpty, serviceName.count >= 3 {
+                            matchCard
                         }
                         
-                        ListView(type           : .relations,
-                                 title          : "Who will benefit from this subscription?",
-                                 addMore        : canAddMembers,
-                                 data           : $relationsData,
-                                 selectedIndex  : $relationIndex,
-                                 onAddFamily    : {nickName, phone, countryCode, colorHex in
-                            let input = AddFamilyMemberRequest(userId       : Constants.getUserId(),
-                                                               nickName     : nickName.trimmed,
-                                                               phoneNumber  : phone,
-                                                               countryCode  : countryCode,
-                                                               color        : colorHex)
-                            addSubscriptionVM.addfamilyMember(input: input)
-                        })
-                        .frame(height: canAddMembers == true ? Double(75 + (52 * relationsData.count)) : Double(30 + (52 * relationsData.count)))
+                        //MARK: PlanType field
+                        FieldSuggestionView1(
+                            text        : $planType,
+                            title       : "Plan Type",
+                            image       : "tag_new",
+                            placeHolder : "Plan type",
+                            suggestions : planTypeSuggestions,
+                            displayKey  : { (item: PlanTypeItem) in item.name },
+                            fieldType   : FieldType.planType,
+                            activeField : $activeField,
+                            action      : handlePlanTypeChange
+                        )
+                        .allowsHitTesting(!isRenew)
+                        .opacity(isRenew ? 0.6 : 1.0)
                         
-                        ReminderSliderView(reminderDays: $reminderDays)
-                        
-                        VStack(alignment: .leading, spacing: 4) {
-                            Text("Notes")
-                                .font(.jetBrainsMedium(11))
-                                .tracking(1)
-                                .textCase(.uppercase)
-                                .foregroundColor(themeManager.textPrimaryLight6_dark62)
-                            VStack{
-                                
-                                if notes.isEmpty {
-                                    Text("Add any additional notes about this subscription...")
-                                        .background(Color.clear)
-                                        .font(.geistRegular(15))
-                                        .foregroundColor(themeManager.textPrimaryLight6_dark62)
-                                        .frame(maxWidth: .infinity, alignment: .leading)
-                                }
-                                TextEditor(text: $notes)
-                                    .scrollContentBackground(.hidden)
-                                    .background(Color.clear)
-                                    .keyboardType(.default)
-                                    .autocapitalization(.none)
-                                    .frame(maxWidth: .infinity, alignment: .leading)
-                                    .multilineTextAlignment(.leading)
-                                    .font(.geistRegular(15))
-                                    .foregroundColor(.textPrimary0E101AF4F1FB)
-                                    .padding(.horizontal, -5)
-                                    .padding(.top, -8)
-                                    .offset(x: 0, y: notes.isEmpty ? -25 : 0)
-                                
-                                Spacer(minLength: 0)
-                            }
-                            .padding(16)
-                            .frame(height: 110)
-                            .overlay(
-                                RoundedRectangle(cornerRadius: 14)
-                                    .stroke(themeManager.textPrimaryLight8_white8, lineWidth: 1)
-                            )
-                            .background(themeManager.white_white4)
-                            .cornerRadius(14)
-                        }
-                        .padding(5)
-                        
-                        /*VStack(spacing: 4) {
-                         Text("Receipt or Screenshot")
-                         .font(.appRegular(14))
-                         .foregroundColor(Color.neutralMain700)
-                         .frame(maxWidth:.infinity, alignment: .leading)
-                         VStack(spacing: 0){
-                         Button(action: uploadImage) {
-                         if let image = selectedImage {
-                         Image(uiImage: image)
-                         .resizable()
-                         .scaledToFill()
-                         .clipShape(RoundedRectangle(cornerRadius: 12))
+                        /*
+                         Button(action: selectPlanType) {
+                         FieldView(text: $planType, textValue: selectedPlanType ?? "", title: "Plan Type", image: "gridicon2", placeHolder: "Please select", isButton: true, isText: true)
                          }
-                         else {
-                         VStack(spacing: 8){
-                         Image("uploadImage")
-                         Text("Upload receipt or screenshot")
-                         .font(.appRegular(14))
-                         .foregroundColor(.neutral400)
-                         
-                         Text("Choose file")
-                         .font(.appRegular(16))
-                         .foregroundColor(.blueMain700)
-                         }
-                         .padding(16)
-                         }
-                         }
-                         .confirmationDialog("Select Image", isPresented: $showActionSheet, titleVisibility: .visible) {
-                         Button("Camera") {
-                         pickerSource = .camera
-                         showImagePicker = true
-                         }
-                         Button("Photo Library") {
-                         pickerSource = .photoLibrary
-                         showImagePicker = true
-                         }
-                         Button("Cancel", role: .cancel) { }
-                         }
-                         .sheet(isPresented: $showImagePicker) {
-                         if pickerSource == .camera {
-                         ImagePicker(sourceType: .camera, selectedImage: $selectedImage)
-                         .edgesIgnoringSafeArea(.all)
-                         .ignoresSafeArea()
-                         } else {
-                         ImagePicker(sourceType: .photoLibrary, selectedImage: $selectedImage)
-                         }
-                         }
-                         }
-                         .frame(maxWidth:.infinity)
-                         .frame(height: 110)
-                         .background(.white)
-                         .cornerRadius(12)
-                         .overlay(
-                         RoundedRectangle(cornerRadius: 12)
-                         .stroke(Color.neutral2200, lineWidth: 1)
-                         )
+                         .sheet(isPresented: $showPlanTypeSheet) {
+                         PlanTypeBottomSheet(selectedPlanType    : $selectedPlanType,
+                         planTypeResponse    : filteredPlanTypes(),
+                         header              : "Select Plan Type",
+                         placeholder         : "Search",
+                         action              : {
+                         planLastActionText = selectedPlanType ?? ""
+                         planType = selectedPlanType ?? ""
+                         autoFillDetails(isAmount: false)
+                         })
+                         //                        .onAppear {
+                         //                            DispatchQueue.main.async {
+                         //                                sheetHeight = sheetHeight
+                         //                            }
+                         //                        }
+                         //                        .id(sheetID)
+                         //                        .overlay {
+                         //                            GeometryReader { geo in
+                         //                                Color.clear
+                         //                                    .preference(
+                         //                                        key: InnerHeightPreferenceKey.self,
+                         //                                        value: geo.size.height
+                         //                                    )
+                         //                            }
+                         //                        }
+                         //                        .onPreferenceChange(InnerHeightPreferenceKey.self) { height in
+                         //                            if height > 150 {
+                         //                                sheetHeight = height
+                         //                            }
+                         //                        }
+                         //                        .presentationDetents(
+                         //                            sheetHeight > UIScreen.main.bounds.height * 0.75
+                         //                                ? [.large]
+                         //                                : [.height(sheetHeight)]// .large]
+                         //                        )
+                         .presentationDetents([.medium, .large])
+                         .presentationDragIndicator(.hidden)
                          }
                          */
+                        
+                        HStack(spacing: 10) {
+                            //MARK: Amount field
+                            VStack{
+                                FieldSuggestionView1(
+                                    text        : $amount,
+                                    title       : "Price",
+                                    image       : "tag_new",
+                                    placeHolder : "0.00",
+                                    currency    : selectedCurrency?.symbol ?? Constants.shared.currencySymbol,
+                                    isNumberPad : true,
+                                    suggestions : filteredPricePlans(),
+                                    displayKey  : { plan in
+                                        String(format: "%.2f", plan.price ?? 0)
+                                    },
+                                    borderColor : !isAmountError,
+                                    fieldType   : FieldType.amount,
+                                    activeField : $activeField,
+                                    //                                lastActionText : $amountLastActionText,
+                                    action      : {
+                                        autoFillDetails(isAmount: true)
+                                    }
+                                )
+                                .addDoneButton{
+                                }
+                                Spacer()
+                            }
+                            
+                            //MARK: currency field
+                            VStack{
+                                Button(action: currencySelection) {
+                                    FieldView(text: $currency, textValue: selectedCurrency?.code ?? "", title: "Currency", image: "globeIcon", placeHolder: Constants.shared.currencyCode, isButton: true, isText: true, isCurrency: true, currencySymbol: selectedCurrency?.symbol ?? "")
+                                        .frame(width: 140, alignment: .trailing)
+                                }
+                                .background {
+                                    GeometryReader { geo in
+                                        if #available(iOS 17.0, *) {
+                                            Color.clear
+                                                .onAppear {
+                                                    fieldFrame = geo.frame(in: .global)
+                                                }
+                                                .onChange(of: geo.frame(in: .global)) { _, newFrame in
+                                                    fieldFrame = newFrame
+                                                }
+                                        } else {
+                                            // Fallback on earlier versions
+                                        }
+                                    }
+                                }
+                                /*.sheet(isPresented: $showCurrencySheet) {
+                                    CountriesBottomSheet(selectedCurrency   : $selectedCurrency,
+                                                         selectedCountry    : $selectedCountry,
+                                                         isCountry          : false,
+                                                         currencyResponse   : commonApiVM.currencyResponse,
+                                                         countryResponse    : commonApiVM.countriesResponse,
+                                                         header             : "Currency",
+                                                         placeholder        : "Search",
+                                                         action             : {
+                                        self.handleCurrencySelection()
+                                    })
+                                    .presentationDetents([.large])
+                                    .presentationDragIndicator(.hidden)
+                                }*/
+                                Spacer()
+                            }
+                        }
+                        
+                        if isAmountError{
+                            HStack(spacing: 6){
+                                Image("info")
+                                    .frame(width: 24, height: 24)
+                                Text("Amount is not matching with the existing data. Are you sure you want to continue?")
+                                    .font(.geistRegular(14))
+                                    .foregroundColor(Color.systemInfoBlue)
+                                Spacer()
+                            }
+                            .padding(.leading, 5)
+                            .padding(.top, -29)
+                        }
+                        
+                        //MARK: Billing cycle field
+                        VStack(alignment: .leading, spacing: 10) {
+                            Text("BILLING CYCLE")
+                                .font(.jetBrainsMedium(11))
+                                .tracking(1)
+                                .foregroundColor(themeManager.textPrimaryLight6_dark62)
+                                .padding(.leading, 5)
+                            
+                            ScrollView(.horizontal, showsIndicators: false) {
+                                HStack(spacing: 4) {
+                                    ForEach(allBillingCycles(), id: \.self) { cycle in
+                                        let isSelected = selectedBilling?.lowercased() == cycle.lowercased()
+                                        Button(action: {
+                                            selectedBilling = cycle
+                                            updateAmount(billing: cycle)
+                                        }) {
+                                            Text(cycle)
+                                                .font(.geistMedium(12))
+                                                .foregroundColor(isSelected ? .white : themeManager.textPrimaryLight6_dark62)
+                                                .padding(.horizontal, 16)
+                                                .frame(height: 44)
+                                                .background(
+                                                    Group {
+                                                        if isSelected {
+                                                            themeManager.gradient(style: .horizontal)
+                                                                .cornerRadius(10)
+                                                        } else {
+                                                            Color.clear
+                                                        }
+                                                    }
+                                                )
+                                                .shadow(color: isSelected ? themeManager.accentTextColor : Color.clear, radius: 4,x: 0,y: 2)
+                                        }
+                                    }
+                                }
+                                .padding(4)
+                                .frame(minWidth: UIScreen.main.bounds.width - 30, alignment: .leading)
+                            }
+                            .background(themeManager.white_white4)
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 16)
+                                    .stroke(themeManager.textPrimaryLight8_white8, lineWidth: 1)
+                            )
+                            .cornerRadius(16)
+                        }
+                        .onChange(of: selectedBilling) { billing in
+                            guard let billing else { return }
+                            
+                            if (isFromEdit || isRenew) && isInitialPayment {
+                                isInitialPayment = false
+                                return
+                            }
+                            if billing != ""{
+                                chargeDate = Constants.shared.getNextDateByFrequency(
+                                    frequency: billing
+                                )
+                            }
+                        }
+                        
+                        //MARK: Next Charge Date field
+                        Button(action: dateSelection) {
+                            FieldView(text: $chargeDate, textValue: "", title: "Next Charge Date", image: "timer_new", placeHolder: "dd/mm/yyyy", isButton: false, isText: true, isDate:true)
+                        }
+                        .background(
+                            DatePickerPopup(isPresented: $isDatePickerPresented, selectedDate: $tempDate) { date in
+                                let formatter = DateFormatter()
+                                formatter.dateFormat = "dd/MM/yyyy"//"yyyy-MM-dd"
+                                self.chargeDate = formatter.string(from: date)
+                                print(chargeDate)
+                            }
+                        )
+                        
+                        //MARK: Category field
+                        VStack(alignment: .leading, spacing: 10) {
+                            Text("CATEGORY")
+                                .font(.jetBrainsMedium(11))
+                                .tracking(1)
+                                .foregroundColor(themeManager.textPrimaryLight6_dark62)
+                                .padding(.leading, 5)
+                            
+                            if let categories = commonApiVM.categoriesResponse {
+                                FlowLayout {
+                                    ForEach(categories, id: \.id) { cat in
+                                        let isSelected = selectedCategory?.id == cat.id
+                                        Button(action: {
+                                            selectedCategory = cat
+                                            category = cat.name ?? ""
+                                        }) {
+                                            Text(cat.name ?? "")
+                                                .font(.geistMedium(12))
+                                                .foregroundColor(isSelected ? .white : themeManager.textPrimaryLight6_dark62)
+                                                .padding(.horizontal, 16)
+                                                .frame(height: 36)
+                                                .background(
+                                                    Group {
+                                                        if isSelected {
+                                                            themeManager.gradient(style: .horizontal)
+                                                        } else {
+                                                            themeManager.white_white4
+                                                        }
+                                                    }
+                                                )
+                                                .cornerRadius(18)
+                                                .overlay(
+                                                    RoundedRectangle(cornerRadius: 18)
+                                                        .stroke(isSelected ? Color.clear : themeManager.textPrimaryLight8_white8, lineWidth: 1)
+                                                )
+                                                .shadow(color: isSelected ? themeManager.accentTextColor : Color.clear, radius: 5,x: 0,y: 3)
+                                        }
+                                    }
+                                }
+                                .padding(.horizontal, 5)
+                            }
+                        }
+                        .allowsHitTesting(!isRenew)
+                        .opacity(isRenew ? 0.6 : 1.0)
+                        
+                        //                    if let source = addSubscriptionVM.providerData?.source{
+                        //                        HStack(spacing: 5){
+                        //                            Text("Source: ")
+                        //                                .font(.geistBold(14))
+                        //                                .foregroundColor(Color.neutralMain700)
+                        //                                .padding(.leading, 5)
+                        //
+                        //                            Text("\(source)")
+                        //                                .font(.geistRegular(14))
+                        //                                .foregroundColor(Color.neutralMain700)
+                        //
+                        //                            Spacer()
+                        //                        }
+                        //                    }
+                        //
+                        //                    if let urls = addSubscriptionVM.providerData?.urls, !urls.isEmpty {
+                        //                        VStack(alignment: .leading, spacing: 4) {
+                        //                            Text("URLs:")
+                        //                                .font(.geistBold(14))
+                        //                                .foregroundColor(Color.neutralMain700)
+                        //
+                        //                            //                            ForEach(urls, id: \.self) { url in
+                        //                            //                                Text(url)
+                        //                            //                                    .font(.appRegular(14))
+                        //                            //                                    .foregroundColor(Color.neutralMain700)
+                        //                            //                            }
+                        //
+                        //                            ForEach(urls, id: \.self) { url in
+                        //                                if let link = URL(string: url) {
+                        //                                    Link(url, destination: link)
+                        //                                        .font(.geistRegular(14))
+                        //                                }
+                        //                            }
+                        //                        }
+                        //                        .frame(maxWidth: .infinity, alignment: .leading)
+                        //                        .padding(.leading, 5)
+                        //                    }
+                        
+                        //MARK: Optional Details
+                        Button(action: optionalDetailsAction) {
+                            HStack(spacing: 8) {
+                                Text("Optional Details")
+                                    .font(.geistMedium(16))
+                                    .foregroundColor(themeManager.textPrimaryLight6_dark62)
+                                    .lineLimit(1)
+                                    .layoutPriority(1)
+                                    .padding(.leading, 5)
+                                //                            DashedHorizontalDivider(dash: [3,3])
+                                Spacer()
+                                HStack {
+                                    Image("downArrow")
+                                        .rotationEffect(.degrees(isMoreEnable ? 180 : 0))
+                                        .animation(.easeInOut(duration: 0.25), value: isMoreEnable)
+                                }
+                                .frame(width: 12, height: 7, alignment: .trailing)
+                            }
+                            .frame(height: 28)
+                        }
+                        .padding(.trailing, 10)
+                        
+                        if isMoreEnable == true {
+                            
+                            Button(action: selectpaymentMethod) {
+                                FieldView(text: $paymentMethod, textValue: paymentMethod, title: "Payment Method", image: "Calendar2", placeHolder: "Select payment method", isButton: true, isText: true, isPayment: true)
+                            }
+                            .sheet(isPresented: $showPaymentMethodSheet) {
+                                PaymentMethodsSheet(selectedPaymentMethod: $selectedPayment, paymentMethodResponse:commonApiVM.paymentMethodResponse, header: "Select Payment Method", placeholder: "Search")
+                                    .presentationDetents([.large])
+                                    .presentationDragIndicator(.hidden)
+                            }
+                            .onChange(of: selectedPayment) { newValue in
+                                guard let newValue = newValue else { return }
+                                isCards = newValue.status ?? false
+                                paymentMethod = newValue.name!
+                            }
+                            if isCards == true {
+                                ListView(type: .cards, title: "Which card is linked to this subscription?", addMore: true, data: $cardsData, selectedIndex: $cardIndex,onDismiss: {
+                                    addSubscriptionVM.listUserCards(input: ListUserCardsRequest(userId: Constants.getUserId()))
+                                } )
+                                .frame(height: Double(75 + (52 * cardsData.count)))
+                            }
+                            
+                            ListView(type           : .relations,
+                                     title          : "Who will benefit from this subscription?",
+                                     addMore        : canAddMembers,
+                                     data           : $relationsData,
+                                     selectedIndex  : $relationIndex,
+                                     onAddFamily    : {nickName, phone, countryCode, colorHex in
+                                let input = AddFamilyMemberRequest(userId       : Constants.getUserId(),
+                                                                   nickName     : nickName.trimmed,
+                                                                   phoneNumber  : phone,
+                                                                   countryCode  : countryCode,
+                                                                   color        : colorHex)
+                                addSubscriptionVM.addfamilyMember(input: input)
+                            })
+                            .frame(height: canAddMembers == true ? Double(75 + (52 * relationsData.count)) : Double(30 + (52 * relationsData.count)))
+                            
+                            ReminderSliderView(reminderDays: $reminderDays)
+                            
+                            VStack(alignment: .leading, spacing: 4) {
+                                Text("Notes")
+                                    .font(.jetBrainsMedium(11))
+                                    .tracking(1)
+                                    .textCase(.uppercase)
+                                    .foregroundColor(themeManager.textPrimaryLight6_dark62)
+                                VStack{
+                                    
+                                    if notes.isEmpty {
+                                        Text("Add any additional notes about this subscription...")
+                                            .background(Color.clear)
+                                            .font(.geistRegular(15))
+                                            .foregroundColor(themeManager.textPrimaryLight6_dark62)
+                                            .frame(maxWidth: .infinity, alignment: .leading)
+                                    }
+                                    TextEditor(text: $notes)
+                                        .scrollContentBackground(.hidden)
+                                        .background(Color.clear)
+                                        .keyboardType(.default)
+                                        .autocapitalization(.none)
+                                        .frame(maxWidth: .infinity, alignment: .leading)
+                                        .multilineTextAlignment(.leading)
+                                        .font(.geistRegular(15))
+                                        .foregroundColor(.textPrimary0E101AF4F1FB)
+                                        .padding(.horizontal, -5)
+                                        .padding(.top, -8)
+                                        .offset(x: 0, y: notes.isEmpty ? -25 : 0)
+                                    
+                                    Spacer(minLength: 0)
+                                }
+                                .padding(16)
+                                .frame(height: 110)
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 14)
+                                        .stroke(themeManager.textPrimaryLight8_white8, lineWidth: 1)
+                                )
+                                .background(themeManager.white_white4)
+                                .cornerRadius(14)
+                            }
+                            .padding(5)
+                            
+                            /*VStack(spacing: 4) {
+                             Text("Receipt or Screenshot")
+                             .font(.appRegular(14))
+                             .foregroundColor(Color.neutralMain700)
+                             .frame(maxWidth:.infinity, alignment: .leading)
+                             VStack(spacing: 0){
+                             Button(action: uploadImage) {
+                             if let image = selectedImage {
+                             Image(uiImage: image)
+                             .resizable()
+                             .scaledToFill()
+                             .clipShape(RoundedRectangle(cornerRadius: 12))
+                             }
+                             else {
+                             VStack(spacing: 8){
+                             Image("uploadImage")
+                             Text("Upload receipt or screenshot")
+                             .font(.appRegular(14))
+                             .foregroundColor(.neutral400)
+                             
+                             Text("Choose file")
+                             .font(.appRegular(16))
+                             .foregroundColor(.blueMain700)
+                             }
+                             .padding(16)
+                             }
+                             }
+                             .confirmationDialog("Select Image", isPresented: $showActionSheet, titleVisibility: .visible) {
+                             Button("Camera") {
+                             pickerSource = .camera
+                             showImagePicker = true
+                             }
+                             Button("Photo Library") {
+                             pickerSource = .photoLibrary
+                             showImagePicker = true
+                             }
+                             Button("Cancel", role: .cancel) { }
+                             }
+                             .sheet(isPresented: $showImagePicker) {
+                             if pickerSource == .camera {
+                             ImagePicker(sourceType: .camera, selectedImage: $selectedImage)
+                             .edgesIgnoringSafeArea(.all)
+                             .ignoresSafeArea()
+                             } else {
+                             ImagePicker(sourceType: .photoLibrary, selectedImage: $selectedImage)
+                             }
+                             }
+                             }
+                             .frame(maxWidth:.infinity)
+                             .frame(height: 110)
+                             .background(.white)
+                             .cornerRadius(12)
+                             .overlay(
+                             RoundedRectangle(cornerRadius: 12)
+                             .stroke(Color.neutral2200, lineWidth: 1)
+                             )
+                             }
+                             */
+                        }
+                        
+                        GradientBgButton(
+                            title       : isFromEdit == true ? "Save Changes" : "Save Subscription",
+                            isSolid     : true,
+                            showChevron : true
+                        ) {
+                            saveAction()
+                        }
+                        .padding(5)
+                        .padding(.bottom, 120)
+                        //                    CustomButton(title: isFromEdit == true ? "Save Changes" : "Save Subscription", action: saveAction)
+                        //                        .padding(5)
+                        //                        .padding(.bottom, 120)
                     }
-                    
-                    GradientBgButton(
-                        title       : isFromEdit == true ? "Save Changes" : "Save Subscription",
-                        isSolid     : true,
-                        showChevron : true
-                    ) {
-                        saveAction()
+                }
+                .padding(.horizontal, 15)
+                .padding(.top, 24)
+                
+                
+                // MARK: Popup Overlay
+
+                if showCurrencySheet {
+
+                    Color.black.opacity(0.001)
+                        .ignoresSafeArea()
+                        .onTapGesture {
+                            withAnimation(.easeInOut) {
+                                showCurrencySheet = false
+                            }
+                        }
+
+                    VStack {
+                        HStack {
+                            Spacer()
+
+                            CurrencyPopup
+                               .position(
+                                   x: fieldFrame.minX + 20,
+                                   y: fieldFrame.maxY + 80
+                               )
+                        }
+
+                        Spacer()
                     }
-                    .padding(5)
-                    .padding(.bottom, 120)
-                    //                    CustomButton(title: isFromEdit == true ? "Save Changes" : "Save Subscription", action: saveAction)
-                    //                        .padding(5)
-                    //                        .padding(.bottom, 120)
+                    .transition(.opacity.combined(with: .scale(scale: 0.95)))
+                    .zIndex(100)
                 }
             }
-            .padding(.horizontal, 15)
-            .padding(.top, 24)
+            
         }
+        .keyboardAdaptive()
         .navigationBarBackButtonHidden()
         .padding(.top, 10)
         .applyAppBackground()
@@ -723,6 +774,74 @@ struct ManualEntryView: View {
                 goBack()
             }
         }
+    }
+    
+    
+    // MARK: Popup
+
+    private var CurrencyPopup: some View {
+
+        ScrollView {
+
+            VStack(spacing: 2) {
+
+                ForEach(commonApiVM.currencyResponse ?? [], id: \.code) { currency in
+
+                    Button {
+
+                        selectedCurrency = currency
+
+                        withAnimation {
+                            showCurrencySheet = false
+                        }
+                        
+                        isCurrencyUpdateGlobalManual = false
+                        isCurrencyUpdateGlobal = false
+                        
+                        self.handleCurrencySelection()
+
+                    } label: {
+
+                        HStack(spacing: 10) {
+
+                            Text(currency.symbol ?? "")
+                                .font(.geistBold(13))
+                                .foregroundColor(themeManager.selectedAccent.senColor)
+                                .frame(width: 34, alignment: .leading)
+
+                            VStack(alignment: .leading, spacing: 2) {
+
+                                Text(currency.code ?? "")
+                                    .font(.geistSemiBold(12))
+                                    .foregroundColor(Color.textPrimary0E101AF4F1FB)
+
+                                Text(currency.name ?? "")
+                                    .font(.geistRegular(10))
+                                    .foregroundColor(Color.textPrimary0E101AF4F1FB.opacity(0.6))
+                            }
+
+                            Spacer()
+                        }
+                        .padding(8)
+                        .background(
+                            selectedCurrency?.code == currency.code
+                            ? AnyShapeStyle(themeManager.accentGradient.opacity(0.13))
+                            : AnyShapeStyle(Color.clear)
+                        )
+                        .clipShape(RoundedRectangle(cornerRadius: 10))
+                    }
+                }
+            }
+            .padding(6)
+        }
+        .frame(width: 220, height: 260)
+        .background(.ultraThinMaterial)
+        .clipShape(RoundedRectangle(cornerRadius: 14))
+        .overlay {
+            RoundedRectangle(cornerRadius: 14)
+                .stroke(themeManager.black_white.opacity(0.14))
+        }
+        .shadow(radius: 20)
     }
     
     //MARK: - User defined methods
@@ -1432,12 +1551,16 @@ struct ManualEntryView: View {
     }
     
     private func currencySelection() {
-        hideKeyboard()
+       /* hideKeyboard()
         handleDone()
         if commonApiVM.currencyResponse != nil {
             showCurrencySheet = true
         }else{
             commonApiVM.getCurrencies()
+        }*/
+        
+        withAnimation(.easeInOut(duration: 0.2)) {
+            showCurrencySheet.toggle()
         }
     }
     
@@ -2409,7 +2532,7 @@ struct ListView: View {
         .onReceive(NotificationCenter.default.publisher(for: .closeAllBottomSheets)) { _ in
             showNewCardSheet = false
         }
-        .sheet(isPresented: $openFamilyMemberSheet) {
+        /*.sheet(isPresented: $openFamilyMemberSheet) {
             AddFamilyMemberBottomSheet(header       : "Add Family Member",
                                        description  : "Add a family member to manage and share plans together.",
                                        buttonName   : "Save",
@@ -2425,7 +2548,7 @@ struct ListView: View {
             .id(UUID())
             .presentationDragIndicator(.hidden)
             .presentationDetents([.height(600)])
-        }
+        }*/
     }
     
     private var defaultList: some View {
@@ -2535,9 +2658,11 @@ struct ListView: View {
                 
             }
         }else if type == .relations{
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                openFamilyMemberSheet = true
-            }
+           // DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+              //  openFamilyMemberSheet = true
+                
+                AppIntentRouter.shared.navigate(to: .addFamilyMemberBottomSheet(header: "Add family member", description: "Add a family member to manage and share plans together.", buttonName: "Save", selectedCountry: nil))
+            //}
         }
     }
 }
@@ -2741,59 +2866,38 @@ extension ManualEntryView {
                 // Plans
                 let plans = getAllPlans()
                 ScrollView(.horizontal, showsIndicators: false) {
-                    HStack(spacing: 6) {
-                        if !plans.isEmpty {
-                            ForEach(plans, id: \.self) { plan in
-                                Button(action: {
-                                    planType = plan.planName ?? ""
-                                    selectedPlanType = plan.planName ?? ""
-                                    if let price = plan.price {
-                                        amount = String(format: "%.2f", price)
+                    if !plans.isEmpty {
+                        let row1 = plans.enumerated().filter { $0.offset % 3 == 0 }.map { $0.element }
+                        let row2 = plans.enumerated().filter { $0.offset % 3 == 1 }.map { $0.element }
+                        let row3 = plans.enumerated().filter { $0.offset % 3 == 2 }.map { $0.element }
+                        
+                        VStack(alignment: .leading, spacing: 6) {
+                            if !row1.isEmpty {
+                                HStack(spacing: 6) {
+                                    ForEach(row1, id: \.self) { plan in
+                                        planPillButton(for: plan)
                                     }
-                                    if let cycle = plan.billingCycle, !cycle.isEmpty {
-                                        selectedBilling = cycle
-                                    }
-                                    if let curr = plan.currencyCode {
-                                        // find currency
-                                        if let currencies = commonApiVM.currencyResponse {
-                                            selectedCurrency = currencies.first(where: { $0.code == curr })
-                                            currency = curr
-                                        }
-                                    }
-                                    
-                                    // Update Next Charge Date if billing cycle changes
-                                    if selectedBilling != nil && selectedBilling != "" {
-                                        if isRenew {
-                                            let baseDate = Date()
-                                            chargeDate = Constants.shared.getNextDateByFrequency(frequency: selectedBilling ?? "", baseDate: baseDate).formattedDate(from: "dd/MM/yyyy", to: "yyyy-MM-dd")
-                                        } else {
-                                            chargeDate = Constants.shared.getNextDateByFrequency(frequency: selectedBilling ?? "").formattedDate(from: "dd/MM/yyyy", to: "yyyy-MM-dd")
-                                        }
-                                    }
-                                    
-                                    // Also set category and service name
-                                    if let pName = addSubscriptionVM.providerData?.providerSubscriptionPlansList?.first?.providerName, !pName.isEmpty {
-                                        serviceLastActionText = pName.trimmed // Update this first!
-                                        serviceName = pName
-                                    }
-                                    if let catName = addSubscriptionVM.providerData?.categoryName {
-                                        category = catName
-                                        if let categories = commonApiVM.categoriesResponse {
-                                            selectedCategory = categories.first(where: { $0.name?.lowercased() == catName.lowercased()})
-                                        }
-                                    }
-                                    
-                                    isAmountError = false
-                                }) {
-                                    PlanPillView(
-                                        title: plan.planName ?? "",
-                                        price: "\(plan.currencySymbol ?? "")\(plan.price ?? 0.0)"
-                                    )
                                 }
-                                .buttonStyle(.plain)
                             }
-                        } else {
-                            // Fallback
+                            if !row2.isEmpty {
+                                HStack(spacing: 6) {
+                                    ForEach(row2, id: \.self) { plan in
+                                        planPillButton(for: plan)
+                                    }
+                                }
+                            }
+                            if !row3.isEmpty {
+                                HStack(spacing: 6) {
+                                    ForEach(row3, id: \.self) { plan in
+                                        planPillButton(for: plan)
+                                    }
+                                }
+                            }
+                        }
+                        .padding(.top, 8)
+                    } else {
+                        // Fallback
+                        HStack(spacing: 6) {
                             Button(action: {
                                 planType = "Free"
                                 selectedPlanType = "Free"
@@ -2819,8 +2923,8 @@ extension ManualEntryView {
                             }
                             .buttonStyle(.plain)
                         }
+                        .padding(.top, 8)
                     }
-                    .padding(.top, 8)
                 }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
@@ -2844,6 +2948,58 @@ extension ManualEntryView {
                 style: .continuous
             )
         )
+    }
+    
+    
+    @ViewBuilder
+    private func planPillButton(for plan: ProviderSubscriptionPlan) -> some View {
+        Button(action: {
+            planType = plan.planName ?? ""
+            selectedPlanType = plan.planName ?? ""
+            if let price = plan.price {
+                amount = String(format: "%.2f", price)
+            }
+            if let cycle = plan.billingCycle, !cycle.isEmpty {
+                selectedBilling = cycle
+            }
+            if let curr = plan.currencyCode {
+                // find currency
+                if let currencies = commonApiVM.currencyResponse {
+                    selectedCurrency = currencies.first(where: { $0.code == curr })
+                    currency = curr
+                }
+            }
+            
+            // Update Next Charge Date if billing cycle changes
+            if selectedBilling != nil && selectedBilling != "" {
+                if isRenew {
+                    let baseDate = Date()
+                    chargeDate = Constants.shared.getNextDateByFrequency(frequency: selectedBilling ?? "", baseDate: baseDate).formattedDate(from: "dd/MM/yyyy", to: "yyyy-MM-dd")
+                } else {
+                    chargeDate = Constants.shared.getNextDateByFrequency(frequency: selectedBilling ?? "").formattedDate(from: "dd/MM/yyyy", to: "yyyy-MM-dd")
+                }
+            }
+            
+            // Also set category and service name
+            if let pName = addSubscriptionVM.providerData?.providerSubscriptionPlansList?.first?.providerName, !pName.isEmpty {
+                serviceLastActionText = pName.trimmed // Update this first!
+                serviceName = pName
+            }
+            if let catName = addSubscriptionVM.providerData?.categoryName {
+                category = catName
+                if let categories = commonApiVM.categoriesResponse {
+                    selectedCategory = categories.first(where: { $0.name?.lowercased() == catName.lowercased()})
+                }
+            }
+            
+            isAmountError = false
+        }) {
+            PlanPillView(
+                title: plan.planName ?? "",
+                price: "\(plan.currencySymbol ?? "")\(plan.price ?? 0.0)"
+            )
+        }
+        .buttonStyle(.plain)
     }
     
     private func getAttributedDescription() -> AttributedString {

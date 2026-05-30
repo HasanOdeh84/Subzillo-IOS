@@ -90,6 +90,7 @@ struct CustomBorderButton: View {
     var showIcon    : Bool = false
     var icon        : String = ""
     var iconOnLeft  : Bool = false
+    var isBgGradient: Bool = false
     var action      : () -> Void = {}
     @EnvironmentObject var themeManager : ThemeManager
     
@@ -118,7 +119,9 @@ struct CustomBorderButton: View {
                 Spacer()
             }
             .frame(maxWidth: .infinity, minHeight: height)
-            .background(background)
+            .background(
+                isBgGradient ? themeManager.accentGradient : LinearGradient(colors: [background], startPoint: .leading, endPoint: .trailing)
+            )
             .overlay(
                 RoundedRectangle(cornerRadius: height / 2)
                     .stroke(borderColor, lineWidth: 2)

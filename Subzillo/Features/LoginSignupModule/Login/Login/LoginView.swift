@@ -40,7 +40,7 @@ struct LoginView: View {
                 // Logo and Header
                 VStack(alignment: .leading) {
                     // Logo with Glow
-                    ZStack {
+                    /*ZStack {
                         Circle()
                             .fill(themeManager.accentColor.opacity(0.3))
                             .frame(width: 80, height: 80)
@@ -53,7 +53,12 @@ struct LoginView: View {
                     }
                     .padding(.top, 70)
                     .padding(.leading, -20)
-                    .padding(.bottom, -10)
+                    .padding(.bottom, -10)*/
+                    
+                    SubzilloLogoView()
+                        .padding(.top, 70)
+                        .padding(.leading, -20)
+                        .padding(.bottom, -10)
                     
                     VStack(alignment: .leading, spacing: 6) {
                         Text("Welcome back")
@@ -125,7 +130,7 @@ struct LoginView: View {
                             
                     }
                     .padding(.top, 12)
-                    .alert(
+                    /*.alert(
                         "Login",
                         isPresented: $showLoginAlert
                     ) {
@@ -147,7 +152,7 @@ struct LoginView: View {
                     } message: {
                         
                         Text("Choose your preferred login method.")
-                    }
+                    }*/
                 }
                 
                 HStack(spacing: 12) {
@@ -265,6 +270,42 @@ struct LoginView: View {
                     },
                     onNo: {
                         loginVM.showRestoreAccSheet = false
+                    }
+                )
+                .overlay {
+                    GeometryReader { geo in
+                        Color.clear
+                            .preference(
+                                key: InnerHeightPreferenceKey.self,
+                                value: geo.size.height
+                            )
+                    }
+                }
+                .onPreferenceChange(InnerHeightPreferenceKey.self) { height in
+                    if height > 150 {
+                        restoreAccSheetHeight = height
+                    }
+                }
+                .presentationDetents([.height(restoreAccSheetHeight)])
+                .presentationDragIndicator(.hidden)
+            }
+             
+            .sheet(isPresented: $showLoginAlert) {
+                RenewSubscriptionBottomSheet(
+                    isLoginMethods : true,
+                    title   : "Choose Login Method",
+                    desc    : "Sign in your way — biometric authentication or one-time password.",
+                    btn1    : "Login with \(selectedBiometric == 0 ? "Face" : "Touch")",
+                    btn2    : "",
+                    btn3    : "Login with OTP",
+                    onRenew : {
+                        authenticate()
+                    },
+                    onRenewWithChanges: {
+                        
+                    },
+                    onNo: {
+                        loginApi()
                     }
                 )
                 .overlay {
@@ -503,3 +544,154 @@ struct AppleSignInButtonView: View {
         .signInWithAppleButtonStyle(.whiteOutline)
     }
 }
+
+struct SubzilloLogoView: View {
+    
+    @EnvironmentObject var themeManager: ThemeManager
+    
+    var size: CGFloat = 100
+    var height: CGFloat = 60
+    var animated: Bool = true
+    
+    @State private var rotateAura = false
+    @State private var breathe = false
+    @State private var floatLogo = false
+    @State private var shimmer = false
+    
+    var body: some View {
+        
+        ZStack {
+            
+            // MARK: Rotating Aura
+            if animated {
+                Circle()
+                    .fill(
+                        AngularGradient(
+                            gradient: Gradient(colors: [
+                                Color(red: 75/255, green: 123/255, blue: 245/255).opacity(0.55),
+                                Color(red: 181/255, green: 54/255, blue: 232/255).opacity(0.55),
+                                Color(red: 75/255, green: 123/255, blue: 245/255).opacity(0.15),
+                                Color(red: 181/255, green: 54/255, blue: 232/255).opacity(0.55),
+                                Color(red: 75/255, green: 123/255, blue: 245/255).opacity(0.55)
+                            ]),
+                            center: .center
+                        )
+                    )
+                    .blur(radius: size * 0.28)
+                    .frame(
+                        width: size + (size * 0.7),
+                        height: size + (size * 0.7)
+                    )
+                    .rotationEffect(.degrees(rotateAura ? 360 : 0))
+                    .animation(
+                        .linear(duration: 8)
+                        .repeatForever(autoreverses: false),
+                        value: rotateAura
+                    )
+            }
+            
+            // MARK: Soft Glow
+            Circle()
+                .fill(
+                    RadialGradient(
+                        colors: [
+                            Color(red: 181/255, green: 54/255, blue: 232/255)
+                                .opacity(0.38),
+                            
+                            Color(red: 75/255, green: 123/255, blue: 245/255)
+                                .opacity(0.22),
+                            
+                            .clear
+                        ],
+                        center: .center,
+                        startRadius: 0,
+                        endRadius: size
+                    )
+                )
+                .blur(radius: size * 0.15)
+                .frame(
+                    width: size + (size * 0.36),
+                    height: size + (size * 0.36)
+                )
+                .scaleEffect(breathe ? 1.08 : 0.95)
+                .opacity(breathe ? 1 : 0.6)
+                .animation(
+                    animated
+                    ? .easeInOut(duration: 3.2)
+                        .repeatForever(autoreverses: true)
+                    : .default,
+                    value: breathe
+                )
+            
+            // MARK: Logo
+            ZStack {
+                
+                Image("logo_new")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: size, height:height)
+                    .shadow(
+                        color: Color.blue.opacity(0.35),
+                        radius: size * 0.12,
+                        y: size * 0.04
+                    )
+                    .shadow(
+                        color: Color.purple.opacity(0.35),
+                        radius: size * 0.12
+                    )
+                    .overlay {
+                        
+                        GeometryReader { proxy in
+                            
+                            let width = proxy.size.width
+                            
+                            Rectangle()
+                                .fill(
+                                    LinearGradient(
+                                        colors: [
+                                            .clear,
+                                            Color.white.opacity(0.15),
+                                            Color.white.opacity(0.95),
+                                            Color.white.opacity(0.15),
+                                            .clear
+                                        ],
+                                        startPoint: .top,
+                                        endPoint: .bottom
+                                    )
+                                )
+                                .frame(width: width * 0.22)
+                                .rotationEffect(.degrees(18))
+                                .offset(
+                                    x: shimmer ? width * 1.4 : -width * 1.4
+                                )
+                                .blendMode(.screen)
+                                .animation(
+                                    .easeInOut(duration: 5.8)
+                                        .repeatForever(autoreverses: false),
+                                    value: shimmer
+                                )
+                        }
+                        .clipped()
+                        .mask {
+                            Image("logo_new")
+                                .resizable()
+                                .scaledToFit()
+                                .frame(width: size, height:height)
+                        }
+                    }
+            }
+            .frame(width: size, height: height)
+            .onAppear {
+                shimmer = true
+            }
+        }
+        .frame(width: size, height: height)
+        .onAppear {
+            rotateAura = true
+            breathe = true
+            floatLogo = true
+            shimmer = true
+        }
+    }
+}
+

@@ -5,6 +5,8 @@ import SDWebImageSwiftUI
 
 struct AgentChatView: View {
     @StateObject var viewModel          = AgentViewModel()
+    var autoMessage: String? = nil
+    @State private var hasAutoSent      : Bool = false
     @EnvironmentObject var commonApiVM  : CommonAPIViewModel
     @State private var inputText        : String = ""
     @State private var showPlusMenu     : Bool = false
@@ -18,6 +20,7 @@ struct AgentChatView: View {
     private let bottomAnchor            = "BOTTOM_ANCHOR"
     @EnvironmentObject var themeManager : ThemeManager
     @State private var selectedSegment  : Segment? = .first
+    @Environment(\.colorScheme) private var colorScheme
     
     var body: some View {
         VStack(spacing: 0) {
@@ -31,14 +34,21 @@ struct AgentChatView: View {
         }
         .padding(.top, AppIntentRouter.shared.path.count > 1 ? 0 : 50)
         .navigationBarHidden(true)
+        .keyboardAdaptive()
         .applyAppBackground()
         .onAppear {
-            if viewModel.isAgenticMode == true
-            {
+            // Auto-send upgrade message if navigated from SubscriptionMatchView
+            if let message = autoMessage, !hasAutoSent {
+                hasAutoSent = true
+                viewModel.isAgenticMode = true
                 selectedSegment = .first
-            }
-            else{
-                selectedSegment = .second
+                viewModel.pendingAutoMessage = message
+            } else {
+                if viewModel.isAgenticMode == true {
+                    selectedSegment = .first
+                } else {
+                    selectedSegment = .second
+                }
             }
         }
         .sheet(isPresented: $showImagePicker) {
@@ -120,7 +130,7 @@ struct AgentChatView: View {
             VStack(alignment: .leading, spacing: 4) {
                 
                 Text("Subzi")
-                    .font(.geistBold(15))
+                    .font(.geistSemiBold(15))
                     .tracking(-0.4)
                     .foregroundStyle(
                         Color.textPrimary0E101AF4F1FB
@@ -128,10 +138,10 @@ struct AgentChatView: View {
                 HStack {
                     
                     Text("")
-                        .font(.appBold(11))
+                        .font(.geistBold(11))
                         .foregroundColor(.white)
-                        .frame(width: 5, height: 5)
-                        .background(Color.successLight0EA870)
+                        .frame(width: 9, height: 9)
+                        .background(Color.successLight0EA870.opacity(0.80))
                         .clipShape(Circle())
                         .shadow(color: Color.successLight0EA870, radius: 5, x: 0, y: 0)
                     
@@ -140,16 +150,13 @@ struct AgentChatView: View {
                         .foregroundStyle(
                             Color.successLight0EA870
                         )
-                    
                 }
             }
-            
             Spacer()
-            
             
             HStack(spacing: 8) {
                 Text("AGENTIC")
-                    .font(.appBold(12))
+                    .font(.geistBold(15))
                     .foregroundStyle(themeManager.accentGradient)
                 
                 Button {
@@ -238,8 +245,6 @@ struct AgentChatView: View {
     
     private var inputAreaView: some View {
         VStack(spacing: 0) {
-            
-            
             if viewModel.isRecordingAudio {
                 HStack(spacing: 10) {
                     HStack(spacing: 8) {
@@ -248,14 +253,16 @@ struct AgentChatView: View {
                         } label: {
                             HStack {
                                 Image("crossicon")
+                                    .renderingMode(.template)
+                                    .foregroundStyle(.dangerE43C5CFF5A7A)
                                     .frame(width: 16, height: 16)
                             }
                             .frame(width: 36, height: 36)
-                            .background(Color("Danger_Light_E43C5C").opacity(0.2))
+                            .background(Color.dangerE43C5CFF5A7A.opacity(0.2))
                             .overlay(
                                 RoundedRectangle(cornerRadius: 36/2)
                                     .stroke(
-                                        Color("Danger_Light_E43C5C").opacity(0.5),
+                                        Color.dangerE43C5CFF5A7A.opacity(0.5),
                                         lineWidth: 1
                                     )
                             )
@@ -295,8 +302,9 @@ struct AgentChatView: View {
                     .overlay(
                         RoundedRectangle(cornerRadius: 24)
                             .stroke(
-                                Color.textPrimary0E101AF4F1FB
-                                    .opacity(0.08),
+                                colorScheme == .light ? .textPrimaryLight0E101A.opacity(0.14) : .textPrimaryDarkF4F1FB.opacity(0.10),
+                                //                                Color.textPrimary0E101AF4F1FB
+                                //                                    .opacity(0.08),
                                 lineWidth: 1
                             )
                     )
@@ -315,6 +323,8 @@ struct AgentChatView: View {
                         } label: {
                             HStack {
                                 Image(showPlusMenu ? "crossiconnew" : "plusicon")
+                                    .renderingMode(.template)
+                                    .foregroundStyle(themeManager.accentTextColor)
                                     .frame(width: 18, height: 18)
                             }
                             .frame(width: 48, height: 48)
@@ -322,7 +332,7 @@ struct AgentChatView: View {
                             .overlay(
                                 RoundedRectangle(cornerRadius: 24)
                                     .stroke(
-                                        showPlusMenu ? themeManager.selectedAccent.senColor : Color.textPrimary0E101AF4F1FB.opacity(0.08),
+                                        showPlusMenu ? themeManager.selectedAccent.senColor : (colorScheme == .light ? .textPrimaryLight0E101A.opacity(0.14) : .textPrimaryDarkF4F1FB.opacity(0.10)),
                                         lineWidth: 1
                                     )
                             )
@@ -347,10 +357,10 @@ struct AgentChatView: View {
                                 if inputText == "" {
                                     Text(showPlusMenu ? "While typing" : (viewModel.isAgenticMode ? "Ask the agent..." : "Message Subzi..."))
                                         .foregroundColor(Color.textPrimary0E101AF4F1FB.opacity(0.6))
-                                        .font(.geistRegular(16))
+                                        .font(.geistMedium(12))
                                 }
                                 TextField("", text: $inputText)
-                                    .font(.geistRegular(16))
+                                    .font(.geistMedium(12))
                                     .foregroundColor(Color.textPrimary0E101AF4F1FB)
                             }
                             .padding(.leading, 12)
@@ -361,13 +371,14 @@ struct AgentChatView: View {
                                 showPlusMenu = false
                             } label: {
                                 HStack {
-                                    Image("sendIcon")
+                                    Image(inputText == "" ? "sendIcon" : "send_white")
                                         .renderingMode(.template)
-                                        .foregroundStyle(inputText == "" ? .textPrimary0E101AF4F1FB .opacity(0.5) : themeManager.selectedAccent.senColor)
+                                        .foregroundStyle(inputText == "" ? (colorScheme == .light ? .textPrimaryLight0E101A.opacity(0.50) : .textPrimaryDarkF4F1FB) : .white)
                                         .frame(width: 16, height: 16)
                                 }
                                 .frame(width: 36, height: 36)
-                                .background(themeManager.textPrimaryDark_white07)
+                                .background(inputText == "" ? LinearGradient(colors: [themeManager.textPrimaryDark_white07], startPoint: .leading, endPoint: .trailing) : themeManager.accentGradient)
+                                
                                 .overlay(
                                     RoundedRectangle(cornerRadius: 36/2)
                                         .stroke(
@@ -386,8 +397,9 @@ struct AgentChatView: View {
                         .overlay(
                             RoundedRectangle(cornerRadius: 24)
                                 .stroke(
-                                    Color.textPrimary0E101AF4F1FB
-                                        .opacity(0.08),
+                                    colorScheme == .light ? .textPrimaryLight0E101A.opacity(0.14) : .textPrimaryDarkF4F1FB.opacity(0.10),
+                                    //                                    Color.textPrimary0E101AF4F1FB
+                                    //                                        .opacity(0.08),
                                     lineWidth: 1
                                 )
                         )
@@ -406,17 +418,180 @@ struct AgentChatView: View {
 // MARK: - Browser View Modal
 
 struct AgentBrowserView: View {
-    @ObservedObject var viewModel: AgentViewModel
-
-    @State private var showPopup: Bool = false
+    @ObservedObject var viewModel       : AgentViewModel
+    @EnvironmentObject var themeManager : ThemeManager
+    @State private var showPopup        : Bool = false
+    @Environment(\.colorScheme) private var colorScheme
     
-    var body: some View {
-        NavigationStack {
-            ZStack {
+    private var displayTitle: String {
+        viewModel.displayMessage.split(separator: "\n").first.map(String.init) ?? viewModel.displayMessage
+    }
+    
+    private var displaySubtitle: String {
+        let lines = viewModel.displayMessage.split(separator: "\n").map(String.init)
+        if lines.count > 1 {
+            return lines.dropFirst().joined(separator: " ")
+        }
+        return viewModel.currentStatus.isEmpty ? "Navigating..." : viewModel.currentStatus
+    }
+    
+    private var headerIcon: some View {
+        Group {
+            if viewModel.needsIntervention {
+                ZStack {
+                    RoundedRectangle(cornerRadius: 10)
+                        .fill(Color("yellow_FFB547").opacity(0.16))
+                        .frame(width: 32, height: 32)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 12)
+                                .stroke(Color("yellow_FFB547"), lineWidth: 1)
+                        )
+                    
+                    Image("lock_yellow")
+                        .resizable()
+                        .frame(width: 16, height: 16)
+                }
+            } else {
+                ZStack {
+                    RoundedRectangle(cornerRadius: 10)
+                        .fill(viewModel.showSuccessScreen ? LinearGradient(colors: [Color.green1DD07B.opacity(0.18)], startPoint: .leading, endPoint: .trailing)  : themeManager.accentGradient)
+                        .frame(width: 32, height: 32)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 12)
+                                .stroke(viewModel.showSuccessScreen ? Color.green1DD07B.opacity(0.45) : themeManager.accentTextColor.opacity(0.5), lineWidth: 1)
+                        )
+                    
+                    Image(viewModel.showSuccessScreen ? "tickicon" : "sparkles")
+                        .resizable()
+                        .renderingMode(.template)
+                        .foregroundColor(viewModel.showSuccessScreen ? Color.green1DD07B : .white)
+                        .frame(width: 16, height: 16)
+                }
+            }
+        }
+    }
+    
+    private var headerTextView: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Text(displayTitle)
+                .font(.geistSemiBold(14))
+                .foregroundColor(.textPrimary0E101AF4F1FB)
+                .lineLimit(1)
+            
+            Text(displaySubtitle)
+                .font(.jetBrainsBold(10))
+                .foregroundColor(themeManager.textPrimaryLight6_dark62)
+                .lineLimit(1)
+        }
+    }
+    
+    private var headerCloseButton: some View {
+        Button {
+            viewModel.cancel()
+        } label: {
+            Image("crossiconnew")
+                .resizable()
+                .renderingMode(.template)
+                .frame(width: 24, height: 24)
+                .padding(5)
+                .foregroundColor(
+                    colorScheme == .light
+                    ? Color("TextPrimary_Light_0E101A").opacity(0.60)
+                    : Color.white.opacity(0.60)
+                )
+                .background(
+                    colorScheme == .light
+                    ? .textPrimaryDarkF4F1FB
+                    : Color.white.opacity(0.10)
+                )
+                .clipShape(Circle())
+                .overlay(
+                    Circle()
+                        .stroke(
+                            colorScheme == .light
+                            ? Color("TextPrimary_Light_0E101A").opacity(0.10)
+                            : Color.white.opacity(0.10),
+                            lineWidth: 1
+                        )
+                )
+        }
+    }
+    
+    private var headerPillArea: some View {
+        HStack {
+            Spacer()
+            if viewModel.needsIntervention {
+                Button {
+                    viewModel.resume()
+                } label: {
+                    HStack(spacing: 6) {
+                        Image("subzi_icon")
+                            .frame(width: 12, height: 12)
+                        Text("HAND BACK TO SUBZI")
+                            .font(.geistExtraBold(10))
+                    }
+                    .foregroundColor(.white)
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 8)
+                    .background(themeManager.selectedAccent.senColor)
+                    .clipShape(Capsule())
+                    .shadow(color: themeManager.accentTextColor.opacity(0.50), radius: 9, x: 0, y: 6)
+                }
+            } else {
+                HStack(spacing: 6) {
+                    Circle()
+                        .fill(themeManager.selectedAccent.senColor)
+                        .frame(width: 6, height: 6)
+                    Text("SUBZI CONTROLLING")
+                        .font(.geistBold(10))
+                        .foregroundColor(.textPrimary0E101AF4F1FB)
+                }
+                .padding(.horizontal, 12)
+                .padding(.vertical, 8)
+                .background(themeManager.white_white4)
+                .clipShape(Capsule())
+                .overlay(Capsule().stroke(themeManager.selectedAccent.senColor.opacity(0.3), lineWidth: 1))
+                .shadow(color: themeManager.accentTextColor.opacity(0.50), radius: 7, x: 0, y: 4)
+            }
+        }
+    }
+    
+    private var browserHeader: some View {
+        VStack(spacing: 0) {
+            HStack(alignment: .top, spacing: 12) {
+                headerIcon
+                headerTextView
+                Spacer()
+                headerCloseButton
+            }
+            .padding(16)
+            
+            AnimatedGradientDivider(isLoading: viewModel.browser.isLoading)
+            
+            headerPillArea
+                .padding(.horizontal, 16)
+                .padding(.vertical, 12)
+        }
+        .background(.bottomBGFFFFFF120A1F)
+        .background(
+            VStack {
+                themeManager.selectedAccent.senColor.opacity(0.15)
+                    .blur(radius: 40)
+                    .frame(height: 100)
+                Spacer()
+            }
+        )
+    }
+    
+    private var webViewArea: some View {
+        ZStack {
+            if viewModel.showSuccessScreen {
+                AgentSuccessView(viewModel: viewModel)
+                    .ignoresSafeArea(edges: .bottom)
+            } else {
                 AgentWebViewRepresentable(controller: viewModel.browser)
                     .ignoresSafeArea(edges: .bottom)
                 
-
                 if viewModel.isInitialLoading {
                     ZStack {
                         Color.white
@@ -427,50 +602,54 @@ struct AgentBrowserView: View {
                     .ignoresSafeArea()
                 }
             }
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                // Leading: Status Message
-                ToolbarItem(placement: .principal) {
-                    Text(viewModel.displayMessage)
-                        .font(.appMedium(14))
-                        .foregroundColor(.neutral800)
-                        .lineLimit(1)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                }
-                
-                // Trailing: Controls
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    HStack(spacing: 12) {
-                        if viewModel.needsIntervention {
-                            Button {
-                                viewModel.resume()
-                            } label: {
-                                Text("Reautomate")
-                                    .font(.appBold(12))
-                                    .foregroundColor(.white)
-                                    .padding(.horizontal, 12)
-                                    .padding(.vertical, 8)
-                                    .background(Color.navyBlueCTA700)
-                                    .cornerRadius(8)
+        }
+    }
+    
+    var body: some View {
+        NavigationStack {
+            VStack(spacing: 0) {
+                browserHeader
+                webViewArea
+            }
+            .overlay(
+                Group {
+                    if !viewModel.needsIntervention {
+                        RoundedRectangle(cornerRadius: 10)
+                            .stroke(themeManager.selectedAccent.senColor, lineWidth: 2)
+                            .overlay {
+                                RoundedRectangle(cornerRadius: 10)
+                                    .stroke(themeManager.selectedAccent.senColor.opacity(0.8), lineWidth: 8)
+                                    .blur(radius: 20)
+                                    .mask(
+                                        RoundedRectangle(cornerRadius: 0)
+                                            .fill(
+                                                LinearGradient(
+                                                    colors: [.white],
+                                                    startPoint: .top,
+                                                    endPoint: .bottom
+                                                )
+                                            )
+                                    )
                             }
-                        }
-                        
-                        Button {
-                            viewModel.cancel()
-                        } label: {
-                            Image(systemName: "xmark.circle.fill")
-                                .font(.title3)
-                                .foregroundColor(.neutral800)
-                        }
+                            .ignoresSafeArea()
                     }
                 }
-            }
-
+                    .allowsHitTesting(false)
+            )
+            .overlay(
+                Group {
+                    if viewModel.showSuccessScreen {
+                        LottieView(name: "onboarding_celebration", loopMode: .loop, isAspectFit: false)
+                            .ignoresSafeArea()
+                    }
+                }
+                    .allowsHitTesting(false)
+            )
+            .navigationBarHidden(true)
             .onReceive(viewModel.browser.$popupWebView) { popup in
                 showPopup = (popup != nil)
             }
             .sheet(isPresented: $showPopup, onDismiss: {
-                // User swiped down or popup closed — clear and reload parent to pick up session
                 if let current = viewModel.browser.webView.url {
                     viewModel.browser.webView.load(URLRequest(url: current))
                 }
@@ -482,6 +661,110 @@ struct AgentBrowserView: View {
                     }
                 }
             }
+        }
+    }
+}
+
+// MARK: - Success View
+struct AgentSuccessView: View {
+    @ObservedObject var viewModel: AgentViewModel
+    @EnvironmentObject var themeManager: ThemeManager
+    
+    var body: some View {
+        ZStack {
+            VStack(spacing: 24) {
+                Spacer()
+                
+                // Checkmark Circle
+                ZStack {
+                    Circle()
+                        .fill(LinearGradient(colors: [Color.green1DD07B, Color.green00A862], startPoint: .top, endPoint: .bottom))
+                        .frame(width: 64, height: 64)
+                        .shadow(color: Color.green1DD07B.opacity(0.55), radius: 15, x: 0, y: 0)
+                    
+                    Image(systemName: "checkmark")
+                        .font(.system(size: 24, weight: .bold))
+                        .foregroundColor(.white)
+                }
+                
+                // Texts
+                VStack(spacing: 12) {
+                    Text(viewModel.successIntent == .cancelSubscription ? "Membership canceled" : "Plan changed")
+                        .font(.geistBold(19))
+                        .foregroundColor(.textPrimary0E101AF4F1FB)
+                    
+                    let dateText = viewModel.completedFields?.billingDate ?? "the end of your billing cycle"
+                    //                let email = Constants.getUserDefaultsValue(for: Constants.userEmail) ?? "your email"
+                    
+                    Text("You'll keep streaming until **\(dateText)**.")// Confirmation sent to **\(email)**")
+                        .font(.geistRegular(12))
+                        .foregroundColor(.textPrimary0E101AF4F1FB.opacity(0.6))
+                        .multilineTextAlignment(.center)
+                        .padding(.horizontal, 32)
+                        .lineSpacing(4)
+                    
+                    if let price = viewModel.completedFields?.price, !price.isEmpty {
+                        HStack(spacing: 6) {
+                            Image("sparkle_green")
+                            //                            .resizable()
+                            //                            .renderingMode(.template)
+                                .frame(width: 11, height: 11)
+                            Text("You Saved \(price)")
+                                .font(.geistBold(11))
+                        }
+                        .foregroundColor(Color.success0EA8705CE4A8)
+                        .padding(.horizontal, 16)
+                        .padding(.vertical, 8)
+                        .background(Color.success0EA8705CE4A8.opacity(0.1))
+                        .clipShape(Capsule())
+                        .overlay(Capsule().stroke(Color.success0EA8705CE4A8.opacity(0.3), lineWidth: 1))
+                    }
+                }
+                
+                Spacer()
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .background(.bottomBGFFFFFF120A1F)
+        }
+    }
+}
+
+// MARK: - Animated Gradient Divider
+struct AnimatedGradientDivider: View {
+    var isLoading: Bool
+    @EnvironmentObject var themeManager: ThemeManager
+    @State private var start = UnitPoint(x: 1, y: 0.5)
+    @State private var end = UnitPoint(x: 2, y: 0.5)
+    
+    var body: some View {
+        if isLoading {
+            Rectangle()
+                .fill(
+                    LinearGradient(
+                        colors: [
+                            Color.clear,
+                            Color(red: 167/255, green: 25/255, blue: 221/255),
+                            Color(red: 124/255, green: 92/255, blue: 255/255),
+                            Color(red: 68/255, green: 137/255, blue: 235/255),
+                            Color.clear
+                        ],
+                        startPoint: start,
+                        endPoint: end
+                    )
+                )
+                .frame(height: 2)
+                .onAppear {
+                    // Reset state before animating to ensure it starts from the right
+                    start = UnitPoint(x: 1, y: 0.5)
+                    end = UnitPoint(x: 2, y: 0.5)
+                    withAnimation(.linear(duration: 1.4).repeatForever(autoreverses: false)) {
+                        start = UnitPoint(x: -1, y: 0.5)
+                        end = UnitPoint(x: 0, y: 0.5)
+                    }
+                }
+        } else {
+            Divider()
+                .background(Color.white.opacity(0.05))
         }
     }
 }
@@ -510,10 +793,11 @@ struct AgentOAuthPopupView: View {
 
 struct MessageBubble: View {
     let message: ChatMessage
-
     @ObservedObject var viewModel: AgentViewModel
     @EnvironmentObject var commonApiVM: CommonAPIViewModel
     @EnvironmentObject var themeManager : ThemeManager
+    @Environment(\.colorScheme) private var colorScheme
+    
     private var gradientPlaceholder: some View {
         Image("profile_pic")
             .resizable()
@@ -539,11 +823,11 @@ struct MessageBubble: View {
     
     private var systemMessageView: some View {
         Text(message.text)
-            .font(.geistMedium(12))
-            .foregroundColor(.secondary)
+            .font(.geistRegular(14))
+            .foregroundColor(Color.textPrimary0E101AF4F1FB)
             .padding(.horizontal, 16)
             .padding(.vertical, 8)
-            .background(Color.textPrimary0E101AF4F1FB)
+            .background(colorScheme == .light ? .surfaceLightFFFFFF : .white.opacity(0.0392))
             .cornerRadius(12)
             .frame(maxWidth: .infinity, alignment: .center)
     }
@@ -556,30 +840,54 @@ struct MessageBubble: View {
                 // Data Card (Integrated inside bubble)
                 // Only show if we don't have structured content already
                 if let fields = message.extractedFields, shouldShowCard(fields), !message.text.contains("Provider:") && !message.text.contains("Service:") {
-                    Text("Your current plan details:")
-                        .font(.geistRegular(12))
-                        .foregroundStyle(
-                            Color.textPrimary0E101AF4F1FB
-                        )
+                    let service = fields.serviceName ?? "Service"
+                    let planName = fields.plan ?? "Premium"
+                    
+                    Text("Your \(service) plan is \(planName)\nHere are the subscription details:")
+                        .font(.geistRegular(14))
+                        .foregroundStyle(Color.textPrimary0E101AF4F1FB)
                         .lineSpacing(4)
                     
-                    VStack(spacing: 8) {
-                        if let serviceName = fields.serviceName {
-                            DataRow(label: "Service", value: serviceName, color: .textPrimary0E101AF4F1FB)
+                    VStack(spacing: 0) {
+                        HStack(alignment: .top) {
+                            VStack(alignment: .leading, spacing: 6) {
+                                Text(service)
+                                    .font(.geistBold(13))
+                                    .foregroundColor(.textPrimary0E101AF4F1FB)
+                                
+                                let billing = fields.billingCycle ?? "monthly"
+                                Text("\(planName) · \(billing)")
+                                    .font(.jetBrainsMedium(10))
+                                    .foregroundColor(themeManager.textPrimaryLight6_dark62)
+                                    .lineLimit(2)
+                            }
+                            
+                            Spacer()
+                            
+                            Text("\(fields.currency ?? "")\(fields.price ?? "0")")
+                                .font(.geistBold(15))
+                                .foregroundColor(.textPrimary0E101AF4F1FB)
                         }
-                        if let billing = fields.billingCycle {
-                            DataRow(label: "Renewal", value: billing, color: .textPrimary0E101AF4F1FB)
+                        .padding(16)
+                        
+                        Divider()
+                            .background(colorScheme == .light ? Color.textPrimaryLight0E101A.opacity(0.14) : .textPrimaryDarkF4F1FB.opacity(0.10))
+                        
+                        HStack {
+                            Text("Renewal Date: \(fields.billingDate ?? "N/A")")
+                                .font(.geistMedium(10))
+                                .foregroundColor(themeManager.textPrimaryLight6_dark62)
+                            Spacer()
                         }
-                        if let plan = fields.plan {
-                            DataRow(label: "Plan", value: plan, color: .textPrimary0E101AF4F1FB)
-                        }
-                        if let price = fields.price {
-                            DataRow(label: "Price", value: "\(price) \(fields.currency ?? "")", color: .textPrimary0E101AF4F1FB)
-                        }
-                        if let nextDate = fields.billingDate {
-                            DataRow(label: "Next Date", value: nextDate, color: .textPrimary0E101AF4F1FB)
-                        }
+                        .padding(.horizontal, 16)
+                        .padding(.vertical, 12)
                     }
+                    .background(colorScheme == .light ? .surfaceLightFFFFFF : .white.opacity(0.0392))
+                    .cornerRadius(12)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 12)
+                            .stroke(colorScheme == .light ? Color.textPrimaryLight0E101A.opacity(0.14) : .textPrimaryDarkF4F1FB.opacity(0.10), lineWidth: 1)
+                    )
                     .padding(.bottom, 8)
                 }
                 
@@ -601,12 +909,13 @@ struct MessageBubble: View {
                     }
                     .padding(.top, 4)
                 }
-                    
+                
             }
             .padding(.horizontal, 11)
             .padding(.vertical, 8)
             .background(
-                themeManager.white_white4
+                colorScheme == .light ? .surfaceLightFFFFFF : .white.opacity(0.0392)
+                //                themeManager.white_white4
             )
             .overlay {
                 
@@ -617,8 +926,9 @@ struct MessageBubble: View {
                     bottomRight: 12
                 )
                 .stroke(
-                    Color.textPrimary0E101AF4F1FB
-                        .opacity(0.08),
+                    //                    Color.textPrimary0E101AF4F1FB
+                    //                        .opacity(0.08),
+                    colorScheme == .light ? .E_2_E_8_F_0 : .textPrimaryDarkF4F1FB.opacity(0.10),
                     lineWidth: 1
                 )
             }
@@ -641,7 +951,7 @@ struct MessageBubble: View {
                 if !message.text.isEmpty {
                     Text(renderInline(message.text))
                         .font(.geistSemiBold(14))
-                        .foregroundColor(Color.white)
+                        .foregroundColor(Color.textPrimaryDarkF4F1FB)
                         .lineSpacing(4)
                 }
                 
@@ -654,11 +964,11 @@ struct MessageBubble: View {
                 }
             }
             //.padding(.leading, (message.imageData != nil ? 8 : 16))
-           // .padding(.trailing, (message.imageData != nil ? 16 : 24))
+            // .padding(.trailing, (message.imageData != nil ? 16 : 24))
             .padding(.horizontal, 11)
             .padding(.vertical, 8)
             .background(
-                themeManager.accentGradient
+                themeManager.gradient(style: .horizontal)
             )
             .clipShape(
                 MessageBubbleShape(
@@ -684,7 +994,7 @@ struct MessageBubble: View {
         // Return true if we have any valid plan data
         return hasPlan || hasPrice
     }
-
+    
 }
 
 struct ExtractedDataCard: View {
@@ -693,13 +1003,13 @@ struct ExtractedDataCard: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
             Text(fields.serviceName ?? "Subscription Details")
-                .font(.appBold(16))
+                .font(.geistBold(16))
                 .foregroundColor(.navyBlueCTA700)
             
             Divider()
             
             VStack(spacing: 8) {
-
+                
                 DataRow(label: "Plan", value: fields.plan, color: .navyBlueCTA700)
                 DataRow(label: "Price", value: fields.price, color: .navyBlueCTA700)
                 DataRow(label: "Bill Date", value: fields.billingDate, color: .navyBlueCTA700)
@@ -860,27 +1170,27 @@ struct PlusMenuView: View {
                 )
         )
         .cornerRadius(24)
-    
-       /* VStack(spacing: 20) {
-            // Handle
-            Capsule()
-                .fill(Color.gray.opacity(0.3))
-                .frame(width: 150, height: 5)
-                .padding(.top, 16)
-            
-            HStack() {
-                PlusMenuButton(icon: "voiceBot") { onVoice() }
-                Spacer()
-                PlusMenuButton(icon: "camerBot") { onCamera() }
-            }
-            .padding(.bottom, 16)
-            .padding(.horizontal, 46)
-        }
-        .frame(maxWidth: .infinity)
-        .background(Color.white)
-        .cornerRadius(24)
-        .overlay(Rectangle().frame(height: 1).foregroundColor(.neutral100), alignment: .top)
-        .shadow(color: Color.black.opacity(0.05), radius: 10, y: -5)*/
+        
+        /* VStack(spacing: 20) {
+         // Handle
+         Capsule()
+         .fill(Color.gray.opacity(0.3))
+         .frame(width: 150, height: 5)
+         .padding(.top, 16)
+         
+         HStack() {
+         PlusMenuButton(icon: "voiceBot") { onVoice() }
+         Spacer()
+         PlusMenuButton(icon: "camerBot") { onCamera() }
+         }
+         .padding(.bottom, 16)
+         .padding(.horizontal, 46)
+         }
+         .frame(maxWidth: .infinity)
+         .background(Color.white)
+         .cornerRadius(24)
+         .overlay(Rectangle().frame(height: 1).foregroundColor(.neutral100), alignment: .top)
+         .shadow(color: Color.black.opacity(0.05), radius: 10, y: -5)*/
     }
 }
 
@@ -984,13 +1294,15 @@ extension View {
 
 struct ThinkingBubble: View {
     @EnvironmentObject var themeManager : ThemeManager
+    @Environment(\.colorScheme) private var colorScheme
+    
     var body: some View {
         HStack {
             HStack(alignment: .top, spacing: 5) {
                 
                 HStack(spacing: 4) {
                     Text("Thinking")
-                        .font(.geistMedium(15))
+                        .font(.geistRegular(14))
                         .foregroundColor(Color.textPrimary0E101AF4F1FB)
                     
                     AnimatedDots()
@@ -998,10 +1310,10 @@ struct ThinkingBubble: View {
                 .padding(.horizontal, 11)
                 .padding(.vertical, 8)
                 .background(
-                    themeManager.white_white4
+                    colorScheme == .light ? .surfaceLightFFFFFF : .white.opacity(0.0392)
+                    //                    themeManager.white_white4
                 )
                 .overlay {
-                    
                     MessageBubbleShape(
                         topLeft: 12,
                         topRight: 12,
@@ -1009,8 +1321,9 @@ struct ThinkingBubble: View {
                         bottomRight: 12
                     )
                     .stroke(
-                        Color.textPrimary0E101AF4F1FB
-                            .opacity(0.08),
+                        //                        Color.textPrimary0E101AF4F1FB
+                        //                            .opacity(0.08),
+                        colorScheme == .light ? .E_2_E_8_F_0 : .textPrimaryDarkF4F1FB.opacity(0.10),
                         lineWidth: 1
                     )
                 }
@@ -1162,15 +1475,16 @@ struct QuickRepliesRow: View {
                     } label: {
                         Text(reply)
                             .font(.geistSemiBold(13))
-                            .foregroundColor(themeManager.selectedAccent.senColor)
+                            .foregroundColor(themeManager.accentTextColor)
                             .padding(.horizontal, 16)
                             .padding(.vertical, 8)
                             .background(Color.clear)
                             .clipShape(Capsule())
                             .overlay(
                                 Capsule()
-                                    .stroke(themeManager.selectedAccent.senColor, lineWidth: 1)
+                                    .stroke(themeManager.accentTextColor, lineWidth: 1)
                             )
+                            .shadow(color: themeManager.accentTextColor.opacity(0.55), radius: 10, x: 0, y: 4)
                     }
                     .padding(.vertical, 5)
                     .padding(.leading, 5)

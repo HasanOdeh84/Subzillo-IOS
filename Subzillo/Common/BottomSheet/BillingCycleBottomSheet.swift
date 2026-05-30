@@ -33,12 +33,12 @@ struct BillingCycleBottomSheet: View {
     var body: some View {
         VStack {
             Capsule()
-                .fill(Color.grayCapsule)
-                .frame(width: 150, height: 5)
+                .fill(Color.capsuleBlack12White14)
+                .frame(width: 40, height: 5)
                 .padding(.top, 24)
             
             Text(LocalizedStringKey(header ?? ""))
-                .font(.appRegular(24))
+                .font(.geistRegular(24))
                 .foregroundColor(.neutralMain700)
                 .padding(.top,24)
             
@@ -103,7 +103,7 @@ struct BillingCycleBottomSheet: View {
                         } label: {
                             HStack {
                                 Text(LocalizedStringKey(billing))
-                                    .font(.appRegular(16))
+                                    .font(.geistRegular(16))
                                     .foregroundColor(.neutralMain700)
                                     .padding(.horizontal, 14)
                                     .frame(maxWidth: .infinity, alignment: .leading)
@@ -129,8 +129,8 @@ struct BillingCycleBottomSheet: View {
             }else{
                 Text("No data found")
                     .padding(30)
-                    .foregroundStyle(Color.gray)
-                    .font(.appRegular(16))
+                    .foregroundStyle(.textPrimary0E101AF4F1FB)
+                    .font(.geistRegular(16))
                 Spacer()
             }
 //            Spacer()

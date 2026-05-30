@@ -14,11 +14,13 @@ class PricingPlansViewModel: ObservableObject {
     var apiReference                                = NetworkRequest.shared
     @Published var pricingPlans                     : [PricingPlan] = []
     @Published var pricingPlanResponse              : PricingPlanResponse?
+    @Published var yearlyDiscount                   : DiscountData?
     private let router                              : AppIntentRouter
     private let sessionManager                      : SessionManager
     @Published var isSubscribe                      : Bool = false
     @Published var restoreSyncFailed                : Bool = false
     static let shared                               = PricingPlansViewModel()
+    @Published var isAlreadyLinkedSheetVisible      : Bool = false
     
     init(router: AppIntentRouter = .shared,sessionManager: SessionManager = .shared){
         self.router = router
@@ -157,10 +159,11 @@ class PricingPlansViewModel: ObservableObject {
             if backendUserId == "" || backendUserId == currentUserId {
                 completion(true)
             } else {
-                AlertManager.shared.showAlert(
-                    title   : "Subscription Alert",
-                    message : "This Apple ID is already linked to another Subzillo account. Please use the original account or a different Apple ID."
-                )
+                self.isAlreadyLinkedSheetVisible = true
+//                AlertManager.shared.showAlert(
+//                    title   : "Subscription Alert",
+//                    message : "This Apple ID is already linked to another Subzillo account. Please use the original account or a different Apple ID."
+//                )
                 completion(false)
             }
         }
@@ -191,6 +194,20 @@ class PricingPlansViewModel: ObservableObject {
                 }
             }
         }
+    }
+    
+    func getYearlyDiscount() {
+        self.yearlyDiscount = nil
+        apiReference.getApi(endPoint: APIEndpoint.getYearlyDiscount, token: authKey, responseType: getYearlyDiscountResponse.self)
+            .sink { [weak self] completion in
+                if case let .failure(error) = completion {
+                    self?.handleError(error,endPoint: APIEndpoint.getYearlyDiscount)
+                }
+            }
+        receiveValue: { [weak self] response in
+            self?.yearlyDiscount = response.data
+        }
+        .store(in: &self.subscriptions)
     }
     
     // MARK: - Handle errors

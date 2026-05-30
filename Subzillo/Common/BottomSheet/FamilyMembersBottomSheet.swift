@@ -102,8 +102,8 @@ struct FamilyMembersBottomSheet: View {
                     
                 } else {
                     Text("No data found")
-                        .font(.appRegular(16))
-                        .foregroundColor(.gray)
+                        .foregroundStyle(.textPrimary0E101AF4F1FB)
+                        .font(.geistRegular(16))
                         .padding(30)
                     
                     Spacer()

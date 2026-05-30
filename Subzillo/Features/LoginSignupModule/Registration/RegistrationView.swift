@@ -24,6 +24,7 @@ struct RegistrationView: View {
     @State var isEmailDisabled                          = false
     @State var isNameDisabled                           = false
     @State var appleEmail                               = ""
+    @State private var mergeAccSheetHeight              : CGFloat = .zero
     @Environment(\.dismiss) var dismiss
     @EnvironmentObject var themeManager                 : ThemeManager
     
@@ -201,6 +202,26 @@ struct RegistrationView: View {
                 }
             }
         }
+        .sheet(isPresented: $registerVM.isMergeAccountSheet) {
+            InfoAlertSheet(
+                onDelegate: {
+                    mergeAccountApi()
+                }, title                : "Merge account",
+                subTitle                : "Please reconnect your Gmail account to resume syncing.",
+                imageName               : "info",
+                buttonTitle             : "Ok",
+                isCancelButtonVisible   : true,
+                isImageVisible          : false,
+                isBgGradient            : true
+            )
+            .onPreferenceChange(InnerHeightPreferenceKey.self) { height in
+                if height > 0 {
+                    mergeAccSheetHeight = height
+                }
+            }
+            .presentationDragIndicator(.hidden)
+            .presentationDetents([.height(mergeAccSheetHeight)])
+        }
     }
     
     //MARK: - Methods
@@ -225,6 +246,28 @@ struct RegistrationView: View {
         } else {
             registerVM.register(input: input, verifyType: verifyData?.verifyType ?? 0, fromSocialLogin: fromSocialLogin, appleEmail: appleEmail, verifyData: verifyData, formattedPhNo: phoneNumber)
         }
+    }
+    
+    func mergeAccountApi(){
+        let phone = phoneNumber.normalizedPhoneNumber()
+        let countryCode = phoneNumber.trimmed == "" ? "" : (verifyData?.verifyType == 1 ? verifyData?.countryCode ?? "" : selectedCountry?.dialCode ?? "")
+        var input = RegisterRequest(userId              : verifyData?.userId ?? "",
+                                    fullName            : fullName.trimmed,
+                                    email               : verifyData?.verifyType == 1 ? email.trimmed : verifyData?.email ?? "",
+                                    countryCode         : countryCode,
+                                    phoneNumber         : verifyData?.verifyType == 1 ? verifyData?.phoneNumber ?? "" : phone.trimmed)
+        if fromSocialLogin {
+            input = RegisterRequest(userId              : verifyData?.userId ?? "",
+                                    fullName            : fullName.trimmed,
+                                    email               : email.trimmed,
+                                    countryCode         : phoneNumber.trimmed == "" ? "" : selectedCountry?.dialCode ?? "",
+                                    phoneNumber         : phone.trimmed)
+        }
+        let input1 = SendMergeOtpRequest(mergeLoginType  : verifyData?.verifyType ?? 0 == 1 ? 2 : 1,
+                                        email           : input.email,
+                                        countryCode     : input.countryCode,
+                                        phoneNumber     : input.phoneNumber)
+        registerVM.mergeAccount(input: input1, fullName: input.fullName)
     }
 }
 

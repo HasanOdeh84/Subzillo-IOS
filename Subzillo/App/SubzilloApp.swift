@@ -502,8 +502,8 @@ struct RootView: View {
             ExtractedSubscriptionsView(subscriptions: subscriptions, fromEmailSyncScreen: fromEmailSync, integrationId: integrationId)
         case .connectICloudView:
             ConnectICloudView()
-        case .AgentChatView:
-            AgentChatView()
+        case .AgentChatView(let autoMessage):
+            AgentChatView(autoMessage: autoMessage)
         case .splash:
             SplashView()
         case .profileTab:
@@ -524,6 +524,8 @@ struct RootView: View {
             PushPermissions()
         case .biometric:
             Biometric()
+        case .addFamilyMemberBottomSheet(let idVal, let header, let description, let buttonName, let buttonImg, let selectedCountry, let phoneNumber, let nickName, let selectedColor, let isEdit):
+            AddFamilyMemberBottomSheet(idVal: idVal, header: header, description: description, buttonName: buttonName, buttonImg: buttonImg, selectedCountry: selectedCountry, phoneNumber: phoneNumber, nickName: nickName, selectedColor: selectedColor, isEdit: isEdit)
         case .addNewCardSheet(let  nickName, let cardNumber, let cardName, let shouldCallAPI, let isEdit, let cardId, let selectedType, let isDefault):
             AddNewCardSheet(
                         nickName: nickName,

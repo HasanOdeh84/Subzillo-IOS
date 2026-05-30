@@ -54,6 +54,7 @@ struct PricingPlansView: View {
     @State private var platformAlertMessage     : String = ""
     @State private var pendingProduct           : (Product, String)?
     @State private var platformSheetHeight      : CGFloat = .zero
+    @State private var alreadyLinkedSheetHeight : CGFloat = .zero
     var fromPreview                             : Bool = false
     @State private var products: [SKProduct]    = []
     @State var planId                           : String?
@@ -109,7 +110,7 @@ struct PricingPlansView: View {
                     SegmentViewNew(
                         selectedSegment: $selectedSegment,
                         leftText: "Monthly",
-                        rightText: "Annual · −20%",
+                        rightText: (viewModel.yearlyDiscount?.discount ?? 0 == 0) ? "Annual" : "Annual · \(viewModel.yearlyDiscount?.discount ?? 0)%",
                         isUpgrade: true
                     )
                     .environmentObject(themeManager)
@@ -183,6 +184,7 @@ struct PricingPlansView: View {
             }
         }
         .onAppear {
+            viewModel.getYearlyDiscount()
             selectedSegment = selectedTab
             justAppeared = true
             Task {
@@ -251,6 +253,23 @@ struct PricingPlansView: View {
             .presentationDragIndicator(.hidden)
             .presentationDetents([.height(platformSheetHeight)])
         }
+        .sheet(isPresented: $viewModel.isAlreadyLinkedSheetVisible) {
+            SubscriptionAlertSheet(
+                onDelegate: {
+                    self.loadingStatus = nil
+                }, title                : "Subscription Alert",
+                subTitle                : "This Apple ID is already linked to another Subzillo account. Please use the original account or a different Apple ID.",
+                buttonTitle             : "Ok",
+                isBtn                   : false
+            )
+            .onPreferenceChange(InnerHeightPreferenceKey.self) { height in
+                if height > 0 {
+                    alreadyLinkedSheetHeight = height
+                }
+            }
+            .presentationDragIndicator(.hidden)
+            .presentationDetents([.height(alreadyLinkedSheetHeight)])
+        }
         .withToast()
     }
     
@@ -260,7 +279,7 @@ struct PricingPlansView: View {
         var attriString = AttributedString(
             localized: "This is an auto-renewing subscription. You will be charged automatically at the end of each billing period unless you cancel at least 24 hours before the renewal date. You can manage or cancel your subscription anytime from your Apple ID settings. For more information please visit our Terms & Conditions and Privacy Policy"
         )
-        attriString.foregroundColor = .textPrimary0E101AF4F1FB.opacity(0.36)
+        attriString.foregroundColor = themeManager.textPrimaryLight6_dark62
         if let privacyRange = attriString.range(of: "Privacy Policy") {
             attriString[privacyRange].link = URL(string: "app://privacy")
             attriString[privacyRange].foregroundColor = Color.textPrimary0E101AF4F1FB
@@ -334,7 +353,7 @@ struct PricingPlansView: View {
         
         let transactionId = transaction.transactionIdentifier ?? ""
         let originalTransactionId = transaction.original?.transactionIdentifier ?? transactionId
-
+        
         // 1. De-duplicate by Transaction ID
         guard !transactionId.isEmpty, !processedTransactionIds.contains(transactionId) else {
             return
@@ -388,7 +407,7 @@ struct PricingPlansView: View {
         
         // 3. Last resort: use the planId set by the button tap
         if let tappedPlanId = self.planId, !tappedPlanId.isEmpty {
-             return tappedPlanId
+            return tappedPlanId
         }
         
         return nil
@@ -478,14 +497,14 @@ struct PricingPlansView: View {
             title           : planName,
             price           : price,
             priceSubtitle   : isFreePlan ? nil : billingCycle,
-            features        : [plan.description ?? "Basic features"],
+            features        : plan.description ?? ["Basic features"],
             badgeColor      : isCurrentPlan ? Color.neutral600 : nil,
             buttonTitle     : buttonTitle,
             isCurrent       : isCurrentPlan,
             isLoading       : isLoadingPrice,
             downgradeText   : downGradeText,
-            isPopularPlan   : isSilverPlan ? true : false,
-            isBestPlan      : isGoldPlan ? true : false,
+            isPopularPlan   : plan.popularStatus ?? false,
+            isBestPlan      : plan.bestValueStatus ?? false,
             action          : {
                 self.loadingStatus = .loading
                 viewModel.runPrePaymentCheck { isSafe in
@@ -691,17 +710,17 @@ struct PricingPlanCard: View {
                             .padding(.top, 6)
                     }
                     
-                   /* if plan.buttonTitle != ""{
-                        CustomButton(title      : plan.buttonTitle,
-                                     background : plan.isCurrent ? Color.neutralDisabled200 : Color.primaryBlue800,
-                                     textColor  : plan.isCurrent ? Color.neutral500 : Color.white,
-                                     height     : 48,
-                                     isHidden   : plan.isCurrent ? true : false,
-                                     action: {
-                            plan.action?()
-                        })
-                        .disabled(plan.isCurrent || plan.isLoading)
-                    }*/
+                    /* if plan.buttonTitle != ""{
+                     CustomButton(title      : plan.buttonTitle,
+                     background : plan.isCurrent ? Color.neutralDisabled200 : Color.primaryBlue800,
+                     textColor  : plan.isCurrent ? Color.neutral500 : Color.white,
+                     height     : 48,
+                     isHidden   : plan.isCurrent ? true : false,
+                     action: {
+                     plan.action?()
+                     })
+                     .disabled(plan.isCurrent || plan.isLoading)
+                     }*/
                 }
                 .padding(18)
             }
@@ -809,16 +828,16 @@ struct PricingPlanCardold: View {
                     )
                     .disabled(plan.isCurrent || plan.isLoading)
                     
-//                    CustomButton(title      : plan.buttonTitle,
-//                                 background : plan.isCurrent ? Color.neutralDisabled200 : Color.primaryBlue800,
-//                                 shadow     : themeManager.accentShadowColor,
-//                                 textColor  : plan.isCurrent ? Color.neutral500 : Color.white,
-//                                 height     : 48,
-//                                 isHidden   : plan.isCurrent ? true : false,
-//                                 action: {
-//                        plan.action?()
-//                    })
-//                    .disabled(plan.isCurrent || plan.isLoading)
+                    //                    CustomButton(title      : plan.buttonTitle,
+                    //                                 background : plan.isCurrent ? Color.neutralDisabled200 : Color.primaryBlue800,
+                    //                                 shadow     : themeManager.accentShadowColor,
+                    //                                 textColor  : plan.isCurrent ? Color.neutral500 : Color.white,
+                    //                                 height     : 48,
+                    //                                 isHidden   : plan.isCurrent ? true : false,
+                    //                                 action: {
+                    //                        plan.action?()
+                    //                    })
+                    //                    .disabled(plan.isCurrent || plan.isLoading)
                 }
             }
             .padding(24)

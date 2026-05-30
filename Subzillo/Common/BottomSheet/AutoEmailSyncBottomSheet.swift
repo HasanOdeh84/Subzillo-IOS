@@ -14,7 +14,8 @@ struct AutoEmailSyncBottomSheet: View {
     @StateObject var settingsVM         = SettingsViewModel()
     @State private var selectedId       : String = ""
     var onSelect                        : (String) -> Void
-    
+    @EnvironmentObject var themeManager : ThemeManager
+    @Environment(\.colorScheme) private var colorScheme
     private let neverId = "never_sync_id"
     
     private var allSyncPeriods: [ListSyncPeriodResponseData] {
@@ -31,61 +32,123 @@ struct AutoEmailSyncBottomSheet: View {
         VStack(spacing: 0) {
             // Handle
             Capsule()
-                .fill(Color.grayCapsule)
-                .frame(width: 150, height: 5)
-                .padding(.vertical, 24)
+                .fill(Color.capsuleBlack12White14)
+                .frame(width: 40, height: 4)
+                .padding(.vertical, 16)
             
-            VStack(alignment: .leading, spacing: 32) {
-                // Title
-                Text("Auto Email Sync")
-                    .font(.appRegular(24))
-                    .foregroundColor(Color.neutralMain700)
-                    .frame(maxWidth: .infinity, alignment: .center)
-                
-                VStack(alignment: .leading, spacing: 20) {
+            VStack(alignment: .leading, spacing: 20) {
+                VStack(alignment: .center, spacing: 4) {
+                    // Title
+                    Text("Auto Email Sync")
+                        .font(.geistSemiBold(16))
+                        .foregroundColor(themeManager.textPrimaryLight_white)
+                    
                     // Subtitle
                     Text("Select your email sync duration")
-                        .font(.appSemiBold(16))
-                        .foregroundColor(Color.neutralMain700)
+                        .font(.geistMedium(12))
+                        .foregroundColor(themeManager.textPrimaryLight6_dark62)
+                }
+                .frame(maxWidth: .infinity, alignment: .center)
+                
+                VStack(alignment: .leading, spacing: 0) {
                     
-                    // Options
-                    VStack(alignment: .leading, spacing: 16) {
-                        if settingsVM.listSyncPeriods != nil {
-                            ForEach(allSyncPeriods, id: \.id) { period in
-                                Button(action: {
-                                    selectedId = period.id ?? ""
-                                }) {
+                    if settingsVM.listSyncPeriods != nil {
+                        //                        ForEach(allSyncPeriods, id: \.id) { period in
+                        //                            Button(action: {
+                        //                                selectedId = period.id ?? ""
+                        //                            }) {
+                        //                                VStack {
+                        //                                    HStack(spacing: 12) {
+                        //                                        Image(selectedId == period.id ? "SelectedRadio" : "UnSelectedRadio")
+                        //                                            .resizable()
+                        //                                            .frame(width: 24, height: 24)
+                        //
+                        //                                        Text(LocalizedStringKey(period.label ?? ""))
+                        //                                            .font(.geistMedium(13))
+                        //                                            .foregroundColor(Color.textPrimary0E101AF4F1FB)
+                        //                                        Spacer()
+                        //                                    }
+                        //                                    //.frame(height:54)
+                        //                                    .padding(18)
+                        //
+                        //                                    Divider()
+                        //                                        .overlay(colorScheme == .light ? Color.textPrimaryLight0E101A.opacity(0.10) : .white.opacity(0.08))
+                        //                                }
+                        //
+                        //                            }
+                        //                        }
+                        ForEach(Array(allSyncPeriods.enumerated()), id: \.element.id) { index, period in
+                            Button(action: {
+                                selectedId = period.id ?? ""
+                            }) {
+                                VStack(spacing: 0) {
                                     HStack(spacing: 12) {
                                         Image(selectedId == period.id ? "SelectedRadio" : "UnSelectedRadio")
                                             .resizable()
                                             .frame(width: 24, height: 24)
                                         
                                         Text(LocalizedStringKey(period.label ?? ""))
-                                            .font(.appRegular(14))
-                                            .foregroundColor(Color.neutralMain700)
+                                            .font(.geistMedium(13))
+                                            .foregroundColor(Color.textPrimary0E101AF4F1FB)
+                                        
+                                        Spacer()
+                                    }
+                                    .padding(18)
+                                    
+                                    if index < allSyncPeriods.count - 1 {
+                                        Divider()
+                                            .overlay(
+                                                colorScheme == .light
+                                                ? Color.textPrimaryLight0E101A.opacity(0.10)
+                                                : .white.opacity(0.08)
+                                            )
                                     }
                                 }
-                                .buttonStyle(PlainButtonStyle())
                             }
-                        } else {
-                            ProgressView()
-                                .frame(maxWidth: .infinity)
                         }
+                        
+                    } else {
+                        ProgressView()
+                            .frame(maxWidth: .infinity)
                     }
+                    
                 }
-                
-                // Submit Button
-                GradientBorderButton(
-                    title           : "Submit",
-                    isBtn           : true,
-                    buttonImage     : "update",
-                    action          : {
-                        onSelect(selectedId == neverId ? "" : selectedId)
-                        dismiss()
-                    },
-                    backgroundColor : .white,
-                    buttonHeight    : 56
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .background(
+                    RoundedRectangle(cornerRadius: 18)
+                        .fill(colorScheme == .light ? .surfaceLightFFFFFF : .white.opacity(0.0392))
+                    //                        .fill(themeManager.textPrimaryLight1_white8)
                 )
+                .overlay {
+                    RoundedRectangle(cornerRadius: 18)
+                        .stroke(
+                            colorScheme == .light ? Color.textPrimaryLight0E101A.opacity(0.10) : .white.opacity(0.08),
+                            lineWidth: 1
+                        )
+                }
+                .cornerRadius(18)
+                // Submit Button
+                
+                /*GradientBorderButton(
+                 title           : "Submit",
+                 isBtn           : true,
+                 buttonImage     : "update",
+                 action          : {
+                 onSelect(selectedId == neverId ? "" : selectedId)
+                 dismiss()
+                 },
+                 backgroundColor : .white,
+                 buttonHeight    : 56
+                 )*/
+                //MARK: Reset to default button
+                GradientBgButton(
+                    title       : "Submit",
+                    isSolid     : true,
+                    showChevron : false
+                ) {
+                    onSelect(selectedId == neverId ? "" : selectedId)
+                    dismiss()
+                }
                 .padding(.top, 8)
                 .disabled(selectedId.isEmpty)
             }
@@ -94,8 +157,8 @@ struct AutoEmailSyncBottomSheet: View {
             
             Spacer()
         }
-        .background(Color.white)
         .cornerRadius(24, corners: [.topLeft, .topRight])
+        .background(.bottomBGFFFFFF120A1F)
         .onAppear {
             settingsVM.listSyncPeriods(input: ListSyncPeriodRequest(userId: Constants.getUserId()))
         }

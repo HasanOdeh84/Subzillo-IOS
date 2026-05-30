@@ -94,8 +94,8 @@ struct ExtractedSubscriptionsView: View {
                         .frame(width: 59, height: 80, alignment: .center)
                     
                     Text("No subscriptions found")
-                        .font(.appBold(16))
-                        .foregroundColor(Color("TextPrimary_ 0E101A_F4F1FB"))
+                        .foregroundStyle(.textPrimary0E101AF4F1FB)
+                        .font(.geistSemiBold(16))
                     Spacer()
                 }
                 .frame(maxWidth: .infinity)

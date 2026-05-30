@@ -416,7 +416,6 @@ struct AddNewCardSheet: View {
             
         }
         .keyboardAdaptive()
-        .dismissKeyboardOnBackgroundTap()
         .applyAppBackground()
         .modifier(ToastModifier(toast: toastManager))
         .onChange(of: myCardsVM.isEdit) { value in

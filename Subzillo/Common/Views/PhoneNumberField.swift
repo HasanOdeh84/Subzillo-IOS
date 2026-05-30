@@ -64,8 +64,11 @@ struct PhoneNumberField: View {
         VStack(alignment: .leading, spacing: 8) {
             if header != ""{
                 Text(LocalizedStringKey(header ?? ""))
-                    .font(.appRegular(14))
-                    .foregroundColor(Color.textDim60637AA8A4C0)
+                    .font(.jetBrainsMedium(11))
+                    .tracking(1)
+                    .textCase(.uppercase)
+                    .foregroundStyle(themeManager.textPrimaryLight6_dark62)
+                    .padding(.bottom, 5)
             }
             
             VStack(spacing: 4) {
@@ -183,10 +186,20 @@ struct PhoneNumberField: View {
                         }
                     }
                 }
-                .frame(height: 56)
-                .background(Color.cardBgLoginFFFFFFFFFFFF)
-                .cornerRadius(14)
-                .overlay(selectionFieldBorderView)
+                .frame(height: 52)
+                .background(themeManager.white_white4)
+                .overlay {
+                    
+                    RoundedRectangle(cornerRadius: 14)
+                        .stroke(
+                            Color.textPrimary0E101AF4F1FB
+                                .opacity(0.08),
+                            lineWidth: 1
+                        )
+                }
+                .clipShape(
+                    RoundedRectangle(cornerRadius: 14)
+                )
 //                .overlay(
 //                    RoundedRectangle(cornerRadius: 14)
 //                        .stroke(isExpanded ? themeManager.accentGradient : LinearGradient(colors: [Color.cardBorderE2E8F0E2E8F0], startPoint: .leading, endPoint: .trailing), lineWidth: 1)

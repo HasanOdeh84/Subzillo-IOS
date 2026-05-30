@@ -65,7 +65,8 @@ class VoiceCommandViewModel: NSObject, ObservableObject, AVAudioPlayerDelegate, 
                 if storedSubscriptions.isEmpty{
                     self.showErrorPopup = true
                 }else{
-                    if attemptCount > response.data?.userFinalRecordingCount ?? 0 {
+                    /* removed voice missing details screen
+                     if attemptCount > response.data?.userFinalRecordingCount ?? 0 {
                         showMissingDetailsBottomSheet = false
                         router.navigate(
                             to: .subscriptionPreviewView(
@@ -81,7 +82,17 @@ class VoiceCommandViewModel: NSObject, ObservableObject, AVAudioPlayerDelegate, 
                         print("attemptCount \(attemptCount)")
                         print("Stored subscriptions \(storedSubscriptions)")
                         showMissingDetailsBottomSheet = true
-                    }
+                    }*/
+                    showMissingDetailsBottomSheet = false
+                    router.navigate(
+                        to: .subscriptionPreviewView(
+                            subscriptionsData   : storedSubscriptions,
+                            content             : "",
+                            isFromImage         : false,
+                            audioUrl            : mergedAudioURL
+                        )
+                    )
+                    return
                 }
                 return
             }
@@ -218,7 +229,18 @@ class VoiceCommandViewModel: NSObject, ObservableObject, AVAudioPlayerDelegate, 
         // Still missing + attempts left → show bottom sheet
         print("attemptCount \(attemptCount)")
         print("Stored subscriptions \(storedSubscriptions)")
+        /* removed voice missing details screen
         showMissingDetailsBottomSheet = true
+         */
+        showMissingDetailsBottomSheet = false
+        router.navigate(
+            to: .subscriptionPreviewView(
+                subscriptionsData   : storedSubscriptions,
+                content             : "",
+                isFromImage         : false,
+                audioUrl            : mergedAudioURL
+            )
+        )
     }
     
     func resetVoiceFlow() {
