@@ -34,10 +34,23 @@ struct NotificationData: Identifiable, Equatable, Codable {
     var createdAt             : String?
     var type                  : Int?
     var subscriptionId        : String?
+    var redirectLink          : String?
+    var notificationData      : NotificationDataObj?
     
     enum CodingKeys: String, CodingKey {
-        case id, title, message, readStatus, createdAt, type, subscriptionId
+        case id, title, message, readStatus, createdAt, type, subscriptionId, notificationData
     }
+}
+
+struct NotificationDataObj: Equatable, Codable {
+    var type                    : String?
+    var image                   : String?
+    var title                   : String?
+    var message                 : String?
+    var redirectLink            : String?
+    var marketingNotificationId : String?
+    var email                   : String?
+    var integrationId           : String?
 }
 
 public struct MarkNotificationReadRequest: Codable {

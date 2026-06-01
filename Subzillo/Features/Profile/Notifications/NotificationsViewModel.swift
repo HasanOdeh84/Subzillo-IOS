@@ -7,6 +7,7 @@
 
 import Foundation
 import Combine
+import UIKit
 
 class NotificationsViewModel: ObservableObject {
     
@@ -119,13 +120,19 @@ class NotificationsViewModel: ObservableObject {
             }
             switch notificationsList[index].type ?? 0{
             case 1:  navigate(to: .connectEmail)
-            case 2:  navigate(to: .subscriptionMatchView(fromList: true, subscriptionId: notificationsList[index].subscriptionId ?? ""))
+            case 2:
+                if notificationsList[index].subscriptionId ?? "" != ""{
+                    navigate(to: .subscriptionMatchView(fromList: true, subscriptionId: notificationsList[index].subscriptionId ?? ""))
+                }
             case 3:  navigate(to: .pricingPlans())//removed as now, we don't have this type
             case 4:  navigate(to: .inviteFriends())
             case 5:  navigate(to: .home)
             case 6:  navigate(to: .inviteFriends())
             case 7:  navigate(to: .home)
-            case 8:  navigate(to: .home) //need to change this
+            case 8:
+                if let urlString = notificationsList[index].notificationData?.redirectLink, let url = URL(string: urlString) {
+                    UIApplication.shared.open(url)
+                }
             default:
                 break
             }

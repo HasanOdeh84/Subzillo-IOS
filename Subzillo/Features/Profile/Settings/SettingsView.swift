@@ -360,12 +360,12 @@ struct SettingsView: View {
                                         )
                                     
                                     // Subtitle
-                                    Text("This cannot be undone")
+                                   /* Text("This cannot be undone")
                                         .font(.geistRegular(12))
                                         .foregroundStyle(
                                             Color.textPrimary0E101AF4F1FB
                                                 .opacity(0.6)
-                                        )
+                                        )*/
                                 }
                                 
                                 Spacer()
@@ -483,7 +483,7 @@ struct SettingsView: View {
                             hideManualBtn   : true)
             .id(UUID())
             .presentationDragIndicator(.hidden)
-            .presentationDetents([.height(500)])
+            .presentationDetents([.height(490)])
         }
     }
     //MARK: - Biometric methods

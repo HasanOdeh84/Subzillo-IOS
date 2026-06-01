@@ -8,7 +8,21 @@
 import SwiftUI
 import SDWebImageSwiftUI
 
+
+struct EditProfileDraft {
+    var email            = ""
+    var phoneNumber      = ""
+    var countryCode      : Country?
+    var selectedCurrency : Currency?
+    var fullName         = ""
+    var subscriptions    : Int? = nil
+    var spending         : Int? = nil
+    var typeVerify       = 1
+}
+
 struct EditProfileView: View {
+    
+    
     
     // MARK: - Properties
     @StateObject var profileVM          = ProfileViewModel()
@@ -51,6 +65,8 @@ struct EditProfileView: View {
     
     private let subscriptionOptions         = ["<5", "6-15", "16-30", "30+"]
     private let spendingOptions             = ["$50-$100", "$100-$200", "$200+"]
+    
+    @State private var didLoad = false
     
     // Computed states
     private var isEmailChanged: Bool {
@@ -266,6 +282,7 @@ struct EditProfileView: View {
             .keyboardAdaptive()
             .applyAppBackground()
             .onAppear {
+                
                 //                if !profileVM.hasLoadedInitialData {
                 getUserDetailsApi()
                 //                    loadProfileData()
@@ -284,6 +301,18 @@ struct EditProfileView: View {
             .onChange(of: profileVM.isUpdate) { value in
                 if value {
                     if accountTypeVerify == 2 || accountTypeVerify == 3 {
+                        
+                        commonApiVM.editProfileDraft = EditProfileDraft(
+                            email: email,
+                            phoneNumber: phoneNumber,
+                            countryCode: selectedCountry,
+                            selectedCurrency: selectedCurrency,
+                            fullName: fullName,
+                            subscriptions: selectedSubscriptions,
+                            spending: selectedSpending,
+                            typeVerify: accountTypeVerify
+                        )
+                        
                         router.navigate(to: .verifyOtp(fromLogin: false, isEditProfile: true, editEmail: email, editPhone: phoneNumber, editCountryCode: selectedCountry?.dialCode ?? "", editVerifyType: accountTypeVerify == 2 ? 2 : 1))
                     } else {
                         router.pop()
@@ -297,7 +326,7 @@ struct EditProfileView: View {
                     commonApiVM.getUserInfo(input: getUserInfoRequest(userId: Constants.getUserId()))
                 })
                 .presentationDragIndicator(.hidden)
-                .presentationDetents([.height(315)])
+                .presentationDetents([.height(430)])
                 .interactiveDismissDisabled(isUploading)
             }
         }
@@ -434,6 +463,18 @@ struct EditProfileView: View {
         
         if let countryCode = info.countryCode {
             selectedCountry = commonApiVM.countriesResponse?.first(where: { $0.dialCode == countryCode || $0.countryCode == countryCode })
+        }
+        
+        if let draft = commonApiVM.editProfileDraft {
+
+            email = draft.email
+            phoneNumber = draft.phoneNumber
+            fullName = draft.fullName
+
+            selectedSubscriptions = draft.subscriptions
+            selectedSpending = draft.spending
+            
+            accountTypeVerify = draft.typeVerify
         }
     }
     

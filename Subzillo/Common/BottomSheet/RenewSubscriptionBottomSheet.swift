@@ -37,7 +37,13 @@ struct RenewSubscriptionBottomSheet: View {
                         .renderingMode(.template)
                         .foregroundStyle(themeManager.accentGradient)
                         .frame(width: 80, height: 80)
-                        .padding(.bottom, 18)
+//                        .padding(.bottom, 18)
+                }else if title == "Renew Subscription"{
+                    Image("renew_new")
+                        .renderingMode(.template)
+                        .foregroundStyle(themeManager.accentGradient)
+                        .frame(width: 80, height: 80)
+                    //                        .padding(.bottom, 18)
                 }
                 
                 VStack(spacing: 12) {
@@ -66,17 +72,28 @@ struct RenewSubscriptionBottomSheet: View {
                     )
                     
                     if btn2 != ""{
-                        
-                        GradientBorderButtonNew(
-                            title           : btn2,
-                            isBtn           : true,
-                            buttonImage     : "plusicon",
-                            action          : {
-                                dismiss()
-                                onRenewWithChanges()
-                            },
-                            backgroundColor : themeManager.selectedAccent.senColor
-                        )
+                        if title == "Renew Subscription" || isLoginMethods{
+                            GradientBgButton(
+                                title       : btn2,
+                                isSolid     : true,
+                                showChevron : false,
+                                action      : {
+                                    dismiss()
+                                    onRenewWithChanges()
+                                }
+                            )
+                        }else{
+                            GradientBorderButtonNew(
+                                title           : btn2,
+                                isBtn           : true,
+                                buttonImage     : "plusicon",
+                                action          : {
+                                    dismiss()
+                                    onRenewWithChanges()
+                                },
+                                backgroundColor : themeManager.selectedAccent.senColor
+                            )
+                        }
                     }
                     
                     if btn3 != "" && isLoginMethods == false {

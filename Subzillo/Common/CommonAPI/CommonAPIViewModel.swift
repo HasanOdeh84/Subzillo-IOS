@@ -11,6 +11,7 @@ import SwiftUI
 class CommonAPIViewModel: ObservableObject {
     
     //MARK: - Properties
+    @Published var editProfileDraft     : EditProfileDraft?
     private var subscriptions           = Set<AnyCancellable>()
     var apiReference                    = NetworkRequest.shared
     @Published var currencyResponse     : [Currency]?

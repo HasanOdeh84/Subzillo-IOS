@@ -100,6 +100,17 @@ struct ManualEntryView: View {
     @State var isCurrencyUpdate                 = false
     var isFromEmail                             : Bool = false
     var fromEmailSync                           : Bool = false
+    @State private var paymentSearchText        : String = ""
+    
+    var filteredPaymentMethods: [PaymentMethod] {
+        if paymentSearchText.isEmpty {
+            return commonApiVM.paymentMethodResponse ?? []
+        }
+        return commonApiVM.paymentMethodResponse?.filter {
+            $0.name?.localizedCaseInsensitiveContains(paymentSearchText) ?? false
+        } ?? []
+    }
+    
     @EnvironmentObject var themeManager         : ThemeManager
     
     //MARK: - body
@@ -176,6 +187,7 @@ struct ManualEntryView: View {
                                 .font(.geistMedium(12))
                                 .foregroundColor(themeManager.textPrimaryLight6_dark62)
                         }
+                        .frame(maxWidth: .infinity, alignment: .leading)
                         .padding(.top, 20)
                         
                         //MARK: Service field
@@ -535,18 +547,33 @@ struct ManualEntryView: View {
                         
                         if isMoreEnable == true {
                             
-                            Button(action: selectpaymentMethod) {
-                                FieldView(text: $paymentMethod, textValue: paymentMethod, title: "Payment Method", image: "Calendar2", placeHolder: "Select payment method", isButton: true, isText: true, isPayment: true)
-                            }
-                            .sheet(isPresented: $showPaymentMethodSheet) {
-                                PaymentMethodsSheet(selectedPaymentMethod: $selectedPayment, paymentMethodResponse:commonApiVM.paymentMethodResponse, header: "Select Payment Method", placeholder: "Search")
-                                    .presentationDetents([.large])
-                                    .presentationDragIndicator(.hidden)
-                            }
-                            .onChange(of: selectedPayment) { newValue in
-                                guard let newValue = newValue else { return }
-                                isCards = newValue.status ?? false
-                                paymentMethod = newValue.name!
+                            VStack(alignment: .leading, spacing: 8) {
+                                Text("Payment Method")
+                                    .font(.jetBrainsMedium(11))
+                                    .tracking(1)
+                                    .textCase(.uppercase)
+                                    .foregroundColor(themeManager.textPrimaryLight6_dark62)
+                                    .padding(.leading, 5)
+                                
+                                InlineSelectionView(
+                                    title                   : "",
+                                    items                   : filteredPaymentMethods,
+                                    selectedItem            : $selectedPayment,
+                                    isExpanded              : $showPaymentMethodSheet,
+                                    searchText              : $paymentSearchText,
+                                    placeholder             : "Search payment method",
+                                    labelProvider           : { $0.name ?? "" },
+                                    flagProvider            : nil,
+                                    detailProvider          : nil,
+                                    secondaryDetailProvider : nil,
+                                    isPayment               : true
+                                )
+                                .onChange(of: selectedPayment) { newValue in
+                                    guard let newValue = newValue else { return }
+                                    isCards = newValue.status ?? false
+                                    paymentMethod = newValue.name ?? ""
+                                }
+                                .padding(.horizontal, 5)
                             }
                             if isCards == true {
                                 ListView(type: .cards, title: "Which card is linked to this subscription?", addMore: true, data: $cardsData, selectedIndex: $cardIndex,onDismiss: {
@@ -687,7 +714,7 @@ struct ManualEntryView: View {
                         //                        .padding(.bottom, 120)
                     }
                 }
-                .padding(.horizontal, 15)
+                .padding(.horizontal, 20)
                 .padding(.top, 24)
                 
                 
@@ -3073,7 +3100,7 @@ struct ReminderSliderView: View {
                 
                 GeometryReader { geometry in
                     let sliderWidth = geometry.size.width
-                    let thumbWidth: CGFloat = 28
+                    let thumbWidth: CGFloat = 20
                     let trackHeight: CGFloat = 8
                     let range: ClosedRange<Double> = 0...14
                     let percentage = CGFloat((Double(reminderDays) - range.lowerBound) / (range.upperBound - range.lowerBound))
@@ -3084,6 +3111,14 @@ struct ReminderSliderView: View {
                         RoundedRectangle(cornerRadius: trackHeight / 2)
                             .fill(themeManager.textPrimaryLight8_white8)
                             .frame(height: trackHeight)
+                            .overlay(
+                                RoundedRectangle(cornerRadius: trackHeight / 2)
+                                    .stroke(
+                                        themeManager.black_white.opacity(0.08),
+                                        lineWidth: 1
+                                    )
+                            )
+                        
                         
                         // Active Track
                         RoundedRectangle(cornerRadius: trackHeight / 2)
@@ -3091,9 +3126,9 @@ struct ReminderSliderView: View {
                             .frame(width: activeWidth + thumbWidth / 2, height: trackHeight)
                         
                         // Thumb
-                        RoundedRectangle(cornerRadius: 12)
-                            .fill(Color.white)
-                            .frame(width: thumbWidth, height: 16)
+                        RoundedRectangle(cornerRadius: thumbWidth/2)
+                            .fill(themeManager.accentGradient)
+                            .frame(width: thumbWidth, height: thumbWidth)
                             .shadow(color: Color.black.opacity(0.15), radius: 2, x: 0, y: 1)
                             .offset(x: activeWidth)
                             .gesture(

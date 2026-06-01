@@ -124,6 +124,9 @@ class AppDelegate: NSObject, ObservableObject, UIApplicationDelegate, UNUserNoti
             case 3:  return .pricingPlans() //removed as now, we don't have this type
             case 4:  return .inviteFriends()
             case 5:  return .home
+            case 6:  return .inviteFriends()
+            case 7:  return .home
+            case 8:  return .notifications
             default: return .notifications
             }
         }()
@@ -375,7 +378,7 @@ struct RootView: View {
         .sheet(isPresented: $sheetManager.isOfflineSheetVisible) {
             OfflineSheet()
                 .presentationDragIndicator(.hidden)
-                .presentationDetents([.height(540)])
+                .presentationDetents([.height(590)])
         }
         .sheet(isPresented: $sheetManager.isUpgradeSheetVisible) {
             InfoAlertSheet(

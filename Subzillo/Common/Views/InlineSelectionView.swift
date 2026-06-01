@@ -21,10 +21,11 @@ struct InlineSelectionView<T: Hashable>: View {
     
     // Closures for data extraction
     let labelProvider: (T) -> String
-    let flagProvider: (T) -> String
+    let flagProvider: ((T) -> String)?
     let detailProvider: ((T) -> String)?
     let secondaryDetailProvider: ((T) -> String)? // For Currency symbol
     var showSelectionField: Bool = true
+    var isPayment   : Bool = false
     
     @EnvironmentObject var themeManager: ThemeManager
     @Environment(\.colorScheme) private var systemScheme
@@ -67,12 +68,20 @@ struct InlineSelectionView<T: Hashable>: View {
             }
         } label: {
             HStack(spacing: 12) {
-                flagView(url: selectedItem.map(flagProvider) ?? "")
+                if let flagProvider = flagProvider {
+                    flagView(url: selectedItem.map(flagProvider) ?? "")
+                }
+                
+                if isPayment{
+                    Image("Calendar2")
+                        .renderingMode(.template)
+                        .foregroundStyle(themeManager.accentTextColor)
+                }
                 
                 VStack(alignment: .leading, spacing: 2) {
-                    Text(selectedItem.map(labelProvider) ?? "Select Options")
-                        .font(.geistSemiBold(16))
-                        .foregroundColor(Color.textPrimary0E101AF4F1FB)
+                    Text(selectedItem.map(labelProvider) ?? (isPayment ? "Select payment method" : "Select Options"))
+                        .font(isPayment ? .geistRegular(15) : .geistSemiBold(16))
+                        .foregroundColor(isPayment ? themeManager.textPrimaryLight6_dark62 : Color.textPrimary0E101AF4F1FB)
                     
                     if let detail = detailProvider, let selected = selectedItem {
                         Text(detail(selected))
@@ -90,10 +99,15 @@ struct InlineSelectionView<T: Hashable>: View {
                         .padding(.trailing, 8)
                 }
                 
-                Image(systemName: "chevron.down")
-                    .font(.system(size: 14, weight: .bold))
-                    .foregroundColor(Color.textDim60637AA8A4C0)
-                    .rotationEffect(.degrees(isExpanded ? 180 : 0))
+                if isPayment{
+                    Image("downArrow")
+                        .rotationEffect(.degrees(isExpanded ? 180 : 0))
+                }else{
+                    Image(systemName: "chevron.down")
+                        .font(.system(size: 14, weight: .bold))
+                        .foregroundColor(Color.textDim60637AA8A4C0)
+                        .rotationEffect(.degrees(isExpanded ? 180 : 0))
+                }
             }
             .padding(.horizontal, 16)
             .frame(height: 60)
@@ -204,7 +218,9 @@ struct InlineSelectionView<T: Hashable>: View {
         let isSelected = item == selectedItem
         
         HStack(spacing: 12) {
-            flagView(url: flagProvider(item))
+            if let flagProvider = flagProvider {
+                flagView(url: flagProvider(item))
+            }
             
             VStack(alignment: .leading, spacing: 2) {
                 Text(labelProvider(item))

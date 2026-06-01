@@ -61,7 +61,7 @@ struct AgentChatView: View {
                 viewModel.sendImage(image)
             })
             .presentationDragIndicator(.hidden)
-            .presentationDetents([.height(470)])
+            .presentationDetents([.height(430)])
             .interactiveDismissDisabled(isUploading)
         }
         .onChange(of: selectedImage) { newImage in

@@ -45,12 +45,12 @@ struct PricingPlanLoadingView: View {
     private var loadingContent: some View {
         VStack(spacing: 12) {
             Text("Loading...")
-                .font(.appBold(20))
-                .foregroundColor(Color.primaryBlue800)
+                .font(.geistBold(20))
+                .foregroundColor(themeManager.accentTextColor)
             
             Text("Please wait")
-                .font(.appMedium(16))
-                .foregroundColor(.black)
+                .font(.geistMedium(16))
+                .foregroundColor(.textPrimary0E101AF4F1FB)
                 .multilineTextAlignment(.center)
                 .lineSpacing(4)
         }
@@ -66,25 +66,34 @@ struct PricingPlanLoadingView: View {
             
             VStack(spacing: 12) {
                 Text("Payment Failed")
-                    .font(.appBold(20))
-                    .foregroundColor(Color.primaryBlue800)
+                    .font(.geistBold(20))
+                    .foregroundColor(themeManager.accentTextColor)
                 
                 Text("Oops! Something went wrong, please try again or use a different payment method")
-                    .font(.appMedium(16))
-                    .foregroundColor(.black)
+                    .font(.geistMedium(16))
+                    .foregroundColor(.textPrimary0E101AF4F1FB)
                     .multilineTextAlignment(.center)
                     .lineSpacing(4)
                     .padding(.horizontal, 10)
             }
             
-            CustomButton(title      : "Try Again",
-                         background : Color.primaryBlue800,
-                         shadow     : themeManager.accentShadowColor,
-                         textColor  : .white,
-                         height     : 52,
-                         action     : {
-                onTryAgain?()
-            })
+//            CustomButton(title      : "Try Again",
+//                         background : Color.primaryBlue800,
+//                         shadow     : themeManager.accentShadowColor,
+//                         textColor  : .white,
+//                         height     : 52,
+//                         action     : {
+//                onTryAgain?()
+//            })
+            
+            GradientBgButton(
+                title       : "Try Again",
+                isSolid     : true,
+                showChevron : false,
+                action      : {
+                    onTryAgain?()
+                }
+            )
             .padding(.top, 8)
         }
     }

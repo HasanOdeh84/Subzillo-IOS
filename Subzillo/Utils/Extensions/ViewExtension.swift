@@ -143,7 +143,9 @@ struct DoneButtonToolbar1: ViewModifier {
                             for: nil
                         )
                     }
-                    .dynamicTypeSize(.medium) // <-- Add this to limit text scaling
+                    //.dynamicTypeSize(.medium) // <-- Add this to limit text scaling*/
+                    .lineLimit(1)
+                    .fixedSize()
                 }
             }
     }

@@ -29,66 +29,95 @@ struct OfflineSheet: View {
                     .padding(.bottom, 16)
                 
                 Text("You're Offline")
-                    .font(.geistBold(24))
-                    .foregroundColor(Color.neutralMain700)
+                    .font(.geistSemiBold(16))
+                    .foregroundColor(Color.textPrimary0E101AF4F1FB)
                 
                 Text("Some features are limited without internet")
-                    .font(.appRegular(18))
-                    .foregroundColor(Color.neutralMain700)
+                    .font(.geistMedium(14))
+                    .foregroundColor(themeManager.textPrimaryLight6_dark62)
                     .multilineTextAlignment(.center)
             }
             
-            Text("Available Offline:")
-                .font(.appSemiBold(16))
-                .foregroundColor(Color.neutralMain700)
-                .multilineTextAlignment(.leading)
+            VStack{
+                Text("Available Offline:")
+                    .font(.geistBold(16))
+                    .foregroundColor(Color.textPrimary0E101AF4F1FB)
+                    .multilineTextAlignment(.leading)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.bottom, 6)
+                
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("• View existing subscriptions")
+                        .font(.geistRegular(16))
+                        .foregroundColor(themeManager.textPrimaryLight6_dark62)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                }
                 .frame(maxWidth: .infinity, alignment: .leading)
-                .padding(.top, 20)
-                .padding(.bottom, 8)
-            
-            VStack(alignment: .leading, spacing: 8) {
-                Text("• View existing subscriptions")
-                    .font(.appRegular(16))
-                    .foregroundColor(Color.neutralMain700)
-                    .frame(maxWidth: .infinity, alignment: .leading)
+//                .padding(.horizontal, 30)
             }
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(.horizontal, 30)
+            .padding(16)
+            .background(themeManager.white_white4)
+            .cornerRadius(16)
+            .overlay(
+                RoundedRectangle(cornerRadius: 16)
+                    .stroke(.textPrimary0E101AF4F1FB.opacity(0.16), lineWidth: 1)
+            )
+            .padding(.top, 20)
+            .padding(.bottom, 12)
             
-            Text("Requires Internet:")
-                .font(.appSemiBold(16))
-                .foregroundColor(Color.neutralMain700)
-                .multilineTextAlignment(.leading)
+            VStack{
+                Text("Requires Internet:")
+                    .font(.geistBold(16))
+                    .foregroundColor(Color.textPrimary0E101AF4F1FB)
+                    .multilineTextAlignment(.leading)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.bottom, 6)
+                
+                VStack(alignment: .leading, spacing: 6) {
+                    Text("• Email scanning")
+                        .font(.geistRegular(16))
+                        .foregroundColor(themeManager.textPrimaryLight6_dark62)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                    Text("• Voice recognition")
+                        .font(.geistRegular(16))
+                        .foregroundColor(themeManager.textPrimaryLight6_dark62)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                    Text("• OCR image processing")
+                        .font(.geistRegular(16))
+                        .foregroundColor(themeManager.textPrimaryLight6_dark62)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                    Text("• Sync across devices")
+                        .font(.geistRegular(16))
+                        .foregroundColor(themeManager.textPrimaryLight6_dark62)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                }
                 .frame(maxWidth: .infinity, alignment: .leading)
-                .padding(.top, 20)
-                .padding(.bottom, 8)
-            
-            VStack(alignment: .leading, spacing: 8) {
-                Text("• Email scanning")
-                    .font(.appRegular(16))
-                    .foregroundColor(Color.neutralMain700)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                Text("• Voice recognition")
-                    .font(.appRegular(16))
-                    .foregroundColor(Color.neutralMain700)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                Text("• OCR image processing")
-                    .font(.appRegular(16))
-                    .foregroundColor(Color.neutralMain700)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                Text("• Sync across devices")
-                    .font(.appRegular(16))
-                    .foregroundColor(Color.neutralMain700)
-                    .frame(maxWidth: .infinity, alignment: .leading)
+//                .padding(.horizontal, 30)
             }
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(.horizontal, 30)
+            .padding(16)
+            .background(themeManager.white_white4)
+            .cornerRadius(16)
+            .overlay(
+                RoundedRectangle(cornerRadius: 16)
+                    .stroke(.textPrimary0E101AF4F1FB.opacity(0.16), lineWidth: 1)
+            )
+            .padding(.bottom, 16)
             
-            CustomButton(title: "Ok",shadow: themeManager.accentShadowColor, action: onOkAction)
-                .padding(.top, 24)
-                .padding(.bottom,20)
+            GradientBgButton(
+                title       : "Ok",
+                isSolid     : true,
+                showChevron : false,
+                action      : {
+                    onOkAction()
+                }
+            )
+            
+//            CustomButton(title: "Ok",shadow: themeManager.accentShadowColor, action: onOkAction)
+//                .padding(.top, 24)
+//                .padding(.bottom,20)
         }
         .padding(.horizontal, 20)
+        .background(.bottomBGFFFFFF120A1F)
     }
     
     //MARK: - Button actions

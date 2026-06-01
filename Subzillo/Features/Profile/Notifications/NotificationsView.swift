@@ -110,10 +110,10 @@ struct NotificationsView: View {
             
             // MARK: - Main Notifications Area
             if viewModel.isLoading && viewModel.notificationsList.isEmpty {
-                Spacer()
-                ProgressView()
-                    .progressViewStyle(CircularProgressViewStyle(tint: themeManager.currentAccent.senColor))
-                Spacer()
+//                Spacer()
+//                ProgressView()
+//                    .progressViewStyle(CircularProgressViewStyle(tint: themeManager.currentAccent.senColor))
+//                Spacer()
             } else if viewModel.notificationsList.isEmpty {
                 Spacer()
                 VStack(spacing: 12) {

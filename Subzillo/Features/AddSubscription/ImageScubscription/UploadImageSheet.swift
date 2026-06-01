@@ -29,6 +29,7 @@ struct UploadImageSheet: View {
     var onDelegate                              : (() -> Void)?
     var onImageSelected                         : ((UIImage) -> Void)?
     @State var permissionBottomTitle            : String = ""
+    @EnvironmentObject var themeManager         : ThemeManager
     
     //MARK: - body
     var body: some View {
@@ -36,19 +37,32 @@ struct UploadImageSheet: View {
             
             VStack {
                 Capsule()
-                    .fill(Color.grayCapsule)
-                    .frame(width: 150, height: 5)
+                    .fill(Color.capsuleBlack12White14)
+                    .frame(width: 40, height: 5)
                     .padding(.bottom, 24)
                     .padding(.top, 0)
+                
+                Image("profilePic_new")
+                    .renderingMode(.template)
+                    .foregroundStyle(themeManager.accentGradient)
+                    .frame(width: 80, height: 80)
+                    .padding(.bottom, 18)
                 
                 VStack(alignment: .leading, spacing: 24) {
                     
                     HStack {
                         Spacer()
-                        Text(fromProfile ? "Profile Picture" : "Upload a Screenshot")
-                            .font(.appSemiBold(24))
-                            .foregroundColor(Color.neutralMain700)
-                            .multilineTextAlignment(.center)
+                        if isChatBot{
+                            Text("Choose an image")
+                                .font(.geistSemiBold(16))
+                                .foregroundColor(Color.textPrimary0E101AF4F1FB)
+                                .multilineTextAlignment(.center)
+                        }else{
+                            Text(fromProfile ? "Profile Picture" : "Upload a Screenshot")
+                                .font(.geistSemiBold(24))
+                                .foregroundColor(Color.textPrimary0E101AF4F1FB)
+                                .multilineTextAlignment(.center)
+                        }
                         Spacer()
                     }
                     
@@ -56,43 +70,44 @@ struct UploadImageSheet: View {
                     //                    .font(.appRegular(16))
                     //                    .foregroundColor(Color.gray)
                     
-                    VStack(spacing: 0) {
+                    VStack(spacing: 12) {
                         UploadItem(title: "Take Photo",
                                    subTitle: "Capture a new picture using your camera",
-                                   image: "camera", imageColor: Color.high, action: cameraAction)
-                        Divider()
-                            .overlay(Color.neutral300Border)
+                                   image: "cameraIcon", imageColor: Color.high, action: cameraAction)
+                        //                        Divider()
+                        //                            .overlay(Color.neutral300Border)
                         UploadItem(title: "Choose from Gallery",
                                    subTitle: "Select an existing photo from your device",
-                                   image: "gallery", imageColor: Color.warning, action: galleryAction)
+                                   image: "gallery_new", imageColor: Color.warning, action: galleryAction)
                         //                    Divider()
                         //                        .overlay(Color.neutral300Border)
                         //                    UploadItem(title: "Paste Text", subTitle: "Copy and paste notification text", image: "text-creation", imageColor: Color.purple100, action: pastTextAction)
-                        if !fromProfile && !isChatBot{
-                            Divider()
-                                .overlay(Color.neutral300Border)
-                            UploadItem(title: "Take Screenshot",
-                                       subTitle: "Take Screenshot for subscriptions",
-                                       image: "screenshot", imageColor: Color.purple100, action: openSubscriptionsAction)
-                        }
+                        //                        if !fromProfile && !isChatBot{
+                        //                            Divider()
+                        //                                .overlay(Color.neutral300Border)
+                        //                            UploadItem(title: "Take Screenshot",
+                        //                                       subTitle: "Take Screenshot for subscriptions",
+                        //                                       image: "screenshot", imageColor: Color.purple100, action: openSubscriptionsAction)
+                        //                        }
                     }
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .frame(height: fromProfile || isChatBot ? 160 : 240)
-                    .cornerRadius(12)
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 12)
-                            .stroke(Color.neutral300Border, lineWidth: 1)
-                    )
-                    if !fromProfile{
-                        GradienCustomeView(title: "Privacy Notice", subTitle: "We only parse the content you provide to detect subscription payments. No data is stored permanently.", imageName: "privacyIcon")
-                            .padding(.bottom, 0)
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                            .fixedSize(horizontal: false, vertical: true)
-                    }
+                    //                    .frame(maxWidth: .infinity, alignment: .leading)
+                    //                    .frame(height: fromProfile || isChatBot ? 160 : 240)
+                    //                    .cornerRadius(12)
+                    //                    .overlay(
+                    //                        RoundedRectangle(cornerRadius: 12)
+                    //                            .stroke(Color.neutral300Border, lineWidth: 1)
+                    //                    )
+                    //                    if !fromProfile{
+                    //                        GradienCustomeView(title: "Privacy Notice", subTitle: "We only parse the content you provide to detect subscription payments. No data is stored permanently.", imageName: "privacyIcon")
+                    //                            .padding(.bottom, 0)
+                    //                            .frame(maxWidth: .infinity, alignment: .leading)
+                    //                            .fixedSize(horizontal: false, vertical: true)
+                    //                    }
                     
                 }
                 .padding(.horizontal, 20)
                 .padding(.vertical, 0)
+                
             }
             .padding(0)
             .sheet(isPresented: $showImagePicker) {
@@ -161,7 +176,8 @@ struct UploadImageSheet: View {
                                 icon            : isCamera == true ? "camePer" : "galleryPer",
                                 hideManualBtn   : fromProfile ? true : false)
                 .presentationDragIndicator(.hidden)
-                .presentationDetents([.height(fromProfile ? 500 : 560)])
+//                .presentationDetents([.height(fromProfile ? 500 : 560)])
+                .presentationDetents([.height(490)])
             }
             .onReceive(NotificationCenter.default.publisher(for: .closeAllBottomSheets)) { _ in
                 showImagePicker = false
@@ -171,19 +187,19 @@ struct UploadImageSheet: View {
             .onAppear{
                 // Reset internal selectedImage when appearing
                 selectedImage = nil
-//                if fromProfile{
-//                    if isCamera{
-//                        permissionBottomTitle = "We need camera access to update profile photo"
-//                    }else{
-//                        permissionBottomTitle = "We need camera access to add subscriptions by take photo"
-//                    }
-//                }else{
-//                    if isCamera{
-//                        permissionBottomTitle = "We need gallery access to update profile photo"
-//                    }else{
-//                        permissionBottomTitle = "We need gallery access to add subscriptions by image upload"
-//                    }
-//                }
+                //                if fromProfile{
+                //                    if isCamera{
+                //                        permissionBottomTitle = "We need camera access to update profile photo"
+                //                    }else{
+                //                        permissionBottomTitle = "We need camera access to add subscriptions by take photo"
+                //                    }
+                //                }else{
+                //                    if isCamera{
+                //                        permissionBottomTitle = "We need gallery access to update profile photo"
+                //                    }else{
+                //                        permissionBottomTitle = "We need gallery access to add subscriptions by image upload"
+                //                    }
+                //                }
             }
             if showLocalLoader {
                 ZStack {
@@ -199,7 +215,7 @@ struct UploadImageSheet: View {
                     .opacity(showLocalLoader ? 1 : 0)
                     .scaleEffect(showLocalLoader ? 1.0 : 0.8)
                 }
-//                .animation(.easeInOut(duration: 0.3), value: showLocalLoader)
+                //                .animation(.easeInOut(duration: 0.3), value: showLocalLoader)
                 .allowsHitTesting(showLocalLoader)
                 //                ZStack {
                 //                    Color.black.opacity(0.5)
@@ -211,6 +227,7 @@ struct UploadImageSheet: View {
                 //                }
             }
         }
+        .background(.bottomBGFFFFFF120A1F)
     }
     
     private func imageHeightForSheet(_ image: UIImage) -> CGFloat {
@@ -380,7 +397,7 @@ struct UploadErrorImageSheet: View {
                     .renderingMode(.template)
                     .foregroundStyle(themeManager.accentGradient)
                     .frame(width: 80, height: 80)
-                    .padding(.bottom, 18)
+//                    .padding(.bottom, 18)
                 
                 Text(isImage ? "Couldn't Read Image" : "No Subscriptions Found")
                     .font(.geistSemiBold(16))
@@ -521,7 +538,7 @@ struct UploadItemNew: View {
                         .foregroundColor(
                             Color("TextPrimary_ 0E101A_F4F1FB").opacity(0.6)
                         )
-                        .lineLimit(1)
+                        //.lineLimit(1)
                         .truncationMode(.tail)
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
@@ -546,43 +563,63 @@ struct UploadItem: View {
     var imageColor              : Color
     var action                  : () -> Void
     var isEmail                 = false
+    @EnvironmentObject var themeManager : ThemeManager
     
     var body: some View {
         Button(action: action) {
             HStack(spacing: 16) {
-                if isEmail{
+                //                if isEmail{
+                //                    Image(image)
+                //                        .frame(width: 48, height: 48)
+                //                        .background(imageColor)
+                //                        .clipShape(RoundedRectangle(cornerRadius: 8))
+                //                }else{
+                //                    Image(image)
+                //                        .frame(width: 48, height: 48)
+                //                    //                    .background(imageColor)
+                //                        .clipShape(RoundedRectangle(cornerRadius: 8))
+                //                }
+                ZStack {
+                    themeManager.accentGradient
+                    
                     Image(image)
-                        .frame(width: 48, height: 48)
-                        .background(imageColor)
-                        .clipShape(RoundedRectangle(cornerRadius: 8))
-                }else{
-                    Image(image)
-                        .frame(width: 48, height: 48)
-                    //                    .background(imageColor)
-                        .clipShape(RoundedRectangle(cornerRadius: 8))
+                        .frame(width:24,height: 24)
                 }
+                .frame(width: 47, height: 47)
+                .clipShape(
+                    RoundedRectangle(cornerRadius: 14)
+                )
+                //                .shadow(
+                //                    color: themeManager.selectedAccent.senColor.opacity(0.55),
+                //                    radius: 15,
+                //                    y: 10
+                //                )
                 
                 VStack(alignment: .leading, spacing: 0) {
                     Text(title)
-                        .font(.appSemiBold(16))
-                        .foregroundColor(.neutralMain700)
+                        .font(.geistBold(12))
+                        .foregroundColor(.textPrimary0E101AF4F1FB)
                     
                     Text(subTitle)
-                        .font(.appRegular(12))
-                        .foregroundColor(.neutral500)
+                        .font(.geistRegular(12))
+                        .foregroundColor(themeManager.textPrimaryLight6_dark62)
                         .multilineTextAlignment(.leading)
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
                 
                 Image("arrow-right-01-round")
-                    .renderingMode(.template)
-                    .foregroundColor(.secondaryNavyBlue400)
-                    .frame(width: 24, height: 24)
+                    .frame(width: 20, height: 20)
                 
             }
             .frame(maxWidth: .infinity)
             .padding(16)
-            .frame(height: 80)
+            .frame(height: 72)
+            .background(themeManager.white_white4)
+            .cornerRadius(16)
+            .overlay(
+                RoundedRectangle(cornerRadius: 16)
+                    .stroke(.textPrimary0E101AF4F1FB.opacity(0.10), lineWidth: 1)
+            )
         }
     }
 }

@@ -115,6 +115,7 @@ struct GradientBorderBgButton: View {
                 } else {
                     Text(LocalizedStringKey(title))
                         .font(.geistBold(17))
+                        .multilineTextAlignment(.center)
                         .foregroundColor(.textPrimary0E101AF4F1FB)
                 }
             }
@@ -124,7 +125,6 @@ struct GradientBorderBgButton: View {
                     .fill(backgroundColor)
             )
             .overlay {
-                
                 RoundedRectangle(cornerRadius: buttonHeight/2)
                     .stroke(
                         Color.textPrimary0E101AF4F1FB
@@ -228,7 +228,7 @@ struct GradientBgButton: View {
                 }
                 
                 Text(LocalizedStringKey(title))
-                    .font(.geistBold(15))
+                    .font(.geistBold(17))
                 
                 if showChevron  {
                     Image(systemName: "chevron.right")

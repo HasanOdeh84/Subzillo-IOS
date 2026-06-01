@@ -31,7 +31,7 @@ struct PermissionSheet: View {
                     .renderingMode(.template)
                     .foregroundStyle(themeManager.accentGradient)
                     .frame(width: 80, height: 80)
-                    .padding(.bottom, 18)
+//                    .padding(.bottom, 18)
                 
                 if type != "notifications"
                 {
@@ -101,13 +101,13 @@ struct PermissionSheet: View {
                 action      : onSettingsAction
             )
             
-            if !hideManualBtn{
-                GradientBorderButtonNew(title: "Add Manually Instead", isBtn: true, buttonImage: "plusicon", action: onManualAction, backgroundColor: themeManager.selectedAccent.senColor)
-                    .padding(.vertical, 10)
-            }
+//            if !hideManualBtn{
+//                GradientBorderButtonNew(title: "Add Manually Instead", isBtn: true, buttonImage: "plusicon", action: onManualAction, backgroundColor: themeManager.selectedAccent.senColor)
+//                    .padding(.vertical, 10)
+//            }
         }
-        .padding(.horizontal, 20)
         .background(.bottomBGFFFFFF120A1F)
+        .padding(.horizontal, 20)
     }
     
     //MARK: - Button actions

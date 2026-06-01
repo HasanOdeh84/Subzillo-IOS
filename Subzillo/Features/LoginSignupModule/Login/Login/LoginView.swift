@@ -296,16 +296,16 @@ struct LoginView: View {
                     title   : "Choose Login Method",
                     desc    : "Sign in your way — biometric authentication or one-time password.",
                     btn1    : "Login with \(selectedBiometric == 0 ? "Face" : "Touch")",
-                    btn2    : "",
-                    btn3    : "Login with OTP",
+                    btn2    : "Login with OTP",
+                    btn3    : "Cancel",
                     onRenew : {
                         authenticate()
                     },
                     onRenewWithChanges: {
-                        
+                        loginApi()
                     },
                     onNo: {
-                        loginApi()
+                        showLoginAlert = false
                     }
                 )
                 .overlay {

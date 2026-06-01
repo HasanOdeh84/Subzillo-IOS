@@ -112,17 +112,19 @@ struct PushPermissions: View {
                 VStack(spacing: 8) {
                     
                     NotificationCard(
+                        iconColor: nil,
                         iconBackground: "#000000",
                         title: "Netflix renews tomorrow",
                         subtitle: "$22.99 · Tap to skip or pause",
                         time: "3d",
-                        icon: "limit1"
+                        icon: "limit1 1"
                     )
                     
                     NotificationCard(
+                        iconColor : themeManager.selectedAccent.senColor,
                         iconBackground: "#000000",
-                        title: "Weekly spending report",
-                        subtitle: "Every Monday morning",
+                        title: "Monthly spending report",
+                        subtitle: "Every month starting",
                         time: "12h",
                         icon: "chart1"
                     )
@@ -229,7 +231,7 @@ struct PushPermissions: View {
     }
 }
 struct NotificationCard: View {
-    
+    let iconColor: Color?
     let iconBackground: String
     let title: String
     let subtitle: String
@@ -246,8 +248,20 @@ struct NotificationCard: View {
                 RoundedRectangle(cornerRadius: 9)
                     .fill(Color(hex: iconBackground))
                 
-                Image(icon)
-                    .frame(width: 22, height: 22)
+                if iconColor != nil
+                {
+                    Image(icon)
+                        .renderingMode(.template)
+                        .foregroundStyle(iconColor!)
+                        .frame(width: 22, height: 22)
+                }
+                else
+                {
+                    Image(icon)
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 22, height: 22)
+                }
             }
             .frame(width: 34, height: 34)
             

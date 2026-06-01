@@ -422,7 +422,9 @@ struct ProfileView: View {
             }
         }
         .padding(20)
+        .ignoresSafeArea()
         .applyAppBackground()
+        .navigationBarBackButtonHidden(true)
         .sheet(item: $selectedAccountType) { type in
             EditAccountBottomSheet(onDelegate       : {
             },

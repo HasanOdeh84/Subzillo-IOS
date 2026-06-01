@@ -85,11 +85,12 @@ struct HomeView: View {
         Group {
             if isHome == nil{
                 ZStack {
-                    Color.black.opacity(0.001)
+                    /*Color.black.opacity(0.001)
                         .ignoresSafeArea()
-                        .opacity(1)
+                        .opacity(1)*/
                 }
                 .allowsHitTesting(true)
+                .applyAppBackground()
             }else if isHome == true{
                 VStack(spacing: 0){
                     // MARK: - Header
@@ -596,7 +597,7 @@ struct HomeView: View {
                                 
                                 
                                 VStack {
-                                       
+                                    let maxValue = months.map(\.1).max() ?? 0
                                        Chart {
                                            
                                            ForEach(Array(months.enumerated()), id: \.offset) { index, item in
@@ -736,7 +737,7 @@ struct HomeView: View {
                                                Rectangle()
                                                    .fill(Color.clear)
                                                    .contentShape(Rectangle())
-                                                   .gesture(
+                                                  /* .gesture(
                                                        DragGesture(minimumDistance: 0)
                                                            .onChanged { value in
                                                                
@@ -749,12 +750,25 @@ struct HomeView: View {
                                                                    cuentmonth = month
                                                                }
                                                            }
+                                                   )*/
+                                                   .gesture(
+                                                       SpatialTapGesture()
+                                                           .onEnded { value in
+
+                                                               let origin = geometry[proxy.plotAreaFrame].origin
+                                                               let currentX = value.location.x - origin.x
+
+                                                               if let month: String = proxy.value(atX: currentX) {
+                                                                   cuentmonth = month
+                                                               }
+                                                           }
                                                    )
 
                                            }
                                        }
+                                       .chartYScale(domain: 0...(maxValue + 100))
                                        .frame(height: 160)
-                                       
+                                       .clipped()
 //                                       Rectangle()
 //                                           .fill(
 //                                               Color("TextPrimary_ 0E101A_F4F1FB")

@@ -305,7 +305,7 @@ struct AddNewCardSheet: View {
                     }
                     
                     
-                    FieldView(text: $cardNumber, title: "Last 4 digits (optional)", image: "cardNum", placeHolder: "4829", maxDigits: 4, isNumberPad: true, isCardNo: true)
+                    FieldView(text: $cardNumber, title: "Last 4 digits", image: "cardNum", placeHolder: "4829", maxDigits: 4, isNumberPad: true, isCardNo: true)
                         .addDoneButton{
                         }
                     
@@ -481,7 +481,7 @@ struct AddNewCardSheet: View {
         streaming.font = .geistSemiBold(11)
         streaming.foregroundColor = .textPrimary0E101AF4F1FB
         
-        var cycle = AttributedString(". No full numbers, expiry, or CVC needed.")
+        var cycle = AttributedString(". No full numbers, expiry, or CVV needed.")
         cycle.foregroundColor = .textPrimary0E101AF4F1FB
         
         

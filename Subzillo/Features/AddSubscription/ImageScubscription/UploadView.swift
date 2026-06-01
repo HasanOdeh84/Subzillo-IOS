@@ -338,7 +338,7 @@ struct UploadView: View {
                                     icon            : isCamera == true ? "camePer" : "galleryPer",
                                     hideManualBtn   : false)
                     .presentationDragIndicator(.hidden)
-                    .presentationDetents([.height(560)])
+                    .presentationDetents([.height(490)])
                 }
                 .onReceive(NotificationCenter.default.publisher(for: .closeAllBottomSheets)) { _ in
                     showCameraPicker = false

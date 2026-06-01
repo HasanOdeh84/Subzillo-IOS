@@ -1,7 +1,17 @@
 {
   "images" : [
     {
-      "filename" : "arrow-right-01-round.svg",
+      "filename" : "Frame-38.svg",
+      "idiom" : "universal"
+    },
+    {
+      "appearances" : [
+        {
+          "appearance" : "luminosity",
+          "value" : "dark"
+        }
+      ],
+      "filename" : "Frame-39.svg",
       "idiom" : "universal"
     }
   ],

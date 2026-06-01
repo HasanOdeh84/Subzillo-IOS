@@ -225,8 +225,8 @@ struct NormalOptionView: View {
                             :
                             LinearGradient(
                                 colors: [
-                                    themeManager.white_white4,
-                                    themeManager.white_white4
+                                    themeManager.black_white.opacity(0.08),
+                                    themeManager.black_white.opacity(0.08)
                                 ],
                                 startPoint: .top,
                                 endPoint: .bottom

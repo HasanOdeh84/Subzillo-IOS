@@ -216,7 +216,7 @@ struct VoiceMissingDetailsSheet: View {
             }, title: "We need microphone access to add subscriptions by voice", type: "voice", value: "Tap Microphone", icon: "voicePer")
             .id(UUID())
             .presentationDragIndicator(.hidden)
-            .presentationDetents([.height(560)])
+            .presentationDetents([.height(490)])
         }
         .sheet(isPresented: $showDiscardPopup) {
             InfoAlertSheet(

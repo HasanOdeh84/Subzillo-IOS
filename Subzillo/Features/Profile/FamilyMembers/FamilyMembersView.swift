@@ -162,40 +162,44 @@ struct FamilyMembersView: View {
                     Spacer().frame(height: 40)
                 }
                 .padding(.horizontal, 24)
+                .padding(.bottom, manualVM.listFamilyMembersResponse?.remainingFamilyMembersLimit ?? 5 == 0 ? 120 : 0)
             }
             
             Spacer(minLength: 0)
             
             // MARK: - Invite Member Button
-            VStack {
-                CustomBorderButton(
-                    title       : "Invite member",
-                    background  : themeManager.white_white4,
-                    borderColor : themeManager.textPrimaryLight8_white8,
-                    textColor   : Color("TextPrimary_ 0E101A_F4F1FB"),
-                    font        : .geistSemiBold(15),
-                    height      : 48,
-                    showIcon    : true,
-                    icon        : "plus_new",
-                    iconOnLeft  : true,
-                    action      : {
-                        let remaining = manualVM.listFamilyMembersResponse?.remainingFamilyMembersLimit ?? 5
-                        if remaining == 0 {
-                            SheetManager.shared.isFamilyMemberLimitSheetVisible = true
-                        } else {
-                           // DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                               // openFamilyMemberSheet = true
-                                
+//            let remaining = manualVM.listFamilyMembersResponse?.remainingFamilyMembersLimit ?? 5
+            if manualVM.listFamilyMembersResponse?.remainingFamilyMembersLimit ?? 5 != 0 {
+                VStack {
+                    CustomBorderButton(
+                        title       : "Invite member",
+                        background  : themeManager.white_white4,
+                        borderColor : themeManager.textPrimaryLight8_white8,
+                        textColor   : Color("TextPrimary_ 0E101A_F4F1FB"),
+                        font        : .geistSemiBold(15),
+                        height      : 48,
+                        showIcon    : true,
+                        icon        : "plus_new",
+                        iconOnLeft  : true,
+                        action      : {
+                            //                        let remaining = manualVM.listFamilyMembersResponse?.remainingFamilyMembersLimit ?? 5
+                            //                        if remaining == 0 {
+                            //                            SheetManager.shared.isFamilyMemberLimitSheetVisible = true
+                            //                        } else {
+                            // DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                            // openFamilyMemberSheet = true
+                            
                             AppIntentRouter.shared.navigate(to: .addFamilyMemberBottomSheet(header: "Add family member", description: "Add a family member to manage and share plans together.", buttonName: "Save", selectedCountry: nil))
-                                
-                           // }
+                            
+                            // }
+                            //                        }
                         }
-                    }
-                )
+                    )
+                }
+                .padding(.horizontal, 24)
+                .padding(.bottom, 120)
+                .padding(.top, 10)
             }
-            .padding(.horizontal, 24)
-            .padding(.bottom, 120)
-            .padding(.top, 10)
         }
         .applyAppBackground()
         .ignoresSafeArea()
